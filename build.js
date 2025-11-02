@@ -14,6 +14,10 @@ const __dirname = path.dirname(__filename);
 
 console.log('🚀 Starting IHARC portal build...');
 
+process.env.NEXT_DISABLE_SWC_NATIVE_BINARY =
+  process.env.NEXT_DISABLE_SWC_NATIVE_BINARY ?? '1';
+process.env.NEXT_USE_TURBOPACK = process.env.NEXT_USE_TURBOPACK ?? '0';
+
 function run(command, description) {
   try {
     console.log(`⚡ ${description}...`);
@@ -29,17 +33,23 @@ function run(command, description) {
 
 const strategies = [
   {
-    description: 'Next build via npx',
-    run: () => run('npx next lint', 'Linting') && run('npx next build', 'Building application')
+    description: 'ESLint + Next build via npx',
+    run: () =>
+      run('npx eslint .', 'Linting') &&
+      run('npx next build --webpack', 'Building application'),
   },
   {
-    description: 'Next build via local binary',
+    description: 'ESLint + Next build via local binaries',
     run: () => {
+      const eslintCli = path.join(__dirname, 'node_modules', '.bin', 'eslint');
       const nextCli = path.join(__dirname, 'node_modules', '.bin', 'next');
-      if (!fs.existsSync(nextCli)) return false;
-      return run(`"${nextCli}" lint`, 'Linting via local binary') && run(`"${nextCli}" build`, 'Building via local binary');
-    }
-  }
+      if (!fs.existsSync(eslintCli) || !fs.existsSync(nextCli)) return false;
+      return (
+        run(`"${eslintCli}" .`, 'Linting via local binary') &&
+        run(`"${nextCli}" build --webpack`, 'Building via local binary')
+      );
+    },
+  },
 ];
 
 let success = false;

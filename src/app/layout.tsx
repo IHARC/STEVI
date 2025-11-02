@@ -1,6 +1,5 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
-import { Roboto, Roboto_Flex } from 'next/font/google';
 import { cn } from '@/lib/utils';
 import '@/styles/main.css';
 import './globals.css';
@@ -18,13 +17,6 @@ const metadataBase = (() => {
     return new URL(DEFAULT_APP_URL);
   }
 })();
-
-const roboto = Roboto({
-  subsets: ['latin'],
-  weight: ['400', '500', '700'],
-  variable: '--font-body',
-});
-const robotoFlex = Roboto_Flex({ subsets: ['latin'], variable: '--font-heading' });
 
 const DEFAULT_GA_MEASUREMENT_ID = 'G-5B08FDG9J6';
 const GA_MEASUREMENT_ID =
@@ -69,12 +61,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <body
-        className={cn(
-          'min-h-screen bg-background text-on-background antialiased',
-          roboto.variable,
-          robotoFlex.variable,
-          'font-sans'
-        )}
+        className={cn('min-h-screen bg-background text-on-background antialiased font-sans')}
       >
         <ThemeProvider>
           <a href="#main-content" className="skip-link">

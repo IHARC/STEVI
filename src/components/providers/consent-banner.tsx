@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useTransition } from 'react';
 import { Button } from '@/components/ui/button';
 import { trackEvent } from '@/lib/analytics';
 
@@ -60,6 +60,7 @@ function persistPreference(state: ConsentState) {
 
 export function ConsentBanner() {
   const [visible, setVisible] = useState(false);
+  const [, startTransition] = useTransition();
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -74,11 +75,9 @@ export function ConsentBanner() {
       stored = null;
     }
 
-    if (stored) {
-      return;
+    if (!stored) {
+      startTransition(() => setVisible(true));
     }
-
-    setVisible(true);
   }, []);
 
   const handleChoice = useCallback((state: ConsentState) => {
