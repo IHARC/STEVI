@@ -90,3 +90,11 @@
 - 🟡 Marketing site cleanup, redirects, and dual-launch comms.
 
 The STEVI team should treat this briefing as the living source of truth—update it as plans solidify, especially when Supabase schema or shared infrastructure changes.
+
+
+NOTES: 
+Always use context7 when I need code generation, setup or configuration steps, or
+library/API documentation. This means you should automatically use the Context7 MCP
+tools to resolve library id and get library docs without me having to explicitly ask.
+
+Always use the supabase mcp tool to view existing implementation. Follow existing patterns already implemented, i.e use of schemas outside of "public" such as "core", "inventory", "justice", etc. Always check first and do not rely on migration files as a reference. 
