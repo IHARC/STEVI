@@ -190,7 +190,7 @@ export async function fetchInventoryOrganizations(supabase: SupabaseAnyServerCli
     .schema('core')
     .from('organizations')
     .select('*')
-    .eq('is_active', true)
+    .order('is_active', { ascending: false })
     .order('name');
   if (error) {
     throw error;

@@ -57,6 +57,7 @@ export function InventoryItemsSection({ items, locations, organizations, categor
   const [isPending, startTransition] = useTransition();
 
   const categoryOptions = useMemo(() => Array.from(new Set(categories)).sort((a, b) => a.localeCompare(b)), [categories]);
+  const activeOrganizations = useMemo(() => organizations.filter((org) => org.isActive), [organizations]);
 
   const handleResult = <T,>(result: { success: boolean; error?: string; data?: T }, message: string, close?: () => void) => {
     if (!result.success) {
@@ -155,7 +156,7 @@ export function InventoryItemsSection({ items, locations, organizations, categor
               actorProfileId={actorProfileId}
               items={items}
               locations={locations}
-              organizations={organizations}
+              organizations={activeOrganizations}
             />
           </Dialog>
           <Dialog open={isCreating} onOpenChange={setIsCreating}>
@@ -264,7 +265,7 @@ export function InventoryItemsSection({ items, locations, organizations, categor
       <ReceiveStockDialog
         item={itemToReceive}
         locations={locations}
-        organizations={organizations}
+        organizations={activeOrganizations}
         isPending={isPending}
         onClose={() => setItemToReceive(null)}
         onSubmit={submitReceiveStock}

@@ -21,6 +21,7 @@ import { useToast } from '@/components/ui/use-toast';
 import {
   createInventoryOrganizationAction,
   deactivateInventoryOrganizationAction,
+  activateInventoryOrganizationAction,
   updateInventoryOrganizationAction,
 } from '@/app/(portal)/admin/inventory/actions';
 import type { InventoryOrganization } from '@/lib/inventory/types';
@@ -67,6 +68,14 @@ export function InventoryOrganizationsSection({ organizations, actorProfileId }:
     formData.set('organization_id', String(organization.id));
     const result = await deactivateInventoryOrganizationAction(formData);
     handleResult(result, 'Organization deactivated.');
+  };
+
+  const submitReactivate = async (organization: InventoryOrganization) => {
+    const formData = new FormData();
+    formData.set('actor_profile_id', actorProfileId);
+    formData.set('organization_id', String(organization.id));
+    const result = await activateInventoryOrganizationAction(formData);
+    handleResult(result, 'Organization reactivated.');
   };
 
   return (
@@ -125,7 +134,17 @@ export function InventoryOrganizationsSection({ organizations, actorProfileId }:
                     >
                       Deactivate
                     </Button>
-                  ) : null}
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-emerald-600 hover:text-emerald-600"
+                      onClick={() => submitReactivate(org)}
+                      disabled={isPending}
+                    >
+                      Reactivate
+                    </Button>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
@@ -133,7 +152,7 @@ export function InventoryOrganizationsSection({ organizations, actorProfileId }:
         </Table>
       </CardContent>
       <CardFooter className="text-xs text-muted-foreground">
-        Deactivating keeps historic receipts intact while preventing new referrals to the organisation.
+        Deactivate partners to pause new activity. Reactivate them when donations resume so historic receipts stay intact.
       </CardFooter>
 
       <OrganizationDialog

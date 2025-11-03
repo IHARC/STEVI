@@ -10,6 +10,7 @@ import {
   createInventoryItem,
   createInventoryLocation,
   createInventoryOrganization,
+  activateInventoryOrganization,
   deactivateInventoryOrganization,
   deleteInventoryItem,
   deleteInventoryLocation,
@@ -402,6 +403,24 @@ export async function updateInventoryOrganizationAction(formData: FormData): Pro
     await logAuditEvent(supabase, {
       actorProfileId: profile.id,
       action: 'inventory_organization_updated',
+      entityType: 'inventory_organization',
+      entityId: String(organizationId),
+    });
+  });
+}
+
+export async function activateInventoryOrganizationAction(formData: FormData): Promise<ActionResult> {
+  return runInventoryMutation(formData, async ({ profile }, supabase) => {
+    const organizationId = parseNumber(formData.get('organization_id'), { required: true });
+    if (organizationId === null) {
+      throw new InventoryAccessError('Organization context missing.');
+    }
+
+    await activateInventoryOrganization(supabase, organizationId);
+
+    await logAuditEvent(supabase, {
+      actorProfileId: profile.id,
+      action: 'inventory_organization_activated',
       entityType: 'inventory_organization',
       entityId: String(organizationId),
     });

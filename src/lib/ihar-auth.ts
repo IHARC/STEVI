@@ -54,19 +54,11 @@ export function getIharcRoles(user: UserLike): IharcRole[] {
     return [];
   }
 
-  const allRoles = new Set<string>();
-
-  const userMetadata = user.user_metadata as MetadataWithRoles | null | undefined;
+  // Only trust roles issued via app_metadata which Supabase signs server-side.
   const appMetadata = user.app_metadata as MetadataWithRoles | null | undefined;
+  const roles = extractRolesFromMetadata(appMetadata);
 
-  extractRolesFromMetadata(userMetadata).forEach((role) => {
-    allRoles.add(role);
-  });
-  extractRolesFromMetadata(appMetadata).forEach((role) => {
-    allRoles.add(role);
-  });
-
-  return Array.from(allRoles).filter((role): role is IharcRole => role.startsWith(IHARC_ROLE_PREFIX));
+  return roles.filter((role): role is IharcRole => role.startsWith(IHARC_ROLE_PREFIX));
 }
 
 export function hasIharcRole(user: UserLike, allowed: IharcRole | IharcRole[]): boolean {

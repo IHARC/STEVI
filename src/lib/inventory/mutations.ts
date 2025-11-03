@@ -376,6 +376,21 @@ export async function deactivateInventoryOrganization(
   }
 }
 
+export async function activateInventoryOrganization(
+  supabase: SupabaseAnyServerClient,
+  organizationId: number,
+): Promise<void> {
+  const { error } = await supabase
+    .schema('core')
+    .from('organizations')
+    .update({ is_active: true, updated_at: new Date().toISOString() })
+    .eq('id', organizationId);
+
+  if (error) {
+    throw error;
+  }
+}
+
 export async function updateInventoryTransactionSource(
   supabase: SupabaseAnyServerClient,
   transactionId: string,
