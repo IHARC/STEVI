@@ -14,7 +14,6 @@ import { normalizeLivedExperience } from '@/lib/lived-experience';
 import { normalizePhoneNumber, maskPhoneNumber } from '@/lib/phone';
 import { normalizeEmail } from '@/lib/email';
 import {
-  NEW_GOVERNMENT_VALUE,
   NEW_ORGANIZATION_VALUE,
   NO_ORGANIZATION_VALUE,
   PUBLIC_MEMBER_ROLE_LABEL,
@@ -28,28 +27,14 @@ type Organization = {
   name: string;
 };
 
-type GovernmentBody = {
-  id: string;
-  name: string;
-  level: Database['portal']['Enums']['government_level'];
-};
-
 type OrganizationRecord = Pick<
   Database['portal']['Tables']['organizations']['Row'],
-  'id' | 'name' | 'category' | 'government_level' | 'verified'
+  'id' | 'name' | 'category' | 'verified'
 >;
 
 type AffiliationType = Database['portal']['Enums']['affiliation_type'];
 
-const ALLOWED_AFFILIATIONS: AffiliationType[] = ['community_member', 'agency_partner', 'government_partner'];
-const GOVERNMENT_LEVELS: PortalProfile['requested_government_level'][] = [
-  'municipal',
-  'county',
-  'provincial',
-  'federal',
-  'other',
-];
-const GOVERNMENT_ROLE_TYPES: PortalProfile['requested_government_role'][] = ['staff', 'politician'];
+const ALLOWED_AFFILIATIONS: AffiliationType[] = ['community_member', 'agency_partner'];
 
 const INITIAL_PROFILE_STATE: ProfileDetailsFormState = { status: 'idle' };
 const INITIAL_EMAIL_STATE: EmailFormState = { status: 'idle' };
@@ -73,10 +58,11 @@ export default async function PortalProfilePage() {
   }
 
   const profile = await ensurePortalProfile(supabase, user.id);
+  const normalizedProfileAffiliation: AffiliationType = profile.affiliation_type === 'government_partner' ? 'agency_partner' : profile.affiliation_type;
 
   const { data: organizationRowsRaw } = await portal
     .from('organizations')
-    .select('id, name, category, government_level, verified')
+    .select('id, name, category, verified')
     .eq('verified', true)
     .order('name', { ascending: true });
 
@@ -87,35 +73,16 @@ export default async function PortalProfilePage() {
       .filter((org) => org.category === 'community')
       .map((org) => ({ id: org.id, name: org.name }));
 
-  const governmentBodies: GovernmentBody[] =
-    organizationRows
-      .filter(
-        (org): org is typeof org & { government_level: Database['portal']['Enums']['government_level'] } =>
-          org.category === 'government' && org.government_level !== null,
-      )
-      .map((org) => ({
-        id: org.id,
-        name: org.name,
-        level: org.government_level,
-      }));
-
   const initialOrganizationId = organizations.some((org) => org.id === profile.organization_id) ? profile.organization_id : null;
-  const initialGovernmentBodyId = governmentBodies.some((gov) => gov.id === profile.organization_id) ? profile.organization_id : null;
-
   const initialValues = {
     displayName: profile.display_name ?? 'Community member',
     organizationId: initialOrganizationId,
-    governmentBodyId: initialGovernmentBodyId,
     positionTitle: profile.position_title,
-    affiliationType: profile.affiliation_type,
+    affiliationType: normalizedProfileAffiliation,
     homelessnessExperience: profile.homelessness_experience ?? 'none',
     substanceUseExperience: profile.substance_use_experience ?? 'none',
     affiliationStatus: profile.affiliation_status,
-    governmentRoleType: profile.government_role_type,
     requestedOrganizationName: profile.requested_organization_name,
-    requestedGovernmentName: profile.requested_government_name,
-    requestedGovernmentLevel: profile.requested_government_level,
-    requestedGovernmentRole: profile.requested_government_role,
   };
 
   const initialEmail = user.email ?? null;
@@ -128,16 +95,15 @@ export default async function PortalProfilePage() {
     const portalClient = supa.schema('portal');
 
     const displayName = (formData.get('display_name') as string | null)?.trim();
-    const rawAffiliation = (formData.get('affiliation_type') as string | null)?.trim() ?? profile.affiliation_type;
-    const affiliationType = ALLOWED_AFFILIATIONS.includes(rawAffiliation as AffiliationType)
+    const rawAffiliation = (formData.get('affiliation_type') as string | null)?.trim() ?? normalizedProfileAffiliation;
+    let affiliationType = ALLOWED_AFFILIATIONS.includes(rawAffiliation as AffiliationType)
       ? (rawAffiliation as AffiliationType)
-      : profile.affiliation_type;
+      : normalizedProfileAffiliation;
+
+      affiliationType = 'agency_partner';
+    }
     const rawAgencyOrganizationId = (formData.get('agency_organization_id') as string | null)?.trim() ?? null;
-    const rawGovernmentBodyId = (formData.get('government_body_id') as string | null)?.trim() ?? null;
     const newOrganizationName = (formData.get('new_organization_name') as string | null)?.trim() ?? null;
-    const newGovernmentName = (formData.get('new_government_name') as string | null)?.trim() ?? null;
-    const rawGovernmentLevel = (formData.get('government_level') as string | null)?.trim() ?? null;
-    const rawGovernmentRole = (formData.get('government_role_type') as string | null)?.trim() ?? null;
     const positionTitleInput = (formData.get('position_title') as string | null)?.trim() ?? null;
     const rawHomelessnessExperience = (formData.get('homelessness_experience') as string | null) ?? 'none';
     const rawSubstanceUseExperience = (formData.get('substance_use_experience') as string | null) ?? 'none';
@@ -146,10 +112,6 @@ export default async function PortalProfilePage() {
 
     let organizationId: string | null = null;
     let requestedOrganizationName: string | null = null;
-    let requestedGovernmentName: string | null = null;
-    let requestedGovernmentLevel: PortalProfile['requested_government_level'] | null = null;
-    let requestedGovernmentRole: PortalProfile['requested_government_role'] | null = null;
-    let selectedGovernmentRole: PortalProfile['requested_government_role'] | null = null;
 
     if (affiliationType === 'agency_partner') {
       if (rawAgencyOrganizationId === NEW_ORGANIZATION_VALUE) {
@@ -159,47 +121,10 @@ export default async function PortalProfilePage() {
         requestedOrganizationName = newOrganizationName;
       } else if (rawAgencyOrganizationId && rawAgencyOrganizationId !== NO_ORGANIZATION_VALUE) {
         organizationId = rawAgencyOrganizationId;
-      } else if (profile.affiliation_type === 'agency_partner' && profile.organization_id) {
+      } else if (normalizedProfileAffiliation === 'agency_partner' && profile.organization_id) {
         organizationId = profile.organization_id;
       } else {
         return { status: 'idle', error: 'Select an organization or request a new listing.' };
-      }
-    } else if (affiliationType === 'government_partner') {
-      selectedGovernmentRole = GOVERNMENT_ROLE_TYPES.includes(
-        rawGovernmentRole as PortalProfile['requested_government_role'],
-      )
-        ? (rawGovernmentRole as PortalProfile['requested_government_role'])
-        : null;
-
-      if (!selectedGovernmentRole) {
-        return { status: 'idle', error: 'Select whether you are staff or elected leadership.' };
-      }
-
-      requestedGovernmentRole = selectedGovernmentRole;
-
-      if (rawGovernmentBodyId === NEW_GOVERNMENT_VALUE) {
-        if (!newGovernmentName || newGovernmentName.length < 3) {
-          return { status: 'idle', error: 'Share the government body name (minimum 3 characters).' };
-        }
-
-        const selectedLevel = GOVERNMENT_LEVELS.includes(
-          rawGovernmentLevel as PortalProfile['requested_government_level'],
-        )
-          ? (rawGovernmentLevel as PortalProfile['requested_government_level'])
-          : null;
-
-        if (!selectedLevel) {
-          return { status: 'idle', error: 'Choose the level of government you represent.' };
-        }
-
-        requestedGovernmentName = newGovernmentName;
-        requestedGovernmentLevel = selectedLevel;
-      } else if (rawGovernmentBodyId && rawGovernmentBodyId !== NO_ORGANIZATION_VALUE) {
-        organizationId = rawGovernmentBodyId;
-      } else if (profile.affiliation_type === 'government_partner' && profile.organization_id) {
-        organizationId = profile.organization_id;
-      } else {
-        return { status: 'idle', error: 'Select your government team or request a new listing.' };
       }
     }
 
@@ -212,19 +137,11 @@ export default async function PortalProfilePage() {
 
     const organizationChanged = organizationId !== profile.organization_id;
     const requestingOrganization = affiliationType === 'agency_partner' && requestedOrganizationName !== null;
-    const requestingGovernment = affiliationType === 'government_partner' && requestedGovernmentName !== null;
-    const governmentRoleChanged =
-      affiliationType === 'government_partner' &&
-      selectedGovernmentRole !== null &&
-      selectedGovernmentRole !== profile.requested_government_role &&
-      selectedGovernmentRole !== profile.government_role_type;
+    const requestingGovernment = false;
     const shouldReset =
-      profile.affiliation_type !== affiliationType ||
+      normalizedProfileAffiliation !== affiliationType ||
       requestingOrganization ||
-      requestingGovernment ||
-      (affiliationType === 'agency_partner' && organizationChanged) ||
-      (affiliationType === 'government_partner' && organizationChanged) ||
-      governmentRoleChanged;
+      (affiliationType === 'agency_partner' && organizationChanged);
 
     let affiliationStatus: PortalProfile['affiliation_status'] = profile.affiliation_status;
     let affiliationRequestedAt = profile.affiliation_requested_at;
@@ -234,10 +151,6 @@ export default async function PortalProfilePage() {
     if (isCommunityMember) {
       organizationId = null;
       requestedOrganizationName = null;
-      requestedGovernmentName = null;
-      requestedGovernmentLevel = null;
-      requestedGovernmentRole = null;
-      selectedGovernmentRole = null;
       affiliationStatus = 'approved';
       affiliationRequestedAt = null;
       affiliationReviewedAt = null;
@@ -252,25 +165,15 @@ export default async function PortalProfilePage() {
 
     if (affiliationStatus !== 'pending') {
       requestedOrganizationName = null;
-      requestedGovernmentName = null;
-      requestedGovernmentLevel = null;
-      requestedGovernmentRole = null;
     }
 
-    const governmentRoleTypeUpdate =
-      isCommunityMember || affiliationType === 'agency_partner' || shouldReset
-        ? null
-        : profile.government_role_type;
+
 
     try {
       const updatePayload: Partial<PortalProfile> = {
         display_name: displayName,
         organization_id: organizationId,
         requested_organization_name: requestedOrganizationName,
-        requested_government_name: requestedGovernmentName,
-        requested_government_level: requestedGovernmentLevel,
-        requested_government_role: requestedGovernmentRole,
-        government_role_type: governmentRoleTypeUpdate,
         position_title: finalPositionTitle,
         affiliation_type: affiliationType,
         affiliation_status: affiliationStatus,
@@ -519,7 +422,7 @@ export default async function PortalProfilePage() {
 
       {awaitingVerification ? (
         <div className="rounded-2xl border border-primary/30 bg-primary/10 p-4 text-sm text-on-primary-container">
-          We are confirming your agency or government role. You can keep contributing as a community member while we
+          We are confirming your IHARC team role. You can keep contributing as a community member while we
           verify.
         </div>
       ) : null}
@@ -532,7 +435,6 @@ export default async function PortalProfilePage() {
 
       <ProfileDetailsForm
         organizations={organizations}
-        governmentBodies={governmentBodies}
         action={updateProfileDetails}
         initialState={INITIAL_PROFILE_STATE}
         initialValues={initialValues}

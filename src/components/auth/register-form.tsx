@@ -12,7 +12,6 @@ import type { Database } from '@/types/supabase';
 import { GoogleAuthButton } from '@/components/auth/google-auth-button';
 import { AuthDivider } from '@/components/auth/auth-divider';
 import {
-  NEW_GOVERNMENT_VALUE,
   NEW_ORGANIZATION_VALUE,
   NO_ORGANIZATION_VALUE,
   PUBLIC_MEMBER_ROLE_LABEL,
@@ -35,18 +34,8 @@ type Organization = {
   name: string;
 };
 
-type GovernmentBody = {
-  id: string;
-  name: string;
-  level: Database['portal']['Enums']['government_level'];
-};
-
-type GovernmentRoleType = Database['portal']['Enums']['government_role_type'];
-type GovernmentLevel = Database['portal']['Enums']['government_level'];
-
 type RegisterFormProps = {
   organizations: Organization[];
-  governmentBodies: GovernmentBody[];
   action: (state: FormState, formData: FormData) => Promise<FormState>;
   nextPath: string;
   initialState: FormState;
@@ -54,16 +43,13 @@ type RegisterFormProps = {
 
 type AffiliationType = Database['portal']['Enums']['affiliation_type'];
 
-export function RegisterForm({ organizations, governmentBodies, action, nextPath, initialState }: RegisterFormProps) {
+export function RegisterForm({ organizations, action, nextPath, initialState }: RegisterFormProps) {
   const [state, formAction] = useActionState(action, initialState);
   const [selectedOrg, setSelectedOrg] = useState(NO_ORGANIZATION_VALUE);
-  const [selectedGovernment, setSelectedGovernment] = useState(NO_ORGANIZATION_VALUE);
   const [affiliationType, setAffiliationType] = useState<AffiliationType>('community_member');
   const [homelessnessExperience, setHomelessnessExperience] = useState<LivedExperienceStatus>('none');
   const [substanceUseExperience, setSubstanceUseExperience] = useState<LivedExperienceStatus>('none');
   const [contactMethod, setContactMethod] = useState<ContactMethod>(initialState.contactMethod ?? 'email');
-  const [governmentRoleType, setGovernmentRoleType] = useState<GovernmentRoleType | null>(null);
-  const [governmentLevel, setGovernmentLevel] = useState<GovernmentLevel | null>(null);
 
   useEffect(() => {
     const nextMethod = state.contactMethod;
@@ -79,30 +65,9 @@ export function RegisterForm({ organizations, governmentBodies, action, nextPath
     if (affiliationType === 'community_member') {
       startTransition(() => {
         setSelectedOrg(NO_ORGANIZATION_VALUE);
-        setSelectedGovernment(NO_ORGANIZATION_VALUE);
-        setGovernmentRoleType(null);
-        setGovernmentLevel(null);
-      });
-    } else if (affiliationType === 'agency_partner') {
-      startTransition(() => {
-        setSelectedGovernment(NO_ORGANIZATION_VALUE);
-        setGovernmentRoleType(null);
-        setGovernmentLevel(null);
-      });
-    } else if (affiliationType === 'government_partner') {
-      startTransition(() => {
-        setSelectedOrg(NO_ORGANIZATION_VALUE);
       });
     }
   }, [affiliationType]);
-
-  useEffect(() => {
-    if (selectedGovernment !== NEW_GOVERNMENT_VALUE) {
-      startTransition(() => {
-        setGovernmentLevel(null);
-      });
-    }
-  }, [selectedGovernment]);
 
   const hideRoleField = affiliationType === 'community_member';
   const otpPending = state.status === 'otp_pending';
@@ -114,11 +79,8 @@ export function RegisterForm({ organizations, governmentBodies, action, nextPath
       ) : (
         <RegistrationFields
           organizations={organizations}
-          governmentBodies={governmentBodies}
           selectedOrg={selectedOrg}
           onSelectOrg={setSelectedOrg}
-          selectedGovernment={selectedGovernment}
-          onSelectGovernment={setSelectedGovernment}
           affiliationType={affiliationType}
           onAffiliationChange={(value) => setAffiliationType(value as AffiliationType)}
           hideRoleField={hideRoleField}
@@ -128,14 +90,6 @@ export function RegisterForm({ organizations, governmentBodies, action, nextPath
           onSubstanceUseChange={(value) => setSubstanceUseExperience(value as LivedExperienceStatus)}
           contactMethod={contactMethod}
           onContactMethodChange={(value) => setContactMethod(value as ContactMethod)}
-          governmentRoleType={governmentRoleType}
-          onGovernmentRoleChange={(value) =>
-            setGovernmentRoleType(value ? (value as GovernmentRoleType) : null)
-          }
-          governmentLevel={governmentLevel}
-          onGovernmentLevelChange={(value) =>
-            setGovernmentLevel(value === '' ? null : (value as GovernmentLevel))
-          }
           nextPath={nextPath}
         />
       )}
@@ -201,11 +155,8 @@ function OtpVerificationStep({ state }: { state: FormState }) {
 
 type RegistrationFieldsProps = {
   organizations: Organization[];
-  governmentBodies: GovernmentBody[];
   selectedOrg: string;
   onSelectOrg: (value: string) => void;
-  selectedGovernment: string;
-  onSelectGovernment: (value: string) => void;
   affiliationType: AffiliationType;
   onAffiliationChange: (value: string) => void;
   hideRoleField: boolean;
@@ -215,36 +166,14 @@ type RegistrationFieldsProps = {
   onSubstanceUseChange: (value: string) => void;
   contactMethod: ContactMethod;
   onContactMethodChange: (value: string) => void;
-  governmentRoleType: GovernmentRoleType | null;
-  onGovernmentRoleChange: (value: string) => void;
-  governmentLevel: GovernmentLevel | null;
-  onGovernmentLevelChange: (value: string) => void;
   nextPath: string;
 };
-
-function formatGovernmentLevel(level: GovernmentLevel): string {
-  switch (level) {
-    case 'municipal':
-      return 'Municipal';
-    case 'county':
-      return 'County / regional';
-    case 'provincial':
-      return 'Provincial / territorial';
-    case 'federal':
-      return 'Federal';
-    default:
-      return 'Other';
-  }
-}
 
 function RegistrationFields(props: RegistrationFieldsProps) {
   const {
     organizations,
-    governmentBodies,
     selectedOrg,
     onSelectOrg,
-    selectedGovernment,
-    onSelectGovernment,
     affiliationType,
     onAffiliationChange,
     hideRoleField,
@@ -254,16 +183,11 @@ function RegistrationFields(props: RegistrationFieldsProps) {
     onSubstanceUseChange,
     contactMethod,
     onContactMethodChange,
-    governmentRoleType,
-    onGovernmentRoleChange,
-    governmentLevel,
-    onGovernmentLevelChange,
     nextPath,
   } = props;
+
   const isAgencyPartner = affiliationType === 'agency_partner';
-  const isGovernmentPartner = affiliationType === 'government_partner';
   const requestingNewOrganization = selectedOrg === NEW_ORGANIZATION_VALUE;
-  const requestingNewGovernment = selectedGovernment === NEW_GOVERNMENT_VALUE;
 
   return (
     <div className="grid gap-6">
@@ -309,7 +233,7 @@ function RegistrationFields(props: RegistrationFieldsProps) {
           name="affiliation_type"
           value={affiliationType}
           onValueChange={onAffiliationChange}
-          className="grid gap-3 md:grid-cols-3"
+          className="grid gap-3 md:grid-cols-2"
         >
           <AffiliationOption
             id="affiliation-community"
@@ -320,27 +244,21 @@ function RegistrationFields(props: RegistrationFieldsProps) {
           <AffiliationOption
             id="affiliation-agency"
             value="agency_partner"
-            title="Agency / organization"
-            description="Request verified posting on behalf of a partner organization."
-          />
-          <AffiliationOption
-            id="affiliation-government"
-            value="government_partner"
-            title="Government representative"
-            description="Join as municipal, regional, or provincial staff or elected leadership."
+            title="IHARC team or partner"
+            description="Request verified publishing on behalf of IHARC staff, outreach teams, or trusted partners."
           />
         </RadioGroup>
         {affiliationType !== 'community_member' ? (
           <Alert className="border-primary/30 bg-primary/10 text-sm text-on-primary-container">
             <AlertTitle>Pending verification</AlertTitle>
             <AlertDescription>
-              An IHARC administrator will confirm your role before activating official posting privileges. You can still
+              An IHARC administrator will confirm your role before activating full posting privileges. You can still
               participate as a community member while we verify.
             </AlertDescription>
           </Alert>
         ) : (
           <p className="text-xs text-muted">
-            We’ll gently note your role as “Member of the public” so collaboration highlights neighbour-led insight.
+            We’ll note your role as “Member of the public” so collaboration highlights neighbour-led insight.
           </p>
         )}
       </div>
@@ -372,165 +290,71 @@ function RegistrationFields(props: RegistrationFieldsProps) {
               <Input
                 id="new_organization_name"
                 name="new_organization_name"
-                placeholder="Northumberland County Outreach"
+                placeholder="Northumberland Outreach Network"
+                minLength={3}
                 required
-                maxLength={160}
               />
-              <p className="text-xs text-muted">
-                Moderators will verify new partners before enabling official responses.
-              </p>
-            </div>
-          ) : (
-            <p className="text-xs text-muted">
-              Link your agency to unlock official responses once moderators approve your affiliation.
-            </p>
-          )}
-        </div>
-      ) : null}
-
-      {isGovernmentPartner ? (
-        <div className="space-y-4 rounded-xl border border-outline/20 p-4">
-          <div className="grid gap-2">
-            <Label htmlFor="government_body_id">Government team</Label>
-            <Select name="government_body_id" value={selectedGovernment} onValueChange={onSelectGovernment}>
-              <SelectTrigger id="government_body_id">
-                <SelectValue placeholder="Select your government team" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={NO_ORGANIZATION_VALUE} disabled>
-                  Select your government team
-                </SelectItem>
-                {governmentBodies.map((body) => (
-                  <SelectItem key={body.id} value={body.id}>
-                    {body.name} · {formatGovernmentLevel(body.level)}
-                  </SelectItem>
-                ))}
-                <SelectItem value={NEW_GOVERNMENT_VALUE}>Request a new government listing</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <fieldset className="space-y-3 rounded-lg border border-outline/20 p-3">
-            <legend className="text-sm font-semibold text-on-surface">How do you serve neighbours?</legend>
-            <RadioGroup
-              name="government_role_type"
-              value={governmentRoleType ?? ''}
-              onValueChange={onGovernmentRoleChange}
-              className="grid gap-2 md:grid-cols-2"
-            >
-              <GovernmentRoleOption
-                id="government-role-staff"
-                value="staff"
-                title="Public servant / staff"
-                description="Administrative, public service, and operational roles."
-              />
-              <GovernmentRoleOption
-                id="government-role-politician"
-                value="politician"
-                title="Elected leadership"
-                description="Mayors, council members, MPs/MPPs, or other elected officials."
-              />
-            </RadioGroup>
-          </fieldset>
-
-          {requestingNewGovernment ? (
-            <div className="grid gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="government_level">Government level</Label>
-                <Select
-                  name="government_level"
-                  value={governmentLevel ?? ''}
-                  onValueChange={onGovernmentLevelChange}
-                >
-                  <SelectTrigger id="government_level">
-                    <SelectValue placeholder="Select a level" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="" disabled>
-                      Select a government level
-                    </SelectItem>
-                    <SelectItem value="municipal">Municipal</SelectItem>
-                    <SelectItem value="county">County / regional</SelectItem>
-                    <SelectItem value="provincial">Provincial / territorial</SelectItem>
-                    <SelectItem value="federal">Federal</SelectItem>
-                    <SelectItem value="other">Other / multi-jurisdictional</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="new_government_name">Government body name</Label>
-                <Input
-                  id="new_government_name"
-                  name="new_government_name"
-                  placeholder="Town of Cobourg Council"
-                  required
-                  maxLength={160}
-                />
-                <p className="text-xs text-muted">
-                  Moderators will confirm this listing before enabling official government updates.
-                </p>
-              </div>
             </div>
           ) : null}
+          <div className="grid gap-2">
+            <Label htmlFor="position_title">Role or position</Label>
+            <Input
+              id="position_title"
+              name="position_title"
+              placeholder="Outreach worker, volunteer coordinator, peer navigator…"
+              required
+            />
+            <p className="text-xs text-muted">
+              We share this internally so teams know how you collaborate with neighbours and partners.
+            </p>
+          </div>
         </div>
-      ) : null}
-
-      {hideRoleField ? (
-        <input type="hidden" name="position_title" value={PUBLIC_MEMBER_ROLE_LABEL} />
       ) : (
-        <div className="grid gap-2">
-          <Label htmlFor="position_title">Position or role</Label>
-          <Input
-            id="position_title"
-            name="position_title"
-            maxLength={120}
-            placeholder="Public Health Nurse, Mayor, Outreach Coordinator, ..."
-            required
-          />
-          <p className="text-xs text-muted">Helps neighbours understand how you collaborate through the IHARC Portal.</p>
-        </div>
+        <input type="hidden" name="agency_organization_id" value={NO_ORGANIZATION_VALUE} />
       )}
 
-      <div className="grid gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="homelessness_experience">Housing lived experience badge</Label>
-          <Select name="homelessness_experience" value={homelessnessExperience} onValueChange={onHomelessnessChange}>
-            <SelectTrigger id="homelessness_experience">
-              <SelectValue placeholder="Select housing lived experience" />
-            </SelectTrigger>
-            <SelectContent>
-              {LIVED_EXPERIENCE_OPTIONS.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <ExperienceHelper selectedValue={homelessnessExperience} />
-          <p className="text-xs text-muted">
-            Share only what feels right. Badges appear beside your contributions to honour lived expertise with
-            homelessness.
-          </p>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="substance_use_experience">Substance use lived experience badge</Label>
-          <Select name="substance_use_experience" value={substanceUseExperience} onValueChange={onSubstanceUseChange}>
-            <SelectTrigger id="substance_use_experience">
-              <SelectValue placeholder="Select substance use lived experience" />
-            </SelectTrigger>
-            <SelectContent>
-              {LIVED_EXPERIENCE_OPTIONS.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <ExperienceHelper selectedValue={substanceUseExperience} />
-          <p className="text-xs text-muted">
-            These badges help acknowledge peers and partners with lived experience around substance use and recovery.
-          </p>
-        </div>
+      {!hideRoleField ? null : (
+        <input type="hidden" name="position_title" value={PUBLIC_MEMBER_ROLE_LABEL} />
+      )}
+
+      <div className="grid gap-2">
+        <Label htmlFor="homelessness_experience">Homelessness lived experience badge</Label>
+        <Select name="homelessness_experience" value={homelessnessExperience} onValueChange={onHomelessnessChange}>
+          <SelectTrigger id="homelessness_experience">
+            <SelectValue placeholder="Select lived experience" />
+          </SelectTrigger>
+          <SelectContent>
+            {LIVED_EXPERIENCE_OPTIONS.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <ExperienceHelper selectedValue={homelessnessExperience} />
+        <p className="text-xs text-muted">
+          Share only what feels right. Badges appear beside your contributions to honour lived expertise with
+          homelessness.
+        </p>
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="substance_use_experience">Substance use lived experience badge</Label>
+        <Select name="substance_use_experience" value={substanceUseExperience} onValueChange={onSubstanceUseChange}>
+          <SelectTrigger id="substance_use_experience">
+            <SelectValue placeholder="Select substance use lived experience" />
+          </SelectTrigger>
+          <SelectContent>
+            {LIVED_EXPERIENCE_OPTIONS.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <ExperienceHelper selectedValue={substanceUseExperience} />
+        <p className="text-xs text-muted">
+          These badges help acknowledge peers and partners with lived experience around substance use and recovery.
+        </p>
       </div>
 
       {contactMethod === 'email' ? (
@@ -582,57 +406,6 @@ function RegistrationFields(props: RegistrationFieldsProps) {
     </div>
   );
 }
-
-type ContactMethodOptionProps = {
-  id: string;
-  value: ContactMethod;
-  title: string;
-  description: string;
-};
-
-type GovernmentRoleOptionProps = {
-  id: string;
-  value: GovernmentRoleType;
-  title: string;
-  description: string;
-};
-
-function GovernmentRoleOption({ id, value, title, description }: GovernmentRoleOptionProps) {
-  return (
-    <label
-      htmlFor={id}
-      className="flex cursor-pointer items-start gap-3 rounded-lg border border-outline/30 bg-surface p-3 text-sm font-medium text-on-surface shadow-subtle transition hover:border-primary/40 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary"
-    >
-      <RadioGroupItem id={id} value={value} className="mt-1" />
-      <span>
-        {title}
-        <span className="mt-1 block text-xs font-normal text-muted">{description}</span>
-      </span>
-    </label>
-  );
-}
-
-function ContactMethodOption({ id, value, title, description }: ContactMethodOptionProps) {
-  return (
-    <label
-      htmlFor={id}
-      className="flex cursor-pointer items-start gap-3 rounded-xl border border-outline/40 bg-surface-container p-3 text-sm font-medium text-on-surface shadow-subtle transition hover:border-primary/40 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary"
-    >
-      <RadioGroupItem id={id} value={value} className="mt-1" />
-      <span>
-        {title}
-        <span className="mt-1 block text-xs font-normal text-muted">{description}</span>
-      </span>
-    </label>
-  );
-}
-
-type AffiliationOptionProps = {
-  id: string;
-  value: AffiliationType;
-  title: string;
-  description: string;
-};
 
 function AffiliationOption({ id, value, title, description }: AffiliationOptionProps) {
   return (

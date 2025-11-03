@@ -25,6 +25,14 @@ const adminTasks: AdminTask[] = [
     href: '/admin/inventory',
   },
   {
+    id: 'users',
+    title: 'User management',
+    description:
+      'Create and manage IHARC staff and volunteer accounts, assign Supabase roles, and handle credentials.',
+    actionLabel: 'Manage users',
+    href: '/admin/users',
+  },
+  {
     id: 'resources',
     title: 'Resource library',
     description:
