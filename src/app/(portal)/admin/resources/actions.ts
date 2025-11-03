@@ -239,15 +239,16 @@ export async function updateResourcePage(formData: FormData) {
     },
   });
 
-  const adminResourcePath = `/command-center/admin/resources/${slug}`;
+  const adminResourcePath = `/admin/resources/${slug}`;
 
-  revalidatePath('/command-center/admin');
+  revalidatePath('/admin');
+  revalidatePath('/admin/resources');
   revalidatePath(adminResourcePath);
   revalidatePath('/resources');
   revalidatePath(`/resources/${slug}`);
   if (currentSlug && currentSlug !== slug) {
     revalidatePath(`/resources/${currentSlug}`);
-    revalidatePath(`/command-center/admin/resources/${currentSlug}`);
+    revalidatePath(`/admin/resources/${currentSlug}`);
   }
   revalidatePath('/sitemap.xml');
 }
@@ -298,10 +299,12 @@ export async function deleteResourcePage(formData: FormData) {
     },
   });
 
-  revalidatePath('/command-center/admin');
+  revalidatePath('/admin');
+  revalidatePath('/admin/resources');
   revalidatePath('/resources');
   if (resourceSlug) {
     revalidatePath(`/resources/${resourceSlug}`);
+    revalidatePath(`/admin/resources/${resourceSlug}`);
   }
   revalidatePath('/sitemap.xml');
 }

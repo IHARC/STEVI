@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
@@ -15,6 +16,14 @@ type AdminTask = {
 };
 
 const adminTasks: AdminTask[] = [
+  {
+    id: 'resources',
+    title: 'Resource library',
+    description:
+      'Publish delegations, policy briefs, and outreach reports that power the marketing site and STEVI resources.',
+    actionLabel: 'Manage resources',
+    href: '/admin/resources',
+  },
   {
     id: 'profile-verification',
     title: 'Profile verification queue',
@@ -74,11 +83,38 @@ export default async function AdminPage() {
             </CardHeader>
             <CardContent>
               <Button variant="outline" asChild className="w-full">
-                <a href={task.href}>{task.actionLabel}</a>
+                <Link href={task.href}>{task.actionLabel}</Link>
               </Button>
             </CardContent>
           </Card>
         ))}
+      </section>
+
+      <section id="resources">
+        <Card>
+          <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <CardTitle className="text-xl">Resource management</CardTitle>
+              <CardDescription>
+                Publish or update the reports and guides neighbours rely on. Changes sync to the marketing site and STEVI
+                client resource directory.
+              </CardDescription>
+            </div>
+            <Button asChild variant="outline" size="sm">
+              <Link href="/admin/resources">Open resource library</Link>
+            </Button>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm text-muted-foreground">
+            <p>
+              We migrated the resource management tools from the marketing repo. Use the resource library to create new
+              posts, update drafts, and retire outdated content without leaving STEVI.
+            </p>
+            <p>
+              Publishing here revalidates both the STEVI portal and the marketing experience so clients and the public
+              see updates right away.
+            </p>
+          </CardContent>
+        </Card>
       </section>
 
       <section id="profiles" className="grid gap-4 md:grid-cols-2">

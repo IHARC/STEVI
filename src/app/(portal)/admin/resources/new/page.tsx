@@ -16,19 +16,19 @@ export default async function AdminResourceNewPage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/login');
+    redirect('/login?next=/admin/resources/new');
   }
 
   const profile = await ensurePortalProfile(supabase, user.id);
   if (profile.role !== 'admin') {
-    redirect('/portal/ideas');
+    redirect('/home');
   }
 
   return (
     <div className="mx-auto w-full max-w-4xl space-y-6 px-4 py-10 text-on-surface">
       <div className="flex flex-col gap-3">
         <Button asChild variant="ghost" className="w-fit">
-          <Link href="/command-center/admin?tab=resources">← Back to admin resources</Link>
+          <Link href="/admin/resources">← Back to admin resources</Link>
         </Button>
         <h1 className="text-3xl font-semibold">Create resource</h1>
         <p className="text-sm text-on-surface/70">

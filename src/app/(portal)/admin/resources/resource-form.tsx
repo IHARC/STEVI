@@ -233,7 +233,7 @@ export function ResourceForm({ mode, profileId, action, onDeleteAction, resource
             {mode === 'create' ? 'Create resource' : 'Save changes'}
           </Button>
           <Button asChild variant="ghost">
-            <Link href="/command-center/admin?tab=resources">Back to admin overview</Link>
+            <Link href="/admin/resources">Back to admin overview</Link>
           </Button>
         </div>
       </form>
