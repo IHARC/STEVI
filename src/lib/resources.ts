@@ -282,7 +282,7 @@ export function isAllowedEmbedUrl(rawUrl: string | URL) {
     const parsed = rawUrl instanceof URL ? rawUrl : new URL(rawUrl);
     const hostname = parsed.hostname.toLowerCase();
     return ALLOWED_EMBED_HOSTS.has(hostname);
-  } catch (error) {
+  } catch {
     return false;
   }
 }

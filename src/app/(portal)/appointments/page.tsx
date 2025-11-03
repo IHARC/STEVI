@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
+import { logAuditEvent } from '@/lib/audit';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -71,8 +72,6 @@ type AppointmentRequestState =
   | { status: 'success'; message: string }
   | { status: 'error'; message: string };
 
-const INITIAL_REQUEST_STATE: AppointmentRequestState = { status: 'idle' };
-
 async function submitAppointmentRequest(
   _prev: AppointmentRequestState,
   formData: FormData,
@@ -96,6 +95,20 @@ async function submitAppointmentRequest(
     if (!user) {
       return { status: 'error', message: 'Sign in before requesting an appointment.' };
     }
+
+    const profile = await ensurePortalProfile(supabase, user.id);
+
+    await logAuditEvent(supabase, {
+      actorProfileId: profile.id,
+      action: 'appointment_request_logged',
+      entityType: 'appointment_request',
+      entityId: null,
+      meta: {
+        reason,
+        preferred_date: preferredDate || null,
+        staff_preference: staffPreference || null,
+      },
+    });
 
     return {
       status: 'success',

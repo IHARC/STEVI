@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useEffect, useId, useState } from 'react';
+import { startTransition, useActionState, useEffect, useId, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -67,28 +67,38 @@ export function RegisterForm({ organizations, governmentBodies, action, nextPath
 
   useEffect(() => {
     if (state.contactMethod && state.contactMethod !== contactMethod) {
-      setContactMethod(state.contactMethod);
+      startTransition(() => {
+        setContactMethod(state.contactMethod);
+      });
     }
   }, [state.contactMethod, contactMethod]);
 
   useEffect(() => {
     if (affiliationType === 'community_member') {
-      setSelectedOrg(NO_ORGANIZATION_VALUE);
-      setSelectedGovernment(NO_ORGANIZATION_VALUE);
-      setGovernmentRoleType(null);
-      setGovernmentLevel(null);
+      startTransition(() => {
+        setSelectedOrg(NO_ORGANIZATION_VALUE);
+        setSelectedGovernment(NO_ORGANIZATION_VALUE);
+        setGovernmentRoleType(null);
+        setGovernmentLevel(null);
+      });
     } else if (affiliationType === 'agency_partner') {
-      setSelectedGovernment(NO_ORGANIZATION_VALUE);
-      setGovernmentRoleType(null);
-      setGovernmentLevel(null);
+      startTransition(() => {
+        setSelectedGovernment(NO_ORGANIZATION_VALUE);
+        setGovernmentRoleType(null);
+        setGovernmentLevel(null);
+      });
     } else if (affiliationType === 'government_partner') {
-      setSelectedOrg(NO_ORGANIZATION_VALUE);
+      startTransition(() => {
+        setSelectedOrg(NO_ORGANIZATION_VALUE);
+      });
     }
   }, [affiliationType]);
 
   useEffect(() => {
     if (selectedGovernment !== NEW_GOVERNMENT_VALUE) {
-      setGovernmentLevel(null);
+      startTransition(() => {
+        setGovernmentLevel(null);
+      });
     }
   }, [selectedGovernment]);
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { startTransition, useEffect, useState } from 'react';
 import { EditorContent, useEditor } from '@tiptap/react';
 import Link from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
@@ -86,7 +86,9 @@ export function ResourceRichTextEditor({ name, label, description, defaultValue 
   });
 
   useEffect(() => {
-    setSerialized(defaultValue ?? '');
+    startTransition(() => {
+      setSerialized(defaultValue ?? '');
+    });
     if (editor && typeof defaultValue === 'string') {
       editor.commands.setContent(defaultValue, false);
     }
@@ -347,7 +349,7 @@ function normalizeUrl(value: string) {
   try {
     const url = new URL(value);
     return url.toString();
-  } catch (error) {
+  } catch {
     return value.startsWith('http://') || value.startsWith('https://') ? value : `https://${value}`;
   }
 }

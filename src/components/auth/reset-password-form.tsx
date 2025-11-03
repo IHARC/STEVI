@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useEffect, useMemo, useState } from 'react';
+import { startTransition, useActionState, useEffect, useMemo, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,16 +30,22 @@ export function ResetPasswordForm({ action, initialState }: ResetPasswordFormPro
 
   useEffect(() => {
     if (state.contactMethod && state.contactMethod !== contactMethod) {
-      setContactMethod(state.contactMethod);
+      startTransition(() => {
+        setContactMethod(state.contactMethod);
+      });
     }
   }, [state.contactMethod, contactMethod]);
 
   useEffect(() => {
     if (state.status === 'success') {
-      setPhoneInput('');
+      startTransition(() => {
+        setPhoneInput('');
+      });
     }
     if (state.phone) {
-      setPhoneInput(state.phone);
+      startTransition(() => {
+        setPhoneInput(state.phone);
+      });
     }
   }, [state.status, state.phone]);
 

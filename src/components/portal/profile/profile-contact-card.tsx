@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useEffect, useMemo, useState } from 'react';
+import { startTransition, useActionState, useEffect, useMemo, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -48,10 +48,14 @@ export function ProfileContactCard({
 
   useEffect(() => {
     if (phoneState.status === 'success' && phoneState.phone) {
-      setPhoneInput(phoneState.phone);
+      startTransition(() => {
+        setPhoneInput(phoneState.phone);
+      });
     }
     if (phoneState.status === 'idle' && !otpPending && phoneState.phone === undefined && initialPhone && !phoneInput) {
-      setPhoneInput(initialPhone);
+      startTransition(() => {
+        setPhoneInput(initialPhone);
+      });
     }
   }, [phoneState, otpPending, initialPhone, phoneInput]);
 

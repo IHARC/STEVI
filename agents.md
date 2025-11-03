@@ -26,11 +26,11 @@
 - Mission, success criteria, and data guardrails captured.
 - Legacy portal and admin surface audited. Supabase usage documented in `docs/migration-roadmap.md`.
 
-### Phase 1 — Foundation & Scaffolding ✅ (initial pass)
+### Phase 1 — Foundation & Scaffolding ✅
 - Next.js 15 scaffold with shared providers, theming, and build tooling in place.
 - Supabase SSR/browser clients and middleware migrated.
 - Core navigation, layout shell, and home/appointments/documents/profile/support routes stubbed with STEVI-focused copy.
-- TODO follow-ups: finalise `.env.example` with admin-specific settings, document runtime expectations in `docs/backend.md`.
+- Follow-ups completed: `.env.example` now includes admin tooling secrets and shared Supabase notes, and runtime expectations live in `docs/backend.md`.
 
 ### Phase 2 — Client Experience (🚧 in progress)
 - Replace collaboration-era modules with STEVI-specific flows:

@@ -64,7 +64,7 @@ export function sanitizeEmbedHtml(input: string) {
 function getHostname(url: string) {
   try {
     return new URL(url).hostname.toLowerCase();
-  } catch (error) {
+  } catch {
     return '';
   }
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { startTransition, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ChevronDown, Menu } from 'lucide-react';
@@ -224,7 +224,9 @@ function MobileNavCollapsible({ item, closeSheet }: MobileNavCollapsibleProps) {
   const [expanded, setExpanded] = useState(item.isActive);
 
   useEffect(() => {
-    setExpanded(item.isActive);
+    startTransition(() => {
+      setExpanded(item.isActive);
+    });
   }, [item.isActive]);
 
   return (

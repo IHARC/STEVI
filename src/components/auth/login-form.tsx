@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useEffect, useState } from 'react';
+import { startTransition, useActionState, useEffect, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,7 +30,9 @@ export function LoginForm({ action, nextPath, initialState }: LoginFormProps) {
 
   useEffect(() => {
     if (state.contactMethod && state.contactMethod !== contactMethod) {
-      setContactMethod(state.contactMethod);
+      startTransition(() => {
+        setContactMethod(state.contactMethod);
+      });
     }
   }, [state.contactMethod, contactMethod]);
 
