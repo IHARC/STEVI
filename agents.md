@@ -2,74 +2,75 @@
 
 ## Mission Snapshot
 - **Product name**: STEVI — Supportive Technology to Enable Vulnerable Individuals.
-- **Purpose**: Dedicated client portal that lets IHARC neighbours experiencing homelessness or substance use challenges access personalised plans, submit ideas, follow working plans, sign petitions, and stay in touch with outreach staff.
-- **Primary users**: IHARC clients, frontline outreach workers, moderators, and collaborating agencies. Marketing visitors will continue using the public IHARC marketing site at `https://iharc.ca`.
-- **Success guardrails**: Keep compassionate tone, accessible semantics, and privacy guarantees reflected in `I.H.A.R.C-Public-Website/docs/portal/architecture.md`. No regression to Supabase RLS/Audit flows.
+- **Operator**: IHARC (Integrated Homelessness & Addictions Response Centre), a non-profit serving people experiencing homelessness and substance use challenges across Northumberland County, Ontario, Canada.
+- **Purpose**: Standalone client support portal where IHARC neighbours can manage appointments, access secure documents, review personalised updates, and stay connected with outreach teams. Supabase-backed admin tooling lives alongside the client experience to manage content that also powers the public marketing site.
+- **Primary users**: IHARC clients, outreach staff, moderators, and partner agencies. Marketing-first visitors use the separate `I.H.A.R.C-Public-Website` app.
+- **Success guardrails**: Maintain compassionate copy, WCAG-friendly patterns, and privacy/audit commitments captured in `I.H.A.R.C-Public-Website/docs/portal/architecture.md`. No regressions to Supabase RLS, audit logging, or rate limiting. Honour IHARC’s trauma-informed, harm-reduction-centred service model.
 
-## Source System Overview
-- The current portal lives inside the marketing Next.js app (`I.H.A.R.C-Public-Website/src/app/portal/*`) with shared components in `src/components/portal`, cached data loaders in `src/data/{ideas,plans,metrics,petition,pit}.ts`, and supporting libraries under `src/lib/{cache,auth,audit,plans,petition,profile,rate-limit,supabase}`.
-- Edge Functions (`portal-moderate`, `portal-ingest-metrics`, `portal-attachments`, `portal-admin-invite`) and RPC helpers already power moderation, rate limiting, audit logging, and attachment workflows.
-- Marketing-only surfaces live in `src/app/(marketing)/*`, with navigation shells (`src/components/shells/*`) blending portal and marketing links.
+## Source System Snapshot
+- Historic portal code lives inside the marketing repo (`I.H.A.R.C-Public-Website/src/app/portal/*`). That implementation focused on ideation and community moderation — we now treat it solely as a design reference.
+- Admin workflows (resources, metrics, invitations, notifications, etc.) currently exist inside the same marketing repo under `src/app/command-center/*`.
+- Supabase functions (`portal-attachments`, `portal-moderate`, `portal-admin-invite`, etc.) and schemas (`portal`, `core`, `inventory`, `justice`) are shared across marketing, STEVI OPS, and this client portal.
 
 ## Target Architecture
-- Separate repositories:
-  - `I.H.A.R.C-Public-Website`: marketing shell only; portal routes removed and replaced with links/redirects to STEVI.
-  - `STEVI`: Next.js 15 App Router app dedicated to the portal. Reuse Supabase project, schema, and edge functions. Preserve tagged caching contract from `src/lib/cache/*`.
-- Shared design/dev foundations:
-  - Copy shared tokens from `src/styles/main.css` and Tailwind config into STEVI. Consider extracting a shared config package (`packages/design-system`) if both repos will evolve together.
-  - Move reusable utilities (`src/lib/utils.ts`, `src/lib/supabase/*`, `src/components/providers/*`) to STEVI and leave thin wrappers or duplicated copies in marketing app as needed.
-- Infrastructure:
-  - Azure Static Web Apps deploys each repo separately. Supabase environment variables stay in place; STEVI gets its own SWA with identical env wiring.
+- Split responsibilities:
+  - `I.H.A.R.C-Public-Website`: pure marketing experience. It becomes a read-only consumer of shared Supabase content (resources, stats, navigation copy, etc.) surfaced through RLS-safe views/functions maintained by STEVI.
+  - `STEVI`: Next.js 15 App Router application for clients + IHARC staff tools. Handles authentication, caching, admin mutations, and all Supabase write operations (appointments, documents, notifications, resources, marketing copy).
+- Supabase acts as the single source of truth that bridges STEVI and the marketing site. Admin flows in STEVI write to Supabase tables/RPCs across schemas like `portal`, `core`, `inventory`, and `justice`, and the marketing app consumes the same data via read-only channels.
+- Shared design tokens (Tailwind + CSS custom properties) remain aligned across repos. Consider formalising a shared package once both apps stabilise.
+- Azure Static Web Apps handles deployments for each repo; both point at the same Supabase project/environment variables.
 
-## Migration & Upgrade Plan
+## Delivery Plan & Status
 
-### Phase 0 — Alignment & Inventory
-- Confirm Supabase schema stays in one project. Use Supabase MCP tool to capture the latest schema snapshot and document dependencies in `STEVI/docs/backend.md`.
-- Catalogue portal routes, server actions, caching keys, and edge-function touchpoints. Cross-check with docs under `I.H.A.R.C-Public-Website/docs/portal/*`.
-- Decide on canonical domain (e.g., `https://portal.iharc.ca`) and SSO/auth approach (Supabase auth sessions stay first-party).
+### Phase 0 — Alignment & Inventory ✅
+- Mission, success criteria, and data guardrails captured.
+- Legacy portal and admin surface audited. Supabase usage documented in `docs/migration-roadmap.md`.
 
-### Phase 1 — Prepare STEVI Repo
-- Scaffold Next.js 15 / TypeScript app in `STEVI/` mirroring lint, build, Tailwind, and Vitest/Playwright setup from the marketing repo.
-- Port base config files: `tsconfig.json`, `next.config.mjs`, `postcss.config.cjs`, `tailwind.config.ts`, `tailwind.config.cjs` (if still needed), `vitest.config.ts`, `.env.example`.
-- Add shared providers (`ThemeProvider`, `AnalyticsProvider`, `ConsentBanner`) and `src/styles/main.css` to keep typography & tokens aligned.
-- Create Supabase clients (`src/lib/supabase/{server,client,rsc,public-client}.ts`), cache helpers, and auth middleware identical to current portal implementation.
+### Phase 1 — Foundation & Scaffolding ✅ (initial pass)
+- Next.js 15 scaffold with shared providers, theming, and build tooling in place.
+- Supabase SSR/browser clients and middleware migrated.
+- Core navigation, layout shell, and home/appointments/documents/profile/support routes stubbed with STEVI-focused copy.
+- TODO follow-ups: finalise `.env.example` with admin-specific settings, document runtime expectations in `docs/backend.md`.
 
-### Phase 2 — Extract Shared Libraries & Components
-- Copy portal-specific libraries: `src/lib/{audit.ts,auth.ts,cache/*,plans.ts,petition,profile.ts,rate-limit.ts,reactions.ts,notifications.ts,telemetry.ts}`. Review each file; if marketing still relies on any module, keep a duplicate or refactor into a small shared npm package later.
-- Move portal data loaders from `src/data/{ideas,plans,petition,metrics,pit}.ts`. Preserve `unstable_cache` tags from `src/lib/cache/tags.ts` and invalidation utilities.
-- Migrate components from `src/components/portal/*`, `src/components/admin/*` (for moderation), and any shared shells or layout pieces used by authenticated pages. Ensure import paths stay relative to new repo root (`@/` alias).
-- Bring over server actions, route handlers (`src/app/portal/api/*`), and middleware logic (`middleware.ts`) that currently enforce auth.
-- Sync domain-specific docs into `STEVI/docs/portal/*` so product context travels with the new repo.
+### Phase 2 — Client Experience (🚧 in progress)
+- Replace collaboration-era modules with STEVI-specific flows:
+  - ✅ Landing, home dashboard, appointments request/history shell, document locker preview, support directory, profile management.
+  - ☐ Wire appointments, documents, and support actions to Supabase tables/RPCs (confirm schemas via MCP before touching).
+  - ☐ Implement notifications/alerts UI once schema confirmed.
+  - ☐ Add Vitest/Playwright coverage for critical journeys.
 
-### Phase 3 — Rebuild Portal Routes in STEVI
-- Recreate directory structure under `STEVI/src/app`:
-  - `/ideas`, `/ideas/submit`, `/ideas/[id]`
-  - `/plans`, `/plans/[slug]`
-  - `/progress`, `/progress/pit`
-  - `/petition/[slug]` plus shared marketing preview components if still required.
-  - `/about`, `/profile`, `/auth` routes (`login`, `register`, `reset-password`), and middleware-driven gating.
-- Wire existing Supabase queries and mutations via copied data loaders. Confirm Edge Function calls (`portal-moderate`, etc.) remain reachable.
-- Restore tests (Vitest unit tests, Playwright e2e) that cover portal flows. Update config paths to new repo layout.
-- Update copy to reference STEVI branding where appropriate while keeping IHARC-insistence for formal names.
+### Phase 3 — Admin Workspace Migration (🚧 starting now)
+- Extract admin tools from marketing repo, re-scope to STEVI (all backed by Supabase mutations and audit logs):
+  - ☐ Profile verification & invitations (Supabase `portal.profiles`, `portal.profile_invites`, RLS-protected RPCs).
+  - ☐ Resource/report library management (`portal.resource_pages`, attachments, embed helpers) with marketing site reading published rows.
+  - ☐ Notifications queue + templates (`portal.notifications`, existing edge functions) to broadcast outreach updates.
+  - ☐ Metrics ingestion controls (if still required) and any governance settings surfaced to staff (`portal.metric_catalog`, `portal.metric_daily`, etc.).
+- Lock down the marketing app to read-only access patterns by exposing pre-approved SQL views or RPCs. Ensure STEVI admin revalidation triggers cover both apps (`/admin`, marketing routes, sitemap, etc.) so Supabase updates propagate everywhere.
 
-### Phase 4 — Upgrade to Full Client Portal
-- Introduce logged-in landing hub: personalised dashboard summarising assigned plans, petition involvement, and key dates.
-- Add secure document locker backed by existing `portal-attachments` bucket with client-specific foldering and expiring links.
-- Extend profile flows (`src/components/portal/profile/*`) to capture preferred contact windows, language, and consent toggles.
-- Build outreach log module: quick entries for field staff tied to `plans` or `ideas`, respecting audit logging and RLS. If new tables are required, design migrations compatible with existing Supabase schema.
-- Expand `progress` area with per-user insights (e.g., plan milestones, petition updates) while keeping aggregated community metrics intact.
-- Add notification preferences UI that maps to Supabase `notifications` tables and existing edge functions.
-- Ensure all new pages honour caching strategy (dynamic routes or tagged caches) and leverage existing rate limiting / audit helpers.
+### Phase 4 — Integration & Hardening (⬜ pending)
+- Confirm cache invalidation strategy (reuse `src/lib/cache/*` tagging helpers).
+- Validate Supabase RLS/auth contexts across server actions and API routes.
+- Fill `docs/backend.md` with table/policy references gathered via Supabase MCP, plus environment setup instructions.
+- Add regression tests and lint/typecheck gates.
 
-### Phase 5 — Hardening & Launch
-- Run full regression suite (lint, typecheck, unit, e2e). Validate cache invalidation by triggering mutations and confirming tags invalidate via `src/lib/cache/invalidate.ts`.
-- Conduct security review: verify middleware protections, Supabase RLS, and attachment signing flows in the new app context.
-- Coordinate content freeze, then remove portal routes from marketing repo:
-  - Delete `src/app/portal/*`, `src/app/ideas`, `src/app/plans`, `src/app/progress`, and related API handlers.
-  - Update navigation components (`src/components/shells/*`, `SiteFooter.tsx`) to link out to the STEVI domain.
-  - Replace any portal previews on marketing pages with summaries that point to STEVI.
-- Set up redirects on marketing site so legacy URLs (e.g., `/portal/ideas`) 301 to STEVI equivalents.
-- Deploy STEVI SWA with Supabase env vars; smoke-test login, submissions, plan promotion, petition signing, and moderation.
+### Phase 5 — Marketing Separation & Launch (⬜ pending)
+- Update marketing repo to consume shared content via read-only APIs (no portal code).
+- Set up redirects and comms for launch.
+- Run coordinated release checklist with outreach/marketing teams.
+
+## Supabase & Backend Expectations
+- Continue using existing schemas (`portal`, `core`, etc.) and edge functions.
+- All new functionality must respect RLS policies — confirm via MCP tools rather than migrations alone.
+- Document environment variables, storage buckets, and function dependencies in STEVI docs.
+
+## Current Deliverables & Milestones
+- ✅ Repo scaffolding + base layout.
+- 🚧 Client dashboard, appointments, documents, support, profile.
+- 🚧 Admin workspace migration (resources, invites, notifications, metrics).
+- ⬜ Integration testing + Supabase documentation.
+- ⬜ Marketing hand-off & dual-launch comms.
+
+The STEVI team should treat this briefing as a living document. Update it as features ship, especially when admin tooling or Supabase dependencies change.
 
 ## Supabase & Backend Preservation
 - Keep the Supabase schema untouched; only augment via migrations coordinated with data team. Use Supabase MCP tool to verify existing policies before shipping.

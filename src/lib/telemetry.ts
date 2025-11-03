@@ -2,7 +2,7 @@ export type TelemetryPayload = Record<string, unknown>;
 
 type TelemetryWindow = Window & { dataLayer?: unknown[] };
 
-const TELEMETRY_ENDPOINT = '/api/portal/telemetry';
+const TELEMETRY_ENDPOINT = '/api/telemetry';
 
 export function trackClientEvent(event: string, payload: TelemetryPayload = {}): void {
   if (typeof window === 'undefined') {
