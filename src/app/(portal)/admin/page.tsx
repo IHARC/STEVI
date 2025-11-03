@@ -17,6 +17,14 @@ type AdminTask = {
 
 const adminTasks: AdminTask[] = [
   {
+    id: 'inventory',
+    title: 'Inventory workspace',
+    description:
+      'Track stock levels, receive donations, and manage partner organisations across IHARC locations.',
+    actionLabel: 'Open inventory tools',
+    href: '/admin/inventory',
+  },
+  {
     id: 'resources',
     title: 'Resource library',
     description:
