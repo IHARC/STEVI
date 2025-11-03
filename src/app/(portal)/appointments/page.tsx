@@ -6,8 +6,8 @@ import { logAuditEvent } from '@/lib/audit';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
+import { RequestAppointmentForm } from './request-appointment-form';
+import type { AppointmentRequestState } from './types';
 
 export const dynamic = 'force-dynamic';
 
@@ -66,11 +66,6 @@ function formatOccursAt(value: string) {
     return value;
   }
 }
-
-type AppointmentRequestState =
-  | { status: 'idle' }
-  | { status: 'success'; message: string }
-  | { status: 'error'; message: string };
 
 async function submitAppointmentRequest(
   _prev: AppointmentRequestState,
@@ -263,48 +258,10 @@ export default async function AppointmentsPage() {
             </p>
           </CardHeader>
           <CardContent>
-            <form action={submitAppointmentRequest} className="space-y-4">
-              <div className="space-y-1.5">
-                <label htmlFor="reason" className="text-sm font-semibold text-on-surface">
-                  What do you want to discuss?
-                </label>
-                <Textarea
-                  id="reason"
-                  name="reason"
-                  required
-                  minLength={8}
-                  placeholder="Example: I need help rescheduling my RAAM visit or getting new ID."
-                  className="min-h-[120px]"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <label htmlFor="preferred-date" className="text-sm font-semibold text-on-surface">
-                  Preferred date or time window <span className="text-on-surface/60">(optional)</span>
-                </label>
-                <Input
-                  id="preferred-date"
-                  name="preferred_date"
-                  placeholder="Example: mornings this week or after 3pm next Tuesday"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <label htmlFor="staff-preference" className="text-sm font-semibold text-on-surface">
-                  Preferred staff member <span className="text-on-surface/60">(optional)</span>
-                </label>
-                <Input
-                  id="staff-preference"
-                  name="staff_preference"
-                  placeholder="Example: Jordan, Morgan, peer navigator, or whoever is available"
-                />
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Submitting will notify the outreach coordination queue linked with STEVI Ops for{' '}
-                {profile.display_name ?? 'your profile'}.
-              </p>
-              <Button type="submit" className="w-full sm:w-auto">
-                Send request
-              </Button>
-            </form>
+            <RequestAppointmentForm
+              action={submitAppointmentRequest}
+              profileDisplayName={profile.display_name}
+            />
           </CardContent>
         </Card>
       </section>
