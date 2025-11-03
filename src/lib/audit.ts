@@ -1,6 +1,6 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database, Json } from '@/types/supabase';
+import type { Json } from '@/types/supabase';
 import { sanitizeForAudit } from '@/lib/safety';
+import type { SupabaseServerClient } from '@/lib/supabase/types';
 
 type AuditPayload = {
   actorProfileId?: string | null;
@@ -11,7 +11,7 @@ type AuditPayload = {
 };
 
 export async function logAuditEvent(
-  supabase: SupabaseClient<Database>,
+  supabase: SupabaseServerClient,
   { actorProfileId = null, action, entityType, entityId, meta }: AuditPayload,
 ) {
   const sanitizedMeta = meta ? sanitizeForAudit(meta) : {};

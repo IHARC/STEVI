@@ -29,11 +29,13 @@ export function LoginForm({ action, nextPath, initialState }: LoginFormProps) {
   const [contactMethod, setContactMethod] = useState<ContactMethod>(initialState.contactMethod ?? 'email');
 
   useEffect(() => {
-    if (state.contactMethod && state.contactMethod !== contactMethod) {
-      startTransition(() => {
-        setContactMethod(state.contactMethod);
-      });
+    const nextMethod = state.contactMethod;
+    if (!nextMethod || nextMethod === contactMethod) {
+      return;
     }
+    startTransition(() => {
+      setContactMethod(nextMethod);
+    });
   }, [state.contactMethod, contactMethod]);
 
   return (

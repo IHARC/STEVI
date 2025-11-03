@@ -163,7 +163,7 @@ export async function getResourceBySlug(
     query = query.eq('is_published', true);
   }
 
-  const { data, error } = await query.maybeSingle<ResourceRow>();
+  const { data, error } = await query.maybeSingle();
 
   if (error) {
     if (error.code === 'PGRST116') {
@@ -176,7 +176,7 @@ export async function getResourceBySlug(
     return null;
   }
 
-  return mapResourceRow(data);
+  return mapResourceRow(data as ResourceRow);
 }
 
 export function normalizeFilters(filters: ResourceFilters): NormalizedResourceFilters {

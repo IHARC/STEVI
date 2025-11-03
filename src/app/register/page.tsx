@@ -62,6 +62,11 @@ type GovernmentBody = {
   level: Database['portal']['Enums']['government_level'];
 };
 
+type OrganizationRecord = Pick<
+  Database['portal']['Tables']['organizations']['Row'],
+  'id' | 'name' | 'category' | 'government_level' | 'verified'
+>;
+
 type SearchParams = Record<string, string | string[]>;
 
 type RegisterPageProps = {
@@ -85,19 +90,21 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
     redirect(nextPath);
   }
 
-  const { data: organizationRows } = await portal
+  const { data: organizationRowsRaw } = await portal
     .from('organizations')
     .select('id, name, category, government_level, verified')
     .eq('verified', true)
     .order('name', { ascending: true });
 
+  const organizationRows = (organizationRowsRaw ?? []) as OrganizationRecord[];
+
   const communityOrganizations: CommunityOrganization[] =
-    (organizationRows ?? [])
+    organizationRows
       .filter((org) => org.category === 'community')
       .map((org) => ({ id: org.id, name: org.name }));
 
   const governmentBodies: GovernmentBody[] =
-    (organizationRows ?? [])
+    organizationRows
       .filter((org): org is typeof org & { government_level: Database['portal']['Enums']['government_level'] } => {
         return org.category === 'government' && org.government_level !== null;
       })

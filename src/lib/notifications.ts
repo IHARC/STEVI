@@ -1,5 +1,5 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database, Json } from '@/types/supabase';
+import type { Json } from '@/types/supabase';
+import type { SupabaseServerClient } from '@/lib/supabase/types';
 
 export type QueueNotificationArgs = {
   profileId?: string | null;
@@ -12,10 +12,7 @@ export type QueueNotificationArgs = {
   payload?: Record<string, unknown>;
 };
 
-export async function queuePortalNotification(
-  supabase: SupabaseClient<Database>,
-  args: QueueNotificationArgs,
-) {
+export async function queuePortalNotification(supabase: SupabaseServerClient, args: QueueNotificationArgs) {
   const { profileId = null, email = null, subject, bodyText, bodyHtml, ideaId, type, payload } = args;
 
   const payloadJson = (payload ?? {}) as Json;

@@ -66,11 +66,13 @@ export function RegisterForm({ organizations, governmentBodies, action, nextPath
   const [governmentLevel, setGovernmentLevel] = useState<GovernmentLevel | null>(null);
 
   useEffect(() => {
-    if (state.contactMethod && state.contactMethod !== contactMethod) {
-      startTransition(() => {
-        setContactMethod(state.contactMethod);
-      });
+    const nextMethod = state.contactMethod;
+    if (!nextMethod || nextMethod === contactMethod) {
+      return;
     }
+    startTransition(() => {
+      setContactMethod(nextMethod);
+    });
   }, [state.contactMethod, contactMethod]);
 
   useEffect(() => {

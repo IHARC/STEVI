@@ -2,6 +2,7 @@
 
 import { startTransition, useEffect, useState } from 'react';
 import { EditorContent, useEditor } from '@tiptap/react';
+import type { Editor } from '@tiptap/core';
 import Link from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
 import StarterKit from '@tiptap/starter-kit';
@@ -68,7 +69,7 @@ export function ResourceRichTextEditor({ name, label, description, defaultValue 
       }),
     ],
     content: defaultValue ?? '',
-    onUpdate({ editor: instance }) {
+    onUpdate({ editor: instance }: { editor: Editor }) {
       setSerialized(instance.getHTML());
     },
     editorProps: {

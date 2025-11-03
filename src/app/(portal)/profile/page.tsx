@@ -34,6 +34,11 @@ type GovernmentBody = {
   level: Database['portal']['Enums']['government_level'];
 };
 
+type OrganizationRecord = Pick<
+  Database['portal']['Tables']['organizations']['Row'],
+  'id' | 'name' | 'category' | 'government_level' | 'verified'
+>;
+
 type AffiliationType = Database['portal']['Enums']['affiliation_type'];
 
 const ALLOWED_AFFILIATIONS: AffiliationType[] = ['community_member', 'agency_partner', 'government_partner'];
@@ -69,19 +74,21 @@ export default async function PortalProfilePage() {
 
   const profile = await ensurePortalProfile(supabase, user.id);
 
-  const { data: organizationRows } = await portal
+  const { data: organizationRowsRaw } = await portal
     .from('organizations')
     .select('id, name, category, government_level, verified')
     .eq('verified', true)
     .order('name', { ascending: true });
 
+  const organizationRows = (organizationRowsRaw ?? []) as OrganizationRecord[];
+
   const organizations: Organization[] =
-    (organizationRows ?? [])
+    organizationRows
       .filter((org) => org.category === 'community')
       .map((org) => ({ id: org.id, name: org.name }));
 
   const governmentBodies: GovernmentBody[] =
-    (organizationRows ?? [])
+    organizationRows
       .filter(
         (org): org is typeof org & { government_level: Database['portal']['Enums']['government_level'] } =>
           org.category === 'government' && org.government_level !== null,

@@ -1,10 +1,10 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/supabase';
+import type { SupabaseAnyServerClient } from '@/lib/supabase/types';
 
 type RateLimitRow = Database['public']['Functions']['portal_check_rate_limit']['Returns'][number];
 
 type RateLimitParams = {
-  supabase: SupabaseClient<Database>;
+  supabase: SupabaseAnyServerClient;
   type: 'idea' | 'comment' | 'flag' | 'idea_update';
   limit: number;
   cooldownMs?: number;

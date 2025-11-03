@@ -1,6 +1,6 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/supabase';
 import { PUBLIC_MEMBER_ROLE_LABEL } from '@/lib/constants';
+import type { SupabaseAnyServerClient } from '@/lib/supabase/types';
 
 export type PortalProfile = Database['portal']['Tables']['profiles']['Row'];
 
@@ -38,7 +38,7 @@ function makeProfileError(step: string, error: PostgrestErrorLike): Error {
 }
 
 export async function ensurePortalProfile(
-  supabase: SupabaseClient<Database>,
+  supabase: SupabaseAnyServerClient,
   userId: string,
   defaults?: Partial<PortalProfile>,
 ) {
@@ -160,10 +160,7 @@ export async function ensurePortalProfile(
   return ensureCommunityMemberTitle(inserted);
 }
 
-export async function getUserEmailForProfile(
-  supabase: SupabaseClient<Database>,
-  profileId: string,
-) {
+export async function getUserEmailForProfile(supabase: SupabaseAnyServerClient, profileId: string) {
   const { data, error } = await supabase.rpc('portal_get_user_email', {
     p_profile_id: profileId,
   });

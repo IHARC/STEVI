@@ -1,6 +1,9 @@
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
+import type { CookieMethodsServer } from '@supabase/ssr';
 import { Database } from '@/types/supabase';
+
+type CookieBatch = Parameters<NonNullable<CookieMethodsServer['setAll']>>[0];
 
 export async function createSupabaseRSCClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -17,7 +20,7 @@ export async function createSupabaseRSCClient() {
       getAll() {
         return cookieStore.getAll();
       },
-      setAll(cookiesToSet) {
+      setAll(cookiesToSet: CookieBatch) {
         cookiesToSet.forEach(({ name, value, options }) => {
           try {
             cookieStore.set(name, value, options);

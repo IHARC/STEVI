@@ -25,18 +25,18 @@ export async function invalidateIdeaCaches(options: InvalidateOptions = {}) {
   }
 
   for (const tag of tags) {
-    await revalidateTag(tag);
+    await revalidateTag(tag, 'max');
   }
 
   if (options.paths) {
     for (const path of options.paths) {
-      if (path) await revalidatePath(path);
+      if (path) await revalidatePath(path, 'page');
     }
   }
 }
 
 export async function invalidateMetricCaches() {
-  await revalidateTag(CACHE_TAGS.metrics);
+  await revalidateTag(CACHE_TAGS.metrics, 'max');
 }
 
 export async function invalidatePlanCaches(options: InvalidateOptions = {}) {
@@ -53,12 +53,12 @@ export async function invalidatePlanCaches(options: InvalidateOptions = {}) {
   }
 
   for (const tag of tags) {
-    await revalidateTag(tag);
+    await revalidateTag(tag, 'max');
   }
 
   if (options.paths) {
     for (const path of options.paths) {
-      if (path) await revalidatePath(path);
+      if (path) await revalidatePath(path, 'page');
     }
   }
 }
@@ -73,12 +73,12 @@ export async function invalidateMythCaches(options: Omit<InvalidateOptions, 'ide
   }
 
   for (const tag of tags) {
-    await revalidateTag(tag);
+    await revalidateTag(tag, 'max');
   }
 
   if (options.paths) {
     for (const path of options.paths) {
-      if (path) await revalidatePath(path);
+      if (path) await revalidatePath(path, 'page');
     }
   }
 }
@@ -97,12 +97,12 @@ export async function invalidatePitCaches(options: Omit<InvalidateOptions, 'idea
   }
 
   for (const tag of tags) {
-    await revalidateTag(tag);
+    await revalidateTag(tag, 'max');
   }
 
   if (options.paths) {
     for (const path of options.paths) {
-      if (path) await revalidatePath(path);
+      if (path) await revalidatePath(path, 'page');
     }
   }
 }
@@ -117,12 +117,12 @@ export async function invalidatePetitionCaches(slug: string, options: Omit<Inval
   }
 
   for (const tag of tags) {
-    await revalidateTag(tag);
+    await revalidateTag(tag, 'max');
   }
 
   if (options.paths) {
     for (const path of options.paths) {
-      if (path) await revalidatePath(path);
+      if (path) await revalidatePath(path, 'page');
     }
   }
 }

@@ -29,9 +29,10 @@ export function ResetPasswordForm({ action, initialState }: ResetPasswordFormPro
   const [phoneInput, setPhoneInput] = useState(state.phone ?? '');
 
   useEffect(() => {
-    if (state.contactMethod && state.contactMethod !== contactMethod) {
+    const nextMethod = state.contactMethod;
+    if (nextMethod && nextMethod !== contactMethod) {
       startTransition(() => {
-        setContactMethod(state.contactMethod);
+        setContactMethod(nextMethod);
       });
     }
   }, [state.contactMethod, contactMethod]);
@@ -44,7 +45,7 @@ export function ResetPasswordForm({ action, initialState }: ResetPasswordFormPro
     }
     if (state.phone) {
       startTransition(() => {
-        setPhoneInput(state.phone);
+        setPhoneInput(state.phone ?? '');
       });
     }
   }, [state.status, state.phone]);

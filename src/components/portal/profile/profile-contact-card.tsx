@@ -48,13 +48,15 @@ export function ProfileContactCard({
 
   useEffect(() => {
     if (phoneState.status === 'success' && phoneState.phone) {
+      const updatedPhone = phoneState.phone;
       startTransition(() => {
-        setPhoneInput(phoneState.phone);
+        setPhoneInput(updatedPhone);
       });
     }
     if (phoneState.status === 'idle' && !otpPending && phoneState.phone === undefined && initialPhone && !phoneInput) {
+      const restoredPhone = initialPhone;
       startTransition(() => {
-        setPhoneInput(initialPhone);
+        setPhoneInput(restoredPhone);
       });
     }
   }, [phoneState, otpPending, initialPhone, phoneInput]);
