@@ -317,7 +317,7 @@ function ExperienceHelper({ selectedValue }: ExperienceHelperProps) {
   if (!copy) {
     return null;
   }
-  return <p className="text-xs text-muted-foreground">{copy}</p>;
+  return <p className="text-xs text-muted-foreground">{copy.description}</p>;
 }
 
 type AffiliationOptionProps = {
