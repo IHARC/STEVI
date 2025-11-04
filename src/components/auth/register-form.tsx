@@ -169,6 +169,20 @@ type RegistrationFieldsProps = {
   nextPath: string;
 };
 
+type ContactMethodOptionProps = {
+  id: string;
+  value: ContactMethod;
+  title: string;
+  description: string;
+};
+
+type AffiliationOptionProps = {
+  id: string;
+  value: AffiliationType;
+  title: string;
+  description: string;
+};
+
 function RegistrationFields(props: RegistrationFieldsProps) {
   const {
     organizations,
@@ -404,6 +418,21 @@ function RegistrationFields(props: RegistrationFieldsProps) {
         />
       </div>
     </div>
+  );
+}
+
+function ContactMethodOption({ id, value, title, description }: ContactMethodOptionProps) {
+  return (
+    <label
+      htmlFor={id}
+      className="flex cursor-pointer items-start gap-3 rounded-xl border border-outline/40 bg-surface-container p-3 text-sm font-medium text-on-surface shadow-subtle transition hover:border-primary/40 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary"
+    >
+      <RadioGroupItem id={id} value={value} className="mt-1" />
+      <span>
+        {title}
+        <span className="mt-1 block text-xs font-normal text-muted">{description}</span>
+      </span>
+    </label>
   );
 }
 

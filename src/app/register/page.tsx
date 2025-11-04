@@ -219,6 +219,8 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
           error: 'Select an existing organization or request a new listing.',
         };
       }
+    }
+
     if (affiliationType !== 'community_member' && !positionTitleInput) {
       return {
         status: 'idle',

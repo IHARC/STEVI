@@ -58,8 +58,9 @@ export default async function PortalProfilePage() {
   }
 
   const profile = await ensurePortalProfile(supabase, user.id);
-  const normalizedProfileAffiliation: AffiliationType = profile.affiliation_type === 'government_partner' ? 'agency_partner' : profile.affiliation_type;
-
+  const currentAffiliation = ALLOWED_AFFILIATIONS.includes(profile.affiliation_type as AffiliationType)
+    ? (profile.affiliation_type as AffiliationType)
+    : 'agency_partner';
   const { data: organizationRowsRaw } = await portal
     .from('organizations')
     .select('id, name, category, verified')
@@ -78,7 +79,7 @@ export default async function PortalProfilePage() {
     displayName: profile.display_name ?? 'Community member',
     organizationId: initialOrganizationId,
     positionTitle: profile.position_title,
-    affiliationType: normalizedProfileAffiliation,
+    affiliationType: currentAffiliation,
     homelessnessExperience: profile.homelessness_experience ?? 'none',
     substanceUseExperience: profile.substance_use_experience ?? 'none',
     affiliationStatus: profile.affiliation_status,
@@ -95,13 +96,10 @@ export default async function PortalProfilePage() {
     const portalClient = supa.schema('portal');
 
     const displayName = (formData.get('display_name') as string | null)?.trim();
-    const rawAffiliation = (formData.get('affiliation_type') as string | null)?.trim() ?? normalizedProfileAffiliation;
+    const rawAffiliation = (formData.get('affiliation_type') as string | null)?.trim() ?? currentAffiliation;
     let affiliationType = ALLOWED_AFFILIATIONS.includes(rawAffiliation as AffiliationType)
       ? (rawAffiliation as AffiliationType)
-      : normalizedProfileAffiliation;
-
-      affiliationType = 'agency_partner';
-    }
+      : currentAffiliation;
     const rawAgencyOrganizationId = (formData.get('agency_organization_id') as string | null)?.trim() ?? null;
     const newOrganizationName = (formData.get('new_organization_name') as string | null)?.trim() ?? null;
     const positionTitleInput = (formData.get('position_title') as string | null)?.trim() ?? null;
@@ -121,7 +119,7 @@ export default async function PortalProfilePage() {
         requestedOrganizationName = newOrganizationName;
       } else if (rawAgencyOrganizationId && rawAgencyOrganizationId !== NO_ORGANIZATION_VALUE) {
         organizationId = rawAgencyOrganizationId;
-      } else if (normalizedProfileAffiliation === 'agency_partner' && profile.organization_id) {
+      } else if (currentAffiliation === 'agency_partner' && profile.organization_id) {
         organizationId = profile.organization_id;
       } else {
         return { status: 'idle', error: 'Select an organization or request a new listing.' };
@@ -137,9 +135,8 @@ export default async function PortalProfilePage() {
 
     const organizationChanged = organizationId !== profile.organization_id;
     const requestingOrganization = affiliationType === 'agency_partner' && requestedOrganizationName !== null;
-    const requestingGovernment = false;
     const shouldReset =
-      normalizedProfileAffiliation !== affiliationType ||
+      currentAffiliation !== affiliationType ||
       requestingOrganization ||
       (affiliationType === 'agency_partner' && organizationChanged);
 

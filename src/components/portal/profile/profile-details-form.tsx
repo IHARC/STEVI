@@ -34,6 +34,8 @@ type Organization = {
 type AffiliationType = Database['portal']['Enums']['affiliation_type'];
 type AffiliationStatus = Database['portal']['Enums']['affiliation_status'];
 
+const ALLOWED_AFFILIATIONS: readonly AffiliationType[] = ['community_member', 'agency_partner'];
+
 type ProfileDetailsFormProps = {
   organizations: Organization[];
   initialState: ProfileDetailsFormState;
@@ -62,13 +64,11 @@ export function ProfileDetailsForm({
     initialValues.organizationId ??
     (initialValues.requestedOrganizationName ? NEW_ORGANIZATION_VALUE : NO_ORGANIZATION_VALUE);
 
-  const normalizedAffiliation =
-    initialValues.affiliationType === 'government_partner'
-      ? 'agency_partner'
-      : initialValues.affiliationType;
-
   const [selectedOrg, setSelectedOrg] = useState(initialOrgSelection);
-  const [affiliationType, setAffiliationType] = useState<AffiliationType>(normalizedAffiliation);
+  const initialAffiliation = ALLOWED_AFFILIATIONS.includes(initialValues.affiliationType)
+    ? initialValues.affiliationType
+    : 'agency_partner';
+  const [affiliationType, setAffiliationType] = useState<AffiliationType>(initialAffiliation);
   const [homelessnessExperience, setHomelessnessExperience] = useState<LivedExperienceStatus>(
     initialValues.homelessnessExperience,
   );
@@ -91,7 +91,7 @@ export function ProfileDetailsForm({
   const pendingVerificationCopy =
     initialValues.affiliationStatus === 'pending'
       ? pendingSummary({
-          affiliationType: normalizedAffiliation,
+          affiliationType: initialAffiliation,
           organizationId: initialValues.organizationId,
           requestedOrganizationName: initialValues.requestedOrganizationName,
           organizationMap,
