@@ -8,11 +8,11 @@ export async function TopNav() {
 
   return (
     <header className="border-b border-outline/20 bg-surface/95 text-on-surface backdrop-blur supports-[backdrop-filter]:bg-surface/80">
-      <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-4">
-        <div className="flex items-center gap-3">
+      <div className="mx-auto flex w-full max-w-page items-center justify-between gap-space-sm px-space-md py-space-md">
+        <div className="flex items-center gap-space-sm">
           <Link
             href="/"
-            className="inline-flex items-center gap-3 rounded-lg px-3 py-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+            className="inline-flex items-center gap-space-sm rounded-[var(--md-sys-shape-corner-small)] px-space-sm py-space-2xs focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
             aria-label="STEVI home"
           >
             <Image
@@ -32,20 +32,20 @@ export async function TopNav() {
               className="hidden h-10 w-auto dark:block"
             />
             <span className="text-left">
-              <span className="block text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <span className="block text-label-sm font-medium uppercase tracking-[0.12em] text-muted-foreground">
                 STEVI
               </span>
-              <span className="block text-base font-semibold text-on-surface">
+              <span className="block text-title-sm font-medium text-on-surface">
                 Client Support Portal
               </span>
             </span>
           </Link>
         </div>
-        <div className="flex items-center gap-2 md:hidden">
+        <div className="flex items-center gap-space-xs md:hidden">
           {mobile}
           <ThemeToggle />
         </div>
-        <div className="hidden items-center gap-3 md:flex">
+        <div className="hidden items-center gap-space-sm md:flex">
           <ThemeToggle />
           {desktop}
         </div>

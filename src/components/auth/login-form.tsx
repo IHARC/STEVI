@@ -39,15 +39,15 @@ export function LoginForm({ action, nextPath, initialState }: LoginFormProps) {
   }, [state.contactMethod, contactMethod]);
 
   return (
-    <form action={formAction} className="mt-8 grid gap-6 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-      <div className="space-y-3">
+    <form action={formAction} className="grid gap-space-lg rounded-[var(--md-sys-shape-corner-extra-large)] border border-outline/30 bg-surface-container p-space-lg shadow-level-1">
+      <div className="space-y-space-sm">
         <GoogleAuthButton intent="login" nextPath={nextPath} />
         <AuthDivider />
       </div>
 
-      <fieldset className="space-y-3 rounded-xl border border-outline/25 p-4">
-        <legend className="text-sm font-semibold text-on-surface">How would you like to sign in?</legend>
-        <RadioGroup name="contact_method" value={contactMethod} onValueChange={(value) => setContactMethod(value as ContactMethod)} className="grid gap-3 md:grid-cols-2">
+      <fieldset className="space-y-space-sm rounded-[var(--md-sys-shape-corner-medium)] border border-outline/30 p-space-md">
+        <legend className="text-body-sm font-medium text-on-surface">How would you like to sign in?</legend>
+        <RadioGroup name="contact_method" value={contactMethod} onValueChange={(value) => setContactMethod(value as ContactMethod)} className="grid gap-space-sm md:grid-cols-2">
           <ContactOption
             id="login-contact-email"
             value="email"
@@ -64,38 +64,38 @@ export function LoginForm({ action, nextPath, initialState }: LoginFormProps) {
       </fieldset>
 
       {contactMethod === 'email' ? (
-        <div className="grid gap-2">
+        <div className="grid gap-space-xs">
           <Label htmlFor="email">Email</Label>
           <Input id="email" name="email" type="email" autoComplete="email" required placeholder="you@example.ca" />
         </div>
       ) : (
-        <div className="grid gap-2">
+        <div className="grid gap-space-xs">
           <Label htmlFor="phone">Phone number</Label>
           <Input id="phone" name="phone" type="tel" autoComplete="tel" inputMode="tel" required placeholder="+16475551234" />
         </div>
       )}
 
-      <div className="grid gap-2">
+      <div className="grid gap-space-xs">
         <Label htmlFor="password">Password</Label>
         <Input id="password" name="password" type="password" autoComplete="current-password" required />
       </div>
 
       {state.error ? (
-        <Alert variant="destructive">
+        <Alert variant="destructive" className="text-body-sm">
           <AlertTitle>We could not sign you in</AlertTitle>
           <AlertDescription>{state.error}</AlertDescription>
         </Alert>
       ) : null}
 
-      <div className="space-y-3">
+      <div className="space-y-space-sm">
         <SubmitButton />
-        <p className="text-sm text-slate-600 dark:text-slate-300">
+        <p className="text-body-sm text-muted">
           Forgot your password?{' '}
           <Link href="/reset-password" className="text-brand underline">
             Reset it here
           </Link>
         </p>
-        <p className="text-sm text-slate-600 dark:text-slate-300">
+        <p className="text-body-sm text-muted">
           Need an account?{' '}
           <Link href="/register" className="text-brand underline">
             Register here
@@ -117,12 +117,12 @@ function ContactOption({ id, value, title, description }: ContactOptionProps) {
   return (
     <label
       htmlFor={id}
-      className="flex cursor-pointer items-start gap-3 rounded-xl border border-outline/40 bg-surface-container p-3 text-sm font-medium text-on-surface shadow-subtle transition hover:border-primary/40 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary"
+      className="flex cursor-pointer items-start gap-space-sm rounded-[var(--md-sys-shape-corner-medium)] border border-outline/40 bg-surface-container p-space-md text-body-sm font-medium text-on-surface shadow-level-1 transition hover:border-primary/40 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary"
     >
       <RadioGroupItem id={id} value={value} className="mt-1" />
       <span>
         {title}
-        <span className="mt-1 block text-xs font-normal text-muted">{description}</span>
+        <span className="mt-space-2xs block text-label-sm font-normal text-muted">{description}</span>
       </span>
     </label>
   );

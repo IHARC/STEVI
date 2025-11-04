@@ -188,7 +188,7 @@ export function ResetPasswordForm({ action, initialState }: ResetPasswordFormPro
       ) : null}
 
       {state.status === 'success' && state.message ? (
-        <Alert className="border-success/40 bg-success/10 text-success">
+        <Alert className="border-secondary/40 bg-secondary/10 text-on-secondary-container">
           <AlertDescription>{state.message}</AlertDescription>
         </Alert>
       ) : null}

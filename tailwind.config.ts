@@ -104,9 +104,164 @@ const config: Config = {
         'neutral-white': 'rgb(255 255 255 / <alpha-value>)',
         'neutral-gray': 'rgb(200 192 192 / <alpha-value>)',
       },
+      fontSize: {
+        'display-lg': [
+          'var(--md-sys-typescale-display-large-size)',
+          {
+            lineHeight: 'var(--md-sys-typescale-display-large-line-height)',
+            letterSpacing: 'var(--md-sys-typescale-display-large-tracking)',
+            fontWeight: 'var(--md-sys-typescale-display-large-weight)',
+            fontFamily: 'var(--md-sys-typescale-headline-font)',
+          },
+        ],
+        'display-md': [
+          'var(--md-sys-typescale-display-medium-size)',
+          {
+            lineHeight: 'var(--md-sys-typescale-display-medium-line-height)',
+            letterSpacing: 'var(--md-sys-typescale-display-medium-tracking)',
+            fontWeight: 'var(--md-sys-typescale-display-medium-weight)',
+            fontFamily: 'var(--md-sys-typescale-headline-font)',
+          },
+        ],
+        'display-sm': [
+          'var(--md-sys-typescale-display-small-size)',
+          {
+            lineHeight: 'var(--md-sys-typescale-display-small-line-height)',
+            letterSpacing: 'var(--md-sys-typescale-display-small-tracking)',
+            fontWeight: 'var(--md-sys-typescale-display-small-weight)',
+            fontFamily: 'var(--md-sys-typescale-headline-font)',
+          },
+        ],
+        'headline-lg': [
+          'var(--md-sys-typescale-headline-large-size)',
+          {
+            lineHeight: 'var(--md-sys-typescale-headline-large-line-height)',
+            letterSpacing: 'var(--md-sys-typescale-headline-large-tracking)',
+            fontWeight: 'var(--md-sys-typescale-headline-large-weight)',
+            fontFamily: 'var(--md-sys-typescale-headline-font)',
+          },
+        ],
+        'headline-md': [
+          'var(--md-sys-typescale-headline-medium-size)',
+          {
+            lineHeight: 'var(--md-sys-typescale-headline-medium-line-height)',
+            letterSpacing: 'var(--md-sys-typescale-headline-medium-tracking)',
+            fontWeight: 'var(--md-sys-typescale-headline-medium-weight)',
+            fontFamily: 'var(--md-sys-typescale-headline-font)',
+          },
+        ],
+        'headline-sm': [
+          'var(--md-sys-typescale-headline-small-size)',
+          {
+            lineHeight: 'var(--md-sys-typescale-headline-small-line-height)',
+            letterSpacing: 'var(--md-sys-typescale-headline-small-tracking)',
+            fontWeight: 'var(--md-sys-typescale-headline-small-weight)',
+            fontFamily: 'var(--md-sys-typescale-headline-font)',
+          },
+        ],
+        'title-lg': [
+          'var(--md-sys-typescale-title-large-size)',
+          {
+            lineHeight: 'var(--md-sys-typescale-title-large-line-height)',
+            letterSpacing: 'var(--md-sys-typescale-title-large-tracking)',
+            fontWeight: 'var(--md-sys-typescale-title-large-weight)',
+            fontFamily: 'var(--md-sys-typescale-body-font)',
+          },
+        ],
+        'title-md': [
+          'var(--md-sys-typescale-title-medium-size)',
+          {
+            lineHeight: 'var(--md-sys-typescale-title-medium-line-height)',
+            letterSpacing: 'var(--md-sys-typescale-title-medium-tracking)',
+            fontWeight: 'var(--md-sys-typescale-title-medium-weight)',
+            fontFamily: 'var(--md-sys-typescale-body-font)',
+          },
+        ],
+        'title-sm': [
+          'var(--md-sys-typescale-title-small-size)',
+          {
+            lineHeight: 'var(--md-sys-typescale-title-small-line-height)',
+            letterSpacing: 'var(--md-sys-typescale-title-small-tracking)',
+            fontWeight: 'var(--md-sys-typescale-title-small-weight)',
+            fontFamily: 'var(--md-sys-typescale-body-font)',
+          },
+        ],
+        'body-lg': [
+          'var(--md-sys-typescale-body-large-size)',
+          {
+            lineHeight: 'var(--md-sys-typescale-body-large-line-height)',
+            letterSpacing: 'var(--md-sys-typescale-body-large-tracking)',
+            fontWeight: 'var(--md-sys-typescale-body-large-weight)',
+            fontFamily: 'var(--md-sys-typescale-body-font)',
+          },
+        ],
+        'body-md': [
+          'var(--md-sys-typescale-body-medium-size)',
+          {
+            lineHeight: 'var(--md-sys-typescale-body-medium-line-height)',
+            letterSpacing: 'var(--md-sys-typescale-body-medium-tracking)',
+            fontWeight: 'var(--md-sys-typescale-body-medium-weight)',
+            fontFamily: 'var(--md-sys-typescale-body-font)',
+          },
+        ],
+        'body-sm': [
+          'var(--md-sys-typescale-body-small-size)',
+          {
+            lineHeight: 'var(--md-sys-typescale-body-small-line-height)',
+            letterSpacing: 'var(--md-sys-typescale-body-small-tracking)',
+            fontWeight: 'var(--md-sys-typescale-body-small-weight)',
+            fontFamily: 'var(--md-sys-typescale-body-font)',
+          },
+        ],
+        'label-lg': [
+          'var(--md-sys-typescale-label-large-size)',
+          {
+            lineHeight: 'var(--md-sys-typescale-label-large-line-height)',
+            letterSpacing: 'var(--md-sys-typescale-label-large-tracking)',
+            fontWeight: 'var(--md-sys-typescale-label-large-weight)',
+            fontFamily: 'var(--md-sys-typescale-body-font)',
+          },
+        ],
+        'label-md': [
+          'var(--md-sys-typescale-label-medium-size)',
+          {
+            lineHeight: 'var(--md-sys-typescale-label-medium-line-height)',
+            letterSpacing: 'var(--md-sys-typescale-label-medium-tracking)',
+            fontWeight: 'var(--md-sys-typescale-label-medium-weight)',
+            fontFamily: 'var(--md-sys-typescale-body-font)',
+          },
+        ],
+        'label-sm': [
+          'var(--md-sys-typescale-label-small-size)',
+          {
+            lineHeight: 'var(--md-sys-typescale-label-small-line-height)',
+            letterSpacing: 'var(--md-sys-typescale-label-small-tracking)',
+            fontWeight: 'var(--md-sys-typescale-label-small-weight)',
+            fontFamily: 'var(--md-sys-typescale-body-font)',
+          },
+        ],
+      },
+      spacing: {
+        'space-2xs': 'var(--md-sys-spacing-2xs)',
+        'space-xs': 'var(--md-sys-spacing-xs)',
+        'space-sm': 'var(--md-sys-spacing-sm)',
+        'space-md': 'var(--md-sys-spacing-md)',
+        'space-lg': 'var(--md-sys-spacing-lg)',
+        'space-xl': 'var(--md-sys-spacing-xl)',
+        'space-2xl': 'var(--md-sys-spacing-2xl)',
+        'space-3xl': 'var(--md-sys-spacing-3xl)',
+        'space-4xl': 'var(--md-sys-spacing-4xl)',
+      },
+      maxWidth: {
+        page: 'min(100%, var(--md-sys-layout-max-width))',
+      },
+      boxShadow: {
+        'level-1': 'var(--shadow-level-1)',
+        'level-2': 'var(--shadow-level-2)',
+      },
       fontFamily: {
-        heading: ['Roboto Flex', 'Roboto', 'system-ui', 'sans-serif'],
-        body: ['Roboto', 'system-ui', 'sans-serif'],
+        heading: ['var(--md-ref-typeface-brand)', 'Roboto Flex', 'Roboto', 'system-ui', 'sans-serif'],
+        body: ['var(--md-ref-typeface-plain)', 'Roboto', 'system-ui', 'sans-serif'],
       },
       borderRadius: {
         lg: 'var(--md-sys-shape-corner-small)',

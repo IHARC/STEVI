@@ -80,21 +80,21 @@ export default async function AdminPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10">
-      <header className="space-y-2">
-        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">Team tools</p>
-        <h1 className="text-3xl font-semibold text-on-surface sm:text-4xl">STEVI admin workspace</h1>
-        <p className="max-w-3xl text-sm text-muted-foreground sm:text-base">
+    <div className="page-shell page-stack">
+      <header className="flex flex-col gap-space-xs">
+        <p className="text-label-sm font-medium uppercase tracking-[0.12em] text-muted-foreground">Team tools</p>
+        <h1 className="text-headline-lg text-on-surface sm:text-display-sm">STEVI admin workspace</h1>
+        <p className="max-w-3xl text-body-md text-muted-foreground sm:text-body-lg">
           Manage profile access, documents, and notifications for neighbours using the STEVI client portal. These tools
           mirror the admin capabilities that previously lived inside the marketing site.
         </p>
       </header>
 
-      <section className="grid gap-4 md:grid-cols-3">
+      <section className="grid gap-space-md md:grid-cols-3">
         {adminTasks.map((task) => (
           <Card key={task.id}>
             <CardHeader>
-              <CardTitle className="text-lg">{task.title}</CardTitle>
+              <CardTitle className="text-title-md">{task.title}</CardTitle>
               <CardDescription>{task.description}</CardDescription>
             </CardHeader>
             <CardContent>
@@ -108,9 +108,9 @@ export default async function AdminPage() {
 
       <section id="resources">
         <Card>
-          <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <CardHeader className="flex flex-col gap-space-sm sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <CardTitle className="text-xl">Resource management</CardTitle>
+              <CardTitle className="text-title-lg">Resource management</CardTitle>
               <CardDescription>
                 Publish or update the reports and guides neighbours rely on. Changes sync to the marketing site and STEVI
                 client resource directory.
@@ -120,7 +120,7 @@ export default async function AdminPage() {
               <Link href="/admin/resources">Open resource library</Link>
             </Button>
           </CardHeader>
-          <CardContent className="space-y-3 text-sm text-muted-foreground">
+          <CardContent className="space-y-space-sm text-body-sm text-muted-foreground">
             <p>
               We migrated the resource management tools from the marketing repo. Use the resource library to create new
               posts, update drafts, and retire outdated content without leaving STEVI.
@@ -133,15 +133,15 @@ export default async function AdminPage() {
         </Card>
       </section>
 
-      <section id="profiles" className="grid gap-4 md:grid-cols-2">
+      <section id="profiles" className="grid gap-space-md md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl">Pending verifications</CardTitle>
+            <CardTitle className="text-title-lg">Pending verifications</CardTitle>
             <CardDescription>
               Approve or decline agency and government affiliation requests submitted by portal members.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3 text-sm text-muted-foreground">
+          <CardContent className="space-y-space-sm text-body-sm text-muted-foreground">
             <p>Profile verification workflows will be migrated from the legacy portal shortly.</p>
             <p>
               Until then, continue to process requests using STEVI Ops. We will backfill this queue in the next sprint.
@@ -150,12 +150,12 @@ export default async function AdminPage() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl">Invitations</CardTitle>
+            <CardTitle className="text-title-lg">Invitations</CardTitle>
             <CardDescription>
               Send new invitations to agency partners directly from STEVI and track their status.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3 text-sm text-muted-foreground">
+          <CardContent className="space-y-space-sm text-body-sm text-muted-foreground">
             <p>
               Invitation management is being migrated from the marketing repo. Documentation will land in{' '}
               <code className="rounded bg-surface-container px-2 py-1">docs/admin/invitations.md</code>.
@@ -168,12 +168,12 @@ export default async function AdminPage() {
       <section id="documents">
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl">Document locker</CardTitle>
+            <CardTitle className="text-title-lg">Document locker</CardTitle>
             <CardDescription>
               Upload files to the <code>portal-attachments</code> bucket with per-client expiry rules.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3 text-sm text-muted-foreground">
+          <CardContent className="space-y-space-sm text-body-sm text-muted-foreground">
             <p>Document tools will surface here as we migrate the moderation and attachment flows.</p>
             <p>
               In the interim, use the STEVI Ops attachment uploader. We’ll wire this page to the same Supabase edge
@@ -186,12 +186,12 @@ export default async function AdminPage() {
       <section id="notifications">
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl">Notifications</CardTitle>
+            <CardTitle className="text-title-lg">Notifications</CardTitle>
             <CardDescription>
               Queue SMS or email notifications using the existing Supabase stored procedures.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3 text-sm text-muted-foreground">
+          <CardContent className="space-y-space-sm text-body-sm text-muted-foreground">
             <p>
               We will migrate notification templates and delivery controls from the marketing repo. This section stays as
               a placeholder until the stored procedures are exposed here.

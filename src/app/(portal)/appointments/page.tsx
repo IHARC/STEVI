@@ -132,15 +132,15 @@ export default async function AppointmentsPage() {
   const pastAppointments = placeholderHistory;
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10">
-      <header className="space-y-2">
-        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+    <div className="page-shell page-stack">
+      <header className="flex flex-col gap-space-xs">
+        <p className="text-label-sm font-medium uppercase tracking-[0.12em] text-muted-foreground">
           Appointment support
         </p>
-        <h1 className="text-3xl font-semibold text-on-surface sm:text-4xl">
+        <h1 className="text-headline-lg text-on-surface sm:text-display-sm">
           Manage your outreach appointments
         </h1>
-        <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">
+        <p className="max-w-2xl text-body-md text-muted-foreground sm:text-body-lg">
           Request meetings, see upcoming visits, and review past appointments linked with your STEVI
           plan.
         </p>
@@ -148,22 +148,22 @@ export default async function AppointmentsPage() {
 
       <section aria-labelledby="upcoming-appointments">
         <Card>
-          <CardHeader className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+          <CardHeader className="flex flex-col gap-space-sm sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <CardTitle id="upcoming-appointments" className="text-xl">
+              <CardTitle id="upcoming-appointments" className="text-title-lg">
                 Upcoming appointments
               </CardTitle>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-body-sm text-muted-foreground">
                 Confirmed sessions appear here once staff approve your request.
               </p>
             </div>
-            <Button variant="outline" asChild>
+            <Button variant="outline" asChild className="text-label-md font-medium">
               <a href="#request-form">Request change</a>
             </Button>
           </CardHeader>
-          <CardContent className="flex flex-col gap-4">
+          <CardContent className="flex flex-col gap-space-md">
             {upcomingAppointments.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-body-sm text-muted-foreground">
                 No appointments booked yet. Use the request form below or call your outreach worker
                 to set something up.
               </p>
@@ -171,16 +171,16 @@ export default async function AppointmentsPage() {
               upcomingAppointments.map((appointment) => (
                 <article
                   key={appointment.id}
-                  className="rounded-xl border border-outline/10 bg-surface-container-low p-4 shadow-sm"
+                  className="rounded-[var(--md-sys-shape-corner-medium)] border border-outline/20 bg-surface-container-low p-space-md shadow-level-1"
                   aria-labelledby={`upcoming-${appointment.id}`}
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <h2 id={`upcoming-${appointment.id}`} className="text-lg font-semibold">
+                    <h2 id={`upcoming-${appointment.id}`} className="text-title-md font-medium">
                       {appointment.title}
                     </h2>
                     <Badge className="capitalize">{appointment.status}</Badge>
                   </div>
-                  <dl className="mt-3 space-y-1 text-sm text-on-surface/80">
+                  <dl className="mt-space-sm space-y-[0.35rem] text-body-sm text-on-surface/80">
                     <div className="flex flex-wrap gap-1">
                       <dt className="font-medium text-on-surface/70">When:</dt>
                       <dd>{formatOccursAt(appointment.occursAt)}</dd>
@@ -218,27 +218,27 @@ export default async function AppointmentsPage() {
               incorrect.
             </p>
           </CardHeader>
-          <CardContent className="grid gap-4 sm:grid-cols-2">
+          <CardContent className="grid gap-space-md sm:grid-cols-2">
             {pastAppointments.map((appointment) => (
               <article
                 key={appointment.id}
-                className="rounded-xl border border-outline/10 bg-surface-container-low p-4"
+                className="rounded-[var(--md-sys-shape-corner-medium)] border border-outline/20 bg-surface-container-low p-space-md"
                 aria-labelledby={`history-${appointment.id}`}
               >
                 <div className="flex items-center justify-between gap-2">
-                  <h2 id={`history-${appointment.id}`} className="text-base font-semibold">
+                  <h2 id={`history-${appointment.id}`} className="text-title-sm font-medium">
                     {appointment.title}
                   </h2>
                   <Badge variant={appointment.status === 'completed' ? 'secondary' : 'outline'}>
                     {appointment.status}
                   </Badge>
                 </div>
-                <p className="mt-2 text-sm text-muted-foreground">
+                <p className="mt-space-xs text-body-sm text-muted-foreground">
                   {formatOccursAt(appointment.occursAt)}
                 </p>
-                <p className="text-sm text-on-surface/80">With {appointment.staffContact}</p>
+                <p className="text-body-sm text-on-surface/80">With {appointment.staffContact}</p>
                 {appointment.notes ? (
-                  <p className="mt-2 text-sm text-on-surface/70">{appointment.notes}</p>
+                  <p className="mt-space-xs text-body-sm text-on-surface/70">{appointment.notes}</p>
                 ) : null}
               </article>
             ))}
@@ -249,10 +249,10 @@ export default async function AppointmentsPage() {
       <section aria-labelledby="request-heading" id="request-form">
         <Card>
           <CardHeader>
-            <CardTitle id="request-heading" className="text-xl">
+            <CardTitle id="request-heading" className="text-title-lg">
               Request a new appointment
             </CardTitle>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-body-sm text-muted-foreground">
               Tell us what you need. The outreach coordinator will respond using your preferred
               contact method.
             </p>

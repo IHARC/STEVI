@@ -67,22 +67,22 @@ export default async function DocumentsPage() {
   const documents = fallbackDocuments;
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10">
-      <header className="space-y-2">
-        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+    <div className="page-shell page-stack">
+      <header className="flex flex-col gap-space-xs">
+        <p className="text-label-sm font-medium uppercase tracking-[0.12em] text-muted-foreground">
           Secure locker
         </p>
-        <h1 className="text-3xl font-semibold text-on-surface sm:text-4xl">Your shared documents</h1>
-        <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">
+        <h1 className="text-headline-lg text-on-surface sm:text-display-sm">Your shared documents</h1>
+        <p className="max-w-2xl text-body-md text-muted-foreground sm:text-body-lg">
           Files added here expire automatically and align with the outreach team’s attachment
           policies.
         </p>
       </header>
 
-      <section aria-labelledby="documents-heading" className="grid gap-4 sm:grid-cols-2">
+      <section aria-labelledby="documents-heading" className="grid gap-space-md sm:grid-cols-2">
         <Card className="sm:col-span-2">
           <CardHeader>
-            <CardTitle id="documents-heading" className="text-xl">
+            <CardTitle id="documents-heading" className="text-title-lg">
               Available documents
             </CardTitle>
             <CardDescription>
@@ -90,23 +90,23 @@ export default async function DocumentsPage() {
               cannot access.
             </CardDescription>
           </CardHeader>
-          <CardContent className="grid gap-4 sm:grid-cols-2">
+          <CardContent className="grid gap-space-md sm:grid-cols-2">
             {documents.map((document) => (
               <article
                 key={document.id}
-                className="flex h-full flex-col justify-between rounded-xl border border-outline/10 bg-surface-container-low p-4 shadow-sm"
+                className="flex h-full flex-col justify-between rounded-[var(--md-sys-shape-corner-medium)] border border-outline/20 bg-surface-container-low p-space-md shadow-level-1"
               >
-                <div className="space-y-2">
+                <div className="space-y-space-xs">
                   <div className="flex items-center justify-between gap-2">
-                    <h2 className="text-lg font-semibold text-on-surface">{document.title}</h2>
+                    <h2 className="text-title-md font-medium text-on-surface">{document.title}</h2>
                     <Badge variant="secondary">{categoryLabels[document.category]}</Badge>
                   </div>
-                  <p className="text-sm text-muted-foreground">{document.description}</p>
-                  <p className="text-xs text-on-surface/60">
+                  <p className="text-body-sm text-muted-foreground">{document.description}</p>
+                  <p className="text-label-sm text-on-surface/60">
                     Updated {formatUpdatedAt(document.updatedAt)}
                   </p>
                 </div>
-                <div className="mt-4">
+                <div className="mt-space-md">
                   {document.downloadUrl ? (
                     <Button asChild className="w-full">
                       <a href={document.downloadUrl}>Download</a>
@@ -120,7 +120,7 @@ export default async function DocumentsPage() {
               </article>
             ))}
             {documents.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-body-sm text-muted-foreground">
                 No documents yet. Outreach staff can add housing applications, safety plans, and
                 proof-of-income letters here for you to access securely.
               </p>
@@ -130,12 +130,12 @@ export default async function DocumentsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Need a new document?</CardTitle>
+            <CardTitle className="text-title-md">Need a new document?</CardTitle>
             <CardDescription>
               Reach out if you need identification support, appeal letters, or assessment notes.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3 text-sm text-muted-foreground">
+          <CardContent className="space-y-space-sm text-body-sm text-muted-foreground">
             <p>
               Message the outreach coordination inbox at{' '}
               <a

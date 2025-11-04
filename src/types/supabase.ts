@@ -405,6 +405,22 @@ export type Database = {
         };
         Returns: undefined;
       };
+      claim_registration_flow: {
+        Args: {
+          p_portal_code?: string | null;
+          p_chosen_name?: string | null;
+          p_date_of_birth_month?: number | null;
+          p_date_of_birth_year?: number | null;
+          p_contact_email?: string | null;
+          p_contact_phone?: string | null;
+        };
+        Returns: {
+          success: boolean | null;
+          reason: string | null;
+          portal_code: string | null;
+          registration_id: string | null;
+        }[];
+      };
       portal_queue_notification: {
         Args: {
           p_subject: string;
@@ -1115,6 +1131,118 @@ export type Database = {
           {
             foreignKeyName: "profile_contacts_user_id_fkey";
             columns: ["user_id"];
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          }?,
+        ];
+      };
+      registration_flows: {
+        Row: {
+          id: string;
+          flow_type: string;
+          status: string;
+          portal_code: string | null;
+          supabase_user_id: string | null;
+          profile_id: string | null;
+          chosen_name: string;
+          legal_name: string | null;
+          pronouns: string | null;
+          contact_email: string | null;
+          contact_phone: string | null;
+          contact_phone_safe_call: boolean | null;
+          contact_phone_safe_text: boolean | null;
+          contact_phone_safe_voicemail: boolean | null;
+          contact_window: string | null;
+          date_of_birth_month: number | null;
+          date_of_birth_year: number | null;
+          postal_code: string | null;
+          indigenous_identity: string | null;
+          disability: string | null;
+          gender_identity: string | null;
+          consent_data_sharing: boolean | null;
+          consent_contact: boolean | null;
+          consent_terms: boolean | null;
+          metadata: Json;
+          claimed_at: string | null;
+          created_at: string;
+          updated_at: string;
+          created_by_user_id: string | null;
+          updated_by_user_id: string | null;
+        };
+        Insert: {
+          id?: string;
+          flow_type: string;
+          status?: string;
+          portal_code?: string | null;
+          supabase_user_id?: string | null;
+          profile_id?: string | null;
+          chosen_name: string;
+          legal_name?: string | null;
+          pronouns?: string | null;
+          contact_email?: string | null;
+          contact_phone?: string | null;
+          contact_phone_safe_call?: boolean | null;
+          contact_phone_safe_text?: boolean | null;
+          contact_phone_safe_voicemail?: boolean | null;
+          contact_window?: string | null;
+          date_of_birth_month?: number | null;
+          date_of_birth_year?: number | null;
+          postal_code?: string | null;
+          indigenous_identity?: string | null;
+          disability?: string | null;
+          gender_identity?: string | null;
+          consent_data_sharing?: boolean | null;
+          consent_contact?: boolean | null;
+          consent_terms?: boolean | null;
+          metadata?: Json;
+          claimed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          created_by_user_id?: string | null;
+          updated_by_user_id?: string | null;
+        };
+        Update: {
+          id?: string;
+          flow_type?: string;
+          status?: string;
+          portal_code?: string | null;
+          supabase_user_id?: string | null;
+          profile_id?: string | null;
+          chosen_name?: string;
+          legal_name?: string | null;
+          pronouns?: string | null;
+          contact_email?: string | null;
+          contact_phone?: string | null;
+          contact_phone_safe_call?: boolean | null;
+          contact_phone_safe_text?: boolean | null;
+          contact_phone_safe_voicemail?: boolean | null;
+          contact_window?: string | null;
+          date_of_birth_month?: number | null;
+          date_of_birth_year?: number | null;
+          postal_code?: string | null;
+          indigenous_identity?: string | null;
+          disability?: string | null;
+          gender_identity?: string | null;
+          consent_data_sharing?: boolean | null;
+          consent_contact?: boolean | null;
+          consent_terms?: boolean | null;
+          metadata?: Json;
+          claimed_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          created_by_user_id?: string | null;
+          updated_by_user_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "registration_flows_profile_fk";
+            columns: ["profile_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }?,
+          {
+            foreignKeyName: "registration_flows_supabase_user_fk";
+            columns: ["supabase_user_id"];
             referencedRelation: "users";
             referencedColumns: ["id"];
           }?,

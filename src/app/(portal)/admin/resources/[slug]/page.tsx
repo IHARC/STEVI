@@ -40,23 +40,23 @@ export default async function AdminResourceEditPage({ params }: { params: RouteP
   }
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-6 px-4 py-10 text-on-surface">
-      <div className="flex flex-col gap-3">
+    <div className="page-shell page-stack text-on-surface">
+      <div className="mx-auto w-full max-w-[min(100%,52rem)] space-y-space-sm">
         <Button asChild variant="ghost" className="w-fit">
           <Link href="/admin/resources">← Back to admin resources</Link>
         </Button>
         <div>
-          <h1 className="text-3xl font-semibold">Edit resource</h1>
-          <p className="text-sm text-on-surface/70">
+          <h1 className="text-headline-lg">Edit resource</h1>
+          <p className="text-body-sm text-on-surface/70">
             Update the public summary, embed new files, or adjust publishing status. Changes apply as soon as you save.
           </p>
         </div>
       </div>
 
-      <Card className="shadow-sm">
-        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <Card className="mx-auto w-full max-w-[min(100%,52rem)]">
+        <CardHeader className="flex flex-col gap-space-sm sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <CardTitle>{resource.title}</CardTitle>
+            <CardTitle className="text-title-lg">{resource.title}</CardTitle>
             <CardDescription>
               {resource.isPublished ? 'Currently visible on the marketing site.' : 'Draft — not yet visible publicly.'}
             </CardDescription>
@@ -67,7 +67,7 @@ export default async function AdminResourceEditPage({ params }: { params: RouteP
             </Link>
           </Button>
         </CardHeader>
-        <CardContent className="space-y-8">
+        <CardContent className="space-y-space-lg">
           <ResourceForm
             mode="edit"
             profileId={profile.id}

@@ -98,19 +98,19 @@ export default async function HomePage() {
   const preferredName = profile.display_name || 'Community member';
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10">
-      <header className="space-y-2">
-        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+    <div className="page-shell page-stack">
+      <header className="flex flex-col gap-space-xs">
+        <p className="text-label-sm font-medium uppercase tracking-[0.12em] text-muted-foreground">
           Welcome back
         </p>
-        <h1 className="text-3xl font-semibold text-on-surface sm:text-4xl">
+        <h1 className="text-headline-lg text-on-surface sm:text-display-sm">
           Hi {preferredName}, you’re connected to STEVI
         </h1>
-        <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">
+        <p className="max-w-2xl text-body-md text-muted-foreground sm:text-body-lg">
           Track appointments, review documents, and stay in touch with outreach staff. Updates here
           sync with the STEVI Ops tools the field team uses.
         </p>
-        <div className="flex flex-wrap gap-3 pt-2">
+        <div className="flex flex-wrap gap-space-md pt-space-xs">
           <Button asChild>
             <Link href="/appointments">Request a new appointment</Link>
           </Button>
@@ -120,32 +120,32 @@ export default async function HomePage() {
         </div>
       </header>
 
-      <section aria-labelledby="appointments-heading" className="grid gap-4 md:grid-cols-2">
+      <section aria-labelledby="appointments-heading" className="grid gap-space-md md:grid-cols-2">
         <Card className="md:col-span-2">
-          <CardHeader className="flex flex-row items-center justify-between gap-4">
+          <CardHeader className="flex flex-col gap-space-sm sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <CardTitle id="appointments-heading" className="text-xl">
+              <CardTitle id="appointments-heading" className="text-title-lg">
                 Your next steps
               </CardTitle>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-body-sm text-muted-foreground">
                 Upcoming meetings and check-ins from your outreach plan.
               </p>
             </div>
-            <Button variant="ghost" asChild>
-              <Link href="/appointments" className="text-sm font-semibold">
+            <Button variant="ghost" asChild className="text-label-md font-medium">
+              <Link href="/appointments">
                 Manage appointments
               </Link>
             </Button>
           </CardHeader>
-          <CardContent className="flex flex-col gap-4">
+          <CardContent className="flex flex-col gap-space-md">
             {appointments.map((appointment) => (
               <article
                 key={appointment.id}
-                className="rounded-xl border border-outline/10 bg-surface-container-low p-4 shadow-sm transition hover:border-primary/40 hover:shadow-md"
+                className="rounded-[var(--md-sys-shape-corner-medium)] border border-outline/20 bg-surface-container-low p-space-md shadow-level-1 transition hover:border-primary/40 hover:shadow-level-2"
                 aria-labelledby={`appointment-${appointment.id}`}
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <h3 id={`appointment-${appointment.id}`} className="text-lg font-semibold text-on-surface">
+                  <h3 id={`appointment-${appointment.id}`} className="text-title-md font-medium text-on-surface">
                     {appointment.title}
                   </h3>
                   <Badge
@@ -155,7 +155,7 @@ export default async function HomePage() {
                     {appointment.status}
                   </Badge>
                 </div>
-                <dl className="mt-2 space-y-1 text-sm text-on-surface/80">
+                <dl className="mt-space-xs space-y-[0.35rem] text-body-sm text-on-surface/80">
                   <div className="flex flex-wrap gap-1">
                     <dt className="font-medium text-on-surface/70">When:</dt>
                     <dd>{formatAppointmentDate(appointment.occursAt)}</dd>
@@ -171,7 +171,7 @@ export default async function HomePage() {
                 </dl>
               </article>
             ))}
-            <p className="text-sm text-muted-foreground">
+            <p className="text-body-sm text-muted-foreground">
               Need to change something?{' '}
               <Link href="/support" className="text-primary underline-offset-4 hover:underline">
                 Message the outreach team
@@ -183,19 +183,19 @@ export default async function HomePage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Support contacts</CardTitle>
-            <p className="text-sm text-muted-foreground">
+            <CardTitle className="text-title-md">Support contacts</CardTitle>
+            <p className="text-body-sm text-muted-foreground">
               Reach out when you need to reschedule, request supplies, or connect with services.
             </p>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-space-md">
             {supportTeam.map((contact) => (
-              <article key={contact.id} className="rounded-lg border border-outline/10 p-4">
+              <article key={contact.id} className="rounded-[var(--md-sys-shape-corner-medium)] border border-outline/20 p-space-md">
                 <header>
-                  <p className="text-base font-semibold text-on-surface">{contact.name}</p>
-                  <p className="text-sm text-muted-foreground">{contact.role}</p>
+                  <p className="text-title-sm font-medium text-on-surface">{contact.name}</p>
+                  <p className="text-body-sm text-muted-foreground">{contact.role}</p>
                 </header>
-                <dl className="mt-3 space-y-1 text-sm">
+                <dl className="mt-space-sm space-y-[0.35rem] text-body-sm">
                   <div className="flex flex-wrap gap-1">
                     <dt className="font-medium text-on-surface/70">Phone:</dt>
                     <dd>
@@ -224,36 +224,36 @@ export default async function HomePage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Focus areas</CardTitle>
-            <p className="text-sm text-muted-foreground">
+            <CardTitle className="text-title-md">Focus areas</CardTitle>
+            <p className="text-body-sm text-muted-foreground">
               Snapshot of your current goals. Staff update these as part of outreach notes.
             </p>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <article className="rounded-lg border border-outline/10 p-4">
+          <CardContent className="space-y-space-md">
+            <article className="rounded-[var(--md-sys-shape-corner-medium)] border border-outline/20 p-space-md">
               <div className="flex items-center justify-between">
-                <p className="text-base font-semibold text-on-surface">Housing application</p>
+                <p className="text-title-sm font-medium text-on-surface">Housing application</p>
                 <Badge variant="secondary">In review</Badge>
               </div>
-              <p className="mt-2 text-sm text-muted-foreground">
+              <p className="mt-space-xs text-body-sm text-muted-foreground">
                 Ontario Works packet submitted last week. Awaiting confirmation from housing help centre.
               </p>
             </article>
-            <article className="rounded-lg border border-outline/10 p-4">
+            <article className="rounded-[var(--md-sys-shape-corner-medium)] border border-outline/20 p-space-md">
               <div className="flex items-center justify-between">
-                <p className="text-base font-semibold text-on-surface">Health supports</p>
+                <p className="text-title-sm font-medium text-on-surface">Health supports</p>
                 <Badge variant="outline">Active</Badge>
               </div>
-              <p className="mt-2 text-sm text-muted-foreground">
+              <p className="mt-space-xs text-body-sm text-muted-foreground">
                 Harm reduction supplies packaged for pickup at the outreach hub. Check in with Morgan if plans change.
               </p>
             </article>
-            <article className="rounded-lg border border-outline/10 p-4">
+            <article className="rounded-[var(--md-sys-shape-corner-medium)] border border-outline/20 p-space-md">
               <div className="flex items-center justify-between">
-                <p className="text-base font-semibold text-on-surface">Income stabilization</p>
+                <p className="text-title-sm font-medium text-on-surface">Income stabilization</p>
                 <Badge className="bg-primary text-on-primary">New</Badge>
               </div>
-              <p className="mt-2 text-sm text-muted-foreground">
+              <p className="mt-space-xs text-body-sm text-muted-foreground">
                 Let the team know if you want help with part-time gig matching or training stipends.
               </p>
             </article>

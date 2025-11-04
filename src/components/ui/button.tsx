@@ -5,27 +5,27 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-semibold tracking-tight transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:pointer-events-none disabled:opacity-60 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-space-xs whitespace-nowrap rounded-full text-label-lg transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:pointer-events-none disabled:opacity-60 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground shadow-sm hover:bg-primary/92 focus-visible:ring-primary",
+          "bg-primary text-primary-foreground shadow-level-2 hover:bg-primary/92 focus-visible:ring-primary",
         destructive:
-          "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90 focus-visible:ring-destructive",
+          "bg-destructive text-destructive-foreground shadow-level-2 hover:bg-destructive/90 focus-visible:ring-destructive",
         outline:
-          "border border-outline bg-surface text-on-surface hover:bg-surface-container focus-visible:ring-primary",
+          "border border-outline bg-surface text-on-surface shadow-level-1 hover:bg-surface-container focus-visible:ring-primary",
         secondary:
-          "bg-secondary-container text-on-secondary-container shadow-sm hover:bg-secondary-container/90 focus-visible:ring-secondary",
+          "bg-secondary-container text-on-secondary-container shadow-level-1 hover:bg-secondary-container/90 focus-visible:ring-secondary",
         ghost:
           "text-primary hover:bg-primary/10 focus-visible:ring-primary/40",
         link: "text-primary underline-offset-4 hover:underline focus-visible:ring-transparent",
       },
       size: {
-        default: "h-11 px-6",
-        sm: "h-9 px-4 text-sm",
-        lg: "h-12 px-8 text-base",
-        icon: "h-11 w-11",
+        default: "h-10 px-space-lg",
+        sm: "h-9 px-space-md text-label-md",
+        lg: "h-12 px-space-xl text-label-lg",
+        icon: "h-10 w-10",
       },
     },
     defaultVariants: {

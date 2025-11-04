@@ -72,16 +72,16 @@ export function ProfileContactCard({
   }, [otpPending, phoneState.maskedPhone, phoneState.phone, phoneInput]);
 
   return (
-    <section className="grid gap-6 rounded-2xl border border-outline/20 bg-surface p-6 shadow-subtle">
-      <div className="space-y-2">
-        <h2 className="text-xl font-semibold text-on-surface">Contact preferences</h2>
-        <p className="text-sm text-on-surface/70">
+    <section className="grid gap-space-lg rounded-[var(--md-sys-shape-corner-extra-large)] border border-outline/20 bg-surface p-space-lg shadow-level-1">
+      <div className="flex flex-col gap-space-xs">
+        <h2 className="text-title-lg font-medium text-on-surface">Contact preferences</h2>
+        <p className="text-body-sm text-on-surface/70">
           Let outreach staff know the best way to reach you about appointments, documents, and plan updates.
         </p>
       </div>
 
-      <form action={emailFormAction} className="grid gap-3">
-        <div className="grid gap-2">
+      <form action={emailFormAction} className="grid gap-space-sm">
+        <div className="grid gap-space-xs">
           <Label htmlFor="profile-email">Email</Label>
           <Input
             id="profile-email"
@@ -91,15 +91,15 @@ export function ProfileContactCard({
             defaultValue={initialEmail ?? ''}
             placeholder="you@example.ca"
           />
-          <p className="text-xs text-muted">
+          <p className="text-label-sm text-muted">
             We send verification, document links, and password reset emails here. Leave blank if you prefer phone updates only.
           </p>
         </div>
-        <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-3">
+        <div className="flex flex-col items-start gap-space-xs sm:flex-row sm:items-center sm:gap-space-sm">
           <EmailSubmitButton />
           {emailState.message ? (
             <span
-              className={`text-sm ${emailState.status === 'success' ? 'text-success' : 'text-muted'}`}
+              className={`text-body-sm ${emailState.status === 'success' ? 'text-primary' : 'text-muted'}`}
               role={emailState.status === 'success' ? 'status' : undefined}
             >
               {emailState.message}
@@ -107,19 +107,19 @@ export function ProfileContactCard({
           ) : null}
         </div>
         {emailState.error ? (
-          <Alert variant="destructive">
+          <Alert variant="destructive" className="text-body-sm">
             <AlertTitle>We could not update your email</AlertTitle>
             <AlertDescription>{emailState.error}</AlertDescription>
           </Alert>
         ) : null}
       </form>
 
-      <form action={phoneFormAction} className="grid gap-3">
+      <form action={phoneFormAction} className="grid gap-space-sm">
         <input type="hidden" name="stage" value={otpPending ? 'verify' : 'request'} />
         {otpPending ? (
           <input type="hidden" name="otp_phone" value={phoneState.phone ?? phoneInput} />
         ) : null}
-        <div className="grid gap-2">
+        <div className="grid gap-space-xs">
           <Label htmlFor="profile-phone">Phone number</Label>
           <Input
             id="profile-phone"
@@ -132,13 +132,13 @@ export function ProfileContactCard({
             placeholder="+16475551234"
             disabled={phoneFieldDisabled}
           />
-          <p className="text-xs text-muted">
+          <p className="text-label-sm text-muted">
             Include your country code so we can text verification codes or urgent appointment updates.
           </p>
         </div>
 
         {otpPending ? (
-          <div className="grid gap-2">
+          <div className="grid gap-space-xs">
             <Label htmlFor="profile-phone-otp">Verification code</Label>
             <Input
               id="profile-phone-otp"
@@ -149,13 +149,13 @@ export function ProfileContactCard({
               placeholder="123456"
               required
             />
-            <p className="text-xs text-muted">
+            <p className="text-label-sm text-muted">
               We texted a 6-digit code to {maskedPhone ?? 'your phone number'}. Codes expire after 5 minutes.
             </p>
           </div>
         ) : null}
 
-        <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-3">
+        <div className="flex flex-col items-start gap-space-xs sm:flex-row sm:items-center sm:gap-space-sm">
           <PhoneSubmitButton otpPending={otpPending} />
           {otpPending ? (
             <Button
@@ -170,25 +170,25 @@ export function ProfileContactCard({
             </Button>
           ) : null}
           {!otpPending && phoneState.message && phoneState.status !== 'success' ? (
-            <span className="text-sm text-muted">{phoneState.message}</span>
+            <span className="text-body-sm text-muted">{phoneState.message}</span>
           ) : null}
         </div>
 
         {phoneState.error ? (
-          <Alert variant="destructive">
+          <Alert variant="destructive" className="text-body-sm">
             <AlertTitle>We could not update your phone number</AlertTitle>
             <AlertDescription>{phoneState.error}</AlertDescription>
           </Alert>
         ) : null}
 
         {otpPending && phoneState.message ? (
-          <Alert className="border-primary/30 bg-primary/10 text-sm text-on-primary-container">
+          <Alert className="border-primary/30 bg-primary/10 text-body-sm text-on-primary-container">
             <AlertDescription>{phoneState.message}</AlertDescription>
           </Alert>
         ) : null}
 
         {phoneState.status === 'success' && phoneState.message ? (
-          <Alert className="border-success/40 bg-success/10 text-success">
+          <Alert className="border-secondary/40 bg-secondary/10 text-on-secondary-container">
             <AlertDescription>{phoneState.message}</AlertDescription>
           </Alert>
         ) : null}

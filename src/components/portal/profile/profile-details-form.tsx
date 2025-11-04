@@ -99,35 +99,38 @@ export function ProfileDetailsForm({
       : null;
 
   return (
-    <form action={formAction} className="space-y-6 rounded-2xl border border-outline/40 bg-surface p-6 shadow-subtle">
-      <div className="space-y-2">
-        <h2 className="text-2xl font-semibold text-on-surface">Profile details</h2>
-        <p className="text-sm text-muted-foreground">
+    <form
+      action={formAction}
+      className="space-y-space-lg rounded-[var(--md-sys-shape-corner-extra-large)] border border-outline/40 bg-surface p-space-lg shadow-level-1"
+    >
+      <div className="flex flex-col gap-space-xs">
+        <h2 className="text-title-lg font-medium text-on-surface">Profile details</h2>
+        <p className="text-body-sm text-muted-foreground">
           Update how neighbours see you in STEVI and confirm the IHARC role you collaborate with.
         </p>
       </div>
 
       {pendingVerificationCopy ? (
-        <Alert className="border-primary/30 bg-primary/10 text-sm text-on-primary-container">
+        <Alert className="border-primary/30 bg-primary/10 text-body-sm text-on-primary-container">
           <AlertTitle>Verification in progress</AlertTitle>
           <AlertDescription>{pendingVerificationCopy}</AlertDescription>
         </Alert>
       ) : null}
 
       {state.status === 'success' && state.message ? (
-        <Alert className="border-primary/30 bg-primary/10 text-sm text-on-primary-container">
+        <Alert className="border-primary/30 bg-primary/10 text-body-sm text-on-primary-container">
           <AlertDescription>{state.message}</AlertDescription>
         </Alert>
       ) : null}
 
       {state.error ? (
-        <Alert variant="destructive">
+        <Alert variant="destructive" className="text-body-sm">
           <AlertTitle>We could not save your updates</AlertTitle>
           <AlertDescription>{state.error}</AlertDescription>
         </Alert>
       ) : null}
 
-      <div className="grid gap-2">
+      <div className="grid gap-space-xs">
         <Label htmlFor="display_name">Display name</Label>
         <Input
           id="display_name"
@@ -139,13 +142,13 @@ export function ProfileDetailsForm({
         />
       </div>
 
-      <div className="grid gap-3">
+      <div className="grid gap-space-sm">
         <Label>How do you collaborate with IHARC?</Label>
         <RadioGroup
           name="affiliation_type"
           value={affiliationType}
           onValueChange={(value) => setAffiliationType(value as AffiliationType)}
-          className="grid gap-3 md:grid-cols-2"
+          className="grid gap-space-sm md:grid-cols-2"
         >
           <AffiliationOption
             id="profile-affiliation-community"
@@ -163,8 +166,8 @@ export function ProfileDetailsForm({
       </div>
 
       {isAgencyPartner ? (
-        <div className="space-y-3 rounded-xl border border-outline/20 p-4">
-          <div className="grid gap-2">
+        <div className="space-y-space-sm rounded-[var(--md-sys-shape-corner-medium)] border border-outline/20 p-space-md">
+          <div className="grid gap-space-xs">
             <Label htmlFor="agency_organization_id">Partner organization</Label>
             <Select name="agency_organization_id" value={selectedOrg} onValueChange={setSelectedOrg}>
               <SelectTrigger id="agency_organization_id">
@@ -185,7 +188,7 @@ export function ProfileDetailsForm({
           </div>
 
           {requestingNewOrganization ? (
-            <div className="grid gap-2">
+            <div className="grid gap-space-xs">
               <Label htmlFor="new_organization_name">Organization name</Label>
               <Input
                 id="new_organization_name"
@@ -200,7 +203,7 @@ export function ProfileDetailsForm({
             <input type="hidden" name="new_organization_name" value="" />
           )}
 
-          <div className="grid gap-2">
+          <div className="grid gap-space-xs">
             <Label htmlFor="position_title">Role or position</Label>
             <Input
               id="position_title"
@@ -209,7 +212,7 @@ export function ProfileDetailsForm({
               required
               defaultValue={initialValues.positionTitle ?? ''}
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-label-sm text-muted-foreground">
               We share this internally so teams know how you collaborate with neighbours and partners.
             </p>
           </div>
@@ -225,7 +228,7 @@ export function ProfileDetailsForm({
         <input type="hidden" name="position_title" value={PUBLIC_MEMBER_ROLE_LABEL} />
       ) : null}
 
-      <div className="grid gap-2">
+      <div className="grid gap-space-xs">
         <Label htmlFor="homelessness_experience">Homelessness lived experience badge</Label>
         <Select
           name="homelessness_experience"
@@ -246,7 +249,7 @@ export function ProfileDetailsForm({
         <ExperienceHelper selectedValue={homelessnessExperience} />
       </div>
 
-      <div className="grid gap-2">
+      <div className="grid gap-space-xs">
         <Label htmlFor="substance_use_experience">Substance use lived experience badge</Label>
         <Select
           name="substance_use_experience"
@@ -317,7 +320,7 @@ function ExperienceHelper({ selectedValue }: ExperienceHelperProps) {
   if (!copy) {
     return null;
   }
-  return <p className="text-xs text-muted-foreground">{copy.description}</p>;
+  return <p className="text-label-sm text-muted-foreground">{copy.description}</p>;
 }
 
 type AffiliationOptionProps = {
@@ -331,12 +334,12 @@ function AffiliationOption({ id, value, title, description }: AffiliationOptionP
   return (
     <label
       htmlFor={id}
-      className="flex cursor-pointer items-start gap-3 rounded-xl border border-outline/40 bg-surface-container p-3 text-sm font-medium text-on-surface shadow-subtle transition hover:border-primary/40 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary"
+      className="flex cursor-pointer items-start gap-space-sm rounded-[var(--md-sys-shape-corner-medium)] border border-outline/40 bg-surface-container p-space-md text-body-sm font-medium text-on-surface shadow-level-1 transition hover:border-primary/40 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary"
     >
       <RadioGroupItem id={id} value={value} className="mt-1" />
       <span>
         {title}
-        <span className="mt-1 block text-xs font-normal text-muted">{description}</span>
+        <span className="mt-space-2xs block text-label-sm font-normal text-muted">{description}</span>
       </span>
     </label>
   );

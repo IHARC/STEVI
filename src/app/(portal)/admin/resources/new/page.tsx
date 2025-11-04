@@ -25,25 +25,25 @@ export default async function AdminResourceNewPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-6 px-4 py-10 text-on-surface">
-      <div className="flex flex-col gap-3">
+    <div className="page-shell page-stack text-on-surface">
+      <div className="mx-auto w-full max-w-[min(100%,52rem)] space-y-space-sm">
         <Button asChild variant="ghost" className="w-fit">
           <Link href="/admin/resources">← Back to admin resources</Link>
         </Button>
-        <h1 className="text-3xl font-semibold">Create resource</h1>
-        <p className="text-sm text-on-surface/70">
+        <h1 className="text-headline-lg">Create resource</h1>
+        <p className="text-body-sm text-on-surface/70">
           Publish delegations, data briefings, or policy notes so neighbours can co-design solutions with real-time context.
         </p>
       </div>
 
-      <Card className="shadow-sm">
+      <Card className="mx-auto w-full max-w-[min(100%,52rem)]">
         <CardHeader>
-          <CardTitle>Compose new report or delegation</CardTitle>
+          <CardTitle className="text-title-lg">Compose new report or delegation</CardTitle>
           <CardDescription>
             Keep the tone compassionate and community-first. Verify all numbers and remind neighbours to call 911 during emergencies.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-8">
+        <CardContent className="space-y-space-lg">
           <ResourceForm mode="create" profileId={profile.id} action={createResourcePage} />
         </CardContent>
       </Card>

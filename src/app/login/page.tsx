@@ -102,14 +102,16 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-12">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight text-slate-900 dark:text-slate-50">Welcome back</h1>
-        <p className="text-sm text-slate-600 dark:text-slate-300">
-          Sign in to add reactions to ideas, leave respectful comments, and manage community project board commitments.
-        </p>
+    <div className="page-shell">
+      <div className="mx-auto w-full max-w-[min(100%,32rem)] space-y-space-sm">
+        <div className="space-y-space-xs">
+          <h1 className="text-headline-md text-on-surface">Welcome back</h1>
+          <p className="text-body-sm text-on-surface/70">
+            Sign in to stay connected with STEVI and manage outreach updates, appointments, and resources.
+          </p>
+        </div>
+        <LoginForm action={loginUser} nextPath={nextPath} initialState={initialState} />
       </div>
-      <LoginForm action={loginUser} nextPath={nextPath} initialState={initialState} />
     </div>
   );
 }
