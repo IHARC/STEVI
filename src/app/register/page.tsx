@@ -78,9 +78,9 @@ export default async function RegisterLandingPage({ searchParams }: RegisterLand
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-16 sm:px-6 lg:px-8">
       <header className="mb-10 max-w-3xl space-y-4">
-        <p className="text-xs uppercase tracking-wide text-outline">IHARC Portal</p>
-        <h1 className="text-4xl font-semibold tracking-tight text-on-surface">What do you want to do today?</h1>
-        <p className="text-base text-muted">
+        <p className="text-label-sm uppercase tracking-wide text-outline">IHARC Portal</p>
+        <h1 className="text-headline-lg font-semibold tracking-tight text-on-surface">What do you want to do today?</h1>
+        <p className="text-body-lg text-muted">
           Pick the option that best matches what you need right now. Every path keeps your information private and
           honours your contact safety preferences.
         </p>
@@ -97,10 +97,10 @@ export default async function RegisterLandingPage({ searchParams }: RegisterLand
               <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary">
                 <Icon className="h-5 w-5" aria-hidden />
               </span>
-              <h2 className="text-xl font-semibold text-on-surface">{title}</h2>
-              <p className="text-sm text-muted">{description}</p>
+              <h2 className="text-title-lg font-semibold text-on-surface">{title}</h2>
+              <p className="text-body-md text-muted">{description}</p>
             </div>
-            <span className="mt-6 inline-flex items-center text-sm font-medium text-primary">
+            <span className="mt-6 inline-flex items-center text-body-md font-medium text-primary">
               Continue
               <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden />
             </span>

@@ -105,6 +105,114 @@ const config: Config = {
         'neutral-gray': 'rgb(200 192 192 / <alpha-value>)',
       },
       fontSize: {
+        xs: [
+          'var(--md-sys-typescale-label-small-size)',
+          {
+            lineHeight: 'var(--md-sys-typescale-label-small-line-height)',
+            letterSpacing: 'var(--md-sys-typescale-label-small-tracking)',
+            fontWeight: 'var(--md-sys-typescale-label-small-weight)',
+            fontFamily: 'var(--md-sys-typescale-body-font)',
+          },
+        ],
+        sm: [
+          'var(--md-sys-typescale-body-medium-size)',
+          {
+            lineHeight: 'var(--md-sys-typescale-body-medium-line-height)',
+            letterSpacing: 'var(--md-sys-typescale-body-medium-tracking)',
+            fontWeight: 'var(--md-sys-typescale-body-medium-weight)',
+            fontFamily: 'var(--md-sys-typescale-body-font)',
+          },
+        ],
+        base: [
+          'var(--md-sys-typescale-body-large-size)',
+          {
+            lineHeight: 'var(--md-sys-typescale-body-large-line-height)',
+            letterSpacing: 'var(--md-sys-typescale-body-large-tracking)',
+            fontWeight: 'var(--md-sys-typescale-body-large-weight)',
+            fontFamily: 'var(--md-sys-typescale-body-font)',
+          },
+        ],
+        lg: [
+          'var(--md-sys-typescale-title-small-size)',
+          {
+            lineHeight: 'var(--md-sys-typescale-title-small-line-height)',
+            letterSpacing: 'var(--md-sys-typescale-title-small-tracking)',
+            fontWeight: 'var(--md-sys-typescale-title-small-weight)',
+            fontFamily: 'var(--md-sys-typescale-body-font)',
+          },
+        ],
+        xl: [
+          'var(--md-sys-typescale-title-medium-size)',
+          {
+            lineHeight: 'var(--md-sys-typescale-title-medium-line-height)',
+            letterSpacing: 'var(--md-sys-typescale-title-medium-tracking)',
+            fontWeight: 'var(--md-sys-typescale-title-medium-weight)',
+            fontFamily: 'var(--md-sys-typescale-body-font)',
+          },
+        ],
+        '2xl': [
+          'var(--md-sys-typescale-title-large-size)',
+          {
+            lineHeight: 'var(--md-sys-typescale-title-large-line-height)',
+            letterSpacing: 'var(--md-sys-typescale-title-large-tracking)',
+            fontWeight: 'var(--md-sys-typescale-title-large-weight)',
+            fontFamily: 'var(--md-sys-typescale-body-font)',
+          },
+        ],
+        '3xl': [
+          'var(--md-sys-typescale-headline-small-size)',
+          {
+            lineHeight: 'var(--md-sys-typescale-headline-small-line-height)',
+            letterSpacing: 'var(--md-sys-typescale-headline-small-tracking)',
+            fontWeight: 'var(--md-sys-typescale-headline-small-weight)',
+            fontFamily: 'var(--md-sys-typescale-headline-font)',
+          },
+        ],
+        '4xl': [
+          'var(--md-sys-typescale-headline-medium-size)',
+          {
+            lineHeight: 'var(--md-sys-typescale-headline-medium-line-height)',
+            letterSpacing: 'var(--md-sys-typescale-headline-medium-tracking)',
+            fontWeight: 'var(--md-sys-typescale-headline-medium-weight)',
+            fontFamily: 'var(--md-sys-typescale-headline-font)',
+          },
+        ],
+        '5xl': [
+          'var(--md-sys-typescale-headline-large-size)',
+          {
+            lineHeight: 'var(--md-sys-typescale-headline-large-line-height)',
+            letterSpacing: 'var(--md-sys-typescale-headline-large-tracking)',
+            fontWeight: 'var(--md-sys-typescale-headline-large-weight)',
+            fontFamily: 'var(--md-sys-typescale-headline-font)',
+          },
+        ],
+        '6xl': [
+          'var(--md-sys-typescale-display-small-size)',
+          {
+            lineHeight: 'var(--md-sys-typescale-display-small-line-height)',
+            letterSpacing: 'var(--md-sys-typescale-display-small-tracking)',
+            fontWeight: 'var(--md-sys-typescale-display-small-weight)',
+            fontFamily: 'var(--md-sys-typescale-headline-font)',
+          },
+        ],
+        '7xl': [
+          'var(--md-sys-typescale-display-medium-size)',
+          {
+            lineHeight: 'var(--md-sys-typescale-display-medium-line-height)',
+            letterSpacing: 'var(--md-sys-typescale-display-medium-tracking)',
+            fontWeight: 'var(--md-sys-typescale-display-medium-weight)',
+            fontFamily: 'var(--md-sys-typescale-headline-font)',
+          },
+        ],
+        '8xl': [
+          'var(--md-sys-typescale-display-large-size)',
+          {
+            lineHeight: 'var(--md-sys-typescale-display-large-line-height)',
+            letterSpacing: 'var(--md-sys-typescale-display-large-tracking)',
+            fontWeight: 'var(--md-sys-typescale-display-large-weight)',
+            fontFamily: 'var(--md-sys-typescale-headline-font)',
+          },
+        ],
         'display-lg': [
           'var(--md-sys-typescale-display-large-size)',
           {
@@ -242,6 +350,21 @@ const config: Config = {
         ],
       },
       spacing: {
+        '0.5': 'calc(var(--md-sys-spacing-2xs) / 2)',
+        '1': 'var(--md-sys-spacing-2xs)',
+        '1.5': 'calc(var(--md-sys-spacing-xs) - (var(--md-sys-spacing-2xs) / 2))',
+        '2': 'var(--md-sys-spacing-xs)',
+        '2.5': 'calc(var(--md-sys-spacing-sm) - (var(--md-sys-spacing-2xs) / 2))',
+        '3': 'var(--md-sys-spacing-sm)',
+        '3.5': 'calc(var(--md-sys-spacing-md) - (var(--md-sys-spacing-2xs) / 2))',
+        '4': 'var(--md-sys-spacing-md)',
+        '5': 'calc(var(--md-sys-spacing-xl) - var(--md-sys-spacing-sm))',
+        '6': 'var(--md-sys-spacing-lg)',
+        '8': 'var(--md-sys-spacing-xl)',
+        '9': 'calc(var(--md-sys-spacing-3xl) - var(--md-sys-spacing-sm))',
+        '10': 'var(--md-sys-spacing-2xl)',
+        '12': 'var(--md-sys-spacing-3xl)',
+        '16': 'var(--md-sys-spacing-4xl)',
         'space-2xs': 'var(--md-sys-spacing-2xs)',
         'space-xs': 'var(--md-sys-spacing-xs)',
         'space-sm': 'var(--md-sys-spacing-sm)',
@@ -264,9 +387,12 @@ const config: Config = {
         body: ['var(--md-ref-typeface-plain)', 'Roboto', 'system-ui', 'sans-serif'],
       },
       borderRadius: {
+        '3xl': 'var(--md-sys-shape-corner-extra-large)',
+        '2xl': 'var(--md-sys-shape-corner-large)',
+        xl: 'var(--md-sys-shape-corner-medium)',
         lg: 'var(--md-sys-shape-corner-small)',
         md: 'var(--md-sys-shape-corner-extra-small)',
-        sm: '0.375rem',
+        sm: 'calc(var(--md-sys-shape-corner-extra-small) - 0.125rem)',
       },
       keyframes: {
         'accordion-down': {

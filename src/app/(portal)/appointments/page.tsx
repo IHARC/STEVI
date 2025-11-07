@@ -210,10 +210,10 @@ export default async function AppointmentsPage() {
       <section aria-labelledby="appointment-history">
         <Card>
           <CardHeader>
-            <CardTitle id="appointment-history" className="text-xl">
+            <CardTitle id="appointment-history" className="text-title-lg">
               Recent history
             </CardTitle>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-body-md text-muted-foreground">
               Outreach staff keep these records synced with STEVI Ops. Reach out if something looks
               incorrect.
             </p>

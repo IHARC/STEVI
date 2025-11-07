@@ -23,19 +23,19 @@ export function InventoryWorkspace({ bootstrap, actorProfileId }: InventoryWorks
     <div className="space-y-6">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="flex w-full flex-wrap justify-start gap-2 bg-transparent p-0">
-          <TabsTrigger value="dashboard" className="rounded-full border px-4 py-1 text-sm">
+          <TabsTrigger value="dashboard" className="rounded-full border px-4 py-1 text-body-md">
             Dashboard
           </TabsTrigger>
-          <TabsTrigger value="items" className="rounded-full border px-4 py-1 text-sm">
+          <TabsTrigger value="items" className="rounded-full border px-4 py-1 text-body-md">
             Items
           </TabsTrigger>
-          <TabsTrigger value="locations" className="rounded-full border px-4 py-1 text-sm">
+          <TabsTrigger value="locations" className="rounded-full border px-4 py-1 text-body-md">
             Locations
           </TabsTrigger>
-          <TabsTrigger value="organizations" className="rounded-full border px-4 py-1 text-sm">
+          <TabsTrigger value="organizations" className="rounded-full border px-4 py-1 text-body-md">
             Organisations
           </TabsTrigger>
-          <TabsTrigger value="receipts" className="rounded-full border px-4 py-1 text-sm">
+          <TabsTrigger value="receipts" className="rounded-full border px-4 py-1 text-body-md">
             Receipts
           </TabsTrigger>
         </TabsList>

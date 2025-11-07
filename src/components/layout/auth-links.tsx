@@ -32,7 +32,7 @@ export function AuthLinks({ layout = 'inline' }: AuthLinksProps = {}) {
   return (
     <div
       className={cn(
-        'text-sm font-semibold text-on-surface/80',
+        'text-body-md font-semibold text-on-surface/80',
         isStacked ? 'flex flex-col gap-2' : 'flex items-center gap-2'
       )}
     >

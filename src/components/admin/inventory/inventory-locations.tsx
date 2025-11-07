@@ -82,8 +82,8 @@ export function InventoryLocationsSection({ locations, actorProfileId }: Invento
     <Card className="border-border/60">
       <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <CardTitle className="text-lg font-semibold">Locations</CardTitle>
-          <p className="text-sm text-muted-foreground">Warehouses, outreach lockers, and mobile units that hold inventory.</p>
+          <CardTitle className="text-title-sm font-semibold">Locations</CardTitle>
+          <p className="text-body-md text-muted-foreground">Warehouses, outreach lockers, and mobile units that hold inventory.</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
@@ -147,7 +147,7 @@ export function InventoryLocationsSection({ locations, actorProfileId }: Invento
           </TableBody>
         </Table>
       </CardContent>
-      <CardFooter className="text-xs text-muted-foreground">
+      <CardFooter className="text-label-sm text-muted-foreground">
         Deleting a location is only allowed when no stock remains and no transactions reference it. Otherwise deactivate to hide it from workflows.
       </CardFooter>
 
@@ -204,7 +204,7 @@ function LocationDialog({ title, actionLabel, actorProfileId, onSubmit, isPendin
               defaultChecked={defaultValues?.active ?? true}
               className="h-4 w-4"
             />
-            <Label htmlFor="location_active" className="text-sm text-muted-foreground">
+            <Label htmlFor="location_active" className="text-body-md text-muted-foreground">
               Location is active
             </Label>
           </div>

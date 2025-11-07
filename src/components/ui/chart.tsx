@@ -61,7 +61,7 @@ const ChartContainer = React.forwardRef<
         data-chart={chartId}
         ref={ref}
         className={cn(
-          "flex aspect-video justify-center text-xs text-on-surface [&_.recharts-cartesian-axis-tick_text]:fill-[var(--chart-axis-color)] [&_.recharts-cartesian-grid_line]:stroke-[var(--chart-grid-color)] [&_.recharts-curve.recharts-tooltip-cursor]:stroke-[var(--chart-cursor-color)] [&_.recharts-dot]:stroke-transparent [&_.recharts-layer]:outline-none [&_.recharts-polar-grid_line]:stroke-[var(--chart-grid-color)] [&_.recharts-radial-bar-background-sector]:fill-[var(--chart-radial-bg-color)] [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-[var(--chart-cursor-fill)] [&_.recharts-reference-line_line]:stroke-[var(--chart-grid-color)] [&_.recharts-sector]:outline-none [&_.recharts-sector]:stroke-transparent [&_.recharts-surface]:outline-none",
+          "flex aspect-video justify-center text-label-sm text-on-surface [&_.recharts-cartesian-axis-tick_text]:fill-[var(--chart-axis-color)] [&_.recharts-cartesian-grid_line]:stroke-[var(--chart-grid-color)] [&_.recharts-curve.recharts-tooltip-cursor]:stroke-[var(--chart-cursor-color)] [&_.recharts-dot]:stroke-transparent [&_.recharts-layer]:outline-none [&_.recharts-polar-grid_line]:stroke-[var(--chart-grid-color)] [&_.recharts-radial-bar-background-sector]:fill-[var(--chart-radial-bg-color)] [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-[var(--chart-cursor-fill)] [&_.recharts-reference-line_line]:stroke-[var(--chart-grid-color)] [&_.recharts-sector]:outline-none [&_.recharts-sector]:stroke-transparent [&_.recharts-surface]:outline-none",
           className
         )}
         style={mergedStyle}
@@ -189,7 +189,7 @@ const ChartTooltipContent = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-          "grid min-w-[8rem] items-start gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-xs shadow-xl",
+          "grid min-w-[8rem] items-start gap-1.5 rounded-lg border border-border/50 bg-background px-2.5 py-1.5 text-label-sm shadow-xl",
           className
         )}
       >

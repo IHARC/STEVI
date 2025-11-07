@@ -23,7 +23,7 @@ export function RequestAppointmentForm({ action, profileDisplayName }: RequestAp
   return (
     <form action={formAction} className="space-y-4" aria-describedby="request-form-feedback">
       <div className="space-y-1.5">
-        <label htmlFor="reason" className="text-sm font-semibold text-on-surface">
+        <label htmlFor="reason" className="text-body-md font-semibold text-on-surface">
           What do you want to discuss?
         </label>
         <Textarea
@@ -36,7 +36,7 @@ export function RequestAppointmentForm({ action, profileDisplayName }: RequestAp
         />
       </div>
       <div className="space-y-1.5">
-        <label htmlFor="preferred-date" className="text-sm font-semibold text-on-surface">
+        <label htmlFor="preferred-date" className="text-body-md font-semibold text-on-surface">
           Preferred date or time window{' '}
           <span className="text-on-surface/60">(optional)</span>
         </label>
@@ -47,7 +47,7 @@ export function RequestAppointmentForm({ action, profileDisplayName }: RequestAp
         />
       </div>
       <div className="space-y-1.5">
-        <label htmlFor="staff-preference" className="text-sm font-semibold text-on-surface">
+        <label htmlFor="staff-preference" className="text-body-md font-semibold text-on-surface">
           Preferred staff member <span className="text-on-surface/60">(optional)</span>
         </label>
         <Input
@@ -56,7 +56,7 @@ export function RequestAppointmentForm({ action, profileDisplayName }: RequestAp
           placeholder="Example: Jordan, Morgan, peer navigator, or whoever is available"
         />
       </div>
-      <p className="text-sm text-muted-foreground">
+      <p className="text-body-md text-muted-foreground">
         Submitting will notify the outreach coordination queue linked with STEVI Ops for {profileLabel}.
       </p>
       <Button type="submit" className="w-full sm:w-auto">
@@ -65,10 +65,10 @@ export function RequestAppointmentForm({ action, profileDisplayName }: RequestAp
       <div
         id="request-form-feedback"
         aria-live="polite"
-        className="text-sm"
+        className="text-body-md"
       >
         {state.status === 'success' ? (
-          <p className="text-emerald-700 dark:text-emerald-500">{state.message}</p>
+          <p className="text-tertiary">{state.message}</p>
         ) : null}
         {state.status === 'error' ? (
           <p className="text-destructive">{state.message}</p>
@@ -77,4 +77,3 @@ export function RequestAppointmentForm({ action, profileDisplayName }: RequestAp
     </form>
   );
 }
-

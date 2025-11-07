@@ -70,9 +70,9 @@ export function ClientClaimForm({ action, initialState = CLIENT_CLAIM_INITIAL_ST
 
       <section className="space-y-4">
         <header>
-          <p className="text-xs uppercase tracking-wide text-outline">Link existing services</p>
-          <h1 className="text-2xl font-semibold text-on-surface">Claim your IHARC record</h1>
-          <p className="mt-2 text-sm text-muted">
+          <p className="text-label-sm uppercase tracking-wide text-outline">Link existing services</p>
+          <h1 className="text-headline-sm font-semibold text-on-surface">Claim your IHARC record</h1>
+          <p className="mt-2 text-body-md text-muted">
             Share at least two pieces of information. We cross-check them securely so your record never gets duplicated.
           </p>
         </header>
@@ -102,13 +102,13 @@ export function ClientClaimForm({ action, initialState = CLIENT_CLAIM_INITIAL_ST
             placeholder="1234-5678"
             autoComplete="one-time-code"
           />
-          <p className="text-xs text-muted">
+          <p className="text-label-sm text-muted">
             This 8-digit code appears on your intake paperwork. If you do not have it, share two other details below.
           </p>
         </div>
 
         <fieldset className="grid gap-3 rounded-xl border border-outline/30 p-4">
-          <legend className="text-sm font-semibold text-on-surface">Who are we linking?</legend>
+          <legend className="text-body-md font-semibold text-on-surface">Who are we linking?</legend>
           <div className="grid gap-2">
             <Label htmlFor="chosen_name">Chosen or preferred name *</Label>
             <Input
@@ -156,7 +156,7 @@ export function ClientClaimForm({ action, initialState = CLIENT_CLAIM_INITIAL_ST
         </fieldset>
 
         <fieldset className="space-y-3 rounded-xl border border-outline/30 p-4">
-          <legend className="text-sm font-semibold text-on-surface">
+          <legend className="text-body-md font-semibold text-on-surface">
             Where should we send login confirmations?
           </legend>
           <RadioGroup
@@ -200,7 +200,7 @@ export function ClientClaimForm({ action, initialState = CLIENT_CLAIM_INITIAL_ST
                 required
                 placeholder="+16475551234"
               />
-              <p className="text-xs text-muted">
+              <p className="text-label-sm text-muted">
                 Include the country code. We will text a verification link and never leave voicemail without consent.
               </p>
             </div>
@@ -209,13 +209,13 @@ export function ClientClaimForm({ action, initialState = CLIENT_CLAIM_INITIAL_ST
 
         <div className="grid gap-2 md:grid-cols-2">
           <div className="grid gap-2">
-            <Label htmlFor="safe_call_claim" className="text-sm font-medium text-on-surface">
+            <Label htmlFor="safe_call_claim" className="text-body-md font-medium text-on-surface">
               Is it safe to call this number?
             </Label>
             <Checkbox id="safe_call_claim" name="safe_call" className="mt-1" />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="safe_text_claim" className="text-sm font-medium text-on-surface">
+            <Label htmlFor="safe_text_claim" className="text-body-md font-medium text-on-surface">
               Is it safe to send text messages?
             </Label>
             <Checkbox id="safe_text_claim" name="safe_text" className="mt-1" />
@@ -249,7 +249,7 @@ export function ClientClaimForm({ action, initialState = CLIENT_CLAIM_INITIAL_ST
         </div>
 
         <fieldset className="space-y-3 rounded-xl border border-outline/30 p-4">
-          <legend className="text-sm font-semibold text-on-surface">Consent</legend>
+          <legend className="text-body-md font-semibold text-on-surface">Consent</legend>
           <ConsentCheckbox
             id="consent_privacy_claim"
             name="consent_privacy"
@@ -272,7 +272,7 @@ export function ClientClaimForm({ action, initialState = CLIENT_CLAIM_INITIAL_ST
       </section>
 
       <div className="flex items-center justify-between gap-4">
-        <p className="text-xs text-muted">
+        <p className="text-label-sm text-muted">
           Staff will review matches before sensitive records unlock. You’ll see confirmation on screen and by email/text.
         </p>
         <SubmitButton isSuccess={isSuccess} />
@@ -293,12 +293,12 @@ function ContactMethodOption({
   return (
     <label
       htmlFor={`contact_method_${value}`}
-      className="flex cursor-pointer items-start gap-3 rounded-xl border border-outline/40 bg-surface-container p-3 text-left text-sm font-medium text-on-surface shadow-subtle transition hover:border-primary/40 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary"
+      className="flex cursor-pointer items-start gap-3 rounded-xl border border-outline/40 bg-surface-container p-3 text-left text-body-md font-medium text-on-surface shadow-subtle transition hover:border-primary/40 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary"
     >
       <RadioGroupItem id={`contact_method_${value}`} value={value} className="mt-1" />
       <span>
         {title}
-        <span className="mt-1 block text-xs font-normal text-muted">{description}</span>
+        <span className="mt-1 block text-label-sm font-normal text-muted">{description}</span>
       </span>
     </label>
   );
@@ -316,7 +316,7 @@ function ConsentCheckbox({
   required?: boolean;
 }) {
   return (
-    <label htmlFor={id} className="flex items-start gap-3 text-sm text-on-surface">
+    <label htmlFor={id} className="flex items-start gap-3 text-body-md text-on-surface">
       <Checkbox id={id} name={name} required={required} className="mt-1" />
       <span>
         {label} {required ? <span className="text-error">*</span> : null}

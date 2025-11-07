@@ -70,11 +70,11 @@ export default async function AdminResourcesPage() {
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-2">
-          <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">Resource library</p>
-          <h1 className="text-3xl font-semibold text-on-surface sm:text-4xl">
+          <p className="text-body-md font-medium uppercase tracking-wide text-muted-foreground">Resource library</p>
+          <h1 className="text-headline-md font-semibold text-on-surface sm:text-headline-lg">
             Manage public resources and reports
           </h1>
-          <p className="max-w-3xl text-sm text-muted-foreground sm:text-base">
+          <p className="max-w-3xl text-body-md text-muted-foreground sm:text-body-lg">
             Publish outreach reports, policy updates, and community resources. Published items power the marketing
             website and client resource hub, while drafts stay internal until you are ready to share them.
           </p>
@@ -87,22 +87,22 @@ export default async function AdminResourcesPage() {
       <section className="grid gap-4 sm:grid-cols-2">
         <Card className="border-outline/20 bg-surface-container">
           <CardHeader>
-            <CardTitle className="text-base text-muted-foreground">Published resources</CardTitle>
+            <CardTitle className="text-body-lg text-muted-foreground">Published resources</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-semibold text-on-surface">{publishedCount}</p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-headline-md font-semibold text-on-surface">{publishedCount}</p>
+            <p className="text-label-sm text-muted-foreground">
               Visible on <span className="font-medium text-on-surface">iharc.ca</span> and the STEVI client portal.
             </p>
           </CardContent>
         </Card>
         <Card className="border-outline/20 bg-surface-container">
           <CardHeader>
-            <CardTitle className="text-base text-muted-foreground">Draft resources</CardTitle>
+            <CardTitle className="text-body-lg text-muted-foreground">Draft resources</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-semibold text-on-surface">{draftCount}</p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-headline-md font-semibold text-on-surface">{draftCount}</p>
+            <p className="text-label-sm text-muted-foreground">
               Only visible to STEVI admins until you publish them.
             </p>
           </CardContent>
@@ -113,9 +113,9 @@ export default async function AdminResourcesPage() {
         {resources.length === 0 ? (
           <Card className="border-outline/20 bg-surface-container">
             <CardHeader>
-              <CardTitle className="text-lg text-on-surface">No resources yet</CardTitle>
+              <CardTitle className="text-title-sm text-on-surface">No resources yet</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4 text-sm text-muted-foreground">
+            <CardContent className="space-y-4 text-body-md text-muted-foreground">
               <p>
                 Start by publishing a delegation summary, policy brief, or outreach update. Resources you publish here
                 are shared with neighbours and partner agencies through both STEVI and the public site.
@@ -144,7 +144,7 @@ export default async function AdminResourcesPage() {
                     <TableCell>
                       <div className="flex flex-col gap-1">
                         <span className="font-medium text-on-surface">{resource.title}</span>
-                        <span className="text-xs text-muted-foreground">/{resource.slug}</span>
+                        <span className="text-label-sm text-muted-foreground">/{resource.slug}</span>
                       </div>
                     </TableCell>
                     <TableCell>

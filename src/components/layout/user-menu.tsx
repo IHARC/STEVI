@@ -42,11 +42,11 @@ export function UserMenu({
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="inline-flex items-center gap-2 rounded-full border border-outline/30 bg-surface px-2 py-1 text-sm font-medium text-on-surface/90 transition hover:bg-brand-soft hover:text-brand focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+          className="inline-flex items-center gap-2 rounded-full border border-outline/30 bg-surface px-2 py-1 text-body-md font-medium text-on-surface/90 transition hover:bg-brand-soft hover:text-brand focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
           aria-label="Account menu"
         >
           <Avatar className="h-8 w-8">
-            <AvatarFallback className="bg-brand-soft text-sm font-semibold uppercase text-brand">
+            <AvatarFallback className="bg-brand-soft text-body-md font-semibold uppercase text-brand">
               {initials}
             </AvatarFallback>
           </Avatar>
@@ -54,18 +54,18 @@ export function UserMenu({
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
-        <div className="px-2 py-1.5 text-sm">
+        <div className="px-2 py-1.5 text-body-md">
           <p className="font-semibold text-on-surface">{displayName}</p>
           {positionTitle ? (
-            <p className="text-xs text-on-surface/70">{positionTitle}</p>
+            <p className="text-label-sm text-on-surface/70">{positionTitle}</p>
           ) : null}
           {awaitingVerification ? (
-            <p className="mt-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+            <p className="mt-1 rounded-full bg-primary/10 px-2 py-0.5 text-label-sm font-semibold text-primary">
               Awaiting verification
             </p>
           ) : null}
           {affiliationRevoked ? (
-            <p className="mt-1 rounded-full bg-inverse-surface/10 px-2 py-0.5 text-xs font-semibold text-inverse-on-surface">
+            <p className="mt-1 rounded-full bg-inverse-surface/10 px-2 py-0.5 text-label-sm font-semibold text-inverse-on-surface">
               Verification declined
             </p>
           ) : null}
@@ -73,7 +73,7 @@ export function UserMenu({
         <DropdownMenuSeparator />
         {menuItems.map((item) => (
           <DropdownMenuItem key={item.href} asChild>
-            <Link href={item.href} className="flex w-full items-center justify-between text-sm">
+            <Link href={item.href} className="flex w-full items-center justify-between text-body-md">
               {item.label}
             </Link>
           </DropdownMenuItem>

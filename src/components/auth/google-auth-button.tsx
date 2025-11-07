@@ -68,7 +68,7 @@ export function GoogleAuthButton({ nextPath, intent }: GoogleAuthButtonProps) {
         {isLoading ? 'Connecting...' : getLabel(intent)}
       </Button>
       {error ? (
-        <p className="text-sm text-destructive" role="alert">
+        <p className="text-body-md text-destructive" role="alert">
           {error}
         </p>
       ) : null}

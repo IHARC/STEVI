@@ -132,8 +132,8 @@ export function ResourceRichTextEditor({ name, label, description, defaultValue 
 
   return (
     <div className="space-y-2">
-      {label ? <label className="text-sm font-medium text-on-surface">{label}</label> : null}
-      {description ? <p className="text-xs text-on-surface/70">{description}</p> : null}
+      {label ? <label className="text-body-md font-medium text-on-surface">{label}</label> : null}
+      {description ? <p className="text-label-sm text-on-surface/70">{description}</p> : null}
       <div className="rounded-3xl border border-outline/20 bg-surface-container-low">
         <div className="flex flex-wrap items-center gap-2 border-b border-outline/15 px-3 py-2">
           <Toggle
@@ -296,7 +296,7 @@ export function ResourceRichTextEditor({ name, label, description, defaultValue 
                   onChange={(event) => setHtmlSnippet(event.target.value)}
                   rows={6}
                   placeholder="<iframe …></iframe>"
-                  className="text-sm"
+                  className="text-body-md"
                 />
                 <DialogFooter className="gap-2 sm:space-x-0">
                   <Button type="button" variant="ghost" onClick={() => setHtmlDialogOpen(false)}>
@@ -335,7 +335,7 @@ export function ResourceRichTextEditor({ name, label, description, defaultValue 
           {editor ? (
             <EditorContent editor={editor} />
           ) : (
-            <div className="min-h-[220px] rounded-2xl border border-outline/20 bg-surface p-4 text-sm text-on-surface/70">
+            <div className="min-h-[220px] rounded-2xl border border-outline/20 bg-surface p-4 text-body-md text-on-surface/70">
               Loading editor…
             </div>
           )}

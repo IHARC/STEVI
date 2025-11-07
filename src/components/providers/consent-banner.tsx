@@ -93,7 +93,7 @@ export function ConsentBanner() {
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-50 border-t border-outline bg-surface shadow-lg">
-      <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 px-4 py-4 text-sm md:flex-row md:items-center md:justify-between md:px-6">
+      <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 px-4 py-4 text-body-md md:flex-row md:items-center md:justify-between md:px-6">
         <div className="text-on-surface md:max-w-xl">
           <p className="font-medium">Cookies that strengthen community care</p>
           <p className="mt-1 text-muted-foreground">

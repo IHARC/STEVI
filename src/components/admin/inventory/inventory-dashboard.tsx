@@ -21,7 +21,7 @@ export function InventoryDashboardSection({ dashboard }: InventoryDashboardProps
       <div className="grid gap-6 lg:grid-cols-2">
         <Card className="h-full">
           <CardHeader>
-            <CardTitle className="text-base font-semibold">Low stock items</CardTitle>
+            <CardTitle className="text-body-lg font-semibold">Low stock items</CardTitle>
           </CardHeader>
           <CardContent className="px-0">
             {dashboard.lowStockItems.length === 0 ? (
@@ -55,7 +55,7 @@ export function InventoryDashboardSection({ dashboard }: InventoryDashboardProps
 
         <Card className="h-full">
           <CardHeader>
-            <CardTitle className="text-base font-semibold">Expiring soon</CardTitle>
+            <CardTitle className="text-body-lg font-semibold">Expiring soon</CardTitle>
           </CardHeader>
           <CardContent className="px-0">
             {dashboard.expiringItems.length === 0 ? (
@@ -90,7 +90,7 @@ export function InventoryDashboardSection({ dashboard }: InventoryDashboardProps
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base font-semibold">Recent receipts</CardTitle>
+          <CardTitle className="text-body-lg font-semibold">Recent receipts</CardTitle>
         </CardHeader>
         <CardContent className="px-0">
           {dashboard.recentReceipts.length === 0 ? (
@@ -135,10 +135,10 @@ function SummaryCard({ label, value, accent = false }: { label: string; value: s
   return (
     <Card className={accent ? 'border-destructive/40 bg-destructive/5 text-destructive-foreground' : ''}>
       <CardHeader>
-        <CardTitle className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</CardTitle>
+        <CardTitle className="text-label-sm font-medium uppercase tracking-wide text-muted-foreground">{label}</CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-2xl font-semibold text-on-surface">{value}</p>
+        <p className="text-headline-sm font-semibold text-on-surface">{value}</p>
       </CardContent>
     </Card>
   );
@@ -146,7 +146,7 @@ function SummaryCard({ label, value, accent = false }: { label: string; value: s
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-2 p-6 text-center text-sm text-muted-foreground">
+    <div className="flex flex-col items-center justify-center gap-2 p-6 text-center text-body-md text-muted-foreground">
       <p>{message}</p>
     </div>
   );
