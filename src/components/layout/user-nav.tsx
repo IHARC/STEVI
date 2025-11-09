@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { ensurePortalProfile } from '@/lib/profile';
+import { buildUserMenuLinks, loadPortalAccess } from '@/lib/portal-access';
 import { AuthLinks } from '@/components/layout/auth-links';
 import { UserMenu } from '@/components/layout/user-menu';
 
@@ -13,33 +13,22 @@ type UserNavigation = {
 
 export async function getUserNavigation(): Promise<UserNavigation> {
   const supabase = await createSupabaseRSCClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const access = await loadPortalAccess(supabase);
 
-  if (!user) {
+  if (!access) {
     return {
       desktop: <AuthLinks />,
       mobile: <AuthLinks layout="stacked" />,
     };
   }
 
-  const profile = await ensurePortalProfile(supabase, user.id);
-  const role = profile.role;
+  const { profile } = access;
   const displayName = profile.display_name || 'Community member';
   const positionTitle = profile.position_title;
   const awaitingVerification = profile.affiliation_status === 'pending';
   const affiliationRevoked = profile.affiliation_status === 'revoked';
-  const showAdminTools = role === 'moderator' || role === 'admin';
 
-  const menuItems: Array<{ href: string; label: string }> = [
-    { href: '/home', label: 'Home' },
-    { href: '/appointments', label: 'Appointments' },
-    { href: '/documents', label: 'Documents' },
-    { href: '/profile', label: 'Profile' },
-    { href: '/support', label: 'Support' },
-    ...(showAdminTools ? [{ href: '/admin', label: 'Admin tools' }] : []),
-  ];
+  const menuItems = buildUserMenuLinks(access);
 
   const menu = (
     <UserMenu

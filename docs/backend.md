@@ -45,6 +45,13 @@ Copy `.env.example` to `.env` and fill the required values. All variables prefix
 - All server actions ensure the caller has a `portal.profiles` row. Use `ensurePortalProfile` before writing to sensitive tables.
 - RLS is enforced on every table. Any new server action must be verified against production policies using Supabase MCP.
 
+## Authorization & Role Separation
+
+- `src/lib/portal-access.ts` centralizes portal access checks. It loads the Supabase user session, the matching `portal.profiles` row, and any IHARC-specific roles stored in `app_metadata.claims.roles`. Only roles issued through Supabase server-side app metadata are trusted.
+- Navigation and menus call `loadPortalAccess` server-side, so clients never receive menu links for admin or staff-only surfaces unless their profile role (moderator/admin) or IHARC role permits it. The UI now mirrors the same rules enforced by server actions.
+- Inventory tooling relies on the same helper plus `ensureInventoryActor` so outreach staff with IHARC roles can reach `/admin/inventory` without granting them full portal moderator access.
+- Do not add new privileged routes without updating `portal-access.ts` — this keeps UI, server actions, and documentation aligned and prevents accidental privilege escalation in future features.
+
 ## Local Development
 
 1. `npm install`
