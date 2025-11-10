@@ -1,12 +1,11 @@
-import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
-import { loadPortalAccess, resolvePortalNavLinks } from '@/lib/portal-access';
+import type { PortalLink } from '@/lib/portal-access';
 import { PortalNavClient } from '@/components/layout/portal-nav-client';
 
-export async function PortalNav() {
-  const supabase = await createSupabaseRSCClient();
-  const access = await loadPortalAccess(supabase);
-  const links = resolvePortalNavLinks(access);
+type PortalNavProps = {
+  links: PortalLink[];
+};
 
+export function PortalNav({ links }: PortalNavProps) {
   if (links.length === 0) {
     return null;
   }

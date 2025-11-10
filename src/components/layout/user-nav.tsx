@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { buildUserMenuLinks, loadPortalAccess } from '@/lib/portal-access';
+import { buildUserMenuLinks, loadPortalAccess, type PortalAccess } from '@/lib/portal-access';
 import { AuthLinks } from '@/components/layout/auth-links';
 import { UserMenu } from '@/components/layout/user-menu';
 
@@ -11,9 +11,13 @@ type UserNavigation = {
   mobile: ReactNode;
 };
 
-export async function getUserNavigation(): Promise<UserNavigation> {
-  const supabase = await createSupabaseRSCClient();
-  const access = await loadPortalAccess(supabase);
+export async function getUserNavigation(accessOverride?: PortalAccess | null): Promise<UserNavigation> {
+  let access = accessOverride;
+
+  if (!access) {
+    const supabase = await createSupabaseRSCClient();
+    access = await loadPortalAccess(supabase);
+  }
 
   if (!access) {
     return {

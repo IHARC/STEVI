@@ -303,6 +303,15 @@ const config: Config = {
             fontFamily: 'var(--md-sys-typescale-body-font)',
           },
         ],
+        'body-lg': [
+          'var(--md-sys-typescale-body-large-size)',
+          {
+            lineHeight: 'var(--md-sys-typescale-body-large-line-height)',
+            letterSpacing: 'var(--md-sys-typescale-body-large-tracking)',
+            fontWeight: 'var(--md-sys-typescale-body-large-weight)',
+            fontFamily: 'var(--md-sys-typescale-body-font)',
+          },
+        ],
         'body-md': [
           'var(--md-sys-typescale-body-medium-size)',
           {

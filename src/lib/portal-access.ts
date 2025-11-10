@@ -1,4 +1,3 @@
-import type { User } from '@supabase/supabase-js';
 import { ensurePortalProfile, type PortalProfile } from '@/lib/profile';
 import { getIharcRoles, type IharcRole } from '@/lib/ihar-auth';
 import { INVENTORY_ALLOWED_ROLES } from '@/lib/inventory/auth';
@@ -34,12 +33,16 @@ const PORTAL_NAV_BLUEPRINT: PortalLinkBlueprint[] = [
 ];
 
 export type PortalAccess = {
-  user: User;
+  userId: string;
+  email: string | null;
   profile: PortalProfile;
   iharcRoles: IharcRole[];
   canAccessAdminWorkspace: boolean;
   canManageResources: boolean;
   canAccessInventoryWorkspace: boolean;
+  canManageNotifications: boolean;
+  canReviewProfiles: boolean;
+  canViewMetrics: boolean;
 };
 
 export async function loadPortalAccess(
@@ -63,13 +66,21 @@ export async function loadPortalAccess(
     INVENTORY_ALLOWED_ROLES.includes(role),
   );
 
+  const canManageNotifications = profile.role === 'admin';
+  const canReviewProfiles = canAccessAdminWorkspace;
+  const canViewMetrics = profile.role === 'admin';
+
   return {
-    user,
+    userId: user.id,
+    email: user.email ?? null,
     profile,
     iharcRoles,
     canAccessAdminWorkspace,
     canManageResources,
     canAccessInventoryWorkspace,
+    canManageNotifications,
+    canReviewProfiles,
+    canViewMetrics,
   };
 }
 

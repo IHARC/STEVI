@@ -1,10 +1,15 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { getUserNavigation } from '@/components/layout/user-nav';
+import type { PortalAccess } from '@/lib/portal-access';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
 
-export async function TopNav() {
-  const { desktop, mobile } = await getUserNavigation();
+type TopNavProps = {
+  portalAccess?: PortalAccess | null;
+};
+
+export async function TopNav({ portalAccess }: TopNavProps = {}) {
+  const { desktop, mobile } = await getUserNavigation(portalAccess);
 
   return (
     <header className="border-b border-outline/20 bg-surface/95 text-on-surface backdrop-blur supports-[backdrop-filter]:bg-surface/80">

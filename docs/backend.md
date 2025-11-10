@@ -51,6 +51,7 @@ Copy `.env.example` to `.env` and fill the required values. All variables prefix
 - Navigation and menus call `loadPortalAccess` server-side, so clients never receive menu links for admin or staff-only surfaces unless their profile role (moderator/admin) or IHARC role permits it. The UI now mirrors the same rules enforced by server actions.
 - Inventory tooling relies on the same helper plus `ensureInventoryActor` so outreach staff with IHARC roles can reach `/admin/inventory` without granting them full portal moderator access.
 - Do not add new privileged routes without updating `portal-access.ts` — this keeps UI, server actions, and documentation aligned and prevents accidental privilege escalation in future features.
+- `(portal)/layout.tsx` now wraps every portal route with `PortalAccessProvider`, so any client component can call `usePortalAccess()` when it needs the authenticated profile, feature gates, or IHARC role list without triggering its own Supabase round-trip. Prefer plumbing access data from this provider before hitting Supabase again.
 
 ## Local Development
 

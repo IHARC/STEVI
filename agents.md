@@ -78,6 +78,12 @@ The STEVI team should treat this briefing as a living document. Update it as fea
 - Update environment documentation to clarify which repo holds `.env` values and how to share secrets between deployments.
 - Monitor audit logs and rate limits after launch to confirm service continuity.
 
+### Access Control Implementation Notes
+- `src/lib/portal-access.ts` is the single source of truth for role/feature gates. Any new privileged surface (profile verification, notifications, metrics, etc.) must register a boolean there (`canManageNotifications`, `canViewMetrics`, etc.) so UI and server actions stay aligned.
+- `(portal)/layout.tsx` now wraps every route with `PortalAccessProvider`. Client components should call `usePortalAccess()` instead of re-fetching Supabase to check roles or feature access. Server components should accept `portalAccess` props from parents or reuse the shared helper sparingly.
+- Navigation (PortalNav, TopNav, user menus) only renders links from the centralized blueprint so community members never see admin or staff-only destinations. Maintain that pattern whenever you introduce new menu links.
+- When scoping future admin features, hide the corresponding cards/sections unless the current profile passes the relevant gate from `portal-access.ts`. This mirrors the RLS-enforced server checks and prevents accidental privilege escalation.
+
 ## Marketing Site Follow-Up
 - After extraction, re-centre marketing copy on awareness, petitions, and contact info while pointing action CTAs to STEVI.
 - Maintain snapshot stats (read-only) on marketing pages using small fetchers or static content so the marketing app no longer needs heavy portal dependencies.
