@@ -2,9 +2,8 @@ import { redirect } from 'next/navigation';
 import { ensurePortalProfile } from '@/lib/profile';
 import type { PortalProfile } from '@/lib/profile';
 import { getIharcRoles, type IharcRole } from '@/lib/ihar-auth';
+import { INVENTORY_ALLOWED_ROLES } from '@/lib/inventory/constants';
 import type { SupabaseAnyServerClient } from '@/lib/supabase/types';
-
-export const INVENTORY_ALLOWED_ROLES: IharcRole[] = ['iharc_admin', 'iharc_supervisor', 'iharc_staff'];
 
 export type InventoryActorContext = {
   profile: PortalProfile;

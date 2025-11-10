@@ -13,7 +13,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { portalLinks } from '@/components/layout/portal-nav';
+import { getPublicPortalLinks } from '@/lib/portal-access';
 import { cn } from '@/lib/utils';
 import type { TopNavDropdownItem } from '@/components/layout/top-nav-dropdown';
 
@@ -41,6 +41,7 @@ export function TopNavMobile({ links, accountSection, quickAction }: TopNavMobil
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const onPortalRoute = pathname.startsWith('/portal');
+  const portalNavLinks = useMemo(() => getPublicPortalLinks(), []);
 
   type MobileMenuItem = {
     type: 'menu';
@@ -96,7 +97,7 @@ export function TopNavMobile({ links, accountSection, quickAction }: TopNavMobil
             {
               id: 'portal',
               title: 'Collaboration Portal',
-              items: portalLinks.map((link) => {
+              items: portalNavLinks.map((link) => {
                 const isActive = link.exact ? pathname === link.href : pathname.startsWith(link.href);
 
                 return {
@@ -110,7 +111,7 @@ export function TopNavMobile({ links, accountSection, quickAction }: TopNavMobil
           ]
         : []),
     ],
-    [links, onPortalRoute, pathname]
+    [links, onPortalRoute, pathname, portalNavLinks]
   );
 
   return (

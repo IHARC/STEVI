@@ -1,6 +1,6 @@
 import { ensurePortalProfile, type PortalProfile } from '@/lib/profile';
 import { getIharcRoles, type IharcRole } from '@/lib/ihar-auth';
-import { INVENTORY_ALLOWED_ROLES } from '@/lib/inventory/auth';
+import { INVENTORY_ALLOWED_ROLES } from '@/lib/inventory/constants';
 import type { SupabaseAnyServerClient } from '@/lib/supabase/types';
 
 export type PortalLink = {
@@ -117,6 +117,10 @@ export function resolvePortalNavLinks(access: PortalAccess | null): PortalLink[]
 const BASE_PORTAL_LINKS = PORTAL_NAV_BLUEPRINT.filter(
   (entry) => !entry.requiresProfileRoles && !entry.requiresIharcRoles,
 ).map(({ href, label, exact }) => ({ href, label, exact } satisfies PortalLink));
+
+export function getPublicPortalLinks(): PortalLink[] {
+  return BASE_PORTAL_LINKS.map((link) => ({ ...link }));
+}
 
 function dedupeLinks(links: PortalLink[]): PortalLink[] {
   const seen = new Set<string>();
