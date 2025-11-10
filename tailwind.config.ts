@@ -1,4 +1,5 @@
 import type { Config } from 'tailwindcss';
+import typographyPlugin from '@tailwindcss/typography';
 import animatePlugin from 'tailwindcss-animate';
 
 const materialColor = (token: string) => `rgb(var(${token}) / <alpha-value>)`;
@@ -419,7 +420,7 @@ const config: Config = {
       },
     },
   },
-  plugins: [animatePlugin],
+  plugins: [animatePlugin, typographyPlugin],
 };
 
 export default config;
