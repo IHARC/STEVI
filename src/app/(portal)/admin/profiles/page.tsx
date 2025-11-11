@@ -10,6 +10,38 @@ import type {
   PendingAffiliation,
   ProfileInviteSummary,
 } from '@/components/admin/profiles/types';
+import type { Database } from '@/types/supabase';
+
+type MaybeArray<T> = T | T[] | null;
+
+type OrganizationRow = Pick<
+  Database['portal']['Tables']['organizations']['Row'],
+  'id' | 'name' | 'category' | 'government_level' | 'verified'
+>;
+type OrganizationRelation = Pick<OrganizationRow, 'id' | 'name'>;
+type PendingProfileRow = Pick<
+  Database['portal']['Tables']['profiles']['Row'],
+  | 'id'
+  | 'display_name'
+  | 'position_title'
+  | 'affiliation_type'
+  | 'affiliation_status'
+  | 'affiliation_requested_at'
+  | 'organization_id'
+  | 'requested_organization_name'
+  | 'requested_government_name'
+  | 'requested_government_level'
+  | 'requested_government_role'
+  | 'government_role_type'
+> & {
+  organization: MaybeArray<OrganizationRelation>;
+};
+type ProfileInviteRow = Pick<
+  Database['portal']['Tables']['profile_invites']['Row'],
+  'id' | 'email' | 'display_name' | 'position_title' | 'affiliation_type' | 'status' | 'created_at'
+> & {
+  organization: MaybeArray<OrganizationRelation>;
+};
 
 export const dynamic = 'force-dynamic';
 
@@ -82,7 +114,8 @@ export default async function AdminProfilesPage() {
     throw invitesResponse.error;
   }
 
-  const organizations: OrganizationOption[] = (organizationsResponse.data ?? []).map((org) => ({
+  const organizationRows = (organizationsResponse.data ?? []) as OrganizationRow[];
+  const organizations: OrganizationOption[] = organizationRows.map((org) => ({
     id: org.id,
     name: org.name,
     category: org.category,
@@ -90,10 +123,11 @@ export default async function AdminProfilesPage() {
     verified: org.verified,
   }));
 
-  const pendingAffiliations: PendingAffiliation[] = (pendingResponse.data ?? []).map((entry) => {
+  const pendingRows = (pendingResponse.data ?? []) as PendingProfileRow[];
+  const pendingAffiliations: PendingAffiliation[] = pendingRows.map((entry) => {
     const organizationRelation = Array.isArray(entry.organization)
       ? entry.organization[0]
-      : entry.organization;
+      : entry.organization ?? null;
     return {
       id: entry.id,
       displayName: entry.display_name,
@@ -111,13 +145,15 @@ export default async function AdminProfilesPage() {
     };
   });
 
-  const recentInvites: ProfileInviteSummary[] = (invitesResponse.data ?? []).map((invite) => {
+  const inviteRows = (invitesResponse.data ?? []) as ProfileInviteRow[];
+  const recentInvites: ProfileInviteSummary[] = inviteRows.map((invite) => {
+    const email = invite.email ?? '';
     const organizationRelation = Array.isArray(invite.organization)
       ? invite.organization[0]
-      : invite.organization;
+      : invite.organization ?? null;
     return {
       id: invite.id,
-      email: invite.email,
+      email,
       displayName: invite.display_name,
       positionTitle: invite.position_title,
       affiliationType: invite.affiliation_type,

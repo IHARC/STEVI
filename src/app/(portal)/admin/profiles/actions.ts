@@ -226,7 +226,7 @@ export async function approveAffiliationAction(formData: FormData): Promise<Acti
 
     await syncOrgRepRole(portal, actorProfile.id, profileId, reviewedAt, elevateRole);
 
-    await supabase.rpc('portal_refresh_profile_claims', { p_profile_id: profileId }).catch((rpcError) => {
+    await supabase.rpc('portal_refresh_profile_claims', { p_profile_id: profileId }).catch((rpcError: unknown) => {
       console.warn('Failed to refresh profile claims', rpcError);
     });
 
@@ -298,7 +298,7 @@ export async function declineAffiliationAction(formData: FormData): Promise<Acti
 
     await syncOrgRepRole(portal, actorProfile.id, profileId, reviewedAt, false);
 
-    await supabase.rpc('portal_refresh_profile_claims', { p_profile_id: profileId }).catch((rpcError) => {
+    await supabase.rpc('portal_refresh_profile_claims', { p_profile_id: profileId }).catch((rpcError: unknown) => {
       console.warn('Failed to refresh profile claims', rpcError);
     });
 

@@ -7,6 +7,27 @@ import type {
   NotificationRecipient,
   NotificationRecord,
 } from '@/components/admin/notifications/types';
+import type { Database } from '@/types/supabase';
+
+type MaybeArray<T> = T | T[] | null;
+
+type OrganizationRelation = Pick<Database['portal']['Tables']['organizations']['Row'], 'name'>;
+type ContactRelation = Pick<
+  Database['portal']['Tables']['profile_contacts']['Row'],
+  'contact_type' | 'contact_value'
+>;
+
+type RecipientRow = Pick<
+  Database['portal']['Tables']['profiles']['Row'],
+  'id' | 'display_name' | 'affiliation_type'
+> & {
+  organization: MaybeArray<OrganizationRelation>;
+  contacts: MaybeArray<ContactRelation>;
+};
+
+type NotificationRow = Database['portal']['Tables']['notifications']['Row'] & {
+  profile: MaybeArray<Pick<Database['portal']['Tables']['profiles']['Row'], 'display_name'>>;
+};
 
 export const dynamic = 'force-dynamic';
 
@@ -68,12 +89,17 @@ export default async function NotificationsAdminPage() {
     throw notificationsResponse.error;
   }
 
-  const recipients: NotificationRecipient[] = (profilesResponse.data ?? []).map((row) => {
-    const contacts = Array.isArray(row.contacts) ? row.contacts : [];
+  const recipientRows = (profilesResponse.data ?? []) as RecipientRow[];
+  const recipients: NotificationRecipient[] = recipientRows.map((row) => {
+    const contacts = Array.isArray(row.contacts)
+      ? row.contacts
+      : row.contacts
+        ? [row.contacts]
+        : [];
     const emailContact = contacts.find((contact) => contact.contact_type === 'email');
     const organizationRelation = Array.isArray(row.organization)
       ? row.organization[0]
-      : row.organization;
+      : row.organization ?? null;
     return {
       id: row.id,
       displayName: row.display_name,
@@ -83,8 +109,9 @@ export default async function NotificationsAdminPage() {
     };
   });
 
-  const notifications: NotificationRecord[] = (notificationsResponse.data ?? []).map((row) => {
-    const profileRelation = Array.isArray(row.profile) ? row.profile[0] : row.profile;
+  const notificationRows = (notificationsResponse.data ?? []) as NotificationRow[];
+  const notifications: NotificationRecord[] = notificationRows.map((row) => {
+    const profileRelation = Array.isArray(row.profile) ? row.profile[0] : row.profile ?? null;
     return {
       id: row.id,
       profileId: row.profile_id,
