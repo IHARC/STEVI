@@ -116,7 +116,7 @@ export function InventoryLocationsSection({ locations, actorProfileId }: Invento
                 <TableCell>{location.code ?? '—'}</TableCell>
                 <TableCell>{location.type ?? '—'}</TableCell>
                 <TableCell>
-                  <span className={location.active ? 'text-green-600' : 'text-muted-foreground'}>
+                  <span className={location.active ? 'text-primary' : 'text-muted-foreground'}>
                     {location.active ? 'Active' : 'Inactive'}
                   </span>
                 </TableCell>

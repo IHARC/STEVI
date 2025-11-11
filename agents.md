@@ -41,9 +41,9 @@
 
 ### Phase 3 — Admin Workspace Migration (🚧 starting now)
 - Extract admin tools from marketing repo, re-scope to STEVI (all backed by Supabase mutations and audit logs):
-  - ☐ Profile verification & invitations (Supabase `portal.profiles`, `portal.profile_invites`, RLS-protected RPCs).
+  - ✅ Profile verification & invitations (Supabase `portal.profiles`, `portal.profile_invites`, RLS-protected RPCs).
   - ✅ Resource/report library management (`portal.resource_pages`, attachments, embed helpers) now managed in STEVI under `/admin/resources`. Marketing site continues to read published rows.
-  - ☐ Notifications queue + templates (`portal.notifications`, existing edge functions) to broadcast outreach updates.
+  - ✅ Notifications queue + templates (`portal.notifications`, existing edge functions) to broadcast outreach updates.
   - ☐ Metrics ingestion controls (if still required) and any governance settings surfaced to staff (`portal.metric_catalog`, `portal.metric_daily`, etc.).
 - Lock down the marketing app to read-only access patterns by exposing pre-approved SQL views or RPCs. Ensure STEVI admin revalidation triggers cover both apps (`/admin`, marketing routes, sitemap, etc.) so Supabase updates propagate everywhere.
 

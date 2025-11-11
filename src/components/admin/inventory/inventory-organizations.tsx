@@ -116,7 +116,7 @@ export function InventoryOrganizationsSection({ organizations, actorProfileId }:
                 <TableCell className="font-medium">{org.name}</TableCell>
                 <TableCell>{org.website ?? '—'}</TableCell>
                 <TableCell>
-                  <span className={org.isActive ? 'text-green-600' : 'text-muted-foreground'}>
+                  <span className={org.isActive ? 'text-primary' : 'text-muted-foreground'}>
                     {org.isActive ? 'Active' : 'Inactive'}
                   </span>
                 </TableCell>

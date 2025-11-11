@@ -200,7 +200,7 @@ export function InventoryItemsSection({ items, locations, organizations, categor
                   {item.minimumThreshold === null ? '—' : item.minimumThreshold.toLocaleString()}
                 </TableCell>
                 <TableCell className="text-right">
-                  <span className={item.active ? 'text-green-600' : 'text-muted-foreground'}>
+                  <span className={item.active ? 'text-primary' : 'text-muted-foreground'}>
                     {item.active ? 'Active' : 'Inactive'}
                   </span>
                 </TableCell>

@@ -36,6 +36,10 @@ Copy `.env.example` to `.env` and fill the required values. All variables prefix
 - **RPC / Functions**:
   - `portal_log_audit_event`, `portal_queue_notification`, and `portal_refresh_profile_claims` are key RPCs already in use.
   - Edge Function `portal-alerts` is invoked from `queuePortalNotification` when `PORTAL_ALERTS_SECRET` is configured. Keep the function source in the marketing repo until we consolidate deployment tooling.
+- **Admin workspaces**:
+  - `/admin/profiles` calls `portal.profiles`, `portal.profile_invites`, and `portal_refresh_profile_claims` to approve or decline partner access, logging every decision through `portal_log_audit_event`.
+  - Invitations now originate from STEVI via the `portal-admin-invite` Edge Function, keeping Supabase audit trails intact.
+  - `/admin/notifications` queues outreach updates by invoking `portal_queue_notification` and surfaces delivery history from `portal.notifications`.
 - **Storage**:
   - Secure documents live in the `portal-attachments` bucket (managed via Supabase storage policies).
 

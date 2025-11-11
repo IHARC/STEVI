@@ -26,9 +26,24 @@ const PORTAL_NAV_BLUEPRINT: PortalLinkBlueprint[] = [
     requiresProfileRoles: ['moderator', 'admin'],
   },
   {
+    href: '/admin/profiles',
+    label: 'Profile verification',
+    requiresProfileRoles: ['moderator', 'admin'],
+  },
+  {
+    href: '/admin/resources',
+    label: 'Resource library',
+    requiresProfileRoles: ['admin'],
+  },
+  {
     href: '/admin/inventory',
     label: 'Inventory workspace',
     requiresIharcRoles: INVENTORY_ALLOWED_ROLES,
+  },
+  {
+    href: '/admin/notifications',
+    label: 'Notifications',
+    requiresProfileRoles: ['admin'],
   },
 ];
 
@@ -140,12 +155,20 @@ export function buildUserMenuLinks(access: PortalAccess): PortalLink[] {
     links.push({ href: '/admin', label: 'Admin workspace' });
   }
 
+  if (access.canReviewProfiles) {
+    links.push({ href: '/admin/profiles', label: 'Profile verification' });
+  }
+
   if (access.canManageResources) {
     links.push({ href: '/admin/resources', label: 'Resource library' });
   }
 
   if (access.canAccessInventoryWorkspace) {
     links.push({ href: '/admin/inventory', label: 'Inventory workspace' });
+  }
+
+  if (access.canManageNotifications) {
+    links.push({ href: '/admin/notifications', label: 'Notifications' });
   }
 
   return dedupeLinks(links);

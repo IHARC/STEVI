@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
 export const dynamic = 'force-dynamic';
@@ -38,7 +38,7 @@ const adminTasks: AdminTask[] = [
     description:
       'Approve new agency and government partner requests so they can access STEVI documents and appointments.',
     actionLabel: 'Review pending profiles',
-    href: '#profiles',
+    href: '/admin/profiles',
   },
   {
     id: 'documents',
@@ -52,7 +52,7 @@ const adminTasks: AdminTask[] = [
     title: 'Notifications & outreach',
     description: 'Send appointment reminders or community alerts. Messages sync with STEVI Ops activity logs.',
     actionLabel: 'Compose message',
-    href: '#notifications',
+    href: '/admin/notifications',
   },
 ];
 
@@ -125,35 +125,54 @@ export default async function AdminPage() {
         </Card>
       </section>
 
-      <section id="profiles" className="grid gap-space-md md:grid-cols-2">
+      <section id="profiles" className="grid gap-space-md lg:grid-cols-2">
         <Card>
-          <CardHeader>
-            <CardTitle className="text-title-lg">Pending verifications</CardTitle>
-            <CardDescription>
-              Approve or decline agency and government affiliation requests submitted by portal members.
-            </CardDescription>
+          <CardHeader className="flex flex-col gap-space-sm">
+            <div>
+              <CardTitle className="text-title-lg">Verification workspace</CardTitle>
+              <CardDescription>
+                Review pending agency and government affiliations, assign organizations, and refresh role claims in one place.
+              </CardDescription>
+            </div>
           </CardHeader>
           <CardContent className="space-y-space-sm text-body-sm text-muted-foreground">
-            <p>Profile verification workflows will be migrated from the legacy portal shortly.</p>
             <p>
-              Until then, continue to process requests using STEVI Ops. We will backfill this queue in the next sprint.
+              Moderators can now approve or decline requests directly within STEVI. Approvals auto-refresh Supabase role claims,
+              revalidate caches, and log every decision for auditing.
             </p>
+            <ul className="list-disc space-y-space-xs pl-5">
+              <li>Assign verified community organizations or government teams before approving.</li>
+              <li>Automatically grant or revoke <code className="rounded bg-surface-container-low px-1">org_rep</code> roles.</li>
+              <li>Keep partner history tidy by clearing requested organization/government details after review.</li>
+            </ul>
           </CardContent>
+          <CardFooter>
+            <Button asChild variant="outline">
+              <Link href="/admin/profiles">Open verification workspace</Link>
+            </Button>
+          </CardFooter>
         </Card>
         <Card>
-          <CardHeader>
-            <CardTitle className="text-title-lg">Invitations</CardTitle>
-            <CardDescription>
-              Send new invitations to agency partners directly from STEVI and track their status.
-            </CardDescription>
+          <CardHeader className="flex flex-col gap-space-sm">
+            <div>
+              <CardTitle className="text-title-lg">Direct invitations</CardTitle>
+              <CardDescription>
+                Send secure invitations with optional context that lands in partners’ inboxes within seconds.
+              </CardDescription>
+            </div>
           </CardHeader>
           <CardContent className="space-y-space-sm text-body-sm text-muted-foreground">
             <p>
-              Invitation management is being migrated from the marketing repo. Documentation will land in{' '}
-              <code className="rounded bg-surface-container px-2 py-1">docs/admin/invitations.md</code>.
+              The invitation form now lives in STEVI. It invokes the <code className="rounded bg-surface-container-low px-1">portal-admin-invite</code>{' '}
+              Edge Function so Supabase audit logs stay intact and delivery mirrors the marketing site.
             </p>
-            <p>For now, continue to use the existing Supabase function or STEVI Ops interface.</p>
+            <p>Recent invitations appear alongside the form with status badges (pending, accepted, expired, cancelled) for quick follow-up.</p>
           </CardContent>
+          <CardFooter>
+            <Button asChild>
+              <Link href="/admin/profiles">Manage invites</Link>
+            </Button>
+          </CardFooter>
         </Card>
       </section>
 
@@ -185,14 +204,19 @@ export default async function AdminPage() {
           </CardHeader>
           <CardContent className="space-y-space-sm text-body-sm text-muted-foreground">
             <p>
-              We will migrate notification templates and delivery controls from the marketing repo. This section stays as
-              a placeholder until the stored procedures are exposed here.
+              The notifications workspace now lives in STEVI. It calls <code className="rounded bg-surface-container-low px-1">portal_queue_notification</code> and triggers the{' '}
+              <code className="rounded bg-surface-container-low px-1">portal-alerts</code> Edge Function automatically when delivery secrets are configured.
             </p>
             <p>
-              Remember to respect consent preferences captured on each profile. Use the profile page to confirm opt-in
-              status before sending alerts.
+              Compose messages with HTML or JSON payloads, respect each profile’s consent flags, and review delivery logs pulled straight from{' '}
+              <code className="rounded bg-surface-container-low px-1">portal.notifications</code>.
             </p>
           </CardContent>
+          <CardFooter>
+            <Button asChild variant="outline">
+              <Link href="/admin/notifications">Open notifications workspace</Link>
+            </Button>
+          </CardFooter>
         </Card>
       </section>
     </div>
