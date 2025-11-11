@@ -22,14 +22,17 @@ export function AnalyticsProvider({ measurementId, enabled = true }: AnalyticsPr
   const searchParams = useSearchParams();
   const search = useMemo(() => searchParams?.toString() ?? '', [searchParams]);
   const lastTrackedPathRef = useRef<string | null>(null);
-  const [consentState, setConsentState] = useState<ConsentState>(null);
+  const [consentState, setConsentState] = useState<ConsentState>(() => {
+    if (typeof window === 'undefined') {
+      return null;
+    }
+    return getStoredConsent();
+  });
 
   useEffect(() => {
     if (!enabled || !measurementId || typeof window === 'undefined') {
       return;
     }
-
-    setConsentState(getStoredConsent());
 
     const handler = (event: Event) => {
       const consentDetail = (event as CustomEvent<ConsentState>).detail;
