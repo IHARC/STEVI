@@ -16,8 +16,6 @@ type ActionResult<T = void> = { success: true; data?: T } | { success: false; er
 
 type GovernmentRoleType = Database['portal']['Enums']['government_role_type'];
 
-type ModeratorContext = Awaited<ReturnType<typeof loadModeratorContext>>;
-
 async function revalidateAdminPaths() {
   await Promise.all(ADMIN_PATHS.map((path) => revalidatePath(path)));
 }

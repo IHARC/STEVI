@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState, useTransition } from 'react';
+import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -50,7 +50,35 @@ function formatGovernmentLevel(value: string | null) {
   return GOV_LEVEL_LABELS[value] ?? value;
 }
 
-export function PendingAffiliationsSection({
+const createOrgSelectionMap = (pending: PendingAffiliation[]) =>
+  Object.fromEntries(pending.map((entry) => [entry.id, entry.organizationId ?? '']));
+
+const createGovRoleSelectionMap = (pending: PendingAffiliation[]) =>
+  Object.fromEntries(
+    pending.map((entry) => [
+      entry.id,
+      entry.requestedGovernmentRole ?? entry.governmentRoleType ?? 'staff',
+    ]),
+  );
+
+export function PendingAffiliationsSection(props: PendingAffiliationsSectionProps) {
+  const resetKey = useMemo(
+    () =>
+      JSON.stringify(
+        props.pending.map((entry) => ({
+          id: entry.id,
+          org: entry.organizationId ?? '',
+          govRole: entry.governmentRoleType ?? '',
+          requested: entry.requestedGovernmentRole ?? '',
+        })),
+      ),
+    [props.pending],
+  );
+
+  return <PendingAffiliationsContent key={resetKey} {...props} />;
+}
+
+function PendingAffiliationsContent({
   pending,
   actorProfileId,
   communityOrganizations,
@@ -59,20 +87,12 @@ export function PendingAffiliationsSection({
   const router = useRouter();
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
-  const [orgSelections, setOrgSelections] = useState<Record<string, string>>({});
-  const [govRoleSelections, setGovRoleSelections] = useState<Record<string, string>>({});
-
-  useEffect(() => {
-    setOrgSelections(Object.fromEntries(pending.map((entry) => [entry.id, entry.organizationId ?? ''])));
-    setGovRoleSelections(
-      Object.fromEntries(
-        pending.map((entry) => [
-          entry.id,
-          entry.requestedGovernmentRole ?? entry.governmentRoleType ?? 'staff',
-        ]),
-      ),
-    );
-  }, [pending]);
+  const [orgSelections, setOrgSelections] = useState<Record<string, string>>(() =>
+    createOrgSelectionMap(pending),
+  );
+  const [govRoleSelections, setGovRoleSelections] = useState<Record<string, string>>(() =>
+    createGovRoleSelectionMap(pending),
+  );
 
   const pendingCountLabel =
     pending.length === 1 ? '1 pending request' : `${pending.length} pending requests`;
