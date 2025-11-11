@@ -48,7 +48,7 @@ export function PartnerApplicationForm({
         <header>
           <p className="text-label-sm uppercase tracking-[0.12em] text-outline">Partner access</p>
           <h1 className="text-title-lg font-medium text-on-surface">Request partner verification</h1>
-          <p className="mt-space-xs text-body-sm text-muted">
+          <p className="mt-space-xs text-body-sm text-muted-foreground">
             Share your agency details so we can confirm the data-sharing agreement and scope your access appropriately.
           </p>
         </header>
@@ -108,7 +108,7 @@ export function PartnerApplicationForm({
             required
             placeholder="you@agency.ca"
           />
-          <p className="text-label-sm text-muted">
+          <p className="text-label-sm text-muted-foreground">
             Use a work email so our team can confirm your domain and agreement status quickly.
           </p>
         </div>
@@ -194,7 +194,7 @@ export function PartnerApplicationForm({
       </section>
 
       <div className="flex items-center justify-between gap-space-md">
-        <p className="text-label-sm text-muted">
+        <p className="text-label-sm text-muted-foreground">
           Partner access stays pending until IHARC staff review your application and confirm least-privilege scopes.
         </p>
         <SubmitButton isSuccess={isSuccess} />

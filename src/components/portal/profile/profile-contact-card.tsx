@@ -91,7 +91,7 @@ export function ProfileContactCard({
             defaultValue={initialEmail ?? ''}
             placeholder="you@example.ca"
           />
-          <p className="text-label-sm text-muted">
+          <p className="text-label-sm text-muted-foreground">
             We send verification, document links, and password reset emails here. Leave blank if you prefer phone updates only.
           </p>
         </div>
@@ -99,7 +99,7 @@ export function ProfileContactCard({
           <EmailSubmitButton />
           {emailState.message ? (
             <span
-              className={`text-body-sm ${emailState.status === 'success' ? 'text-primary' : 'text-muted'}`}
+              className={`text-body-sm ${emailState.status === 'success' ? 'text-primary' : 'text-muted-foreground'}`}
               role={emailState.status === 'success' ? 'status' : undefined}
             >
               {emailState.message}
@@ -132,7 +132,7 @@ export function ProfileContactCard({
             placeholder="+16475551234"
             disabled={phoneFieldDisabled}
           />
-          <p className="text-label-sm text-muted">
+          <p className="text-label-sm text-muted-foreground">
             Include your country code so we can text verification codes or urgent appointment updates.
           </p>
         </div>
@@ -149,7 +149,7 @@ export function ProfileContactCard({
               placeholder="123456"
               required
             />
-            <p className="text-label-sm text-muted">
+            <p className="text-label-sm text-muted-foreground">
               We texted a 6-digit code to {maskedPhone ?? 'your phone number'}. Codes expire after 5 minutes.
             </p>
           </div>
@@ -170,7 +170,7 @@ export function ProfileContactCard({
             </Button>
           ) : null}
           {!otpPending && phoneState.message && phoneState.status !== 'success' ? (
-            <span className="text-body-sm text-muted">{phoneState.message}</span>
+            <span className="text-body-sm text-muted-foreground">{phoneState.message}</span>
           ) : null}
         </div>
 

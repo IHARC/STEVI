@@ -14,6 +14,7 @@ import {
   CSRF_ERROR_MESSAGE,
 } from '@/lib/csrf';
 import type { Json } from '@/types/supabase';
+import { FormPageShell } from '@/components/layout/form-page-shell';
 
 export const dynamic = 'force-dynamic';
 
@@ -278,14 +279,14 @@ export default async function ClientIntakePage({ searchParams }: ClientIntakePag
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
+    <FormPageShell maxWidth="form-lg">
       <ClientIntakeForm
         action={submitIntake}
         initialState={CLIENT_INTAKE_INITIAL_STATE}
         nextPath={nextPath}
         csrfToken={csrfToken}
       />
-    </div>
+    </FormPageShell>
   );
 }
 

@@ -47,7 +47,7 @@ export function CommunityRegistrationForm({
         <header>
           <p className="text-label-sm uppercase tracking-[0.12em] text-outline">Neighbour updates</p>
           <h1 className="text-title-lg font-medium text-on-surface">Join as a community member</h1>
-          <p className="mt-space-xs text-body-sm text-muted">
+          <p className="mt-space-xs text-body-sm text-muted-foreground">
             Get email updates about IHARC programs, submit feedback, and follow progress on local initiatives.
           </p>
         </header>
@@ -90,7 +90,7 @@ export function CommunityRegistrationForm({
             required
             placeholder="you@example.ca"
           />
-          <p className="text-label-sm text-muted">
+          <p className="text-label-sm text-muted-foreground">
             We’ll send a confirmation email. You can manage notification preferences after signing in.
           </p>
         </div>
@@ -143,7 +143,7 @@ export function CommunityRegistrationForm({
       </section>
 
       <div className="flex items-center justify-between gap-space-md">
-        <p className="text-label-sm text-muted">You can unsubscribe from emails or delete your profile at any time.</p>
+        <p className="text-label-sm text-muted-foreground">You can unsubscribe from emails or delete your profile at any time.</p>
         <SubmitButton isSuccess={isSuccess} />
       </div>
     </form>

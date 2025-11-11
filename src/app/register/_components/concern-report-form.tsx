@@ -52,7 +52,7 @@ export function ConcernReportForm({
         <header>
           <p className="text-label-sm uppercase tracking-[0.12em] text-outline">Community concern</p>
           <h1 className="text-title-lg font-medium text-on-surface">Report a concern or share feedback</h1>
-          <p className="mt-space-xs text-body-sm text-muted">
+          <p className="mt-space-xs text-body-sm text-muted-foreground">
             We review every submission within two business days. If someone is in immediate danger, call 911. For
             non-emergency social and health navigation, contact{' '}
             <a
@@ -190,7 +190,7 @@ export function ConcernReportForm({
       </section>
 
       <div className="flex items-center justify-between gap-space-md">
-        <p className="text-label-sm text-muted">We log every submission and keep sensitive details private.</p>
+        <p className="text-label-sm text-muted-foreground">We log every submission and keep sensitive details private.</p>
         <SubmitButton isSuccess={isSuccess} />
       </div>
     </form>
@@ -214,7 +214,7 @@ function ContactOption({
       <RadioGroupItem id={`contact_preference_${value}`} value={value} className="mt-1" />
       <span>
         {title}
-        <span className="mt-space-2xs block text-label-sm font-normal text-muted">{description}</span>
+        <span className="mt-space-2xs block text-label-sm font-normal text-muted-foreground">{description}</span>
       </span>
     </label>
   );

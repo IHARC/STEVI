@@ -77,9 +77,9 @@ export function ClientClaimForm({
 
       <section className="space-y-4">
         <header>
-          <p className="text-label-sm uppercase tracking-wide text-outline">Link existing services</p>
+          <p className="text-label-sm uppercase tracking-[0.12em] text-outline">Link existing services</p>
           <h1 className="text-headline-sm font-semibold text-on-surface">Claim your IHARC record</h1>
-          <p className="mt-2 text-body-md text-muted">
+          <p className="mt-2 text-body-md text-muted-foreground">
             Share at least two pieces of information. We cross-check them securely so your record never gets duplicated.
           </p>
         </header>
@@ -109,7 +109,7 @@ export function ClientClaimForm({
             placeholder="1234-5678"
             autoComplete="one-time-code"
           />
-          <p className="text-label-sm text-muted">
+          <p className="text-label-sm text-muted-foreground">
             This 8-digit code appears on your intake paperwork. If you do not have it, share two other details below.
           </p>
         </div>
@@ -207,7 +207,7 @@ export function ClientClaimForm({
                 required
                 placeholder="+16475551234"
               />
-              <p className="text-label-sm text-muted">
+              <p className="text-label-sm text-muted-foreground">
                 Include the country code. We will text a verification link and never leave voicemail without consent.
               </p>
             </div>
@@ -279,7 +279,7 @@ export function ClientClaimForm({
       </section>
 
       <div className="flex items-center justify-between gap-4">
-        <p className="text-label-sm text-muted">
+        <p className="text-label-sm text-muted-foreground">
           Staff will review matches before sensitive records unlock. You’ll see confirmation on screen and by email/text.
         </p>
         <SubmitButton isSuccess={isSuccess} />
@@ -305,7 +305,7 @@ function ContactMethodOption({
       <RadioGroupItem id={`contact_method_${value}`} value={value} className="mt-1" />
       <span>
         {title}
-        <span className="mt-1 block text-label-sm font-normal text-muted">{description}</span>
+        <span className="mt-1 block text-label-sm font-normal text-muted-foreground">{description}</span>
       </span>
     </label>
   );

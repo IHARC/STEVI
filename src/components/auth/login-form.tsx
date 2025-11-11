@@ -91,13 +91,13 @@ export function LoginForm({ action, nextPath, initialState, csrfToken }: LoginFo
 
       <div className="space-y-space-sm">
         <SubmitButton />
-        <p className="text-body-sm text-muted">
+        <p className="text-body-sm text-muted-foreground">
           Forgot your password?{' '}
           <Link href="/reset-password" className="text-brand underline">
             Reset it here
           </Link>
         </p>
-        <p className="text-body-sm text-muted">
+        <p className="text-body-sm text-muted-foreground">
           Need an account?{' '}
           <Link href="/register" className="text-brand underline">
             Register here
@@ -124,7 +124,7 @@ function ContactOption({ id, value, title, description }: ContactOptionProps) {
       <RadioGroupItem id={id} value={value} className="mt-1" />
       <span>
         {title}
-        <span className="mt-space-2xs block text-label-sm font-normal text-muted">{description}</span>
+        <span className="mt-space-2xs block text-label-sm font-normal text-muted-foreground">{description}</span>
       </span>
     </label>
   );

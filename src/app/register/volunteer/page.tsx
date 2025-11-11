@@ -17,6 +17,7 @@ import {
   CSRF_ERROR_MESSAGE,
 } from '@/lib/csrf';
 import type { Json } from '@/types/supabase';
+import { FormPageShell } from '@/components/layout/form-page-shell';
 
 export const dynamic = 'force-dynamic';
 
@@ -185,13 +186,13 @@ export default async function VolunteerApplicationPage({ searchParams }: Volunte
   }
 
   return (
-    <div className="mx-auto w-full max-w-2xl px-4 py-16 sm:px-6 lg:px-8">
+    <FormPageShell maxWidth="form-lg">
       <VolunteerApplicationForm
         action={submitVolunteerApplication}
         initialState={VOLUNTEER_APPLICATION_INITIAL_STATE}
         nextPath={nextPath}
         csrfToken={csrfToken}
       />
-    </div>
+    </FormPageShell>
   );
 }

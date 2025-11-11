@@ -108,7 +108,7 @@ export function ResetPasswordForm({ action, initialState, csrfToken }: ResetPass
             required
             placeholder="you@example.ca"
           />
-          <p className="text-label-sm text-muted">We will email a secure link to update your password.</p>
+          <p className="text-label-sm text-muted-foreground">We will email a secure link to update your password.</p>
         </div>
       ) : (
         <>
@@ -128,7 +128,7 @@ export function ResetPasswordForm({ action, initialState, csrfToken }: ResetPass
               disabled={otpPending}
               required={!otpPending}
             />
-            <p className="text-label-sm text-muted">Include your country code so we can text you a verification code.</p>
+            <p className="text-label-sm text-muted-foreground">Include your country code so we can text you a verification code.</p>
           </div>
 
           {otpPending ? (
@@ -143,7 +143,7 @@ export function ResetPasswordForm({ action, initialState, csrfToken }: ResetPass
                 placeholder="123456"
                 required
               />
-              <p className="text-label-sm text-muted">
+              <p className="text-label-sm text-muted-foreground">
                 We texted a 6-digit code to {maskedPhone ?? 'your phone number'}. Codes expire after 5 minutes.
               </p>
             </div>
@@ -223,7 +223,7 @@ function ContactOption({ id, value, title, description }: ContactOptionProps) {
       <RadioGroupItem id={id} value={value} className="mt-1" />
       <span>
         {title}
-        <span className="mt-1 block text-label-sm font-normal text-muted">{description}</span>
+        <span className="mt-1 block text-label-sm font-normal text-muted-foreground">{description}</span>
       </span>
     </label>
   );

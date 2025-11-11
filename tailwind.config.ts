@@ -350,6 +350,9 @@ const config: Config = {
         'space-4xl': 'var(--md-sys-spacing-4xl)',
       },
       maxWidth: {
+        'form-sm': 'min(100%, 28rem)',
+        'form-md': 'min(100%, 36rem)',
+        'form-lg': 'min(100%, 48rem)',
         page: 'min(100%, var(--md-sys-layout-max-width))',
       },
       boxShadow: {

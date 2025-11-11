@@ -89,7 +89,7 @@ export function InvitePartnerCard({ actorProfileId, organizations, recentInvites
         <form ref={formRef} onSubmit={handleSubmit} className="grid gap-space-md">
           <div className="grid gap-space-sm md:grid-cols-2">
             <label className="grid gap-1 text-body-sm text-on-surface">
-              <span className="text-label-sm uppercase tracking-wide text-muted-foreground">Email</span>
+              <span className="text-label-sm uppercase tracking-[0.12em] text-muted-foreground">Email</span>
               <Input
                 name="invite_email"
                 type="email"
@@ -99,7 +99,7 @@ export function InvitePartnerCard({ actorProfileId, organizations, recentInvites
               />
             </label>
             <label className="grid gap-1 text-body-sm text-on-surface">
-              <span className="text-label-sm uppercase tracking-wide text-muted-foreground">
+              <span className="text-label-sm uppercase tracking-[0.12em] text-muted-foreground">
                 Display name (optional)
               </span>
               <Input name="invite_display_name" placeholder="Public display name" disabled={isPending} />
@@ -107,7 +107,7 @@ export function InvitePartnerCard({ actorProfileId, organizations, recentInvites
           </div>
           <div className="grid gap-space-sm md:grid-cols-2">
             <label className="grid gap-1 text-body-sm text-on-surface">
-              <span className="text-label-sm uppercase tracking-wide text-muted-foreground">
+              <span className="text-label-sm uppercase tracking-[0.12em] text-muted-foreground">
                 Position or role (optional)
               </span>
               <Input
@@ -117,7 +117,7 @@ export function InvitePartnerCard({ actorProfileId, organizations, recentInvites
               />
             </label>
             <label className="grid gap-1 text-body-sm text-on-surface">
-              <span className="text-label-sm uppercase tracking-wide text-muted-foreground">
+              <span className="text-label-sm uppercase tracking-[0.12em] text-muted-foreground">
                 Affiliation type
               </span>
               <select
@@ -136,7 +136,7 @@ export function InvitePartnerCard({ actorProfileId, organizations, recentInvites
           </div>
           <div className="grid gap-space-sm md:grid-cols-[minmax(0,1fr)_200px] md:items-end">
             <label className="grid gap-1 text-body-sm text-on-surface">
-              <span className="text-label-sm uppercase tracking-wide text-muted-foreground">
+              <span className="text-label-sm uppercase tracking-[0.12em] text-muted-foreground">
                 Organization (optional)
               </span>
               <select
@@ -159,7 +159,7 @@ export function InvitePartnerCard({ actorProfileId, organizations, recentInvites
             </Button>
           </div>
           <label className="grid gap-1 text-body-sm text-on-surface">
-            <span className="text-label-sm uppercase tracking-wide text-muted-foreground">
+            <span className="text-label-sm uppercase tracking-[0.12em] text-muted-foreground">
               Message (optional)
             </span>
             <Textarea
@@ -173,7 +173,7 @@ export function InvitePartnerCard({ actorProfileId, organizations, recentInvites
 
         {recentInvites.length ? (
           <div className="space-y-space-sm">
-            <p className="text-label-sm uppercase tracking-wide text-muted-foreground">Recent invites</p>
+            <p className="text-label-sm uppercase tracking-[0.12em] text-muted-foreground">Recent invites</p>
             <ul className="divide-y divide-outline/20 rounded-[var(--md-sys-shape-corner-medium)] border border-outline/30">
               {recentInvites.map((invite) => (
                 <li key={invite.id} className="flex flex-col gap-space-xs px-space-md py-space-sm sm:flex-row sm:items-center sm:justify-between">
@@ -192,7 +192,7 @@ export function InvitePartnerCard({ actorProfileId, organizations, recentInvites
                   <div className="flex flex-col items-start gap-1 text-label-sm text-muted-foreground sm:items-end">
                     <Badge
                       variant={invite.status === 'pending' ? 'secondary' : 'outline'}
-                      className="uppercase tracking-wide"
+                      className="uppercase tracking-[0.12em]"
                     >
                       {STATUS_LABELS[invite.status]}
                     </Badge>

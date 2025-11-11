@@ -82,9 +82,9 @@ export function ClientIntakeForm({
 
       <section className="space-y-space-md">
         <header>
-          <p className="text-label-sm uppercase tracking-wide text-outline">New client intake</p>
+          <p className="text-label-sm uppercase tracking-[0.12em] text-outline">New client intake</p>
           <h1 className="text-headline-sm font-semibold text-on-surface">Tell us how to keep you safe</h1>
-          <p className="mt-space-xs text-body-md text-muted">
+          <p className="mt-space-xs text-body-md text-muted-foreground">
             Every field is optional unless labelled required. Share only what feels right today — you can update details
             with your outreach team later.
           </p>
@@ -172,7 +172,7 @@ export function ClientIntakeForm({
               required={contactChoice === 'phone' || contactChoice === 'both'}
               placeholder="+16475551234"
             />
-            <p className="text-label-sm text-muted">Include your country code so we can text verification codes if needed.</p>
+            <p className="text-label-sm text-muted-foreground">Include your country code so we can text verification codes if needed.</p>
           </div>
         )}
 
@@ -251,7 +251,7 @@ export function ClientIntakeForm({
 
         <fieldset className="space-y-space-sm rounded-xl border border-outline/30 p-space-md">
           <legend className="text-title-sm font-semibold text-on-surface">Optional demographic details</legend>
-          <p className="text-body-sm text-muted">
+          <p className="text-body-sm text-muted-foreground">
             These questions help IHARC report on equity outcomes. Share only what feels right — skipping them never
             impacts services.
           </p>
@@ -361,7 +361,7 @@ export function ClientIntakeForm({
 
       <div className="flex items-center justify-between gap-space-md">
         <div>
-          <p className="text-body-sm text-muted">
+          <p className="text-body-sm text-muted-foreground">
             We’ll email or text a confirmation as soon as possible. Staff can also look you up with your name and code.
           </p>
           {state.warnings?.length ? (
@@ -387,7 +387,7 @@ function ContactOption({ value, title, description }: { value: ContactChoice; ti
       <RadioGroupItem id={`contact_choice_${value}`} value={value} className="mt-space-2xs" />
       <span className="text-title-sm font-medium">
         {title}
-        <span className="mt-space-2xs block text-body-sm font-normal text-muted">{description}</span>
+        <span className="mt-space-2xs block text-body-sm font-normal text-muted-foreground">{description}</span>
       </span>
     </label>
   );

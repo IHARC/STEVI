@@ -339,7 +339,7 @@ function AffiliationOption({ id, value, title, description }: AffiliationOptionP
       <RadioGroupItem id={id} value={value} className="mt-1" />
       <span>
         {title}
-        <span className="mt-space-2xs block text-label-sm font-normal text-muted">{description}</span>
+        <span className="mt-space-2xs block text-label-sm font-normal text-muted-foreground">{description}</span>
       </span>
     </label>
   );

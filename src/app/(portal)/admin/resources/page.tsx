@@ -67,11 +67,11 @@ export default async function AdminResourcesPage() {
   const draftCount = resources.length - publishedCount;
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10">
-      <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-2">
-          <p className="text-body-md font-medium uppercase tracking-wide text-muted-foreground">Resource library</p>
-          <h1 className="text-headline-md font-semibold text-on-surface sm:text-headline-lg">
+    <div className="page-shell page-stack">
+      <header className="flex flex-col gap-space-sm sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-space-xs">
+          <p className="text-label-sm font-medium uppercase tracking-[0.12em] text-muted-foreground">Resource library</p>
+          <h1 className="text-headline-lg text-on-surface sm:text-display-sm">
             Manage public resources and reports
           </h1>
           <p className="max-w-3xl text-body-md text-muted-foreground sm:text-body-lg">
@@ -84,7 +84,7 @@ export default async function AdminResourcesPage() {
         </Button>
       </header>
 
-      <section className="grid gap-4 sm:grid-cols-2">
+      <section className="grid gap-space-md sm:grid-cols-2">
         <Card className="border-outline/20 bg-surface-container">
           <CardHeader>
             <CardTitle className="text-body-lg text-muted-foreground">Published resources</CardTitle>
@@ -109,7 +109,7 @@ export default async function AdminResourcesPage() {
         </Card>
       </section>
 
-      <section>
+      <section className="space-y-space-md">
         {resources.length === 0 ? (
           <Card className="border-outline/20 bg-surface-container">
             <CardHeader>
@@ -142,7 +142,7 @@ export default async function AdminResourcesPage() {
                 {resources.map((resource) => (
                   <TableRow key={resource.id} className="bg-transparent">
                     <TableCell>
-                      <div className="flex flex-col gap-1">
+                      <div className="flex flex-col gap-space-2xs">
                         <span className="font-medium text-on-surface">{resource.title}</span>
                         <span className="text-label-sm text-muted-foreground">/{resource.slug}</span>
                       </div>
@@ -156,7 +156,7 @@ export default async function AdminResourcesPage() {
                     <TableCell>{formatPublishedDate(resource.datePublished)}</TableCell>
                     <TableCell>{formatUpdatedDate(resource.updatedAt)}</TableCell>
                     <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
+                      <div className="flex items-center justify-end gap-space-xs">
                         <Button asChild variant="outline" size="sm">
                           <Link href={`/admin/resources/${resource.slug}`}>Edit</Link>
                         </Button>

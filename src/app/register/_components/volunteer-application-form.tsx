@@ -48,7 +48,7 @@ export function VolunteerApplicationForm({
         <header>
           <p className="text-label-sm uppercase tracking-[0.12em] text-outline">Volunteer onboarding</p>
           <h1 className="text-title-lg font-medium text-on-surface">Apply as a volunteer</h1>
-          <p className="mt-space-xs text-body-sm text-muted">
+          <p className="mt-space-xs text-body-sm text-muted-foreground">
             Tell us how you’d like to help neighbours. We’ll reach out about orientation, background checks, and shifts.
           </p>
         </header>
@@ -161,7 +161,7 @@ export function VolunteerApplicationForm({
       </section>
 
       <div className="flex items-center justify-between gap-space-md">
-        <p className="text-label-sm text-muted">
+        <p className="text-label-sm text-muted-foreground">
           Volunteers receive limited access until screening and training are complete. You can withdraw at any time.
         </p>
         <SubmitButton isSuccess={isSuccess} />

@@ -17,10 +17,10 @@ export default async function InventoryAdminPage() {
   const bootstrap = await fetchInventoryBootstrap(supabase);
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-10">
-      <header className="space-y-2">
-        <p className="text-body-md font-medium uppercase tracking-wide text-muted-foreground">Inventory</p>
-        <h1 className="text-headline-md font-semibold text-on-surface sm:text-headline-lg">Inventory workspace</h1>
+    <div className="page-shell page-stack">
+      <header className="flex flex-col gap-space-xs">
+        <p className="text-label-sm font-medium uppercase tracking-[0.12em] text-muted-foreground">Inventory</p>
+        <h1 className="text-headline-lg text-on-surface sm:text-display-sm">Inventory workspace</h1>
         <p className="max-w-3xl text-body-md text-muted-foreground sm:text-body-lg">
           Manage stock across IHARC locations, attribute incoming donations, and keep reconciliation aligned with outreach teams.
         </p>

@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { ArrowRight, FileQuestion, HandHeart, LogIn, UsersRound, UserPlus } from 'lucide-react';
 import { resolveNextPath } from '@/lib/auth';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
+import { FormPageShell } from '@/components/layout/form-page-shell';
 
 export const dynamic = 'force-dynamic';
 
@@ -76,17 +77,13 @@ export default async function RegisterLandingPage({ searchParams }: RegisterLand
   }
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-16 sm:px-6 lg:px-8">
-      <header className="mb-10 max-w-3xl space-y-4">
-        <p className="text-label-sm uppercase tracking-wide text-outline">IHARC Portal</p>
-        <h1 className="text-headline-lg font-semibold tracking-tight text-on-surface">What do you want to do today?</h1>
-        <p className="text-body-lg text-muted">
-          Pick the option that best matches what you need right now. Every path keeps your information private and
-          honours your contact safety preferences.
-        </p>
-      </header>
-
-      <div className="grid gap-5 md:grid-cols-2">
+    <FormPageShell
+      eyebrow="IHARC portal"
+      title="What do you want to do today?"
+      description="Pick the option that best matches what you need right now. Every path keeps your information private and honours your contact safety preferences."
+      maxWidth="xl"
+    >
+      <div className="grid gap-space-md md:grid-cols-2">
         {ACTIONS.map(({ title, description, href, icon: Icon }) => (
           <Link
             key={title}
@@ -98,7 +95,7 @@ export default async function RegisterLandingPage({ searchParams }: RegisterLand
                 <Icon className="h-5 w-5" aria-hidden />
               </span>
               <h2 className="text-title-lg font-semibold text-on-surface">{title}</h2>
-              <p className="text-body-md text-muted">{description}</p>
+              <p className="text-body-md text-muted-foreground">{description}</p>
             </div>
             <span className="mt-6 inline-flex items-center text-body-md font-medium text-primary">
               Continue
@@ -107,7 +104,7 @@ export default async function RegisterLandingPage({ searchParams }: RegisterLand
           </Link>
         ))}
       </div>
-    </div>
+    </FormPageShell>
   );
 }
 

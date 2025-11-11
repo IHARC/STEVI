@@ -79,7 +79,7 @@ export function ComposeNotificationForm({ actorProfileId, recipients }: ComposeN
           <input type="hidden" name="recipient_profile_id" value={selectedRecipient} />
           <div className="grid gap-space-sm md:grid-cols-2">
             <Label className="grid gap-1 text-body-sm text-on-surface">
-              <span className="text-label-sm uppercase tracking-wide text-muted-foreground">
+              <span className="text-label-sm uppercase tracking-[0.12em] text-muted-foreground">
                 Recipient
               </span>
               <select
@@ -98,7 +98,7 @@ export function ComposeNotificationForm({ actorProfileId, recipients }: ComposeN
               </select>
             </Label>
             <Label className="grid gap-1 text-body-sm text-on-surface">
-              <span className="text-label-sm uppercase tracking-wide text-muted-foreground">
+              <span className="text-label-sm uppercase tracking-[0.12em] text-muted-foreground">
                 Notification type
               </span>
               <select
@@ -118,7 +118,7 @@ export function ComposeNotificationForm({ actorProfileId, recipients }: ComposeN
 
           <div className="grid gap-space-sm md:grid-cols-2">
             <Label className="grid gap-1 text-body-sm text-on-surface">
-              <span className="text-label-sm uppercase tracking-wide text-muted-foreground">
+              <span className="text-label-sm uppercase tracking-[0.12em] text-muted-foreground">
                 Recipient email override
               </span>
               <Input
@@ -131,7 +131,7 @@ export function ComposeNotificationForm({ actorProfileId, recipients }: ComposeN
               />
             </Label>
             <Label className="grid gap-1 text-body-sm text-on-surface">
-              <span className="text-label-sm uppercase tracking-wide text-muted-foreground">
+              <span className="text-label-sm uppercase tracking-[0.12em] text-muted-foreground">
                 Payload (JSON, optional)
               </span>
               <Textarea
@@ -144,12 +144,12 @@ export function ComposeNotificationForm({ actorProfileId, recipients }: ComposeN
           </div>
 
           <Label className="grid gap-1 text-body-sm text-on-surface">
-            <span className="text-label-sm uppercase tracking-wide text-muted-foreground">Subject</span>
+            <span className="text-label-sm uppercase tracking-[0.12em] text-muted-foreground">Subject</span>
             <Input name="subject" placeholder="Reminder: upcoming appointment" required disabled={isPending} />
           </Label>
 
           <Label className="grid gap-1 text-body-sm text-on-surface">
-            <span className="text-label-sm uppercase tracking-wide text-muted-foreground">
+            <span className="text-label-sm uppercase tracking-[0.12em] text-muted-foreground">
               Plain text body
             </span>
             <Textarea
@@ -162,7 +162,7 @@ export function ComposeNotificationForm({ actorProfileId, recipients }: ComposeN
           </Label>
 
           <Label className="grid gap-1 text-body-sm text-on-surface">
-            <span className="text-label-sm uppercase tracking-wide text-muted-foreground">
+            <span className="text-label-sm uppercase tracking-[0.12em] text-muted-foreground">
               HTML body (optional)
             </span>
             <Textarea

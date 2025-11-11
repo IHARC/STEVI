@@ -49,7 +49,7 @@ export function MobileAccountNav({
         </div>
       </div>
       {awaitingVerification || affiliationRevoked ? (
-        <div className="mt-3 flex flex-wrap gap-2 text-label-sm font-semibold uppercase tracking-wide">
+        <div className="mt-3 flex flex-wrap gap-2 text-label-sm font-semibold uppercase tracking-[0.12em]">
           {awaitingVerification ? (
             <span className="inline-flex rounded-full bg-primary/10 px-2 py-1 text-primary">
               Awaiting verification
@@ -70,7 +70,7 @@ export function MobileAccountNav({
             className="inline-flex w-full items-center justify-between rounded-full border border-outline/20 bg-surface px-4 py-2 text-body-md font-semibold text-on-surface/90 transition hover:border-primary/40 hover:bg-primary/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
           >
             <span>{item.label}</span>
-            <span className="text-label-sm font-medium uppercase tracking-wide text-on-surface/60">
+            <span className="text-label-sm font-medium uppercase tracking-[0.12em] text-on-surface/60">
               Open
             </span>
           </Link>

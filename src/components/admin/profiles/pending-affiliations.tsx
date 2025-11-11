@@ -141,7 +141,7 @@ export function PendingAffiliationsSection({
             away.
           </CardDescription>
         </div>
-        <Badge variant="outline" className="self-start text-label-sm uppercase tracking-wide">
+        <Badge variant="outline" className="self-start text-label-sm uppercase tracking-[0.12em]">
           {pendingCountLabel}
         </Badge>
       </CardHeader>
@@ -194,7 +194,7 @@ export function PendingAffiliationsSection({
                 <div className="mt-space-md flex flex-col gap-space-sm border-t border-outline/20 pt-space-sm lg:flex-row lg:items-end lg:justify-between">
                   <div className="grid gap-space-sm lg:grid-cols-[minmax(0,320px)_auto] lg:items-end lg:gap-space-md">
                     <label className="grid gap-1 text-body-sm text-on-surface">
-                      <span className="text-label-sm uppercase tracking-wide text-muted-foreground">
+                      <span className="text-label-sm uppercase tracking-[0.12em] text-muted-foreground">
                         Approved organization
                       </span>
                       <select
@@ -215,7 +215,7 @@ export function PendingAffiliationsSection({
                     </label>
                     {entry.affiliationType === 'government_partner' ? (
                       <label className="grid gap-1 text-body-sm text-on-surface">
-                        <span className="text-label-sm uppercase tracking-wide text-muted-foreground">
+                        <span className="text-label-sm uppercase tracking-[0.12em] text-muted-foreground">
                           Role type
                         </span>
                         <select

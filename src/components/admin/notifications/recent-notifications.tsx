@@ -79,7 +79,7 @@ export function RecentNotifications({ notifications }: RecentNotificationsProps)
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-label-sm uppercase tracking-wide text-muted-foreground">
+                  <TableCell className="text-label-sm uppercase tracking-[0.12em] text-muted-foreground">
                     {notification.notificationType}
                   </TableCell>
                   <TableCell>
