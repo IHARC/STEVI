@@ -23,12 +23,14 @@ type PartnerApplicationFormProps = {
   action: (state: PartnerApplicationState, formData: FormData) => Promise<PartnerApplicationState>;
   initialState?: PartnerApplicationState;
   nextPath: string;
+  csrfToken: string;
 };
 
 export function PartnerApplicationForm({
   action,
   initialState = PARTNER_APPLICATION_INITIAL_STATE,
   nextPath,
+  csrfToken,
 }: PartnerApplicationFormProps) {
   const [state, formAction] = useActionState(action, initialState);
   const isSuccess = state.status === 'success';
@@ -40,6 +42,7 @@ export function PartnerApplicationForm({
       noValidate
     >
       <input type="hidden" name="next" value={nextPath} />
+      <input type="hidden" name="csrf_token" value={csrfToken} />
 
       <section className="space-y-space-sm">
         <header>

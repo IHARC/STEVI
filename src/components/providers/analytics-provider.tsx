@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Script from 'next/script';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { trackClientEvent } from '@/lib/telemetry';
@@ -15,14 +15,35 @@ type AnalyticsWindow = Window & {
   gtag?: (...args: unknown[]) => void;
 };
 
+type ConsentState = 'granted' | 'denied' | null;
+
 export function AnalyticsProvider({ measurementId, enabled = true }: AnalyticsProviderProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const search = useMemo(() => searchParams?.toString() ?? '', [searchParams]);
   const lastTrackedPathRef = useRef<string | null>(null);
+  const [consentState, setConsentState] = useState<ConsentState>(null);
 
   useEffect(() => {
     if (!enabled || !measurementId || typeof window === 'undefined') {
+      return;
+    }
+
+    setConsentState(getStoredConsent());
+
+    const handler = (event: Event) => {
+      const consentDetail = (event as CustomEvent<ConsentState>).detail;
+      if (consentDetail === 'granted' || consentDetail === 'denied') {
+        setConsentState(consentDetail);
+      }
+    };
+
+    window.addEventListener('iharc-consent-change', handler);
+    return () => window.removeEventListener('iharc-consent-change', handler);
+  }, [enabled, measurementId]);
+
+  useEffect(() => {
+    if (!enabled || !measurementId || consentState !== 'granted' || typeof window === 'undefined') {
       return;
     }
 
@@ -63,9 +84,9 @@ export function AnalyticsProvider({ measurementId, enabled = true }: AnalyticsPr
     });
 
     trackClientEvent('page_view', payload);
-  }, [enabled, measurementId, pathname, search]);
+  }, [enabled, measurementId, pathname, search, consentState]);
 
-  if (!enabled || !measurementId) {
+  if (!enabled || !measurementId || consentState !== 'granted') {
     return null;
   }
 
@@ -87,40 +108,14 @@ export function AnalyticsProvider({ measurementId, enabled = true }: AnalyticsPr
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               window.gtag = window.gtag || gtag;
-
-              var consentDefaults = {
+              gtag('consent', 'default', {
                 ad_storage: 'granted',
                 analytics_storage: 'granted',
                 ad_user_data: 'granted',
                 ad_personalization: 'granted',
                 wait_for_update: 500,
-              };
-
-              try {
-                var storedConsent = window.localStorage.getItem(consentKey);
-                if (storedConsent === 'granted') {
-                  consentDefaults = {
-                    ad_storage: 'granted',
-                    analytics_storage: 'granted',
-                    ad_user_data: 'granted',
-                    ad_personalization: 'granted',
-                    wait_for_update: 500,
-                  };
-                } else if (storedConsent === 'denied') {
-                  consentDefaults = {
-                    ad_storage: 'denied',
-                    analytics_storage: 'denied',
-                    ad_user_data: 'denied',
-                    ad_personalization: 'denied',
-                    wait_for_update: 500,
-                  };
-                }
-              } catch (error) {
-                // Ignore storage access issues
-              }
-
-              gtag('consent', 'default', consentDefaults);
-              gtag('set', 'ads_data_redaction', consentDefaults.ad_storage === 'denied');
+              });
+              gtag('set', 'ads_data_redaction', false);
               gtag('js', new Date());
               gtag('config', measurementId, { anonymize_ip: true });
             })();
@@ -129,4 +124,16 @@ export function AnalyticsProvider({ measurementId, enabled = true }: AnalyticsPr
       />
     </>
   );
+}
+
+function getStoredConsent(): ConsentState {
+  try {
+    const stored = window.localStorage.getItem('iharc-consent-preference');
+    if (stored === 'granted' || stored === 'denied') {
+      return stored;
+    }
+  } catch {
+    // ignore
+  }
+  return null;
 }

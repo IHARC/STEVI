@@ -9,6 +9,12 @@ import { emptyToNull } from '@/lib/registration';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
+import {
+  getOrCreateCsrfToken,
+  validateCsrfFromForm,
+  InvalidCsrfTokenError,
+  CSRF_ERROR_MESSAGE,
+} from '@/lib/csrf';
 import type { Json } from '@/types/supabase';
 
 export const dynamic = 'force-dynamic';
@@ -32,11 +38,22 @@ export default async function CommunityRegistrationPage({ searchParams }: Commun
     redirect(nextPath);
   }
 
+  const csrfToken = await getOrCreateCsrfToken();
+
   async function registerCommunityMember(
     prevState: CommunityRegistrationState,
     formData: FormData,
   ): Promise<CommunityRegistrationState> {
     'use server';
+
+    try {
+      await validateCsrfFromForm(formData);
+    } catch (error) {
+      if (error instanceof InvalidCsrfTokenError) {
+        return { status: 'idle', error: CSRF_ERROR_MESSAGE };
+      }
+      throw error;
+    }
 
     const displayName = emptyToNull(formData.get('display_name')) ?? '';
     const email = emptyToNull((formData.get('email') as string | null)?.toLowerCase() ?? null);
@@ -158,6 +175,7 @@ export default async function CommunityRegistrationPage({ searchParams }: Commun
         action={registerCommunityMember}
         initialState={COMMUNITY_REGISTRATION_INITIAL_STATE}
         nextPath={nextPath}
+        csrfToken={csrfToken}
       />
     </div>
   );

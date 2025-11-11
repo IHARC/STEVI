@@ -5,6 +5,12 @@ import {
   UpdateRecoveredPasswordForm,
   type UpdateRecoveredPasswordState,
 } from '@/components/auth/update-password-form';
+import {
+  getOrCreateCsrfToken,
+  validateCsrfFromForm,
+  InvalidCsrfTokenError,
+  CSRF_ERROR_MESSAGE,
+} from '@/lib/csrf';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,11 +28,22 @@ export default async function ResetPasswordUpdatePage() {
     redirect('/login?error=reset_session');
   }
 
+  const csrfToken = await getOrCreateCsrfToken();
+
   async function finalizePasswordReset(
     _prevState: UpdateRecoveredPasswordState,
     formData: FormData,
   ): Promise<UpdateResult> {
     'use server';
+
+    try {
+      await validateCsrfFromForm(formData);
+    } catch (error) {
+      if (error instanceof InvalidCsrfTokenError) {
+        return { status: 'idle', error: CSRF_ERROR_MESSAGE };
+      }
+      throw error;
+    }
 
     const supa = await createSupabaseServerClient();
     const {
@@ -68,5 +85,5 @@ export default async function ResetPasswordUpdatePage() {
     }
   }
 
-  return <UpdateRecoveredPasswordForm action={finalizePasswordReset} initialState={INITIAL_STATE} />;
+  return <UpdateRecoveredPasswordForm action={finalizePasswordReset} initialState={INITIAL_STATE} csrfToken={csrfToken} />;
 }

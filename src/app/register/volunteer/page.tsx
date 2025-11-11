@@ -10,6 +10,12 @@ import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
 import { normalizePhoneNumber } from '@/lib/phone';
+import {
+  getOrCreateCsrfToken,
+  validateCsrfFromForm,
+  InvalidCsrfTokenError,
+  CSRF_ERROR_MESSAGE,
+} from '@/lib/csrf';
 import type { Json } from '@/types/supabase';
 
 export const dynamic = 'force-dynamic';
@@ -33,11 +39,22 @@ export default async function VolunteerApplicationPage({ searchParams }: Volunte
     redirect(nextPath);
   }
 
+  const csrfToken = await getOrCreateCsrfToken();
+
   async function submitVolunteerApplication(
     prevState: VolunteerApplicationState,
     formData: FormData,
   ): Promise<VolunteerApplicationState> {
     'use server';
+
+    try {
+      await validateCsrfFromForm(formData);
+    } catch (error) {
+      if (error instanceof InvalidCsrfTokenError) {
+        return { status: 'idle', error: CSRF_ERROR_MESSAGE };
+      }
+      throw error;
+    }
 
     const fullName = emptyToNull(formData.get('full_name')) ?? '';
     const pronouns = emptyToNull(formData.get('pronouns'));
@@ -173,6 +190,7 @@ export default async function VolunteerApplicationPage({ searchParams }: Volunte
         action={submitVolunteerApplication}
         initialState={VOLUNTEER_APPLICATION_INITIAL_STATE}
         nextPath={nextPath}
+        csrfToken={csrfToken}
       />
     </div>
   );

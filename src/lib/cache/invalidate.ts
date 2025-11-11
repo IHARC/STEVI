@@ -1,6 +1,8 @@
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { CACHE_TAGS } from './tags';
 
+const IMMEDIATE_CACHE_LIFE = { expire: 0 } as const;
+
 type InvalidateOptions = {
   ideaId?: string;
   planSlug?: string;
@@ -25,7 +27,7 @@ export async function invalidateIdeaCaches(options: InvalidateOptions = {}) {
   }
 
   for (const tag of tags) {
-    await revalidateTag(tag, 'max');
+    await revalidateTag(tag, IMMEDIATE_CACHE_LIFE);
   }
 
   if (options.paths) {
@@ -36,7 +38,7 @@ export async function invalidateIdeaCaches(options: InvalidateOptions = {}) {
 }
 
 export async function invalidateMetricCaches() {
-  await revalidateTag(CACHE_TAGS.metrics, 'max');
+  await revalidateTag(CACHE_TAGS.metrics, IMMEDIATE_CACHE_LIFE);
 }
 
 export async function invalidatePlanCaches(options: InvalidateOptions = {}) {
@@ -53,7 +55,7 @@ export async function invalidatePlanCaches(options: InvalidateOptions = {}) {
   }
 
   for (const tag of tags) {
-    await revalidateTag(tag, 'max');
+    await revalidateTag(tag, IMMEDIATE_CACHE_LIFE);
   }
 
   if (options.paths) {
@@ -73,7 +75,7 @@ export async function invalidateMythCaches(options: Omit<InvalidateOptions, 'ide
   }
 
   for (const tag of tags) {
-    await revalidateTag(tag, 'max');
+    await revalidateTag(tag, IMMEDIATE_CACHE_LIFE);
   }
 
   if (options.paths) {
@@ -97,7 +99,7 @@ export async function invalidatePitCaches(options: Omit<InvalidateOptions, 'idea
   }
 
   for (const tag of tags) {
-    await revalidateTag(tag, 'max');
+    await revalidateTag(tag, IMMEDIATE_CACHE_LIFE);
   }
 
   if (options.paths) {
@@ -117,7 +119,7 @@ export async function invalidatePetitionCaches(slug: string, options: Omit<Inval
   }
 
   for (const tag of tags) {
-    await revalidateTag(tag, 'max');
+    await revalidateTag(tag, IMMEDIATE_CACHE_LIFE);
   }
 
   if (options.paths) {

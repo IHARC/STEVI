@@ -2,13 +2,31 @@ import { ConcernReportForm, CONCERN_REPORT_INITIAL_STATE, type ConcernReportStat
 import { formatPortalCode, generatePortalCode, emptyToNull } from '@/lib/registration';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { normalizePhoneNumber } from '@/lib/phone';
+import { checkRateLimit } from '@/lib/rate-limit';
+import {
+  getOrCreateCsrfToken,
+  validateCsrfFromForm,
+  InvalidCsrfTokenError,
+  CSRF_ERROR_MESSAGE,
+} from '@/lib/csrf';
 import type { Json } from '@/types/supabase';
 
 export const dynamic = 'force-dynamic';
 
-export default function ConcernReportPage() {
+export default async function ConcernReportPage() {
+  const csrfToken = await getOrCreateCsrfToken();
+
   async function submitConcern(prevState: ConcernReportState, formData: FormData): Promise<ConcernReportState> {
     'use server';
+
+    try {
+      await validateCsrfFromForm(formData);
+    } catch (error) {
+      if (error instanceof InvalidCsrfTokenError) {
+        return { status: 'idle', error: CSRF_ERROR_MESSAGE };
+      }
+      throw error;
+    }
 
     const category = emptyToNull(formData.get('category')) ?? 'other';
     const description = emptyToNull(formData.get('description')) ?? '';
@@ -41,6 +59,20 @@ export default function ConcernReportPage() {
     }
 
     const supabase = await createSupabaseServerClient();
+    const concernRateLimit = await checkRateLimit({
+      supabase,
+      type: 'registration_concern',
+      limit: 5,
+      cooldownMs: 5 * 60 * 1000,
+    });
+
+    if (!concernRateLimit.allowed) {
+      return {
+        status: 'idle',
+        error: formatRateLimitError(concernRateLimit.retryInMs),
+      };
+    }
+
     const portal = supabase.schema('portal');
 
     const metadata: Json = {
@@ -102,7 +134,16 @@ export default function ConcernReportPage() {
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-16 sm:px-6 lg:px-8">
-      <ConcernReportForm action={submitConcern} initialState={CONCERN_REPORT_INITIAL_STATE} />
+      <ConcernReportForm
+        action={submitConcern}
+        initialState={CONCERN_REPORT_INITIAL_STATE}
+        csrfToken={csrfToken}
+      />
     </div>
   );
+}
+
+function formatRateLimitError(retryInMs: number): string {
+  const minutes = Math.max(1, Math.ceil(retryInMs / 60000));
+  return `We’re receiving many requests. Please wait about ${minutes} minute${minutes === 1 ? '' : 's'} and try again.`;
 }

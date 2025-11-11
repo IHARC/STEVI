@@ -56,6 +56,12 @@ function persistPreference(state: ConsentState) {
   } catch {
     // Ignore storage errors (e.g., private browsing)
   }
+
+  try {
+    window.dispatchEvent(new CustomEvent<ConsentState>('iharc-consent-change', { detail: state }));
+  } catch {
+    // Ignore if the environment cannot dispatch custom events
+  }
 }
 
 export function ConsentBanner() {

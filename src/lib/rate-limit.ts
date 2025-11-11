@@ -3,9 +3,18 @@ import type { SupabaseAnyServerClient } from '@/lib/supabase/types';
 
 type RateLimitRow = Database['public']['Functions']['portal_check_rate_limit']['Returns'][number];
 
+type RateLimitEvent =
+  | 'idea'
+  | 'comment'
+  | 'flag'
+  | 'idea_update'
+  | 'registration_intake'
+  | 'registration_claim'
+  | 'registration_concern';
+
 type RateLimitParams = {
   supabase: SupabaseAnyServerClient;
-  type: 'idea' | 'comment' | 'flag' | 'idea_update';
+  type: RateLimitEvent;
   limit: number;
   cooldownMs?: number;
 };

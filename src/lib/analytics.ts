@@ -8,9 +8,8 @@ type AnalyticsWindow = Window & {
 
 const isTrue = (value: string | undefined | null) => value?.toLowerCase() === 'true';
 
-const DEFAULT_GA4_ID = 'G-5B08FDG9J6';
 const ANALYTICS_DISABLED = isTrue(process.env.NEXT_PUBLIC_ANALYTICS_DISABLED ?? 'false');
-const GA4_ID = process.env.NEXT_PUBLIC_GA4_ID ?? process.env.PUBLIC_GA4_ID ?? DEFAULT_GA4_ID;
+const GA4_ID = process.env.NEXT_PUBLIC_GA4_ID ?? process.env.PUBLIC_GA4_ID ?? null;
 
 export function trackEvent(name: string, data: Record<string, unknown> = {}) {
   if (typeof window === 'undefined') {

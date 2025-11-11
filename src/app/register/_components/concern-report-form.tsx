@@ -29,9 +29,14 @@ type ContactPreference = 'anonymous' | 'email' | 'phone';
 type ConcernReportFormProps = {
   action: (state: ConcernReportState, formData: FormData) => Promise<ConcernReportState>;
   initialState?: ConcernReportState;
+  csrfToken: string;
 };
 
-export function ConcernReportForm({ action, initialState = CONCERN_REPORT_INITIAL_STATE }: ConcernReportFormProps) {
+export function ConcernReportForm({
+  action,
+  initialState = CONCERN_REPORT_INITIAL_STATE,
+  csrfToken,
+}: ConcernReportFormProps) {
   const [state, formAction] = useActionState(action, initialState);
   const [contactPreference, setContactPreference] = useState<ContactPreference>('anonymous');
   const isSuccess = state.status === 'success';
@@ -42,6 +47,7 @@ export function ConcernReportForm({ action, initialState = CONCERN_REPORT_INITIA
       className="space-y-space-lg rounded-[var(--md-sys-shape-corner-extra-large)] border border-outline/40 bg-surface p-space-lg shadow-level-1 sm:p-space-xl"
       noValidate
     >
+      <input type="hidden" name="csrf_token" value={csrfToken} />
       <section className="space-y-space-sm">
         <header>
           <p className="text-label-sm uppercase tracking-[0.12em] text-outline">Community concern</p>

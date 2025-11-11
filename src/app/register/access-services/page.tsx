@@ -6,6 +6,13 @@ import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
 import { maskPhoneNumber, normalizePhoneNumber } from '@/lib/phone';
+import { checkRateLimit } from '@/lib/rate-limit';
+import {
+  getOrCreateCsrfToken,
+  validateCsrfFromForm,
+  InvalidCsrfTokenError,
+  CSRF_ERROR_MESSAGE,
+} from '@/lib/csrf';
 import type { Json } from '@/types/supabase';
 
 export const dynamic = 'force-dynamic';
@@ -31,8 +38,19 @@ export default async function ClientClaimPage({ searchParams }: ClientClaimPageP
     redirect(nextPath);
   }
 
+  const csrfToken = await getOrCreateCsrfToken();
+
   async function claimAccount(prevState: ClientClaimFormState, formData: FormData): Promise<ClientClaimFormState> {
     'use server';
+
+    try {
+      await validateCsrfFromForm(formData);
+    } catch (error) {
+      if (error instanceof InvalidCsrfTokenError) {
+        return { status: 'idle', error: CSRF_ERROR_MESSAGE };
+      }
+      throw error;
+    }
 
     const contactMethod = parseContactMethod(formData.get('contact_method'));
     const portalCodeRaw = emptyToNull(formData.get('portal_code'));
@@ -98,6 +116,20 @@ export default async function ClientClaimPage({ searchParams }: ClientClaimPageP
     }
 
     const supabase = await createSupabaseServerClient();
+    const claimRateLimit = await checkRateLimit({
+      supabase,
+      type: 'registration_claim',
+      limit: 3,
+      cooldownMs: 5 * 60 * 1000,
+    });
+
+    if (!claimRateLimit.allowed) {
+      return {
+        status: 'idle',
+        error: formatRateLimitError(claimRateLimit.retryInMs),
+      };
+    }
+
     let createdUserId: string | null = null;
     let profileId: string | null = null;
     let sessionAvailable = false;
@@ -249,7 +281,12 @@ export default async function ClientClaimPage({ searchParams }: ClientClaimPageP
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
-      <ClientClaimForm action={claimAccount} initialState={CLIENT_CLAIM_INITIAL_STATE} nextPath={nextPath} />
+      <ClientClaimForm
+        action={claimAccount}
+        initialState={CLIENT_CLAIM_INITIAL_STATE}
+        nextPath={nextPath}
+        csrfToken={csrfToken}
+      />
     </div>
   );
 }
@@ -290,4 +327,9 @@ function mapClaimFailure(reason: string): string {
     default:
       return 'We could not link your record right now. Please contact IHARC staff for assistance.';
   }
+}
+
+function formatRateLimitError(retryInMs: number): string {
+  const minutes = Math.max(1, Math.ceil(retryInMs / 60000));
+  return `We’re receiving many requests. Please wait about ${minutes} minute${minutes === 1 ? '' : 's'} before trying again.`;
 }

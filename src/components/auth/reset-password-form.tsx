@@ -21,9 +21,10 @@ export type ResetPasswordState = {
 type ResetPasswordFormProps = {
   action: (state: ResetPasswordState, formData: FormData) => Promise<ResetPasswordState>;
   initialState: ResetPasswordState;
+  csrfToken: string;
 };
 
-export function ResetPasswordForm({ action, initialState }: ResetPasswordFormProps) {
+export function ResetPasswordForm({ action, initialState, csrfToken }: ResetPasswordFormProps) {
   const [state, formAction] = useActionState(action, initialState);
   const [contactMethod, setContactMethod] = useState<'email' | 'phone'>(initialState.contactMethod ?? 'email');
   const [phoneInput, setPhoneInput] = useState(state.phone ?? '');
@@ -64,6 +65,7 @@ export function ResetPasswordForm({ action, initialState }: ResetPasswordFormPro
 
   return (
     <form action={formAction} className="grid gap-6 rounded-2xl border border-outline/20 bg-surface p-6 shadow-subtle">
+      <input type="hidden" name="csrf_token" value={csrfToken} />
       <div className="space-y-2">
         <h1 className="text-headline-md font-semibold tracking-tight text-on-surface">Reset your password</h1>
         <p className="text-body-md text-on-surface/70">

@@ -18,9 +18,7 @@ const metadataBase = (() => {
   }
 })();
 
-const DEFAULT_GA_MEASUREMENT_ID = 'G-5B08FDG9J6';
-const GA_MEASUREMENT_ID =
-  process.env.NEXT_PUBLIC_GA4_ID ?? process.env.PUBLIC_GA4_ID ?? DEFAULT_GA_MEASUREMENT_ID;
+const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA4_ID ?? process.env.PUBLIC_GA4_ID ?? null;
 const ANALYTICS_DISABLED =
   (process.env.NEXT_PUBLIC_ANALYTICS_DISABLED ?? 'false').toLowerCase() === 'true';
 const ANALYTICS_ENABLED = Boolean(GA_MEASUREMENT_ID) && !ANALYTICS_DISABLED;

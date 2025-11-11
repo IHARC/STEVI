@@ -6,6 +6,13 @@ import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
 import { maskPhoneNumber, normalizePhoneNumber } from '@/lib/phone';
+import { checkRateLimit } from '@/lib/rate-limit';
+import {
+  getOrCreateCsrfToken,
+  validateCsrfFromForm,
+  InvalidCsrfTokenError,
+  CSRF_ERROR_MESSAGE,
+} from '@/lib/csrf';
 import type { Json } from '@/types/supabase';
 
 export const dynamic = 'force-dynamic';
@@ -31,8 +38,19 @@ export default async function ClientIntakePage({ searchParams }: ClientIntakePag
     redirect(nextPath);
   }
 
+  const csrfToken = await getOrCreateCsrfToken();
+
   async function submitIntake(prevState: ClientIntakeFormState, formData: FormData): Promise<ClientIntakeFormState> {
     'use server';
+
+    try {
+      await validateCsrfFromForm(formData);
+    } catch (error) {
+      if (error instanceof InvalidCsrfTokenError) {
+        return { status: 'idle', error: CSRF_ERROR_MESSAGE };
+      }
+      throw error;
+    }
 
     const contactChoice = parseContactChoice(formData.get('contact_choice'));
     const email = emptyToNull((formData.get('contact_email') as string | null)?.toLowerCase() ?? null);
@@ -105,6 +123,20 @@ export default async function ClientIntakePage({ searchParams }: ClientIntakePag
     };
 
     const supabase = await createSupabaseServerClient();
+    const intakeRateLimit = await checkRateLimit({
+      supabase,
+      type: 'registration_intake',
+      limit: 3,
+      cooldownMs: 5 * 60 * 1000,
+    });
+
+    if (!intakeRateLimit.allowed) {
+      return {
+        status: 'idle',
+        error: formatRateLimitError(intakeRateLimit.retryInMs),
+      };
+    }
+
     const portal = supabase.schema('portal');
     let createdUserId: string | null = null;
     let profileId: string | null = null;
@@ -247,7 +279,12 @@ export default async function ClientIntakePage({ searchParams }: ClientIntakePag
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
-      <ClientIntakeForm action={submitIntake} initialState={CLIENT_INTAKE_INITIAL_STATE} nextPath={nextPath} />
+      <ClientIntakeForm
+        action={submitIntake}
+        initialState={CLIENT_INTAKE_INITIAL_STATE}
+        nextPath={nextPath}
+        csrfToken={csrfToken}
+      />
     </div>
   );
 }
@@ -290,4 +327,9 @@ function buildSuccessMessage(choice: ContactChoice): string {
   }
 
   return 'We emailed instructions to finish verifying your account. You can use this code as backup with staff.';
+}
+
+function formatRateLimitError(retryInMs: number): string {
+  const minutes = Math.max(1, Math.ceil(retryInMs / 60000));
+  return `We’re receiving many requests. Please wait about ${minutes} minute${minutes === 1 ? '' : 's'} and try again.`;
 }

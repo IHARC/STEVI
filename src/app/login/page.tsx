@@ -4,6 +4,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { LoginForm } from '@/components/auth/login-form';
 import { resolveNextPath, parseAuthErrorCode, type AuthErrorCode } from '@/lib/auth';
 import { normalizePhoneNumber } from '@/lib/phone';
+import { getOrCreateCsrfToken, validateCsrfFromForm, InvalidCsrfTokenError, CSRF_ERROR_MESSAGE } from '@/lib/csrf';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,8 +45,19 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     ? { ...INITIAL_FORM_STATE, error: initialError }
     : INITIAL_FORM_STATE;
 
+  const csrfToken = await getOrCreateCsrfToken();
+
   async function loginUser(_prevState: FormState, formData: FormData): Promise<FormState> {
     'use server';
+
+    try {
+      await validateCsrfFromForm(formData);
+    } catch (error) {
+      if (error instanceof InvalidCsrfTokenError) {
+        return { error: CSRF_ERROR_MESSAGE, contactMethod: 'email' };
+      }
+      throw error;
+    }
 
     const contactMethod = normalizeContactMethod(formData.get('contact_method'));
     const password = (formData.get('password') as string | null) ?? '';
@@ -110,7 +122,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             Sign in to stay connected with STEVI and manage outreach updates, appointments, and resources.
           </p>
         </div>
-        <LoginForm action={loginUser} nextPath={nextPath} initialState={initialState} />
+        <LoginForm action={loginUser} nextPath={nextPath} initialState={initialState} csrfToken={csrfToken} />
       </div>
     </div>
   );
