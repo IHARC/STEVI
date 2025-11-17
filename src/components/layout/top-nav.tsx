@@ -17,7 +17,7 @@ export async function TopNav({ portalAccess }: TopNavProps = {}) {
         <div className="flex items-center gap-space-sm">
           <Link
             href="/"
-            className="inline-flex items-center gap-space-sm rounded-[var(--md-sys-shape-corner-small)] px-space-sm py-space-2xs focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+            className="inline-flex items-center gap-space-sm rounded-lg px-space-sm py-space-2xs focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
             aria-label="STEVI home"
           >
             <Image
@@ -37,7 +37,7 @@ export async function TopNav({ portalAccess }: TopNavProps = {}) {
               className="hidden h-10 w-auto dark:block"
             />
             <span className="text-left">
-              <span className="block text-label-sm font-medium uppercase tracking-[0.12em] text-muted-foreground">
+              <span className="block text-label-sm font-medium uppercase text-muted-foreground">
                 STEVI
               </span>
               <span className="block text-title-sm font-medium text-on-surface">

@@ -134,7 +134,7 @@ export default async function AppointmentsPage() {
   return (
     <div className="page-shell page-stack">
       <header className="flex flex-col gap-space-xs">
-        <p className="text-label-sm font-medium uppercase tracking-[0.12em] text-muted-foreground">
+        <p className="text-label-sm font-medium uppercase text-muted-foreground">
           Appointment support
         </p>
         <h1 className="text-headline-lg text-on-surface sm:text-display-sm">
@@ -171,7 +171,7 @@ export default async function AppointmentsPage() {
               upcomingAppointments.map((appointment) => (
                 <article
                   key={appointment.id}
-                  className="rounded-[var(--md-sys-shape-corner-medium)] border border-outline/20 bg-surface-container-low p-space-md shadow-level-1"
+                  className="rounded-xl border border-outline/20 bg-surface-container-low p-space-md shadow-level-1"
                   aria-labelledby={`upcoming-${appointment.id}`}
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
@@ -222,7 +222,7 @@ export default async function AppointmentsPage() {
             {pastAppointments.map((appointment) => (
               <article
                 key={appointment.id}
-                className="rounded-[var(--md-sys-shape-corner-medium)] border border-outline/20 bg-surface-container-low p-space-md"
+                className="rounded-xl border border-outline/20 bg-surface-container-low p-space-md"
                 aria-labelledby={`history-${appointment.id}`}
               >
                 <div className="flex items-center justify-between gap-2">

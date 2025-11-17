@@ -20,7 +20,7 @@ export default async function LandingPage() {
       id="main-content"
       className="page-shell flex min-h-[70vh] flex-col items-center justify-center gap-space-lg text-center"
     >
-      <span className="rounded-full border border-outline bg-surface px-space-md py-space-2xs text-label-sm font-medium uppercase tracking-[0.12em] text-muted-foreground">
+      <span className="rounded-full border border-outline bg-surface px-space-md py-space-2xs text-label-sm font-medium uppercase text-muted-foreground">
         Supportive Technology to Enable Vulnerable Individuals
       </span>
       <h1 className="text-display-sm text-on-surface md:text-display-md">

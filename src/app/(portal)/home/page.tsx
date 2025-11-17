@@ -100,7 +100,7 @@ export default async function HomePage() {
   return (
     <div className="page-shell page-stack">
       <header className="flex flex-col gap-space-xs">
-        <p className="text-label-sm font-medium uppercase tracking-[0.12em] text-muted-foreground">
+        <p className="text-label-sm font-medium uppercase text-muted-foreground">
           Welcome back
         </p>
         <h1 className="text-headline-lg text-on-surface sm:text-display-sm">
@@ -141,7 +141,7 @@ export default async function HomePage() {
             {appointments.map((appointment) => (
               <article
                 key={appointment.id}
-                className="rounded-[var(--md-sys-shape-corner-medium)] border border-outline/20 bg-surface-container-low p-space-md shadow-level-1 transition hover:border-primary/40 hover:shadow-level-2"
+                className="rounded-xl border border-outline/20 bg-surface-container-low p-space-md shadow-level-1 transition state-layer-color-primary hover:border-primary hover:state-layer-hover hover:shadow-level-2"
                 aria-labelledby={`appointment-${appointment.id}`}
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
@@ -190,7 +190,7 @@ export default async function HomePage() {
           </CardHeader>
           <CardContent className="space-y-space-md">
             {supportTeam.map((contact) => (
-              <article key={contact.id} className="rounded-[var(--md-sys-shape-corner-medium)] border border-outline/20 p-space-md">
+              <article key={contact.id} className="rounded-xl border border-outline/20 p-space-md">
                 <header>
                   <p className="text-title-sm font-medium text-on-surface">{contact.name}</p>
                   <p className="text-body-sm text-muted-foreground">{contact.role}</p>
@@ -230,7 +230,7 @@ export default async function HomePage() {
             </p>
           </CardHeader>
           <CardContent className="space-y-space-md">
-            <article className="rounded-[var(--md-sys-shape-corner-medium)] border border-outline/20 p-space-md">
+            <article className="rounded-xl border border-outline/20 p-space-md">
               <div className="flex items-center justify-between">
                 <p className="text-title-sm font-medium text-on-surface">Housing application</p>
                 <Badge variant="secondary">In review</Badge>
@@ -239,7 +239,7 @@ export default async function HomePage() {
                 Ontario Works packet submitted last week. Awaiting confirmation from housing help centre.
               </p>
             </article>
-            <article className="rounded-[var(--md-sys-shape-corner-medium)] border border-outline/20 p-space-md">
+            <article className="rounded-xl border border-outline/20 p-space-md">
               <div className="flex items-center justify-between">
                 <p className="text-title-sm font-medium text-on-surface">Health supports</p>
                 <Badge variant="outline">Active</Badge>
@@ -248,7 +248,7 @@ export default async function HomePage() {
                 Harm reduction supplies packaged for pickup at the outreach hub. Check in with Morgan if plans change.
               </p>
             </article>
-            <article className="rounded-[var(--md-sys-shape-corner-medium)] border border-outline/20 p-space-md">
+            <article className="rounded-xl border border-outline/20 p-space-md">
               <div className="flex items-center justify-between">
                 <p className="text-title-sm font-medium text-on-surface">Income stabilization</p>
                 <Badge className="bg-primary text-on-primary">New</Badge>

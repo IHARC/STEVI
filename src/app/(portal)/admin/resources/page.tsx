@@ -70,7 +70,7 @@ export default async function AdminResourcesPage() {
     <div className="page-shell page-stack">
       <header className="flex flex-col gap-space-sm sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-space-xs">
-          <p className="text-label-sm font-medium uppercase tracking-[0.12em] text-muted-foreground">Resource library</p>
+          <p className="text-label-sm font-medium uppercase text-muted-foreground">Resource library</p>
           <h1 className="text-headline-lg text-on-surface sm:text-display-sm">
             Manage public resources and reports
           </h1>

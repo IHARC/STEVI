@@ -66,7 +66,7 @@ export default async function SupportPage() {
   return (
     <div className="page-shell page-stack">
       <header className="flex flex-col gap-space-xs">
-        <p className="text-label-sm font-medium uppercase tracking-[0.12em] text-muted-foreground">
+        <p className="text-label-sm font-medium uppercase text-muted-foreground">
           Connect with IHARC
         </p>
         <h1 className="text-headline-lg text-on-surface sm:text-display-sm">Support and contact</h1>
@@ -119,7 +119,7 @@ export default async function SupportPage() {
           </CardHeader>
           <CardContent className="grid gap-space-md md:grid-cols-3">
             {faqs.map((faq) => (
-              <article key={faq.question} className="rounded-[var(--md-sys-shape-corner-medium)] border border-outline/20 p-space-md">
+              <article key={faq.question} className="rounded-xl border border-outline/20 p-space-md">
                 <h2 className="text-title-sm font-medium text-on-surface">{faq.question}</h2>
                 <p className="mt-space-xs text-body-sm text-muted-foreground">{faq.answer}</p>
               </article>

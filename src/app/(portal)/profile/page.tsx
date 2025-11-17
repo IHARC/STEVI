@@ -418,14 +418,14 @@ export default async function PortalProfilePage() {
       </header>
 
       {awaitingVerification ? (
-        <div className="rounded-[var(--md-sys-shape-corner-large)] border border-primary/30 bg-primary/10 p-space-md text-body-sm text-on-primary-container">
+        <div className="rounded-2xl border border-primary bg-primary-container p-space-md text-body-sm text-on-primary-container">
           We are confirming your IHARC team role. You can keep contributing as a community member while we
           verify.
         </div>
       ) : null}
 
       {affiliationRevoked ? (
-        <div className="rounded-[var(--md-sys-shape-corner-large)] border border-error/30 bg-error/10 p-space-md text-body-sm text-error">
+        <div className="rounded-2xl border border-error bg-error-container p-space-md text-body-sm text-on-error-container">
           Your verified affiliation was revoked. Reach out to IHARC administrators if circumstances have changed.
         </div>
       ) : null}

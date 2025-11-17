@@ -77,7 +77,7 @@ export function ClientClaimForm({
 
       <section className="space-y-4">
         <header>
-          <p className="text-label-sm uppercase tracking-[0.12em] text-outline">Link existing services</p>
+          <p className="text-label-sm uppercase text-outline">Link existing services</p>
           <h1 className="text-headline-sm font-semibold text-on-surface">Claim your IHARC record</h1>
           <p className="mt-2 text-body-md text-muted-foreground">
             Share at least two pieces of information. We cross-check them securely so your record never gets duplicated.
@@ -92,7 +92,7 @@ export function ClientClaimForm({
         ) : null}
 
         {isSuccess && state.message ? (
-          <Alert className="border-primary/30 bg-primary/10 text-on-primary-container">
+          <Alert className="border-primary bg-primary-container text-on-primary-container">
             <AlertTitle>Record linked</AlertTitle>
             <AlertDescription>{state.message}</AlertDescription>
           </Alert>
@@ -300,7 +300,7 @@ function ContactMethodOption({
   return (
     <label
       htmlFor={`contact_method_${value}`}
-      className="flex cursor-pointer items-start gap-3 rounded-xl border border-outline/40 bg-surface-container p-3 text-left text-body-md font-medium text-on-surface shadow-subtle transition hover:border-primary/40 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary"
+      className="flex cursor-pointer items-start gap-3 rounded-xl border border-outline/40 bg-surface-container p-3 text-left text-body-md font-medium text-on-surface shadow-subtle transition state-layer-color-primary hover:border-primary hover:state-layer-hover focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:state-layer-focus"
     >
       <RadioGroupItem id={`contact_method_${value}`} value={value} className="mt-1" />
       <span>

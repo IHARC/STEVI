@@ -44,13 +44,13 @@ export function ConcernReportForm({
   return (
     <form
       action={formAction}
-      className="space-y-space-lg rounded-[var(--md-sys-shape-corner-extra-large)] border border-outline/40 bg-surface p-space-lg shadow-level-1 sm:p-space-xl"
+      className="space-y-space-lg rounded-3xl border border-outline/40 bg-surface p-space-lg shadow-level-1 sm:p-space-xl"
       noValidate
     >
       <input type="hidden" name="csrf_token" value={csrfToken} />
       <section className="space-y-space-sm">
         <header>
-          <p className="text-label-sm uppercase tracking-[0.12em] text-outline">Community concern</p>
+          <p className="text-label-sm uppercase text-outline">Community concern</p>
           <h1 className="text-title-lg font-medium text-on-surface">Report a concern or share feedback</h1>
           <p className="mt-space-xs text-body-sm text-muted-foreground">
             We review every submission within two business days. If someone is in immediate danger, call 911. For
@@ -75,7 +75,7 @@ export function ConcernReportForm({
         ) : null}
 
         {isSuccess && state.message ? (
-          <Alert className="border-primary/30 bg-primary/10 text-body-sm text-on-primary-container">
+          <Alert className="border-primary bg-primary-container text-body-sm text-on-primary-container">
             <AlertTitle>Thanks for reaching out</AlertTitle>
             <AlertDescription className="space-y-2">
               <p>{state.message}</p>
@@ -129,7 +129,7 @@ export function ConcernReportForm({
           />
         </div>
 
-        <fieldset className="space-y-space-sm rounded-[var(--md-sys-shape-corner-medium)] border border-outline/30 p-space-md">
+        <fieldset className="space-y-space-sm rounded-xl border border-outline/30 p-space-md">
           <legend className="text-body-sm font-medium text-on-surface">How should we follow up?</legend>
           <RadioGroup
             value={contactPreference}
@@ -209,7 +209,7 @@ function ContactOption({
   return (
     <label
       htmlFor={`contact_preference_${value}`}
-      className="flex cursor-pointer items-start gap-space-sm rounded-[var(--md-sys-shape-corner-medium)] border border-outline/40 bg-surface-container p-space-md text-left text-body-sm font-medium text-on-surface shadow-level-1 transition hover:border-primary/40 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary"
+      className="flex cursor-pointer items-start gap-space-sm rounded-xl border border-outline/40 bg-surface-container p-space-md text-left text-body-sm font-medium text-on-surface shadow-level-1 transition state-layer-color-primary hover:border-primary hover:state-layer-hover focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:state-layer-focus"
     >
       <RadioGroupItem id={`contact_preference_${value}`} value={value} className="mt-1" />
       <span>

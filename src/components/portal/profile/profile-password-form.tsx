@@ -24,7 +24,7 @@ export function ProfilePasswordForm({ action, initialState, hasEmail, hasPhone }
   const [state, formAction] = useActionState(action, initialState);
 
   return (
-    <section className="grid gap-space-lg rounded-[var(--md-sys-shape-corner-extra-large)] border border-outline/20 bg-surface p-space-lg shadow-level-1">
+    <section className="grid gap-space-lg rounded-3xl border border-outline/20 bg-surface p-space-lg shadow-level-1">
       <div className="flex flex-col gap-space-xs">
         <h2 className="text-title-lg font-medium text-on-surface">Password</h2>
         <p className="text-body-sm text-on-surface/70">
@@ -58,7 +58,7 @@ export function ProfilePasswordForm({ action, initialState, hasEmail, hasPhone }
         ) : null}
 
         {state.status === 'success' && state.message ? (
-          <Alert className="border-secondary/40 bg-secondary/10 text-on-secondary-container">
+          <Alert className="border-secondary bg-secondary-container text-on-secondary-container">
             <AlertDescription>{state.message}</AlertDescription>
           </Alert>
         ) : null}

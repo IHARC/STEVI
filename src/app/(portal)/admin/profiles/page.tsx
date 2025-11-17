@@ -170,7 +170,7 @@ export default async function AdminProfilesPage() {
   return (
     <div className="page-shell page-stack">
       <header className="flex flex-col gap-space-xs">
-        <p className="text-label-sm font-medium uppercase tracking-[0.12em] text-muted-foreground">
+        <p className="text-label-sm font-medium uppercase text-muted-foreground">
           Access &amp; verification
         </p>
         <h1 className="text-headline-lg text-on-surface sm:text-display-sm">Profile verification &amp; invitations</h1>

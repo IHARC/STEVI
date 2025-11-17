@@ -88,10 +88,10 @@ export default async function RegisterLandingPage({ searchParams }: RegisterLand
           <Link
             key={title}
             href={href(nextPath)}
-            className="group flex h-full flex-col justify-between rounded-2xl border border-outline/40 bg-surface p-6 shadow-subtle transition hover:border-primary/50 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            className="group flex h-full flex-col justify-between rounded-2xl border border-outline/40 bg-surface p-6 shadow-subtle transition hover:border-primary hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary state-layer-color-primary hover:state-layer-hover focus-visible:state-layer-focus"
           >
             <div className="space-y-3">
-              <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <span className="inline-flex h-11 w-11 items-center justify-center rounded-full text-primary state-layer-color-primary state-layer-hover">
                 <Icon className="h-5 w-5" aria-hidden />
               </span>
               <h2 className="text-title-lg font-semibold text-on-surface">{title}</h2>

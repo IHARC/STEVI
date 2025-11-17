@@ -130,7 +130,7 @@ export default async function NotificationsAdminPage() {
   return (
     <div className="page-shell page-stack">
       <header className="flex flex-col gap-space-xs">
-        <p className="text-label-sm font-medium uppercase tracking-[0.12em] text-muted-foreground">
+        <p className="text-label-sm font-medium uppercase text-muted-foreground">
           Outreach messaging
         </p>
         <h1 className="text-headline-lg text-on-surface sm:text-display-sm">Notifications workspace</h1>

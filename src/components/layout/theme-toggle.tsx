@@ -56,8 +56,8 @@ export function ThemeToggle() {
           <ActiveIcon className="h-5 w-5" aria-hidden />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-44 rounded-[var(--md-sys-shape-corner-small)]">
-        <DropdownMenuLabel className="text-label-sm uppercase tracking-[0.12em] text-on-surface-variant">
+      <DropdownMenuContent align="end" className="w-44 rounded-lg">
+        <DropdownMenuLabel className="text-label-sm uppercase text-on-surface-variant">
           Appearance
         </DropdownMenuLabel>
         {THEME_OPTIONS.map(({ key, label, icon: Icon }) => (
@@ -72,7 +72,7 @@ export function ThemeToggle() {
             <Icon className="h-4 w-4" aria-hidden />
             <span className="flex-1 text-on-surface">{label}</span>
             {selectedTheme === key ? (
-              <span className="text-label-sm font-semibold uppercase tracking-[0.12em] text-primary">On</span>
+              <span className="text-label-sm font-semibold uppercase text-primary">On</span>
             ) : null}
           </DropdownMenuItem>
         ))}

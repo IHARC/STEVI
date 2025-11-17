@@ -2,18 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+/* @tokens:start */
 :root {
   color-scheme: light;
-
-  /* Typeface tokens */
   --md-ref-typeface-brand: 'Roboto Flex', 'Roboto', 'system-ui', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --md-ref-typeface-plain: 'Roboto', 'system-ui', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-body: var(--md-ref-typeface-plain);
   --font-heading: var(--md-ref-typeface-brand);
   --md-sys-typescale-body-font: var(--md-ref-typeface-plain), 'Roboto Fallback', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --md-sys-typescale-headline-font: var(--md-ref-typeface-brand), 'Roboto Flex Fallback', 'Roboto Fallback', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-
-  /* Material 3 system color tokens */
   --md-sys-color-primary: 210 35 77;
   --md-sys-color-on-primary: 255 255 255;
   --md-sys-color-primary-container: 255 217 226;
@@ -50,91 +47,75 @@
   --md-sys-color-inverse-primary: 255 170 195;
   --md-sys-color-shadow: 0 0 0;
   --md-sys-color-scrim: 0 0 0;
-
-  /* Shape tokens */
+  --md-sys-state-hover-opacity: 0.08;
+  --md-sys-state-focus-opacity: 0.12;
+  --md-sys-state-pressed-opacity: 0.12;
+  --md-sys-state-dragged-opacity: 0.16;
   --md-sys-shape-corner-extra-small: 0.5rem;
   --md-sys-shape-corner-small: 0.75rem;
   --md-sys-shape-corner-medium: 1rem;
   --md-sys-shape-corner-large: 1.5rem;
   --md-sys-shape-corner-extra-large: 2rem;
-
-  /* Typography scale tokens (Material 3) */
   --md-sys-typescale-display-large-size: 3.5625rem;
   --md-sys-typescale-display-large-line-height: 4rem;
   --md-sys-typescale-display-large-weight: 400;
   --md-sys-typescale-display-large-tracking: -0.015625rem;
-
   --md-sys-typescale-display-medium-size: 2.8125rem;
   --md-sys-typescale-display-medium-line-height: 3.25rem;
   --md-sys-typescale-display-medium-weight: 400;
   --md-sys-typescale-display-medium-tracking: 0rem;
-
   --md-sys-typescale-display-small-size: 2.25rem;
   --md-sys-typescale-display-small-line-height: 2.75rem;
   --md-sys-typescale-display-small-weight: 400;
   --md-sys-typescale-display-small-tracking: 0rem;
-
   --md-sys-typescale-headline-large-size: 2rem;
   --md-sys-typescale-headline-large-line-height: 2.5rem;
   --md-sys-typescale-headline-large-weight: 400;
   --md-sys-typescale-headline-large-tracking: 0rem;
-
   --md-sys-typescale-headline-medium-size: 1.75rem;
   --md-sys-typescale-headline-medium-line-height: 2.25rem;
   --md-sys-typescale-headline-medium-weight: 400;
   --md-sys-typescale-headline-medium-tracking: 0rem;
-
   --md-sys-typescale-headline-small-size: 1.5rem;
   --md-sys-typescale-headline-small-line-height: 2rem;
   --md-sys-typescale-headline-small-weight: 400;
   --md-sys-typescale-headline-small-tracking: 0rem;
-
   --md-sys-typescale-title-large-size: 1.375rem;
   --md-sys-typescale-title-large-line-height: 1.75rem;
   --md-sys-typescale-title-large-weight: 400;
   --md-sys-typescale-title-large-tracking: 0rem;
-
   --md-sys-typescale-title-medium-size: 1rem;
   --md-sys-typescale-title-medium-line-height: 1.5rem;
   --md-sys-typescale-title-medium-weight: 500;
   --md-sys-typescale-title-medium-tracking: 0.009375rem;
-
   --md-sys-typescale-title-small-size: 0.875rem;
   --md-sys-typescale-title-small-line-height: 1.25rem;
   --md-sys-typescale-title-small-weight: 500;
   --md-sys-typescale-title-small-tracking: 0.00625rem;
-
   --md-sys-typescale-body-large-size: 1rem;
   --md-sys-typescale-body-large-line-height: 1.5rem;
   --md-sys-typescale-body-large-weight: 400;
   --md-sys-typescale-body-large-tracking: 0.03125rem;
-
   --md-sys-typescale-body-medium-size: 0.875rem;
   --md-sys-typescale-body-medium-line-height: 1.25rem;
   --md-sys-typescale-body-medium-weight: 400;
   --md-sys-typescale-body-medium-tracking: 0.015625rem;
-
   --md-sys-typescale-body-small-size: 0.75rem;
   --md-sys-typescale-body-small-line-height: 1rem;
   --md-sys-typescale-body-small-weight: 400;
   --md-sys-typescale-body-small-tracking: 0.025rem;
-
   --md-sys-typescale-label-large-size: 0.875rem;
   --md-sys-typescale-label-large-line-height: 1.25rem;
   --md-sys-typescale-label-large-weight: 500;
   --md-sys-typescale-label-large-tracking: 0.0125rem;
-
   --md-sys-typescale-label-medium-size: 0.75rem;
   --md-sys-typescale-label-medium-line-height: 1rem;
   --md-sys-typescale-label-medium-weight: 500;
   --md-sys-typescale-label-medium-tracking: 0.03125rem;
-
   --md-sys-typescale-label-small-size: 0.6875rem;
   --md-sys-typescale-label-small-line-height: 1rem;
   --md-sys-typescale-label-small-weight: 500;
   --md-sys-typescale-label-small-tracking: 0.03125rem;
-
-  /* Spacing & layout tokens */
   --md-sys-spacing-2xs: 0.25rem;
   --md-sys-spacing-xs: 0.5rem;
   --md-sys-spacing-sm: 0.75rem;
@@ -145,8 +126,6 @@
   --md-sys-spacing-3xl: 3rem;
   --md-sys-spacing-4xl: 4rem;
   --md-sys-layout-max-width: 72rem;
-
-  /* Elevation tokens */
   --shadow-level-1: 0 1px 2px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
   --shadow-level-2: 0 3px 12px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08);
 }
@@ -189,10 +168,14 @@
   --md-sys-color-inverse-primary: 210 35 77;
   --md-sys-color-shadow: 0 0 0;
   --md-sys-color-scrim: 0 0 0;
-
+  --md-sys-state-hover-opacity: 0.08;
+  --md-sys-state-focus-opacity: 0.12;
+  --md-sys-state-pressed-opacity: 0.12;
+  --md-sys-state-dragged-opacity: 0.16;
   --shadow-level-1: 0 1px 3px rgba(0, 0, 0, 0.38), 0 2px 6px rgba(0, 0, 0, 0.24);
   --shadow-level-2: 0 8px 16px rgba(0, 0, 0, 0.38), 0 4px 6px rgba(0, 0, 0, 0.24);
 }
+/* @tokens:end */
 
 /* Font display optimization */
 @font-face {
@@ -403,6 +386,54 @@
 }
 
 @layer utilities {
+  .state-layer-color-primary {
+    --state-layer-color: var(--md-sys-color-primary);
+  }
+
+  .state-layer-color-primary-container {
+    --state-layer-color: var(--md-sys-color-primary-container);
+  }
+
+  .state-layer-color-secondary {
+    --state-layer-color: var(--md-sys-color-secondary);
+  }
+
+  .state-layer-color-secondary-container {
+    --state-layer-color: var(--md-sys-color-secondary-container);
+  }
+
+  .state-layer-color-surface {
+    --state-layer-color: var(--md-sys-color-on-surface);
+  }
+
+  .state-layer-color-surface-container {
+    --state-layer-color: var(--md-sys-color-surface-container);
+  }
+
+  .state-layer-color-error {
+    --state-layer-color: var(--md-sys-color-error);
+  }
+
+  .state-layer-color-inverse-surface {
+    --state-layer-color: var(--md-sys-color-inverse-surface);
+  }
+
+  .state-layer-hover {
+    background-color: rgb(var(--state-layer-color, var(--md-sys-color-on-surface)) / var(--md-sys-state-hover-opacity));
+  }
+
+  .state-layer-focus {
+    background-color: rgb(var(--state-layer-color, var(--md-sys-color-on-surface)) / var(--md-sys-state-focus-opacity));
+  }
+
+  .state-layer-pressed {
+    background-color: rgb(var(--state-layer-color, var(--md-sys-color-on-surface)) / var(--md-sys-state-pressed-opacity));
+  }
+
+  .state-layer-dragged {
+    background-color: rgb(var(--state-layer-color, var(--md-sys-color-on-surface)) / var(--md-sys-state-dragged-opacity));
+  }
+
   .visually-hidden {
     @apply sr-only;
   }

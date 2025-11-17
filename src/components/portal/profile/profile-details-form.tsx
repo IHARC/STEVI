@@ -101,7 +101,7 @@ export function ProfileDetailsForm({
   return (
     <form
       action={formAction}
-      className="space-y-space-lg rounded-[var(--md-sys-shape-corner-extra-large)] border border-outline/40 bg-surface p-space-lg shadow-level-1"
+      className="space-y-space-lg rounded-3xl border border-outline/40 bg-surface p-space-lg shadow-level-1"
     >
       <div className="flex flex-col gap-space-xs">
         <h2 className="text-title-lg font-medium text-on-surface">Profile details</h2>
@@ -111,14 +111,14 @@ export function ProfileDetailsForm({
       </div>
 
       {pendingVerificationCopy ? (
-        <Alert className="border-primary/30 bg-primary/10 text-body-sm text-on-primary-container">
+        <Alert className="border-primary bg-primary-container text-body-sm text-on-primary-container">
           <AlertTitle>Verification in progress</AlertTitle>
           <AlertDescription>{pendingVerificationCopy}</AlertDescription>
         </Alert>
       ) : null}
 
       {state.status === 'success' && state.message ? (
-        <Alert className="border-primary/30 bg-primary/10 text-body-sm text-on-primary-container">
+        <Alert className="border-primary bg-primary-container text-body-sm text-on-primary-container">
           <AlertDescription>{state.message}</AlertDescription>
         </Alert>
       ) : null}
@@ -166,7 +166,7 @@ export function ProfileDetailsForm({
       </div>
 
       {isAgencyPartner ? (
-        <div className="space-y-space-sm rounded-[var(--md-sys-shape-corner-medium)] border border-outline/20 p-space-md">
+        <div className="space-y-space-sm rounded-xl border border-outline/20 p-space-md">
           <div className="grid gap-space-xs">
             <Label htmlFor="agency_organization_id">Partner organization</Label>
             <Select name="agency_organization_id" value={selectedOrg} onValueChange={setSelectedOrg}>
@@ -334,7 +334,7 @@ function AffiliationOption({ id, value, title, description }: AffiliationOptionP
   return (
     <label
       htmlFor={id}
-      className="flex cursor-pointer items-start gap-space-sm rounded-[var(--md-sys-shape-corner-medium)] border border-outline/40 bg-surface-container p-space-md text-body-sm font-medium text-on-surface shadow-level-1 transition hover:border-primary/40 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary"
+      className="flex cursor-pointer items-start gap-space-sm rounded-xl border border-outline/40 bg-surface-container p-space-md text-body-sm font-medium text-on-surface shadow-level-1 transition state-layer-color-primary hover:border-primary hover:state-layer-hover focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:state-layer-focus"
     >
       <RadioGroupItem id={id} value={value} className="mt-1" />
       <span>

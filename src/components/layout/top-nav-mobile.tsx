@@ -131,7 +131,7 @@ export function TopNavMobile({ links, accountSection, quickAction }: TopNavMobil
         className="flex h-full w-[min(22rem,100vw)] flex-col gap-6 border-none bg-surface px-5 py-6 text-on-surface shadow-lg"
       >
         <SheetHeader className="space-y-1 text-left">
-          <SheetTitle className="text-title-lg font-semibold tracking-tight text-on-surface">
+          <SheetTitle className="text-title-lg font-semibold text-on-surface">
             Navigation
           </SheetTitle>
         </SheetHeader>
@@ -139,7 +139,7 @@ export function TopNavMobile({ links, accountSection, quickAction }: TopNavMobil
           <nav aria-label="Primary navigation" className="flex flex-col gap-6">
             {navSections.map((section) => (
               <div key={section.id} className="flex flex-col gap-1.5">
-                <p className="text-body-md font-semibold uppercase tracking-[0.12em] text-on-surface/80">
+                <p className="text-body-md font-semibold uppercase text-on-surface/80">
                   {section.title}
                 </p>
                 {section.items.map((item) =>
@@ -158,7 +158,7 @@ export function TopNavMobile({ links, accountSection, quickAction }: TopNavMobil
                     >
                       <span>{item.label}</span>
                       {item.isActive ? (
-                        <span className="text-label-sm font-semibold uppercase tracking-[0.12em] text-primary">
+                        <span className="text-label-sm font-semibold uppercase text-primary">
                           Active
                         </span>
                       ) : null}
@@ -183,7 +183,7 @@ export function TopNavMobile({ links, accountSection, quickAction }: TopNavMobil
                 }
               }}
             >
-              <p className="text-body-md font-semibold uppercase tracking-[0.12em] text-on-surface/80">
+              <p className="text-body-md font-semibold uppercase text-on-surface/80">
                 Quick action
               </p>
               {quickAction}
@@ -201,7 +201,7 @@ export function TopNavMobile({ links, accountSection, quickAction }: TopNavMobil
               }
             }}
           >
-            <p className="text-body-md font-semibold uppercase tracking-[0.12em] text-on-surface/80">
+            <p className="text-body-md font-semibold uppercase text-on-surface/80">
               Account
             </p>
             {accountSection}
@@ -247,7 +247,7 @@ function MobileNavCollapsible({ item, closeSheet }: MobileNavCollapsibleProps) {
         <span>{item.label}</span>
         <div className="flex items-center gap-2">
           {item.isActive ? (
-            <span className="text-label-sm font-semibold uppercase tracking-[0.12em] text-primary">Active</span>
+            <span className="text-label-sm font-semibold uppercase text-primary">Active</span>
           ) : null}
           <ChevronDown
             className={cn('h-4 w-4 transition-transform', expanded ? 'rotate-180' : undefined)}
@@ -266,10 +266,10 @@ function MobileNavCollapsible({ item, closeSheet }: MobileNavCollapsibleProps) {
             href={child.href}
             onClick={closeSheet}
             className={cn(
-              'rounded-xl px-3 py-2 text-body-md transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
+              'rounded-xl px-3 py-2 text-body-md transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface state-layer-color-primary focus-visible:state-layer-focus',
               child.isActive
-                ? 'bg-primary/15 text-primary'
-                : 'text-on-surface hover:bg-surface-container-high'
+                ? 'state-layer-pressed text-primary'
+                : 'text-on-surface hover:state-layer-hover'
             )}
             aria-current={child.isActive ? 'page' : undefined}
           >

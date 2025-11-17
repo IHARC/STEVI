@@ -31,7 +31,7 @@ export function ResourceForm({ mode, profileId, action, onDeleteAction, resource
 
   return (
     <div className="space-y-space-lg">
-      <div className="rounded-[var(--md-sys-shape-corner-extra-large)] border border-outline/20 bg-surface-container p-space-md text-body-sm text-on-surface/80">
+      <div className="rounded-3xl border border-outline/20 bg-surface-container p-space-md text-body-sm text-on-surface/80">
         <p>
           Speak in plain, strengths-based language. Highlight community collaboration, note Good Samaritan protections for overdose response, and repeat that neighbours
           should call 911 during emergencies.
@@ -241,7 +241,7 @@ export function ResourceForm({ mode, profileId, action, onDeleteAction, resource
       {isEdit && resource && onDeleteAction ? (
         <form
           action={onDeleteAction}
-          className="rounded-[var(--md-sys-shape-corner-extra-large)] border border-error/20 bg-error-container p-space-md text-on-error-container"
+          className="rounded-3xl border border-error/20 bg-error-container p-space-md text-on-error-container"
         >
           <input type="hidden" name="actor_profile_id" value={profileId} />
           <input type="hidden" name="resource_id" value={resource.id} />

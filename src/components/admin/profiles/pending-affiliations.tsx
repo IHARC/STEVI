@@ -161,7 +161,7 @@ function PendingAffiliationsContent({
             away.
           </CardDescription>
         </div>
-        <Badge variant="outline" className="self-start text-label-sm uppercase tracking-[0.12em]">
+        <Badge variant="outline" className="self-start text-label-sm uppercase">
           {pendingCountLabel}
         </Badge>
       </CardHeader>
@@ -183,7 +183,7 @@ function PendingAffiliationsContent({
             return (
               <article
                 key={entry.id}
-                className="rounded-[var(--md-sys-shape-corner-medium)] border border-outline/30 bg-surface-container-low p-space-md shadow-level-1"
+                className="rounded-xl border border-outline/30 bg-surface-container-low p-space-md shadow-level-1"
               >
                 <header className="flex flex-col gap-space-2">
                   <div className="flex flex-wrap items-center gap-space-xs">
@@ -214,11 +214,11 @@ function PendingAffiliationsContent({
                 <div className="mt-space-md flex flex-col gap-space-sm border-t border-outline/20 pt-space-sm lg:flex-row lg:items-end lg:justify-between">
                   <div className="grid gap-space-sm lg:grid-cols-[minmax(0,320px)_auto] lg:items-end lg:gap-space-md">
                     <label className="grid gap-1 text-body-sm text-on-surface">
-                      <span className="text-label-sm uppercase tracking-[0.12em] text-muted-foreground">
+                      <span className="text-label-sm uppercase text-muted-foreground">
                         Approved organization
                       </span>
                       <select
-                        className="rounded-[var(--md-sys-shape-corner-small)] border border-outline/40 bg-surface px-3 py-2 text-body-sm text-on-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                        className="rounded-lg border border-outline/40 bg-surface px-3 py-2 text-body-sm text-on-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                         value={orgValue}
                         onChange={(event) =>
                           setOrgSelections((prev) => ({ ...prev, [entry.id]: event.target.value }))
@@ -235,11 +235,11 @@ function PendingAffiliationsContent({
                     </label>
                     {entry.affiliationType === 'government_partner' ? (
                       <label className="grid gap-1 text-body-sm text-on-surface">
-                        <span className="text-label-sm uppercase tracking-[0.12em] text-muted-foreground">
+                        <span className="text-label-sm uppercase text-muted-foreground">
                           Role type
                         </span>
                         <select
-                          className="rounded-[var(--md-sys-shape-corner-small)] border border-outline/40 bg-surface px-3 py-2 text-body-sm text-on-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                          className="rounded-lg border border-outline/40 bg-surface px-3 py-2 text-body-sm text-on-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                           value={govRoleValue}
                           onChange={(event) =>
                             setGovRoleSelections((prev) => ({ ...prev, [entry.id]: event.target.value }))

@@ -29,7 +29,7 @@ export function UpdateRecoveredPasswordForm({ action, initialState, csrfToken }:
     <form action={formAction} className="mx-auto grid w-full max-w-xl gap-6 rounded-2xl border border-outline/20 bg-surface p-6 shadow-subtle">
       <input type="hidden" name="csrf_token" value={csrfToken} />
       <div className="space-y-2">
-        <h1 className="text-headline-md font-semibold tracking-tight text-on-surface">Set a new password</h1>
+        <h1 className="text-headline-md font-semibold text-on-surface">Set a new password</h1>
         <p className="text-body-md text-on-surface/70">
           You reached this page from a trusted recovery link. Create a new password below to finish resetting your
           account.
@@ -61,7 +61,7 @@ export function UpdateRecoveredPasswordForm({ action, initialState, csrfToken }:
       ) : null}
 
       {state.status === 'success' && state.message ? (
-        <Alert className="border-secondary/40 bg-secondary/10 text-on-secondary-container">
+        <Alert className="border-secondary bg-secondary-container text-on-secondary-container">
           <AlertDescription>{state.message}</AlertDescription>
         </Alert>
       ) : null}

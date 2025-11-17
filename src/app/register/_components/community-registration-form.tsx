@@ -37,7 +37,7 @@ export function CommunityRegistrationForm({
   return (
     <form
       action={formAction}
-      className="space-y-space-lg rounded-[var(--md-sys-shape-corner-extra-large)] border border-outline/40 bg-surface p-space-lg shadow-level-1 sm:p-space-xl"
+      className="space-y-space-lg rounded-3xl border border-outline/40 bg-surface p-space-lg shadow-level-1 sm:p-space-xl"
       noValidate
     >
       <input type="hidden" name="next" value={nextPath} />
@@ -45,7 +45,7 @@ export function CommunityRegistrationForm({
 
       <section className="space-y-space-sm">
         <header>
-          <p className="text-label-sm uppercase tracking-[0.12em] text-outline">Neighbour updates</p>
+          <p className="text-label-sm uppercase text-outline">Neighbour updates</p>
           <h1 className="text-title-lg font-medium text-on-surface">Join as a community member</h1>
           <p className="mt-space-xs text-body-sm text-muted-foreground">
             Get email updates about IHARC programs, submit feedback, and follow progress on local initiatives.
@@ -60,7 +60,7 @@ export function CommunityRegistrationForm({
         ) : null}
 
         {isSuccess && state.message ? (
-          <Alert className="border-primary/30 bg-primary/10 text-body-sm text-on-primary-container">
+          <Alert className="border-primary bg-primary-container text-body-sm text-on-primary-container">
             <AlertTitle>Welcome to the IHARC community</AlertTitle>
             <AlertDescription>{state.message}</AlertDescription>
           </Alert>
@@ -121,7 +121,7 @@ export function CommunityRegistrationForm({
           />
         </div>
 
-        <div className="space-y-space-sm rounded-[var(--md-sys-shape-corner-medium)] border border-outline/30 p-space-md">
+        <div className="space-y-space-sm rounded-xl border border-outline/30 p-space-md">
           <ConsentCheckbox
             id="consent_privacy_community"
             name="consent_privacy"

@@ -41,7 +41,7 @@ export function FormPageShell({
         {hasHeader ? (
           <header className={cn('flex w-full flex-col gap-space-xs', alignmentClass)}>
             {eyebrow ? (
-              <p className="text-label-sm font-medium uppercase tracking-[0.12em] text-muted-foreground">
+              <p className="text-label-sm font-medium uppercase text-muted-foreground">
                 {eyebrow}
               </p>
             ) : null}

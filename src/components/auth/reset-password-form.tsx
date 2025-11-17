@@ -67,7 +67,7 @@ export function ResetPasswordForm({ action, initialState, csrfToken }: ResetPass
     <form action={formAction} className="grid gap-6 rounded-2xl border border-outline/20 bg-surface p-6 shadow-subtle">
       <input type="hidden" name="csrf_token" value={csrfToken} />
       <div className="space-y-2">
-        <h1 className="text-headline-md font-semibold tracking-tight text-on-surface">Reset your password</h1>
+        <h1 className="text-headline-md font-semibold text-on-surface">Reset your password</h1>
         <p className="text-body-md text-on-surface/70">
           Choose how you would like to verify your identity. We will send a secure link or code before you set a new
           password.
@@ -190,7 +190,7 @@ export function ResetPasswordForm({ action, initialState, csrfToken }: ResetPass
       ) : null}
 
       {state.status === 'success' && state.message ? (
-        <Alert className="border-secondary/40 bg-secondary/10 text-on-secondary-container">
+        <Alert className="border-secondary bg-secondary-container text-on-secondary-container">
           <AlertDescription>{state.message}</AlertDescription>
         </Alert>
       ) : null}
@@ -218,7 +218,7 @@ function ContactOption({ id, value, title, description }: ContactOptionProps) {
   return (
     <label
       htmlFor={id}
-      className="flex cursor-pointer items-start gap-3 rounded-xl border border-outline/40 bg-surface-container p-3 text-body-md font-medium text-on-surface shadow-subtle transition hover:border-primary/40 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary"
+      className="flex cursor-pointer items-start gap-3 rounded-xl border border-outline/40 bg-surface-container p-3 text-body-md font-medium text-on-surface shadow-subtle transition state-layer-color-primary hover:border-primary hover:state-layer-hover focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:state-layer-focus"
     >
       <RadioGroupItem id={id} value={value} className="mt-1" />
       <span>

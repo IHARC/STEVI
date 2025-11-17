@@ -74,7 +74,7 @@ export default async function AdminPage() {
   return (
     <div className="page-shell page-stack">
       <header className="flex flex-col gap-space-xs">
-        <p className="text-label-sm font-medium uppercase tracking-[0.12em] text-muted-foreground">Team tools</p>
+        <p className="text-label-sm font-medium uppercase text-muted-foreground">Team tools</p>
         <h1 className="text-headline-lg text-on-surface sm:text-display-sm">STEVI admin workspace</h1>
         <p className="max-w-3xl text-body-md text-muted-foreground sm:text-body-lg">
           Manage profile access, documents, and notifications for neighbours using the STEVI client portal. These tools

@@ -60,12 +60,12 @@ export function UserMenu({
             <p className="text-label-sm text-on-surface/70">{positionTitle}</p>
           ) : null}
           {awaitingVerification ? (
-            <p className="mt-1 rounded-full bg-primary/10 px-2 py-0.5 text-label-sm font-semibold text-primary">
+            <p className="mt-1 rounded-full px-2 py-0.5 text-label-sm font-semibold text-primary state-layer-color-primary state-layer-hover">
               Awaiting verification
             </p>
           ) : null}
           {affiliationRevoked ? (
-            <p className="mt-1 rounded-full bg-inverse-surface/10 px-2 py-0.5 text-label-sm font-semibold text-inverse-on-surface">
+            <p className="mt-1 rounded-full px-2 py-0.5 text-label-sm font-semibold text-inverse-on-surface state-layer-color-inverse-surface state-layer-hover">
               Verification declined
             </p>
           ) : null}

@@ -82,7 +82,7 @@ export function ClientIntakeForm({
 
       <section className="space-y-space-md">
         <header>
-          <p className="text-label-sm uppercase tracking-[0.12em] text-outline">New client intake</p>
+          <p className="text-label-sm uppercase text-outline">New client intake</p>
           <h1 className="text-headline-sm font-semibold text-on-surface">Tell us how to keep you safe</h1>
           <p className="mt-space-xs text-body-md text-muted-foreground">
             Every field is optional unless labelled required. Share only what feels right today — you can update details
@@ -98,7 +98,7 @@ export function ClientIntakeForm({
         ) : null}
 
         {isSuccess ? (
-          <Alert className="border-primary/30 bg-primary/10 text-on-primary-container">
+          <Alert className="border-primary bg-primary-container text-on-primary-container">
             <AlertTitle>Intake received</AlertTitle>
             <AlertDescription className="space-y-space-sm">
               <p>{state.message ?? 'Thanks for sharing your details. An outreach worker will follow up shortly.'}</p>
@@ -382,7 +382,7 @@ function ContactOption({ value, title, description }: { value: ContactChoice; ti
   return (
     <label
       htmlFor={`contact_choice_${value}`}
-      className="flex cursor-pointer items-start gap-space-sm rounded-xl border border-outline/40 bg-surface-container p-space-sm text-left text-title-sm font-medium text-on-surface shadow-subtle transition hover:border-primary/40 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary"
+      className="flex cursor-pointer items-start gap-space-sm rounded-xl border border-outline/40 bg-surface-container p-space-sm text-left text-title-sm font-medium text-on-surface shadow-subtle transition state-layer-color-primary hover:border-primary hover:state-layer-hover focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:state-layer-focus"
     >
       <RadioGroupItem id={`contact_choice_${value}`} value={value} className="mt-space-2xs" />
       <span className="text-title-sm font-medium">

@@ -38,7 +38,7 @@ export function TopNavDropdown({ label, items }: TopNavDropdownProps) {
             'group inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-body-md font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
             isActive || open
               ? 'bg-brand-soft text-brand'
-              : 'text-on-surface/80 hover:bg-brand-soft hover:text-brand'
+              : 'text-on-surface/80 state-layer-color-primary hover:state-layer-hover hover:text-brand'
           )}
           aria-label={`${label} menu`}
           aria-haspopup="menu"
@@ -64,8 +64,8 @@ export function TopNavDropdown({ label, items }: TopNavDropdownProps) {
                 key={item.href}
                 asChild
                 className={cn(
-                  'group rounded-2xl px-3 py-2.5 outline-none transition focus:bg-primary/10 focus:text-on-surface',
-                  itemActive ? 'bg-primary/15 text-primary' : 'hover:bg-surface-container-high'
+                  'group rounded-2xl px-3 py-2.5 text-on-surface outline-none transition state-layer-color-primary focus:state-layer-focus',
+                  itemActive ? 'state-layer-pressed text-primary' : 'hover:state-layer-hover'
                 )}
               >
                 <Link href={item.href} aria-current={itemActive ? 'page' : undefined} className="flex flex-col">

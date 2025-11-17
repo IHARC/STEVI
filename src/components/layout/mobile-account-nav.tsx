@@ -49,14 +49,14 @@ export function MobileAccountNav({
         </div>
       </div>
       {awaitingVerification || affiliationRevoked ? (
-        <div className="mt-3 flex flex-wrap gap-2 text-label-sm font-semibold uppercase tracking-[0.12em]">
+        <div className="mt-3 flex flex-wrap gap-2 text-label-sm font-semibold uppercase">
           {awaitingVerification ? (
-            <span className="inline-flex rounded-full bg-primary/10 px-2 py-1 text-primary">
+            <span className="inline-flex rounded-full px-2 py-1 text-primary state-layer-color-primary state-layer-hover">
               Awaiting verification
             </span>
           ) : null}
           {affiliationRevoked ? (
-            <span className="inline-flex rounded-full bg-inverse-surface/10 px-2 py-1 text-inverse-on-surface">
+            <span className="inline-flex rounded-full px-2 py-1 text-inverse-on-surface state-layer-color-inverse-surface state-layer-hover">
               Verification declined
             </span>
           ) : null}
@@ -67,10 +67,10 @@ export function MobileAccountNav({
           <Link
             key={item.href}
             href={item.href}
-            className="inline-flex w-full items-center justify-between rounded-full border border-outline/20 bg-surface px-4 py-2 text-body-md font-semibold text-on-surface/90 transition hover:border-primary/40 hover:bg-primary/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+            className="inline-flex w-full items-center justify-between rounded-full border border-outline/20 bg-surface px-4 py-2 text-body-md font-semibold text-on-surface/90 transition state-layer-color-primary hover:border-primary hover:state-layer-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:state-layer-focus active:state-layer-pressed"
           >
             <span>{item.label}</span>
-            <span className="text-label-sm font-medium uppercase tracking-[0.12em] text-on-surface/60">
+            <span className="text-label-sm font-medium uppercase text-on-surface/60">
               Open
             </span>
           </Link>

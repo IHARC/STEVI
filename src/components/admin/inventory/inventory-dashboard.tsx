@@ -133,9 +133,13 @@ export function InventoryDashboardSection({ dashboard }: InventoryDashboardProps
 
 function SummaryCard({ label, value, accent = false }: { label: string; value: string; accent?: boolean }) {
   return (
-    <Card className={accent ? 'border-destructive/40 bg-destructive/5 text-destructive-foreground' : ''}>
+    <Card
+      className={
+        accent ? 'border-destructive text-destructive-foreground state-layer-color-error state-layer-hover' : ''
+      }
+    >
       <CardHeader>
-        <CardTitle className="text-label-sm font-medium uppercase tracking-[0.12em] text-muted-foreground">{label}</CardTitle>
+        <CardTitle className="text-label-sm font-medium uppercase text-muted-foreground">{label}</CardTitle>
       </CardHeader>
       <CardContent>
         <p className="text-headline-sm font-semibold text-on-surface">{value}</p>

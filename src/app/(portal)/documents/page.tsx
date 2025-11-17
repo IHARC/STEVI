@@ -69,7 +69,7 @@ export default async function DocumentsPage() {
   return (
     <div className="page-shell page-stack">
       <header className="flex flex-col gap-space-xs">
-        <p className="text-label-sm font-medium uppercase tracking-[0.12em] text-muted-foreground">
+        <p className="text-label-sm font-medium uppercase text-muted-foreground">
           Secure locker
         </p>
         <h1 className="text-headline-lg text-on-surface sm:text-display-sm">Your shared documents</h1>
@@ -94,7 +94,7 @@ export default async function DocumentsPage() {
             {documents.map((document) => (
               <article
                 key={document.id}
-                className="flex h-full flex-col justify-between rounded-[var(--md-sys-shape-corner-medium)] border border-outline/20 bg-surface-container-low p-space-md shadow-level-1"
+                className="flex h-full flex-col justify-between rounded-xl border border-outline/20 bg-surface-container-low p-space-md shadow-level-1"
               >
                 <div className="space-y-space-xs">
                   <div className="flex items-center justify-between gap-2">

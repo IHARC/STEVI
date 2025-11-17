@@ -38,7 +38,7 @@ export function VolunteerApplicationForm({
   return (
     <form
       action={formAction}
-      className="space-y-space-lg rounded-[var(--md-sys-shape-corner-extra-large)] border border-outline/40 bg-surface p-space-lg shadow-level-1 sm:p-space-xl"
+      className="space-y-space-lg rounded-3xl border border-outline/40 bg-surface p-space-lg shadow-level-1 sm:p-space-xl"
       noValidate
     >
       <input type="hidden" name="next" value={nextPath} />
@@ -46,7 +46,7 @@ export function VolunteerApplicationForm({
 
       <section className="space-y-space-sm">
         <header>
-          <p className="text-label-sm uppercase tracking-[0.12em] text-outline">Volunteer onboarding</p>
+          <p className="text-label-sm uppercase text-outline">Volunteer onboarding</p>
           <h1 className="text-title-lg font-medium text-on-surface">Apply as a volunteer</h1>
           <p className="mt-space-xs text-body-sm text-muted-foreground">
             Tell us how you’d like to help neighbours. We’ll reach out about orientation, background checks, and shifts.
@@ -61,7 +61,7 @@ export function VolunteerApplicationForm({
         ) : null}
 
         {isSuccess && state.message ? (
-          <Alert className="border-primary/30 bg-primary/10 text-body-sm text-on-primary-container">
+          <Alert className="border-primary bg-primary-container text-body-sm text-on-primary-container">
             <AlertTitle>Volunteer application received</AlertTitle>
             <AlertDescription>{state.message}</AlertDescription>
           </Alert>
@@ -138,7 +138,7 @@ export function VolunteerApplicationForm({
           </div>
         </div>
 
-        <div className="space-y-space-sm rounded-[var(--md-sys-shape-corner-medium)] border border-outline/30 p-space-md">
+        <div className="space-y-space-sm rounded-xl border border-outline/30 p-space-md">
           <ConsentCheckbox
             id="consent_privacy_volunteer"
             name="consent_privacy"

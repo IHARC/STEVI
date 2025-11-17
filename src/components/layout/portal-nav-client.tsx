@@ -60,7 +60,7 @@ function PortalNavLink({ link, pathname }: PortalNavLinkProps) {
         'flex-shrink-0 whitespace-nowrap rounded-full px-space-md py-space-2xs text-label-md font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-container',
         active
           ? 'bg-primary text-on-primary shadow-level-1'
-          : 'text-on-surface/80 hover:bg-primary/10 hover:text-primary',
+          : 'text-on-surface/80 state-layer-color-primary hover:state-layer-hover hover:text-primary',
       )}
       aria-current={active ? 'page' : undefined}
     >

@@ -72,7 +72,7 @@ export function ProfileContactCard({
   }, [otpPending, phoneState.maskedPhone, phoneState.phone, phoneInput]);
 
   return (
-    <section className="grid gap-space-lg rounded-[var(--md-sys-shape-corner-extra-large)] border border-outline/20 bg-surface p-space-lg shadow-level-1">
+    <section className="grid gap-space-lg rounded-3xl border border-outline/20 bg-surface p-space-lg shadow-level-1">
       <div className="flex flex-col gap-space-xs">
         <h2 className="text-title-lg font-medium text-on-surface">Contact preferences</h2>
         <p className="text-body-sm text-on-surface/70">
@@ -182,13 +182,13 @@ export function ProfileContactCard({
         ) : null}
 
         {otpPending && phoneState.message ? (
-          <Alert className="border-primary/30 bg-primary/10 text-body-sm text-on-primary-container">
+          <Alert className="border-primary bg-primary-container text-body-sm text-on-primary-container">
             <AlertDescription>{phoneState.message}</AlertDescription>
           </Alert>
         ) : null}
 
         {phoneState.status === 'success' && phoneState.message ? (
-          <Alert className="border-secondary/40 bg-secondary/10 text-on-secondary-container">
+          <Alert className="border-secondary bg-secondary-container text-on-secondary-container">
             <AlertDescription>{phoneState.message}</AlertDescription>
           </Alert>
         ) : null}

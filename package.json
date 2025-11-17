@@ -11,6 +11,7 @@
     "start": "next start",
     "preview": "next start -p 4321",
     "build": "node build.js",
+    "sync:tokens": "node scripts/generate-design-tokens.mjs",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",

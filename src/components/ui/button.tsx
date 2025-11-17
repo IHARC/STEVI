@@ -18,7 +18,7 @@ const buttonVariants = cva(
         secondary:
           "bg-secondary-container text-on-secondary-container shadow-level-1 hover:bg-secondary-container/90 focus-visible:ring-secondary",
         ghost:
-          "text-primary hover:bg-primary/10 focus-visible:ring-primary/40",
+          "text-primary state-layer-color-primary hover:state-layer-hover focus-visible:ring-primary focus-visible:state-layer-focus active:state-layer-pressed",
         link: "text-primary underline-offset-4 hover:underline focus-visible:ring-transparent",
       },
       size: {
