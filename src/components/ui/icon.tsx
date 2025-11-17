@@ -14,14 +14,14 @@ const ICON_SIZE_MAP = {
 
 export type IconSize = keyof typeof ICON_SIZE_MAP
 
-export interface IconProps extends React.ComponentPropsWithoutRef<SVGSVGElement> {
+export interface IconProps extends React.ComponentPropsWithoutRef<"svg"> {
   icon: LucideIcon
   size?: IconSize
   strokeWidth?: number
   decorative?: boolean
 }
 
-export const Icon = React.forwardRef<SVGSVGElement, IconProps>(
+export const Icon = React.forwardRef<React.ElementRef<"svg">, IconProps>(
   (
     {
       icon: IconPrimitive,

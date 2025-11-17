@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { ArrowRight, FileQuestion, HandHeart, LogIn, UsersRound, UserPlus } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { resolveNextPath } from '@/lib/auth';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { FormPageShell } from '@/components/layout/form-page-shell';
@@ -24,7 +25,7 @@ const ACTIONS: Array<{
   title: string;
   description: string;
   href: (next: string) => string;
-  glyph: React.ElementType;
+  glyph: LucideIcon;
 }> = [
   {
     title: 'Get help (new to IHARC)',
