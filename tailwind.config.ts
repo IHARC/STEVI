@@ -382,8 +382,8 @@ const config: Config = {
         },
       },
       animation: {
-        'accordion-down': 'accordion-down 0.2s ease-out',
-        'accordion-up': 'accordion-up 0.2s ease-out',
+        'accordion-down': 'accordion-down var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-standard)',
+        'accordion-up': 'accordion-up var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-standard)',
       },
       transitionDuration: {
         250: '250ms',

@@ -3,13 +3,7 @@ import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
-import { getStateLayerClasses } from "@/lib/state-layer"
-
-const navStateLayer = {
-  primary: `${getStateLayerClasses("primary")} hover:text-primary`,
-  brand: `${getStateLayerClasses("primary")} hover:text-brand`,
-  inverse: `${getStateLayerClasses("inverse")} hover:text-inverse-on-surface`,
-}
+import { getStateLayerClasses, type StateLayerTone } from "@/lib/state-layer"
 
 const navPillVariants = cva(
   "inline-flex items-center gap-space-2xs rounded-full text-label-md font-medium transition-colors motion-duration-short motion-ease-standard focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface",
@@ -45,21 +39,6 @@ const navPillVariants = cva(
         active: true,
         className: "bg-inverse-surface text-inverse-on-surface shadow-level-1",
       },
-      {
-        tone: "primary",
-        active: false,
-        className: navStateLayer.primary,
-      },
-      {
-        tone: "brand",
-        active: false,
-        className: navStateLayer.brand,
-      },
-      {
-        tone: "inverse",
-        active: false,
-        className: navStateLayer.inverse,
-      },
     ],
     defaultVariants: {
       tone: "primary",
@@ -73,14 +52,41 @@ export interface NavPillProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof navPillVariants> {
   asChild?: boolean
+  stateLayerTone?: StateLayerTone | null
+}
+
+const NAV_PILL_STATE_LAYERS: Record<
+  NonNullable<VariantProps<typeof navPillVariants>["tone"]>,
+  StateLayerTone
+> = {
+  primary: "brand",
+  brand: "brand",
+  inverse: "inverse",
+}
+
+const NAV_PILL_HOVER_TEXT: Record<
+  NonNullable<VariantProps<typeof navPillVariants>["tone"]>,
+  string
+> = {
+  primary: "hover:text-primary",
+  brand: "hover:text-brand",
+  inverse: "hover:text-inverse-on-surface",
 }
 
 export const NavPill = React.forwardRef<HTMLButtonElement, NavPillProps>(
-  ({ className, tone, active, size, asChild = false, ...props }, ref) => {
+  (
+    { className, tone, active, size, stateLayerTone, asChild = false, ...props },
+    ref,
+  ) => {
     const Comp = asChild ? Slot : "button"
+    const resolvedTone = tone ?? "primary"
+    const fallbackTone = NAV_PILL_STATE_LAYERS[resolvedTone]
+    const toneForLayer = stateLayerTone ?? fallbackTone
+    const stateLayerClass = !active ? getStateLayerClasses(toneForLayer) : ""
+    const hoverTextClass = !active ? NAV_PILL_HOVER_TEXT[resolvedTone] : ""
     return (
       <Comp
-        className={cn(navPillVariants({ tone, active, size }), className)}
+        className={cn(navPillVariants({ tone, active, size }), stateLayerClass, hoverTextClass, className)}
         ref={ref}
         {...props}
       />

@@ -377,7 +377,7 @@
   }
 
   .card {
-    @apply rounded-xl border p-6 transition-all duration-250 ease-out;
+    @apply rounded-xl border p-6 transition-all motion-duration-medium motion-ease-standard;
     background-color: rgb(var(--md-sys-color-surface-container-high) / 1);
     border-color: rgb(var(--md-sys-color-outline-variant) / 1);
     color: rgb(var(--md-sys-color-on-surface) / 1);
@@ -390,7 +390,7 @@
   }
 
   .skip-link {
-    @apply fixed -top-10 left-4 z-50 rounded-full px-4 py-2 transition-all duration-300;
+    @apply fixed -top-10 left-4 z-50 rounded-full px-4 py-2 transition-all motion-duration-long motion-ease-standard;
     background-color: rgb(var(--md-sys-color-primary) / 1);
     color: rgb(var(--md-sys-color-on-primary) / 1);
   }
@@ -488,6 +488,38 @@
 
   .motion-ease-accelerate {
     transition-timing-function: var(--md-sys-motion-easing-accelerate);
+  }
+
+  .motion-animate-duration-short {
+    animation-duration: var(--md-sys-motion-duration-short);
+  }
+
+  .motion-animate-duration-medium {
+    animation-duration: var(--md-sys-motion-duration-medium);
+  }
+
+  .motion-animate-duration-long {
+    animation-duration: var(--md-sys-motion-duration-long);
+  }
+
+  .motion-animate-duration-extra-long {
+    animation-duration: var(--md-sys-motion-duration-extra-long);
+  }
+
+  .motion-animate-ease-standard {
+    animation-timing-function: var(--md-sys-motion-easing-standard);
+  }
+
+  .motion-animate-ease-emphasized {
+    animation-timing-function: var(--md-sys-motion-easing-emphasized);
+  }
+
+  .motion-animate-ease-decelerate {
+    animation-timing-function: var(--md-sys-motion-easing-decelerate);
+  }
+
+  .motion-animate-ease-accelerate {
+    animation-timing-function: var(--md-sys-motion-easing-accelerate);
   }
 
   .visually-hidden {

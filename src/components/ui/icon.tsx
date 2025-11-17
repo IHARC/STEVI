@@ -4,6 +4,8 @@ import type { LucideIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const ICON_SIZE_MAP = {
+  indicator: "var(--md-sys-spacing-xs)",
+  control: "calc(var(--md-sys-spacing-sm) - (var(--md-sys-spacing-2xs)/2))",
   xs: "var(--md-sys-size-icon-xs)",
   sm: "var(--md-sys-size-icon-sm)",
   md: "var(--md-sys-size-icon-md)",
@@ -25,7 +27,7 @@ export const Icon = React.forwardRef<SVGSVGElement, IconProps>(
       icon: IconPrimitive,
       className,
       size = "md",
-      strokeWidth = 1.75,
+      strokeWidth = 1.5,
       decorative = true,
       style,
       ...props

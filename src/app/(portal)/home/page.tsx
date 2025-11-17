@@ -251,7 +251,7 @@ export default async function HomePage() {
             <article className="rounded-xl border border-outline/20 p-space-md">
               <div className="flex items-center justify-between">
                 <p className="text-title-sm font-medium text-on-surface">Income stabilization</p>
-                <Badge className="bg-primary text-on-primary">New</Badge>
+                <Badge>New</Badge>
               </div>
               <p className="mt-space-xs text-body-sm text-muted-foreground">
                 Let the team know if you want help with part-time gig matching or training stipends.
