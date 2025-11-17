@@ -11,6 +11,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
+import { NavPill } from '@/components/ui/nav-pill';
+import { Icon } from '@/components/ui/icon';
 
 export type TopNavDropdownItem = {
   href: string;
@@ -32,24 +34,24 @@ export function TopNavDropdown({ label, items }: TopNavDropdownProps) {
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <button
+        <NavPill
           type="button"
-          className={cn(
-            'group inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-body-md font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
-            isActive || open
-              ? 'bg-brand-soft text-brand'
-              : 'text-on-surface/80 state-layer-color-primary hover:state-layer-hover hover:text-brand'
-          )}
+          tone="brand"
+          size="lg"
+          active={isActive || open}
+          className="group gap-1.5"
           aria-label={`${label} menu`}
           aria-haspopup="menu"
           aria-expanded={open}
         >
           <span>{label}</span>
-          <ChevronDown
-            className={cn('h-4 w-4 transition-transform', open ? 'rotate-180' : undefined)}
+          <Icon
+            icon={ChevronDown}
+            size="sm"
+            className={cn('transition-transform motion-duration-short motion-ease-standard', open ? 'rotate-180' : undefined)}
             aria-hidden
           />
-        </button>
+        </NavPill>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="start"
@@ -60,20 +62,21 @@ export function TopNavDropdown({ label, items }: TopNavDropdownProps) {
             const itemActive = pathname.startsWith(item.href);
 
             return (
-              <DropdownMenuItem
-                key={item.href}
-                asChild
-                className={cn(
-                  'group rounded-2xl px-3 py-2.5 text-on-surface outline-none transition state-layer-color-primary focus:state-layer-focus',
-                  itemActive ? 'state-layer-pressed text-primary' : 'hover:state-layer-hover'
-                )}
-              >
-                <Link href={item.href} aria-current={itemActive ? 'page' : undefined} className="flex flex-col">
-                  <span className="text-body-md font-semibold">{item.label}</span>
-                  {item.description ? (
-                    <span className="text-label-sm text-on-surface/70">{item.description}</span>
-                  ) : null}
-                </Link>
+              <DropdownMenuItem key={item.href} asChild className="p-0">
+                <NavPill
+                  asChild
+                  tone="brand"
+                  size="lg"
+                  active={itemActive}
+                  className="w-full flex-col items-start gap-0 rounded-2xl px-3 py-2.5 text-left"
+                >
+                  <Link href={item.href} aria-current={itemActive ? 'page' : undefined} className="flex flex-col">
+                    <span className="text-body-md font-semibold">{item.label}</span>
+                    {item.description ? (
+                      <span className="text-label-sm text-on-surface/70">{item.description}</span>
+                    ) : null}
+                  </Link>
+                </NavPill>
               </DropdownMenuItem>
             );
           })}

@@ -33,6 +33,7 @@ import {
   Underline as UnderlineIcon,
   Undo,
 } from 'lucide-react';
+import { Icon } from '@/components/ui/icon';
 
 type ResourceRichTextEditorProps = {
   name: string;
@@ -147,7 +148,7 @@ export function ResourceRichTextEditor({ name, label, description, defaultValue 
               })
             }
           >
-            <Bold className="h-4 w-4" />
+            <Icon icon={Bold} size="sm" aria-hidden />
           </Toggle>
           <Toggle
             type="button"
@@ -160,7 +161,7 @@ export function ResourceRichTextEditor({ name, label, description, defaultValue 
               })
             }
           >
-            <Italic className="h-4 w-4" />
+            <Icon icon={Italic} size="sm" aria-hidden />
           </Toggle>
           <Toggle
             type="button"
@@ -173,7 +174,7 @@ export function ResourceRichTextEditor({ name, label, description, defaultValue 
               })
             }
           >
-            <UnderlineIcon className="h-4 w-4" />
+            <Icon icon={UnderlineIcon} size="sm" aria-hidden />
           </Toggle>
           <Button
             type="button"
@@ -212,7 +213,7 @@ export function ResourceRichTextEditor({ name, label, description, defaultValue 
               })
             }
           >
-            <List className="h-4 w-4" />
+            <Icon icon={List} size="sm" aria-hidden />
           </Toggle>
           <Toggle
             type="button"
@@ -225,7 +226,7 @@ export function ResourceRichTextEditor({ name, label, description, defaultValue 
               })
             }
           >
-            <ListOrdered className="h-4 w-4" />
+            <Icon icon={ListOrdered} size="sm" aria-hidden />
           </Toggle>
           <Toggle
             type="button"
@@ -238,14 +239,14 @@ export function ResourceRichTextEditor({ name, label, description, defaultValue 
               })
             }
           >
-            <Quote className="h-4 w-4" />
+            <Icon icon={Quote} size="sm" aria-hidden />
           </Toggle>
 
           <div className="ml-auto flex items-center gap-2">
             <Dialog open={linkDialogOpen} onOpenChange={setLinkDialogOpen}>
               <DialogTrigger asChild>
                 <Button type="button" size="sm" variant="ghost" aria-label="Insert link">
-                  <LinkIcon className="h-4 w-4" />
+                  <Icon icon={LinkIcon} size="sm" aria-hidden />
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-md">
@@ -281,7 +282,7 @@ export function ResourceRichTextEditor({ name, label, description, defaultValue 
             <Dialog open={htmlDialogOpen} onOpenChange={setHtmlDialogOpen}>
               <DialogTrigger asChild>
                 <Button type="button" size="sm" variant="ghost" aria-label="Insert HTML">
-                  <FileCode className="h-4 w-4" />
+                  <Icon icon={FileCode} size="sm" aria-hidden />
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-lg">
@@ -317,7 +318,7 @@ export function ResourceRichTextEditor({ name, label, description, defaultValue 
               onClick={() => editor?.chain().focus().undo().run()}
               disabled={!editor?.can().undo()}
             >
-              <Undo className="h-4 w-4" />
+              <Icon icon={Undo} size="sm" aria-hidden />
             </Button>
             <Button
               type="button"
@@ -327,7 +328,7 @@ export function ResourceRichTextEditor({ name, label, description, defaultValue 
               onClick={() => editor?.chain().focus().redo().run()}
               disabled={!editor?.can().redo()}
             >
-              <Redo className="h-4 w-4" />
+              <Icon icon={Redo} size="sm" aria-hidden />
             </Button>
           </div>
         </div>

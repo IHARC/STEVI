@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { PortalLink } from '@/lib/portal-access';
-import { cn } from '@/lib/utils';
+import { NavPill } from '@/components/ui/nav-pill';
 
 type PortalNavClientProps = {
   links: PortalLink[];
@@ -54,17 +54,10 @@ function PortalNavLink({ link, pathname }: PortalNavLinkProps) {
   const active = link.exact ? pathname === link.href : pathname.startsWith(link.href);
 
   return (
-    <Link
-      href={link.href}
-      className={cn(
-        'flex-shrink-0 whitespace-nowrap rounded-full px-space-md py-space-2xs text-label-md font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-container',
-        active
-          ? 'bg-primary text-on-primary shadow-level-1'
-          : 'text-on-surface/80 state-layer-color-primary hover:state-layer-hover hover:text-primary',
-      )}
-      aria-current={active ? 'page' : undefined}
-    >
-      {link.label}
-    </Link>
+    <NavPill asChild active={active} className="flex-shrink-0 whitespace-nowrap" tone="primary">
+      <Link href={link.href} aria-current={active ? 'page' : undefined}>
+        {link.label}
+      </Link>
+    </NavPill>
   );
 }

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ChevronDown, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { NavPill } from '@/components/ui/nav-pill';
 import {
   Sheet,
   SheetContent,
@@ -13,6 +14,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
+import { Icon } from '@/components/ui/icon';
 import { getPublicPortalLinks } from '@/lib/portal-access';
 import { cn } from '@/lib/utils';
 import type { TopNavDropdownItem } from '@/components/layout/top-nav-dropdown';
@@ -120,10 +122,10 @@ export function TopNavMobile({ links, accountSection, quickAction }: TopNavMobil
         <Button
           variant="ghost"
           size="icon"
-          className="h-10 w-10 rounded-full bg-transparent text-on-surface hover:bg-surface-container"
+          className="h-10 w-10 rounded-full bg-transparent text-on-surface transition-colors motion-duration-short motion-ease-standard hover:bg-surface-container"
           aria-label="Open navigation menu"
         >
-          <Menu className="h-5 w-5" aria-hidden />
+          <Icon icon={Menu} size="md" aria-hidden />
         </Button>
       </SheetTrigger>
       <SheetContent
@@ -144,25 +146,28 @@ export function TopNavMobile({ links, accountSection, quickAction }: TopNavMobil
                 </p>
                 {section.items.map((item) =>
                   item.type === 'link' ? (
-                    <Link
+                    <NavPill
                       key={item.href}
-                      href={item.href}
-                      onClick={() => setOpen(false)}
-                      className={cn(
-                        'flex items-center justify-between rounded-full px-4 py-3 text-body-lg font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
-                        item.isActive
-                          ? 'bg-secondary-container text-on-secondary-container'
-                          : 'text-on-surface hover:bg-surface-container-highest'
-                      )}
-                      aria-current={item.isActive ? 'page' : undefined}
+                      asChild
+                      tone="primary"
+                      size="lg"
+                      active={item.isActive}
+                      className="w-full justify-between rounded-full px-4 py-3 text-body-lg font-medium"
                     >
-                      <span>{item.label}</span>
-                      {item.isActive ? (
-                        <span className="text-label-sm font-semibold uppercase text-primary">
-                          Active
-                        </span>
-                      ) : null}
-                    </Link>
+                      <Link
+                        href={item.href}
+                        onClick={() => setOpen(false)}
+                        aria-current={item.isActive ? 'page' : undefined}
+                        className="flex w-full items-center justify-between"
+                      >
+                        <span>{item.label}</span>
+                        {item.isActive ? (
+                          <span className="text-label-sm font-semibold uppercase text-primary">
+                            Active
+                          </span>
+                        ) : null}
+                      </Link>
+                    </NavPill>
                   ) : (
                     <MobileNavCollapsible key={item.label} item={item} closeSheet={() => setOpen(false)} />
                   )
@@ -236,7 +241,7 @@ function MobileNavCollapsible({ item, closeSheet }: MobileNavCollapsibleProps) {
         type="button"
         onClick={() => setExpanded((previous) => !previous)}
         className={cn(
-          'flex w-full items-center justify-between rounded-2xl px-4 py-3 text-body-lg font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
+          'flex w-full items-center justify-between rounded-2xl px-4 py-3 text-body-lg font-medium transition-colors motion-duration-short motion-ease-standard focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
           item.isActive || expanded
             ? 'bg-secondary-container text-on-secondary-container'
             : 'text-on-surface hover:bg-surface-container-high'
@@ -249,8 +254,10 @@ function MobileNavCollapsible({ item, closeSheet }: MobileNavCollapsibleProps) {
           {item.isActive ? (
             <span className="text-label-sm font-semibold uppercase text-primary">Active</span>
           ) : null}
-          <ChevronDown
-            className={cn('h-4 w-4 transition-transform', expanded ? 'rotate-180' : undefined)}
+          <Icon
+            icon={ChevronDown}
+            size="sm"
+            className={cn('transition-transform motion-duration-short motion-ease-standard', expanded ? 'rotate-180' : undefined)}
             aria-hidden
           />
         </div>
@@ -261,23 +268,26 @@ function MobileNavCollapsible({ item, closeSheet }: MobileNavCollapsibleProps) {
         aria-hidden={!expanded}
       >
         {item.items.map((child) => (
-          <Link
+          <NavPill
             key={child.href}
-            href={child.href}
-            onClick={closeSheet}
-            className={cn(
-              'rounded-xl px-3 py-2 text-body-md transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface state-layer-color-primary focus-visible:state-layer-focus',
-              child.isActive
-                ? 'state-layer-pressed text-primary'
-                : 'text-on-surface hover:state-layer-hover'
-            )}
-            aria-current={child.isActive ? 'page' : undefined}
+            asChild
+            tone="primary"
+            size="lg"
+            active={child.isActive}
+            className="w-full flex-col items-start gap-0 rounded-xl px-3 py-2 text-left"
           >
-            <span className="block font-semibold">{child.label}</span>
-            {child.description ? (
-              <span className="mt-0.5 block text-label-sm text-on-surface/70">{child.description}</span>
-            ) : null}
-          </Link>
+            <Link
+              href={child.href}
+              onClick={closeSheet}
+              aria-current={child.isActive ? 'page' : undefined}
+              className="w-full text-body-md"
+            >
+              <span className="block font-semibold">{child.label}</span>
+              {child.description ? (
+                <span className="mt-0.5 block text-label-sm text-on-surface/70">{child.description}</span>
+              ) : null}
+            </Link>
+          </NavPill>
         ))}
       </div>
     </div>

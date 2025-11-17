@@ -11,11 +11,12 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Icon } from '@/components/ui/icon';
 
 const THEME_OPTIONS = [
-  { key: 'light', label: 'Light', icon: Sun },
-  { key: 'dark', label: 'Dark', icon: Moon },
-  { key: 'system', label: 'System', icon: Monitor },
+  { key: 'light', label: 'Light', glyph: Sun },
+  { key: 'dark', label: 'Dark', glyph: Moon },
+  { key: 'system', label: 'System', glyph: Monitor },
 ] as const;
 
 export function ThemeToggle() {
@@ -50,17 +51,17 @@ export function ThemeToggle() {
         <Button
           variant="ghost"
           size="icon"
-          className="h-10 w-10 rounded-full bg-transparent text-on-surface hover:bg-surface-container focus-visible:ring-primary"
+          className="h-10 w-10 rounded-full bg-transparent text-on-surface transition-colors motion-duration-short motion-ease-standard hover:bg-surface-container focus-visible:ring-primary"
           aria-label="Toggle color theme"
         >
-          <ActiveIcon className="h-5 w-5" aria-hidden />
+          <Icon icon={ActiveIcon} size="md" aria-hidden />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-44 rounded-lg">
         <DropdownMenuLabel className="text-label-sm uppercase text-on-surface-variant">
           Appearance
         </DropdownMenuLabel>
-        {THEME_OPTIONS.map(({ key, label, icon: Icon }) => (
+        {THEME_OPTIONS.map(({ key, label, glyph: Glyph }) => (
           <DropdownMenuItem
             key={key}
             onSelect={(event) => {
@@ -69,7 +70,7 @@ export function ThemeToggle() {
             }}
             className="flex items-center gap-2 text-body-md"
           >
-            <Icon className="h-4 w-4" aria-hidden />
+            <Icon icon={Glyph} size="sm" aria-hidden />
             <span className="flex-1 text-on-surface">{label}</span>
             {selectedTheme === key ? (
               <span className="text-label-sm font-semibold uppercase text-primary">On</span>

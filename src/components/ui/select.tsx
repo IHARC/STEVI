@@ -3,6 +3,7 @@ import * as SelectPrimitive from "@radix-ui/react-select"
 import { Check, ChevronDown, ChevronUp } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { Icon } from "@/components/ui/icon"
 
 const Select = SelectPrimitive.Root
 
@@ -17,14 +18,14 @@ const SelectTrigger = React.forwardRef<
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      "flex h-12 w-full items-center justify-between rounded-lg border border-outline bg-surface px-space-md py-space-sm text-body-md text-on-surface shadow-level-1 ring-offset-surface placeholder:text-on-surface-variant/70 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-surface disabled:cursor-not-allowed disabled:opacity-60 [&>span]:line-clamp-1 md:h-11",
-      className
+      "flex h-12 w-full items-center justify-between rounded-lg border border-outline bg-surface px-space-md py-space-sm text-body-md text-on-surface shadow-level-1 ring-offset-surface transition-colors motion-duration-medium motion-ease-standard placeholder:text-on-surface-variant/70 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-surface disabled:cursor-not-allowed disabled:opacity-60 [&>span]:line-clamp-1 md:h-11",
+      className,
     )}
     {...props}
   >
     {children}
     <SelectPrimitive.Icon asChild>
-      <ChevronDown className="h-4 w-4 text-on-surface-variant" />
+      <Icon icon={ChevronDown} size="sm" className="text-on-surface-variant" aria-hidden />
     </SelectPrimitive.Icon>
   </SelectPrimitive.Trigger>
 ))
@@ -38,11 +39,11 @@ const SelectScrollUpButton = React.forwardRef<
     ref={ref}
     className={cn(
       "flex cursor-default items-center justify-center py-1",
-      className
+      className,
     )}
     {...props}
   >
-    <ChevronUp className="h-4 w-4" />
+    <Icon icon={ChevronUp} size="sm" aria-hidden />
   </SelectPrimitive.ScrollUpButton>
 ))
 SelectScrollUpButton.displayName = SelectPrimitive.ScrollUpButton.displayName
@@ -55,11 +56,11 @@ const SelectScrollDownButton = React.forwardRef<
     ref={ref}
     className={cn(
       "flex cursor-default items-center justify-center py-1",
-      className
+      className,
     )}
     {...props}
   >
-    <ChevronDown className="h-4 w-4" />
+    <Icon icon={ChevronDown} size="sm" aria-hidden />
   </SelectPrimitive.ScrollDownButton>
 ))
 SelectScrollDownButton.displayName =
@@ -116,14 +117,14 @@ const SelectItem = React.forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex w-full cursor-default select-none items-center rounded-[calc(var(--md-sys-shape-corner-small)/1.4)] py-space-sm pl-8 pr-3 text-body-md text-on-surface outline-none focus:bg-secondary-container focus:text-on-secondary-container data-[disabled]:pointer-events-none data-[disabled]:opacity-40",
-      className
+      "relative flex w-full cursor-default select-none items-center rounded-[calc(var(--md-sys-shape-corner-small)/1.4)] py-space-sm pl-8 pr-3 text-body-md text-on-surface outline-none transition-colors motion-duration-short motion-ease-standard focus:bg-secondary-container focus:text-on-secondary-container data-[disabled]:pointer-events-none data-[disabled]:opacity-40",
+      className,
     )}
     {...props}
   >
     <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
       <SelectPrimitive.ItemIndicator>
-        <Check className="h-4 w-4" />
+        <Icon icon={Check} size="sm" aria-hidden />
       </SelectPrimitive.ItemIndicator>
     </span>
 
