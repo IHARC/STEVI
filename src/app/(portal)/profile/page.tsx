@@ -187,7 +187,7 @@ export default async function PortalProfilePage() {
         throw error;
       }
 
-      revalidatePath('/profile');
+      await revalidatePath('/profile');
       return { status: 'success', message: 'Profile updated.' };
     } catch (error) {
       if (error instanceof Error) {
@@ -288,7 +288,7 @@ export default async function PortalProfilePage() {
           throw verifyError;
         }
 
-        revalidatePath('/profile');
+        await revalidatePath('/profile');
         return {
           status: 'success',
           phone: normalizedPhone,

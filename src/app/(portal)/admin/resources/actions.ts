@@ -7,6 +7,21 @@ import { RESOURCE_KIND_LABELS, normalizeResourceSlug, type Resource, type Resour
 import { sanitizeResourceHtml } from '@/lib/sanitize-resource-html';
 import { buildResourceEmbedPayload, parseResourceAttachmentsInput, parseResourceTagsInput } from './resource-utils';
 
+async function revalidatePaths(
+  ...paths: Array<string | null | undefined>
+): Promise<void> {
+  const unique = Array.from(
+    new Set(
+      paths
+        .filter((path): path is string => Boolean(path))
+        .map((path) => path.trim())
+        .filter(Boolean),
+    ),
+  );
+
+  await Promise.all(unique.map((path) => revalidatePath(path)));
+}
+
 export async function createResourcePage(formData: FormData) {
   const supa = await createSupabaseServerClient();
   const portalClient = supa.schema('portal');
@@ -116,9 +131,7 @@ export async function createResourcePage(formData: FormData) {
 
   const adminResourcePath = `/admin/resources/${slug}`;
 
-  revalidatePath('/admin');
-  revalidatePath('/admin/resources');
-  revalidatePath(adminResourcePath);
+  await revalidatePaths('/admin', '/admin/resources', adminResourcePath);
 }
 
 export async function updateResourcePage(formData: FormData) {
@@ -241,16 +254,19 @@ export async function updateResourcePage(formData: FormData) {
 
   const adminResourcePath = `/admin/resources/${slug}`;
 
-  revalidatePath('/admin');
-  revalidatePath('/admin/resources');
-  revalidatePath(adminResourcePath);
-  revalidatePath('/resources');
-  revalidatePath(`/resources/${slug}`);
-  if (currentSlug && currentSlug !== slug) {
-    revalidatePath(`/resources/${currentSlug}`);
-    revalidatePath(`/admin/resources/${currentSlug}`);
-  }
-  revalidatePath('/sitemap.xml');
+  const legacySlugPath = currentSlug && currentSlug !== slug ? `/resources/${currentSlug}` : null;
+  const legacyAdminPath = currentSlug && currentSlug !== slug ? `/admin/resources/${currentSlug}` : null;
+
+  await revalidatePaths(
+    '/admin',
+    '/admin/resources',
+    adminResourcePath,
+    '/resources',
+    `/resources/${slug}`,
+    legacySlugPath,
+    legacyAdminPath,
+    '/sitemap.xml',
+  );
 }
 
 export async function deleteResourcePage(formData: FormData) {
@@ -299,12 +315,12 @@ export async function deleteResourcePage(formData: FormData) {
     },
   });
 
-  revalidatePath('/admin');
-  revalidatePath('/admin/resources');
-  revalidatePath('/resources');
-  if (resourceSlug) {
-    revalidatePath(`/resources/${resourceSlug}`);
-    revalidatePath(`/admin/resources/${resourceSlug}`);
-  }
-  revalidatePath('/sitemap.xml');
+  await revalidatePaths(
+    '/admin',
+    '/admin/resources',
+    '/resources',
+    resourceSlug ? `/resources/${resourceSlug}` : null,
+    resourceSlug ? `/admin/resources/${resourceSlug}` : null,
+    '/sitemap.xml',
+  );
 }
