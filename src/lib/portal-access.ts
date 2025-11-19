@@ -36,6 +36,11 @@ const PORTAL_NAV_BLUEPRINT: PortalLinkBlueprint[] = [
     requiresProfileRoles: ['admin'],
   },
   {
+    href: '/admin/marketing/footer',
+    label: 'Marketing footer',
+    requiresProfileRoles: ['admin'],
+  },
+  {
     href: '/admin/inventory',
     label: 'Inventory workspace',
     requiresIharcRoles: INVENTORY_ALLOWED_ROLES,
@@ -58,6 +63,7 @@ export type PortalAccess = {
   canManageNotifications: boolean;
   canReviewProfiles: boolean;
   canViewMetrics: boolean;
+  canManageSiteFooter: boolean;
 };
 
 export async function loadPortalAccess(
@@ -82,6 +88,7 @@ export async function loadPortalAccess(
   );
 
   const canManageNotifications = profile.role === 'admin';
+  const canManageSiteFooter = profile.role === 'admin';
   const canReviewProfiles = canAccessAdminWorkspace;
   const canViewMetrics = profile.role === 'admin';
 
@@ -96,6 +103,7 @@ export async function loadPortalAccess(
     canManageNotifications,
     canReviewProfiles,
     canViewMetrics,
+    canManageSiteFooter,
   };
 }
 
@@ -161,6 +169,10 @@ export function buildUserMenuLinks(access: PortalAccess): PortalLink[] {
 
   if (access.canManageResources) {
     links.push({ href: '/admin/resources', label: 'Resource library' });
+  }
+
+  if (access.canManageSiteFooter) {
+    links.push({ href: '/admin/marketing/footer', label: 'Marketing footer' });
   }
 
   if (access.canAccessInventoryWorkspace) {

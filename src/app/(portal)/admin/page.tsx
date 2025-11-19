@@ -33,6 +33,13 @@ const adminTasks: AdminTask[] = [
     href: '/admin/resources',
   },
   {
+    id: 'marketing-footer',
+    title: 'Public site footer',
+    description: 'Update the footer text displayed on every page of the public IHARC marketing site.',
+    actionLabel: 'Edit footer copy',
+    href: '/admin/marketing/footer',
+  },
+  {
     id: 'profile-verification',
     title: 'Profile verification queue',
     description:
