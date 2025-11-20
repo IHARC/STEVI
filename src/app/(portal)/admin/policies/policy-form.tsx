@@ -4,7 +4,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
 import { ResourceRichTextEditor } from '@/components/admin/resource-rich-text-editor';
 import { POLICY_CATEGORY_LABELS, type Policy } from '@/lib/policies';
 
