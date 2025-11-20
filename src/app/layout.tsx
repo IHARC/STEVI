@@ -5,7 +5,6 @@ import '@/styles/main.css';
 import './globals.css';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { AnalyticsProvider } from '@/components/providers/analytics-provider';
-import { ConsentBanner } from '@/components/providers/consent-banner';
 
 const DEFAULT_APP_URL = 'https://stevi.iharc.ca';
 const appUrl =
@@ -68,7 +67,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Suspense fallback={null}>
             <AnalyticsProvider measurementId={GA_MEASUREMENT_ID} enabled={ANALYTICS_ENABLED} />
           </Suspense>
-          <ConsentBanner />
           {children}
         </ThemeProvider>
       </body>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import Script from 'next/script';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { trackClientEvent } from '@/lib/telemetry';
@@ -15,38 +15,14 @@ type AnalyticsWindow = Window & {
   gtag?: (...args: unknown[]) => void;
 };
 
-type ConsentState = 'granted' | 'denied' | null;
-
 export function AnalyticsProvider({ measurementId, enabled = true }: AnalyticsProviderProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const search = useMemo(() => searchParams?.toString() ?? '', [searchParams]);
   const lastTrackedPathRef = useRef<string | null>(null);
-  const [consentState, setConsentState] = useState<ConsentState>(() => {
-    if (typeof window === 'undefined') {
-      return null;
-    }
-    return getStoredConsent();
-  });
 
   useEffect(() => {
     if (!enabled || !measurementId || typeof window === 'undefined') {
-      return;
-    }
-
-    const handler = (event: Event) => {
-      const consentDetail = (event as CustomEvent<ConsentState>).detail;
-      if (consentDetail === 'granted' || consentDetail === 'denied') {
-        setConsentState(consentDetail);
-      }
-    };
-
-    window.addEventListener('iharc-consent-change', handler);
-    return () => window.removeEventListener('iharc-consent-change', handler);
-  }, [enabled, measurementId]);
-
-  useEffect(() => {
-    if (!enabled || !measurementId || consentState !== 'granted' || typeof window === 'undefined') {
       return;
     }
 
@@ -87,9 +63,9 @@ export function AnalyticsProvider({ measurementId, enabled = true }: AnalyticsPr
     });
 
     trackClientEvent('page_view', payload);
-  }, [enabled, measurementId, pathname, search, consentState]);
+  }, [enabled, measurementId, pathname, search]);
 
-  if (!enabled || !measurementId || consentState !== 'granted') {
+  if (!enabled || !measurementId) {
     return null;
   }
 
@@ -129,14 +105,4 @@ export function AnalyticsProvider({ measurementId, enabled = true }: AnalyticsPr
   );
 }
 
-function getStoredConsent(): ConsentState {
-  try {
-    const stored = window.localStorage.getItem('iharc-consent-preference');
-    if (stored === 'granted' || stored === 'denied') {
-      return stored;
-    }
-  } catch {
-    // ignore
-  }
-  return null;
-}
+// Consent is assumed granted by default; no banner or preference storage.

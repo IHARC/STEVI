@@ -54,6 +54,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       await validateCsrfFromForm(formData);
     } catch (error) {
       if (error instanceof InvalidCsrfTokenError) {
+        if (process.env.NODE_ENV !== 'production') {
+          console.error('[login] csrf invalid');
+        }
         return { error: CSRF_ERROR_MESSAGE, contactMethod: 'email' };
       }
       throw error;

@@ -3,6 +3,7 @@ export const CSRF_COOKIE_FALLBACK = 'stevi-csrf';
 export const CSRF_FIELD_NAME = 'csrf_token';
 export const CSRF_ERROR_MESSAGE = 'For your safety, refresh the page and try again.';
 export const TOKEN_LENGTH_BYTES = 32;
+export const CSRF_HEADER_NAME = 'x-stevi-csrf';
 
 export type CsrfCookieOptions = {
   httpOnly: true;

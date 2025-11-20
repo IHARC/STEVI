@@ -4,6 +4,7 @@ import {
   CSRF_COOKIE_PRIMARY,
   CSRF_COOKIE_FALLBACK,
   TOKEN_LENGTH_BYTES,
+  CSRF_HEADER_NAME,
   buildCsrfCookieOptions,
 } from '@/lib/csrf/constants';
 
@@ -24,6 +25,17 @@ export async function middleware(request: NextRequest) {
     response.cookies.set(CSRF_COOKIE_PRIMARY, csrfToken, buildCsrfCookieOptions(true));
   }
 
+  console.error('[middleware] csrf issued', {
+    tokenPrefix: csrfToken.slice(0, 8),
+    hasFallback: Boolean(response.cookies.get(CSRF_COOKIE_FALLBACK)),
+    hasHost: Boolean(response.cookies.get(CSRF_COOKIE_PRIMARY)),
+    isSecure,
+    requestCookies: request.cookies.getAll().map((c) => c.name),
+    responseCookies: response.cookies.getAll().map((c) => c.name),
+    requestHeaderCookie: requestHeaders?.get('cookie') ?? null,
+    forwardedProtocol: request.headers.get('x-forwarded-proto'),
+  });
+
   return response;
 }
 
@@ -43,6 +55,8 @@ function ensureCsrfOnRequest(request: NextRequest): {
     request.cookies.get(CSRF_COOKIE_PRIMARY)?.value || request.cookies.get(CSRF_COOKIE_FALLBACK)?.value;
 
   if (existing) {
+    const headers = new Headers(request.headers);
+    headers.set(CSRF_HEADER_NAME, existing);
     return { csrfToken: existing, isSecure };
   }
 
@@ -52,6 +66,7 @@ function ensureCsrfOnRequest(request: NextRequest): {
   const cookieName = isSecure ? CSRF_COOKIE_PRIMARY : CSRF_COOKIE_FALLBACK;
   const serialized = `${cookieName}=${token}`;
   requestHeaders.set('cookie', existingCookieHeader ? `${existingCookieHeader}; ${serialized}` : serialized);
+  requestHeaders.set(CSRF_HEADER_NAME, token);
 
   return { csrfToken: token, requestHeaders, isSecure };
 }
