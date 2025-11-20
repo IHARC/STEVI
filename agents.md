@@ -9,7 +9,7 @@
 
 ## Source System Snapshot
 - Historic portal code lives inside the marketing repo (`I.H.A.R.C-Public-Website/src/app/portal/*`). That implementation focused on ideation and community moderation — we now treat it solely as a design reference.
-- Admin workflows (resources, metrics, invitations, notifications, etc.) currently exist inside the same marketing repo under `src/app/command-center/*`.
+- Admin workflows (resources, metrics, invitations, notifications, policies, etc.) currently exist inside the same marketing repo under `src/app/command-center/*`; STEVI is now the home for those mutations.
 - Supabase functions (`portal-attachments`, `portal-moderate`, `portal-admin-invite`, etc.) and schemas (`portal`, `core`, `inventory`, `justice`) are shared across marketing, STEVI OPS, and this client portal.
 
 ## Target Architecture
@@ -43,6 +43,7 @@
 - Extract admin tools from marketing repo, re-scope to STEVI (all backed by Supabase mutations and audit logs):
   - ✅ Profile verification & invitations (Supabase `portal.profiles`, `portal.profile_invites`, RLS-protected RPCs).
   - ✅ Resource/report library management (`portal.resource_pages`, attachments, embed helpers) now managed in STEVI under `/admin/resources`. Marketing site continues to read published rows.
+  - ✅ Policies module (`portal.policies`, new enums/status) managed at `/admin/policies`, using TipTap rich text, RLS respecting roles, audit logging, and marketing cache revalidation.
   - ✅ Notifications queue + templates (`portal.notifications`, existing edge functions) to broadcast outreach updates.
   - ☐ Metrics ingestion controls (if still required) and any governance settings surfaced to staff (`portal.metric_catalog`, `portal.metric_daily`, etc.).
 - Lock down the marketing app to read-only access patterns by exposing pre-approved SQL views or RPCs. Ensure STEVI admin revalidation triggers cover both apps (`/admin`, marketing routes, sitemap, etc.) so Supabase updates propagate everywhere.
@@ -66,7 +67,7 @@
 ## Current Deliverables & Milestones
 - ✅ Repo scaffolding + base layout.
 - 🚧 Client dashboard, appointments, documents, support, profile.
-- 🚧 Admin workspace migration (resources, invites, notifications, metrics).
+- 🚧 Admin workspace migration (resources, invites, notifications, policies, metrics).
 - ⬜ Integration testing + Supabase documentation.
 - ⬜ Marketing hand-off & dual-launch comms.
 
