@@ -7,10 +7,15 @@ export async function middleware(request: NextRequest) {
   // sees the same value the browser will store. Without this, first-page loads
   // would render a mismatched token and trigger a CSRF validation failure on
   // the first sign-in attempt.
-  const { csrfToken, isSecure } = ensureCsrfOnRequest(request);
+  const requestHeaders = new Headers(request.headers);
+  const { csrfToken, isSecure } = ensureCsrfOnRequest(request, requestHeaders);
 
-  let response = NextResponse.next();
-  response = await updateSession(request, response);
+  const supabaseCookies = await updateSession(request, requestHeaders);
+
+  const response = NextResponse.next({ request: { headers: requestHeaders } });
+  supabaseCookies.forEach(({ name, value, options }) => {
+    response.cookies.set(name, value, options);
+  });
   // Mirror the request token onto the response so the browser persists it.
   const fallbackOptions = buildCsrfCookieOptions(isSecure);
   response.cookies.set(CSRF_COOKIE_FALLBACK, csrfToken, fallbackOptions);
@@ -26,7 +31,10 @@ export const config = {
   matcher: ['/:path*'],
 };
 
-function ensureCsrfOnRequest(request: NextRequest): {
+function ensureCsrfOnRequest(
+  request: NextRequest,
+  requestHeaders: Headers,
+): {
   csrfToken: string;
   isSecure: boolean;
 } {
@@ -43,6 +51,7 @@ function ensureCsrfOnRequest(request: NextRequest): {
 
   // Mutate the incoming request's cookies so downstream server components read the same token.
   request.cookies.set(cookieName, token);
+  requestHeaders.set('cookie', request.cookies.toString());
 
   return { csrfToken: token, isSecure };
 }
