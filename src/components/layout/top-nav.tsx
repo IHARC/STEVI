@@ -1,7 +1,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { CommandPalette } from '@/components/layout/command-palette';
 import { getUserNavigation } from '@/components/layout/user-nav';
-import type { PortalAccess } from '@/lib/portal-access';
+import { buildCommandPaletteItems, type PortalAccess } from '@/lib/portal-access';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
 
 type TopNavProps = {
@@ -10,6 +11,7 @@ type TopNavProps = {
 
 export async function TopNav({ portalAccess }: TopNavProps = {}) {
   const { desktop, mobile } = await getUserNavigation(portalAccess);
+  const commands = buildCommandPaletteItems(portalAccess ?? null);
 
   return (
     <header className="border-b border-outline/20 bg-surface/95 text-on-surface backdrop-blur supports-[backdrop-filter]:bg-surface/80">
@@ -47,10 +49,12 @@ export async function TopNav({ portalAccess }: TopNavProps = {}) {
           </Link>
         </div>
         <div className="flex items-center gap-space-xs md:hidden">
+          <CommandPalette items={commands} compactTrigger />
           {mobile}
           <ThemeToggle />
         </div>
         <div className="hidden items-center gap-space-sm md:flex">
+          <CommandPalette items={commands} />
           <ThemeToggle />
           {desktop}
         </div>
