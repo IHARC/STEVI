@@ -33,6 +33,15 @@ jobs:
           app_build_command: "npm run build" # Ensure Next.js build script runs
           output_location: ".next" # Deploy Next.js build output
           ###### End of Repository/Build Configurations ######
+        env:
+          # Supabase: required at build-time for client bundles _and_ runtime for SSR functions.
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          NEXT_PUBLIC_ANALYTICS_DISABLED: ${{ secrets.NEXT_PUBLIC_ANALYTICS_DISABLED }}
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'

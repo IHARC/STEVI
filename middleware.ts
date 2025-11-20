@@ -1,17 +1,27 @@
 import { type NextRequest } from 'next/server';
 import { updateSession } from '@/lib/supabase/middleware';
-import { CSRF_COOKIE_NAME, CSRF_COOKIE_OPTIONS, TOKEN_LENGTH_BYTES } from '@/lib/csrf/constants';
+import {
+  CSRF_COOKIE_PRIMARY,
+  CSRF_COOKIE_FALLBACK,
+  TOKEN_LENGTH_BYTES,
+  buildCsrfCookieOptions,
+} from '@/lib/csrf/constants';
 
 export async function middleware(request: NextRequest) {
   // Ensure the CSRF token is present on the incoming request so the page render
   // sees the same value the browser will store. Without this, first-page loads
   // would render a mismatched token and trigger a CSRF validation failure on
   // the first sign-in attempt.
-  const { csrfToken, requestHeaders } = ensureCsrfOnRequest(request);
+  const { csrfToken, requestHeaders, isSecure } = ensureCsrfOnRequest(request);
 
   const response = await updateSession(request, requestHeaders);
   // Mirror the request token onto the response so the browser persists it.
-  response.cookies.set(CSRF_COOKIE_NAME, csrfToken, CSRF_COOKIE_OPTIONS);
+  const fallbackOptions = buildCsrfCookieOptions(isSecure);
+  response.cookies.set(CSRF_COOKIE_FALLBACK, csrfToken, fallbackOptions);
+  // Add a __Host- cookie when the request is secure to harden production.
+  if (isSecure) {
+    response.cookies.set(CSRF_COOKIE_PRIMARY, csrfToken, buildCsrfCookieOptions(true));
+  }
 
   return response;
 }
@@ -22,19 +32,33 @@ export const config = {
   ],
 };
 
-function ensureCsrfOnRequest(request: NextRequest): { csrfToken: string; requestHeaders?: Headers } {
-  const existing = request.cookies.get(CSRF_COOKIE_NAME)?.value;
+function ensureCsrfOnRequest(request: NextRequest): {
+  csrfToken: string;
+  isSecure: boolean;
+  requestHeaders?: Headers;
+} {
+  const isSecure = isSecureRequest(request);
+  const existing =
+    request.cookies.get(CSRF_COOKIE_PRIMARY)?.value || request.cookies.get(CSRF_COOKIE_FALLBACK)?.value;
+
   if (existing) {
-    return { csrfToken: existing };
+    return { csrfToken: existing, isSecure };
   }
 
   const token = createCsrfToken();
   const requestHeaders = new Headers(request.headers);
   const existingCookieHeader = requestHeaders.get('cookie');
-  const serialized = `${CSRF_COOKIE_NAME}=${token}`;
+  const cookieName = isSecure ? CSRF_COOKIE_PRIMARY : CSRF_COOKIE_FALLBACK;
+  const serialized = `${cookieName}=${token}`;
   requestHeaders.set('cookie', existingCookieHeader ? `${existingCookieHeader}; ${serialized}` : serialized);
 
-  return { csrfToken: token, requestHeaders };
+  return { csrfToken: token, requestHeaders, isSecure };
+}
+
+function isSecureRequest(request: NextRequest): boolean {
+  if (request.nextUrl.protocol === 'https:') return true;
+  const forwardedProto = request.headers.get('x-forwarded-proto');
+  return forwardedProto === 'https';
 }
 
 function createCsrfToken(): string {

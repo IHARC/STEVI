@@ -1,12 +1,18 @@
 import crypto from 'node:crypto';
 import { cookies } from 'next/headers';
 import {
-  CSRF_COOKIE_NAME,
+  CSRF_COOKIE_PRIMARY,
+  CSRF_COOKIE_FALLBACK,
   CSRF_FIELD_NAME,
   TOKEN_LENGTH_BYTES,
 } from '@/lib/csrf/constants';
 
-export { CSRF_COOKIE_NAME, CSRF_FIELD_NAME, CSRF_ERROR_MESSAGE } from '@/lib/csrf/constants';
+export {
+  CSRF_COOKIE_PRIMARY,
+  CSRF_COOKIE_FALLBACK,
+  CSRF_FIELD_NAME,
+} from '@/lib/csrf/constants';
+export { CSRF_ERROR_MESSAGE } from '@/lib/csrf/constants';
 
 export class InvalidCsrfTokenError extends Error {
   constructor() {
@@ -25,7 +31,8 @@ function toBuffer(value: string): Buffer {
 
 export async function getOrCreateCsrfToken(): Promise<string> {
   const cookieStore = await cookies();
-  const existing = cookieStore.get(CSRF_COOKIE_NAME)?.value;
+  const existing =
+    cookieStore.get(CSRF_COOKIE_PRIMARY)?.value ?? cookieStore.get(CSRF_COOKIE_FALLBACK)?.value;
 
   if (existing) {
     return existing;
@@ -36,7 +43,8 @@ export async function getOrCreateCsrfToken(): Promise<string> {
 
 export async function assertValidCsrfToken(value: string | null | undefined): Promise<void> {
   const cookieStore = await cookies();
-  const stored = cookieStore.get(CSRF_COOKIE_NAME)?.value;
+  const stored =
+    cookieStore.get(CSRF_COOKIE_PRIMARY)?.value ?? cookieStore.get(CSRF_COOKIE_FALLBACK)?.value;
 
   if (!stored || typeof value !== 'string' || !value) {
     throw new InvalidCsrfTokenError();
