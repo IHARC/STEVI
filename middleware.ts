@@ -1,4 +1,4 @@
-import type { NextRequest, NextResponse } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
 import { updateSession } from '@/lib/supabase/middleware';
 import { CSRF_COOKIE_NAME, CSRF_COOKIE_OPTIONS, TOKEN_LENGTH_BYTES } from '@/lib/csrf/constants';
 
