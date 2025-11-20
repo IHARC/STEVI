@@ -1,4 +1,4 @@
-import { type NextRequest } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
 import { updateSession } from '@/lib/supabase/middleware';
 import {
   CSRF_COOKIE_PRIMARY,
@@ -14,7 +14,8 @@ export async function middleware(request: NextRequest) {
   // the first sign-in attempt.
   const { csrfToken, requestHeaders, isSecure } = ensureCsrfOnRequest(request);
 
-  const response = await updateSession(request, requestHeaders);
+  let response = NextResponse.next(requestHeaders ? { request: { headers: requestHeaders } } : undefined);
+  response = await updateSession(request, response);
   // Mirror the request token onto the response so the browser persists it.
   const fallbackOptions = buildCsrfCookieOptions(isSecure);
   response.cookies.set(CSRF_COOKIE_FALLBACK, csrfToken, fallbackOptions);
