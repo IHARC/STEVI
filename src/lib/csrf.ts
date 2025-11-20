@@ -3,7 +3,6 @@ import { cookies } from 'next/headers';
 import {
   CSRF_COOKIE_NAME,
   CSRF_FIELD_NAME,
-  CSRF_ERROR_MESSAGE,
   TOKEN_LENGTH_BYTES,
 } from '@/lib/csrf/constants';
 

@@ -2,21 +2,21 @@ import { createServerClient } from '@supabase/ssr';
 import type { CookieMethodsServer } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import type { Database } from '@/types/supabase';
+import { getSupabaseEnvOrNull } from '@/lib/supabase/config';
 
 type CookieBatch = Parameters<NonNullable<CookieMethodsServer['setAll']>>[0];
 
 export async function updateSession(request: NextRequest, requestHeaders?: Headers) {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const env = getSupabaseEnvOrNull();
 
-  if (!supabaseUrl || !supabaseAnonKey) {
+  if (!env) {
     return NextResponse.next(requestHeaders ? { request: { headers: requestHeaders } } : undefined);
   }
 
   const nextInit = requestHeaders ? { request: { headers: requestHeaders } } : undefined;
   let supabaseResponse = NextResponse.next(nextInit);
 
-  const supabase = createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
+  const supabase = createServerClient<Database>(env.url, env.anonKey, {
     cookies: {
       getAll() {
         return request.cookies.getAll();
