@@ -7,6 +7,7 @@ import { NO_ORGANIZATION_VALUE } from '@/lib/constants';
 import { ensurePortalProfile, type PortalProfile } from '@/lib/profile';
 import type { SupabaseServerClient } from '@/lib/supabase/types';
 import type { Database } from '@/types/supabase';
+import { CSRF_ERROR_MESSAGE, InvalidCsrfTokenError, validateCsrfFromForm } from '@/lib/csrf';
 
 const ADMIN_ROOT_PATH = '/admin';
 const ADMIN_PROFILES_PATH = '/admin/profiles';
@@ -58,11 +59,7 @@ function getErrorMessage(error: unknown): string {
   return 'Something went wrong. Try again in a moment.';
 }
 
-async function loadModeratorContext(actorProfileId: string) {
-  if (!actorProfileId) {
-    throw new Error('Moderator context is required.');
-  }
-
+async function loadModeratorContext() {
   const supabase = await createSupabaseServerClient();
   const {
     data: { user },
@@ -73,24 +70,13 @@ async function loadModeratorContext(actorProfileId: string) {
     throw userError ?? new Error('Sign in to continue.');
   }
 
-  const portal = supabase.schema('portal');
-  const { data: actorProfile, error: actorError } = await portal
-    .from('profiles')
-    .select('id, role, user_id')
-    .eq('id', actorProfileId)
-    .maybeSingle();
-
-  if (actorError || !actorProfile) {
-    throw actorError ?? new Error('Moderator profile not found.');
-  }
-
-  if (actorProfile.user_id !== user.id) {
-    throw new Error('Moderator session mismatch.');
-  }
+  const actorProfile = await ensurePortalProfile(supabase, user.id);
 
   if (!['moderator', 'admin'].includes(actorProfile.role)) {
     throw new Error('Moderator access is required.');
   }
+
+  const portal = supabase.schema('portal');
 
   return { supabase, portal, user, actorProfile };
 }
@@ -108,7 +94,7 @@ function requireGovernmentRole(value: string | null): GovernmentRoleType {
 
 export async function sendPartnerInviteAction(formData: FormData): Promise<ActionResult> {
   try {
-    const actorProfileId = requireString(formData, 'actor_profile_id', 'Moderator context is required.');
+    await validateCsrfFromForm(formData);
     const email = requireString(formData, 'invite_email', 'Enter the contact email.');
     const displayName = readString(formData, 'invite_display_name');
     const positionTitle = readString(formData, 'invite_position_title');
@@ -129,7 +115,7 @@ export async function sendPartnerInviteAction(formData: FormData): Promise<Actio
       throw new Error('Provide a valid email address.');
     }
 
-    const context = await loadModeratorContext(actorProfileId);
+    const context = await loadModeratorContext();
 
     const {
       data: sessionData,
@@ -148,7 +134,7 @@ export async function sendPartnerInviteAction(formData: FormData): Promise<Actio
         affiliationType,
         organizationId,
         message,
-        actorProfileId,
+        actorProfileId: context.actorProfile.id,
       },
       headers: { Authorization: `Bearer ${sessionData.session.access_token}` },
     });
@@ -162,18 +148,21 @@ export async function sendPartnerInviteAction(formData: FormData): Promise<Actio
     return { success: true };
   } catch (error) {
     console.error('sendPartnerInviteAction error', error);
+    if (error instanceof InvalidCsrfTokenError) {
+      return { success: false, error: CSRF_ERROR_MESSAGE };
+    }
     return { success: false, error: getErrorMessage(error) };
   }
 }
 
 export async function approveAffiliationAction(formData: FormData): Promise<ActionResult> {
   try {
-    const actorProfileId = requireString(formData, 'actor_profile_id', 'Moderator context is required.');
+    await validateCsrfFromForm(formData);
     const profileId = requireString(formData, 'profile_id', 'Profile context is required.');
     const approvedOrganizationId = normalizeOrganizationId(formData.get('approved_organization_id'));
     const approvedGovernmentRole = readString(formData, 'approved_government_role');
 
-    const { supabase, portal, actorProfile } = await loadModeratorContext(actorProfileId);
+    const { supabase, portal, actorProfile } = await loadModeratorContext();
 
     const { data: pendingProfile, error: profileError } = await portal
       .from('profiles')
@@ -253,16 +242,19 @@ export async function approveAffiliationAction(formData: FormData): Promise<Acti
     return { success: true };
   } catch (error) {
     console.error('approveAffiliationAction error', error);
+    if (error instanceof InvalidCsrfTokenError) {
+      return { success: false, error: CSRF_ERROR_MESSAGE };
+    }
     return { success: false, error: getErrorMessage(error) };
   }
 }
 
 export async function declineAffiliationAction(formData: FormData): Promise<ActionResult> {
   try {
-    const actorProfileId = requireString(formData, 'actor_profile_id', 'Moderator context is required.');
+    await validateCsrfFromForm(formData);
     const profileId = requireString(formData, 'profile_id', 'Profile context is required.');
 
-    const { supabase, portal, actorProfile } = await loadModeratorContext(actorProfileId);
+    const { supabase, portal, actorProfile } = await loadModeratorContext();
 
     const { data: pendingProfile, error: profileError } = await portal
       .from('profiles')
@@ -320,6 +312,9 @@ export async function declineAffiliationAction(formData: FormData): Promise<Acti
     return { success: true };
   } catch (error) {
     console.error('declineAffiliationAction error', error);
+    if (error instanceof InvalidCsrfTokenError) {
+      return { success: false, error: CSRF_ERROR_MESSAGE };
+    }
     return { success: false, error: getErrorMessage(error) };
   }
 }

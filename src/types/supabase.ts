@@ -2179,9 +2179,82 @@ export type Database = {
             columns: ["updated_by_profile_id"];
           referencedRelation: "profiles";
           referencedColumns: ["id"];
-        }?,
-      ];
-    };
+          }?,
+        ];
+      };
+      policies: {
+        Row: {
+          id: string;
+          slug: string;
+          title: string;
+          category: Database["portal"]["Enums"]["policy_category"];
+          short_summary: string;
+          body_html: string;
+          status: Database["portal"]["Enums"]["policy_status"];
+          is_published: boolean | null;
+          sort_order: number;
+          last_reviewed_at: string;
+          effective_from: string | null;
+          effective_to: string | null;
+          internal_ref: string | null;
+          created_by_profile_id: string | null;
+          updated_by_profile_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          slug: string;
+          title: string;
+          category?: Database["portal"]["Enums"]["policy_category"];
+          short_summary: string;
+          body_html?: string;
+          status?: Database["portal"]["Enums"]["policy_status"];
+          is_published?: boolean | null;
+          sort_order?: number;
+          last_reviewed_at?: string;
+          effective_from?: string | null;
+          effective_to?: string | null;
+          internal_ref?: string | null;
+          created_by_profile_id?: string | null;
+          updated_by_profile_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          slug?: string;
+          title?: string;
+          category?: Database["portal"]["Enums"]["policy_category"];
+          short_summary?: string;
+          body_html?: string;
+          status?: Database["portal"]["Enums"]["policy_status"];
+          is_published?: boolean | null;
+          sort_order?: number;
+          last_reviewed_at?: string;
+          effective_from?: string | null;
+          effective_to?: string | null;
+          internal_ref?: string | null;
+          created_by_profile_id?: string | null;
+          updated_by_profile_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "policies_created_by_profile_id_fkey";
+            columns: ["created_by_profile_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }?,
+          {
+            foreignKeyName: "policies_updated_by_profile_id_fkey";
+            columns: ["updated_by_profile_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }?,
+        ];
+      };
       site_footer_settings: {
         Row: {
           id: string;
@@ -2805,6 +2878,14 @@ export type Database = {
         | "dataset"
         | "other";
       resource_embed_placement: "above" | "below";
+      policy_category:
+        | "client_rights"
+        | "safety"
+        | "staff"
+        | "governance"
+        | "operations"
+        | "finance";
+      policy_status: "draft" | "published" | "archived";
       petition_display_preference:
         | "anonymous"
         | "first_name_last_initial"

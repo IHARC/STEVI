@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
+import { getOrCreateCsrfToken } from '@/lib/csrf';
 import { updateSiteFooterAction } from './actions';
 
 export const dynamic = 'force-dynamic';
@@ -27,6 +28,8 @@ export default async function MarketingFooterAdminPage() {
   if (profile.role !== 'admin') {
     redirect('/home');
   }
+
+  const csrfToken = await getOrCreateCsrfToken();
 
   const portal = supabase.schema('portal');
   const { data: footer } = await portal
@@ -74,7 +77,7 @@ export default async function MarketingFooterAdminPage() {
         </CardHeader>
         <CardContent>
           <form action={updateSiteFooterAction} className="space-y-space-md">
-            <input type="hidden" name="actor_profile_id" value={profile.id} />
+            <input type="hidden" name="csrf_token" value={csrfToken} />
             <input type="hidden" name="slot" value="public_marketing" />
 
             <div className="space-y-space-2xs">

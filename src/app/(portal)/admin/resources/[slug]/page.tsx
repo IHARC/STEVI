@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
+import { getOrCreateCsrfToken } from '@/lib/csrf';
 import { ResourceForm } from '../resource-form';
 import { deleteResourcePage, updateResourcePage } from '../actions';
 import { getResourceBySlug } from '@/lib/resources';
@@ -39,6 +40,8 @@ export default async function AdminResourceEditPage({ params }: { params: RouteP
     notFound();
   }
 
+  const csrfToken = await getOrCreateCsrfToken();
+
   return (
     <div className="page-shell page-stack text-on-surface">
       <div className="mx-auto w-full max-w-[min(100%,52rem)] space-y-space-sm">
@@ -70,7 +73,7 @@ export default async function AdminResourceEditPage({ params }: { params: RouteP
         <CardContent className="space-y-space-lg">
           <ResourceForm
             mode="edit"
-            profileId={profile.id}
+            csrfToken={csrfToken}
             action={updateResourcePage}
             onDeleteAction={deleteResourcePage}
             resource={resource}

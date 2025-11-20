@@ -30,7 +30,7 @@ const allowedAttributes: IOptions['allowedAttributes'] = {
   img: ['src', 'alt', 'title', 'loading', 'width', 'height'],
 };
 
-const allowedSchemes = ['http', 'https', 'mailto'];
+const allowedSchemes = ['https', 'mailto'];
 
 export function sanitizeResourceHtml(input: string) {
   return sanitizeHtml(input, {
@@ -38,8 +38,8 @@ export function sanitizeResourceHtml(input: string) {
     allowedAttributes,
     allowedSchemes,
     allowedSchemesByTag: {
-      iframe: ['http', 'https'],
-      img: ['http', 'https'],
+      iframe: ['https'],
+      img: ['https'],
     },
     transformTags: {
       iframe: (tagName, attribs) => {

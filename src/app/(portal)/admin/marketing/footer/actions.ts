@@ -3,6 +3,8 @@
 import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { logAuditEvent } from '@/lib/audit';
+import { ensurePortalProfile } from '@/lib/profile';
+import { CSRF_ERROR_MESSAGE, InvalidCsrfTokenError, validateCsrfFromForm } from '@/lib/csrf';
 
 const ADMIN_PATHS = ['/admin', '/admin/marketing/footer'] as const;
 const DEFAULT_SLOT = 'public_marketing';
@@ -31,41 +33,33 @@ function getErrorMessage(error: unknown): string {
   return 'Unable to update footer. Try again shortly.';
 }
 
+async function requireAdminContext() {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    throw userError ?? new Error('Sign in to continue.');
+  }
+
+  const actorProfile = await ensurePortalProfile(supabase, user.id);
+  if (actorProfile.role !== 'admin') {
+    throw new Error('Admin access is required to update the footer.');
+  }
+
+  return { supabase, portal: supabase.schema('portal'), actorProfile };
+}
+
 export async function updateSiteFooterAction(formData: FormData): Promise<void> {
   try {
-    const actorProfileId = requireText(formData, 'actor_profile_id', 'Admin context is required.');
+    await validateCsrfFromForm(formData);
     const slot = readText(formData, 'slot') ?? DEFAULT_SLOT;
     const primaryText = requireText(formData, 'primary_text', 'Add the primary footer text.');
     const secondaryText = readText(formData, 'secondary_text');
 
-    const supabase = await createSupabaseServerClient();
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      throw userError ?? new Error('Sign in to continue.');
-    }
-
-    const portal = supabase.schema('portal');
-    const { data: actorProfile, error: actorProfileError } = await portal
-      .from('profiles')
-      .select('id, role, user_id')
-      .eq('id', actorProfileId)
-      .maybeSingle();
-
-    if (actorProfileError || !actorProfile) {
-      throw actorProfileError ?? new Error('Admin profile not found.');
-    }
-
-    if (actorProfile.user_id !== user.id) {
-      throw new Error('Admin session mismatch.');
-    }
-
-    if (actorProfile.role !== 'admin') {
-      throw new Error('Admin access is required to update the footer.');
-    }
+    const { supabase, portal, actorProfile } = await requireAdminContext();
 
     const { data: existing, error: existingError } = await portal
       .from('site_footer_settings')
@@ -89,7 +83,7 @@ export async function updateSiteFooterAction(formData: FormData): Promise<void> 
           primary_text: primaryText,
           secondary_text: secondaryText ?? null,
           is_active: true,
-          updated_by_profile_id: actorProfileId,
+          updated_by_profile_id: actorProfile.id,
         })
         .eq('id', existing.id);
 
@@ -104,8 +98,8 @@ export async function updateSiteFooterAction(formData: FormData): Promise<void> 
           primary_text: primaryText,
           secondary_text: secondaryText ?? null,
           is_active: true,
-          created_by_profile_id: actorProfileId,
-          updated_by_profile_id: actorProfileId,
+          created_by_profile_id: actorProfile.id,
+          updated_by_profile_id: actorProfile.id,
         })
         .select('id')
         .maybeSingle();
@@ -118,7 +112,7 @@ export async function updateSiteFooterAction(formData: FormData): Promise<void> 
     }
 
     await logAuditEvent(supabase, {
-      actorProfileId,
+      actorProfileId: actorProfile.id,
       action: 'marketing_footer_updated',
       entityType: 'site_footer',
       entityId: footerId,
@@ -133,6 +127,9 @@ export async function updateSiteFooterAction(formData: FormData): Promise<void> 
     return;
   } catch (error) {
     console.error('updateSiteFooterAction error', error);
+    if (error instanceof InvalidCsrfTokenError) {
+      throw new Error(CSRF_ERROR_MESSAGE);
+    }
     throw new Error(getErrorMessage(error));
   }
 }

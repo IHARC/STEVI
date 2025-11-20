@@ -9,7 +9,7 @@ const allowedAttributes: IOptions['allowedAttributes'] = {
   a: ['href', 'title', 'rel', 'target'],
 };
 
-const allowedSchemes = ['http', 'https', 'mailto'];
+const allowedSchemes = ['https', 'mailto'];
 
 export function sanitizeEmbedHtml(input: string) {
   return sanitizeHtml(input, {
@@ -17,7 +17,7 @@ export function sanitizeEmbedHtml(input: string) {
     allowedAttributes,
     allowedSchemes,
     allowedSchemesByTag: {
-      iframe: ['http', 'https'],
+      iframe: ['https'],
     },
     transformTags: {
       iframe: (tagName, attribs) => {

@@ -36,6 +36,11 @@ const PORTAL_NAV_BLUEPRINT: PortalLinkBlueprint[] = [
     requiresProfileRoles: ['admin'],
   },
   {
+    href: '/admin/policies',
+    label: 'Policies',
+    requiresProfileRoles: ['admin'],
+  },
+  {
     href: '/admin/marketing/footer',
     label: 'Marketing footer',
     requiresProfileRoles: ['admin'],
@@ -59,6 +64,7 @@ export type PortalAccess = {
   iharcRoles: IharcRole[];
   canAccessAdminWorkspace: boolean;
   canManageResources: boolean;
+  canManagePolicies: boolean;
   canAccessInventoryWorkspace: boolean;
   canManageNotifications: boolean;
   canReviewProfiles: boolean;
@@ -83,6 +89,7 @@ export async function loadPortalAccess(
 
   const canAccessAdminWorkspace = profile.role === 'moderator' || profile.role === 'admin';
   const canManageResources = profile.role === 'admin';
+  const canManagePolicies = profile.role === 'admin';
   const canAccessInventoryWorkspace = iharcRoles.some((role) =>
     INVENTORY_ALLOWED_ROLES.includes(role),
   );
@@ -99,6 +106,7 @@ export async function loadPortalAccess(
     iharcRoles,
     canAccessAdminWorkspace,
     canManageResources,
+    canManagePolicies,
     canAccessInventoryWorkspace,
     canManageNotifications,
     canReviewProfiles,
@@ -169,6 +177,9 @@ export function buildUserMenuLinks(access: PortalAccess): PortalLink[] {
 
   if (access.canManageResources) {
     links.push({ href: '/admin/resources', label: 'Resource library' });
+  }
+  if (access.canManagePolicies) {
+    links.push({ href: '/admin/policies', label: 'Policies' });
   }
 
   if (access.canManageSiteFooter) {

@@ -5,6 +5,8 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { logAuditEvent } from '@/lib/audit';
 import { queuePortalNotification } from '@/lib/notifications';
 import { getUserEmailForProfile } from '@/lib/profile';
+import { CSRF_ERROR_MESSAGE, InvalidCsrfTokenError, validateCsrfFromForm } from '@/lib/csrf';
+import { ensurePortalProfile } from '@/lib/profile';
 
 const ADMIN_PATHS = ['/admin', '/admin/notifications'] as const;
 
@@ -49,9 +51,29 @@ function getErrorMessage(error: unknown): string {
   return 'Unable to send notification. Try again shortly.';
 }
 
+async function requireAdminContext() {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    throw userError ?? new Error('Sign in to send notifications.');
+  }
+
+  const actorProfile = await ensurePortalProfile(supabase, user.id);
+  if (actorProfile.role !== 'admin') {
+    throw new Error('Only admins can send notifications.');
+  }
+
+  return { supabase, actorProfile };
+}
+
 export async function sendNotificationAction(formData: FormData): Promise<ActionResult> {
   try {
-    const actorProfileId = requireString(formData, 'actor_profile_id', 'Admin context is required.');
+    await validateCsrfFromForm(formData);
+
     const subject = requireString(formData, 'subject', 'Add a subject line.');
     const bodyText = requireString(formData, 'body_text', 'Add the plain text body.');
     const bodyHtml = readString(formData, 'body_html');
@@ -64,34 +86,7 @@ export async function sendNotificationAction(formData: FormData): Promise<Action
       throw new Error('Select a recipient or provide an email address.');
     }
 
-    const supabase = await createSupabaseServerClient();
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      throw userError ?? new Error('Sign in to send notifications.');
-    }
-
-    const portal = supabase.schema('portal');
-    const { data: actorProfile, error: actorError } = await portal
-      .from('profiles')
-      .select('id, role, user_id')
-      .eq('id', actorProfileId)
-      .maybeSingle();
-
-    if (actorError || !actorProfile) {
-      throw actorError ?? new Error('Admin profile not found.');
-    }
-
-    if (actorProfile.user_id !== user.id) {
-      throw new Error('Admin session mismatch.');
-    }
-
-    if (actorProfile.role !== 'admin') {
-      throw new Error('Only admins can send notifications.');
-    }
+    const { supabase, actorProfile } = await requireAdminContext();
 
     let recipientEmail = providedEmail?.toLowerCase() ?? null;
 
@@ -116,7 +111,7 @@ export async function sendNotificationAction(formData: FormData): Promise<Action
     });
 
     await logAuditEvent(supabase, {
-      actorProfileId,
+      actorProfileId: actorProfile.id,
       action: 'notification_queued',
       entityType: 'notification',
       entityId: null,
@@ -132,6 +127,8 @@ export async function sendNotificationAction(formData: FormData): Promise<Action
     return { success: true };
   } catch (error) {
     console.error('sendNotificationAction error', error);
-    return { success: false, error: getErrorMessage(error) };
+    const message =
+      error instanceof InvalidCsrfTokenError ? CSRF_ERROR_MESSAGE : getErrorMessage(error);
+    return { success: false, error: message };
   }
 }

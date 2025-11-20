@@ -33,6 +33,13 @@ const adminTasks: AdminTask[] = [
     href: '/admin/resources',
   },
   {
+    id: 'policies',
+    title: 'Policies & procedures',
+    description: 'Manage IHARC policies / SOPs for public transparency and STEVI client guidance in one place.',
+    actionLabel: 'Manage policies',
+    href: '/admin/policies',
+  },
+  {
     id: 'marketing-footer',
     title: 'Public site footer',
     description: 'Update the footer text displayed on every page of the public IHARC marketing site.',

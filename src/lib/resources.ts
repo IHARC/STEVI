@@ -67,20 +67,33 @@ export type ResourceFilters = {
   year?: string | null;
 };
 
+type PaginationOptions = {
+  page?: number;
+  pageSize?: number;
+};
+
 type FetchOptions = {
   includeUnpublished?: boolean;
-};
+} & PaginationOptions;
+
+export type ResourceListOptions = {
+  filters?: ResourceFilters;
+  includeUnpublished?: boolean;
+} & PaginationOptions;
 
 export type NormalizedResourceFilters = Required<ResourceFilters>;
 
-export async function fetchResourceLibrary(options: FetchOptions = {}): Promise<Resource[]> {
-  const supabase = await createSupabaseRSCClient();
-  const portal = supabase.schema('portal');
+export type ResourceListResult = {
+  items: Resource[];
+  total: number;
+  page: number;
+  pageSize: number;
+  hasMore: boolean;
+};
 
-  let query = portal
-    .from('resource_pages')
-    .select(
-      `
+const DEFAULT_PAGE_SIZE = 50;
+const MAX_PAGE_SIZE = 200;
+const RESOURCE_SELECT = `
         id,
         slug,
         title,
@@ -99,30 +112,75 @@ export async function fetchResourceLibrary(options: FetchOptions = {}): Promise<
         updated_by_profile_id,
         created_at,
         updated_at
-      `,
-    )
+      `;
+
+function resolvePagination(options: PaginationOptions = {}) {
+  const page = Math.max(1, options.page ?? 1);
+  const rawSize = options.pageSize ?? DEFAULT_PAGE_SIZE;
+  const pageSize = Math.min(Math.max(rawSize, 1), MAX_PAGE_SIZE);
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+  return { page, pageSize, from, to };
+}
+
+export async function fetchResourceLibrary(options: FetchOptions = {}): Promise<Resource[]> {
+  const { items } = await listResources({}, options);
+  return items;
+}
+
+export async function listResources(
+  filters: ResourceFilters = {},
+  options: ResourceListOptions = {},
+): Promise<ResourceListResult> {
+  const normalizedFilters = normalizeFilters(filters);
+  const { page, pageSize, from, to } = resolvePagination(options);
+
+  const supabase = await createSupabaseRSCClient();
+  const portal = supabase.schema('portal');
+
+  let query = portal
+    .from('resource_pages')
+    .select(RESOURCE_SELECT, { count: 'exact' })
     .order('date_published', { ascending: false })
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .range(from, to);
 
   if (!options.includeUnpublished) {
     query = query.eq('is_published', true);
   }
 
-  const { data, error } = await query;
+  if (normalizedFilters.kind) {
+    query = query.eq('kind', normalizedFilters.kind);
+  }
+
+  if (normalizedFilters.tag) {
+    query = query.contains('tags', [normalizedFilters.tag]);
+  }
+
+  if (normalizedFilters.year) {
+    const start = `${normalizedFilters.year}-01-01`;
+    const end = `${Number(normalizedFilters.year) + 1}-01-01`;
+    query = query.gte('date_published', start).lt('date_published', end);
+  }
+
+  if (normalizedFilters.q) {
+    const search = `%${normalizedFilters.q}%`;
+    query = query.or(
+      ['title.ilike.' + search, 'summary.ilike.' + search, 'location.ilike.' + search].join(','),
+    );
+  }
+
+  const { data, error, count } = await query;
   if (error) {
     throw error;
   }
 
   const rows = (data ?? []) as ResourceRow[];
-  return rows.map(mapResourceRow);
-}
+  const items = rows.map(mapResourceRow);
+  const total = typeof count === 'number' ? count : items.length;
+  const hasMore = total > to + 1;
 
-export async function listResources(
-  filters: ResourceFilters = {},
-  options: FetchOptions = {},
-): Promise<Resource[]> {
-  const dataset = await fetchResourceLibrary(options);
-  return filterResources(dataset, filters);
+  return { items, total, page, pageSize, hasMore };
 }
 
 export async function getResourceBySlug(
@@ -134,28 +192,7 @@ export async function getResourceBySlug(
 
   let query = portal
     .from('resource_pages')
-    .select(
-      `
-        id,
-        slug,
-        title,
-        kind,
-        summary,
-        location,
-        date_published,
-        tags,
-        attachments,
-        embed,
-        embed_placement,
-        body_html,
-        is_published,
-        cover_image,
-        created_by_profile_id,
-        updated_by_profile_id,
-        created_at,
-        updated_at
-      `,
-    )
+    .select(RESOURCE_SELECT)
     .eq('slug', slug)
     .limit(1);
 
@@ -202,53 +239,6 @@ export function normalizeFilters(filters: ResourceFilters): NormalizedResourceFi
   return normalized;
 }
 
-export function filterResources(dataset: Resource[], filters: ResourceFilters = {}): Resource[] {
-  const { q, kind, tag, year } = normalizeFilters(filters);
-  const searchTerm = q?.trim().toLowerCase();
-  const tagFilter = tag?.toLowerCase();
-
-  const items = dataset
-    .filter((resource) => {
-      if (!resource.isPublished) {
-        return false;
-      }
-
-      if (kind && resource.kind !== kind) {
-        return false;
-      }
-
-      if (year && !resource.datePublished.startsWith(year)) {
-        return false;
-      }
-
-      if (tagFilter && !resource.tags.some((entry) => entry.toLowerCase() === tagFilter)) {
-        return false;
-      }
-
-      if (!searchTerm) {
-        return true;
-      }
-
-      const haystack = [
-        resource.title,
-        resource.summary ?? '',
-        resource.location ?? '',
-        resource.tags.join(' '),
-      ]
-        .join(' ')
-        .toLowerCase();
-
-      return haystack.includes(searchTerm);
-    })
-    .sort(
-      (a, b) =>
-        new Date(b.datePublished).getTime() - new Date(a.datePublished).getTime() ||
-        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
-    );
-
-  return items;
-}
-
 export function getResourceYears(dataset: Resource[]): string[] {
   const years = new Set<string>();
   for (const resource of dataset) {
@@ -280,6 +270,9 @@ export function formatResourceDate(value: string) {
 export function isAllowedEmbedUrl(rawUrl: string | URL) {
   try {
     const parsed = rawUrl instanceof URL ? rawUrl : new URL(rawUrl);
+    if (parsed.protocol.toLowerCase() !== 'https:') {
+      return false;
+    }
     const hostname = parsed.hostname.toLowerCase();
     return ALLOWED_EMBED_HOSTS.has(hostname);
   } catch {

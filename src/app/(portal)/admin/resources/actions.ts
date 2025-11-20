@@ -6,6 +6,8 @@ import { logAuditEvent } from '@/lib/audit';
 import { RESOURCE_KIND_LABELS, normalizeResourceSlug, type Resource, type ResourceEmbedPlacement } from '@/lib/resources';
 import { sanitizeResourceHtml } from '@/lib/sanitize-resource-html';
 import { buildResourceEmbedPayload, parseResourceAttachmentsInput, parseResourceTagsInput } from './resource-utils';
+import { ensurePortalProfile } from '@/lib/profile';
+import { CSRF_ERROR_MESSAGE, InvalidCsrfTokenError, validateCsrfFromForm } from '@/lib/csrf';
 
 async function revalidatePaths(
   ...paths: Array<string | null | undefined>
@@ -22,33 +24,36 @@ async function revalidatePaths(
   await Promise.all(unique.map((path) => revalidatePath(path)));
 }
 
-export async function createResourcePage(formData: FormData) {
-  const supa = await createSupabaseServerClient();
-  const portalClient = supa.schema('portal');
-
-  const actorProfileId = formData.get('actor_profile_id') as string | null;
-  if (!actorProfileId) {
-    throw new Error('Admin context is required.');
-  }
-
+async function requireAdminContext() {
+  const supabase = await createSupabaseServerClient();
   const {
     data: { user },
     error: userError,
-  } = await supa.auth.getUser();
+  } = await supabase.auth.getUser();
 
   if (userError || !user) {
     throw userError ?? new Error('Sign in to continue.');
   }
 
-  const { data: actorProfile, error: actorProfileError } = await portalClient
-    .from('profiles')
-    .select('id, role, user_id')
-    .eq('id', actorProfileId)
-    .maybeSingle();
-
-  if (actorProfileError || !actorProfile || actorProfile.user_id !== user.id || actorProfile.role !== 'admin') {
-    throw new Error('Admin access is required to publish resources.');
+  const actorProfile = await ensurePortalProfile(supabase, user.id);
+  if (actorProfile.role !== 'admin') {
+    throw new Error('Admin access is required.');
   }
+
+  return { supabase, portalClient: supabase.schema('portal'), actorProfile };
+}
+
+export async function createResourcePage(formData: FormData) {
+  try {
+    await validateCsrfFromForm(formData);
+  } catch (error) {
+    if (error instanceof InvalidCsrfTokenError) {
+      throw new Error(CSRF_ERROR_MESSAGE);
+    }
+    throw error;
+  }
+
+  const { supabase: supa, portalClient, actorProfile } = await requireAdminContext();
 
   const title = (formData.get('title') as string | null)?.trim() ?? '';
   if (!title) {
@@ -106,8 +111,8 @@ export async function createResourcePage(formData: FormData) {
       embed_placement: embedPlacement,
       body_html: bodyHtml,
       is_published: isPublished,
-      created_by_profile_id: actorProfileId,
-      updated_by_profile_id: actorProfileId,
+      created_by_profile_id: actorProfile.id,
+      updated_by_profile_id: actorProfile.id,
     })
     .select('id, slug')
     .maybeSingle();
@@ -117,7 +122,7 @@ export async function createResourcePage(formData: FormData) {
   }
 
   await logAuditEvent(supa, {
-    actorProfileId,
+    actorProfileId: actorProfile.id,
     action: 'resource_page_created',
     entityType: 'resource_page',
     entityId: inserted?.id ?? null,
@@ -135,34 +140,22 @@ export async function createResourcePage(formData: FormData) {
 }
 
 export async function updateResourcePage(formData: FormData) {
-  const supa = await createSupabaseServerClient();
-  const portalClient = supa.schema('portal');
+  try {
+    await validateCsrfFromForm(formData);
+  } catch (error) {
+    if (error instanceof InvalidCsrfTokenError) {
+      throw new Error(CSRF_ERROR_MESSAGE);
+    }
+    throw error;
+  }
 
-  const actorProfileId = formData.get('actor_profile_id') as string | null;
+  const { supabase: supa, portalClient, actorProfile } = await requireAdminContext();
+
   const resourceId = formData.get('resource_id') as string | null;
   const currentSlug = (formData.get('current_slug') as string | null)?.trim() ?? null;
 
-  if (!actorProfileId || !resourceId) {
+  if (!resourceId) {
     throw new Error('Admin context is required.');
-  }
-
-  const {
-    data: { user },
-    error: userError,
-  } = await supa.auth.getUser();
-
-  if (userError || !user) {
-    throw userError ?? new Error('Sign in to continue.');
-  }
-
-  const { data: actorProfile, error: actorProfileError } = await portalClient
-    .from('profiles')
-    .select('id, role, user_id')
-    .eq('id', actorProfileId)
-    .maybeSingle();
-
-  if (actorProfileError || !actorProfile || actorProfile.user_id !== user.id || actorProfile.role !== 'admin') {
-    throw new Error('Admin access is required to update resources.');
   }
 
   const { data: existing, error: existingError } = await portalClient
@@ -231,7 +224,7 @@ export async function updateResourcePage(formData: FormData) {
       embed_placement: embedPlacement,
       body_html: bodyHtml,
       is_published: isPublished,
-      updated_by_profile_id: actorProfileId,
+      updated_by_profile_id: actorProfile.id,
     })
     .eq('id', resourceId);
 
@@ -240,7 +233,7 @@ export async function updateResourcePage(formData: FormData) {
   }
 
   await logAuditEvent(supa, {
-    actorProfileId,
+    actorProfileId: actorProfile.id,
     action: 'resource_page_updated',
     entityType: 'resource_page',
     entityId: resourceId,
@@ -270,35 +263,23 @@ export async function updateResourcePage(formData: FormData) {
 }
 
 export async function deleteResourcePage(formData: FormData) {
-  const supa = await createSupabaseServerClient();
-  const portalClient = supa.schema('portal');
+  try {
+    await validateCsrfFromForm(formData);
+  } catch (error) {
+    if (error instanceof InvalidCsrfTokenError) {
+      throw new Error(CSRF_ERROR_MESSAGE);
+    }
+    throw error;
+  }
 
-  const actorProfileId = formData.get('actor_profile_id') as string | null;
   const resourceId = formData.get('resource_id') as string | null;
   const resourceSlug = (formData.get('resource_slug') as string | null)?.trim() ?? null;
 
-  if (!actorProfileId || !resourceId) {
+  if (!resourceId) {
     throw new Error('Admin context is required.');
   }
 
-  const {
-    data: { user },
-    error: userError,
-  } = await supa.auth.getUser();
-
-  if (userError || !user) {
-    throw userError ?? new Error('Sign in to continue.');
-  }
-
-  const { data: actorProfile, error: actorProfileError } = await portalClient
-    .from('profiles')
-    .select('id, role, user_id')
-    .eq('id', actorProfileId)
-    .maybeSingle();
-
-  if (actorProfileError || !actorProfile || actorProfile.user_id !== user.id || actorProfile.role !== 'admin') {
-    throw new Error('Admin access is required to remove resources.');
-  }
+  const { supabase: supa, portalClient, actorProfile } = await requireAdminContext();
 
   const { error: deleteError } = await portalClient.from('resource_pages').delete().eq('id', resourceId);
   if (deleteError) {
@@ -306,7 +287,7 @@ export async function deleteResourcePage(formData: FormData) {
   }
 
   await logAuditEvent(supa, {
-    actorProfileId,
+    actorProfileId: actorProfile.id,
     action: 'resource_page_deleted',
     entityType: 'resource_page',
     entityId: resourceId,

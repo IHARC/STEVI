@@ -13,7 +13,7 @@ import { sendPartnerInviteAction } from '@/app/(portal)/admin/profiles/actions';
 import type { OrganizationOption, ProfileInviteSummary } from './types';
 
 type InvitePartnerCardProps = {
-  actorProfileId: string;
+  csrfToken: string;
   organizations: OrganizationOption[];
   recentInvites: ProfileInviteSummary[];
 };
@@ -31,7 +31,7 @@ const STATUS_LABELS: Record<ProfileInviteSummary['status'], string> = {
   expired: 'Expired',
 };
 
-export function InvitePartnerCard({ actorProfileId, organizations, recentInvites }: InvitePartnerCardProps) {
+export function InvitePartnerCard({ csrfToken, organizations, recentInvites }: InvitePartnerCardProps) {
   const router = useRouter();
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
@@ -54,7 +54,7 @@ export function InvitePartnerCard({ actorProfileId, organizations, recentInvites
       return;
     }
     const formData = new FormData(event.currentTarget);
-    formData.set('actor_profile_id', actorProfileId);
+    formData.set('csrf_token', csrfToken);
 
     const result = await sendPartnerInviteAction(formData);
     if (!result.success) {
@@ -87,6 +87,7 @@ export function InvitePartnerCard({ actorProfileId, organizations, recentInvites
       </CardHeader>
       <CardContent className="space-y-space-md">
         <form ref={formRef} onSubmit={handleSubmit} className="grid gap-space-md">
+          <input type="hidden" name="csrf_token" value={csrfToken} />
           <div className="grid gap-space-sm md:grid-cols-2">
             <label className="grid gap-1 text-body-sm text-on-surface">
               <span className="text-label-sm uppercase text-muted-foreground">Email</span>

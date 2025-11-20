@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
-import { fetchResourceLibrary, RESOURCE_KIND_LABELS } from '@/lib/resources';
+import { listResources, RESOURCE_KIND_LABELS } from '@/lib/resources';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,6 +16,8 @@ import {
 } from '@/components/ui/table';
 
 export const dynamic = 'force-dynamic';
+
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 const publishedDateFormatter = new Intl.DateTimeFormat('en-CA', { dateStyle: 'medium' });
 const updatedDateFormatter = new Intl.DateTimeFormat('en-CA', {
@@ -47,7 +49,66 @@ function formatUpdatedDate(value: string | null | undefined) {
   }
 }
 
-export default async function AdminResourcesPage() {
+function parsePageParam(raw: string | string[] | undefined): number {
+  if (!raw) return 1;
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
+}
+
+function buildPageHref(page: number) {
+  const search = page > 1 ? `?page=${page}` : '';
+  return `/admin/resources${search}`;
+}
+
+function PaginationControls({ page, totalPages, hasMore }: { page: number; totalPages: number; hasMore: boolean }) {
+  if (totalPages <= 1 && !hasMore) {
+    return null;
+  }
+
+  const prevPage = page > 1 ? page - 1 : null;
+  const nextPage = page < totalPages || hasMore ? page + 1 : null;
+
+  return (
+    <nav
+      aria-label="Resource pagination"
+      className="flex flex-wrap items-center justify-between gap-space-sm rounded-2xl border border-outline/20 bg-surface-container p-space-sm text-body-sm text-on-surface"
+    >
+      <span className="text-label-sm text-muted-foreground">
+        Page {page} of {totalPages} {hasMore ? '+' : ''}
+      </span>
+      <div className="flex items-center gap-space-xs">
+        <Button
+          asChild
+          variant="outline"
+          size="sm"
+          disabled={!prevPage}
+          aria-disabled={!prevPage}
+        >
+          <Link href={prevPage ? buildPageHref(prevPage) : '#'} prefetch>
+            ← Previous
+          </Link>
+        </Button>
+        <Button
+          asChild
+          variant="outline"
+          size="sm"
+          disabled={!nextPage}
+          aria-disabled={!nextPage}
+        >
+          <Link href={nextPage ? buildPageHref(nextPage) : '#'} prefetch>
+            Next →
+          </Link>
+        </Button>
+      </div>
+    </nav>
+  );
+}
+
+const PAGE_SIZE = 50;
+
+export default async function AdminResourcesPage({ searchParams }: { searchParams?: SearchParams }) {
+  const resolvedParams = searchParams ? await searchParams : undefined;
   const supabase = await createSupabaseRSCClient();
   const {
     data: { user },
@@ -62,9 +123,12 @@ export default async function AdminResourcesPage() {
     redirect('/home');
   }
 
-  const resources = await fetchResourceLibrary({ includeUnpublished: true });
+  const page = parsePageParam(resolvedParams?.page);
+  const resourceResult = await listResources({}, { includeUnpublished: true, page, pageSize: PAGE_SIZE });
+  const resources = resourceResult.items;
   const publishedCount = resources.filter((entry) => entry.isPublished).length;
   const draftCount = resources.length - publishedCount;
+  const totalPages = Math.max(1, Math.ceil(resourceResult.total / resourceResult.pageSize));
 
   return (
     <div className="page-shell page-stack">
@@ -110,6 +174,14 @@ export default async function AdminResourcesPage() {
       </section>
 
       <section className="space-y-space-md">
+        {resourceResult.hasMore ? (
+          <p className="text-body-sm text-muted-foreground">
+            Showing {resources.length} of {resourceResult.total} resources. Use pagination to browse the full library.
+          </p>
+        ) : null}
+
+        <PaginationControls page={page} totalPages={totalPages} hasMore={resourceResult.hasMore} />
+
         {resources.length === 0 ? (
           <Card className="border-outline/20 bg-surface-container">
             <CardHeader>
@@ -184,6 +256,8 @@ export default async function AdminResourcesPage() {
             </Table>
           </div>
         )}
+
+        <PaginationControls page={page} totalPages={totalPages} hasMore={resourceResult.hasMore} />
       </section>
     </div>
   );

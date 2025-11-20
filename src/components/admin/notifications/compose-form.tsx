@@ -12,7 +12,7 @@ import { sendNotificationAction } from '@/app/(portal)/admin/notifications/actio
 import type { NotificationRecipient } from './types';
 
 type ComposeNotificationFormProps = {
-  actorProfileId: string;
+  csrfToken: string;
   recipients: NotificationRecipient[];
 };
 
@@ -23,7 +23,7 @@ const NOTIFICATION_TYPES = [
   { value: 'case_note', label: 'Case note / follow-up' },
 ];
 
-export function ComposeNotificationForm({ actorProfileId, recipients }: ComposeNotificationFormProps) {
+export function ComposeNotificationForm({ csrfToken, recipients }: ComposeNotificationFormProps) {
   const router = useRouter();
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
@@ -51,7 +51,7 @@ export function ComposeNotificationForm({ actorProfileId, recipients }: ComposeN
       return;
     }
     const formData = new FormData(event.currentTarget);
-    formData.set('actor_profile_id', actorProfileId);
+    formData.set('csrf_token', csrfToken);
 
     const result = await sendNotificationAction(formData);
     if (!result.success) {
@@ -70,13 +70,14 @@ export function ComposeNotificationForm({ actorProfileId, recipients }: ComposeN
     <Card className="border-border/60">
       <CardHeader>
         <CardTitle className="text-title-lg">Compose notification</CardTitle>
-        <CardDescription>
-          Send trauma-informed updates. Messages respect notification consent stored with each profile.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form ref={formRef} onSubmit={handleSubmit} className="grid gap-space-md">
-          <input type="hidden" name="recipient_profile_id" value={selectedRecipient} />
+      <CardDescription>
+        Send trauma-informed updates. Messages respect notification consent stored with each profile.
+      </CardDescription>
+    </CardHeader>
+    <CardContent>
+      <form ref={formRef} onSubmit={handleSubmit} className="grid gap-space-md">
+        <input type="hidden" name="csrf_token" value={csrfToken} />
+        <input type="hidden" name="recipient_profile_id" value={selectedRecipient} />
           <div className="grid gap-space-sm md:grid-cols-2">
             <Label className="grid gap-1 text-body-sm text-on-surface">
               <span className="text-label-sm uppercase text-muted-foreground">

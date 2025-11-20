@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { PendingAffiliationsSection } from '@/components/admin/profiles/pending-affiliations';
 import { InvitePartnerCard } from '@/components/admin/profiles/invite-partner-card';
+import { getOrCreateCsrfToken } from '@/lib/csrf';
 import type {
   OrganizationOption,
   PendingAffiliation,
@@ -59,6 +60,8 @@ export default async function AdminProfilesPage() {
   if (!['moderator', 'admin'].includes(profile.role)) {
     redirect('/home');
   }
+
+  const csrfToken = await getOrCreateCsrfToken();
 
   const portal = supabase.schema('portal');
 
@@ -200,13 +203,13 @@ export default async function AdminProfilesPage() {
 
       <PendingAffiliationsSection
         pending={pendingAffiliations}
-        actorProfileId={profile.id}
+        csrfToken={csrfToken}
         communityOrganizations={agencyOrgs}
         governmentOrganizations={governmentOrgs}
       />
 
       <InvitePartnerCard
-        actorProfileId={profile.id}
+        csrfToken={csrfToken}
         organizations={organizations}
         recentInvites={recentInvites}
       />

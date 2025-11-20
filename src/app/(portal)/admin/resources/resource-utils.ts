@@ -6,6 +6,15 @@ export type ResourceAttachmentInput = {
   url: string;
 };
 
+const ALLOWED_ATTACHMENT_SCHEMES = new Set(['https:', 'mailto:']);
+
+function assertAllowedAttachmentScheme(url: URL, rawInput: string): URL {
+  if (!ALLOWED_ATTACHMENT_SCHEMES.has(url.protocol)) {
+    throw new Error(`Attachments must use https or mailto links. Check: ${rawInput}`);
+  }
+  return url;
+}
+
 export function parseResourceTagsInput(input: string): string[] {
   return input
     .split(',')
@@ -32,7 +41,8 @@ export function parseResourceAttachmentsInput(input: string): ResourceAttachment
 
     let normalizedUrl: string;
     try {
-      normalizedUrl = new URL(urlCandidate).toString();
+      const parsed = assertAllowedAttachmentScheme(new URL(urlCandidate), urlCandidate);
+      normalizedUrl = parsed.toString();
     } catch {
       throw new Error(`Attachment URL must be valid. Check: ${urlCandidate}`);
     }
@@ -79,6 +89,15 @@ export function buildResourceEmbedPayload(values: {
       const url = values.url?.trim();
       if (!url) {
         throw new Error('Provide the external resource URL.');
+      }
+      let parsedUrl: URL;
+      try {
+        parsedUrl = new URL(url);
+      } catch {
+        throw new Error('Provide a valid https URL for the external resource.');
+      }
+      if (parsedUrl.protocol !== 'https:') {
+        throw new Error('External resource URLs must use https.');
       }
       return { type, url, label: values.label?.trim() || undefined };
     }

@@ -11,13 +11,13 @@ import { attachmentsToTextarea, getResourceEmbedDefaults } from './resource-util
 
 type ResourceFormProps = {
   mode: 'create' | 'edit';
-  profileId: string;
+  csrfToken: string;
   action: (formData: FormData) => Promise<void>;
   onDeleteAction?: (formData: FormData) => Promise<void>;
   resource?: Resource | null;
 };
 
-export function ResourceForm({ mode, profileId, action, onDeleteAction, resource }: ResourceFormProps) {
+export function ResourceForm({ mode, csrfToken, action, onDeleteAction, resource }: ResourceFormProps) {
   const isEdit = mode === 'edit' && resource;
 
   const embedDefaults = resource ? getResourceEmbedDefaults(resource) : { type: 'none', url: '', provider: 'youtube', label: '', html: '' };
@@ -39,7 +39,7 @@ export function ResourceForm({ mode, profileId, action, onDeleteAction, resource
       </div>
 
       <form action={action} className="space-y-space-lg">
-        <input type="hidden" name="actor_profile_id" value={profileId} />
+        <input type="hidden" name="csrf_token" value={csrfToken} />
         {isEdit ? (
           <>
             <input type="hidden" name="resource_id" value={resource.id} />
@@ -243,7 +243,7 @@ export function ResourceForm({ mode, profileId, action, onDeleteAction, resource
           action={onDeleteAction}
           className="rounded-3xl border border-error/20 bg-error-container p-space-md text-on-error-container"
         >
-          <input type="hidden" name="actor_profile_id" value={profileId} />
+          <input type="hidden" name="csrf_token" value={csrfToken} />
           <input type="hidden" name="resource_id" value={resource.id} />
           <input type="hidden" name="resource_slug" value={resource.slug} />
           <div className="flex flex-col gap-space-sm sm:flex-row sm:items-center sm:justify-between">

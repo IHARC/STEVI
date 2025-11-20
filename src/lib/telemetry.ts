@@ -3,6 +3,7 @@ export type TelemetryPayload = Record<string, unknown>;
 type TelemetryWindow = Window & { dataLayer?: unknown[] };
 
 const TELEMETRY_ENDPOINT = '/api/telemetry';
+export const ALLOWED_TELEMETRY_EVENTS = ['page_view', 'consent_preference_saved'] as const;
 
 export function trackClientEvent(event: string, payload: TelemetryPayload = {}): void {
   if (typeof window === 'undefined') {
