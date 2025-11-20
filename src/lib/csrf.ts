@@ -1,10 +1,13 @@
 import crypto from 'node:crypto';
 import { cookies } from 'next/headers';
+import {
+  CSRF_COOKIE_NAME,
+  CSRF_FIELD_NAME,
+  CSRF_ERROR_MESSAGE,
+  TOKEN_LENGTH_BYTES,
+} from '@/lib/csrf/constants';
 
-export const CSRF_COOKIE_NAME = '__Host-stevi-csrf';
-export const CSRF_FIELD_NAME = 'csrf_token';
-const TOKEN_LENGTH_BYTES = 32;
-export const CSRF_ERROR_MESSAGE = 'For your safety, refresh the page and try again.';
+export { CSRF_COOKIE_NAME, CSRF_FIELD_NAME, CSRF_ERROR_MESSAGE } from '@/lib/csrf/constants';
 
 export class InvalidCsrfTokenError extends Error {
   constructor() {
@@ -29,15 +32,7 @@ export async function getOrCreateCsrfToken(): Promise<string> {
     return existing;
   }
 
-  const token = generateToken();
-  cookieStore.set(CSRF_COOKIE_NAME, token, {
-    httpOnly: true,
-    sameSite: 'strict',
-    secure: process.env.NODE_ENV !== 'development',
-    path: '/',
-  });
-
-  return token;
+  return generateToken();
 }
 
 export async function assertValidCsrfToken(value: string | null | undefined): Promise<void> {
