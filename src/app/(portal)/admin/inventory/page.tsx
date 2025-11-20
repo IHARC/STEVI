@@ -8,13 +8,14 @@ export const dynamic = 'force-dynamic';
 
 export default async function InventoryAdminPage() {
   const supabase = await createSupabaseRSCClient();
-  const { profile } = await ensureInventoryActor(supabase, true);
+  const { profile, roles } = await ensureInventoryActor(supabase, true);
 
   if (!profile) {
     redirect('/home');
   }
 
   const bootstrap = await fetchInventoryBootstrap(supabase);
+  const canManageLocations = roles.includes('iharc_admin');
 
   return (
     <div className="page-shell page-stack">
@@ -26,7 +27,7 @@ export default async function InventoryAdminPage() {
         </p>
       </header>
 
-      <InventoryWorkspace bootstrap={bootstrap} actorProfileId={profile.id} />
+      <InventoryWorkspace bootstrap={bootstrap} actorProfileId={profile.id} canManageLocations={canManageLocations} />
     </div>
   );
 }

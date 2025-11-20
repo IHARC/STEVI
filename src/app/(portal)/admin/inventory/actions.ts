@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { logAuditEvent } from '@/lib/audit';
-import { ensureInventoryActor, InventoryAccessError } from '@/lib/inventory/auth';
+import { ensureInventoryActor, InventoryAccessError, requireInventoryAdmin } from '@/lib/inventory/auth';
 import {
   adjustInventoryStock,
   bulkReceiveInventoryStock,
@@ -294,11 +294,13 @@ export async function adjustInventoryStockAction(formData: FormData): Promise<Ac
 export async function createInventoryLocationAction(
   formData: FormData,
 ): Promise<ActionResult<{ location: InventoryLocation }>> {
-  return runInventoryMutation(formData, async ({ profile }, supabase) => {
+  return runInventoryMutation(formData, async ({ profile, roles }, supabase) => {
+    requireInventoryAdmin(roles);
+
     const location = await createInventoryLocation(supabase, {
       name: getRequiredString(formData, 'name', 'Location name is required.'),
-      code: getOptionalString(formData, 'code'),
-      type: getOptionalString(formData, 'type'),
+      code: getRequiredString(formData, 'code', 'Location code is required.'),
+      type: getRequiredString(formData, 'type', 'Location type is required.'),
       address: getOptionalString(formData, 'address'),
       active: normalizeBoolean(formData.get('active'), true),
     });
@@ -315,13 +317,15 @@ export async function createInventoryLocationAction(
 }
 
 export async function updateInventoryLocationAction(formData: FormData): Promise<ActionResult> {
-  return runInventoryMutation(formData, async ({ profile }, supabase) => {
+  return runInventoryMutation(formData, async ({ profile, roles }, supabase) => {
+    requireInventoryAdmin(roles);
+
     const locationId = getRequiredString(formData, 'location_id', 'Location context missing.');
 
     await updateInventoryLocation(supabase, locationId, {
       name: getRequiredString(formData, 'name', 'Location name is required.'),
-      code: getOptionalString(formData, 'code'),
-      type: getOptionalString(formData, 'type'),
+      code: getRequiredString(formData, 'code', 'Location code is required.'),
+      type: getRequiredString(formData, 'type', 'Location type is required.'),
       address: getOptionalString(formData, 'address'),
       active: normalizeBoolean(formData.get('active'), true),
     });
@@ -336,7 +340,9 @@ export async function updateInventoryLocationAction(formData: FormData): Promise
 }
 
 export async function toggleInventoryLocationAction(formData: FormData): Promise<ActionResult> {
-  return runInventoryMutation(formData, async ({ profile }, supabase) => {
+  return runInventoryMutation(formData, async ({ profile, roles }, supabase) => {
+    requireInventoryAdmin(roles);
+
     const locationId = getRequiredString(formData, 'location_id', 'Location context missing.');
     const active = normalizeBoolean(formData.get('active'), true);
 
@@ -352,7 +358,9 @@ export async function toggleInventoryLocationAction(formData: FormData): Promise
 }
 
 export async function deleteInventoryLocationAction(formData: FormData): Promise<ActionResult> {
-  return runInventoryMutation(formData, async ({ profile }, supabase) => {
+  return runInventoryMutation(formData, async ({ profile, roles }, supabase) => {
+    requireInventoryAdmin(roles);
+
     const locationId = getRequiredString(formData, 'location_id', 'Location context missing.');
 
     await deleteInventoryLocation(supabase, locationId);

@@ -12,11 +12,12 @@ import { InventoryReceiptsSection } from './inventory-receipts';
 type InventoryWorkspaceProps = {
   bootstrap: InventoryBootstrap;
   actorProfileId: string;
+  canManageLocations: boolean;
 };
 
 const DEFAULT_TAB = 'dashboard';
 
-export function InventoryWorkspace({ bootstrap, actorProfileId }: InventoryWorkspaceProps) {
+export function InventoryWorkspace({ bootstrap, actorProfileId, canManageLocations }: InventoryWorkspaceProps) {
   const [activeTab, setActiveTab] = useState<string>(DEFAULT_TAB);
 
   return (
@@ -55,7 +56,11 @@ export function InventoryWorkspace({ bootstrap, actorProfileId }: InventoryWorks
         </TabsContent>
 
         <TabsContent value="locations">
-          <InventoryLocationsSection locations={bootstrap.locations} actorProfileId={actorProfileId} />
+          <InventoryLocationsSection
+            locations={bootstrap.locations}
+            actorProfileId={actorProfileId}
+            canManageLocations={canManageLocations}
+          />
         </TabsContent>
 
         <TabsContent value="organizations">

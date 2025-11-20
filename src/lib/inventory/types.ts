@@ -53,6 +53,9 @@ export type InventoryLocation = {
   name: string;
   code: string | null;
   type: string | null;
+  /**
+   * Free-form human readable address. Stored as jsonb in DB; we surface a string for UI.
+   */
   address: string | null;
   active: boolean;
   createdAt: string | null;
@@ -123,8 +126,8 @@ export type InventoryItemWithInitialStockInput = InventoryItemInput & {
 
 export type InventoryLocationInput = {
   name: string;
-  code?: string | null;
-  type?: string | null;
+  code: string;
+  type: string;
   address?: string | null;
   active?: boolean;
 };

@@ -93,12 +93,26 @@ function mapExpiringItem(row: Record<string, unknown>): ExpiringItem {
 }
 
 function mapLocation(row: Record<string, unknown>): InventoryLocation {
+  const rawAddress = row.address;
+  let address: string | null = null;
+  if (typeof rawAddress === 'string') {
+    address = rawAddress;
+  } else if (rawAddress && typeof rawAddress === 'object') {
+    const formatted =
+      typeof (rawAddress as Record<string, unknown>).formatted === 'string'
+        ? String((rawAddress as Record<string, unknown>).formatted)
+        : typeof (rawAddress as Record<string, unknown>).label === 'string'
+          ? String((rawAddress as Record<string, unknown>).label)
+          : null;
+    address = formatted ?? JSON.stringify(rawAddress);
+  }
+
   return {
     id: String(row.id),
     name: String(row.name ?? ''),
     code: typeof row.code === 'string' ? row.code : null,
     type: typeof row.type === 'string' ? row.type : null,
-    address: typeof row.address === 'string' ? row.address : null,
+    address,
     active: asBoolean(row.active, true),
     createdAt: typeof row.created_at === 'string' ? row.created_at : null,
     updatedAt: typeof row.updated_at === 'string' ? row.updated_at : null,
@@ -139,7 +153,7 @@ function mapReceipt(row: Record<string, unknown>): InventoryReceipt {
 }
 
 async function rpc<T>(supabase: SupabaseAnyServerClient, fn: string, params?: Record<string, unknown>): Promise<T[]> {
-  const { data, error } = await supabase.rpc(fn, params ?? {});
+  const { data, error } = await supabase.schema('inventory').rpc(fn, params ?? {});
   if (error) {
     throw error;
   }
@@ -150,8 +164,11 @@ async function rpc<T>(supabase: SupabaseAnyServerClient, fn: string, params?: Re
 }
 
 export async function fetchInventoryItems(supabase: SupabaseAnyServerClient): Promise<InventoryItem[]> {
-  const rows = await rpc<Record<string, unknown>>(supabase, 'get_items_with_balances');
-  return rows.map(mapInventoryItem);
+  const { data, error } = await supabase.schema('inventory').from('v_items_with_balances').select('*').order('name');
+  if (error) {
+    throw error;
+  }
+  return ((data ?? []) as Record<string, unknown>[]).map(mapInventoryItem);
 }
 
 export async function fetchLowStockItems(supabase: SupabaseAnyServerClient): Promise<LowStockItem[]> {
@@ -337,4 +354,3 @@ export async function fetchInventoryBootstrap(supabase: SupabaseAnyServerClient)
     categories,
   };
 }
-

@@ -16,6 +16,22 @@ import {
 
 const DEFAULT_INITIAL_STOCK_NOTES = 'Initial stock recorded in STEVI inventory workspace';
 
+function normalizeLocationAddress(address?: string | null) {
+  if (!address || address.trim().length === 0) {
+    return null;
+  }
+  const trimmed = address.trim();
+  try {
+    const parsed = JSON.parse(trimmed);
+    if (parsed && typeof parsed === 'object') {
+      return parsed;
+    }
+  } catch {
+    // fall through to formatted wrapper
+  }
+  return { formatted: trimmed };
+}
+
 function prepareItemPayload(input: InventoryItemInput) {
   const now = new Date().toISOString();
   return {
@@ -53,9 +69,9 @@ function prepareLocationPayload(input: InventoryLocationInput) {
   return {
     id: crypto.randomUUID(),
     name: input.name,
-    code: input.code ?? null,
-    type: input.type ?? null,
-    address: input.address ?? null,
+    code: input.code,
+    type: input.type,
+    address: normalizeLocationAddress(input.address),
     active: input.active ?? true,
     created_at: now,
     updated_at: now,
@@ -66,9 +82,9 @@ function prepareLocationUpdatePayload(input: InventoryLocationInput) {
   const now = new Date().toISOString();
   return {
     name: input.name,
-    code: input.code ?? null,
-    type: input.type ?? null,
-    address: input.address ?? null,
+    code: input.code,
+    type: input.type,
+    address: normalizeLocationAddress(input.address),
     active: input.active ?? true,
     updated_at: now,
   };
@@ -114,7 +130,7 @@ export async function createInventoryItem(
   }
 
   if (input.initialStockQuantity && input.initialStockQuantity > 0 && input.initialStockLocationId) {
-    await supabase.rpc('receive_stock', {
+    await supabase.schema('inventory').rpc('receive_stock', {
       p_item_id: payload.id,
       p_location_id: input.initialStockLocationId,
       p_qty: input.initialStockQuantity,
@@ -187,7 +203,7 @@ export async function receiveInventoryStock(
   supabase: SupabaseAnyServerClient,
   input: StockReceiptInput,
 ): Promise<void> {
-  await supabase.rpc('receive_stock_with_source', {
+  await supabase.schema('inventory').rpc('receive_stock_with_source', {
     p_item_id: input.itemId,
     p_location_id: input.locationId,
     p_qty: input.quantity,
@@ -205,7 +221,7 @@ export async function transferInventoryStock(
   supabase: SupabaseAnyServerClient,
   input: StockTransferInput,
 ): Promise<void> {
-  await supabase.rpc('transfer_stock', {
+  await supabase.schema('inventory').rpc('transfer_stock', {
     p_item_id: input.itemId,
     p_from_location_id: input.fromLocationId,
     p_to_location_id: input.toLocationId,
@@ -219,7 +235,7 @@ export async function adjustInventoryStock(
   supabase: SupabaseAnyServerClient,
   input: StockAdjustmentInput,
 ): Promise<void> {
-  await supabase.rpc('adjust_stock', {
+  await supabase.schema('inventory').rpc('adjust_stock', {
     p_item_id: input.itemId,
     p_location_id: input.locationId,
     p_qty_delta: input.quantityDelta,
@@ -399,7 +415,7 @@ export async function updateInventoryTransactionSource(
   notes: string | null,
 ): Promise<InventoryReceipt | null> {
   const providerId = providerOrgId === null ? null : Number.isNaN(providerOrgId) ? null : providerOrgId;
-  const { error } = await supabase.rpc('update_transaction_source', {
+  const { error } = await supabase.schema('inventory').rpc('update_transaction_source', {
     p_transaction_id: transactionId,
     p_provider_org_id: providerId,
     p_source_type: sourceType,

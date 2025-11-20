@@ -21,6 +21,10 @@ function hasRequiredRole(roles: IharcRole[]): boolean {
   return roles.some((role) => INVENTORY_ALLOWED_ROLES.includes(role));
 }
 
+export function isInventoryAdmin(roles: IharcRole[]): boolean {
+  return roles.includes('iharc_admin');
+}
+
 export async function ensureInventoryActor(
   supabase: SupabaseAnyServerClient,
   redirectOnFailure = false,
@@ -48,4 +52,10 @@ export async function ensureInventoryActor(
   const profile = await ensurePortalProfile(supabase, user.id);
 
   return { profile, roles };
+}
+
+export function requireInventoryAdmin(roles: IharcRole[]): void {
+  if (!isInventoryAdmin(roles)) {
+    throw new InventoryAccessError('Only IHARC admins can change inventory locations.');
+  }
 }

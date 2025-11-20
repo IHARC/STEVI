@@ -28,9 +28,10 @@ import type { InventoryLocation } from '@/lib/inventory/types';
 type InventoryLocationsSectionProps = {
   locations: InventoryLocation[];
   actorProfileId: string;
+  canManageLocations: boolean;
 };
 
-export function InventoryLocationsSection({ locations, actorProfileId }: InventoryLocationsSectionProps) {
+export function InventoryLocationsSection({ locations, actorProfileId, canManageLocations }: InventoryLocationsSectionProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
@@ -84,10 +85,13 @@ export function InventoryLocationsSection({ locations, actorProfileId }: Invento
         <div>
           <CardTitle className="text-title-sm font-semibold">Locations</CardTitle>
           <p className="text-body-md text-muted-foreground">Warehouses, outreach lockers, and mobile units that hold inventory.</p>
+          {!canManageLocations ? (
+            <p className="text-label-sm text-orange-700">Viewing only: only IHARC admins can add or edit locations.</p>
+          ) : null}
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button>Create location</Button>
+            <Button disabled={!canManageLocations}>Create location</Button>
           </DialogTrigger>
           <LocationDialog
             title="Create location"
@@ -95,6 +99,7 @@ export function InventoryLocationsSection({ locations, actorProfileId }: Invento
             actorProfileId={actorProfileId}
             onSubmit={submitCreate}
             isPending={isPending}
+            canManageLocations={canManageLocations}
           />
         </Dialog>
       </CardHeader>
@@ -121,14 +126,14 @@ export function InventoryLocationsSection({ locations, actorProfileId }: Invento
                   </span>
                 </TableCell>
                 <TableCell className="space-x-2 text-right">
-                  <Button size="sm" variant="outline" onClick={() => setEditing(location)}>
+                  <Button size="sm" variant="outline" onClick={() => setEditing(location)} disabled={!canManageLocations}>
                     Edit
                   </Button>
                   <Button
                     size="sm"
                     variant="ghost"
                     onClick={() => submitToggle(location, !location.active)}
-                    disabled={isPending}
+                    disabled={isPending || !canManageLocations}
                   >
                     {location.active ? 'Deactivate' : 'Activate'}
                   </Button>
@@ -137,7 +142,7 @@ export function InventoryLocationsSection({ locations, actorProfileId }: Invento
                     variant="ghost"
                     className="text-destructive hover:text-destructive"
                     onClick={() => submitDelete(location)}
-                    disabled={isPending}
+                    disabled={isPending || !canManageLocations}
                   >
                     Delete
                   </Button>
@@ -160,6 +165,7 @@ export function InventoryLocationsSection({ locations, actorProfileId }: Invento
         defaultValues={editing}
         open={editing !== null}
         onOpenChange={(open) => !open && setEditing(null)}
+        canManageLocations={canManageLocations}
       />
     </Card>
   );
@@ -174,9 +180,20 @@ type LocationDialogProps = {
   defaultValues?: InventoryLocation | null;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  canManageLocations: boolean;
 };
 
-function LocationDialog({ title, actionLabel, actorProfileId, onSubmit, isPending, defaultValues, open, onOpenChange }: LocationDialogProps) {
+function LocationDialog({
+  title,
+  actionLabel,
+  actorProfileId,
+  onSubmit,
+  isPending,
+  defaultValues,
+  open,
+  onOpenChange,
+  canManageLocations,
+}: LocationDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
@@ -189,13 +206,13 @@ function LocationDialog({ title, actionLabel, actorProfileId, onSubmit, isPendin
           {defaultValues ? <input type="hidden" name="location_id" value={defaultValues.id} /> : null}
           <div className="grid gap-2">
             <Label htmlFor="location_name">Name</Label>
-            <Input id="location_name" name="name" defaultValue={defaultValues?.name ?? ''} required />
+            <Input id="location_name" name="name" defaultValue={defaultValues?.name ?? ''} required disabled={!canManageLocations} />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Code" name="code" defaultValue={defaultValues?.code ?? ''} placeholder="Optional identifier" />
-            <Field label="Type" name="type" defaultValue={defaultValues?.type ?? ''} placeholder="e.g., Warehouse" />
+            <Field label="Code" name="code" defaultValue={defaultValues?.code ?? ''} placeholder="Short code" required disabled={!canManageLocations} />
+            <Field label="Type" name="type" defaultValue={defaultValues?.type ?? ''} placeholder="e.g., Warehouse" required disabled={!canManageLocations} />
           </div>
-          <Field label="Address" name="address" defaultValue={defaultValues?.address ?? ''} placeholder="Street, city" />
+          <Field label="Address" name="address" defaultValue={defaultValues?.address ?? ''} placeholder="Street, city" disabled={!canManageLocations} />
           <div className="flex items-center gap-2">
             <input
               id="location_active"
@@ -203,13 +220,14 @@ function LocationDialog({ title, actionLabel, actorProfileId, onSubmit, isPendin
               type="checkbox"
               defaultChecked={defaultValues?.active ?? true}
               className="h-4 w-4"
+              disabled={!canManageLocations}
             />
             <Label htmlFor="location_active" className="text-body-md text-muted-foreground">
               Location is active
             </Label>
           </div>
           <DialogFooter>
-            <Button type="submit" disabled={isPending}>
+            <Button type="submit" disabled={isPending || !canManageLocations}>
               {actionLabel}
             </Button>
           </DialogFooter>
@@ -224,13 +242,22 @@ type FieldProps = {
   name: string;
   defaultValue?: string | null;
   placeholder?: string;
+  required?: boolean;
+  disabled?: boolean;
 };
 
-function Field({ label, name, defaultValue, placeholder }: FieldProps) {
+function Field({ label, name, defaultValue, placeholder, required, disabled }: FieldProps) {
   return (
     <div className="grid gap-2">
       <Label htmlFor={name}>{label}</Label>
-      <Input id={name} name={name} defaultValue={defaultValue ?? ''} placeholder={placeholder} />
+      <Input
+        id={name}
+        name={name}
+        defaultValue={defaultValue ?? ''}
+        placeholder={placeholder}
+        required={required}
+        disabled={disabled}
+      />
     </div>
   );
 }
