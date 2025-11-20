@@ -1,21 +1,15 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { updateSession } from '@/lib/supabase/middleware';
-import {
-  CSRF_COOKIE_PRIMARY,
-  CSRF_COOKIE_FALLBACK,
-  TOKEN_LENGTH_BYTES,
-  CSRF_HEADER_NAME,
-  buildCsrfCookieOptions,
-} from '@/lib/csrf/constants';
+import { CSRF_COOKIE_PRIMARY, CSRF_COOKIE_FALLBACK, TOKEN_LENGTH_BYTES, buildCsrfCookieOptions } from '@/lib/csrf/constants';
 
 export async function middleware(request: NextRequest) {
   // Ensure the CSRF token is present on the incoming request so the page render
   // sees the same value the browser will store. Without this, first-page loads
   // would render a mismatched token and trigger a CSRF validation failure on
   // the first sign-in attempt.
-  const { csrfToken, requestHeaders, isSecure } = ensureCsrfOnRequest(request);
+  const { csrfToken, isSecure } = ensureCsrfOnRequest(request);
 
-  let response = NextResponse.next(requestHeaders ? { request: { headers: requestHeaders } } : undefined);
+  let response = NextResponse.next();
   response = await updateSession(request, response);
   // Mirror the request token onto the response so the browser persists it.
   const fallbackOptions = buildCsrfCookieOptions(isSecure);
@@ -25,50 +19,32 @@ export async function middleware(request: NextRequest) {
     response.cookies.set(CSRF_COOKIE_PRIMARY, csrfToken, buildCsrfCookieOptions(true));
   }
 
-  console.error('[middleware] csrf issued', {
-    tokenPrefix: csrfToken.slice(0, 8),
-    hasFallback: Boolean(response.cookies.get(CSRF_COOKIE_FALLBACK)),
-    hasHost: Boolean(response.cookies.get(CSRF_COOKIE_PRIMARY)),
-    isSecure,
-    requestCookies: request.cookies.getAll().map((c) => c.name),
-    responseCookies: response.cookies.getAll().map((c) => c.name),
-    requestHeaderCookie: requestHeaders?.get('cookie') ?? null,
-    forwardedProtocol: request.headers.get('x-forwarded-proto'),
-  });
-
   return response;
 }
 
 export const config = {
-  matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-  ],
+  matcher: ['/:path*'],
 };
 
 function ensureCsrfOnRequest(request: NextRequest): {
   csrfToken: string;
   isSecure: boolean;
-  requestHeaders?: Headers;
 } {
   const isSecure = isSecureRequest(request);
   const existing =
     request.cookies.get(CSRF_COOKIE_PRIMARY)?.value || request.cookies.get(CSRF_COOKIE_FALLBACK)?.value;
 
   if (existing) {
-    const headers = new Headers(request.headers);
-    headers.set(CSRF_HEADER_NAME, existing);
     return { csrfToken: existing, isSecure };
   }
 
   const token = createCsrfToken();
-  const requestHeaders = new Headers(request.headers);
-  const existingCookieHeader = requestHeaders.get('cookie');
   const cookieName = isSecure ? CSRF_COOKIE_PRIMARY : CSRF_COOKIE_FALLBACK;
-  const serialized = `${cookieName}=${token}`;
-  requestHeaders.set('cookie', existingCookieHeader ? `${existingCookieHeader}; ${serialized}` : serialized);
-  requestHeaders.set(CSRF_HEADER_NAME, token);
 
-  return { csrfToken: token, requestHeaders, isSecure };
+  // Mutate the incoming request's cookies so downstream server components read the same token.
+  request.cookies.set(cookieName, token);
+
+  return { csrfToken: token, isSecure };
 }
 
 function isSecureRequest(request: NextRequest): boolean {

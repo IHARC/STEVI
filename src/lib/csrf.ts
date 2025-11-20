@@ -1,10 +1,9 @@
 import crypto from 'node:crypto';
-import { cookies, headers } from 'next/headers';
+import { cookies } from 'next/headers';
 import {
   CSRF_COOKIE_PRIMARY,
   CSRF_COOKIE_FALLBACK,
   CSRF_FIELD_NAME,
-  CSRF_HEADER_NAME,
   TOKEN_LENGTH_BYTES,
 } from '@/lib/csrf/constants';
 
@@ -35,42 +34,28 @@ export async function getOrCreateCsrfToken(): Promise<string> {
   const existing =
     cookieStore.get(CSRF_COOKIE_PRIMARY)?.value ?? cookieStore.get(CSRF_COOKIE_FALLBACK)?.value;
 
-  if (existing) {
-    return existing;
-  }
-
-  const headerStore = await headers();
-  const headerToken = headerStore.get(CSRF_HEADER_NAME);
-  if (headerToken) {
-    return headerToken;
-  }
-
-  return generateToken();
+  return existing ?? generateToken();
 }
 
 export async function assertValidCsrfToken(value: string | null | undefined): Promise<void> {
   const cookieStore = await cookies();
   const stored =
     cookieStore.get(CSRF_COOKIE_PRIMARY)?.value ?? cookieStore.get(CSRF_COOKIE_FALLBACK)?.value;
-  const headerStore = await headers();
-  const headerToken = headerStore.get(CSRF_HEADER_NAME);
-  const reference = stored ?? headerToken ?? null;
 
-  if (!reference || typeof value !== 'string' || !value) {
+  if (!stored || typeof value !== 'string' || !value) {
     if (process.env.NODE_ENV !== 'production') {
       console.error('[csrf] missing token', {
-        hasStored: Boolean(reference),
+        hasStored: Boolean(stored),
         providedType: typeof value,
         providedLength: typeof value === 'string' ? value.length : null,
         cookieNames: cookieStore.getAll().map((c) => c.name),
-        hasHeaderToken: Boolean(headerToken),
       });
     }
     throw new InvalidCsrfTokenError();
   }
 
   const providedBuffer = toBuffer(value);
-  const storedBuffer = toBuffer(reference);
+  const storedBuffer = toBuffer(stored);
 
   if (providedBuffer.length !== storedBuffer.length) {
     if (process.env.NODE_ENV !== 'production') {
@@ -87,8 +72,8 @@ export async function assertValidCsrfToken(value: string | null | undefined): Pr
       console.error('[csrf] token mismatch', {
         providedPrefix: value.slice(0, 6),
         providedSuffix: value.slice(-6),
-        storedPrefix: reference.slice(0, 6),
-        storedSuffix: reference.slice(-6),
+        storedPrefix: stored.slice(0, 6),
+        storedSuffix: stored.slice(-6),
       });
     }
     throw new InvalidCsrfTokenError();
