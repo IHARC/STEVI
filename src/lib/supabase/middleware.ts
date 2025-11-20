@@ -5,15 +5,16 @@ import type { Database } from '@/types/supabase';
 
 type CookieBatch = Parameters<NonNullable<CookieMethodsServer['setAll']>>[0];
 
-export async function updateSession(request: NextRequest) {
+export async function updateSession(request: NextRequest, requestHeaders?: Headers) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    return NextResponse.next({ request });
+    return NextResponse.next(requestHeaders ? { request: { headers: requestHeaders } } : undefined);
   }
 
-  let supabaseResponse = NextResponse.next({ request });
+  const nextInit = requestHeaders ? { request: { headers: requestHeaders } } : undefined;
+  let supabaseResponse = NextResponse.next(nextInit);
 
   const supabase = createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
     cookies: {
@@ -24,7 +25,7 @@ export async function updateSession(request: NextRequest) {
         cookiesToSet.forEach(({ name, value }) => {
           request.cookies.set(name, value);
         });
-        supabaseResponse = NextResponse.next({ request });
+        supabaseResponse = NextResponse.next(nextInit);
         cookiesToSet.forEach(({ name, value, options }) => {
           supabaseResponse.cookies.set(name, value, options);
         });

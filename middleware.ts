@@ -1,10 +1,19 @@
-import { NextResponse, type NextRequest } from 'next/server';
+import { type NextRequest } from 'next/server';
 import { updateSession } from '@/lib/supabase/middleware';
 import { CSRF_COOKIE_NAME, CSRF_COOKIE_OPTIONS, TOKEN_LENGTH_BYTES } from '@/lib/csrf/constants';
 
 export async function middleware(request: NextRequest) {
-  const response = await updateSession(request);
-  return ensureCsrfCookie(request, response);
+  // Ensure the CSRF token is present on the incoming request so the page render
+  // sees the same value the browser will store. Without this, first-page loads
+  // would render a mismatched token and trigger a CSRF validation failure on
+  // the first sign-in attempt.
+  const { csrfToken, requestHeaders } = ensureCsrfOnRequest(request);
+
+  const response = await updateSession(request, requestHeaders);
+  // Mirror the request token onto the response so the browser persists it.
+  response.cookies.set(CSRF_COOKIE_NAME, csrfToken, CSRF_COOKIE_OPTIONS);
+
+  return response;
 }
 
 export const config = {
@@ -13,15 +22,19 @@ export const config = {
   ],
 };
 
-function ensureCsrfCookie(request: NextRequest, response: NextResponse) {
-  if (request.cookies.get(CSRF_COOKIE_NAME)?.value) {
-    return response;
+function ensureCsrfOnRequest(request: NextRequest): { csrfToken: string; requestHeaders?: Headers } {
+  const existing = request.cookies.get(CSRF_COOKIE_NAME)?.value;
+  if (existing) {
+    return { csrfToken: existing };
   }
 
   const token = createCsrfToken();
-  request.cookies.set(CSRF_COOKIE_NAME, token);
-  response.cookies.set(CSRF_COOKIE_NAME, token, CSRF_COOKIE_OPTIONS);
-  return response;
+  const requestHeaders = new Headers(request.headers);
+  const existingCookieHeader = requestHeaders.get('cookie');
+  const serialized = `${CSRF_COOKIE_NAME}=${token}`;
+  requestHeaders.set('cookie', existingCookieHeader ? `${existingCookieHeader}; ${serialized}` : serialized);
+
+  return { csrfToken: token, requestHeaders };
 }
 
 function createCsrfToken(): string {
