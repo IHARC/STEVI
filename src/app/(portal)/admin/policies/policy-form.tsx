@@ -15,13 +15,12 @@ const STATUS_OPTIONS = [
 
 type PolicyFormProps = {
   mode: 'create' | 'edit';
-  csrfToken: string;
   action: (formData: FormData) => Promise<void>;
   onDeleteAction?: (formData: FormData) => Promise<void>;
   policy?: Policy | null;
 };
 
-export function PolicyForm({ mode, csrfToken, action, onDeleteAction, policy }: PolicyFormProps) {
+export function PolicyForm({ mode, action, onDeleteAction, policy }: PolicyFormProps) {
   const isEdit = mode === 'edit' && policy;
 
   const bodyDefault = policy?.bodyHtml ?? '';
@@ -44,7 +43,6 @@ export function PolicyForm({ mode, csrfToken, action, onDeleteAction, policy }: 
       </div>
 
       <form action={action} className="space-y-space-lg">
-        <input type="hidden" name="csrf_token" value={csrfToken} />
         {isEdit ? (
           <>
             <input type="hidden" name="policy_id" value={policy.id} />
@@ -192,7 +190,6 @@ export function PolicyForm({ mode, csrfToken, action, onDeleteAction, policy }: 
           action={onDeleteAction}
           className="rounded-3xl border border-error/20 bg-error-container p-space-md text-on-error-container"
         >
-          <input type="hidden" name="csrf_token" value={csrfToken} />
           <input type="hidden" name="policy_id" value={policy.id} />
           <input type="hidden" name="policy_slug" value={policy.slug} />
           <div className="flex flex-col gap-space-sm sm:flex-row sm:items-center sm:justify-between">

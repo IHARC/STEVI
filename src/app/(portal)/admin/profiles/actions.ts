@@ -7,7 +7,6 @@ import { NO_ORGANIZATION_VALUE } from '@/lib/constants';
 import { ensurePortalProfile, type PortalProfile } from '@/lib/profile';
 import type { SupabaseServerClient } from '@/lib/supabase/types';
 import type { Database } from '@/types/supabase';
-import { CSRF_ERROR_MESSAGE, InvalidCsrfTokenError, validateCsrfFromForm } from '@/lib/csrf';
 
 const ADMIN_ROOT_PATH = '/admin';
 const ADMIN_PROFILES_PATH = '/admin/profiles';
@@ -94,7 +93,6 @@ function requireGovernmentRole(value: string | null): GovernmentRoleType {
 
 export async function sendPartnerInviteAction(formData: FormData): Promise<ActionResult> {
   try {
-    await validateCsrfFromForm(formData);
     const email = requireString(formData, 'invite_email', 'Enter the contact email.');
     const displayName = readString(formData, 'invite_display_name');
     const positionTitle = readString(formData, 'invite_position_title');
@@ -148,16 +146,12 @@ export async function sendPartnerInviteAction(formData: FormData): Promise<Actio
     return { success: true };
   } catch (error) {
     console.error('sendPartnerInviteAction error', error);
-    if (error instanceof InvalidCsrfTokenError) {
-      return { success: false, error: CSRF_ERROR_MESSAGE };
-    }
     return { success: false, error: getErrorMessage(error) };
   }
 }
 
 export async function approveAffiliationAction(formData: FormData): Promise<ActionResult> {
   try {
-    await validateCsrfFromForm(formData);
     const profileId = requireString(formData, 'profile_id', 'Profile context is required.');
     const approvedOrganizationId = normalizeOrganizationId(formData.get('approved_organization_id'));
     const approvedGovernmentRole = readString(formData, 'approved_government_role');
@@ -242,16 +236,12 @@ export async function approveAffiliationAction(formData: FormData): Promise<Acti
     return { success: true };
   } catch (error) {
     console.error('approveAffiliationAction error', error);
-    if (error instanceof InvalidCsrfTokenError) {
-      return { success: false, error: CSRF_ERROR_MESSAGE };
-    }
     return { success: false, error: getErrorMessage(error) };
   }
 }
 
 export async function declineAffiliationAction(formData: FormData): Promise<ActionResult> {
   try {
-    await validateCsrfFromForm(formData);
     const profileId = requireString(formData, 'profile_id', 'Profile context is required.');
 
     const { supabase, portal, actorProfile } = await loadModeratorContext();
@@ -312,9 +302,6 @@ export async function declineAffiliationAction(formData: FormData): Promise<Acti
     return { success: true };
   } catch (error) {
     console.error('declineAffiliationAction error', error);
-    if (error instanceof InvalidCsrfTokenError) {
-      return { success: false, error: CSRF_ERROR_MESSAGE };
-    }
     return { success: false, error: getErrorMessage(error) };
   }
 }

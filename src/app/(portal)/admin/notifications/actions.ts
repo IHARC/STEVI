@@ -5,7 +5,6 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { logAuditEvent } from '@/lib/audit';
 import { queuePortalNotification } from '@/lib/notifications';
 import { getUserEmailForProfile } from '@/lib/profile';
-import { CSRF_ERROR_MESSAGE, InvalidCsrfTokenError, validateCsrfFromForm } from '@/lib/csrf';
 import { ensurePortalProfile } from '@/lib/profile';
 
 const ADMIN_PATHS = ['/admin', '/admin/notifications'] as const;
@@ -72,8 +71,6 @@ async function requireAdminContext() {
 
 export async function sendNotificationAction(formData: FormData): Promise<ActionResult> {
   try {
-    await validateCsrfFromForm(formData);
-
     const subject = requireString(formData, 'subject', 'Add a subject line.');
     const bodyText = requireString(formData, 'body_text', 'Add the plain text body.');
     const bodyHtml = readString(formData, 'body_html');
@@ -127,8 +124,6 @@ export async function sendNotificationAction(formData: FormData): Promise<Action
     return { success: true };
   } catch (error) {
     console.error('sendNotificationAction error', error);
-    const message =
-      error instanceof InvalidCsrfTokenError ? CSRF_ERROR_MESSAGE : getErrorMessage(error);
-    return { success: false, error: message };
+    return { success: false, error: getErrorMessage(error) };
   }
 }

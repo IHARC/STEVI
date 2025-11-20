@@ -7,7 +7,6 @@ import { RESOURCE_KIND_LABELS, normalizeResourceSlug, type Resource, type Resour
 import { sanitizeResourceHtml } from '@/lib/sanitize-resource-html';
 import { buildResourceEmbedPayload, parseResourceAttachmentsInput, parseResourceTagsInput } from './resource-utils';
 import { ensurePortalProfile } from '@/lib/profile';
-import { CSRF_ERROR_MESSAGE, InvalidCsrfTokenError, validateCsrfFromForm } from '@/lib/csrf';
 
 async function revalidatePaths(
   ...paths: Array<string | null | undefined>
@@ -44,15 +43,6 @@ async function requireAdminContext() {
 }
 
 export async function createResourcePage(formData: FormData) {
-  try {
-    await validateCsrfFromForm(formData);
-  } catch (error) {
-    if (error instanceof InvalidCsrfTokenError) {
-      throw new Error(CSRF_ERROR_MESSAGE);
-    }
-    throw error;
-  }
-
   const { supabase: supa, portalClient, actorProfile } = await requireAdminContext();
 
   const title = (formData.get('title') as string | null)?.trim() ?? '';
@@ -140,15 +130,6 @@ export async function createResourcePage(formData: FormData) {
 }
 
 export async function updateResourcePage(formData: FormData) {
-  try {
-    await validateCsrfFromForm(formData);
-  } catch (error) {
-    if (error instanceof InvalidCsrfTokenError) {
-      throw new Error(CSRF_ERROR_MESSAGE);
-    }
-    throw error;
-  }
-
   const { supabase: supa, portalClient, actorProfile } = await requireAdminContext();
 
   const resourceId = formData.get('resource_id') as string | null;
@@ -263,15 +244,6 @@ export async function updateResourcePage(formData: FormData) {
 }
 
 export async function deleteResourcePage(formData: FormData) {
-  try {
-    await validateCsrfFromForm(formData);
-  } catch (error) {
-    if (error instanceof InvalidCsrfTokenError) {
-      throw new Error(CSRF_ERROR_MESSAGE);
-    }
-    throw error;
-  }
-
   const resourceId = formData.get('resource_id') as string | null;
   const resourceSlug = (formData.get('resource_slug') as string | null)?.trim() ?? null;
 

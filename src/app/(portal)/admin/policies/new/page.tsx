@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { PolicyForm } from '@/app/(portal)/admin/policies/policy-form';
 import { createPolicy } from '@/app/(portal)/admin/policies/actions';
-import { getOrCreateCsrfToken } from '@/lib/csrf';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
 import { Button } from '@/components/ui/button';
@@ -22,8 +21,6 @@ export default async function NewPolicyPage() {
     redirect('/home');
   }
 
-  const csrfToken = await getOrCreateCsrfToken();
-
   return (
     <div className="page-shell page-stack">
       <header className="flex flex-col gap-space-sm sm:flex-row sm:items-start sm:justify-between">
@@ -40,7 +37,7 @@ export default async function NewPolicyPage() {
         </Button>
       </header>
 
-      <PolicyForm mode="create" csrfToken={csrfToken} action={createPolicy} />
+      <PolicyForm mode="create" action={createPolicy} />
     </div>
   );
 }

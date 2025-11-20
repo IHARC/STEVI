@@ -11,7 +11,6 @@ import type { OrganizationOption, PendingAffiliation } from './types';
 
 type PendingAffiliationsSectionProps = {
   pending: PendingAffiliation[];
-  csrfToken: string;
   communityOrganizations: OrganizationOption[];
   governmentOrganizations: OrganizationOption[];
 };
@@ -80,7 +79,6 @@ export function PendingAffiliationsSection(props: PendingAffiliationsSectionProp
 
 function PendingAffiliationsContent({
   pending,
-  csrfToken,
   communityOrganizations,
   governmentOrganizations,
 }: PendingAffiliationsSectionProps) {
@@ -113,7 +111,6 @@ function PendingAffiliationsContent({
 
   const handleApprove = async (profileId: string) => {
     const formData = new FormData();
-    formData.set('csrf_token', csrfToken);
     formData.set('profile_id', profileId);
     if (orgSelections[profileId]) {
       formData.set('approved_organization_id', orgSelections[profileId]);
@@ -136,7 +133,6 @@ function PendingAffiliationsContent({
 
   const handleDecline = async (profileId: string) => {
     const formData = new FormData();
-    formData.set('csrf_token', csrfToken);
     formData.set('profile_id', profileId);
     const result = await declineAffiliationAction(formData);
     if (!result.success) {

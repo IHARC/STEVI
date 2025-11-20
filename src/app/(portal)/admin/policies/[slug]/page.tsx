@@ -2,7 +2,6 @@ import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
 import { PolicyForm } from '@/app/(portal)/admin/policies/policy-form';
 import { deletePolicy, updatePolicy } from '@/app/(portal)/admin/policies/actions';
-import { getOrCreateCsrfToken } from '@/lib/csrf';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
 import { getPolicyBySlug } from '@/lib/policies';
@@ -40,8 +39,6 @@ export default async function PolicyDetailPage({ params }: { params: RouteParams
     notFound();
   }
 
-  const csrfToken = await getOrCreateCsrfToken();
-
   return (
     <div className="page-shell page-stack">
       <header className="flex flex-col gap-space-sm sm:flex-row sm:items-start sm:justify-between">
@@ -59,7 +56,6 @@ export default async function PolicyDetailPage({ params }: { params: RouteParams
 
       <PolicyForm
         mode="edit"
-        csrfToken={csrfToken}
         action={updatePolicy}
         onDeleteAction={deletePolicy}
         policy={policy}

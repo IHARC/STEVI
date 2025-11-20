@@ -23,14 +23,12 @@ type VolunteerApplicationFormProps = {
   action: (state: VolunteerApplicationState, formData: FormData) => Promise<VolunteerApplicationState>;
   initialState?: VolunteerApplicationState;
   nextPath: string;
-  csrfToken: string;
 };
 
 export function VolunteerApplicationForm({
   action,
   initialState = VOLUNTEER_APPLICATION_INITIAL_STATE,
   nextPath,
-  csrfToken,
 }: VolunteerApplicationFormProps) {
   const [state, formAction] = useActionState(action, initialState);
   const isSuccess = state.status === 'success';
@@ -42,7 +40,6 @@ export function VolunteerApplicationForm({
       noValidate
     >
       <input type="hidden" name="next" value={nextPath} />
-      <input type="hidden" name="csrf_token" value={csrfToken} />
 
       <section className="space-y-space-sm">
         <header>

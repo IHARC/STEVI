@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
-import { getOrCreateCsrfToken } from '@/lib/csrf';
 import { ComposeNotificationForm } from '@/components/admin/notifications/compose-form';
 import { RecentNotifications } from '@/components/admin/notifications/recent-notifications';
 import type {
@@ -46,8 +45,6 @@ export default async function NotificationsAdminPage() {
   if (profile.role !== 'admin') {
     redirect('/home');
   }
-
-  const csrfToken = await getOrCreateCsrfToken();
 
   const portal = supabase.schema('portal');
 
@@ -143,7 +140,7 @@ export default async function NotificationsAdminPage() {
         </p>
       </header>
 
-      <ComposeNotificationForm csrfToken={csrfToken} recipients={recipients} />
+      <ComposeNotificationForm recipients={recipients} />
 
       <RecentNotifications notifications={notifications} />
     </div>

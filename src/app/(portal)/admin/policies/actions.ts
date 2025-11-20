@@ -5,7 +5,6 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { logAuditEvent } from '@/lib/audit';
 import { sanitizeResourceHtml } from '@/lib/sanitize-resource-html';
 import { ensurePortalProfile } from '@/lib/profile';
-import { CSRF_ERROR_MESSAGE, InvalidCsrfTokenError, validateCsrfFromForm } from '@/lib/csrf';
 import { normalizePolicySlug, type PolicyCategory, type PolicyStatus } from '@/lib/policies';
 
 async function revalidatePaths(...paths: Array<string | null | undefined>): Promise<void> {
@@ -71,15 +70,6 @@ function parseDate(value: string | null): string | null {
 }
 
 export async function createPolicy(formData: FormData) {
-  try {
-    await validateCsrfFromForm(formData);
-  } catch (error) {
-    if (error instanceof InvalidCsrfTokenError) {
-      throw new Error(CSRF_ERROR_MESSAGE);
-    }
-    throw error;
-  }
-
   const { supabase: supa, portalClient, actorProfile } = await requireAdminContext();
 
   const title = (formData.get('title') as string | null)?.trim() ?? '';
@@ -149,15 +139,6 @@ export async function createPolicy(formData: FormData) {
 }
 
 export async function updatePolicy(formData: FormData) {
-  try {
-    await validateCsrfFromForm(formData);
-  } catch (error) {
-    if (error instanceof InvalidCsrfTokenError) {
-      throw new Error(CSRF_ERROR_MESSAGE);
-    }
-    throw error;
-  }
-
   const { supabase: supa, portalClient, actorProfile } = await requireAdminContext();
 
   const policyId = formData.get('policy_id') as string | null;
@@ -254,15 +235,6 @@ export async function updatePolicy(formData: FormData) {
 }
 
 export async function deletePolicy(formData: FormData) {
-  try {
-    await validateCsrfFromForm(formData);
-  } catch (error) {
-    if (error instanceof InvalidCsrfTokenError) {
-      throw new Error(CSRF_ERROR_MESSAGE);
-    }
-    throw error;
-  }
-
   const policyId = formData.get('policy_id') as string | null;
   const policySlug = (formData.get('policy_slug') as string | null)?.trim() ?? null;
 

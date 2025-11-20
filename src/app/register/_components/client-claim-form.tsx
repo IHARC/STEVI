@@ -36,14 +36,12 @@ type ClientClaimFormProps = {
   action: (state: ClientClaimFormState, formData: FormData) => Promise<ClientClaimFormState>;
   initialState?: ClientClaimFormState;
   nextPath: string;
-  csrfToken: string;
 };
 
 export function ClientClaimForm({
   action,
   initialState = CLIENT_CLAIM_INITIAL_STATE,
   nextPath,
-  csrfToken,
 }: ClientClaimFormProps) {
   const [state, formAction] = useActionState(action, initialState);
   const [contactMethod, setContactMethod] = useState<ContactMethod>('email');
@@ -73,7 +71,6 @@ export function ClientClaimForm({
     >
       <input type="hidden" name="next" value={nextPath} />
       <input type="hidden" name="contact_method" value={contactMethod} />
-      <input type="hidden" name="csrf_token" value={csrfToken} />
 
       <section className="space-y-4">
         <header>

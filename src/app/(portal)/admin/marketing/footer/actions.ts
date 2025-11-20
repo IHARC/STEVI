@@ -4,7 +4,6 @@ import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { logAuditEvent } from '@/lib/audit';
 import { ensurePortalProfile } from '@/lib/profile';
-import { CSRF_ERROR_MESSAGE, InvalidCsrfTokenError, validateCsrfFromForm } from '@/lib/csrf';
 
 const ADMIN_PATHS = ['/admin', '/admin/marketing/footer'] as const;
 const DEFAULT_SLOT = 'public_marketing';
@@ -54,7 +53,6 @@ async function requireAdminContext() {
 
 export async function updateSiteFooterAction(formData: FormData): Promise<void> {
   try {
-    await validateCsrfFromForm(formData);
     const slot = readText(formData, 'slot') ?? DEFAULT_SLOT;
     const primaryText = requireText(formData, 'primary_text', 'Add the primary footer text.');
     const secondaryText = readText(formData, 'secondary_text');
@@ -127,9 +125,6 @@ export async function updateSiteFooterAction(formData: FormData): Promise<void> 
     return;
   } catch (error) {
     console.error('updateSiteFooterAction error', error);
-    if (error instanceof InvalidCsrfTokenError) {
-      throw new Error(CSRF_ERROR_MESSAGE);
-    }
     throw new Error(getErrorMessage(error));
   }
 }

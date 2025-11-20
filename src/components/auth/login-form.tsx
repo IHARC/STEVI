@@ -22,10 +22,9 @@ type LoginFormProps = {
   action: (state: FormState, formData: FormData) => Promise<FormState>;
   nextPath: string;
   initialState: FormState;
-  csrfToken: string;
 };
 
-export function LoginForm({ action, nextPath, initialState, csrfToken }: LoginFormProps) {
+export function LoginForm({ action, nextPath, initialState }: LoginFormProps) {
   const [state, formAction] = useActionState(action, initialState);
   const [contactMethod, setContactMethod] = useState<ContactMethod>(initialState.contactMethod ?? 'email');
 
@@ -41,7 +40,6 @@ export function LoginForm({ action, nextPath, initialState, csrfToken }: LoginFo
 
   return (
     <form action={formAction} className="grid gap-space-lg rounded-3xl border border-outline/30 bg-surface-container p-space-lg shadow-level-1">
-      <input type="hidden" name="csrf_token" value={csrfToken} />
       <div className="space-y-space-sm">
         <GoogleAuthButton intent="login" nextPath={nextPath} />
         <AuthDivider />

@@ -4,7 +4,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
-import { getOrCreateCsrfToken } from '@/lib/csrf';
 import { ResourceForm } from '../resource-form';
 import { createResourcePage } from '../actions';
 
@@ -24,8 +23,6 @@ export default async function AdminResourceNewPage() {
   if (profile.role !== 'admin') {
     redirect('/home');
   }
-
-  const csrfToken = await getOrCreateCsrfToken();
 
   return (
     <div className="page-shell page-stack text-on-surface">
@@ -47,7 +44,7 @@ export default async function AdminResourceNewPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-space-lg">
-          <ResourceForm mode="create" csrfToken={csrfToken} action={createResourcePage} />
+          <ResourceForm mode="create" action={createResourcePage} />
         </CardContent>
       </Card>
     </div>

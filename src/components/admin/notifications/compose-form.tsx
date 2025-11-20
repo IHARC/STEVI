@@ -12,7 +12,6 @@ import { sendNotificationAction } from '@/app/(portal)/admin/notifications/actio
 import type { NotificationRecipient } from './types';
 
 type ComposeNotificationFormProps = {
-  csrfToken: string;
   recipients: NotificationRecipient[];
 };
 
@@ -23,7 +22,7 @@ const NOTIFICATION_TYPES = [
   { value: 'case_note', label: 'Case note / follow-up' },
 ];
 
-export function ComposeNotificationForm({ csrfToken, recipients }: ComposeNotificationFormProps) {
+export function ComposeNotificationForm({ recipients }: ComposeNotificationFormProps) {
   const router = useRouter();
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
@@ -51,7 +50,6 @@ export function ComposeNotificationForm({ csrfToken, recipients }: ComposeNotifi
       return;
     }
     const formData = new FormData(event.currentTarget);
-    formData.set('csrf_token', csrfToken);
 
     const result = await sendNotificationAction(formData);
     if (!result.success) {
@@ -76,7 +74,6 @@ export function ComposeNotificationForm({ csrfToken, recipients }: ComposeNotifi
     </CardHeader>
     <CardContent>
       <form ref={formRef} onSubmit={handleSubmit} className="grid gap-space-md">
-        <input type="hidden" name="csrf_token" value={csrfToken} />
         <input type="hidden" name="recipient_profile_id" value={selectedRecipient} />
           <div className="grid gap-space-sm md:grid-cols-2">
             <Label className="grid gap-1 text-body-sm text-on-surface">

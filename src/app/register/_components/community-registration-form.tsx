@@ -22,14 +22,12 @@ type CommunityRegistrationFormProps = {
   action: (state: CommunityRegistrationState, formData: FormData) => Promise<CommunityRegistrationState>;
   initialState?: CommunityRegistrationState;
   nextPath: string;
-  csrfToken: string;
 };
 
 export function CommunityRegistrationForm({
   action,
   initialState = COMMUNITY_REGISTRATION_INITIAL_STATE,
   nextPath,
-  csrfToken,
 }: CommunityRegistrationFormProps) {
   const [state, formAction] = useActionState(action, initialState);
   const isSuccess = state.status === 'success';
@@ -41,7 +39,6 @@ export function CommunityRegistrationForm({
       noValidate
     >
       <input type="hidden" name="next" value={nextPath} />
-      <input type="hidden" name="csrf_token" value={csrfToken} />
 
       <section className="space-y-space-sm">
         <header>

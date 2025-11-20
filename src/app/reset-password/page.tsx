@@ -2,12 +2,6 @@ import { ResetPasswordForm, type ResetPasswordState } from '@/components/auth/re
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { normalizeEmail } from '@/lib/email';
 import { normalizePhoneNumber, maskPhoneNumber } from '@/lib/phone';
-import {
-  getOrCreateCsrfToken,
-  validateCsrfFromForm,
-  InvalidCsrfTokenError,
-  CSRF_ERROR_MESSAGE,
-} from '@/lib/csrf';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,18 +15,8 @@ const INITIAL_STATE: ResetPasswordState = {
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? 'https://iharc.ca';
 
 export default async function ResetPasswordPage() {
-  const csrfToken = await getOrCreateCsrfToken();
   async function resetPassword(prevState: ResetPasswordState, formData: FormData): Promise<ResetPasswordResult> {
     'use server';
-
-    try {
-      await validateCsrfFromForm(formData);
-    } catch (error) {
-      if (error instanceof InvalidCsrfTokenError) {
-        return { status: 'idle', contactMethod: 'email', error: CSRF_ERROR_MESSAGE };
-      }
-      throw error;
-    }
 
     const contactMethod = normalizeContactMethod(formData.get('contact_method'));
 
@@ -198,7 +182,7 @@ export default async function ResetPasswordPage() {
     }
   }
 
-  return <ResetPasswordForm action={resetPassword} initialState={INITIAL_STATE} csrfToken={csrfToken} />;
+  return <ResetPasswordForm action={resetPassword} initialState={INITIAL_STATE} />;
 }
 
 function normalizeContactMethod(value: FormDataEntryValue | null): 'email' | 'phone' {

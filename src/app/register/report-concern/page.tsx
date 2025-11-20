@@ -3,31 +3,14 @@ import { formatPortalCode, generatePortalCode, emptyToNull } from '@/lib/registr
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { normalizePhoneNumber } from '@/lib/phone';
 import { checkRateLimit } from '@/lib/rate-limit';
-import {
-  getOrCreateCsrfToken,
-  validateCsrfFromForm,
-  InvalidCsrfTokenError,
-  CSRF_ERROR_MESSAGE,
-} from '@/lib/csrf';
 import type { Json } from '@/types/supabase';
 import { FormPageShell } from '@/components/layout/form-page-shell';
 
 export const dynamic = 'force-dynamic';
 
 export default async function ConcernReportPage() {
-  const csrfToken = await getOrCreateCsrfToken();
-
   async function submitConcern(prevState: ConcernReportState, formData: FormData): Promise<ConcernReportState> {
     'use server';
-
-    try {
-      await validateCsrfFromForm(formData);
-    } catch (error) {
-      if (error instanceof InvalidCsrfTokenError) {
-        return { status: 'idle', error: CSRF_ERROR_MESSAGE };
-      }
-      throw error;
-    }
 
     const category = emptyToNull(formData.get('category')) ?? 'other';
     const description = emptyToNull(formData.get('description')) ?? '';
@@ -138,7 +121,6 @@ export default async function ConcernReportPage() {
       <ConcernReportForm
         action={submitConcern}
         initialState={CONCERN_REPORT_INITIAL_STATE}
-        csrfToken={csrfToken}
       />
     </FormPageShell>
   );

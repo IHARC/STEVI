@@ -7,12 +7,6 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
 import { maskPhoneNumber, normalizePhoneNumber } from '@/lib/phone';
 import { checkRateLimit } from '@/lib/rate-limit';
-import {
-  getOrCreateCsrfToken,
-  validateCsrfFromForm,
-  InvalidCsrfTokenError,
-  CSRF_ERROR_MESSAGE,
-} from '@/lib/csrf';
 import type { Json } from '@/types/supabase';
 import { FormPageShell } from '@/components/layout/form-page-shell';
 
@@ -39,19 +33,8 @@ export default async function ClientClaimPage({ searchParams }: ClientClaimPageP
     redirect(nextPath);
   }
 
-  const csrfToken = await getOrCreateCsrfToken();
-
   async function claimAccount(prevState: ClientClaimFormState, formData: FormData): Promise<ClientClaimFormState> {
     'use server';
-
-    try {
-      await validateCsrfFromForm(formData);
-    } catch (error) {
-      if (error instanceof InvalidCsrfTokenError) {
-        return { status: 'idle', error: CSRF_ERROR_MESSAGE };
-      }
-      throw error;
-    }
 
     const contactMethod = parseContactMethod(formData.get('contact_method'));
     const portalCodeRaw = emptyToNull(formData.get('portal_code'));
@@ -286,7 +269,6 @@ export default async function ClientClaimPage({ searchParams }: ClientClaimPageP
         action={claimAccount}
         initialState={CLIENT_CLAIM_INITIAL_STATE}
         nextPath={nextPath}
-        csrfToken={csrfToken}
       />
     </FormPageShell>
   );

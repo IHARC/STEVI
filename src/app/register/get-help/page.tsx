@@ -7,12 +7,6 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
 import { maskPhoneNumber, normalizePhoneNumber } from '@/lib/phone';
 import { checkRateLimit } from '@/lib/rate-limit';
-import {
-  getOrCreateCsrfToken,
-  validateCsrfFromForm,
-  InvalidCsrfTokenError,
-  CSRF_ERROR_MESSAGE,
-} from '@/lib/csrf';
 import type { Json } from '@/types/supabase';
 import { FormPageShell } from '@/components/layout/form-page-shell';
 
@@ -39,19 +33,8 @@ export default async function ClientIntakePage({ searchParams }: ClientIntakePag
     redirect(nextPath);
   }
 
-  const csrfToken = await getOrCreateCsrfToken();
-
   async function submitIntake(prevState: ClientIntakeFormState, formData: FormData): Promise<ClientIntakeFormState> {
     'use server';
-
-    try {
-      await validateCsrfFromForm(formData);
-    } catch (error) {
-      if (error instanceof InvalidCsrfTokenError) {
-        return { status: 'idle', error: CSRF_ERROR_MESSAGE };
-      }
-      throw error;
-    }
 
     const contactChoice = parseContactChoice(formData.get('contact_choice'));
     const email = emptyToNull((formData.get('contact_email') as string | null)?.toLowerCase() ?? null);
@@ -284,7 +267,6 @@ export default async function ClientIntakePage({ searchParams }: ClientIntakePag
         action={submitIntake}
         initialState={CLIENT_INTAKE_INITIAL_STATE}
         nextPath={nextPath}
-        csrfToken={csrfToken}
       />
     </FormPageShell>
   );

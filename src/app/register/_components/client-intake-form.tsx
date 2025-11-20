@@ -40,14 +40,12 @@ type ClientIntakeFormProps = {
   action: (state: ClientIntakeFormState, formData: FormData) => Promise<ClientIntakeFormState>;
   initialState?: ClientIntakeFormState;
   nextPath: string;
-  csrfToken: string;
 };
 
 export function ClientIntakeForm({
   action,
   initialState = CLIENT_INTAKE_INITIAL_STATE,
   nextPath,
-  csrfToken,
 }: ClientIntakeFormProps) {
   const [state, formAction] = useActionState(action, initialState);
   const [contactChoice, setContactChoice] = useState<ContactChoice>('email');
@@ -78,7 +76,6 @@ export function ClientIntakeForm({
     >
       <input type="hidden" name="next" value={nextPath} />
       <input type="hidden" name="contact_choice" value={contactChoice} />
-      <input type="hidden" name="csrf_token" value={csrfToken} />
 
       <section className="space-y-space-md">
         <header>
