@@ -96,7 +96,9 @@ export async function ensurePortalProfile(
   const existingProfile = await fetchProfileByUserId();
 
   if (existingProfile) {
-    await refreshUserClaims(existingProfile.user_id);
+    if (existingProfile.user_id) {
+      await refreshUserClaims(existingProfile.user_id);
+    }
     return ensureCommunityMemberTitle(existingProfile);
   }
 

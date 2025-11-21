@@ -298,7 +298,6 @@ async function syncOrgRepRole(
   profileId: string,
   elevate: boolean,
 ) {
-  // @ts-expect-error set_profile_role exists in DB but not generated types yet
   const { error } = await supabase.rpc('set_profile_role', {
     p_profile_id: profileId,
     p_role_name: 'portal_org_rep',

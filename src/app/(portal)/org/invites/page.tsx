@@ -44,6 +44,13 @@ export default async function OrgInvitesPage() {
     redirect('/home');
   }
 
+  const handleInvite = async (formData: FormData) => {
+    const result = await createOrgInviteAction(formData);
+    if (!result.success) {
+      throw new Error(result.error);
+    }
+  };
+
   const portal = supabase.schema('portal');
   const { data: invites, error } = await portal
     .from('profile_invites')
@@ -72,7 +79,7 @@ export default async function OrgInvitesPage() {
           <CardDescription>Creates a pending invitation locked to your organization.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form className="grid gap-space-md md:grid-cols-2" action={createOrgInviteAction}>
+          <form className="grid gap-space-md md:grid-cols-2" action={handleInvite}>
             <div className="space-y-space-xs">
               <Label htmlFor="email">Email</Label>
               <Input id="email" name="email" type="email" required placeholder="person@example.org" />

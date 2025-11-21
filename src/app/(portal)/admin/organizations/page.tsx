@@ -53,6 +53,20 @@ export default async function AdminOrganizationsPage() {
     throw error;
   }
 
+  const handleCreate = async (formData: FormData) => {
+    const result = await createOrganizationAction(formData);
+    if (!result.success) {
+      throw new Error(result.error);
+    }
+  };
+
+  const handlePromote = async (formData: FormData) => {
+    const result = await promoteOrgAdminAction(formData);
+    if (!result.success) {
+      throw new Error(result.error);
+    }
+  };
+
   return (
     <div className="space-y-space-lg">
       <header className="space-y-space-xs">
@@ -69,7 +83,7 @@ export default async function AdminOrganizationsPage() {
           <CardDescription>New entries can be assigned to users from the profile verification queue.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form className="grid gap-space-md md:grid-cols-3" action={createOrganizationAction}>
+          <form className="grid gap-space-md md:grid-cols-3" action={handleCreate}>
             <div className="space-y-space-xs">
               <Label htmlFor="name">Name</Label>
               <Input id="name" name="name" required placeholder="Community Food Bank" />
@@ -106,7 +120,7 @@ export default async function AdminOrganizationsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form className="grid gap-space-md md:grid-cols-3" action={promoteOrgAdminAction}>
+          <form className="grid gap-space-md md:grid-cols-3" action={handlePromote}>
             <div className="space-y-space-xs">
               <Label htmlFor="profile_id">Profile ID</Label>
               <Input id="profile_id" name="profile_id" required placeholder="UUID" />

@@ -46,7 +46,6 @@ async function setRole(
   supabase: SupabaseServerClient,
   payload: ToggleRolePayload,
 ) {
-  // @ts-expect-error set_profile_role is defined in the database but not yet in generated types
   const { error } = await supabase.rpc('set_profile_role', {
     p_profile_id: payload.profileId,
     p_role_name: payload.roleName,

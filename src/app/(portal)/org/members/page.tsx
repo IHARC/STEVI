@@ -21,6 +21,17 @@ const dateFormatter = new Intl.DateTimeFormat('en-CA', {
   timeStyle: 'short',
 });
 
+type OrgMember = {
+  id: string;
+  user_id: string | null;
+  display_name: string;
+  position_title: string | null;
+  organization_id: string | null;
+  last_seen_at: string | null;
+  affiliation_status: string;
+  portal_roles: string[];
+};
+
 function formatDate(value: string | null) {
   if (!value) return '—';
   try {
@@ -39,15 +50,66 @@ export default async function OrgMembersPage() {
   }
 
   const portal = supabase.schema('portal');
-  const { data: members, error } = await portal
+  const { data: memberProfiles, error } = await portal
     .from('profiles')
-    .select('id, display_name, position_title, role, organization_id, last_seen_at, affiliation_status')
+    .select('id, user_id, display_name, position_title, organization_id, last_seen_at, affiliation_status')
     .eq('organization_id', access.organizationId)
     .order('display_name');
 
   if (error) {
     throw error;
   }
+
+  const users = (memberProfiles ?? []) as Array<{
+    id: string;
+    user_id: string | null;
+    display_name: string;
+    position_title: string | null;
+    organization_id: string | null;
+    last_seen_at: string | null;
+    affiliation_status: string;
+  }>;
+
+  const userIds = users.map((u) => u.user_id).filter((id): id is string => Boolean(id));
+  let roleMap = new Map<string, string[]>();
+  if (userIds.length) {
+    const { data: roleRows, error: roleError } = await supabase
+      .schema('core')
+      .from('user_roles')
+      .select('user_id, roles:roles!inner(name)')
+      .in('user_id', userIds);
+
+    if (roleError) {
+      throw roleError;
+    }
+
+    (roleRows ?? []).forEach((row: { user_id: string; roles: { name: string } | null }) => {
+      const name = row.roles?.name;
+      if (!name) return;
+      const list = roleMap.get(row.user_id) ?? [];
+      list.push(name);
+      roleMap.set(row.user_id, list);
+    });
+  }
+
+  const members: OrgMember[] = users.map((u) => ({
+    ...u,
+    portal_roles: (roleMap.get(u.user_id ?? '') ?? []).filter((role) => role.startsWith('portal_')),
+  }));
+
+  const handleToggle = async (formData: FormData) => {
+    const result = await toggleMemberRoleAction(formData);
+    if (!result.success) {
+      throw new Error(result.error);
+    }
+  };
+
+  const handleRemove = async (formData: FormData) => {
+    const result = await removeMemberAction(formData);
+    if (!result.success) {
+      throw new Error(result.error);
+    }
+  };
 
   return (
     <div className="space-y-space-lg">
@@ -75,10 +137,11 @@ export default async function OrgMembersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {(members ?? []).map((member) => {
+              {members.map((member: OrgMember) => {
                 const isSelf = member.id === access.profile.id;
-                const isOrgAdmin = member.role === 'org_admin';
-                const isOrgRep = member.role === 'org_rep';
+                const isOrgAdmin =
+                  member.portal_roles.includes('portal_org_admin') || member.portal_roles.includes('portal_admin');
+                const isOrgRep = member.portal_roles.includes('portal_org_rep');
 
                 return (
                   <TableRow key={member.id}>
@@ -92,7 +155,9 @@ export default async function OrgMembersPage() {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-space-xs">
-                        <Badge variant={isOrgAdmin ? 'default' : 'secondary'}>{member.role}</Badge>
+                        <Badge variant={isOrgAdmin ? 'default' : 'secondary'}>
+                          {member.portal_roles[0] ?? 'portal_user'}
+                        </Badge>
                         <Badge variant="outline" className="text-xs capitalize">
                           {member.affiliation_status}
                         </Badge>
@@ -100,23 +165,23 @@ export default async function OrgMembersPage() {
                     </TableCell>
                     <TableCell>{formatDate(member.last_seen_at)}</TableCell>
                     <TableCell className="flex justify-end gap-space-xs">
-                      <form action={toggleMemberRoleAction}>
+                      <form action={handleToggle}>
                         <input type="hidden" name="profile_id" value={member.id} />
-                        <input type="hidden" name="role_name" value="org_admin" />
+                        <input type="hidden" name="role_name" value="portal_org_admin" />
                         <input type="hidden" name="enable" value={(!isOrgAdmin).toString()} />
                         <Button type="submit" variant={isOrgAdmin ? 'outline' : 'default'} size="sm" disabled={isSelf}>
                           {isOrgAdmin ? 'Remove org admin' : 'Make org admin'}
                         </Button>
                       </form>
-                      <form action={toggleMemberRoleAction}>
+                      <form action={handleToggle}>
                         <input type="hidden" name="profile_id" value={member.id} />
-                        <input type="hidden" name="role_name" value="org_rep" />
+                        <input type="hidden" name="role_name" value="portal_org_rep" />
                         <input type="hidden" name="enable" value={(!isOrgRep).toString()} />
                         <Button type="submit" variant={isOrgRep ? 'outline' : 'secondary'} size="sm" disabled={isSelf && isOrgAdmin}>
                           {isOrgRep ? 'Remove org rep' : 'Make org rep'}
                         </Button>
                       </form>
-                      <form action={removeMemberAction}>
+                      <form action={handleRemove}>
                         <input type="hidden" name="profile_id" value={member.id} />
                         <Button type="submit" variant="ghost" size="sm" disabled={isSelf}>
                           Remove

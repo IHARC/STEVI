@@ -119,7 +119,6 @@ export async function promoteOrgAdminAction(formData: FormData): Promise<ActionR
       .eq('id', profileId);
     if (profileUpdate.error) throw profileUpdate.error;
 
-    // @ts-expect-error set_profile_role exists in DB but not generated types yet
     const { error: roleError } = await supabase.rpc('set_profile_role', {
       p_profile_id: profileId,
       p_role_name: 'portal_org_admin',

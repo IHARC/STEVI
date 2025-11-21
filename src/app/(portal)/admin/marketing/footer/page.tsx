@@ -39,12 +39,16 @@ export default async function MarketingFooterAdminPage() {
     .order('updated_at', { ascending: false })
     .limit(2);
 
+  type FooterRow = { setting_key: string; setting_value: string | null; updated_at: string | null };
+  const settings = (footer ?? []) as FooterRow[];
   const primaryText =
-    footer?.find((row) => row.setting_key === 'marketing.footer.primary_text')?.setting_value ?? DEFAULT_PRIMARY;
+    settings.find((row: FooterRow) => row.setting_key === 'marketing.footer.primary_text')?.setting_value?.trim() ??
+    DEFAULT_PRIMARY;
   const secondaryText =
-    footer?.find((row) => row.setting_key === 'marketing.footer.secondary_text')?.setting_value ?? DEFAULT_SECONDARY;
-  const lastUpdated = footer?.[0]?.updated_at
-    ? new Date(footer.updated_at).toLocaleString('en-CA', {
+    settings.find((row: FooterRow) => row.setting_key === 'marketing.footer.secondary_text')?.setting_value?.trim() ??
+    DEFAULT_SECONDARY;
+  const lastUpdated = settings?.[0]?.updated_at
+    ? new Date(settings[0].updated_at as string).toLocaleString('en-CA', {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
