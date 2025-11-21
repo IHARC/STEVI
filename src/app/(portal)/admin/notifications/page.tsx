@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
+import { getPortalRoles } from '@/lib/ihar-auth';
 import { ComposeNotificationForm } from '@/components/admin/notifications/compose-form';
 import { RecentNotifications } from '@/components/admin/notifications/recent-notifications';
 import type {
@@ -41,11 +42,12 @@ export default async function NotificationsAdminPage() {
     redirect('/login?next=/admin/notifications');
   }
 
-  const profile = await ensurePortalProfile(supabase, user.id);
-  if (profile.role !== 'admin') {
+  const portalRoles = getPortalRoles(user);
+  if (!portalRoles.includes('portal_admin')) {
     redirect('/home');
   }
 
+  const profile = await ensurePortalProfile(supabase, user.id);
   const portal = supabase.schema('portal');
 
   const [profilesResponse, notificationsResponse] = await Promise.all([

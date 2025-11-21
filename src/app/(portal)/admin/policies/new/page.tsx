@@ -4,6 +4,7 @@ import { PolicyForm } from '@/app/(portal)/admin/policies/policy-form';
 import { createPolicy } from '@/app/(portal)/admin/policies/actions';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
+import { getPortalRoles } from '@/lib/ihar-auth';
 import { Button } from '@/components/ui/button';
 
 export default async function NewPolicyPage() {
@@ -16,11 +17,12 @@ export default async function NewPolicyPage() {
     redirect('/login?next=/admin/policies/new');
   }
 
-  const profile = await ensurePortalProfile(supabase, user.id);
-  if (profile.role !== 'admin') {
+  const portalRoles = getPortalRoles(user);
+  if (!portalRoles.includes('portal_admin')) {
     redirect('/home');
   }
 
+  const profile = await ensurePortalProfile(supabase, user.id);
   return (
     <div className="page-shell page-stack">
       <header className="flex flex-col gap-space-sm sm:flex-row sm:items-start sm:justify-between">

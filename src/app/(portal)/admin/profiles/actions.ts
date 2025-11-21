@@ -5,6 +5,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { logAuditEvent } from '@/lib/audit';
 import { NO_ORGANIZATION_VALUE } from '@/lib/constants';
 import { ensurePortalProfile, type PortalProfile } from '@/lib/profile';
+import { getPortalRoles } from '@/lib/ihar-auth';
 import type { SupabaseServerClient } from '@/lib/supabase/types';
 import type { Database } from '@/types/supabase';
 
@@ -69,12 +70,12 @@ async function loadModeratorContext() {
     throw userError ?? new Error('Sign in to continue.');
   }
 
-  const actorProfile = await ensurePortalProfile(supabase, user.id);
-
-  if (!['moderator', 'admin'].includes(actorProfile.role)) {
+  const roles = getPortalRoles(user);
+  if (!roles.includes('portal_admin') && !roles.includes('portal_moderator')) {
     throw new Error('Moderator access is required.');
   }
 
+  const actorProfile = await ensurePortalProfile(supabase, user.id);
   const portal = supabase.schema('portal');
 
   return { supabase, portal, user, actorProfile };
@@ -207,17 +208,7 @@ export async function approveAffiliationAction(formData: FormData): Promise<Acti
       throw updateError;
     }
 
-    await syncOrgRepRole(portal, actorProfile.id, profileId, reviewedAt, elevateRole);
-
-    await supabase.rpc('portal_refresh_profile_claims', { p_profile_id: profileId }).catch((rpcError: unknown) => {
-      console.warn('Failed to refresh profile claims', rpcError);
-    });
-
-    if (pendingProfile.user_id) {
-      await ensurePortalProfile(supabase, pendingProfile.user_id).catch((refreshError) => {
-        console.warn('Failed to refresh portal profile cache', refreshError);
-      });
-    }
+    await syncOrgRepRole(supabase, profileId, elevateRole);
 
     await logAuditEvent(supabase, {
       actorProfileId: actorProfile.id,
@@ -278,11 +269,7 @@ export async function declineAffiliationAction(formData: FormData): Promise<Acti
       throw declineError;
     }
 
-    await syncOrgRepRole(portal, actorProfile.id, profileId, reviewedAt, false);
-
-    await supabase.rpc('portal_refresh_profile_claims', { p_profile_id: profileId }).catch((rpcError: unknown) => {
-      console.warn('Failed to refresh profile claims', rpcError);
-    });
+    await syncOrgRepRole(supabase, profileId, false);
 
     if (pendingProfile.user_id) {
       await ensurePortalProfile(supabase, pendingProfile.user_id).catch((refreshError) => {
@@ -307,74 +294,18 @@ export async function declineAffiliationAction(formData: FormData): Promise<Acti
 }
 
 async function syncOrgRepRole(
-  portal: ReturnType<SupabaseServerClient['schema']>,
-  actorProfileId: string,
+  supabase: SupabaseServerClient,
   profileId: string,
-  reviewedAt: string,
   elevate: boolean,
 ) {
-  const { data: roleRow, error: roleError } = await portal.from('roles').select('id').eq('name', 'org_rep').maybeSingle();
+  // @ts-expect-error set_profile_role exists in DB but not generated types yet
+  const { error } = await supabase.rpc('set_profile_role', {
+    p_profile_id: profileId,
+    p_role_name: 'portal_org_rep',
+    p_enable: elevate,
+  });
 
-  if (roleError) {
-    throw roleError;
-  }
-
-  if (!roleRow) {
-    throw new Error('Org representative role is not configured.');
-  }
-
-  if (elevate) {
-    const { data: existingRole, error: existingRoleError } = await portal
-      .from('profile_roles')
-      .select('id, revoked_at')
-      .eq('profile_id', profileId)
-      .eq('role_id', roleRow.id)
-      .maybeSingle();
-
-    if (existingRoleError) {
-      throw existingRoleError;
-    }
-
-    if (!existingRole) {
-      const { error: insertError } = await portal.from('profile_roles').insert({
-        profile_id: profileId,
-        role_id: roleRow.id,
-        granted_at: reviewedAt,
-        granted_by_profile_id: actorProfileId,
-      });
-      if (insertError) {
-        throw insertError;
-      }
-    } else if (existingRole.revoked_at) {
-      const { error: restoreError } = await portal
-        .from('profile_roles')
-        .update({
-          revoked_at: null,
-          revoked_by_profile_id: null,
-          reason: null,
-          updated_at: reviewedAt,
-          granted_at: reviewedAt,
-          granted_by_profile_id: actorProfileId,
-        })
-        .eq('id', existingRole.id);
-      if (restoreError) {
-        throw restoreError;
-      }
-    }
-  } else {
-    const { error: revokeError } = await portal
-      .from('profile_roles')
-      .update({
-        revoked_at: reviewedAt,
-        revoked_by_profile_id: actorProfileId,
-        updated_at: reviewedAt,
-      })
-      .eq('profile_id', profileId)
-      .eq('role_id', roleRow.id)
-      .is('revoked_at', null);
-
-    if (revokeError) {
-      throw revokeError;
-    }
+  if (error) {
+    throw error;
   }
 }

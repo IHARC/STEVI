@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
+import { getPortalRoles } from '@/lib/ihar-auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { PendingAffiliationsSection } from '@/components/admin/profiles/pending-affiliations';
@@ -55,11 +56,12 @@ export default async function AdminProfilesPage() {
     redirect('/login?next=/admin/profiles');
   }
 
-  const profile = await ensurePortalProfile(supabase, user.id);
-  if (!['moderator', 'admin'].includes(profile.role)) {
+  const portalRoles = getPortalRoles(user);
+  if (!portalRoles.includes('portal_admin') && !portalRoles.includes('portal_moderator')) {
     redirect('/home');
   }
 
+  const profile = await ensurePortalProfile(supabase, user.id);
   const portal = supabase.schema('portal');
 
   const [organizationsResponse, pendingResponse, invitesResponse] = await Promise.all([

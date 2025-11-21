@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
 import { logAuditEvent } from '@/lib/audit';
+import { getPortalRoles } from '@/lib/ihar-auth';
 import type { SupabaseServerClient } from '@/lib/supabase/types';
 
 const MEMBERS_PATH = '/org/members';
@@ -12,7 +13,7 @@ type ActionResult = { success: true } | { success: false; error: string };
 
 type ToggleRolePayload = {
   profileId: string;
-  roleName: 'org_admin' | 'org_rep';
+  roleName: 'portal_org_admin' | 'portal_org_rep';
   enable: boolean;
 };
 
@@ -27,11 +28,12 @@ async function requireOrgAdminContext() {
     throw userError ?? new Error('Sign in to continue.');
   }
 
-  const actorProfile = await ensurePortalProfile(supabase, user.id);
-  if (actorProfile.role !== 'org_admin') {
+  const portalRoles = getPortalRoles(user);
+  if (!portalRoles.includes('portal_org_admin') && !portalRoles.includes('portal_admin')) {
     throw new Error('Organization admin access is required.');
   }
 
+  const actorProfile = await ensurePortalProfile(supabase, user.id);
   if (!actorProfile.organization_id) {
     throw new Error('Your profile is not linked to an organization.');
   }
@@ -40,74 +42,20 @@ async function requireOrgAdminContext() {
   return { supabase, portal, actorProfile };
 }
 
-async function upsertRoleAssignment(
-  portal: ReturnType<SupabaseServerClient['schema']>,
+async function setRole(
+  supabase: SupabaseServerClient,
   payload: ToggleRolePayload,
-  actorProfileId: string,
 ) {
-  const roleResponse = await portal.from('roles').select('id').eq('name', payload.roleName).maybeSingle();
-  if (roleResponse.error || !roleResponse.data) {
-    throw roleResponse.error ?? new Error('Role not found.');
+  // @ts-expect-error set_profile_role is defined in the database but not yet in generated types
+  const { error } = await supabase.rpc('set_profile_role', {
+    p_profile_id: payload.profileId,
+    p_role_name: payload.roleName,
+    p_enable: payload.enable,
+  });
+
+  if (error) {
+    throw error;
   }
-
-  const roleId = roleResponse.data.id;
-  const now = new Date().toISOString();
-
-  if (payload.enable) {
-    const existing = await portal
-      .from('profile_roles')
-      .select('id, revoked_at')
-      .eq('profile_id', payload.profileId)
-      .eq('role_id', roleId)
-      .maybeSingle();
-
-    if (existing.error) throw existing.error;
-
-    if (!existing.data) {
-      const insert = await portal.from('profile_roles').insert({
-        profile_id: payload.profileId,
-        role_id: roleId,
-        granted_at: now,
-        granted_by_profile_id: actorProfileId,
-      });
-      if (insert.error) throw insert.error;
-    } else if (existing.data.revoked_at) {
-      const restore = await portal
-        .from('profile_roles')
-        .update({
-          revoked_at: null,
-          revoked_by_profile_id: null,
-          reason: null,
-          updated_at: now,
-          granted_at: now,
-          granted_by_profile_id: actorProfileId,
-        })
-        .eq('id', existing.data.id);
-      if (restore.error) throw restore.error;
-    }
-  } else {
-    const revoke = await portal
-      .from('profile_roles')
-      .update({
-        revoked_at: now,
-        revoked_by_profile_id: actorProfileId,
-        updated_at: now,
-      })
-      .eq('profile_id', payload.profileId)
-      .eq('role_id', roleId)
-      .is('revoked_at', null);
-    if (revoke.error) throw revoke.error;
-  }
-}
-
-function normalizeProfileRole(roleName: 'org_admin' | 'org_rep', enable: boolean, currentRole: string | null) {
-  if (!enable) {
-    if (currentRole === roleName) {
-      return 'user';
-    }
-    return currentRole ?? 'user';
-  }
-  return roleName;
 }
 
 export async function toggleMemberRoleAction(formData: FormData): Promise<ActionResult> {
@@ -121,7 +69,7 @@ export async function toggleMemberRoleAction(formData: FormData): Promise<Action
     }
 
     const enable = enableValue === 'true';
-    if (roleName !== 'org_admin' && roleName !== 'org_rep') {
+    if (roleName !== 'portal_org_admin' && roleName !== 'portal_org_rep') {
       throw new Error('Unsupported role.');
     }
 
@@ -129,7 +77,7 @@ export async function toggleMemberRoleAction(formData: FormData): Promise<Action
 
     const { data: member, error: memberError } = await portal
       .from('profiles')
-      .select('id, organization_id, role')
+      .select('id, organization_id, user_id')
       .eq('id', profileId)
       .maybeSingle();
 
@@ -141,18 +89,7 @@ export async function toggleMemberRoleAction(formData: FormData): Promise<Action
       throw new Error('You can only manage members in your organization.');
     }
 
-    await upsertRoleAssignment(portal, { profileId, roleName: roleName as ToggleRolePayload['roleName'], enable }, actorProfile.id);
-
-    const nextRole = normalizeProfileRole(roleName as ToggleRolePayload['roleName'], enable, member.role);
-    if (nextRole !== member.role) {
-      const roleUpdate = await portal
-        .from('profiles')
-        .update({ role: nextRole, updated_at: new Date().toISOString() })
-        .eq('id', profileId);
-      if (roleUpdate.error) throw roleUpdate.error;
-    }
-
-    await supabase.rpc('portal_refresh_profile_claims', { p_profile_id: profileId }).catch(() => undefined);
+    await setRole(supabase, { profileId, roleName: roleName as ToggleRolePayload['roleName'], enable });
 
     await logAuditEvent(supabase, {
       actorProfileId: actorProfile.id,
@@ -197,13 +134,9 @@ export async function removeMemberAction(formData: FormData): Promise<ActionResu
 
     const now = new Date().toISOString();
 
-    for (const roleName of ['org_admin', 'org_rep'] as const) {
+    for (const roleName of ['portal_org_admin', 'portal_org_rep'] as const) {
       try {
-        await upsertRoleAssignment(
-          portal,
-          { profileId, roleName, enable: false },
-          actorProfile.id,
-        );
+        await setRole(supabase, { profileId, roleName, enable: false });
       } catch (roleError) {
         console.warn(`Failed to revoke ${roleName} role when removing member`, roleError);
       }
@@ -211,11 +144,9 @@ export async function removeMemberAction(formData: FormData): Promise<ActionResu
 
     const clearOrg = await portal
       .from('profiles')
-      .update({ organization_id: null, role: 'user', updated_at: now })
+      .update({ organization_id: null, updated_at: now })
       .eq('id', profileId);
     if (clearOrg.error) throw clearOrg.error;
-
-    await supabase.rpc('portal_refresh_profile_claims', { p_profile_id: profileId }).catch(() => undefined);
 
     await logAuditEvent(supabase, {
       actorProfileId: actorProfile.id,

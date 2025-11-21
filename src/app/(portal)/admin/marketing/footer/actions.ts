@@ -4,9 +4,11 @@ import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { logAuditEvent } from '@/lib/audit';
 import { ensurePortalProfile } from '@/lib/profile';
+import { getPortalRoles } from '@/lib/ihar-auth';
 
 const ADMIN_PATHS = ['/admin', '/admin/marketing/footer'] as const;
-const DEFAULT_SLOT = 'public_marketing';
+const PRIMARY_KEY = 'marketing.footer.primary_text';
+const SECONDARY_KEY = 'marketing.footer.secondary_text';
 
 function readText(formData: FormData, key: string): string | null {
   const value = formData.get(key);
@@ -43,79 +45,62 @@ async function requireAdminContext() {
     throw userError ?? new Error('Sign in to continue.');
   }
 
-  const actorProfile = await ensurePortalProfile(supabase, user.id);
-  if (actorProfile.role !== 'admin') {
+  const portalRoles = getPortalRoles(user);
+  if (!portalRoles.includes('portal_admin')) {
     throw new Error('Admin access is required to update the footer.');
   }
 
-  return { supabase, portal: supabase.schema('portal'), actorProfile };
+  const actorProfile = await ensurePortalProfile(supabase, user.id);
+  if (!actorProfile) {
+    throw new Error('Admin access is required to update the footer.');
+  }
+
+  return { supabase, core: supabase.schema('core'), actorProfile };
 }
 
 export async function updateSiteFooterAction(formData: FormData): Promise<void> {
   try {
-    const slot = readText(formData, 'slot') ?? DEFAULT_SLOT;
     const primaryText = requireText(formData, 'primary_text', 'Add the primary footer text.');
     const secondaryText = readText(formData, 'secondary_text');
 
-    const { supabase, portal, actorProfile } = await requireAdminContext();
+    const { supabase, core, actorProfile } = await requireAdminContext();
 
-    const { data: existing, error: existingError } = await portal
-      .from('site_footer_settings')
-      .select('id')
-      .eq('slot', slot)
-      .eq('is_active', true)
-      .order('updated_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    const now = new Date().toISOString();
 
-    if (existingError) {
-      throw existingError;
-    }
+    const { error: primaryError } = await core
+      .from('system_settings')
+      .upsert(
+        {
+          setting_key: PRIMARY_KEY,
+          setting_type: 'string',
+          setting_value: primaryText,
+          updated_by: actorProfile.id,
+          updated_at: now,
+        },
+        { onConflict: 'setting_key' },
+      );
+    if (primaryError) throw primaryError;
 
-    let footerId = existing?.id ?? null;
-
-    if (existing?.id) {
-      const { error: updateError } = await portal
-        .from('site_footer_settings')
-        .update({
-          primary_text: primaryText,
-          secondary_text: secondaryText ?? null,
-          is_active: true,
-          updated_by_profile_id: actorProfile.id,
-        })
-        .eq('id', existing.id);
-
-      if (updateError) {
-        throw updateError;
-      }
-    } else {
-      const { data: inserted, error: insertError } = await portal
-        .from('site_footer_settings')
-        .insert({
-          slot,
-          primary_text: primaryText,
-          secondary_text: secondaryText ?? null,
-          is_active: true,
-          created_by_profile_id: actorProfile.id,
-          updated_by_profile_id: actorProfile.id,
-        })
-        .select('id')
-        .maybeSingle();
-
-      if (insertError) {
-        throw insertError;
-      }
-
-      footerId = inserted?.id ?? footerId;
-    }
+    const { error: secondaryError } = await core
+      .from('system_settings')
+      .upsert(
+        {
+          setting_key: SECONDARY_KEY,
+          setting_type: 'string',
+          setting_value: secondaryText,
+          updated_by: actorProfile.id,
+          updated_at: now,
+        },
+        { onConflict: 'setting_key' },
+      );
+    if (secondaryError) throw secondaryError;
 
     await logAuditEvent(supabase, {
       actorProfileId: actorProfile.id,
       action: 'marketing_footer_updated',
       entityType: 'site_footer',
-      entityId: footerId,
+      entityId: null,
       meta: {
-        slot,
         has_secondary: Boolean(secondaryText),
       },
     });

@@ -6,6 +6,13 @@ export type IharcRole =
   | 'iharc_staff'
   | 'iharc_volunteer';
 
+export type PortalRole =
+  | 'portal_admin'
+  | 'portal_moderator'
+  | 'portal_org_admin'
+  | 'portal_org_rep'
+  | 'portal_user';
+
 type MetadataWithRoles = {
   role?: string | null;
   roles?: string[] | null;
@@ -59,6 +66,13 @@ export function getIharcRoles(user: UserLike): IharcRole[] {
   const roles = extractRolesFromMetadata(appMetadata);
 
   return roles.filter((role): role is IharcRole => role.startsWith(IHARC_ROLE_PREFIX));
+}
+
+export function getPortalRoles(user: UserLike): PortalRole[] {
+  if (!user) return [];
+  const appMetadata = user.app_metadata as MetadataWithRoles | null | undefined;
+  const roles = extractRolesFromMetadata(appMetadata);
+  return roles.filter((role): role is PortalRole => role.startsWith('portal_'));
 }
 
 export function hasIharcRole(user: UserLike, allowed: IharcRole | IharcRole[]): boolean {

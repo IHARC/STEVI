@@ -61,14 +61,12 @@ export async function ensurePortalProfile(
     return data ?? null;
   };
 
-  const refreshProfileClaims = async (profileId: string) => {
+  const refreshUserClaims = async (userIdToRefresh: string) => {
     try {
-      await supabase.rpc('portal_refresh_profile_claims', {
-        p_profile_id: profileId,
-      });
+      await supabase.rpc('refresh_user_permissions', { user_uuid: userIdToRefresh });
     } catch (claimError) {
       if (process.env.NODE_ENV !== 'production') {
-        console.warn('Failed to refresh profile claims', claimError);
+        console.warn('Failed to refresh user claims', claimError);
       }
     }
   };
@@ -98,7 +96,7 @@ export async function ensurePortalProfile(
   const existingProfile = await fetchProfileByUserId();
 
   if (existingProfile) {
-    await refreshProfileClaims(existingProfile.id);
+    await refreshUserClaims(existingProfile.user_id);
     return ensureCommunityMemberTitle(existingProfile);
   }
 
@@ -114,7 +112,6 @@ export async function ensurePortalProfile(
   const insertPayload = {
     user_id: userId,
     display_name: defaults?.display_name ?? 'Community Member',
-    role: 'user',
     organization_id: defaults?.organization_id ?? null,
     rules_acknowledged_at: defaults?.rules_acknowledged_at ?? null,
     position_title: positionTitle,
@@ -155,7 +152,7 @@ export async function ensurePortalProfile(
     throw insertError;
   }
 
-  await refreshProfileClaims(inserted.id);
+  await refreshUserClaims(userId);
 
   return ensureCommunityMemberTitle(inserted);
 }

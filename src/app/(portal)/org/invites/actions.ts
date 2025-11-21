@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
 import { logAuditEvent } from '@/lib/audit';
+import { getPortalRoles } from '@/lib/ihar-auth';
 
 const INVITES_PATH = '/org/invites';
 
@@ -35,8 +36,13 @@ export async function createOrgInviteAction(formData: FormData) {
       throw error ?? new Error('Sign in to continue.');
     }
 
+    const portalRoles = getPortalRoles(user);
+    if (!portalRoles.includes('portal_org_admin') && !portalRoles.includes('portal_admin')) {
+      throw new Error('Organization admin access is required.');
+    }
+
     const actorProfile = await ensurePortalProfile(supabase, user.id);
-    if (actorProfile.role !== 'org_admin' || !actorProfile.organization_id) {
+    if (!actorProfile.organization_id) {
       throw new Error('Organization admin access is required.');
     }
 

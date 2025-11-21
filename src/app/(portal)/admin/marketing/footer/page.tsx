@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
 import { updateSiteFooterAction } from './actions';
+import { getPortalRoles } from '@/lib/ihar-auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,24 +24,26 @@ export default async function MarketingFooterAdminPage() {
     redirect('/login?next=/admin/marketing/footer');
   }
 
-  const profile = await ensurePortalProfile(supabase, user.id);
-  if (profile.role !== 'admin') {
+  const portalRoles = getPortalRoles(user);
+  if (!portalRoles.includes('portal_admin')) {
     redirect('/home');
   }
 
-  const portal = supabase.schema('portal');
-  const { data: footer } = await portal
-    .from('site_footer_settings')
-    .select('primary_text, secondary_text, updated_at')
-    .eq('slot', 'public_marketing')
-    .eq('is_active', true)
-    .order('updated_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  const profile = await ensurePortalProfile(supabase, user.id);
 
-  const primaryText = footer?.primary_text ?? DEFAULT_PRIMARY;
-  const secondaryText = footer ? footer.secondary_text : DEFAULT_SECONDARY;
-  const lastUpdated = footer?.updated_at
+  const core = supabase.schema('core');
+  const { data: footer } = await core
+    .from('system_settings')
+    .select('setting_key, setting_value, updated_at')
+    .in('setting_key', ['marketing.footer.primary_text', 'marketing.footer.secondary_text'])
+    .order('updated_at', { ascending: false })
+    .limit(2);
+
+  const primaryText =
+    footer?.find((row) => row.setting_key === 'marketing.footer.primary_text')?.setting_value ?? DEFAULT_PRIMARY;
+  const secondaryText =
+    footer?.find((row) => row.setting_key === 'marketing.footer.secondary_text')?.setting_value ?? DEFAULT_SECONDARY;
+  const lastUpdated = footer?.[0]?.updated_at
     ? new Date(footer.updated_at).toLocaleString('en-CA', {
         year: 'numeric',
         month: 'short',
@@ -74,8 +77,6 @@ export default async function MarketingFooterAdminPage() {
         </CardHeader>
         <CardContent>
           <form action={updateSiteFooterAction} className="space-y-space-md">
-            <input type="hidden" name="slot" value="public_marketing" />
-
             <div className="space-y-space-2xs">
               <Label htmlFor="primary_text">Primary line</Label>
               <Input

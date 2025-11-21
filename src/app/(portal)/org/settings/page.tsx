@@ -37,7 +37,7 @@ export default async function OrgSettingsPage() {
             </div>
             <div>
               <dt className="font-medium text-on-surface">Role</dt>
-              <dd>{access.profile.role}</dd>
+              <dd>{access.portalRoles.join(', ') || 'portal_user'}</dd>
             </div>
           </dl>
         </CardContent>

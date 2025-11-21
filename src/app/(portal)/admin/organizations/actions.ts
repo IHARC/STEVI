@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
 import { logAuditEvent } from '@/lib/audit';
+import { getPortalRoles } from '@/lib/ihar-auth';
 
 const LIST_PATH = '/admin/organizations';
 
@@ -36,8 +37,13 @@ export async function createOrganizationAction(formData: FormData): Promise<Acti
       throw error ?? new Error('Sign in to continue.');
     }
 
+    const portalRoles = getPortalRoles(user);
+    if (!portalRoles.includes('portal_admin')) {
+      throw new Error('Administrator access is required.');
+    }
+
     const actorProfile = await ensurePortalProfile(supabase, user.id);
-    if (actorProfile.role !== 'admin') {
+    if (!actorProfile) {
       throw new Error('Administrator access is required.');
     }
 
@@ -97,55 +103,29 @@ export async function promoteOrgAdminAction(formData: FormData): Promise<ActionR
       throw error ?? new Error('Sign in to continue.');
     }
 
-    const actorProfile = await ensurePortalProfile(supabase, user.id);
-    if (actorProfile.role !== 'admin') {
+    const portalRoles = getPortalRoles(user);
+    if (!portalRoles.includes('portal_admin')) {
       throw new Error('Administrator access is required.');
     }
 
+    const actorProfile = await ensurePortalProfile(supabase, user.id);
     const portal = supabase.schema('portal');
-
-    const { data: roleRow, error: roleError } = await portal
-      .from('roles')
-      .select('id')
-      .eq('name', 'org_admin')
-      .maybeSingle();
-    if (roleError || !roleRow) {
-      throw roleError ?? new Error('org_admin role missing.');
-    }
 
     const now = new Date().toISOString();
 
     const profileUpdate = await portal
       .from('profiles')
-      .update({ organization_id: organizationId, role: 'org_admin', updated_at: now })
+      .update({ organization_id: organizationId, updated_at: now })
       .eq('id', profileId);
     if (profileUpdate.error) throw profileUpdate.error;
 
-    const existing = await portal
-      .from('profile_roles')
-      .select('id, revoked_at')
-      .eq('profile_id', profileId)
-      .eq('role_id', roleRow.id)
-      .maybeSingle();
-    if (existing.error) throw existing.error;
-
-    if (!existing.data) {
-      const insert = await portal.from('profile_roles').insert({
-        profile_id: profileId,
-        role_id: roleRow.id,
-        granted_at: now,
-        granted_by_profile_id: actorProfile.id,
-      });
-      if (insert.error) throw insert.error;
-    } else if (existing.data.revoked_at) {
-      const restore = await portal
-        .from('profile_roles')
-        .update({ revoked_at: null, revoked_by_profile_id: null, updated_at: now })
-        .eq('id', existing.data.id);
-      if (restore.error) throw restore.error;
-    }
-
-    await supabase.rpc('portal_refresh_profile_claims', { p_profile_id: profileId }).catch(() => undefined);
+    // @ts-expect-error set_profile_role exists in DB but not generated types yet
+    const { error: roleError } = await supabase.rpc('set_profile_role', {
+      p_profile_id: profileId,
+      p_role_name: 'portal_org_admin',
+      p_enable: true,
+    });
+    if (roleError) throw roleError;
 
     await logAuditEvent(supabase, {
       actorProfileId: actorProfile.id,

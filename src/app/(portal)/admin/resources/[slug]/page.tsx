@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
+import { getPortalRoles } from '@/lib/ihar-auth';
 import { ResourceForm } from '../resource-form';
 import { deleteResourcePage, updateResourcePage } from '../actions';
 import { getResourceBySlug } from '@/lib/resources';
@@ -29,11 +30,12 @@ export default async function AdminResourceEditPage({ params }: { params: RouteP
     redirect(`/login?next=/admin/resources/${slug}`);
   }
 
-  const profile = await ensurePortalProfile(supabase, user.id);
-  if (profile.role !== 'admin') {
+  const portalRoles = getPortalRoles(user);
+  if (!portalRoles.includes('portal_admin')) {
     redirect('/home');
   }
 
+  const profile = await ensurePortalProfile(supabase, user.id);
   const resource = await getResourceBySlug(slug, { includeUnpublished: true });
   if (!resource) {
     notFound();

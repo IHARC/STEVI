@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
+import { getPortalRoles } from '@/lib/ihar-auth';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
@@ -87,10 +88,12 @@ export default async function AdminPage() {
     redirect('/login?next=/admin');
   }
 
-  const profile = await ensurePortalProfile(supabase, user.id);
-  if (!['moderator', 'admin'].includes(profile.role)) {
+  const portalRoles = getPortalRoles(user);
+  if (!portalRoles.includes('portal_admin') && !portalRoles.includes('portal_moderator')) {
     redirect('/home');
   }
+
+  const profile = await ensurePortalProfile(supabase, user.id);
 
   return (
     <div className="page-shell page-stack">

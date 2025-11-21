@@ -1,7 +1,7 @@
 import type { LucideIcon } from 'lucide-react';
 import { Boxes, Megaphone, Notebook, Users2 } from 'lucide-react';
 import { ensurePortalProfile, type PortalProfile } from '@/lib/profile';
-import { getIharcRoles, type IharcRole } from '@/lib/ihar-auth';
+import { getIharcRoles, getPortalRoles, type IharcRole, type PortalRole } from '@/lib/ihar-auth';
 import { INVENTORY_ALLOWED_ROLES } from '@/lib/inventory/constants';
 import type { SupabaseAnyServerClient } from '@/lib/supabase/types';
 
@@ -13,7 +13,7 @@ export type PortalLink = {
 };
 
 type LinkRequirement = {
-  requiresProfileRoles?: PortalProfile['role'][];
+  requiresPortalRoles?: PortalRole[];
   requiresIharcRoles?: IharcRole[];
   requiresGuard?: (access: PortalAccess) => boolean;
 };
@@ -78,7 +78,7 @@ const ADMIN_NAV_BLUEPRINT: WorkspaceNavBlueprint = {
         {
           href: '/admin/profiles',
           label: 'Profile verification',
-          requiresProfileRoles: ['moderator', 'admin'],
+          requiresPortalRoles: ['portal_moderator', 'portal_admin'],
         },
       ],
     },
@@ -90,17 +90,17 @@ const ADMIN_NAV_BLUEPRINT: WorkspaceNavBlueprint = {
         {
           href: '/admin/resources',
           label: 'Resource library',
-          requiresProfileRoles: ['admin'],
+          requiresPortalRoles: ['portal_admin'],
         },
         {
           href: '/admin/policies',
           label: 'Policies',
-          requiresProfileRoles: ['admin'],
+          requiresPortalRoles: ['portal_admin'],
         },
         {
           href: '/admin/marketing/footer',
           label: 'Marketing footer',
-          requiresProfileRoles: ['admin'],
+          requiresPortalRoles: ['portal_admin'],
         },
       ],
     },
@@ -112,7 +112,7 @@ const ADMIN_NAV_BLUEPRINT: WorkspaceNavBlueprint = {
         {
           href: '/admin/notifications',
           label: 'Notifications',
-          requiresProfileRoles: ['admin'],
+          requiresPortalRoles: ['portal_admin'],
         },
       ],
     },
@@ -129,7 +129,7 @@ const ADMIN_NAV_BLUEPRINT: WorkspaceNavBlueprint = {
         {
           href: '/admin/organizations',
           label: 'Organizations',
-          requiresProfileRoles: ['admin'],
+          requiresPortalRoles: ['portal_admin'],
         },
       ],
     },
@@ -179,6 +179,7 @@ export type PortalAccess = {
   email: string | null;
   profile: PortalProfile;
   iharcRoles: IharcRole[];
+  portalRoles: PortalRole[];
   organizationId: string | null;
   canAccessAdminWorkspace: boolean;
   canAccessOrgWorkspace: boolean;
@@ -207,20 +208,25 @@ export async function loadPortalAccess(
 
   const profile = await ensurePortalProfile(supabase, user.id);
   const iharcRoles = getIharcRoles(user);
+  const portalRoles = getPortalRoles(user);
   const organizationId = profile.organization_id ?? null;
 
-  const canAccessAdminWorkspace = profile.role === 'moderator' || profile.role === 'admin';
-  const canAccessOrgWorkspace = profile.role === 'org_admin' && organizationId !== null;
-  const canManageResources = profile.role === 'admin';
-  const canManagePolicies = profile.role === 'admin';
+  const isPortalAdmin = portalRoles.includes('portal_admin');
+  const isPortalModerator = portalRoles.includes('portal_moderator');
+  const isOrgAdmin = portalRoles.includes('portal_org_admin');
+
+  const canAccessAdminWorkspace = isPortalAdmin || isPortalModerator;
+  const canAccessOrgWorkspace = isOrgAdmin && organizationId !== null;
+  const canManageResources = isPortalAdmin;
+  const canManagePolicies = isPortalAdmin;
   const canAccessInventoryWorkspace = iharcRoles.some((role) =>
     INVENTORY_ALLOWED_ROLES.includes(role),
   );
 
-  const canManageNotifications = profile.role === 'admin';
-  const canManageSiteFooter = profile.role === 'admin';
+  const canManageNotifications = isPortalAdmin;
+  const canManageSiteFooter = isPortalAdmin;
   const canReviewProfiles = canAccessAdminWorkspace;
-  const canViewMetrics = profile.role === 'admin';
+  const canViewMetrics = isPortalAdmin;
   const canManageOrgUsers = canAccessOrgWorkspace;
   const canManageOrgInvites = canAccessOrgWorkspace;
 
@@ -229,6 +235,7 @@ export async function loadPortalAccess(
     email: user.email ?? null,
     profile,
     iharcRoles,
+    portalRoles,
     organizationId,
     canAccessAdminWorkspace,
     canAccessOrgWorkspace,
@@ -245,15 +252,15 @@ export async function loadPortalAccess(
 }
 
 function linkIsAllowed(blueprint: PortalLinkBlueprint, access: PortalAccess): boolean {
-  const { profile, iharcRoles } = access;
+  const { portalRoles, iharcRoles } = access;
 
   if (blueprint.requiresGuard && !blueprint.requiresGuard(access)) {
     return false;
   }
 
   if (
-    blueprint.requiresProfileRoles &&
-    !blueprint.requiresProfileRoles.includes(profile.role)
+    blueprint.requiresPortalRoles &&
+    !portalRoles.some((role) => blueprint.requiresPortalRoles?.includes(role))
   ) {
     return false;
   }
@@ -317,7 +324,7 @@ export function resolveOrgWorkspaceNav(access: PortalAccess | null): WorkspaceNa
 }
 
 const PUBLIC_CLIENT_LINKS: PortalLink[] = CLIENT_NAV_BLUEPRINT.filter(
-  (entry) => !entry.requiresGuard && !entry.requiresProfileRoles && !entry.requiresIharcRoles,
+  (entry) => !entry.requiresGuard && !entry.requiresPortalRoles && !entry.requiresIharcRoles,
 ).map(({ href, label, exact }) => ({ href, label, exact } satisfies PortalLink));
 
 export function getPublicPortalLinks(): PortalLink[] {

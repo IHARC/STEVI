@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
+import { getPortalRoles } from '@/lib/ihar-auth';
 import { ResourceForm } from '../resource-form';
 import { createResourcePage } from '../actions';
 
@@ -19,10 +20,12 @@ export default async function AdminResourceNewPage() {
     redirect('/login?next=/admin/resources/new');
   }
 
-  const profile = await ensurePortalProfile(supabase, user.id);
-  if (profile.role !== 'admin') {
+  const portalRoles = getPortalRoles(user);
+  if (!portalRoles.includes('portal_admin')) {
     redirect('/home');
   }
+
+  const profile = await ensurePortalProfile(supabase, user.id);
 
   return (
     <div className="page-shell page-stack text-on-surface">
