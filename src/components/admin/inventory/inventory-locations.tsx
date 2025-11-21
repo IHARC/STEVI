@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/components/ui/use-toast';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   createInventoryLocationAction,
   deleteInventoryLocationAction,
@@ -86,7 +87,9 @@ export function InventoryLocationsSection({ locations, actorProfileId, canManage
           <CardTitle className="text-title-sm font-semibold">Locations</CardTitle>
           <p className="text-body-md text-muted-foreground">Warehouses, outreach lockers, and mobile units that hold inventory.</p>
           {!canManageLocations ? (
-            <p className="text-label-sm text-orange-700">Viewing only: only IHARC admins can add or edit locations.</p>
+            <p className="text-label-sm text-warning-foreground">
+              Viewing only: only IHARC admins can add or edit locations.
+            </p>
           ) : null}
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
@@ -214,12 +217,10 @@ function LocationDialog({
           </div>
           <Field label="Address" name="address" defaultValue={defaultValues?.address ?? ''} placeholder="Street, city" disabled={!canManageLocations} />
           <div className="flex items-center gap-2">
-            <input
+            <Checkbox
               id="location_active"
               name="active"
-              type="checkbox"
               defaultChecked={defaultValues?.active ?? true}
-              className="h-4 w-4"
               disabled={!canManageLocations}
             />
             <Label htmlFor="location_active" className="text-body-md text-muted-foreground">

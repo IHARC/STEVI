@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
 import { sendNotificationAction } from '@/app/(portal)/admin/notifications/actions';
 import type { NotificationRecipient } from './types';
@@ -74,43 +75,47 @@ export function ComposeNotificationForm({ recipients }: ComposeNotificationFormP
     </CardHeader>
     <CardContent>
       <form ref={formRef} onSubmit={handleSubmit} className="grid gap-space-md">
-        <input type="hidden" name="recipient_profile_id" value={selectedRecipient} />
           <div className="grid gap-space-sm md:grid-cols-2">
             <Label className="grid gap-1 text-body-sm text-on-surface">
               <span className="text-label-sm uppercase text-muted-foreground">
                 Recipient
               </span>
-              <select
+              <Select
+                name="recipient_profile_id"
                 value={selectedRecipient}
-                onChange={(event) => handleRecipientChange(event.target.value)}
-                className="rounded-lg border border-outline/40 bg-surface px-3 py-2 text-body-sm text-on-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                onValueChange={handleRecipientChange}
                 disabled={isPending}
               >
-                <option value="">Select profile</option>
-                {recipients.map((recipient) => (
-                  <option key={recipient.id} value={recipient.id}>
-                    {recipient.displayName}
-                    {recipient.organizationName ? ` • ${recipient.organizationName}` : ''}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger aria-label="Recipient">
+                  <SelectValue placeholder="Select profile" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Select profile</SelectItem>
+                  {recipients.map((recipient) => (
+                    <SelectItem key={recipient.id} value={recipient.id}>
+                      {recipient.displayName}
+                      {recipient.organizationName ? ` • ${recipient.organizationName}` : ''}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </Label>
             <Label className="grid gap-1 text-body-sm text-on-surface">
               <span className="text-label-sm uppercase text-muted-foreground">
                 Notification type
               </span>
-              <select
-                name="notification_type"
-                defaultValue="general"
-                className="rounded-lg border border-outline/40 bg-surface px-3 py-2 text-body-sm text-on-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                disabled={isPending}
-              >
-                {NOTIFICATION_TYPES.map((type) => (
-                  <option key={type.value} value={type.value}>
-                    {type.label}
-                  </option>
-                ))}
-              </select>
+              <Select name="notification_type" defaultValue="general" disabled={isPending}>
+                <SelectTrigger aria-label="Notification type">
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {NOTIFICATION_TYPES.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </Label>
           </div>
 

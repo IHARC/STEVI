@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -94,15 +95,15 @@ export default async function AdminOrganizationsPage() {
             </div>
             <div className="space-y-space-xs">
               <Label htmlFor="category">Category</Label>
-              <select
-                id="category"
-                name="category"
-                className="h-10 rounded-md border border-input bg-background px-3 text-sm"
-                defaultValue="community"
-              >
-                <option value="community">Community</option>
-                <option value="government">Government</option>
-              </select>
+              <Select name="category" defaultValue="community" required>
+                <SelectTrigger id="category">
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="community">Community</SelectItem>
+                  <SelectItem value="government">Government</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="md:col-span-3 flex justify-end">
               <Button type="submit">Create organization</Button>
@@ -127,22 +128,18 @@ export default async function AdminOrganizationsPage() {
             </div>
             <div className="space-y-space-xs">
               <Label htmlFor="organization_id">Organization</Label>
-              <select
-                id="organization_id"
-                name="organization_id"
-                className="h-10 rounded-md border border-input bg-background px-3 text-sm"
-                required
-                defaultValue=""
-              >
-                <option value="" disabled>
-                  Select organization
-                </option>
-                {(orgs as OrganizationRow[] | null)?.map((org) => (
-                  <option key={org.id} value={org.id}>
-                    {org.name}
-                  </option>
-                ))}
-              </select>
+              <Select name="organization_id" required>
+                <SelectTrigger id="organization_id">
+                  <SelectValue placeholder="Select organization" />
+                </SelectTrigger>
+                <SelectContent>
+                  {(orgs as OrganizationRow[] | null)?.map((org) => (
+                    <SelectItem key={org.id} value={org.id}>
+                      {org.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="md:col-span-3 flex justify-end">
               <Button type="submit">Promote to org admin</Button>

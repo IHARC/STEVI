@@ -18,6 +18,8 @@ import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   adjustInventoryStockAction,
   bulkReceiveInventoryStockAction,
@@ -387,30 +389,29 @@ function ItemDialog({
               />
               <div className="grid gap-2">
                 <Label htmlFor="initial_location_id">Initial location</Label>
-                <select
-                  id="initial_location_id"
-                  name="initial_location_id"
-                  className="rounded-md border border-input bg-background px-3 py-2 text-body-md shadow-sm focus:outline-none"
-                >
-                  <option value="">Select location</option>
-                  {locations.map((location) => (
-                    <option key={location.id} value={location.id}>
-                      {location.name}
-                    </option>
-                  ))}
-                </select>
+                <Select name="initial_location_id">
+                  <SelectTrigger id="initial_location_id">
+                    <SelectValue placeholder="Select location" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">None</SelectItem>
+                    {locations.map((location) => (
+                      <SelectItem key={location.id} value={location.id}>
+                        {location.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <p className="text-label-sm text-muted-foreground">Required if you record initial stock above zero.</p>
               </div>
             </div>
           ) : null}
 
           <div className="flex items-center gap-2">
-            <input
+            <Checkbox
               id="item_active"
               name="active"
-              type="checkbox"
               defaultChecked={defaultValues?.active ?? true}
-              className="h-4 w-4"
             />
             <Label htmlFor="item_active" className="text-body-md text-muted-foreground">
               Item is active in operations
@@ -491,48 +492,49 @@ function ReceiveStockDialog({ item, locations, organizations, onSubmit, onClose,
             </div>
             <div className="grid gap-2">
               <Label htmlFor="receive_location">Location</Label>
-              <select
-                id="receive_location"
-                name="location_id"
-                required
-                className="rounded-md border border-input bg-background px-3 py-2 text-body-md shadow-sm focus:outline-none"
-              >
-                <option value="">Select location</option>
-                {locations.map((location) => (
-                  <option key={location.id} value={location.id}>
-                    {location.name}
-                  </option>
-                ))}
-              </select>
+              <Select name="location_id" required>
+                <SelectTrigger id="receive_location">
+                  <SelectValue placeholder="Select location" />
+                </SelectTrigger>
+                <SelectContent>
+                  {locations.map((location) => (
+                    <SelectItem key={location.id} value={location.id}>
+                      {location.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="receive_source">Source type</Label>
-              <select
-                id="receive_source"
-                name="source_type"
-                className="rounded-md border border-input bg-background px-3 py-2 text-body-md shadow-sm focus:outline-none"
-              >
-                <option value="">Select source</option>
-                <option value="donation">Donation</option>
-                <option value="purchase">Purchase</option>
-                <option value="transfer_in">Transfer in</option>
-                <option value="adjustment">Adjustment</option>
-              </select>
+              <Select name="source_type">
+                <SelectTrigger id="receive_source">
+                  <SelectValue placeholder="Select source" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="donation">Donation</SelectItem>
+                  <SelectItem value="purchase">Purchase</SelectItem>
+                  <SelectItem value="transfer_in">Transfer in</SelectItem>
+                  <SelectItem value="adjustment">Adjustment</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="provider_org">Provider organisation</Label>
-              <select
-                id="provider_org"
-                name="provider_org_id"
-                className="rounded-md border border-input bg-background px-3 py-2 text-body-md shadow-sm focus:outline-none"
-              >
-                <option value="">None</option>
-                {organizations.map((org) => (
-                  <option key={org.id} value={org.id}>
-                    {org.name}
-                  </option>
-                ))}
-              </select>
+              <Select name="provider_org_id">
+                <SelectTrigger id="provider_org">
+                  <SelectValue placeholder="None" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">None</SelectItem>
+                  {organizations.map((org) => (
+                    <SelectItem key={org.id} value={String(org.id)}>
+                      {org.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Lot number" name="lot_number" placeholder="Optional" />
@@ -657,19 +659,18 @@ function SelectField({ label, name, locations, required }: SelectFieldProps) {
   return (
     <div className="grid gap-2">
       <Label htmlFor={name}>{label}</Label>
-      <select
-        id={name}
-        name={name}
-        required={required}
-        className="rounded-md border border-input bg-background px-3 py-2 text-body-md shadow-sm focus:outline-none"
-      >
-        <option value="">Select location</option>
-        {locations.map((location) => (
-          <option key={location.id} value={location.id}>
-            {location.name}
-          </option>
-        ))}
-      </select>
+      <Select name={name} required={required}>
+        <SelectTrigger id={name}>
+          <SelectValue placeholder="Select location" />
+        </SelectTrigger>
+        <SelectContent>
+          {locations.map((location) => (
+            <SelectItem key={location.id} value={location.id}>
+              {location.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }
