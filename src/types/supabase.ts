@@ -2815,6 +2815,10 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: string | null;
       };
+      current_organization_id: {
+        Args: Record<PropertyKey, never>;
+        Returns: string | null;
+      };
       current_role: {
         Args: Record<PropertyKey, never>;
         Returns: Database["portal"]["Enums"]["profile_role"] | null;
@@ -2823,13 +2827,17 @@ export type Database = {
         Args: { roles: Database["portal"]["Enums"]["profile_role"][] };
         Returns: boolean;
       };
+      same_org: {
+        Args: { p_profile_id: string };
+        Returns: boolean;
+      };
       normalize_phone: {
         Args: { value: string | null };
         Returns: string | null;
       };
     };
     Enums: {
-      profile_role: "user" | "org_rep" | "moderator" | "admin";
+      profile_role: "user" | "org_rep" | "org_admin" | "moderator" | "admin";
       affiliation_type: "community_member" | "agency_partner" | "government_partner";
       affiliation_status: "approved" | "pending" | "revoked";
       lived_experience_status: "none" | "current" | "former" | "prefer_not_to_share";
@@ -3122,7 +3130,7 @@ export type CompositeTypes<
 export const Constants = {
   portal: {
     Enums: {
-      profile_role: ["user", "org_rep", "moderator", "admin"] as const,
+      profile_role: ["user", "org_rep", "org_admin", "moderator", "admin"] as const,
       affiliation_type: ["community_member", "agency_partner", "government_partner"] as const,
       affiliation_status: ["approved", "pending", "revoked"] as const,
       lived_experience_status: ["none", "current", "former", "prefer_not_to_share"] as const,

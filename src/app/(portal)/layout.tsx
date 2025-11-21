@@ -14,13 +14,14 @@ export default async function PortalLayout({ children }: { children: ReactNode }
   const headerList = await headers();
   const currentPath = headerList.get('next-url') ?? headerList.get('x-invoke-path') ?? '';
   const isAdminPath = currentPath.includes('/admin');
+  const isOrgPath = currentPath.includes('/org');
 
   return (
     <PortalAccessProvider access={portalAccess}>
       <PortalShell
         navLinks={navLinks}
         portalAccess={portalAccess}
-        showClientNav={!isAdminPath}
+        showClientNav={!isAdminPath && !isOrgPath}
       >
         {children}
       </PortalShell>

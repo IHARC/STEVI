@@ -55,6 +55,13 @@ const adminTasks: AdminTask[] = [
     href: '/admin/profiles',
   },
   {
+    id: 'organizations',
+    title: 'Organizations',
+    description: 'Create and verify partner organizations. Org admins stay scoped to their own records.',
+    actionLabel: 'Manage organizations',
+    href: '/admin/organizations',
+  },
+  {
     id: 'documents',
     title: 'Secure document locker',
     description: 'Upload or expire shared files. Use this to deliver housing documents or consent forms.',

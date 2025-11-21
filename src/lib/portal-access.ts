@@ -58,6 +58,12 @@ const CLIENT_NAV_BLUEPRINT: PortalLinkBlueprint[] = [
     exact: false,
     requiresGuard: (access) => access.canAccessAdminWorkspace,
   },
+  {
+    href: '/org',
+    label: 'Organization workspace',
+    exact: false,
+    requiresGuard: (access) => access.canAccessOrgWorkspace,
+  },
 ];
 
 const ADMIN_NAV_BLUEPRINT: WorkspaceNavBlueprint = {
@@ -120,19 +126,62 @@ const ADMIN_NAV_BLUEPRINT: WorkspaceNavBlueprint = {
           label: 'Inventory workspace',
           requiresIharcRoles: INVENTORY_ALLOWED_ROLES,
         },
+        {
+          href: '/admin/organizations',
+          label: 'Organizations',
+          requiresProfileRoles: ['admin'],
+        },
       ],
     },
   ],
 };
 
-const WORKSPACE_NAV_BLUEPRINTS: WorkspaceNavBlueprint[] = [ADMIN_NAV_BLUEPRINT];
+const ORG_NAV_BLUEPRINT: WorkspaceNavBlueprint = {
+  id: 'org',
+  label: 'Organization workspace',
+  groups: [
+    {
+      id: 'people',
+      label: 'People',
+      icon: Users2,
+      links: [
+        {
+          href: '/org/members',
+          label: 'Members',
+          requiresGuard: (access) => access.canManageOrgUsers,
+        },
+        {
+          href: '/org/invites',
+          label: 'Invitations',
+          requiresGuard: (access) => access.canManageOrgInvites,
+        },
+      ],
+    },
+    {
+      id: 'settings',
+      label: 'Settings',
+      icon: Boxes,
+      links: [
+        {
+          href: '/org',
+          label: 'Overview',
+          requiresGuard: (access) => access.canAccessOrgWorkspace,
+        },
+      ],
+    },
+  ],
+};
+
+const WORKSPACE_NAV_BLUEPRINTS: WorkspaceNavBlueprint[] = [ADMIN_NAV_BLUEPRINT, ORG_NAV_BLUEPRINT];
 
 export type PortalAccess = {
   userId: string;
   email: string | null;
   profile: PortalProfile;
   iharcRoles: IharcRole[];
+  organizationId: string | null;
   canAccessAdminWorkspace: boolean;
+  canAccessOrgWorkspace: boolean;
   canManageResources: boolean;
   canManagePolicies: boolean;
   canAccessInventoryWorkspace: boolean;
@@ -140,6 +189,8 @@ export type PortalAccess = {
   canReviewProfiles: boolean;
   canViewMetrics: boolean;
   canManageSiteFooter: boolean;
+  canManageOrgUsers: boolean;
+  canManageOrgInvites: boolean;
 };
 
 export async function loadPortalAccess(
@@ -156,8 +207,10 @@ export async function loadPortalAccess(
 
   const profile = await ensurePortalProfile(supabase, user.id);
   const iharcRoles = getIharcRoles(user);
+  const organizationId = profile.organization_id ?? null;
 
   const canAccessAdminWorkspace = profile.role === 'moderator' || profile.role === 'admin';
+  const canAccessOrgWorkspace = profile.role === 'org_admin' && organizationId !== null;
   const canManageResources = profile.role === 'admin';
   const canManagePolicies = profile.role === 'admin';
   const canAccessInventoryWorkspace = iharcRoles.some((role) =>
@@ -168,13 +221,17 @@ export async function loadPortalAccess(
   const canManageSiteFooter = profile.role === 'admin';
   const canReviewProfiles = canAccessAdminWorkspace;
   const canViewMetrics = profile.role === 'admin';
+  const canManageOrgUsers = canAccessOrgWorkspace;
+  const canManageOrgInvites = canAccessOrgWorkspace;
 
   return {
     userId: user.id,
     email: user.email ?? null,
     profile,
     iharcRoles,
+    organizationId,
     canAccessAdminWorkspace,
+    canAccessOrgWorkspace,
     canManageResources,
     canManagePolicies,
     canAccessInventoryWorkspace,
@@ -182,6 +239,8 @@ export async function loadPortalAccess(
     canReviewProfiles,
     canViewMetrics,
     canManageSiteFooter,
+    canManageOrgUsers,
+    canManageOrgInvites,
   };
 }
 
@@ -252,6 +311,11 @@ export function resolveAdminWorkspaceNav(access: PortalAccess | null): Workspace
   return resolveWorkspace(access, 'admin');
 }
 
+export function resolveOrgWorkspaceNav(access: PortalAccess | null): WorkspaceNav | null {
+  if (!access || !access.canAccessOrgWorkspace) return null;
+  return resolveWorkspace(access, 'org');
+}
+
 const PUBLIC_CLIENT_LINKS: PortalLink[] = CLIENT_NAV_BLUEPRINT.filter(
   (entry) => !entry.requiresGuard && !entry.requiresProfileRoles && !entry.requiresIharcRoles,
 ).map(({ href, label, exact }) => ({ href, label, exact } satisfies PortalLink));
@@ -267,6 +331,11 @@ const USER_MENU_BLUEPRINT: PortalLinkBlueprint[] = [
     href: '/admin',
     label: 'Admin workspace',
     requiresGuard: (access) => access.canAccessAdminWorkspace,
+  },
+  {
+    href: '/org',
+    label: 'Organization workspace',
+    requiresGuard: (access) => access.canAccessOrgWorkspace,
   },
 ];
 
@@ -305,5 +374,12 @@ export function buildCommandPaletteItems(access: PortalAccess | null): CommandPa
       )
     : [];
 
-  return dedupeLinks<CommandPaletteItem>([...clientCommands, ...adminCommands]);
+  const orgNav = resolveOrgWorkspaceNav(access);
+  const orgCommands: CommandPaletteItem[] = orgNav
+    ? orgNav.groups.flatMap((group) =>
+        group.links.map((link) => ({ ...link, group: group.label || 'Organization' })),
+      )
+    : [];
+
+  return dedupeLinks<CommandPaletteItem>([...clientCommands, ...adminCommands, ...orgCommands]);
 }
