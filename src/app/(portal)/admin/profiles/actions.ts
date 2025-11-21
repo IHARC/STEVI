@@ -38,7 +38,7 @@ function requireString(formData: FormData, key: string, message: string): string
   return value;
 }
 
-function normalizeOrganizationId(value: FormDataEntryValue | null): string | null {
+function normalizeOrganizationId(value: FormDataEntryValue | null): number | null {
   if (typeof value !== 'string') {
     return null;
   }
@@ -46,7 +46,8 @@ function normalizeOrganizationId(value: FormDataEntryValue | null): string | nul
   if (!trimmed || trimmed === NO_ORGANIZATION_VALUE) {
     return null;
   }
-  return trimmed;
+  const parsed = Number.parseInt(trimmed, 10);
+  return Number.isNaN(parsed) ? null : parsed;
 }
 
 function getErrorMessage(error: unknown): string {
@@ -173,7 +174,7 @@ export async function approveAffiliationAction(formData: FormData): Promise<Acti
 
     const reviewedAt = new Date().toISOString();
 
-    let organizationId: string | null = null;
+    let organizationId: number | null = null;
     let governmentRole: GovernmentRoleType | null = null;
 
     if (pendingProfile.affiliation_type === 'agency_partner') {

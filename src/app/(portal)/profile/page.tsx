@@ -27,11 +27,6 @@ type Organization = {
   name: string;
 };
 
-type OrganizationRecord = Pick<
-  Database['portal']['Tables']['organizations']['Row'],
-  'id' | 'name' | 'category' | 'verified'
->;
-
 type AffiliationType = Database['portal']['Enums']['affiliation_type'];
 
 const ALLOWED_AFFILIATIONS: AffiliationType[] = ['community_member', 'agency_partner'];
@@ -48,7 +43,6 @@ type UpdatePasswordResult = PasswordFormState;
 
 export default async function PortalProfilePage() {
   const supabase = await createSupabaseRSCClient();
-  const portal = supabase.schema('portal');
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -61,20 +55,21 @@ export default async function PortalProfilePage() {
   const currentAffiliation = ALLOWED_AFFILIATIONS.includes(profile.affiliation_type as AffiliationType)
     ? (profile.affiliation_type as AffiliationType)
     : 'agency_partner';
-  const { data: organizationRowsRaw } = await portal
+  const { data: organizationRowsRaw } = await supabase
+    .schema('core')
     .from('organizations')
-    .select('id, name, category, verified')
-    .eq('verified', true)
+    .select('id, name, is_active')
+    .eq('is_active', true)
     .order('name', { ascending: true });
 
-  const organizationRows = (organizationRowsRaw ?? []) as OrganizationRecord[];
+  const organizationRows = (organizationRowsRaw ?? []) as Array<{ id: number; name: string }>;
 
   const organizations: Organization[] =
-    organizationRows
-      .filter((org) => org.category === 'community')
-      .map((org) => ({ id: org.id, name: org.name }));
+    organizationRows.map((org) => ({ id: String(org.id), name: org.name }));
 
-  const initialOrganizationId = organizations.some((org) => org.id === profile.organization_id) ? profile.organization_id : null;
+  const initialOrganizationId = organizations.some((org) => Number(org.id) === Number(profile.organization_id))
+    ? String(profile.organization_id)
+    : null;
   const initialValues = {
     displayName: profile.display_name ?? 'Community member',
     organizationId: initialOrganizationId,
@@ -108,7 +103,7 @@ export default async function PortalProfilePage() {
     const homelessnessExperience = normalizeLivedExperience(rawHomelessnessExperience);
     const substanceUseExperience = normalizeLivedExperience(rawSubstanceUseExperience);
 
-    let organizationId: string | null = null;
+    let organizationId: number | null = null;
     let requestedOrganizationName: string | null = null;
 
     if (affiliationType === 'agency_partner') {
@@ -118,9 +113,11 @@ export default async function PortalProfilePage() {
         }
         requestedOrganizationName = newOrganizationName;
       } else if (rawAgencyOrganizationId && rawAgencyOrganizationId !== NO_ORGANIZATION_VALUE) {
-        organizationId = rawAgencyOrganizationId;
+        const parsed = Number.parseInt(rawAgencyOrganizationId, 10);
+        organizationId = Number.isNaN(parsed) ? null : parsed;
       } else if (currentAffiliation === 'agency_partner' && profile.organization_id) {
-        organizationId = profile.organization_id;
+        const parsed = typeof profile.organization_id === 'number' ? profile.organization_id : Number(profile.organization_id);
+        organizationId = Number.isNaN(parsed) ? null : parsed;
       } else {
         return { status: 'idle', error: 'Select an organization or request a new listing.' };
       }
@@ -133,7 +130,7 @@ export default async function PortalProfilePage() {
     const isCommunityMember = affiliationType === 'community_member';
     const finalPositionTitle = isCommunityMember ? PUBLIC_MEMBER_ROLE_LABEL : positionTitleInput;
 
-    const organizationChanged = organizationId !== profile.organization_id;
+    const organizationChanged = organizationId !== (profile.organization_id === null ? null : Number(profile.organization_id));
     const requestingOrganization = affiliationType === 'agency_partner' && requestedOrganizationName !== null;
     const shouldReset =
       currentAffiliation !== affiliationType ||

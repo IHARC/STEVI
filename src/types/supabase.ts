@@ -929,64 +929,12 @@ export type Database = {
   };
   portal: {
     Tables: {
-      organizations: {
-        Row: {
-          id: string;
-          name: string;
-          website: string | null;
-          verified: boolean;
-          created_by: string | null;
-          updated_by: string | null;
-          created_at: string;
-          updated_at: string;
-          category: Database["portal"]["Enums"]["organization_category"];
-          government_level: Database["portal"]["Enums"]["government_level"] | null;
-        };
-        Insert: {
-          id?: string;
-          name: string;
-          website?: string | null;
-          verified?: boolean;
-          created_by?: string | null;
-          updated_by?: string | null;
-          created_at?: string;
-          updated_at?: string;
-          category?: Database["portal"]["Enums"]["organization_category"];
-          government_level?: Database["portal"]["Enums"]["government_level"] | null;
-        };
-        Update: {
-          id?: string;
-          name?: string;
-          website?: string | null;
-          verified?: boolean;
-          created_by?: string | null;
-          updated_by?: string | null;
-          created_at?: string;
-          updated_at?: string;
-          category?: Database["portal"]["Enums"]["organization_category"];
-          government_level?: Database["portal"]["Enums"]["government_level"] | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "organizations_created_by_fkey";
-            columns: ["created_by"];
-            referencedRelation: "users";
-            referencedColumns: ["id"];
-          }?,
-          {
-            foreignKeyName: "organizations_updated_by_fkey";
-            columns: ["updated_by"];
-            referencedRelation: "users";
-            referencedColumns: ["id"];
-          }?,
-        ];
-      };
       profiles: {
         Row: {
           id: string;
           user_id: string | null;
           display_name: string;
-          organization_id: string | null;
+          organization_id: number | null;
           role: Database["portal"]["Enums"]["profile_role"];
           avatar_url: string | null;
           bio: string | null;
@@ -1015,7 +963,7 @@ export type Database = {
           id?: string;
           user_id?: string | null;
           display_name: string;
-          organization_id?: string | null;
+          organization_id?: number | null;
           role?: Database["portal"]["Enums"]["profile_role"];
           avatar_url?: string | null;
           bio?: string | null;
@@ -1044,7 +992,7 @@ export type Database = {
           id?: string;
           user_id?: string | null;
           display_name?: string;
-          organization_id?: string | null;
+          organization_id?: number | null;
           role?: Database["portal"]["Enums"]["profile_role"];
           avatar_url?: string | null;
           bio?: string | null;
@@ -1074,6 +1022,7 @@ export type Database = {
             foreignKeyName: "profiles_organization_id_fkey";
             columns: ["organization_id"];
             referencedRelation: "organizations";
+            referencedSchema: "core";
             referencedColumns: ["id"];
           }?,
           {
@@ -1455,7 +1404,7 @@ export type Database = {
           display_name: string | null;
           position_title: string | null;
           affiliation_type: Database["portal"]["Enums"]["affiliation_type"];
-          organization_id: string | null;
+          organization_id: number | null;
           message: string | null;
           status: Database["portal"]["Enums"]["invite_status"];
           token: string;
@@ -1473,7 +1422,7 @@ export type Database = {
           display_name?: string | null;
           position_title?: string | null;
           affiliation_type: Database["portal"]["Enums"]["affiliation_type"];
-          organization_id?: string | null;
+          organization_id?: number | null;
           message?: string | null;
           status?: Database["portal"]["Enums"]["invite_status"];
           token?: string;
@@ -1492,7 +1441,7 @@ export type Database = {
           display_name?: string | null;
           position_title?: string | null;
           affiliation_type?: Database["portal"]["Enums"]["affiliation_type"];
-          organization_id?: string | null;
+          organization_id?: number | null;
           message?: string | null;
           status?: Database["portal"]["Enums"]["invite_status"];
           token?: string;
@@ -1521,6 +1470,7 @@ export type Database = {
             foreignKeyName: "profile_invites_organization_id_fkey";
             columns: ["organization_id"];
             referencedRelation: "organizations";
+            referencedSchema: "core";
             referencedColumns: ["id"];
           }?,
           {

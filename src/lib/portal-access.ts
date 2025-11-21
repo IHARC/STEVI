@@ -180,7 +180,7 @@ export type PortalAccess = {
   profile: PortalProfile;
   iharcRoles: IharcRole[];
   portalRoles: PortalRole[];
-  organizationId: string | null;
+  organizationId: number | null;
   canAccessAdminWorkspace: boolean;
   canAccessOrgWorkspace: boolean;
   canManageResources: boolean;

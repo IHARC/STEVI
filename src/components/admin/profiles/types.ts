@@ -8,11 +8,9 @@ export type OrganizationCategory = Database['portal']['Enums']['organization_cat
 export type InviteStatus = Database['portal']['Enums']['invite_status'];
 
 export type OrganizationOption = {
-  id: string;
+  id: string; // stored as string for form controls; underlying core.organizations id (bigint)
   name: string;
-  category: OrganizationCategory;
-  governmentLevel: GovernmentLevel | null;
-  verified: boolean;
+  governmentLevel?: GovernmentLevel | null;
 };
 
 export type PendingAffiliation = {

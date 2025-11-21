@@ -21,7 +21,6 @@ export async function createOrganizationAction(formData: FormData): Promise<Acti
   try {
     const name = getString(formData, 'name');
     const website = getString(formData, 'website');
-    const category = getString(formData, 'category') ?? 'community';
 
     if (!name) {
       throw new Error('Organization name is required.');
@@ -47,16 +46,19 @@ export async function createOrganizationAction(formData: FormData): Promise<Acti
       throw new Error('Administrator access is required.');
     }
 
-    const portal = supabase.schema('portal');
-    const insert = await portal
+    const core = supabase.schema('core');
+    const insert = await core
       .from('organizations')
       .insert({
         name,
         website,
-        category: category === 'government' ? 'government' : 'community',
-        verified: false,
+        organization_type: null,
+        is_active: true,
+        status: 'active',
         created_by: actorProfile.id,
         updated_by: actorProfile.id,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       })
       .select('id')
       .maybeSingle();
@@ -115,7 +117,7 @@ export async function promoteOrgAdminAction(formData: FormData): Promise<ActionR
 
     const profileUpdate = await portal
       .from('profiles')
-      .update({ organization_id: organizationId, updated_at: now })
+      .update({ organization_id: Number.parseInt(organizationId, 10), updated_at: now })
       .eq('id', profileId);
     if (profileUpdate.error) throw profileUpdate.error;
 

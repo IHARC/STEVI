@@ -13,13 +13,7 @@ import type {
 } from '@/components/admin/profiles/types';
 import type { Database } from '@/types/supabase';
 
-type MaybeArray<T> = T | T[] | null;
-
-type OrganizationRow = Pick<
-  Database['portal']['Tables']['organizations']['Row'],
-  'id' | 'name' | 'category' | 'government_level' | 'verified'
->;
-type OrganizationRelation = Pick<OrganizationRow, 'id' | 'name'>;
+type OrganizationRow = { id: number; name: string; organization_type: string | null };
 type PendingProfileRow = Pick<
   Database['portal']['Tables']['profiles']['Row'],
   | 'id'
@@ -34,15 +28,11 @@ type PendingProfileRow = Pick<
   | 'requested_government_level'
   | 'requested_government_role'
   | 'government_role_type'
-> & {
-  organization: MaybeArray<OrganizationRelation>;
-};
+>;
 type ProfileInviteRow = Pick<
   Database['portal']['Tables']['profile_invites']['Row'],
   'id' | 'email' | 'display_name' | 'position_title' | 'affiliation_type' | 'status' | 'created_at'
-> & {
-  organization: MaybeArray<OrganizationRelation>;
-};
+>;
 
 export const dynamic = 'force-dynamic';
 
@@ -63,9 +53,10 @@ export default async function AdminProfilesPage() {
 
   await ensurePortalProfile(supabase, user.id);
   const portal = supabase.schema('portal');
+  const core = supabase.schema('core');
 
   const [organizationsResponse, pendingResponse, invitesResponse] = await Promise.all([
-    portal.from('organizations').select('id, name, category, government_level, verified').order('name'),
+    core.from('organizations').select('id, name, organization_type').order('name'),
     portal
       .from('profiles')
       .select(
@@ -82,7 +73,6 @@ export default async function AdminProfilesPage() {
           requested_government_level,
           requested_government_role,
           government_role_type,
-          organization:organizations(id, name)
         `,
       )
       .eq('affiliation_status', 'pending')
@@ -98,8 +88,7 @@ export default async function AdminProfilesPage() {
           position_title,
           affiliation_type,
           status,
-          created_at,
-          organization:organizations(id, name)
+          created_at
         `,
       )
       .order('created_at', { ascending: false })
@@ -118,18 +107,16 @@ export default async function AdminProfilesPage() {
 
   const organizationRows = (organizationsResponse.data ?? []) as OrganizationRow[];
   const organizations: OrganizationOption[] = organizationRows.map((org) => ({
-    id: org.id,
+    id: String(org.id),
     name: org.name,
-    category: org.category,
-    governmentLevel: org.government_level,
-    verified: org.verified,
+    governmentLevel: null,
   }));
 
   const pendingRows = (pendingResponse.data ?? []) as PendingProfileRow[];
+  const organizationsById = new Map(organizations.map((org) => [org.id, org]));
   const pendingAffiliations: PendingAffiliation[] = pendingRows.map((entry) => {
-    const organizationRelation = Array.isArray(entry.organization)
-      ? entry.organization[0]
-      : entry.organization ?? null;
+    const orgId = entry.organization_id === null ? null : String(entry.organization_id);
+    const orgOption = orgId ? organizationsById.get(orgId) : null;
     return {
       id: entry.id,
       displayName: entry.display_name,
@@ -137,8 +124,8 @@ export default async function AdminProfilesPage() {
       affiliationType: entry.affiliation_type,
       affiliationStatus: entry.affiliation_status,
       affiliationRequestedAt: entry.affiliation_requested_at,
-      organizationId: entry.organization_id,
-      organizationName: organizationRelation?.name ?? null,
+      organizationId: orgOption?.id ?? null,
+      organizationName: orgOption?.name ?? null,
       requestedOrganizationName: entry.requested_organization_name,
       requestedGovernmentName: entry.requested_government_name,
       requestedGovernmentLevel: entry.requested_government_level,
@@ -149,24 +136,24 @@ export default async function AdminProfilesPage() {
 
   const inviteRows = (invitesResponse.data ?? []) as ProfileInviteRow[];
   const recentInvites: ProfileInviteSummary[] = inviteRows.map((invite) => {
-    const email = invite.email ?? '';
-    const organizationRelation = Array.isArray(invite.organization)
-      ? invite.organization[0]
-      : invite.organization ?? null;
     return {
       id: invite.id,
-      email,
+      email: invite.email ?? '',
       displayName: invite.display_name,
       positionTitle: invite.position_title,
       affiliationType: invite.affiliation_type,
       status: invite.status,
       createdAt: invite.created_at,
-      organizationName: organizationRelation?.name ?? null,
+      organizationName: null,
     };
   });
 
-  const agencyOrgs = organizations.filter((org) => org.category === 'community');
-  const governmentOrgs = organizations.filter((org) => org.category === 'government');
+  const agencyOrgs = organizations.filter(
+    (org) => !(org.name.toLowerCase().includes('government') || org.name.toLowerCase().includes('county')),
+  );
+  const governmentOrgs = organizations.filter(
+    (org) => org.name.toLowerCase().includes('government') || org.name.toLowerCase().includes('county'),
+  );
   const pendingInviteCount = recentInvites.filter((invite) => invite.status === 'pending').length;
 
   return (

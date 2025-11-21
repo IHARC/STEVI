@@ -21,11 +21,11 @@ import { Badge } from '@/components/ui/badge';
 export const dynamic = 'force-dynamic';
 
 type OrganizationRow = {
-  id: string;
+  id: number;
   name: string;
   website: string | null;
-  category: 'community' | 'government';
-  verified: boolean;
+  organization_type: string | null;
+  is_active: boolean | null;
 };
 
 export default async function AdminOrganizationsPage() {
@@ -44,10 +44,10 @@ export default async function AdminOrganizationsPage() {
   }
 
   await ensurePortalProfile(supabase, user.id);
-  const portal = supabase.schema('portal');
-  const { data: orgs, error } = await portal
+  const core = supabase.schema('core');
+  const { data: orgs, error } = await core
     .from('organizations')
-    .select('id, name, website, category, verified')
+    .select('id, name, website, organization_type, is_active')
     .order('name');
 
   if (error) {
@@ -93,18 +93,6 @@ export default async function AdminOrganizationsPage() {
               <Label htmlFor="website">Website</Label>
               <Input id="website" name="website" type="url" placeholder="https://example.org" />
             </div>
-            <div className="space-y-space-xs">
-              <Label htmlFor="category">Category</Label>
-              <Select name="category" defaultValue="community" required>
-                <SelectTrigger id="category">
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="community">Community</SelectItem>
-                  <SelectItem value="government">Government</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
             <div className="md:col-span-3 flex justify-end">
               <Button type="submit">Create organization</Button>
             </div>
@@ -134,7 +122,7 @@ export default async function AdminOrganizationsPage() {
                 </SelectTrigger>
                 <SelectContent>
                   {(orgs as OrganizationRow[] | null)?.map((org) => (
-                    <SelectItem key={org.id} value={org.id}>
+                    <SelectItem key={org.id} value={String(org.id)}>
                       {org.name}
                     </SelectItem>
                   ))}
@@ -158,7 +146,7 @@ export default async function AdminOrganizationsPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
-                <TableHead>Category</TableHead>
+                <TableHead>Type</TableHead>
                 <TableHead>Website</TableHead>
                 <TableHead>Status</TableHead>
               </TableRow>
@@ -167,11 +155,11 @@ export default async function AdminOrganizationsPage() {
               {(orgs as OrganizationRow[] | null)?.map((org) => (
                 <TableRow key={org.id}>
                   <TableCell>{org.name}</TableCell>
-                  <TableCell className="capitalize">{org.category}</TableCell>
+                  <TableCell className="capitalize">{org.organization_type ?? '—'}</TableCell>
                   <TableCell className="text-muted-foreground text-sm">{org.website ?? '—'}</TableCell>
                   <TableCell>
-                    <Badge variant={org.verified ? 'default' : 'secondary'}>
-                      {org.verified ? 'Verified' : 'Pending'}
+                    <Badge variant={org.is_active === false ? 'secondary' : 'default'}>
+                      {org.is_active === false ? 'Inactive' : 'Active'}
                     </Badge>
                   </TableCell>
                 </TableRow>

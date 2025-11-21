@@ -12,7 +12,7 @@ import type { Database } from '@/types/supabase';
 
 type MaybeArray<T> = T | T[] | null;
 
-type OrganizationRelation = Pick<Database['portal']['Tables']['organizations']['Row'], 'name'>;
+type OrganizationRelation = { name: string | null };
 type ContactRelation = Pick<
   Database['portal']['Tables']['profile_contacts']['Row'],
   'contact_type' | 'contact_value'
@@ -58,7 +58,7 @@ export default async function NotificationsAdminPage() {
           id,
           display_name,
           affiliation_type,
-          organization:organizations(name),
+          organization:core.organizations(name),
           contacts:profile_contacts(contact_type, contact_value)
         `,
       )

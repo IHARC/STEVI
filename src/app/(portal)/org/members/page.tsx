@@ -26,7 +26,7 @@ type OrgMember = {
   user_id: string | null;
   display_name: string;
   position_title: string | null;
-  organization_id: string | null;
+  organization_id: number | null;
   last_seen_at: string | null;
   affiliation_status: string;
   portal_roles: string[];
@@ -65,7 +65,7 @@ export default async function OrgMembersPage() {
     user_id: string | null;
     display_name: string;
     position_title: string | null;
-    organization_id: string | null;
+    organization_id: number | null;
     last_seen_at: string | null;
     affiliation_status: string;
   }>;
