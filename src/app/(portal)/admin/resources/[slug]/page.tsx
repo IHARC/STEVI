@@ -35,7 +35,7 @@ export default async function AdminResourceEditPage({ params }: { params: RouteP
     redirect('/home');
   }
 
-  const profile = await ensurePortalProfile(supabase, user.id);
+  await ensurePortalProfile(supabase, user.id);
   const resource = await getResourceBySlug(slug, { includeUnpublished: true });
   if (!resource) {
     notFound();

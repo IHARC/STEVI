@@ -25,7 +25,7 @@ export default async function AdminResourceNewPage() {
     redirect('/home');
   }
 
-  const profile = await ensurePortalProfile(supabase, user.id);
+  await ensurePortalProfile(supabase, user.id);
 
   return (
     <div className="page-shell page-stack text-on-surface">

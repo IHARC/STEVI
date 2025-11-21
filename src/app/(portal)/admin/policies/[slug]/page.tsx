@@ -35,7 +35,7 @@ export default async function PolicyDetailPage({ params }: { params: RouteParams
     redirect('/home');
   }
 
-  const profile = await ensurePortalProfile(supabase, user.id);
+  await ensurePortalProfile(supabase, user.id);
   const policy = await getPolicyBySlug(slug, { includeUnpublished: true });
   if (!policy) {
     notFound();

@@ -61,7 +61,7 @@ export default async function AdminProfilesPage() {
     redirect('/home');
   }
 
-  const profile = await ensurePortalProfile(supabase, user.id);
+  await ensurePortalProfile(supabase, user.id);
   const portal = supabase.schema('portal');
 
   const [organizationsResponse, pendingResponse, invitesResponse] = await Promise.all([

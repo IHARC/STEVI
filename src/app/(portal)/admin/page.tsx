@@ -93,7 +93,7 @@ export default async function AdminPage() {
     redirect('/home');
   }
 
-  const profile = await ensurePortalProfile(supabase, user.id);
+  await ensurePortalProfile(supabase, user.id);
 
   return (
     <div className="page-shell page-stack">

@@ -29,7 +29,7 @@ export default async function MarketingFooterAdminPage() {
     redirect('/home');
   }
 
-  const profile = await ensurePortalProfile(supabase, user.id);
+  await ensurePortalProfile(supabase, user.id);
 
   const core = supabase.schema('core');
   const { data: footer } = await core

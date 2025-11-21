@@ -47,7 +47,7 @@ export default async function NotificationsAdminPage() {
     redirect('/home');
   }
 
-  const profile = await ensurePortalProfile(supabase, user.id);
+  await ensurePortalProfile(supabase, user.id);
   const portal = supabase.schema('portal');
 
   const [profilesResponse, notificationsResponse] = await Promise.all([

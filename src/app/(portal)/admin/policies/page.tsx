@@ -35,7 +35,7 @@ export default async function AdminPoliciesPage() {
     redirect('/home');
   }
 
-  const profile = await ensurePortalProfile(supabase, user.id);
+  await ensurePortalProfile(supabase, user.id);
   const policies = await listPolicies({ includeUnpublished: true });
   const publishedCount = policies.filter((p) => p.isPublished).length;
   const draftCount = policies.filter((p) => p.status === 'draft').length;

@@ -22,7 +22,7 @@ export default async function NewPolicyPage() {
     redirect('/home');
   }
 
-  const profile = await ensurePortalProfile(supabase, user.id);
+  await ensurePortalProfile(supabase, user.id);
   return (
     <div className="page-shell page-stack">
       <header className="flex flex-col gap-space-sm sm:flex-row sm:items-start sm:justify-between">
