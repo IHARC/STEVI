@@ -7610,6 +7610,60 @@ export type Database = {
           },
         ]
       }
+      public_settings: {
+        Row: {
+          created_at: string
+          created_by_profile_id: string | null
+          description: string | null
+          id: string
+          is_public: boolean
+          setting_key: string
+          setting_type: string
+          setting_value: string | null
+          updated_at: string
+          updated_by_profile_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by_profile_id?: string | null
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          setting_key: string
+          setting_type?: string
+          setting_value?: string | null
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by_profile_id?: string | null
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          setting_key?: string
+          setting_type?: string
+          setting_value?: string | null
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_settings_created_by_profile_id_fkey"
+            columns: ["created_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_settings_updated_by_profile_id_fkey"
+            columns: ["updated_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       petition_signatures: {
         Row: {
           created_at: string

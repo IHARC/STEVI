@@ -107,7 +107,6 @@ export async function saveCatalogItem(formData: FormData) {
   });
 
   await revalidatePath('/admin/donations');
-  return { id: data?.id ?? id ?? '' };
 }
 
 export async function toggleCatalogItem(formData: FormData) {
@@ -130,7 +129,6 @@ export async function toggleCatalogItem(formData: FormData) {
   });
 
   await revalidatePath('/admin/donations');
-  return { id };
 }
 
 export async function importInventoryItem(formData: FormData) {
@@ -200,5 +198,4 @@ export async function importInventoryItem(formData: FormData) {
   });
 
   await revalidatePath('/admin/donations');
-  return { id: inserted?.id ?? '' };
 }

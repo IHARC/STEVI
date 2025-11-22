@@ -55,7 +55,7 @@ async function requireAdminContext() {
     throw new Error('Admin access is required to update the footer.');
   }
 
-  return { supabase, core: supabase.schema('core'), actorProfile };
+  return { supabase, portal: supabase.schema('portal'), actorProfile };
 }
 
 export async function updateSiteFooterAction(formData: FormData): Promise<void> {
@@ -63,32 +63,34 @@ export async function updateSiteFooterAction(formData: FormData): Promise<void> 
     const primaryText = requireText(formData, 'primary_text', 'Add the primary footer text.');
     const secondaryText = readText(formData, 'secondary_text');
 
-    const { supabase, core, actorProfile } = await requireAdminContext();
+    const { supabase, portal, actorProfile } = await requireAdminContext();
 
     const now = new Date().toISOString();
 
-    const { error: primaryError } = await core
-      .from('system_settings')
+    const { error: primaryError } = await portal
+      .from('public_settings')
       .upsert(
         {
           setting_key: PRIMARY_KEY,
-          setting_type: 'string',
           setting_value: primaryText,
-          updated_by: actorProfile.id,
+          setting_type: 'string',
+          is_public: true,
+          updated_by_profile_id: actorProfile.id,
           updated_at: now,
         },
         { onConflict: 'setting_key' },
       );
     if (primaryError) throw primaryError;
 
-    const { error: secondaryError } = await core
-      .from('system_settings')
+    const { error: secondaryError } = await portal
+      .from('public_settings')
       .upsert(
         {
           setting_key: SECONDARY_KEY,
           setting_type: 'string',
           setting_value: secondaryText,
-          updated_by: actorProfile.id,
+          is_public: true,
+          updated_by_profile_id: actorProfile.id,
           updated_at: now,
         },
         { onConflict: 'setting_key' },

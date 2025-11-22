@@ -11,6 +11,8 @@ import { getPortalRoles } from '@/lib/ihar-auth';
 
 export const dynamic = 'force-dynamic';
 
+const PRIMARY_KEY = 'marketing.footer.primary_text';
+const SECONDARY_KEY = 'marketing.footer.secondary_text';
 const DEFAULT_PRIMARY = 'IHARC — Integrated Homelessness and Addictions Response Centre.';
 const DEFAULT_SECONDARY = 'Inclusive, accessible, community-first data platform.';
 
@@ -31,22 +33,21 @@ export default async function MarketingFooterAdminPage() {
 
   await ensurePortalProfile(supabase, user.id);
 
-  const core = supabase.schema('core');
-  const { data: footer } = await core
-    .from('system_settings')
+  const portal = supabase.schema('portal');
+  const { data: footer } = await portal
+    .from('public_settings')
     .select('setting_key, setting_value, updated_at')
-    .in('setting_key', ['marketing.footer.primary_text', 'marketing.footer.secondary_text'])
+    .eq('is_public', true)
+    .in('setting_key', [PRIMARY_KEY, SECONDARY_KEY])
     .order('updated_at', { ascending: false })
     .limit(2);
 
   type FooterRow = { setting_key: string; setting_value: string | null; updated_at: string | null };
   const settings = (footer ?? []) as FooterRow[];
   const primaryText =
-    settings.find((row: FooterRow) => row.setting_key === 'marketing.footer.primary_text')?.setting_value?.trim() ??
-    DEFAULT_PRIMARY;
+    settings.find((row: FooterRow) => row.setting_key === PRIMARY_KEY)?.setting_value?.trim() ?? DEFAULT_PRIMARY;
   const secondaryText =
-    settings.find((row: FooterRow) => row.setting_key === 'marketing.footer.secondary_text')?.setting_value?.trim() ??
-    DEFAULT_SECONDARY;
+    settings.find((row: FooterRow) => row.setting_key === SECONDARY_KEY)?.setting_value?.trim() ?? DEFAULT_SECONDARY;
   const lastUpdated = settings?.[0]?.updated_at
     ? new Date(settings[0].updated_at as string).toLocaleString('en-CA', {
         year: 'numeric',
