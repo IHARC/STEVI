@@ -6,6 +6,7 @@ import { logAuditEvent } from '@/lib/audit';
 import { sanitizeResourceHtml } from '@/lib/sanitize-resource-html';
 import { ensurePortalProfile } from '@/lib/profile';
 import { normalizePolicySlug, type PolicyCategory, type PolicyStatus } from '@/lib/policies';
+import { getPortalRoles } from '@/lib/ihar-auth';
 
 async function revalidatePaths(...paths: Array<string | null | undefined>): Promise<void> {
   const unique = Array.from(
@@ -32,7 +33,8 @@ async function requireAdminContext() {
   }
 
   const actorProfile = await ensurePortalProfile(supabase, user.id);
-  if (actorProfile.role !== 'admin') {
+  const portalRoles = getPortalRoles(user);
+  if (!portalRoles.includes('portal_admin')) {
     throw new Error('Admin access is required.');
   }
 

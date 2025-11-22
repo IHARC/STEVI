@@ -6,6 +6,7 @@ import { logAuditEvent } from '@/lib/audit';
 import { queuePortalNotification } from '@/lib/notifications';
 import { getUserEmailForProfile } from '@/lib/profile';
 import { ensurePortalProfile } from '@/lib/profile';
+import { getPortalRoles } from '@/lib/ihar-auth';
 
 const ADMIN_PATHS = ['/admin', '/admin/notifications'] as const;
 
@@ -62,7 +63,8 @@ async function requireAdminContext() {
   }
 
   const actorProfile = await ensurePortalProfile(supabase, user.id);
-  if (actorProfile.role !== 'admin') {
+  const portalRoles = getPortalRoles(user);
+  if (!portalRoles.includes('portal_admin')) {
     throw new Error('Only admins can send notifications.');
   }
 

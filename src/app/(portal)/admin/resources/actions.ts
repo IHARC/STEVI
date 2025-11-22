@@ -7,6 +7,7 @@ import { RESOURCE_KIND_LABELS, normalizeResourceSlug, type Resource, type Resour
 import { sanitizeResourceHtml } from '@/lib/sanitize-resource-html';
 import { buildResourceEmbedPayload, parseResourceAttachmentsInput, parseResourceTagsInput } from './resource-utils';
 import { ensurePortalProfile } from '@/lib/profile';
+import { getPortalRoles } from '@/lib/ihar-auth';
 
 async function revalidatePaths(
   ...paths: Array<string | null | undefined>
@@ -35,7 +36,8 @@ async function requireAdminContext() {
   }
 
   const actorProfile = await ensurePortalProfile(supabase, user.id);
-  if (actorProfile.role !== 'admin') {
+  const portalRoles = getPortalRoles(user);
+  if (!portalRoles.includes('portal_admin')) {
     throw new Error('Admin access is required.');
   }
 
