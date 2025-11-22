@@ -32,6 +32,7 @@ Copy `.env.example` to `.env` and fill the required values. All variables prefix
 - **Schemas**:
   - `portal.profiles`, `portal.profile_invites`, `portal.resource_pages`, `portal.notifications` handle most portal data.
   - `portal.registration_flows` stores all public registration submissions (client intakes, claims, partner/volunteer applications, concern reports). See `docs/portal/registration.md` for details.
+  - `portal.volunteer_*` now holds all volunteer metadata (profiles, roles, statuses, activities, verify tokens). The legacy `admin` schema has been removed; route all volunteer onboarding/reporting to `portal` tables.
   - We do **not** create new tables without coordination; use Supabase MCP to inspect the live schema before shipping mutations.
 - **RPC / Functions**:
   - `portal_log_audit_event`, `portal_queue_notification`, and `portal_refresh_profile_claims` are key RPCs already in use.

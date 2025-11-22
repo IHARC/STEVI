@@ -2640,6 +2640,383 @@ export type Database = {
             foreignKeyName: "metric_daily_metric_id_fkey";
             columns: ["metric_id"];
             referencedRelation: "metric_catalog";
+          referencedColumns: ["id"];
+        },
+      ];
+    };
+      volunteer_roles: {
+        Row: {
+          id: string;
+          name: string;
+          display_name: string;
+          description: string | null;
+          requires_training: boolean;
+          active: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          display_name: string;
+          description?: string | null;
+          requires_training?: boolean;
+          active?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          display_name?: string;
+          description?: string | null;
+          requires_training?: boolean;
+          active?: boolean;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      volunteer_statuses: {
+        Row: {
+          id: string;
+          name: string;
+          display_name: string;
+          description: string | null;
+          active: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          display_name: string;
+          description?: string | null;
+          active?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          display_name?: string;
+          description?: string | null;
+          active?: boolean;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      volunteer_profiles: {
+        Row: {
+          id: string;
+          profile_id: string | null;
+          volunteer_code: string;
+          first_name: string;
+          last_name: string;
+          email: string | null;
+          phone: string | null;
+          address_line1: string | null;
+          address_line2: string | null;
+          city: string | null;
+          state_province: string | null;
+          postal_code: string | null;
+          country: string | null;
+          date_of_birth: string | null;
+          emergency_contact_name: string | null;
+          emergency_contact_phone: string | null;
+          emergency_contact_relationship: string | null;
+          skills: string[] | null;
+          interests: string[] | null;
+          availability_notes: string | null;
+          background_check_completed: boolean | null;
+          background_check_date: string | null;
+          background_check_expiry: string | null;
+          training_completed: boolean | null;
+          training_completion_date: string | null;
+          notes: string | null;
+          active: boolean;
+          created_at: string;
+          updated_at: string;
+          created_by: string | null;
+          updated_by: string | null;
+          current_status_id: string | null;
+        };
+        Insert: {
+          id?: string;
+          profile_id?: string | null;
+          volunteer_code: string;
+          first_name: string;
+          last_name: string;
+          email?: string | null;
+          phone?: string | null;
+          address_line1?: string | null;
+          address_line2?: string | null;
+          city?: string | null;
+          state_province?: string | null;
+          postal_code?: string | null;
+          country?: string | null;
+          date_of_birth?: string | null;
+          emergency_contact_name?: string | null;
+          emergency_contact_phone?: string | null;
+          emergency_contact_relationship?: string | null;
+          skills?: string[] | null;
+          interests?: string[] | null;
+          availability_notes?: string | null;
+          background_check_completed?: boolean | null;
+          background_check_date?: string | null;
+          background_check_expiry?: string | null;
+          training_completed?: boolean | null;
+          training_completion_date?: string | null;
+          notes?: string | null;
+          active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+          created_by?: string | null;
+          updated_by?: string | null;
+          current_status_id?: string | null;
+        };
+        Update: {
+          id?: string;
+          profile_id?: string | null;
+          volunteer_code?: string;
+          first_name?: string;
+          last_name?: string;
+          email?: string | null;
+          phone?: string | null;
+          address_line1?: string | null;
+          address_line2?: string | null;
+          city?: string | null;
+          state_province?: string | null;
+          postal_code?: string | null;
+          country?: string | null;
+          date_of_birth?: string | null;
+          emergency_contact_name?: string | null;
+          emergency_contact_phone?: string | null;
+          emergency_contact_relationship?: string | null;
+          skills?: string[] | null;
+          interests?: string[] | null;
+          availability_notes?: string | null;
+          background_check_completed?: boolean | null;
+          background_check_date?: string | null;
+          background_check_expiry?: string | null;
+          training_completed?: boolean | null;
+          training_completion_date?: string | null;
+          notes?: string | null;
+          active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+          created_by?: string | null;
+          updated_by?: string | null;
+          current_status_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "volunteer_profiles_profile_id_fkey";
+            columns: ["profile_id"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }?,
+          {
+            foreignKeyName: "volunteer_profiles_created_by_fkey";
+            columns: ["created_by"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }?,
+          {
+            foreignKeyName: "volunteer_profiles_updated_by_fkey";
+            columns: ["updated_by"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }?,
+          {
+            foreignKeyName: "volunteer_profiles_current_status_id_fkey";
+            columns: ["current_status_id"];
+            referencedRelation: "volunteer_statuses";
+            referencedColumns: ["id"];
+          }?,
+        ];
+      };
+      volunteer_status_assignments: {
+        Row: {
+          id: string;
+          volunteer_profile_id: string;
+          status_id: string;
+          assigned_by: string | null;
+          reason: string | null;
+          notes: string | null;
+          is_current: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          volunteer_profile_id: string;
+          status_id: string;
+          assigned_by?: string | null;
+          reason?: string | null;
+          notes?: string | null;
+          is_current?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          volunteer_profile_id?: string;
+          status_id?: string;
+          assigned_by?: string | null;
+          reason?: string | null;
+          notes?: string | null;
+          is_current?: boolean;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "volunteer_status_assignments_assigned_by_fkey";
+            columns: ["assigned_by"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }?,
+          {
+            foreignKeyName: "volunteer_status_assignments_status_id_fkey";
+            columns: ["status_id"];
+            referencedRelation: "volunteer_statuses";
+            referencedColumns: ["id"];
+          }?,
+          {
+            foreignKeyName: "volunteer_status_assignments_volunteer_profile_id_fkey";
+            columns: ["volunteer_profile_id"];
+            referencedRelation: "volunteer_profiles";
+            referencedColumns: ["id"];
+          }?,
+        ];
+      };
+      volunteer_role_assignments: {
+        Row: {
+          id: string;
+          volunteer_profile_id: string;
+          role_id: string;
+          assigned_by: string | null;
+          expires_at: string | null;
+          reason: string | null;
+          notes: string | null;
+          is_current: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          volunteer_profile_id: string;
+          role_id: string;
+          assigned_by?: string | null;
+          expires_at?: string | null;
+          reason?: string | null;
+          notes?: string | null;
+          is_current?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          volunteer_profile_id?: string;
+          role_id?: string;
+          assigned_by?: string | null;
+          expires_at?: string | null;
+          reason?: string | null;
+          notes?: string | null;
+          is_current?: boolean;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "volunteer_role_assignments_assigned_by_fkey";
+            columns: ["assigned_by"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }?,
+          {
+            foreignKeyName: "volunteer_role_assignments_role_id_fkey";
+            columns: ["role_id"];
+            referencedRelation: "volunteer_roles";
+            referencedColumns: ["id"];
+          }?,
+          {
+            foreignKeyName: "volunteer_role_assignments_volunteer_profile_id_fkey";
+            columns: ["volunteer_profile_id"];
+            referencedRelation: "volunteer_profiles";
+            referencedColumns: ["id"];
+          }?,
+        ];
+      };
+      volunteer_activities: {
+        Row: {
+          id: string;
+          volunteer_profile_id: string;
+          activity_type: string;
+          title: string;
+          description: string;
+          metadata: Json | null;
+          created_at: string;
+          created_by: string | null;
+          is_important: boolean | null;
+          is_private: boolean | null;
+        };
+        Insert: {
+          id?: string;
+          volunteer_profile_id: string;
+          activity_type: string;
+          title: string;
+          description: string;
+          metadata?: Json | null;
+          created_at?: string;
+          created_by?: string | null;
+          is_important?: boolean | null;
+          is_private?: boolean | null;
+        };
+        Update: {
+          id?: string;
+          volunteer_profile_id?: string;
+          activity_type?: string;
+          title?: string;
+          description?: string;
+          metadata?: Json | null;
+          created_at?: string;
+          created_by?: string | null;
+          is_important?: boolean | null;
+          is_private?: boolean | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "volunteer_activities_created_by_fkey";
+            columns: ["created_by"];
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          }?,
+          {
+            foreignKeyName: "volunteer_activities_volunteer_profile_id_fkey";
+            columns: ["volunteer_profile_id"];
+            referencedRelation: "volunteer_profiles";
+            referencedColumns: ["id"];
+          }?,
+        ];
+      };
+      volunteer_verify_tokens: {
+        Row: {
+          jti: string;
+          volunteer_profile_id: string;
+          expires_at: string;
+          used: boolean;
+          created_at: string;
+        };
+        Insert: {
+          jti: string;
+          volunteer_profile_id: string;
+          expires_at: string;
+          used?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          jti?: string;
+          volunteer_profile_id?: string;
+          expires_at?: string;
+          used?: boolean;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "volunteer_verify_tokens_volunteer_profile_id_fkey";
+            columns: ["volunteer_profile_id"];
+            referencedRelation: "volunteer_profiles";
             referencedColumns: ["id"];
           },
         ];

@@ -81,6 +81,7 @@ Route: `/register/volunteer`
 * Similar to community registrations but stores volunteer-specific metadata: `pronouns`, `interests`, `availability`, `consent_screening`.
 * Profiles default to `affiliation_type = 'community_member'` with `position_title = 'Volunteer applicant'`.
 * Staff can update `status` to reflect screening progress and schedule orientation using the stored contact info.
+* When a volunteer is approved, move their record into the canonical `portal.volunteer_profiles` + `portal.volunteer_role_assignments` / `portal.volunteer_status_assignments` tables (admin schema removed). Use the registration row’s contact details to seed the volunteer profile and log the action to `portal.audit_log`.
 
 ## Concern / Feedback Flow
 
