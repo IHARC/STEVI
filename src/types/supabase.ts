@@ -7097,6 +7097,213 @@ export type Database = {
       [_ in never]: never
     }
   }
+  donations: {
+    Tables: {
+      catalog_items: {
+        Row: {
+          id: string
+          slug: string
+          title: string
+          short_description: string | null
+          long_description: string | null
+          category: string | null
+          inventory_item_id: string
+          unit_cost_cents: number | null
+          currency: string
+          default_quantity: number
+          priority: number
+          target_buffer: number | null
+          image_url: string | null
+          stripe_price_id: string | null
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          slug: string
+          title: string
+          short_description?: string | null
+          long_description?: string | null
+          category?: string | null
+          inventory_item_id: string
+          unit_cost_cents?: number | null
+          currency?: string
+          default_quantity?: number
+          priority?: number
+          target_buffer?: number | null
+          image_url?: string | null
+          stripe_price_id?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          slug?: string
+          title?: string
+          short_description?: string | null
+          long_description?: string | null
+          category?: string | null
+          inventory_item_id?: string
+          unit_cost_cents?: number | null
+          currency?: string
+          default_quantity?: number
+          priority?: number
+          target_buffer?: number | null
+          image_url?: string | null
+          stripe_price_id?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalog_items_inventory_item_id_fkey"
+            columns: ["inventory_item_id"]
+            isOneToOne: false
+            referencedRelation: "items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      donation_intents: {
+        Row: {
+          id: string
+          status: Database["donations"]["Enums"]["donation_intent_status"]
+          items: Json
+          total_amount_cents: number
+          currency: string
+          donor_email: string | null
+          stripe_session_id: string | null
+          created_at: string
+          completed_at: string | null
+          metadata: Json | null
+        }
+        Insert: {
+          id?: string
+          status?: Database["donations"]["Enums"]["donation_intent_status"]
+          items?: Json
+          total_amount_cents: number
+          currency?: string
+          donor_email?: string | null
+          stripe_session_id?: string | null
+          created_at?: string
+          completed_at?: string | null
+          metadata?: Json | null
+        }
+        Update: {
+          id?: string
+          status?: Database["donations"]["Enums"]["donation_intent_status"]
+          items?: Json
+          total_amount_cents?: number
+          currency?: string
+          donor_email?: string | null
+          stripe_session_id?: string | null
+          created_at?: string
+          completed_at?: string | null
+          metadata?: Json | null
+        }
+        Relationships: []
+      }
+      donation_payments: {
+        Row: {
+          id: string
+          donation_intent_id: string
+          provider: string
+          provider_payment_id: string | null
+          amount_cents: number
+          currency: string
+          status: Database["donations"]["Enums"]["donation_payment_status"]
+          processed_at: string
+          raw_payload: Json | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          donation_intent_id: string
+          provider?: string
+          provider_payment_id?: string | null
+          amount_cents: number
+          currency?: string
+          status?: Database["donations"]["Enums"]["donation_payment_status"]
+          processed_at?: string
+          raw_payload?: Json | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          donation_intent_id?: string
+          provider?: string
+          provider_payment_id?: string | null
+          amount_cents?: number
+          currency?: string
+          status?: Database["donations"]["Enums"]["donation_payment_status"]
+          processed_at?: string
+          raw_payload?: Json | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "donation_payments_donation_intent_id_fkey"
+            columns: ["donation_intent_id"]
+            isOneToOne: false
+            referencedRelation: "donation_intents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+    }
+    Views: {
+      catalog_item_metrics: {
+        Row: {
+          catalog_item_id: string | null
+          inventory_item_id: string | null
+          inventory_item_name: string | null
+          inventory_item_category: string | null
+          unit_type: string | null
+          current_stock: number | null
+          target_buffer: number | null
+          distributed_last_30_days: number | null
+          distributed_last_365_days: number | null
+        }
+        Relationships: []
+      }
+      v_distribution_30d: {
+        Row: {
+          inventory_item_id: string | null
+          units_distributed: number | null
+        }
+        Relationships: []
+      }
+      v_distribution_365d: {
+        Row: {
+          inventory_item_id: string | null
+          units_distributed: number | null
+        }
+        Relationships: []
+      }
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      donation_intent_status:
+        | "pending"
+        | "requires_payment"
+        | "paid"
+        | "failed"
+        | "cancelled"
+      donation_payment_status:
+        | "succeeded"
+        | "requires_action"
+        | "failed"
+        | "refunded"
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   portal: {
     Tables: {
       audit_log: {
@@ -8510,6 +8717,26 @@ export type Database = {
           last_signed_at: string | null
           petition_id: string | null
           signature_count: number | null
+        }
+        Relationships: []
+      }
+      donation_catalog_public: {
+        Row: {
+          id: string | null
+          slug: string | null
+          title: string | null
+          short_description: string | null
+          long_description: string | null
+          category: string | null
+          unit_cost_cents: number | null
+          currency: string | null
+          default_quantity: number | null
+          priority: number | null
+          image_url: string | null
+          target_buffer: number | null
+          current_stock: number | null
+          distributed_last_30_days: number | null
+          distributed_last_365_days: number | null
         }
         Relationships: []
       }

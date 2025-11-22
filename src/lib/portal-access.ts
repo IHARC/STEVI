@@ -127,6 +127,11 @@ const ADMIN_NAV_BLUEPRINT: WorkspaceNavBlueprint = {
           requiresIharcRoles: INVENTORY_ALLOWED_ROLES,
         },
         {
+          href: '/admin/donations',
+          label: 'Donations catalogue',
+          requiresIharcRoles: ['iharc_admin'],
+        },
+        {
           href: '/admin/organizations',
           label: 'Organizations',
           requiresPortalRoles: ['portal_admin'],
