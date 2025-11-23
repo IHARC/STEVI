@@ -1,6 +1,7 @@
 export const MARKETING_SETTINGS_KEYS = {
   navItems: 'marketing.nav.items',
   navPortalCtaLabel: 'marketing.nav.portal_cta_label',
+  branding: 'marketing.branding',
   hero: 'marketing.hero',
   contextCards: 'marketing.home.context_cards',
   supportsUrgent: 'marketing.supports.urgent',
@@ -21,6 +22,12 @@ export type HeroContent = {
   imageAlt?: string | null;
   primaryCta: { label: string; href: string; analytics?: Record<string, unknown> | null };
   secondaryLink: { label: string; href: string; analytics?: Record<string, unknown> | null } | null;
+};
+
+export type BrandingAssets = {
+  logoLightUrl: string | null;
+  logoDarkUrl: string | null;
+  faviconUrl: string | null;
 };
 
 export type ContextCard = { id: string; title: string; description: string; href: string };

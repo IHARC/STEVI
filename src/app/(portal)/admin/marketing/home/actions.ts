@@ -9,6 +9,7 @@ import {
   MARKETING_SETTINGS_KEYS,
   ContextCard,
   HeroContent,
+  BrandingAssets,
   assertNonEmpty,
 } from '@/lib/marketing/settings';
 import { sanitizeFileName } from '@/lib/utils';
@@ -101,6 +102,12 @@ export async function saveHomeSettings(formData: FormData) {
     throw new Error('Add alternative text for the hero image.');
   }
 
+  const branding: BrandingAssets = {
+    logoLightUrl: (formData.get('branding_logo_light_url') as string | null)?.trim() || null,
+    logoDarkUrl: (formData.get('branding_logo_dark_url') as string | null)?.trim() || null,
+    faviconUrl: (formData.get('branding_favicon_url') as string | null)?.trim() || null,
+  };
+
   const contextCards = parseContextCards(
     typeof formData.get('context_cards_json') === 'string'
       ? (formData.get('context_cards_json') as string)
@@ -136,12 +143,25 @@ export async function saveHomeSettings(formData: FormData) {
   );
   if (contextError) throw contextError;
 
+  const { error: brandingError } = await portal.from('public_settings').upsert(
+    {
+      setting_key: MARKETING_SETTINGS_KEYS.branding,
+      setting_type: 'json',
+      setting_value: JSON.stringify(branding),
+      is_public: true,
+      updated_by_profile_id: actorProfile.id,
+      updated_at: now,
+    },
+    { onConflict: 'setting_key' },
+  );
+  if (brandingError) throw brandingError;
+
   await logAuditEvent(supabase, {
     actorProfileId: actorProfile.id,
     action: 'marketing_home_updated',
     entityType: 'marketing_home',
     entityId: null,
-    meta: { context_cards: contextCards.length },
+    meta: { context_cards: contextCards.length, branding },
   });
 
   ADMIN_PATHS.forEach((path) => revalidatePath(path));
@@ -184,4 +204,54 @@ export async function uploadHeroImage(formData: FormData) {
   });
 
   return { url: publicUrl.publicUrl, path: objectPath };
+}
+
+type BrandingKind = 'logo_light' | 'logo_dark' | 'favicon';
+
+const BRANDING_PREFIX_MAP: Record<BrandingKind, string> = {
+  logo_light: 'logo-light/',
+  logo_dark: 'logo-dark/',
+  favicon: 'favicon/',
+};
+
+export async function uploadBrandingAsset(formData: FormData) {
+  const file = formData.get('file');
+  const kind = formData.get('kind');
+
+  if (!(file instanceof File)) {
+    throw new Error('Select a file to upload.');
+  }
+  if (typeof kind !== 'string' || !(kind in BRANDING_PREFIX_MAP)) {
+    throw new Error('Unsupported branding asset type.');
+  }
+
+  if (file.size > 2 * 1024 * 1024) {
+    throw new Error('Brand assets must be under 2 MB.');
+  }
+
+  const { supabase, actorProfile } = await requireAdminContext();
+  const prefix = BRANDING_PREFIX_MAP[kind as BrandingKind];
+  const sanitized = sanitizeFileName(file.name || kind);
+  const objectPath = `${prefix}${Date.now()}-${sanitized}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from(HERO_BUCKET)
+    .upload(objectPath, file, {
+      upsert: true,
+      cacheControl: '3600',
+      contentType: file.type || 'image/png',
+    });
+  if (uploadError) throw uploadError;
+
+  const { data: publicUrl } = supabase.storage.from(HERO_BUCKET).getPublicUrl(objectPath);
+
+  await logAuditEvent(supabase, {
+    actorProfileId: actorProfile.id,
+    action: 'marketing_branding_uploaded',
+    entityType: 'marketing_branding',
+    entityId: objectPath,
+    meta: { bucket: HERO_BUCKET, path: objectPath, kind, size: file.size },
+  });
+
+  return { url: publicUrl.publicUrl, path: objectPath, kind };
 }
