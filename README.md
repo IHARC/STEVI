@@ -7,7 +7,7 @@ remains focused on public storytelling while this repo carries the authenticated
 
 ## Getting Started
 
-- **Prerequisites**: Node.js ≥ 18.18 and npm 9+ (local environment currently reports Node 25 but production targets 18.x).
+- **Prerequisites**: Node.js 20.x (npm 10+). Use `nvm use` to stay aligned with production.
 - **Install dependencies**: `npm install`
 - **Run locally**: `npm run dev` (defaults to <http://localhost:3000>)
 - **Type checks**: `npm run typecheck`
