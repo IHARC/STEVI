@@ -11,8 +11,10 @@ import {
   HeroContent,
   assertNonEmpty,
 } from '@/lib/marketing/settings';
+import { sanitizeFileName } from '@/lib/utils';
 
 const ADMIN_PATHS = ['/admin', '/admin/marketing/home'] as const;
+const HERO_BUCKET = 'app-branding';
 
 function parseContextCards(raw: string | null): ContextCard[] {
   if (!raw) {
@@ -76,6 +78,8 @@ export async function saveHomeSettings(formData: FormData) {
     headline: assertNonEmpty(formData.get('hero_headline') as string | null, 'Hero headline'),
     body: assertNonEmpty(formData.get('hero_body') as string | null, 'Hero body'),
     supporting: assertNonEmpty(formData.get('hero_supporting') as string | null, 'Hero supporting text'),
+    imageUrl: (formData.get('hero_image_url') as string | null)?.trim() || null,
+    imageAlt: (formData.get('hero_image_alt') as string | null)?.trim() || null,
     primaryCta: {
       label: assertNonEmpty(formData.get('hero_primary_label') as string | null, 'Primary CTA label'),
       href: assertNonEmpty(formData.get('hero_primary_href') as string | null, 'Primary CTA href'),
@@ -92,6 +96,10 @@ export async function saveHomeSettings(formData: FormData) {
       };
     })(),
   };
+
+  if (hero.imageUrl && !hero.imageAlt) {
+    throw new Error('Add alternative text for the hero image.');
+  }
 
   const contextCards = parseContextCards(
     typeof formData.get('context_cards_json') === 'string'
@@ -137,4 +145,43 @@ export async function saveHomeSettings(formData: FormData) {
   });
 
   ADMIN_PATHS.forEach((path) => revalidatePath(path));
+}
+
+export async function uploadHeroImage(formData: FormData) {
+  const file = formData.get('file');
+  if (!(file instanceof File)) {
+    throw new Error('Select an image to upload.');
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    throw new Error('Image must be under 5 MB.');
+  }
+
+  const { supabase, actorProfile } = await requireAdminContext();
+  const sanitized = sanitizeFileName(file.name || 'hero');
+  const objectPath = `hero/${Date.now()}-${sanitized}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from(HERO_BUCKET)
+    .upload(objectPath, file, {
+      upsert: true,
+      cacheControl: '3600',
+      contentType: file.type || 'image/jpeg',
+    });
+
+  if (uploadError) {
+    throw uploadError;
+  }
+
+  const { data: publicUrl } = supabase.storage.from(HERO_BUCKET).getPublicUrl(objectPath);
+
+  await logAuditEvent(supabase, {
+    actorProfileId: actorProfile.id,
+    action: 'marketing_hero_image_uploaded',
+    entityType: 'marketing_hero_image',
+    entityId: objectPath,
+    meta: { bucket: HERO_BUCKET, path: objectPath, size: file.size },
+  });
+
+  return { url: publicUrl.publicUrl, path: objectPath };
 }

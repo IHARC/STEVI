@@ -17,6 +17,8 @@ export type HeroContent = {
   headline: string;
   body: string;
   supporting: string;
+  imageUrl?: string | null;
+  imageAlt?: string | null;
   primaryCta: { label: string; href: string; analytics?: Record<string, unknown> | null };
   secondaryLink: { label: string; href: string; analytics?: Record<string, unknown> | null } | null;
 };

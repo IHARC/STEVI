@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { useState, useTransition } from 'react';
+import { Image as ImageIcon, Loader2, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import type { ContextCard, HeroContent } from '@/lib/marketing/settings';
-import { saveHomeSettings } from './actions';
+import { saveHomeSettings, uploadHeroImage } from './actions';
 
 type Props = {
   hero: HeroContent;
@@ -20,6 +20,8 @@ function serializeContext(cards: ContextCard[]) {
 
 export function HomeForm({ hero, contextCards }: Props) {
   const [cards, setCards] = useState<ContextCard[]>(contextCards);
+  const [heroImageUrl, setHeroImageUrl] = useState(hero.imageUrl ?? '');
+  const [isUploading, startUpload] = useTransition();
 
   const updateCard = (index: number, field: keyof ContextCard, value: string) => {
     setCards((prev) => prev.map((card, i) => (i === index ? { ...card, [field]: value } : card)));
@@ -30,8 +32,24 @@ export function HomeForm({ hero, contextCards }: Props) {
 
   const removeCard = (index: number) => setCards((prev) => prev.filter((_, i) => i !== index));
 
+  const handleImageUpload = (file?: File | null) => {
+    if (!file) return;
+    startUpload(async () => {
+      try {
+        const data = new FormData();
+        data.append('file', file);
+        const result = await uploadHeroImage(data);
+        setHeroImageUrl(result.url);
+      } catch (error) {
+        console.error(error);
+        alert('Upload failed. Please try again or use a smaller image.');
+      }
+    });
+  };
+
   return (
     <form action={saveHomeSettings} className="space-y-space-lg">
+      <input type="hidden" name="hero_image_url" value={heroImageUrl} />
       <input type="hidden" name="context_cards_json" value={serializeContext(cards)} />
       <div className="grid gap-space-md md:grid-cols-2">
         <div className="space-y-space-sm">
@@ -56,6 +74,56 @@ export function HomeForm({ hero, contextCards }: Props) {
           required
           rows={2}
         />
+      </div>
+      <div className="grid gap-space-md md:grid-cols-[2fr,1fr]">
+        <div className="space-y-space-sm">
+          <Label htmlFor="hero_image_alt">Hero image alt text</Label>
+          <Input
+            id="hero_image_alt"
+            name="hero_image_alt"
+            defaultValue={hero.imageAlt ?? ''}
+            placeholder="Describe the photo for people using screen readers"
+            maxLength={200}
+          />
+          <p className="text-body-sm text-muted-foreground">
+            Required if an image is present. Keep it concise and specific.
+          </p>
+        </div>
+        <div className="space-y-space-xs rounded-lg border border-border bg-surface p-space-sm">
+          <div className="flex items-center justify-between gap-space-xs">
+            <div className="space-y-space-2xs">
+              <p className="text-title-sm">Hero image</p>
+              <p className="text-body-sm text-muted-foreground">JPEG/PNG, up to 5 MB. Stored in app-branding bucket.</p>
+            </div>
+            <label className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-body-sm font-medium text-on-surface shadow-sm transition hover:bg-surface cursor-pointer">
+              <ImageIcon className="h-4 w-4" aria-hidden />
+              {isUploading ? 'Uploading…' : 'Upload'}
+              <input
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                onChange={(e) => handleImageUpload(e.target.files?.[0] ?? null)}
+                disabled={isUploading}
+              />
+            </label>
+          </div>
+          <div className="relative aspect-video overflow-hidden rounded-md border border-dashed border-border bg-muted/30">
+            {isUploading ? (
+              <div className="absolute inset-0 flex items-center justify-center gap-2 text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                <span>Uploading image…</span>
+              </div>
+            ) : heroImageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={heroImageUrl} alt={hero.imageAlt ?? ''} className="h-full w-full object-cover" />
+            ) : (
+              <div className="flex h-full items-center justify-center text-body-sm text-muted-foreground">No image selected</div>
+            )}
+          </div>
+          {heroImageUrl ? (
+            <p className="text-body-xs text-muted-foreground break-all">{heroImageUrl}</p>
+          ) : null}
+        </div>
       </div>
       <div className="grid gap-space-md md:grid-cols-2">
         <div className="space-y-space-sm">
