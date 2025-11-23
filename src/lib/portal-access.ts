@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import { Boxes, Megaphone, Notebook, Users2 } from 'lucide-react';
+import { Boxes, Globe2, Megaphone, Notebook, Users2 } from 'lucide-react';
 import { ensurePortalProfile, type PortalProfile } from '@/lib/profile';
 import { getIharcRoles, getPortalRoles, type IharcRole, type PortalRole } from '@/lib/ihar-auth';
 import { INVENTORY_ALLOWED_ROLES } from '@/lib/inventory/constants';
@@ -97,10 +97,37 @@ const ADMIN_NAV_BLUEPRINT: WorkspaceNavBlueprint = {
           label: 'Policies',
           requiresPortalRoles: ['portal_admin'],
         },
+      ],
+    },
+    {
+      id: 'website',
+      label: 'Website',
+      icon: Globe2,
+      links: [
+        {
+          href: '/admin/marketing/navigation',
+          label: 'Navigation',
+          requiresGuard: (access) => access.canManageWebsiteContent,
+        },
+        {
+          href: '/admin/marketing/home',
+          label: 'Home & context',
+          requiresGuard: (access) => access.canManageWebsiteContent,
+        },
+        {
+          href: '/admin/marketing/supports',
+          label: 'Supports',
+          requiresGuard: (access) => access.canManageWebsiteContent,
+        },
+        {
+          href: '/admin/marketing/programs',
+          label: 'Programs',
+          requiresGuard: (access) => access.canManageWebsiteContent,
+        },
         {
           href: '/admin/marketing/footer',
-          label: 'Marketing footer',
-          requiresPortalRoles: ['portal_admin'],
+          label: 'Footer',
+          requiresGuard: (access) => access.canManageWebsiteContent,
         },
       ],
     },
@@ -194,6 +221,7 @@ export type PortalAccess = {
   canManageNotifications: boolean;
   canReviewProfiles: boolean;
   canViewMetrics: boolean;
+  canManageWebsiteContent: boolean;
   canManageSiteFooter: boolean;
   canManageOrgUsers: boolean;
   canManageOrgInvites: boolean;
@@ -229,6 +257,7 @@ export async function loadPortalAccess(
   );
 
   const canManageNotifications = isPortalAdmin;
+  const canManageWebsiteContent = isPortalAdmin;
   const canManageSiteFooter = isPortalAdmin;
   const canReviewProfiles = canAccessAdminWorkspace;
   const canViewMetrics = isPortalAdmin;
@@ -248,6 +277,7 @@ export async function loadPortalAccess(
     canManagePolicies,
     canAccessInventoryWorkspace,
     canManageNotifications,
+    canManageWebsiteContent,
     canReviewProfiles,
     canViewMetrics,
     canManageSiteFooter,

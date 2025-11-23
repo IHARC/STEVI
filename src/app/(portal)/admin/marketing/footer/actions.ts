@@ -5,10 +5,9 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { logAuditEvent } from '@/lib/audit';
 import { ensurePortalProfile } from '@/lib/profile';
 import { getPortalRoles } from '@/lib/ihar-auth';
+import { MARKETING_SETTINGS_KEYS } from '@/lib/marketing/settings';
 
 const ADMIN_PATHS = ['/admin', '/admin/marketing/footer'] as const;
-const PRIMARY_KEY = 'marketing.footer.primary_text';
-const SECONDARY_KEY = 'marketing.footer.secondary_text';
 
 function readText(formData: FormData, key: string): string | null {
   const value = formData.get(key);
@@ -71,7 +70,7 @@ export async function updateSiteFooterAction(formData: FormData): Promise<void> 
       .from('public_settings')
       .upsert(
         {
-          setting_key: PRIMARY_KEY,
+          setting_key: MARKETING_SETTINGS_KEYS.footerPrimary,
           setting_value: primaryText,
           setting_type: 'string',
           is_public: true,
@@ -86,7 +85,7 @@ export async function updateSiteFooterAction(formData: FormData): Promise<void> 
       .from('public_settings')
       .upsert(
         {
-          setting_key: SECONDARY_KEY,
+          setting_key: MARKETING_SETTINGS_KEYS.footerSecondary,
           setting_type: 'string',
           setting_value: secondaryText,
           is_public: true,

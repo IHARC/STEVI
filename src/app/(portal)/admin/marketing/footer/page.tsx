@@ -6,15 +6,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
-import { updateSiteFooterAction } from './actions';
 import { getPortalRoles } from '@/lib/ihar-auth';
+import { MARKETING_SETTINGS_KEYS } from '@/lib/marketing/settings';
+import { updateSiteFooterAction } from './actions';
 
 export const dynamic = 'force-dynamic';
-
-const PRIMARY_KEY = 'marketing.footer.primary_text';
-const SECONDARY_KEY = 'marketing.footer.secondary_text';
-const DEFAULT_PRIMARY = 'IHARC — Integrated Homelessness and Addictions Response Centre.';
-const DEFAULT_SECONDARY = 'Inclusive, accessible, community-first data platform.';
 
 export default async function MarketingFooterAdminPage() {
   const supabase = await createSupabaseRSCClient();
@@ -38,16 +34,18 @@ export default async function MarketingFooterAdminPage() {
     .from('public_settings')
     .select('setting_key, setting_value, updated_at')
     .eq('is_public', true)
-    .in('setting_key', [PRIMARY_KEY, SECONDARY_KEY])
+    .in('setting_key', [MARKETING_SETTINGS_KEYS.footerPrimary, MARKETING_SETTINGS_KEYS.footerSecondary])
     .order('updated_at', { ascending: false })
     .limit(2);
 
   type FooterRow = { setting_key: string; setting_value: string | null; updated_at: string | null };
   const settings = (footer ?? []) as FooterRow[];
   const primaryText =
-    settings.find((row: FooterRow) => row.setting_key === PRIMARY_KEY)?.setting_value?.trim() ?? DEFAULT_PRIMARY;
+    settings.find((row: FooterRow) => row.setting_key === MARKETING_SETTINGS_KEYS.footerPrimary)?.setting_value?.trim() ??
+    '';
   const secondaryText =
-    settings.find((row: FooterRow) => row.setting_key === SECONDARY_KEY)?.setting_value?.trim() ?? DEFAULT_SECONDARY;
+    settings.find((row: FooterRow) => row.setting_key === MARKETING_SETTINGS_KEYS.footerSecondary)?.setting_value?.trim() ??
+    '';
   const lastUpdated = settings?.[0]?.updated_at
     ? new Date(settings[0].updated_at as string).toLocaleString('en-CA', {
         year: 'numeric',
