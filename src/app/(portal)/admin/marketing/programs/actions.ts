@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
-import { getPortalRoles } from '@/lib/ihar-auth';
+import { loadPortalAccess } from '@/lib/portal-access';
 import { logAuditEvent } from '@/lib/audit';
 import { MARKETING_SETTINGS_KEYS, ProgramEntry, assertNonEmpty } from '@/lib/marketing/settings';
 
@@ -45,23 +45,17 @@ function parsePrograms(raw: string | null): ProgramEntry[] {
 
 async function requireAdminContext() {
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const access = await loadPortalAccess(supabase);
 
-  if (!user) {
+  if (!access) {
     throw new Error('Sign in to manage programs.');
   }
 
-  const portalRoles = getPortalRoles(user);
-  if (!portalRoles.includes('portal_admin')) {
+  if (!access.canManageWebsiteContent) {
     throw new Error('Portal admin access is required.');
   }
 
-  const actorProfile = await ensurePortalProfile(supabase, user.id);
-  if (!actorProfile) {
-    throw new Error('Portal profile is required.');
-  }
+  const actorProfile = await ensurePortalProfile(supabase, access.userId);
 
   return { supabase, portal: supabase.schema('portal'), actorProfile };
 }

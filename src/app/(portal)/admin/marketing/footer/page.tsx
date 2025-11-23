@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
-import { getPortalRoles } from '@/lib/ihar-auth';
+import { loadPortalAccess } from '@/lib/portal-access';
 import { MARKETING_SETTINGS_KEYS } from '@/lib/marketing/settings';
 import { updateSiteFooterAction } from './actions';
 
@@ -14,20 +14,17 @@ export const dynamic = 'force-dynamic';
 
 export default async function MarketingFooterAdminPage() {
   const supabase = await createSupabaseRSCClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const access = await loadPortalAccess(supabase);
 
-  if (!user) {
+  if (!access) {
     redirect('/login?next=/admin/marketing/footer');
   }
 
-  const portalRoles = getPortalRoles(user);
-  if (!portalRoles.includes('portal_admin')) {
+  if (!access.canManageWebsiteContent) {
     redirect('/home');
   }
 
-  await ensurePortalProfile(supabase, user.id);
+  await ensurePortalProfile(supabase, access.userId);
 
   const portal = supabase.schema('portal');
   const { data: footer } = await portal

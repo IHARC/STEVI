@@ -7,7 +7,7 @@ import { RESOURCE_KIND_LABELS, normalizeResourceSlug, type Resource, type Resour
 import { sanitizeResourceHtml } from '@/lib/sanitize-resource-html';
 import { buildResourceEmbedPayload, parseResourceAttachmentsInput, parseResourceTagsInput } from './resource-utils';
 import { ensurePortalProfile } from '@/lib/profile';
-import { getPortalRoles } from '@/lib/ihar-auth';
+import { loadPortalAccess } from '@/lib/portal-access';
 
 async function revalidatePaths(
   ...paths: Array<string | null | undefined>
@@ -26,20 +26,17 @@ async function revalidatePaths(
 
 async function requireAdminContext() {
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
+  const access = await loadPortalAccess(supabase);
 
-  if (userError || !user) {
-    throw userError ?? new Error('Sign in to continue.');
+  if (!access) {
+    throw new Error('Sign in to continue.');
   }
 
-  const actorProfile = await ensurePortalProfile(supabase, user.id);
-  const portalRoles = getPortalRoles(user);
-  if (!portalRoles.includes('portal_admin')) {
+  if (!access.canManageResources) {
     throw new Error('Admin access is required.');
   }
+
+  const actorProfile = await ensurePortalProfile(supabase, access.userId);
 
   return { supabase, portalClient: supabase.schema('portal'), actorProfile };
 }

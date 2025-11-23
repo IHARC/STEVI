@@ -1,7 +1,7 @@
 import type { LucideIcon } from 'lucide-react';
 import { Boxes, Globe2, Megaphone, Notebook, Users2 } from 'lucide-react';
 import { ensurePortalProfile, type PortalProfile } from '@/lib/profile';
-import { getIharcRoles, getPortalRoles, type IharcRole, type PortalRole } from '@/lib/ihar-auth';
+import { type IharcRole, type PortalRole } from '@/lib/ihar-auth';
 import { INVENTORY_ALLOWED_ROLES } from '@/lib/inventory/constants';
 import type { SupabaseAnyServerClient } from '@/lib/supabase/types';
 
@@ -240,8 +240,10 @@ export async function loadPortalAccess(
   }
 
   const profile = await ensurePortalProfile(supabase, user.id);
-  const iharcRoles = getIharcRoles(user);
-  const portalRoles = getPortalRoles(user);
+  const roles = await fetchUserRoles(supabase, user.id);
+
+  const iharcRoles = roles.filter((role): role is IharcRole => role.startsWith('iharc_'));
+  const portalRoles = roles.filter((role): role is PortalRole => role.startsWith('portal_'));
   const organizationId = profile.organization_id ?? null;
 
   const isPortalAdmin = portalRoles.includes('portal_admin');
@@ -284,6 +286,19 @@ export async function loadPortalAccess(
     canManageOrgUsers,
     canManageOrgInvites,
   };
+}
+
+async function fetchUserRoles(
+  supabase: SupabaseAnyServerClient,
+  userId: string,
+): Promise<string[]> {
+  const { data, error } = await supabase.rpc('get_user_roles', { user_uuid: userId });
+
+  if (error) {
+    throw new Error('Unable to load your roles right now. Please try again or contact support.');
+  }
+
+  return data ?? [];
 }
 
 function linkIsAllowed(blueprint: PortalLinkBlueprint, access: PortalAccess): boolean {

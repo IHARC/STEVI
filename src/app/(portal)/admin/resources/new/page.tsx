@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
-import { getPortalRoles } from '@/lib/ihar-auth';
+import { loadPortalAccess } from '@/lib/portal-access';
 import { ResourceForm } from '../resource-form';
 import { createResourcePage } from '../actions';
 
@@ -12,20 +12,17 @@ export const dynamic = 'force-dynamic';
 
 export default async function AdminResourceNewPage() {
   const supabase = await createSupabaseRSCClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const access = await loadPortalAccess(supabase);
 
-  if (!user) {
+  if (!access) {
     redirect('/login?next=/admin/resources/new');
   }
 
-  const portalRoles = getPortalRoles(user);
-  if (!portalRoles.includes('portal_admin')) {
+  if (!access.canManageResources) {
     redirect('/home');
   }
 
-  await ensurePortalProfile(supabase, user.id);
+  await ensurePortalProfile(supabase, access.userId);
 
   return (
     <div className="page-shell page-stack text-on-surface">

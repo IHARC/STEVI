@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
-import { getPortalRoles } from '@/lib/ihar-auth';
+import { loadPortalAccess } from '@/lib/portal-access';
 import { createOrganizationAction, promoteOrgAdminAction } from './actions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -30,20 +30,17 @@ type OrganizationRow = {
 
 export default async function AdminOrganizationsPage() {
   const supabase = await createSupabaseRSCClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const access = await loadPortalAccess(supabase);
 
-  if (!user) {
+  if (!access) {
     redirect('/login?next=/admin/organizations');
   }
 
-  const portalRoles = getPortalRoles(user);
-  if (!portalRoles.includes('portal_admin')) {
+  if (!access.canAccessAdminWorkspace) {
     redirect('/home');
   }
 
-  await ensurePortalProfile(supabase, user.id);
+  await ensurePortalProfile(supabase, access.userId);
   const core = supabase.schema('core');
   const { data: orgs, error } = await core
     .from('organizations')

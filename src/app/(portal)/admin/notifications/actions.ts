@@ -6,7 +6,7 @@ import { logAuditEvent } from '@/lib/audit';
 import { queuePortalNotification } from '@/lib/notifications';
 import { getUserEmailForProfile } from '@/lib/profile';
 import { ensurePortalProfile } from '@/lib/profile';
-import { getPortalRoles } from '@/lib/ihar-auth';
+import { loadPortalAccess } from '@/lib/portal-access';
 
 const ADMIN_PATHS = ['/admin', '/admin/notifications'] as const;
 
@@ -53,20 +53,17 @@ function getErrorMessage(error: unknown): string {
 
 async function requireAdminContext() {
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
+  const access = await loadPortalAccess(supabase);
 
-  if (userError || !user) {
-    throw userError ?? new Error('Sign in to send notifications.');
+  if (!access) {
+    throw new Error('Sign in to send notifications.');
   }
 
-  const actorProfile = await ensurePortalProfile(supabase, user.id);
-  const portalRoles = getPortalRoles(user);
-  if (!portalRoles.includes('portal_admin')) {
+  if (!access.canManageNotifications) {
     throw new Error('Only admins can send notifications.');
   }
+
+  const actorProfile = await ensurePortalProfile(supabase, access.userId);
 
   return { supabase, actorProfile };
 }

@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
 import { logAuditEvent } from '@/lib/audit';
-import { getPortalRoles } from '@/lib/ihar-auth';
+import { loadPortalAccess } from '@/lib/portal-access';
 
 const INVITES_PATH = '/org/invites';
 
@@ -27,21 +27,17 @@ export async function createOrgInviteAction(formData: FormData) {
     }
 
     const supabase = await createSupabaseServerClient();
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser();
+    const access = await loadPortalAccess(supabase);
 
-    if (error || !user) {
-      throw error ?? new Error('Sign in to continue.');
+    if (!access) {
+      throw new Error('Sign in to continue.');
     }
 
-    const portalRoles = getPortalRoles(user);
-    if (!portalRoles.includes('portal_org_admin') && !portalRoles.includes('portal_admin')) {
+    if (!access.canManageOrgInvites) {
       throw new Error('Organization admin access is required.');
     }
 
-    const actorProfile = await ensurePortalProfile(supabase, user.id);
+    const actorProfile = await ensurePortalProfile(supabase, access.userId);
     if (!actorProfile.organization_id) {
       throw new Error('Organization admin access is required.');
     }
@@ -55,7 +51,7 @@ export async function createOrgInviteAction(formData: FormData) {
       affiliation_type: 'agency_partner',
       organization_id: actorProfile.organization_id,
       invited_by_profile_id: actorProfile.id,
-      invited_by_user_id: user.id,
+      invited_by_user_id: access.userId,
     });
 
     if (insert.error) {

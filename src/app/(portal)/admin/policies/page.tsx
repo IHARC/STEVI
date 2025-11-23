@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
-import { getPortalRoles } from '@/lib/ihar-auth';
+import { loadPortalAccess } from '@/lib/portal-access';
 import { listPolicies, POLICY_CATEGORY_LABELS } from '@/lib/policies';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -22,20 +22,17 @@ function formatDate(value: string | null | undefined) {
 
 export default async function AdminPoliciesPage() {
   const supabase = await createSupabaseRSCClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const access = await loadPortalAccess(supabase);
 
-  if (!user) {
+  if (!access) {
     redirect('/login?next=/admin/policies');
   }
 
-  const portalRoles = getPortalRoles(user);
-  if (!portalRoles.includes('portal_admin')) {
+  if (!access.canManagePolicies) {
     redirect('/home');
   }
 
-  await ensurePortalProfile(supabase, user.id);
+  await ensurePortalProfile(supabase, access.userId);
   const policies = await listPolicies({ includeUnpublished: true });
   const publishedCount = policies.filter((p) => p.isPublished).length;
   const draftCount = policies.filter((p) => p.status === 'draft').length;

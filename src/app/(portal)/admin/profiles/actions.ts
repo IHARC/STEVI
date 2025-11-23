@@ -5,7 +5,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { logAuditEvent } from '@/lib/audit';
 import { NO_ORGANIZATION_VALUE } from '@/lib/constants';
 import { ensurePortalProfile, type PortalProfile } from '@/lib/profile';
-import { getPortalRoles } from '@/lib/ihar-auth';
+import { loadPortalAccess } from '@/lib/portal-access';
 import type { SupabaseServerClient } from '@/lib/supabase/types';
 import type { Database } from '@/types/supabase';
 
@@ -62,24 +62,20 @@ function getErrorMessage(error: unknown): string {
 
 async function loadModeratorContext() {
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
+  const access = await loadPortalAccess(supabase);
 
-  if (userError || !user) {
-    throw userError ?? new Error('Sign in to continue.');
+  if (!access) {
+    throw new Error('Sign in to continue.');
   }
 
-  const roles = getPortalRoles(user);
-  if (!roles.includes('portal_admin') && !roles.includes('portal_moderator')) {
+  if (!access.canReviewProfiles) {
     throw new Error('Moderator access is required.');
   }
 
-  const actorProfile = await ensurePortalProfile(supabase, user.id);
+  const actorProfile = await ensurePortalProfile(supabase, access.userId);
   const portal = supabase.schema('portal');
 
-  return { supabase, portal, user, actorProfile };
+  return { supabase, portal, userId: access.userId, actorProfile };
 }
 
 function requireGovernmentRole(value: string | null): GovernmentRoleType {

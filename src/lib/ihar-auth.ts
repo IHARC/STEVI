@@ -70,6 +70,7 @@ export function getIharcRoles(user: UserLike): IharcRole[] {
 
 export function getPortalRoles(user: UserLike): PortalRole[] {
   if (!user) return [];
+
   const appMetadata = user.app_metadata as MetadataWithRoles | null | undefined;
   const roles = extractRolesFromMetadata(appMetadata);
   return roles.filter((role): role is PortalRole => role.startsWith('portal_'));

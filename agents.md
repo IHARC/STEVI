@@ -97,6 +97,16 @@ The STEVI team should treat this briefing as a living document. Update it as fea
   5) Keep server-side guards on every privileged page/API route—blueprint hiding is UI only; access control must still rely on Supabase RLS + server checks.
 - Mobile: the left rail collapses into a sheet; command palette (⌘/Ctrl+K) is the quickest cross-surface launcher.
 
+### Role & Permission System (Authoritative Flow)
+- Roles come **only** from Supabase `get_user_roles(user_uuid)`; JWT/app_metadata fallbacks are removed. If a role is missing, fix the DB role bindings (core.roles / core.user_roles) or the `refresh_user_permissions` RPC, not the app.
+- `PortalAccess` derives capability flags (`canAccessAdminWorkspace`, `canManageResources`, `canManageWebsiteContent`, `canManageOrgUsers/Invites`, `canManageNotifications`, etc.) from that RPC result. UI links, server pages, and actions must gate on these flags—never on raw role strings.
+- Adding a new role/feature:
+  1) Create/assign the role and permissions in Supabase (`core.roles`, `core.permissions`, `core.role_permissions`, `core.user_roles`).
+  2) Add a capability flag in `src/lib/portal-access.ts` that checks the role/permission you just added.
+  3) Gate new pages/actions/components using the capability flag and, if needed, add nav links via the workspace blueprints in `portal-access.ts`.
+  4) Ensure RLS/policies for the target tables or RPCs enforce the same role; never rely on UI hiding.
+- Organization-specific flows should use the same pattern: org roles live in Supabase, capability flags in `PortalAccess`, links in `resolveOrgWorkspaceNav`, and server actions must call `loadPortalAccess` instead of parsing JWT metadata.
+
 ## Marketing Site Follow-Up
 - After extraction, re-centre marketing copy on awareness, petitions, and contact info while pointing action CTAs to STEVI.
 - Maintain snapshot stats (read-only) on marketing pages using small fetchers or static content so the marketing app no longer needs heavy portal dependencies.

@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
-import { getPortalRoles } from '@/lib/ihar-auth';
+import { loadPortalAccess } from '@/lib/portal-access';
 import { ComposeNotificationForm } from '@/components/admin/notifications/compose-form';
 import { RecentNotifications } from '@/components/admin/notifications/recent-notifications';
 import type {
@@ -34,20 +34,17 @@ export const dynamic = 'force-dynamic';
 
 export default async function NotificationsAdminPage() {
   const supabase = await createSupabaseRSCClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const access = await loadPortalAccess(supabase);
 
-  if (!user) {
+  if (!access) {
     redirect('/login?next=/admin/notifications');
   }
 
-  const portalRoles = getPortalRoles(user);
-  if (!portalRoles.includes('portal_admin')) {
+  if (!access.canManageNotifications) {
     redirect('/home');
   }
 
-  await ensurePortalProfile(supabase, user.id);
+  await ensurePortalProfile(supabase, access.userId);
   const portal = supabase.schema('portal');
 
   const [profilesResponse, notificationsResponse] = await Promise.all([

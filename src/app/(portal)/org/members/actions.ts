@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
 import { logAuditEvent } from '@/lib/audit';
-import { getPortalRoles } from '@/lib/ihar-auth';
+import { loadPortalAccess } from '@/lib/portal-access';
 import type { SupabaseServerClient } from '@/lib/supabase/types';
 
 const MEMBERS_PATH = '/org/members';
@@ -19,21 +19,17 @@ type ToggleRolePayload = {
 
 async function requireOrgAdminContext() {
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
+  const access = await loadPortalAccess(supabase);
 
-  if (userError || !user) {
-    throw userError ?? new Error('Sign in to continue.');
+  if (!access) {
+    throw new Error('Sign in to continue.');
   }
 
-  const portalRoles = getPortalRoles(user);
-  if (!portalRoles.includes('portal_org_admin') && !portalRoles.includes('portal_admin')) {
+  if (!access.canManageOrgUsers) {
     throw new Error('Organization admin access is required.');
   }
 
-  const actorProfile = await ensurePortalProfile(supabase, user.id);
+  const actorProfile = await ensurePortalProfile(supabase, access.userId);
   if (!actorProfile.organization_id) {
     throw new Error('Your profile is not linked to an organization.');
   }

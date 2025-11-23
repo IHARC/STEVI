@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
 import { logAuditEvent } from '@/lib/audit';
-import { getPortalRoles } from '@/lib/ihar-auth';
+import { loadPortalAccess } from '@/lib/portal-access';
 
 const LIST_PATH = '/admin/organizations';
 
@@ -27,21 +27,17 @@ export async function createOrganizationAction(formData: FormData): Promise<Acti
     }
 
     const supabase = await createSupabaseServerClient();
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser();
+    const access = await loadPortalAccess(supabase);
 
-    if (error || !user) {
-      throw error ?? new Error('Sign in to continue.');
+    if (!access) {
+      throw new Error('Sign in to continue.');
     }
 
-    const portalRoles = getPortalRoles(user);
-    if (!portalRoles.includes('portal_admin')) {
+    if (!access.canAccessAdminWorkspace) {
       throw new Error('Administrator access is required.');
     }
 
-    const actorProfile = await ensurePortalProfile(supabase, user.id);
+    const actorProfile = await ensurePortalProfile(supabase, access.userId);
     if (!actorProfile) {
       throw new Error('Administrator access is required.');
     }
@@ -96,21 +92,17 @@ export async function promoteOrgAdminAction(formData: FormData): Promise<ActionR
     }
 
     const supabase = await createSupabaseServerClient();
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser();
+    const access = await loadPortalAccess(supabase);
 
-    if (error || !user) {
-      throw error ?? new Error('Sign in to continue.');
+    if (!access) {
+      throw new Error('Sign in to continue.');
     }
 
-    const portalRoles = getPortalRoles(user);
-    if (!portalRoles.includes('portal_admin')) {
+    if (!access.canAccessAdminWorkspace) {
       throw new Error('Administrator access is required.');
     }
 
-    const actorProfile = await ensurePortalProfile(supabase, user.id);
+    const actorProfile = await ensurePortalProfile(supabase, access.userId);
     const portal = supabase.schema('portal');
 
     const now = new Date().toISOString();

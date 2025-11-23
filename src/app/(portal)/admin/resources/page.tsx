@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
-import { getPortalRoles } from '@/lib/ihar-auth';
+import { loadPortalAccess } from '@/lib/portal-access';
 import { listResources, RESOURCE_KIND_LABELS } from '@/lib/resources';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -111,20 +111,17 @@ const PAGE_SIZE = 50;
 export default async function AdminResourcesPage({ searchParams }: { searchParams?: SearchParams }) {
   const resolvedParams = searchParams ? await searchParams : undefined;
   const supabase = await createSupabaseRSCClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const access = await loadPortalAccess(supabase);
 
-  if (!user) {
+  if (!access) {
     redirect('/login?next=/admin/resources');
   }
 
-  const portalRoles = getPortalRoles(user);
-  if (!portalRoles.includes('portal_admin')) {
+  if (!access.canManageResources) {
     redirect('/home');
   }
 
-  const profile = await ensurePortalProfile(supabase, user.id);
+  const profile = await ensurePortalProfile(supabase, access.userId);
   if (!profile) {
     redirect('/home');
   }

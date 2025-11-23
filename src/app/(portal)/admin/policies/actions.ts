@@ -6,7 +6,7 @@ import { logAuditEvent } from '@/lib/audit';
 import { sanitizeResourceHtml } from '@/lib/sanitize-resource-html';
 import { ensurePortalProfile } from '@/lib/profile';
 import { normalizePolicySlug, type PolicyCategory, type PolicyStatus } from '@/lib/policies';
-import { getPortalRoles } from '@/lib/ihar-auth';
+import { loadPortalAccess } from '@/lib/portal-access';
 
 async function revalidatePaths(...paths: Array<string | null | undefined>): Promise<void> {
   const unique = Array.from(
@@ -23,20 +23,17 @@ async function revalidatePaths(...paths: Array<string | null | undefined>): Prom
 
 async function requireAdminContext() {
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
+  const access = await loadPortalAccess(supabase);
 
-  if (userError || !user) {
-    throw userError ?? new Error('Sign in to continue.');
+  if (!access) {
+    throw new Error('Sign in to continue.');
   }
 
-  const actorProfile = await ensurePortalProfile(supabase, user.id);
-  const portalRoles = getPortalRoles(user);
-  if (!portalRoles.includes('portal_admin')) {
+  if (!access.canManagePolicies) {
     throw new Error('Admin access is required.');
   }
+
+  const actorProfile = await ensurePortalProfile(supabase, access.userId);
 
   return { supabase, portalClient: supabase.schema('portal'), actorProfile };
 }

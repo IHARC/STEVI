@@ -52,11 +52,18 @@ Copy `.env.example` to `.env` and fill the required values. All variables prefix
 
 ## Authorization & Role Separation
 
-- `src/lib/portal-access.ts` centralizes portal access checks. It loads the Supabase user session, the matching `portal.profiles` row, and any IHARC-specific roles stored in `app_metadata.claims.roles`. Only roles issued through Supabase server-side app metadata are trusted.
-- Navigation and menus call `loadPortalAccess` server-side, so clients never receive menu links for admin or staff-only surfaces unless their profile role (moderator/admin) or IHARC role permits it. The UI now mirrors the same rules enforced by server actions.
-- Inventory tooling relies on the same helper plus `ensureInventoryActor` so outreach staff with IHARC roles can reach `/admin/inventory` without granting them full portal moderator access.
-- Do not add new privileged routes without updating `portal-access.ts` — this keeps UI, server actions, and documentation aligned and prevents accidental privilege escalation in future features.
-- `(portal)/layout.tsx` now wraps every portal route with `PortalAccessProvider`, so any client component can call `usePortalAccess()` when it needs the authenticated profile, feature gates, or IHARC role list without triggering its own Supabase round-trip. Prefer plumbing access data from this provider before hitting Supabase again.
+- `src/lib/portal-access.ts` is the single source of truth for portal authorization. It pulls roles from the Supabase RPC `get_user_roles(user_uuid)` (no JWT fallbacks) and derives capability flags (`canManageResources`, `canManagePolicies`, `canManageWebsiteContent`, `canManageNotifications`, `canManageOrgUsers/Invites`, `canAccessAdminWorkspace`, etc.).
+- Navigation, layouts, server pages, and server actions consume these capability flags—never raw role strings—to avoid drift and ensure UI/server parity.
+- Inventory tooling still uses `ensureInventoryActor` on top of `PortalAccess` for IHARC-specific roles when needed.
+- Do not add new privileged routes without updating `portal-access.ts`; keep UI links, server guards, and Supabase RLS in sync to prevent privilege escalation.
+- `(portal)/layout.tsx` wraps every portal route with `PortalAccessProvider`, so client components can read `usePortalAccess()` without making extra Supabase calls. Prefer passing `portalAccess` from parents rather than fetching again.
+
+### Adding a New Role or Privileged Feature (checklist)
+1. **Supabase first**: Create/assign the role and permissions in Supabase (`core.roles`, `core.permissions`, `core.role_permissions`, `core.user_roles`). Update any role-granting RPCs if needed.
+2. **Capability flag**: Add a boolean to `src/lib/portal-access.ts` that derives from the new role/permission (e.g., `canManageX`).
+3. **UI & routing**: Gate new pages, server actions, and nav links using that capability flag. Add links via the workspace blueprints in `portal-access.ts` instead of hard-coding paths.
+4. **RLS**: Ensure the target tables/RPCs enforce the same role in their policies. Never rely solely on UI hiding.
+5. **Docs/tests**: Document the new capability in this section and add minimal tests/Playwright coverage if it introduces a new surface.
 
 ## Local Development
 

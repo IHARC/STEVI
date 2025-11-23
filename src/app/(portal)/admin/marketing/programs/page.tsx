@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
-import { getPortalRoles } from '@/lib/ihar-auth';
+import { loadPortalAccess } from '@/lib/portal-access';
 import { MARKETING_SETTINGS_KEYS, ProgramEntry, parseJsonSetting } from '@/lib/marketing/settings';
 import { ProgramsForm } from './ProgramsForm';
 
@@ -12,20 +12,17 @@ type SettingRow = { setting_key: string; setting_value: string | null };
 
 export default async function MarketingProgramsPage() {
   const supabase = await createSupabaseRSCClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const access = await loadPortalAccess(supabase);
 
-  if (!user) {
+  if (!access) {
     redirect('/login?next=/admin/marketing/programs');
   }
 
-  const portalRoles = getPortalRoles(user);
-  if (!portalRoles.includes('portal_admin')) {
+  if (!access.canManageWebsiteContent) {
     redirect('/home');
   }
 
-  await ensurePortalProfile(supabase, user.id);
+  await ensurePortalProfile(supabase, access.userId);
 
   const portal = supabase.schema('portal');
   const { data } = await portal

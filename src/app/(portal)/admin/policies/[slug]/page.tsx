@@ -4,7 +4,7 @@ import { PolicyForm } from '@/app/(portal)/admin/policies/policy-form';
 import { deletePolicy, updatePolicy } from '@/app/(portal)/admin/policies/actions';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
-import { getPortalRoles } from '@/lib/ihar-auth';
+import { loadPortalAccess } from '@/lib/portal-access';
 import { getPolicyBySlug } from '@/lib/policies';
 import { Button } from '@/components/ui/button';
 
@@ -22,20 +22,17 @@ export default async function PolicyDetailPage({ params }: { params: RouteParams
   }
 
   const supabase = await createSupabaseRSCClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const access = await loadPortalAccess(supabase);
 
-  if (!user) {
+  if (!access) {
     redirect(`/login?next=/admin/policies/${slug}`);
   }
 
-  const portalRoles = getPortalRoles(user);
-  if (!portalRoles.includes('portal_admin')) {
+  if (!access.canManagePolicies) {
     redirect('/home');
   }
 
-  await ensurePortalProfile(supabase, user.id);
+  await ensurePortalProfile(supabase, access.userId);
   const policy = await getPolicyBySlug(slug, { includeUnpublished: true });
   if (!policy) {
     notFound();
