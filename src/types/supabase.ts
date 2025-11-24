@@ -12,6 +12,1184 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
   }
+  case_mgmt: {
+    Tables: {
+      calls_for_service: {
+        Row: {
+          anonymous_reporter: boolean | null
+          anonymous_reporter_details: string | null
+          attachments_count: number | null
+          call_taker_id: string | null
+          call_taker_notes: string | null
+          converted_incident_id: number | null
+          created_at: string | null
+          created_by: string | null
+          dedupe_key: string | null
+          duplicate_of_report_id: number | null
+          escalated_at: string | null
+          escalated_by: string | null
+          escalated_to_incident_id: number | null
+          id: number
+          initial_report_narrative: string
+          location_confidence: string | null
+          location_text: string | null
+          notify_channel:
+            | Database["core"]["Enums"]["notify_channel_enum"]
+            | null
+          notify_opt_in: boolean | null
+          notify_target: string | null
+          origin: Database["core"]["Enums"]["cfs_origin_enum"] | null
+          priority_hint:
+            | Database["core"]["Enums"]["incident_priority_enum"]
+            | null
+          public_tracking_id: string | null
+          received_at: string | null
+          referring_agency_name: string | null
+          referring_organization_id: number | null
+          related_report_ids: number[] | null
+          report_method: string
+          report_number: string
+          report_priority_assessment: string
+          report_received_at: string
+          report_source_details: Json | null
+          report_status: string | null
+          reported_coordinates: string | null
+          reported_location: string | null
+          reporter_address: string | null
+          reporter_email: string | null
+          reporter_name: string | null
+          reporter_phone: string | null
+          reporter_relationship: string | null
+          reporting_organization_id: number | null
+          reporting_person_id: number | null
+          risk_score: number | null
+          source: Database["core"]["Enums"]["cfs_source_enum"] | null
+          status: Database["core"]["Enums"]["cfs_status_enum"] | null
+          triaged_by: string | null
+          type_hint: Database["core"]["Enums"]["incident_type_enum"] | null
+          updated_at: string | null
+          updated_by: string | null
+          urgency_indicators: Json | null
+          verification_method: string | null
+          verification_notes: string | null
+          verification_status: string | null
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          anonymous_reporter?: boolean | null
+          anonymous_reporter_details?: string | null
+          attachments_count?: number | null
+          call_taker_id?: string | null
+          call_taker_notes?: string | null
+          converted_incident_id?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          dedupe_key?: string | null
+          duplicate_of_report_id?: number | null
+          escalated_at?: string | null
+          escalated_by?: string | null
+          escalated_to_incident_id?: number | null
+          id?: number
+          initial_report_narrative: string
+          location_confidence?: string | null
+          location_text?: string | null
+          notify_channel?:
+            | Database["core"]["Enums"]["notify_channel_enum"]
+            | null
+          notify_opt_in?: boolean | null
+          notify_target?: string | null
+          origin?: Database["core"]["Enums"]["cfs_origin_enum"] | null
+          priority_hint?:
+            | Database["core"]["Enums"]["incident_priority_enum"]
+            | null
+          public_tracking_id?: string | null
+          received_at?: string | null
+          referring_agency_name?: string | null
+          referring_organization_id?: number | null
+          related_report_ids?: number[] | null
+          report_method: string
+          report_number?: string
+          report_priority_assessment?: string
+          report_received_at?: string
+          report_source_details?: Json | null
+          report_status?: string | null
+          reported_coordinates?: string | null
+          reported_location?: string | null
+          reporter_address?: string | null
+          reporter_email?: string | null
+          reporter_name?: string | null
+          reporter_phone?: string | null
+          reporter_relationship?: string | null
+          reporting_organization_id?: number | null
+          reporting_person_id?: number | null
+          risk_score?: number | null
+          source?: Database["core"]["Enums"]["cfs_source_enum"] | null
+          status?: Database["core"]["Enums"]["cfs_status_enum"] | null
+          triaged_by?: string | null
+          type_hint?: Database["core"]["Enums"]["incident_type_enum"] | null
+          updated_at?: string | null
+          updated_by?: string | null
+          urgency_indicators?: Json | null
+          verification_method?: string | null
+          verification_notes?: string | null
+          verification_status?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          anonymous_reporter?: boolean | null
+          anonymous_reporter_details?: string | null
+          attachments_count?: number | null
+          call_taker_id?: string | null
+          call_taker_notes?: string | null
+          converted_incident_id?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          dedupe_key?: string | null
+          duplicate_of_report_id?: number | null
+          escalated_at?: string | null
+          escalated_by?: string | null
+          escalated_to_incident_id?: number | null
+          id?: number
+          initial_report_narrative?: string
+          location_confidence?: string | null
+          location_text?: string | null
+          notify_channel?:
+            | Database["core"]["Enums"]["notify_channel_enum"]
+            | null
+          notify_opt_in?: boolean | null
+          notify_target?: string | null
+          origin?: Database["core"]["Enums"]["cfs_origin_enum"] | null
+          priority_hint?:
+            | Database["core"]["Enums"]["incident_priority_enum"]
+            | null
+          public_tracking_id?: string | null
+          received_at?: string | null
+          referring_agency_name?: string | null
+          referring_organization_id?: number | null
+          related_report_ids?: number[] | null
+          report_method?: string
+          report_number?: string
+          report_priority_assessment?: string
+          report_received_at?: string
+          report_source_details?: Json | null
+          report_status?: string | null
+          reported_coordinates?: string | null
+          reported_location?: string | null
+          reporter_address?: string | null
+          reporter_email?: string | null
+          reporter_name?: string | null
+          reporter_phone?: string | null
+          reporter_relationship?: string | null
+          reporting_organization_id?: number | null
+          reporting_person_id?: number | null
+          risk_score?: number | null
+          source?: Database["core"]["Enums"]["cfs_source_enum"] | null
+          status?: Database["core"]["Enums"]["cfs_status_enum"] | null
+          triaged_by?: string | null
+          type_hint?: Database["core"]["Enums"]["incident_type_enum"] | null
+          updated_at?: string | null
+          updated_by?: string | null
+          urgency_indicators?: Json | null
+          verification_method?: string | null
+          verification_notes?: string | null
+          verification_status?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calls_for_service_converted_incident_id_fkey"
+            columns: ["converted_incident_id"]
+            isOneToOne: false
+            referencedRelation: "incidents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_escalated_incident"
+            columns: ["escalated_to_incident_id"]
+            isOneToOne: false
+            referencedRelation: "incidents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incident_reports_duplicate_of_report_id_fkey"
+            columns: ["duplicate_of_report_id"]
+            isOneToOne: false
+            referencedRelation: "calls_for_service"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cfs_timeline: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          duration_seconds: number | null
+          id: number
+          incident_id: number | null
+          incident_report_id: number
+          performed_by: string | null
+          phase: string
+          phase_completed_at: string | null
+          phase_data: Json | null
+          phase_notes: string | null
+          phase_started_at: string
+          phase_status: string | null
+          sla_met: boolean | null
+          sla_target_seconds: number | null
+          sub_phase: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          duration_seconds?: number | null
+          id?: number
+          incident_id?: number | null
+          incident_report_id: number
+          performed_by?: string | null
+          phase: string
+          phase_completed_at?: string | null
+          phase_data?: Json | null
+          phase_notes?: string | null
+          phase_started_at?: string
+          phase_status?: string | null
+          sla_met?: boolean | null
+          sla_target_seconds?: number | null
+          sub_phase?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          duration_seconds?: number | null
+          id?: number
+          incident_id?: number | null
+          incident_report_id?: number
+          performed_by?: string | null
+          phase?: string
+          phase_completed_at?: string | null
+          phase_data?: Json | null
+          phase_notes?: string | null
+          phase_started_at?: string
+          phase_status?: string | null
+          sla_met?: boolean | null
+          sla_target_seconds?: number | null
+          sub_phase?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_timeline_incident"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "incidents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incident_report_timeline_incident_report_id_fkey"
+            columns: ["incident_report_id"]
+            isOneToOne: false
+            referencedRelation: "calls_for_service"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_intakes: {
+        Row: {
+          consent_confirmed: boolean
+          created_at: string
+          ethnicity: Database["core"]["Enums"]["ethnicity_enum"][]
+          general_notes: string | null
+          health_concerns: Database["core"]["Enums"]["health_concern_enum"][]
+          housing_status:
+            | Database["core"]["Enums"]["housing_status_enum"]
+            | null
+          id: number
+          immediate_needs:
+            | Database["core"]["Enums"]["assessment_urgency"]
+            | null
+          intake_date: string
+          intake_worker: string | null
+          person_id: number
+          place_of_origin:
+            | Database["core"]["Enums"]["place_of_origin_enum"]
+            | null
+          privacy_acknowledged: boolean
+          risk_factors: Database["core"]["Enums"]["risk_factor_enum"][]
+          risk_level: Database["core"]["Enums"]["risk_level_enum"] | null
+          situation_notes: string | null
+        }
+        Insert: {
+          consent_confirmed: boolean
+          created_at?: string
+          ethnicity?: Database["core"]["Enums"]["ethnicity_enum"][]
+          general_notes?: string | null
+          health_concerns?: Database["core"]["Enums"]["health_concern_enum"][]
+          housing_status?:
+            | Database["core"]["Enums"]["housing_status_enum"]
+            | null
+          id?: number
+          immediate_needs?:
+            | Database["core"]["Enums"]["assessment_urgency"]
+            | null
+          intake_date?: string
+          intake_worker?: string | null
+          person_id: number
+          place_of_origin?:
+            | Database["core"]["Enums"]["place_of_origin_enum"]
+            | null
+          privacy_acknowledged: boolean
+          risk_factors?: Database["core"]["Enums"]["risk_factor_enum"][]
+          risk_level?: Database["core"]["Enums"]["risk_level_enum"] | null
+          situation_notes?: string | null
+        }
+        Update: {
+          consent_confirmed?: boolean
+          created_at?: string
+          ethnicity?: Database["core"]["Enums"]["ethnicity_enum"][]
+          general_notes?: string | null
+          health_concerns?: Database["core"]["Enums"]["health_concern_enum"][]
+          housing_status?:
+            | Database["core"]["Enums"]["housing_status_enum"]
+            | null
+          id?: number
+          immediate_needs?:
+            | Database["core"]["Enums"]["assessment_urgency"]
+            | null
+          intake_date?: string
+          intake_worker?: string | null
+          person_id?: number
+          place_of_origin?:
+            | Database["core"]["Enums"]["place_of_origin_enum"]
+            | null
+          privacy_acknowledged?: boolean
+          risk_factors?: Database["core"]["Enums"]["risk_factor_enum"][]
+          risk_level?: Database["core"]["Enums"]["risk_level_enum"] | null
+          situation_notes?: string | null
+        }
+        Relationships: []
+      }
+      incident_links: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: number
+          incident_id: number
+          link_type: string | null
+          linked_record_id: number
+          linked_record_type: string
+          notes: string | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: number
+          incident_id: number
+          link_type?: string | null
+          linked_record_id: number
+          linked_record_type: string
+          notes?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: number
+          incident_id?: number
+          link_type?: string | null
+          linked_record_id?: number
+          linked_record_type?: string
+          notes?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incident_links_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "incidents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      incident_people: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: number
+          incident_id: number
+          involvement_type: string
+          is_unknown_party: boolean
+          notes: string | null
+          party_role: Database["core"]["Enums"]["party_role_enum"] | null
+          person_id: number | null
+          unknown_party_description: string | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: number
+          incident_id: number
+          involvement_type: string
+          is_unknown_party?: boolean
+          notes?: string | null
+          party_role?: Database["core"]["Enums"]["party_role_enum"] | null
+          person_id?: number | null
+          unknown_party_description?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: number
+          incident_id?: number
+          involvement_type?: string
+          is_unknown_party?: boolean
+          notes?: string | null
+          party_role?: Database["core"]["Enums"]["party_role_enum"] | null
+          person_id?: number | null
+          unknown_party_description?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incident_people_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "incidents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      incident_person_medical: {
+        Row: {
+          consciousness_level: string | null
+          created_at: string | null
+          created_by: string | null
+          first_aid_details: string | null
+          first_aid_other: string | null
+          first_aid_provided: boolean | null
+          first_aid_type: string[] | null
+          follow_up_notes: string | null
+          follow_up_required: boolean | null
+          hospital_destination: string | null
+          hospital_transport_offered: boolean | null
+          id: number
+          incident_person_id: number
+          injury_severity: string | null
+          medical_assessment_notes: string | null
+          medical_issue_description: string | null
+          medical_issue_other: string | null
+          medical_issue_type: string | null
+          medical_referral_details: string | null
+          medical_referral_made: boolean | null
+          required_medical_attention: boolean
+          transport_decline_reason: string | null
+          transport_declined: boolean | null
+          transport_notes: string | null
+          transported_by: string | null
+          updated_at: string | null
+          updated_by: string | null
+          vital_signs_notes: string | null
+        }
+        Insert: {
+          consciousness_level?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          first_aid_details?: string | null
+          first_aid_other?: string | null
+          first_aid_provided?: boolean | null
+          first_aid_type?: string[] | null
+          follow_up_notes?: string | null
+          follow_up_required?: boolean | null
+          hospital_destination?: string | null
+          hospital_transport_offered?: boolean | null
+          id?: number
+          incident_person_id: number
+          injury_severity?: string | null
+          medical_assessment_notes?: string | null
+          medical_issue_description?: string | null
+          medical_issue_other?: string | null
+          medical_issue_type?: string | null
+          medical_referral_details?: string | null
+          medical_referral_made?: boolean | null
+          required_medical_attention?: boolean
+          transport_decline_reason?: string | null
+          transport_declined?: boolean | null
+          transport_notes?: string | null
+          transported_by?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          vital_signs_notes?: string | null
+        }
+        Update: {
+          consciousness_level?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          first_aid_details?: string | null
+          first_aid_other?: string | null
+          first_aid_provided?: boolean | null
+          first_aid_type?: string[] | null
+          follow_up_notes?: string | null
+          follow_up_required?: boolean | null
+          hospital_destination?: string | null
+          hospital_transport_offered?: boolean | null
+          id?: number
+          incident_person_id?: number
+          injury_severity?: string | null
+          medical_assessment_notes?: string | null
+          medical_issue_description?: string | null
+          medical_issue_other?: string | null
+          medical_issue_type?: string | null
+          medical_referral_details?: string | null
+          medical_referral_made?: boolean | null
+          required_medical_attention?: boolean
+          transport_decline_reason?: string | null
+          transport_declined?: boolean | null
+          transport_notes?: string | null
+          transported_by?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          vital_signs_notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incident_person_medical_incident_person_id_fkey"
+            columns: ["incident_person_id"]
+            isOneToOne: false
+            referencedRelation: "incident_people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      incidents: {
+        Row: {
+          actions_taken: string | null
+          address_id: number | null
+          address_search: string | null
+          agency_coordination_notes: string | null
+          agency_response_notes: string | null
+          ambulance_unit_number: string | null
+          assigned_ranger: string | null
+          bylaw_enforcement_action: string | null
+          bylaw_file_number: string | null
+          bylaw_notes: string | null
+          bylaw_notified: boolean | null
+          bylaw_officers_attending: string | null
+          bylaw_personnel_names: string | null
+          bylaw_response_time: string | null
+          city: string | null
+          community_impact_notes: string | null
+          coordinates: string | null
+          country: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          dispatch_at: string | null
+          dispatch_notes: string | null
+          dispatch_priority:
+            | Database["core"]["Enums"]["dispatch_priority_enum"]
+            | null
+          disposition_type: string | null
+          draft_created_at: string | null
+          ems_personnel_names: string | null
+          ems_response_time: string | null
+          environmental_factors:
+            | Database["core"]["Enums"]["environmental_factors_enum"][]
+            | null
+          fire_department_called: boolean | null
+          fire_personnel: string | null
+          fire_unit_number: string | null
+          first_unit_arrived_at: string | null
+          first_unit_assigned_at: string | null
+          follow_up_date: string | null
+          follow_up_notes: string | null
+          follow_up_required: boolean | null
+          hospital_destination: string | null
+          hospital_transport_offered: boolean | null
+          id: number
+          incident_cleared_at: string | null
+          incident_commander: string | null
+          incident_complexity:
+            | Database["core"]["Enums"]["incident_complexity_enum"]
+            | null
+          incident_date: string | null
+          incident_number: string | null
+          incident_people: Json | null
+          incident_report_id: number | null
+          incident_time: string | null
+          incident_type: Database["core"]["Enums"]["incident_type_enum"] | null
+          initial_observations: string | null
+          is_draft: boolean | null
+          latitude: number | null
+          location: string
+          location_notes: string | null
+          log_entries: Json | null
+          longitude: number | null
+          media_attention: boolean | null
+          medical_assessment_notes: string | null
+          mental_health_component: boolean | null
+          multi_agency_response: boolean | null
+          officers_attending: string | null
+          outcome: string | null
+          paramedics_called: boolean | null
+          people_involved: string | null
+          police_file_number: string | null
+          police_notified: boolean | null
+          postal_code: string | null
+          priority: Database["core"]["Enums"]["incident_priority_enum"] | null
+          priority_reason: string | null
+          property_brand: string | null
+          property_condition: string | null
+          property_description: string | null
+          property_involved: boolean | null
+          property_model: string | null
+          property_recovered: boolean | null
+          property_serial: string | null
+          property_type: string | null
+          property_value: string | null
+          province: string | null
+          public_safety_impact:
+            | Database["core"]["Enums"]["public_safety_impact_enum"]
+            | null
+          recommendations: string | null
+          recovery_method: string | null
+          referrals_made: string[] | null
+          related_medical_episode_id: string | null
+          reported_by: string | null
+          reporter_id: string | null
+          resource_allocation_notes: string | null
+          resources_distributed: string[] | null
+          response_time_minutes: number | null
+          safety_concerns: string | null
+          scene_conditions: string | null
+          scene_safety: string | null
+          services_notes: string | null
+          services_offered: string[] | null
+          services_provided: string[] | null
+          status: Database["core"]["Enums"]["incident_status_enum"] | null
+          status_history: Json | null
+          street_address: string | null
+          substance_indicators:
+            | Database["core"]["Enums"]["substance_indicators_enum"][]
+            | null
+          tags: string[] | null
+          total_incident_time_minutes: number | null
+          transport_decline_reason: string | null
+          transport_declined: boolean | null
+          updated_at: string | null
+          updated_by: string | null
+          weather_conditions: string | null
+        }
+        Insert: {
+          actions_taken?: string | null
+          address_id?: number | null
+          address_search?: string | null
+          agency_coordination_notes?: string | null
+          agency_response_notes?: string | null
+          ambulance_unit_number?: string | null
+          assigned_ranger?: string | null
+          bylaw_enforcement_action?: string | null
+          bylaw_file_number?: string | null
+          bylaw_notes?: string | null
+          bylaw_notified?: boolean | null
+          bylaw_officers_attending?: string | null
+          bylaw_personnel_names?: string | null
+          bylaw_response_time?: string | null
+          city?: string | null
+          community_impact_notes?: string | null
+          coordinates?: string | null
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          dispatch_at?: string | null
+          dispatch_notes?: string | null
+          dispatch_priority?:
+            | Database["core"]["Enums"]["dispatch_priority_enum"]
+            | null
+          disposition_type?: string | null
+          draft_created_at?: string | null
+          ems_personnel_names?: string | null
+          ems_response_time?: string | null
+          environmental_factors?:
+            | Database["core"]["Enums"]["environmental_factors_enum"][]
+            | null
+          fire_department_called?: boolean | null
+          fire_personnel?: string | null
+          fire_unit_number?: string | null
+          first_unit_arrived_at?: string | null
+          first_unit_assigned_at?: string | null
+          follow_up_date?: string | null
+          follow_up_notes?: string | null
+          follow_up_required?: boolean | null
+          hospital_destination?: string | null
+          hospital_transport_offered?: boolean | null
+          id?: number
+          incident_cleared_at?: string | null
+          incident_commander?: string | null
+          incident_complexity?:
+            | Database["core"]["Enums"]["incident_complexity_enum"]
+            | null
+          incident_date?: string | null
+          incident_number?: string | null
+          incident_people?: Json | null
+          incident_report_id?: number | null
+          incident_time?: string | null
+          incident_type?: Database["core"]["Enums"]["incident_type_enum"] | null
+          initial_observations?: string | null
+          is_draft?: boolean | null
+          latitude?: number | null
+          location: string
+          location_notes?: string | null
+          log_entries?: Json | null
+          longitude?: number | null
+          media_attention?: boolean | null
+          medical_assessment_notes?: string | null
+          mental_health_component?: boolean | null
+          multi_agency_response?: boolean | null
+          officers_attending?: string | null
+          outcome?: string | null
+          paramedics_called?: boolean | null
+          people_involved?: string | null
+          police_file_number?: string | null
+          police_notified?: boolean | null
+          postal_code?: string | null
+          priority?: Database["core"]["Enums"]["incident_priority_enum"] | null
+          priority_reason?: string | null
+          property_brand?: string | null
+          property_condition?: string | null
+          property_description?: string | null
+          property_involved?: boolean | null
+          property_model?: string | null
+          property_recovered?: boolean | null
+          property_serial?: string | null
+          property_type?: string | null
+          property_value?: string | null
+          province?: string | null
+          public_safety_impact?:
+            | Database["core"]["Enums"]["public_safety_impact_enum"]
+            | null
+          recommendations?: string | null
+          recovery_method?: string | null
+          referrals_made?: string[] | null
+          related_medical_episode_id?: string | null
+          reported_by?: string | null
+          reporter_id?: string | null
+          resource_allocation_notes?: string | null
+          resources_distributed?: string[] | null
+          response_time_minutes?: number | null
+          safety_concerns?: string | null
+          scene_conditions?: string | null
+          scene_safety?: string | null
+          services_notes?: string | null
+          services_offered?: string[] | null
+          services_provided?: string[] | null
+          status?: Database["core"]["Enums"]["incident_status_enum"] | null
+          status_history?: Json | null
+          street_address?: string | null
+          substance_indicators?:
+            | Database["core"]["Enums"]["substance_indicators_enum"][]
+            | null
+          tags?: string[] | null
+          total_incident_time_minutes?: number | null
+          transport_decline_reason?: string | null
+          transport_declined?: boolean | null
+          updated_at?: string | null
+          updated_by?: string | null
+          weather_conditions?: string | null
+        }
+        Update: {
+          actions_taken?: string | null
+          address_id?: number | null
+          address_search?: string | null
+          agency_coordination_notes?: string | null
+          agency_response_notes?: string | null
+          ambulance_unit_number?: string | null
+          assigned_ranger?: string | null
+          bylaw_enforcement_action?: string | null
+          bylaw_file_number?: string | null
+          bylaw_notes?: string | null
+          bylaw_notified?: boolean | null
+          bylaw_officers_attending?: string | null
+          bylaw_personnel_names?: string | null
+          bylaw_response_time?: string | null
+          city?: string | null
+          community_impact_notes?: string | null
+          coordinates?: string | null
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          dispatch_at?: string | null
+          dispatch_notes?: string | null
+          dispatch_priority?:
+            | Database["core"]["Enums"]["dispatch_priority_enum"]
+            | null
+          disposition_type?: string | null
+          draft_created_at?: string | null
+          ems_personnel_names?: string | null
+          ems_response_time?: string | null
+          environmental_factors?:
+            | Database["core"]["Enums"]["environmental_factors_enum"][]
+            | null
+          fire_department_called?: boolean | null
+          fire_personnel?: string | null
+          fire_unit_number?: string | null
+          first_unit_arrived_at?: string | null
+          first_unit_assigned_at?: string | null
+          follow_up_date?: string | null
+          follow_up_notes?: string | null
+          follow_up_required?: boolean | null
+          hospital_destination?: string | null
+          hospital_transport_offered?: boolean | null
+          id?: number
+          incident_cleared_at?: string | null
+          incident_commander?: string | null
+          incident_complexity?:
+            | Database["core"]["Enums"]["incident_complexity_enum"]
+            | null
+          incident_date?: string | null
+          incident_number?: string | null
+          incident_people?: Json | null
+          incident_report_id?: number | null
+          incident_time?: string | null
+          incident_type?: Database["core"]["Enums"]["incident_type_enum"] | null
+          initial_observations?: string | null
+          is_draft?: boolean | null
+          latitude?: number | null
+          location?: string
+          location_notes?: string | null
+          log_entries?: Json | null
+          longitude?: number | null
+          media_attention?: boolean | null
+          medical_assessment_notes?: string | null
+          mental_health_component?: boolean | null
+          multi_agency_response?: boolean | null
+          officers_attending?: string | null
+          outcome?: string | null
+          paramedics_called?: boolean | null
+          people_involved?: string | null
+          police_file_number?: string | null
+          police_notified?: boolean | null
+          postal_code?: string | null
+          priority?: Database["core"]["Enums"]["incident_priority_enum"] | null
+          priority_reason?: string | null
+          property_brand?: string | null
+          property_condition?: string | null
+          property_description?: string | null
+          property_involved?: boolean | null
+          property_model?: string | null
+          property_recovered?: boolean | null
+          property_serial?: string | null
+          property_type?: string | null
+          property_value?: string | null
+          province?: string | null
+          public_safety_impact?:
+            | Database["core"]["Enums"]["public_safety_impact_enum"]
+            | null
+          recommendations?: string | null
+          recovery_method?: string | null
+          referrals_made?: string[] | null
+          related_medical_episode_id?: string | null
+          reported_by?: string | null
+          reporter_id?: string | null
+          resource_allocation_notes?: string | null
+          resources_distributed?: string[] | null
+          response_time_minutes?: number | null
+          safety_concerns?: string | null
+          scene_conditions?: string | null
+          scene_safety?: string | null
+          services_notes?: string | null
+          services_offered?: string[] | null
+          services_provided?: string[] | null
+          status?: Database["core"]["Enums"]["incident_status_enum"] | null
+          status_history?: Json | null
+          street_address?: string | null
+          substance_indicators?:
+            | Database["core"]["Enums"]["substance_indicators_enum"][]
+            | null
+          tags?: string[] | null
+          total_incident_time_minutes?: number | null
+          transport_decline_reason?: string | null
+          transport_declined?: boolean | null
+          updated_at?: string | null
+          updated_by?: string | null
+          weather_conditions?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incidents_incident_report_id_fkey"
+            columns: ["incident_report_id"]
+            isOneToOne: false
+            referencedRelation: "calls_for_service"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_actions: {
+        Row: {
+          action_description: string
+          action_type: string
+          created_at: string | null
+          created_by: string | null
+          id: number
+          new_status: string | null
+          notes: string | null
+          old_status: string | null
+          performed_at: string | null
+          performed_by: string
+          property_id: number
+          updated_at: string | null
+          updated_by: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action_description: string
+          action_type: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: number
+          new_status?: string | null
+          notes?: string | null
+          old_status?: string | null
+          performed_at?: string | null
+          performed_by: string
+          property_id: number
+          updated_at?: string | null
+          updated_by?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action_description?: string
+          action_type?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: number
+          new_status?: string | null
+          notes?: string | null
+          old_status?: string | null
+          performed_at?: string | null
+          performed_by?: string
+          property_id?: number
+          updated_at?: string | null
+          updated_by?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_actions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "property_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_records: {
+        Row: {
+          bike_id: string | null
+          brand: string | null
+          category: string | null
+          color: string | null
+          condition: string | null
+          created_at: string | null
+          created_by: string
+          description: string
+          disposition_date: string | null
+          disposition_notes: string | null
+          disposition_type: string | null
+          estimated_value: number | null
+          found_by: string
+          found_coordinates: string | null
+          found_date: string
+          found_location: string
+          found_time: string
+          handed_to_police_date: string | null
+          id: number
+          incident_id: number | null
+          investigation_notes: string | null
+          model: string | null
+          owner_address: string | null
+          owner_contact: string | null
+          owner_name: string | null
+          photos: Json | null
+          police_file_number: string | null
+          police_officer: string | null
+          property_number: string
+          property_type: string
+          recovery_method: string | null
+          return_accepted_by: string | null
+          return_business_address: string | null
+          return_business_name: string | null
+          return_contact_person: string | null
+          return_individual_id_number: string | null
+          return_individual_id_type: string | null
+          return_location: string | null
+          return_method: string | null
+          return_notes: string | null
+          return_photos: Json | null
+          return_receipt_number: string | null
+          return_recipient_email: string | null
+          return_recipient_name: string | null
+          return_recipient_phone: string | null
+          return_relationship: string | null
+          return_type: string | null
+          return_verification_method: string | null
+          returned_date: string | null
+          returned_time: string | null
+          returned_to: string | null
+          serial_number: string | null
+          status: string
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          bike_id?: string | null
+          brand?: string | null
+          category?: string | null
+          color?: string | null
+          condition?: string | null
+          created_at?: string | null
+          created_by: string
+          description: string
+          disposition_date?: string | null
+          disposition_notes?: string | null
+          disposition_type?: string | null
+          estimated_value?: number | null
+          found_by: string
+          found_coordinates?: string | null
+          found_date: string
+          found_location: string
+          found_time: string
+          handed_to_police_date?: string | null
+          id?: number
+          incident_id?: number | null
+          investigation_notes?: string | null
+          model?: string | null
+          owner_address?: string | null
+          owner_contact?: string | null
+          owner_name?: string | null
+          photos?: Json | null
+          police_file_number?: string | null
+          police_officer?: string | null
+          property_number: string
+          property_type: string
+          recovery_method?: string | null
+          return_accepted_by?: string | null
+          return_business_address?: string | null
+          return_business_name?: string | null
+          return_contact_person?: string | null
+          return_individual_id_number?: string | null
+          return_individual_id_type?: string | null
+          return_location?: string | null
+          return_method?: string | null
+          return_notes?: string | null
+          return_photos?: Json | null
+          return_receipt_number?: string | null
+          return_recipient_email?: string | null
+          return_recipient_name?: string | null
+          return_recipient_phone?: string | null
+          return_relationship?: string | null
+          return_type?: string | null
+          return_verification_method?: string | null
+          returned_date?: string | null
+          returned_time?: string | null
+          returned_to?: string | null
+          serial_number?: string | null
+          status?: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          bike_id?: string | null
+          brand?: string | null
+          category?: string | null
+          color?: string | null
+          condition?: string | null
+          created_at?: string | null
+          created_by?: string
+          description?: string
+          disposition_date?: string | null
+          disposition_notes?: string | null
+          disposition_type?: string | null
+          estimated_value?: number | null
+          found_by?: string
+          found_coordinates?: string | null
+          found_date?: string
+          found_location?: string
+          found_time?: string
+          handed_to_police_date?: string | null
+          id?: number
+          incident_id?: number | null
+          investigation_notes?: string | null
+          model?: string | null
+          owner_address?: string | null
+          owner_contact?: string | null
+          owner_name?: string | null
+          photos?: Json | null
+          police_file_number?: string | null
+          police_officer?: string | null
+          property_number?: string
+          property_type?: string
+          recovery_method?: string | null
+          return_accepted_by?: string | null
+          return_business_address?: string | null
+          return_business_name?: string | null
+          return_contact_person?: string | null
+          return_individual_id_number?: string | null
+          return_individual_id_type?: string | null
+          return_location?: string | null
+          return_method?: string | null
+          return_notes?: string | null
+          return_photos?: Json | null
+          return_receipt_number?: string | null
+          return_recipient_email?: string | null
+          return_recipient_name?: string | null
+          return_recipient_phone?: string | null
+          return_relationship?: string | null
+          return_type?: string | null
+          return_verification_method?: string | null
+          returned_date?: string | null
+          returned_time?: string | null
+          returned_to?: string | null
+          serial_number?: string | null
+          status?: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_records_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "incidents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   core: {
     Tables: {
       address_activities: {
@@ -4563,10 +5741,44 @@ export type Database = {
         }[]
       }
       has_permission: { Args: { permission_name: string }; Returns: boolean }
+      is_user_in_roles: {
+        Args: { p_roles: string[]; p_user?: string }
+        Returns: boolean
+      }
       refresh_user_permissions: { Args: { user_uuid?: string }; Returns: Json }
       remove_user_role: {
         Args: { role_name: string; target_user_id: string }
         Returns: boolean
+      }
+      staff_caseload: {
+        Args: { staff_uuid: string }
+        Returns: {
+          client_name: string
+          next_at: string
+          next_step: string
+          person_id: number
+          status: string
+        }[]
+      }
+      staff_outreach_logs: {
+        Args: { limit_rows?: number; staff_uuid: string }
+        Returns: {
+          id: string
+          location: string
+          occurred_at: string
+          summary: string
+          title: string
+        }[]
+      }
+      staff_shifts_today: {
+        Args: { staff_uuid: string }
+        Returns: {
+          ends_at: string
+          id: string
+          location: string
+          starts_at: string
+          title: string
+        }[]
       }
       validate_admin_access: { Args: never; Returns: boolean }
     }
@@ -5262,6 +6474,954 @@ export type Database = {
         | "large"
         | "very_large"
         | "extensive"
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+  donations: {
+    Tables: {
+      catalog_items: {
+        Row: {
+          category: string | null
+          created_at: string
+          currency: string
+          default_quantity: number
+          id: string
+          image_url: string | null
+          inventory_item_id: string
+          is_active: boolean
+          long_description: string | null
+          priority: number
+          short_description: string | null
+          slug: string
+          stripe_price_id: string | null
+          target_buffer: number | null
+          title: string
+          unit_cost_cents: number | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          currency?: string
+          default_quantity?: number
+          id?: string
+          image_url?: string | null
+          inventory_item_id: string
+          is_active?: boolean
+          long_description?: string | null
+          priority?: number
+          short_description?: string | null
+          slug: string
+          stripe_price_id?: string | null
+          target_buffer?: number | null
+          title: string
+          unit_cost_cents?: number | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          currency?: string
+          default_quantity?: number
+          id?: string
+          image_url?: string | null
+          inventory_item_id?: string
+          is_active?: boolean
+          long_description?: string | null
+          priority?: number
+          short_description?: string | null
+          slug?: string
+          stripe_price_id?: string | null
+          target_buffer?: number | null
+          title?: string
+          unit_cost_cents?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      donation_intents: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          currency: string
+          donor_email: string | null
+          id: string
+          items: Json
+          metadata: Json | null
+          status: Database["donations"]["Enums"]["donation_intent_status"]
+          stripe_session_id: string | null
+          total_amount_cents: number
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          currency?: string
+          donor_email?: string | null
+          id?: string
+          items?: Json
+          metadata?: Json | null
+          status?: Database["donations"]["Enums"]["donation_intent_status"]
+          stripe_session_id?: string | null
+          total_amount_cents: number
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          currency?: string
+          donor_email?: string | null
+          id?: string
+          items?: Json
+          metadata?: Json | null
+          status?: Database["donations"]["Enums"]["donation_intent_status"]
+          stripe_session_id?: string | null
+          total_amount_cents?: number
+        }
+        Relationships: []
+      }
+      donation_payments: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          currency: string
+          donation_intent_id: string
+          id: string
+          processed_at: string
+          provider: string
+          provider_payment_id: string | null
+          raw_payload: Json | null
+          status: Database["donations"]["Enums"]["donation_payment_status"]
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          currency?: string
+          donation_intent_id: string
+          id?: string
+          processed_at?: string
+          provider?: string
+          provider_payment_id?: string | null
+          raw_payload?: Json | null
+          status?: Database["donations"]["Enums"]["donation_payment_status"]
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          currency?: string
+          donation_intent_id?: string
+          id?: string
+          processed_at?: string
+          provider?: string
+          provider_payment_id?: string | null
+          raw_payload?: Json | null
+          status?: Database["donations"]["Enums"]["donation_payment_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "donation_payments_donation_intent_id_fkey"
+            columns: ["donation_intent_id"]
+            isOneToOne: false
+            referencedRelation: "donation_intents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+    }
+    Views: {
+      catalog_item_metrics: {
+        Row: {
+          catalog_item_id: string | null
+          current_stock: number | null
+          distributed_last_30_days: number | null
+          distributed_last_365_days: number | null
+          inventory_item_category: string | null
+          inventory_item_id: string | null
+          inventory_item_name: string | null
+          target_buffer: number | null
+          unit_type: string | null
+        }
+        Relationships: []
+      }
+      v_distribution_30d: {
+        Row: {
+          inventory_item_id: string | null
+          units_distributed: number | null
+        }
+        Relationships: []
+      }
+      v_distribution_365d: {
+        Row: {
+          inventory_item_id: string | null
+          units_distributed: number | null
+        }
+        Relationships: []
+      }
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      donation_intent_status:
+        | "pending"
+        | "requires_payment"
+        | "paid"
+        | "failed"
+        | "cancelled"
+      donation_payment_status:
+        | "succeeded"
+        | "requires_action"
+        | "failed"
+        | "refunded"
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+  hazmat: {
+    Tables: {
+      hazmat_custody_transfers: {
+        Row: {
+          compliance_notes: string | null
+          container_condition: string | null
+          container_id: string | null
+          container_type: string
+          created_at: string | null
+          created_by: string
+          episode_id: string
+          from_location: string
+          from_person: string
+          from_role: string | null
+          id: string
+          irregularities_noted: string | null
+          official_receipt_provided: boolean | null
+          photo_documentation: boolean | null
+          purpose_of_transfer: string
+          receipt_number: string | null
+          requires_official_receipt: boolean | null
+          seal_applied: boolean | null
+          seal_condition_after: string | null
+          seal_condition_before: string | null
+          seal_manufacturer: string | null
+          seal_serial_number: string | null
+          to_location: string
+          to_person: string
+          to_role: string | null
+          transfer_datetime: string
+          transfer_notes: string | null
+          transfer_type: string
+          transport_method: string | null
+          updated_at: string | null
+          updated_by: string | null
+          witness_person: string | null
+        }
+        Insert: {
+          compliance_notes?: string | null
+          container_condition?: string | null
+          container_id?: string | null
+          container_type: string
+          created_at?: string | null
+          created_by: string
+          episode_id: string
+          from_location: string
+          from_person: string
+          from_role?: string | null
+          id?: string
+          irregularities_noted?: string | null
+          official_receipt_provided?: boolean | null
+          photo_documentation?: boolean | null
+          purpose_of_transfer: string
+          receipt_number?: string | null
+          requires_official_receipt?: boolean | null
+          seal_applied?: boolean | null
+          seal_condition_after?: string | null
+          seal_condition_before?: string | null
+          seal_manufacturer?: string | null
+          seal_serial_number?: string | null
+          to_location: string
+          to_person: string
+          to_role?: string | null
+          transfer_datetime: string
+          transfer_notes?: string | null
+          transfer_type: string
+          transport_method?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          witness_person?: string | null
+        }
+        Update: {
+          compliance_notes?: string | null
+          container_condition?: string | null
+          container_id?: string | null
+          container_type?: string
+          created_at?: string | null
+          created_by?: string
+          episode_id?: string
+          from_location?: string
+          from_person?: string
+          from_role?: string | null
+          id?: string
+          irregularities_noted?: string | null
+          official_receipt_provided?: boolean | null
+          photo_documentation?: boolean | null
+          purpose_of_transfer?: string
+          receipt_number?: string | null
+          requires_official_receipt?: boolean | null
+          seal_applied?: boolean | null
+          seal_condition_after?: string | null
+          seal_condition_before?: string | null
+          seal_manufacturer?: string | null
+          seal_serial_number?: string | null
+          to_location?: string
+          to_person?: string
+          to_role?: string | null
+          transfer_datetime?: string
+          transfer_notes?: string | null
+          transfer_type?: string
+          transport_method?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          witness_person?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hazmat_custody_transfers_episode_id_fkey"
+            columns: ["episode_id"]
+            isOneToOne: false
+            referencedRelation: "hazmat_episodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hazmat_disposal_records: {
+        Row: {
+          budget_code: string | null
+          certificate_number: string | null
+          chain_of_custody_completed: boolean | null
+          compliance_documentation: string | null
+          created_at: string | null
+          created_by: string
+          disposal_authorized_by: string | null
+          disposal_certificate_received: boolean | null
+          disposal_confirmed_by: string | null
+          disposal_cost: number | null
+          disposal_date: string
+          disposal_datetime: string
+          disposal_method: string
+          disposal_notes: string | null
+          disposal_photos_taken: boolean | null
+          environmental_impact_notes: string | null
+          episode_id: string
+          final_seal_status: string | null
+          final_seal_verification: boolean | null
+          id: string
+          official_receipt_number: string | null
+          permit_numbers: string | null
+          receiving_authority_type: string | null
+          receiving_contact_info: string | null
+          receiving_contact_person: string | null
+          receiving_organization: string
+          regulatory_body: string | null
+          regulatory_requirements_met: boolean | null
+          updated_at: string | null
+          updated_by: string | null
+          witness_to_disposal: string | null
+        }
+        Insert: {
+          budget_code?: string | null
+          certificate_number?: string | null
+          chain_of_custody_completed?: boolean | null
+          compliance_documentation?: string | null
+          created_at?: string | null
+          created_by: string
+          disposal_authorized_by?: string | null
+          disposal_certificate_received?: boolean | null
+          disposal_confirmed_by?: string | null
+          disposal_cost?: number | null
+          disposal_date: string
+          disposal_datetime: string
+          disposal_method: string
+          disposal_notes?: string | null
+          disposal_photos_taken?: boolean | null
+          environmental_impact_notes?: string | null
+          episode_id: string
+          final_seal_status?: string | null
+          final_seal_verification?: boolean | null
+          id?: string
+          official_receipt_number?: string | null
+          permit_numbers?: string | null
+          receiving_authority_type?: string | null
+          receiving_contact_info?: string | null
+          receiving_contact_person?: string | null
+          receiving_organization: string
+          regulatory_body?: string | null
+          regulatory_requirements_met?: boolean | null
+          updated_at?: string | null
+          updated_by?: string | null
+          witness_to_disposal?: string | null
+        }
+        Update: {
+          budget_code?: string | null
+          certificate_number?: string | null
+          chain_of_custody_completed?: boolean | null
+          compliance_documentation?: string | null
+          created_at?: string | null
+          created_by?: string
+          disposal_authorized_by?: string | null
+          disposal_certificate_received?: boolean | null
+          disposal_confirmed_by?: string | null
+          disposal_cost?: number | null
+          disposal_date?: string
+          disposal_datetime?: string
+          disposal_method?: string
+          disposal_notes?: string | null
+          disposal_photos_taken?: boolean | null
+          environmental_impact_notes?: string | null
+          episode_id?: string
+          final_seal_status?: string | null
+          final_seal_verification?: boolean | null
+          id?: string
+          official_receipt_number?: string | null
+          permit_numbers?: string | null
+          receiving_authority_type?: string | null
+          receiving_contact_info?: string | null
+          receiving_contact_person?: string | null
+          receiving_organization?: string
+          regulatory_body?: string | null
+          regulatory_requirements_met?: boolean | null
+          updated_at?: string | null
+          updated_by?: string | null
+          witness_to_disposal?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hazmat_disposal_records_episode_id_fkey"
+            columns: ["episode_id"]
+            isOneToOne: false
+            referencedRelation: "hazmat_episodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hazmat_episodes: {
+        Row: {
+          additional_notes: string | null
+          address_id: number | null
+          caller_contact: string | null
+          caller_name: string | null
+          children_present: boolean | null
+          collected_by: string | null
+          collection_datetime: string | null
+          collection_duration: unknown
+          collection_status: string | null
+          controlled_substance_present: boolean
+          created_at: string | null
+          created_by: string
+          custody_tracking_started_at: string | null
+          discovered_by: string
+          discovery_date: string
+          discovery_location: string | null
+          discovery_time: string | null
+          episode_number: string
+          episode_type: string
+          gps_coordinates: string | null
+          id: string
+          immediate_risk_present: boolean | null
+          location_notes: string
+          location_type: string | null
+          pets_present: boolean | null
+          photo_documentation_available: boolean | null
+          priority_level: string | null
+          public_access_restricted: boolean | null
+          related_incident_id: string | null
+          related_person_id: number | null
+          reported_by_user_id: string | null
+          safety_concerns: string | null
+          situation_description: string
+          source_cfs_id: number | null
+          updated_at: string | null
+          updated_by: string | null
+          visibility_conditions: string | null
+          weather_conditions: string | null
+          witness_statements: string | null
+        }
+        Insert: {
+          additional_notes?: string | null
+          address_id?: number | null
+          caller_contact?: string | null
+          caller_name?: string | null
+          children_present?: boolean | null
+          collected_by?: string | null
+          collection_datetime?: string | null
+          collection_duration?: unknown
+          collection_status?: string | null
+          controlled_substance_present?: boolean
+          created_at?: string | null
+          created_by: string
+          custody_tracking_started_at?: string | null
+          discovered_by: string
+          discovery_date: string
+          discovery_location?: string | null
+          discovery_time?: string | null
+          episode_number: string
+          episode_type: string
+          gps_coordinates?: string | null
+          id?: string
+          immediate_risk_present?: boolean | null
+          location_notes: string
+          location_type?: string | null
+          pets_present?: boolean | null
+          photo_documentation_available?: boolean | null
+          priority_level?: string | null
+          public_access_restricted?: boolean | null
+          related_incident_id?: string | null
+          related_person_id?: number | null
+          reported_by_user_id?: string | null
+          safety_concerns?: string | null
+          situation_description: string
+          source_cfs_id?: number | null
+          updated_at?: string | null
+          updated_by?: string | null
+          visibility_conditions?: string | null
+          weather_conditions?: string | null
+          witness_statements?: string | null
+        }
+        Update: {
+          additional_notes?: string | null
+          address_id?: number | null
+          caller_contact?: string | null
+          caller_name?: string | null
+          children_present?: boolean | null
+          collected_by?: string | null
+          collection_datetime?: string | null
+          collection_duration?: unknown
+          collection_status?: string | null
+          controlled_substance_present?: boolean
+          created_at?: string | null
+          created_by?: string
+          custody_tracking_started_at?: string | null
+          discovered_by?: string
+          discovery_date?: string
+          discovery_location?: string | null
+          discovery_time?: string | null
+          episode_number?: string
+          episode_type?: string
+          gps_coordinates?: string | null
+          id?: string
+          immediate_risk_present?: boolean | null
+          location_notes?: string
+          location_type?: string | null
+          pets_present?: boolean | null
+          photo_documentation_available?: boolean | null
+          priority_level?: string | null
+          public_access_restricted?: boolean | null
+          related_incident_id?: string | null
+          related_person_id?: number | null
+          reported_by_user_id?: string | null
+          safety_concerns?: string | null
+          situation_description?: string
+          source_cfs_id?: number | null
+          updated_at?: string | null
+          updated_by?: string | null
+          visibility_conditions?: string | null
+          weather_conditions?: string | null
+          witness_statements?: string | null
+        }
+        Relationships: []
+      }
+      hazmat_items: {
+        Row: {
+          chain_of_custody_required: boolean
+          chain_of_custody_started_at: string | null
+          collection_container_type: string | null
+          collection_method: string | null
+          color_description: string | null
+          contamination_type: string | null
+          created_at: string | null
+          created_by: string
+          cross_contamination_risk: string | null
+          episode_id: string
+          estimated_quantity: string | null
+          evidence_tag_applied: boolean | null
+          evidence_tag_number: string | null
+          hazard_level: string | null
+          id: string
+          item_description: string
+          item_number: number
+          item_type: string
+          photo_taken: boolean | null
+          physical_condition: string | null
+          size_description: string | null
+          special_handling_notes: string | null
+          special_handling_required: boolean | null
+          tamper_seal_applied: boolean
+          tamper_seal_serial: string | null
+          test_count: number | null
+          test_method:
+            | Database["core"]["Enums"]["hazmat_test_method_enum"]
+            | null
+          test_notes: string | null
+          test_observed_color: string | null
+          test_performed: boolean
+          test_result:
+            | Database["core"]["Enums"]["hazmat_test_result_enum"]
+            | null
+          updated_at: string | null
+          updated_by: string | null
+          visible_contamination: boolean | null
+        }
+        Insert: {
+          chain_of_custody_required?: boolean
+          chain_of_custody_started_at?: string | null
+          collection_container_type?: string | null
+          collection_method?: string | null
+          color_description?: string | null
+          contamination_type?: string | null
+          created_at?: string | null
+          created_by: string
+          cross_contamination_risk?: string | null
+          episode_id: string
+          estimated_quantity?: string | null
+          evidence_tag_applied?: boolean | null
+          evidence_tag_number?: string | null
+          hazard_level?: string | null
+          id?: string
+          item_description: string
+          item_number: number
+          item_type: string
+          photo_taken?: boolean | null
+          physical_condition?: string | null
+          size_description?: string | null
+          special_handling_notes?: string | null
+          special_handling_required?: boolean | null
+          tamper_seal_applied?: boolean
+          tamper_seal_serial?: string | null
+          test_count?: number | null
+          test_method?:
+            | Database["core"]["Enums"]["hazmat_test_method_enum"]
+            | null
+          test_notes?: string | null
+          test_observed_color?: string | null
+          test_performed?: boolean
+          test_result?:
+            | Database["core"]["Enums"]["hazmat_test_result_enum"]
+            | null
+          updated_at?: string | null
+          updated_by?: string | null
+          visible_contamination?: boolean | null
+        }
+        Update: {
+          chain_of_custody_required?: boolean
+          chain_of_custody_started_at?: string | null
+          collection_container_type?: string | null
+          collection_method?: string | null
+          color_description?: string | null
+          contamination_type?: string | null
+          created_at?: string | null
+          created_by?: string
+          cross_contamination_risk?: string | null
+          episode_id?: string
+          estimated_quantity?: string | null
+          evidence_tag_applied?: boolean | null
+          evidence_tag_number?: string | null
+          hazard_level?: string | null
+          id?: string
+          item_description?: string
+          item_number?: number
+          item_type?: string
+          photo_taken?: boolean | null
+          physical_condition?: string | null
+          size_description?: string | null
+          special_handling_notes?: string | null
+          special_handling_required?: boolean | null
+          tamper_seal_applied?: boolean
+          tamper_seal_serial?: string | null
+          test_count?: number | null
+          test_method?:
+            | Database["core"]["Enums"]["hazmat_test_method_enum"]
+            | null
+          test_notes?: string | null
+          test_observed_color?: string | null
+          test_performed?: boolean
+          test_result?:
+            | Database["core"]["Enums"]["hazmat_test_result_enum"]
+            | null
+          updated_at?: string | null
+          updated_by?: string | null
+          visible_contamination?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hazmat_items_episode_id_fkey"
+            columns: ["episode_id"]
+            isOneToOne: false
+            referencedRelation: "hazmat_episodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hazmat_safety_incidents: {
+        Row: {
+          additional_training_needed: string | null
+          containment_actions: string | null
+          contributing_factors: string | null
+          corrective_actions_identified: string | null
+          created_at: string | null
+          created_by: string
+          decontamination_performed: boolean | null
+          episode_id: string
+          exposure_duration: string | null
+          external_agencies_notified: string | null
+          external_reporting_required: boolean | null
+          follow_up_medical_required: boolean | null
+          id: string
+          immediate_cause: string | null
+          immediate_response_taken: string | null
+          incident_datetime: string
+          incident_description: string
+          incident_reported_by: string
+          incident_type: string
+          incident_witnessed_by: string | null
+          investigation_completed: boolean | null
+          investigation_findings: string | null
+          location_of_incident: string | null
+          materials_involved: string | null
+          medical_attention_required: boolean | null
+          medical_response_details: string | null
+          people_involved_count: number | null
+          policy_changes_recommended: string | null
+          potential_exposure_routes: string | null
+          protective_equipment_effectiveness: string | null
+          protective_equipment_used: string | null
+          public_count: number | null
+          public_involved: boolean | null
+          report_approved_by: string | null
+          report_reviewed_by: string | null
+          severity_level: string | null
+          staff_involved: string | null
+          supervisor_notified: boolean | null
+          supervisor_notified_datetime: string | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          additional_training_needed?: string | null
+          containment_actions?: string | null
+          contributing_factors?: string | null
+          corrective_actions_identified?: string | null
+          created_at?: string | null
+          created_by: string
+          decontamination_performed?: boolean | null
+          episode_id: string
+          exposure_duration?: string | null
+          external_agencies_notified?: string | null
+          external_reporting_required?: boolean | null
+          follow_up_medical_required?: boolean | null
+          id?: string
+          immediate_cause?: string | null
+          immediate_response_taken?: string | null
+          incident_datetime: string
+          incident_description: string
+          incident_reported_by: string
+          incident_type: string
+          incident_witnessed_by?: string | null
+          investigation_completed?: boolean | null
+          investigation_findings?: string | null
+          location_of_incident?: string | null
+          materials_involved?: string | null
+          medical_attention_required?: boolean | null
+          medical_response_details?: string | null
+          people_involved_count?: number | null
+          policy_changes_recommended?: string | null
+          potential_exposure_routes?: string | null
+          protective_equipment_effectiveness?: string | null
+          protective_equipment_used?: string | null
+          public_count?: number | null
+          public_involved?: boolean | null
+          report_approved_by?: string | null
+          report_reviewed_by?: string | null
+          severity_level?: string | null
+          staff_involved?: string | null
+          supervisor_notified?: boolean | null
+          supervisor_notified_datetime?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          additional_training_needed?: string | null
+          containment_actions?: string | null
+          contributing_factors?: string | null
+          corrective_actions_identified?: string | null
+          created_at?: string | null
+          created_by?: string
+          decontamination_performed?: boolean | null
+          episode_id?: string
+          exposure_duration?: string | null
+          external_agencies_notified?: string | null
+          external_reporting_required?: boolean | null
+          follow_up_medical_required?: boolean | null
+          id?: string
+          immediate_cause?: string | null
+          immediate_response_taken?: string | null
+          incident_datetime?: string
+          incident_description?: string
+          incident_reported_by?: string
+          incident_type?: string
+          incident_witnessed_by?: string | null
+          investigation_completed?: boolean | null
+          investigation_findings?: string | null
+          location_of_incident?: string | null
+          materials_involved?: string | null
+          medical_attention_required?: boolean | null
+          medical_response_details?: string | null
+          people_involved_count?: number | null
+          policy_changes_recommended?: string | null
+          potential_exposure_routes?: string | null
+          protective_equipment_effectiveness?: string | null
+          protective_equipment_used?: string | null
+          public_count?: number | null
+          public_involved?: boolean | null
+          report_approved_by?: string | null
+          report_reviewed_by?: string | null
+          severity_level?: string | null
+          staff_involved?: string | null
+          supervisor_notified?: boolean | null
+          supervisor_notified_datetime?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hazmat_safety_incidents_episode_id_fkey"
+            columns: ["episode_id"]
+            isOneToOne: false
+            referencedRelation: "hazmat_episodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hazmat_storage_logs: {
+        Row: {
+          access_authorized_by: string | null
+          access_level_required: string | null
+          container_integrity_check: boolean | null
+          container_status: string | null
+          created_at: string | null
+          created_by: string | null
+          episode_id: string
+          humidity_logged: boolean | null
+          humidity_reading: string | null
+          id: string
+          log_datetime: string
+          log_description: string
+          log_type: string
+          logged_by: string
+          logged_by_role: string | null
+          maintenance_performed: string | null
+          recommendations: string | null
+          safety_concerns_noted: string | null
+          safety_inspection_performed: boolean | null
+          seal_status: string | null
+          seal_status_check: boolean | null
+          security_check_performed: boolean | null
+          storage_facility: string
+          storage_position: string | null
+          storage_unit: string | null
+          supervisor_name: string | null
+          supervisor_notified: boolean | null
+          temperature_logged: boolean | null
+          temperature_reading: string | null
+          updated_at: string | null
+          updated_by: string | null
+          ventilation_status: string | null
+        }
+        Insert: {
+          access_authorized_by?: string | null
+          access_level_required?: string | null
+          container_integrity_check?: boolean | null
+          container_status?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          episode_id: string
+          humidity_logged?: boolean | null
+          humidity_reading?: string | null
+          id?: string
+          log_datetime: string
+          log_description: string
+          log_type: string
+          logged_by: string
+          logged_by_role?: string | null
+          maintenance_performed?: string | null
+          recommendations?: string | null
+          safety_concerns_noted?: string | null
+          safety_inspection_performed?: boolean | null
+          seal_status?: string | null
+          seal_status_check?: boolean | null
+          security_check_performed?: boolean | null
+          storage_facility: string
+          storage_position?: string | null
+          storage_unit?: string | null
+          supervisor_name?: string | null
+          supervisor_notified?: boolean | null
+          temperature_logged?: boolean | null
+          temperature_reading?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          ventilation_status?: string | null
+        }
+        Update: {
+          access_authorized_by?: string | null
+          access_level_required?: string | null
+          container_integrity_check?: boolean | null
+          container_status?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          episode_id?: string
+          humidity_logged?: boolean | null
+          humidity_reading?: string | null
+          id?: string
+          log_datetime?: string
+          log_description?: string
+          log_type?: string
+          logged_by?: string
+          logged_by_role?: string | null
+          maintenance_performed?: string | null
+          recommendations?: string | null
+          safety_concerns_noted?: string | null
+          safety_inspection_performed?: boolean | null
+          seal_status?: string | null
+          seal_status_check?: boolean | null
+          security_check_performed?: boolean | null
+          storage_facility?: string
+          storage_position?: string | null
+          storage_unit?: string | null
+          supervisor_name?: string | null
+          supervisor_notified?: boolean | null
+          temperature_logged?: boolean | null
+          temperature_reading?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          ventilation_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hazmat_storage_logs_episode_id_fkey"
+            columns: ["episode_id"]
+            isOneToOne: false
+            referencedRelation: "hazmat_episodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
@@ -7097,213 +9257,6 @@ export type Database = {
       [_ in never]: never
     }
   }
-  donations: {
-    Tables: {
-      catalog_items: {
-        Row: {
-          id: string
-          slug: string
-          title: string
-          short_description: string | null
-          long_description: string | null
-          category: string | null
-          inventory_item_id: string
-          unit_cost_cents: number | null
-          currency: string
-          default_quantity: number
-          priority: number
-          target_buffer: number | null
-          image_url: string | null
-          stripe_price_id: string | null
-          is_active: boolean
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          slug: string
-          title: string
-          short_description?: string | null
-          long_description?: string | null
-          category?: string | null
-          inventory_item_id: string
-          unit_cost_cents?: number | null
-          currency?: string
-          default_quantity?: number
-          priority?: number
-          target_buffer?: number | null
-          image_url?: string | null
-          stripe_price_id?: string | null
-          is_active?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          slug?: string
-          title?: string
-          short_description?: string | null
-          long_description?: string | null
-          category?: string | null
-          inventory_item_id?: string
-          unit_cost_cents?: number | null
-          currency?: string
-          default_quantity?: number
-          priority?: number
-          target_buffer?: number | null
-          image_url?: string | null
-          stripe_price_id?: string | null
-          is_active?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "catalog_items_inventory_item_id_fkey"
-            columns: ["inventory_item_id"]
-            isOneToOne: false
-            referencedRelation: "items"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      donation_intents: {
-        Row: {
-          id: string
-          status: Database["donations"]["Enums"]["donation_intent_status"]
-          items: Json
-          total_amount_cents: number
-          currency: string
-          donor_email: string | null
-          stripe_session_id: string | null
-          created_at: string
-          completed_at: string | null
-          metadata: Json | null
-        }
-        Insert: {
-          id?: string
-          status?: Database["donations"]["Enums"]["donation_intent_status"]
-          items?: Json
-          total_amount_cents: number
-          currency?: string
-          donor_email?: string | null
-          stripe_session_id?: string | null
-          created_at?: string
-          completed_at?: string | null
-          metadata?: Json | null
-        }
-        Update: {
-          id?: string
-          status?: Database["donations"]["Enums"]["donation_intent_status"]
-          items?: Json
-          total_amount_cents?: number
-          currency?: string
-          donor_email?: string | null
-          stripe_session_id?: string | null
-          created_at?: string
-          completed_at?: string | null
-          metadata?: Json | null
-        }
-        Relationships: []
-      }
-      donation_payments: {
-        Row: {
-          id: string
-          donation_intent_id: string
-          provider: string
-          provider_payment_id: string | null
-          amount_cents: number
-          currency: string
-          status: Database["donations"]["Enums"]["donation_payment_status"]
-          processed_at: string
-          raw_payload: Json | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          donation_intent_id: string
-          provider?: string
-          provider_payment_id?: string | null
-          amount_cents: number
-          currency?: string
-          status?: Database["donations"]["Enums"]["donation_payment_status"]
-          processed_at?: string
-          raw_payload?: Json | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          donation_intent_id?: string
-          provider?: string
-          provider_payment_id?: string | null
-          amount_cents?: number
-          currency?: string
-          status?: Database["donations"]["Enums"]["donation_payment_status"]
-          processed_at?: string
-          raw_payload?: Json | null
-          created_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "donation_payments_donation_intent_id_fkey"
-            columns: ["donation_intent_id"]
-            isOneToOne: false
-            referencedRelation: "donation_intents"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-    }
-    Views: {
-      catalog_item_metrics: {
-        Row: {
-          catalog_item_id: string | null
-          inventory_item_id: string | null
-          inventory_item_name: string | null
-          inventory_item_category: string | null
-          unit_type: string | null
-          current_stock: number | null
-          target_buffer: number | null
-          distributed_last_30_days: number | null
-          distributed_last_365_days: number | null
-        }
-        Relationships: []
-      }
-      v_distribution_30d: {
-        Row: {
-          inventory_item_id: string | null
-          units_distributed: number | null
-        }
-        Relationships: []
-      }
-      v_distribution_365d: {
-        Row: {
-          inventory_item_id: string | null
-          units_distributed: number | null
-        }
-        Relationships: []
-      }
-    }
-    Functions: {
-      [_ in never]: never
-    }
-    Enums: {
-      donation_intent_status:
-        | "pending"
-        | "requires_payment"
-        | "paid"
-        | "failed"
-        | "cancelled"
-      donation_payment_status:
-        | "succeeded"
-        | "requires_action"
-        | "failed"
-        | "refunded"
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   portal: {
     Tables: {
       audit_log: {
@@ -7347,72 +9300,13 @@ export type Database = {
           },
         ]
       }
-      comments: {
-        Row: {
-          author_profile_id: string
-          body: string
-          comment_type: Database["portal"]["Enums"]["comment_type"]
-          created_at: string
-          depth: number
-          evidence_url: string | null
-          id: string
-          idea_id: string
-          is_official: boolean
-          parent_comment_id: string | null
-          updated_at: string
-        }
-        Insert: {
-          author_profile_id: string
-          body: string
-          comment_type?: Database["portal"]["Enums"]["comment_type"]
-          created_at?: string
-          depth?: number
-          evidence_url?: string | null
-          id?: string
-          idea_id: string
-          is_official?: boolean
-          parent_comment_id?: string | null
-          updated_at?: string
-        }
-        Update: {
-          author_profile_id?: string
-          body?: string
-          comment_type?: Database["portal"]["Enums"]["comment_type"]
-          created_at?: string
-          depth?: number
-          evidence_url?: string | null
-          id?: string
-          idea_id?: string
-          is_official?: boolean
-          parent_comment_id?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "comments_author_profile_id_fkey"
-            columns: ["author_profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "comments_parent_comment_id_fkey"
-            columns: ["parent_comment_id"]
-            isOneToOne: false
-            referencedRelation: "comments"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       flags: {
         Row: {
-          comment_id: string | null
           created_at: string
           details: string | null
           entity_id: string
           entity_type: Database["portal"]["Enums"]["flag_entity_type"]
           id: string
-          idea_id: string | null
           reason: Database["portal"]["Enums"]["flag_reason"]
           reporter_profile_id: string
           resolution_note: string | null
@@ -7422,13 +9316,11 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          comment_id?: string | null
           created_at?: string
           details?: string | null
           entity_id: string
           entity_type: Database["portal"]["Enums"]["flag_entity_type"]
           id?: string
-          idea_id?: string | null
           reason: Database["portal"]["Enums"]["flag_reason"]
           reporter_profile_id: string
           resolution_note?: string | null
@@ -7438,13 +9330,11 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          comment_id?: string | null
           created_at?: string
           details?: string | null
           entity_id?: string
           entity_type?: Database["portal"]["Enums"]["flag_entity_type"]
           id?: string
-          idea_id?: string | null
           reason?: Database["portal"]["Enums"]["flag_reason"]
           reporter_profile_id?: string
           resolution_note?: string | null
@@ -7466,13 +9356,6 @@ export type Database = {
             columns: ["resolved_by_profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "portal_flags_comment_fk"
-            columns: ["comment_id"]
-            isOneToOne: false
-            referencedRelation: "comments"
             referencedColumns: ["id"]
           },
         ]
@@ -7559,7 +9442,6 @@ export type Database = {
           channels: string[]
           created_at: string
           id: string
-          idea_id: string | null
           notification_type: string
           payload: Json
           profile_id: string | null
@@ -7575,7 +9457,6 @@ export type Database = {
           channels?: string[]
           created_at?: string
           id?: string
-          idea_id?: string | null
           notification_type: string
           payload?: Json
           profile_id?: string | null
@@ -7591,7 +9472,6 @@ export type Database = {
           channels?: string[]
           created_at?: string
           id?: string
-          idea_id?: string | null
           notification_type?: string
           payload?: Json
           profile_id?: string | null
@@ -7604,60 +9484,6 @@ export type Database = {
           {
             foreignKeyName: "notifications_profile_id_fkey"
             columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      public_settings: {
-        Row: {
-          created_at: string
-          created_by_profile_id: string | null
-          description: string | null
-          id: string
-          is_public: boolean
-          setting_key: string
-          setting_type: string
-          setting_value: string | null
-          updated_at: string
-          updated_by_profile_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          created_by_profile_id?: string | null
-          description?: string | null
-          id?: string
-          is_public?: boolean
-          setting_key: string
-          setting_type?: string
-          setting_value?: string | null
-          updated_at?: string
-          updated_by_profile_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          created_by_profile_id?: string | null
-          description?: string | null
-          id?: string
-          is_public?: boolean
-          setting_key?: string
-          setting_type?: string
-          setting_value?: string | null
-          updated_at?: string
-          updated_by_profile_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "public_settings_created_by_profile_id_fkey"
-            columns: ["created_by_profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "public_settings_updated_by_profile_id_fkey"
-            columns: ["updated_by_profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -8091,6 +9917,60 @@ export type Database = {
           {
             foreignKeyName: "profiles_affiliation_reviewed_by_fkey"
             columns: ["affiliation_reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      public_settings: {
+        Row: {
+          created_at: string
+          created_by_profile_id: string | null
+          description: string | null
+          id: string
+          is_public: boolean
+          setting_key: string
+          setting_type: string
+          setting_value: string | null
+          updated_at: string
+          updated_by_profile_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by_profile_id?: string | null
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          setting_key: string
+          setting_type?: string
+          setting_value?: string | null
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by_profile_id?: string | null
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          setting_key?: string
+          setting_type?: string
+          setting_value?: string | null
+          updated_at?: string
+          updated_by_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_settings_created_by_profile_id_fkey"
+            columns: ["created_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_settings_updated_by_profile_id_fkey"
+            columns: ["updated_by_profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -8672,37 +10552,28 @@ export type Database = {
           },
         ]
       }
-      votes: {
-        Row: {
-          created_at: string
-          idea_id: string
-          reaction: Database["portal"]["Enums"]["reaction_type"]
-          voter_profile_id: string
-        }
-        Insert: {
-          created_at?: string
-          idea_id: string
-          reaction?: Database["portal"]["Enums"]["reaction_type"]
-          voter_profile_id: string
-        }
-        Update: {
-          created_at?: string
-          idea_id?: string
-          reaction?: Database["portal"]["Enums"]["reaction_type"]
-          voter_profile_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "votes_voter_profile_id_fkey"
-            columns: ["voter_profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
     }
     Views: {
+      donation_catalog_public: {
+        Row: {
+          category: string | null
+          currency: string | null
+          current_stock: number | null
+          default_quantity: number | null
+          distributed_last_30_days: number | null
+          distributed_last_365_days: number | null
+          id: string | null
+          image_url: string | null
+          long_description: string | null
+          priority: number | null
+          short_description: string | null
+          slug: string | null
+          target_buffer: number | null
+          title: string | null
+          unit_cost_cents: number | null
+        }
+        Relationships: []
+      }
       petition_public_signers: {
         Row: {
           created_at: string | null
@@ -8771,26 +10642,6 @@ export type Database = {
           last_signed_at: string | null
           petition_id: string | null
           signature_count: number | null
-        }
-        Relationships: []
-      }
-      donation_catalog_public: {
-        Row: {
-          id: string | null
-          slug: string | null
-          title: string | null
-          short_description: string | null
-          long_description: string | null
-          category: string | null
-          unit_cost_cents: number | null
-          currency: string | null
-          default_quantity: number | null
-          priority: number | null
-          image_url: string | null
-          target_buffer: number | null
-          current_stock: number | null
-          distributed_last_30_days: number | null
-          distributed_last_365_days: number | null
         }
         Relationships: []
       }
@@ -9577,7 +11428,7 @@ export type Database = {
         Args: {
           p_action: string
           p_actor_profile_id?: string
-          p_entity_id?: string
+          p_entity_id: string
           p_entity_type: string
           p_meta?: Json
         }
@@ -9586,12 +11437,11 @@ export type Database = {
       portal_queue_notification: {
         Args: {
           p_body_html?: string
-          p_body_text: string
-          p_idea_id?: string
+          p_body_text?: string
           p_payload?: Json
           p_profile_id?: string
           p_recipient_email?: string
-          p_subject: string
+          p_subject?: string
           p_type?: string
         }
         Returns: string
@@ -9794,511 +11644,6 @@ export type Database = {
       [_ in never]: never
     }
   }
-  storage: {
-    Tables: {
-      buckets: {
-        Row: {
-          allowed_mime_types: string[] | null
-          avif_autodetection: boolean | null
-          created_at: string | null
-          file_size_limit: number | null
-          id: string
-          name: string
-          owner: string | null
-          owner_id: string | null
-          public: boolean | null
-          type: Database["storage"]["Enums"]["buckettype"]
-          updated_at: string | null
-        }
-        Insert: {
-          allowed_mime_types?: string[] | null
-          avif_autodetection?: boolean | null
-          created_at?: string | null
-          file_size_limit?: number | null
-          id: string
-          name: string
-          owner?: string | null
-          owner_id?: string | null
-          public?: boolean | null
-          type?: Database["storage"]["Enums"]["buckettype"]
-          updated_at?: string | null
-        }
-        Update: {
-          allowed_mime_types?: string[] | null
-          avif_autodetection?: boolean | null
-          created_at?: string | null
-          file_size_limit?: number | null
-          id?: string
-          name?: string
-          owner?: string | null
-          owner_id?: string | null
-          public?: boolean | null
-          type?: Database["storage"]["Enums"]["buckettype"]
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      buckets_analytics: {
-        Row: {
-          created_at: string
-          deleted_at: string | null
-          format: string
-          id: string
-          name: string
-          type: Database["storage"]["Enums"]["buckettype"]
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          deleted_at?: string | null
-          format?: string
-          id?: string
-          name: string
-          type?: Database["storage"]["Enums"]["buckettype"]
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          deleted_at?: string | null
-          format?: string
-          id?: string
-          name?: string
-          type?: Database["storage"]["Enums"]["buckettype"]
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      buckets_vectors: {
-        Row: {
-          created_at: string
-          id: string
-          type: Database["storage"]["Enums"]["buckettype"]
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id: string
-          type?: Database["storage"]["Enums"]["buckettype"]
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          type?: Database["storage"]["Enums"]["buckettype"]
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      migrations: {
-        Row: {
-          executed_at: string | null
-          hash: string
-          id: number
-          name: string
-        }
-        Insert: {
-          executed_at?: string | null
-          hash: string
-          id: number
-          name: string
-        }
-        Update: {
-          executed_at?: string | null
-          hash?: string
-          id?: number
-          name?: string
-        }
-        Relationships: []
-      }
-      objects: {
-        Row: {
-          bucket_id: string | null
-          created_at: string | null
-          id: string
-          last_accessed_at: string | null
-          level: number | null
-          metadata: Json | null
-          name: string | null
-          owner: string | null
-          owner_id: string | null
-          path_tokens: string[] | null
-          updated_at: string | null
-          user_metadata: Json | null
-          version: string | null
-        }
-        Insert: {
-          bucket_id?: string | null
-          created_at?: string | null
-          id?: string
-          last_accessed_at?: string | null
-          level?: number | null
-          metadata?: Json | null
-          name?: string | null
-          owner?: string | null
-          owner_id?: string | null
-          path_tokens?: string[] | null
-          updated_at?: string | null
-          user_metadata?: Json | null
-          version?: string | null
-        }
-        Update: {
-          bucket_id?: string | null
-          created_at?: string | null
-          id?: string
-          last_accessed_at?: string | null
-          level?: number | null
-          metadata?: Json | null
-          name?: string | null
-          owner?: string | null
-          owner_id?: string | null
-          path_tokens?: string[] | null
-          updated_at?: string | null
-          user_metadata?: Json | null
-          version?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "objects_bucketId_fkey"
-            columns: ["bucket_id"]
-            isOneToOne: false
-            referencedRelation: "buckets"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      prefixes: {
-        Row: {
-          bucket_id: string
-          created_at: string | null
-          level: number
-          name: string
-          updated_at: string | null
-        }
-        Insert: {
-          bucket_id: string
-          created_at?: string | null
-          level?: number
-          name: string
-          updated_at?: string | null
-        }
-        Update: {
-          bucket_id?: string
-          created_at?: string | null
-          level?: number
-          name?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "prefixes_bucketId_fkey"
-            columns: ["bucket_id"]
-            isOneToOne: false
-            referencedRelation: "buckets"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      s3_multipart_uploads: {
-        Row: {
-          bucket_id: string
-          created_at: string
-          id: string
-          in_progress_size: number
-          key: string
-          owner_id: string | null
-          upload_signature: string
-          user_metadata: Json | null
-          version: string
-        }
-        Insert: {
-          bucket_id: string
-          created_at?: string
-          id: string
-          in_progress_size?: number
-          key: string
-          owner_id?: string | null
-          upload_signature: string
-          user_metadata?: Json | null
-          version: string
-        }
-        Update: {
-          bucket_id?: string
-          created_at?: string
-          id?: string
-          in_progress_size?: number
-          key?: string
-          owner_id?: string | null
-          upload_signature?: string
-          user_metadata?: Json | null
-          version?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "s3_multipart_uploads_bucket_id_fkey"
-            columns: ["bucket_id"]
-            isOneToOne: false
-            referencedRelation: "buckets"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      s3_multipart_uploads_parts: {
-        Row: {
-          bucket_id: string
-          created_at: string
-          etag: string
-          id: string
-          key: string
-          owner_id: string | null
-          part_number: number
-          size: number
-          upload_id: string
-          version: string
-        }
-        Insert: {
-          bucket_id: string
-          created_at?: string
-          etag: string
-          id?: string
-          key: string
-          owner_id?: string | null
-          part_number: number
-          size?: number
-          upload_id: string
-          version: string
-        }
-        Update: {
-          bucket_id?: string
-          created_at?: string
-          etag?: string
-          id?: string
-          key?: string
-          owner_id?: string | null
-          part_number?: number
-          size?: number
-          upload_id?: string
-          version?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "s3_multipart_uploads_parts_bucket_id_fkey"
-            columns: ["bucket_id"]
-            isOneToOne: false
-            referencedRelation: "buckets"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "s3_multipart_uploads_parts_upload_id_fkey"
-            columns: ["upload_id"]
-            isOneToOne: false
-            referencedRelation: "s3_multipart_uploads"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      vector_indexes: {
-        Row: {
-          bucket_id: string
-          created_at: string
-          data_type: string
-          dimension: number
-          distance_metric: string
-          id: string
-          metadata_configuration: Json | null
-          name: string
-          updated_at: string
-        }
-        Insert: {
-          bucket_id: string
-          created_at?: string
-          data_type: string
-          dimension: number
-          distance_metric: string
-          id?: string
-          metadata_configuration?: Json | null
-          name: string
-          updated_at?: string
-        }
-        Update: {
-          bucket_id?: string
-          created_at?: string
-          data_type?: string
-          dimension?: number
-          distance_metric?: string
-          id?: string
-          metadata_configuration?: Json | null
-          name?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "vector_indexes_bucket_id_fkey"
-            columns: ["bucket_id"]
-            isOneToOne: false
-            referencedRelation: "buckets_vectors"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      add_prefixes: {
-        Args: { _bucket_id: string; _name: string }
-        Returns: undefined
-      }
-      can_insert_object: {
-        Args: { bucketid: string; metadata: Json; name: string; owner: string }
-        Returns: undefined
-      }
-      delete_leaf_prefixes: {
-        Args: { bucket_ids: string[]; names: string[] }
-        Returns: undefined
-      }
-      delete_prefix: {
-        Args: { _bucket_id: string; _name: string }
-        Returns: boolean
-      }
-      extension: { Args: { name: string }; Returns: string }
-      filename: { Args: { name: string }; Returns: string }
-      foldername: { Args: { name: string }; Returns: string[] }
-      get_level: { Args: { name: string }; Returns: number }
-      get_prefix: { Args: { name: string }; Returns: string }
-      get_prefixes: { Args: { name: string }; Returns: string[] }
-      get_size_by_bucket: {
-        Args: never
-        Returns: {
-          bucket_id: string
-          size: number
-        }[]
-      }
-      list_multipart_uploads_with_delimiter: {
-        Args: {
-          bucket_id: string
-          delimiter_param: string
-          max_keys?: number
-          next_key_token?: string
-          next_upload_token?: string
-          prefix_param: string
-        }
-        Returns: {
-          created_at: string
-          id: string
-          key: string
-        }[]
-      }
-      list_objects_with_delimiter: {
-        Args: {
-          bucket_id: string
-          delimiter_param: string
-          max_keys?: number
-          next_token?: string
-          prefix_param: string
-          start_after?: string
-        }
-        Returns: {
-          id: string
-          metadata: Json
-          name: string
-          updated_at: string
-        }[]
-      }
-      lock_top_prefixes: {
-        Args: { bucket_ids: string[]; names: string[] }
-        Returns: undefined
-      }
-      operation: { Args: never; Returns: string }
-      search: {
-        Args: {
-          bucketname: string
-          levels?: number
-          limits?: number
-          offsets?: number
-          prefix: string
-          search?: string
-          sortcolumn?: string
-          sortorder?: string
-        }
-        Returns: {
-          created_at: string
-          id: string
-          last_accessed_at: string
-          metadata: Json
-          name: string
-          updated_at: string
-        }[]
-      }
-      search_legacy_v1: {
-        Args: {
-          bucketname: string
-          levels?: number
-          limits?: number
-          offsets?: number
-          prefix: string
-          search?: string
-          sortcolumn?: string
-          sortorder?: string
-        }
-        Returns: {
-          created_at: string
-          id: string
-          last_accessed_at: string
-          metadata: Json
-          name: string
-          updated_at: string
-        }[]
-      }
-      search_v1_optimised: {
-        Args: {
-          bucketname: string
-          levels?: number
-          limits?: number
-          offsets?: number
-          prefix: string
-          search?: string
-          sortcolumn?: string
-          sortorder?: string
-        }
-        Returns: {
-          created_at: string
-          id: string
-          last_accessed_at: string
-          metadata: Json
-          name: string
-          updated_at: string
-        }[]
-      }
-      search_v2: {
-        Args: {
-          bucket_name: string
-          levels?: number
-          limits?: number
-          prefix: string
-          sort_column?: string
-          sort_column_after?: string
-          sort_order?: string
-          start_after?: string
-        }
-        Returns: {
-          created_at: string
-          id: string
-          key: string
-          last_accessed_at: string
-          metadata: Json
-          name: string
-          updated_at: string
-        }[]
-      }
-    }
-    Enums: {
-      buckettype: "STANDARD" | "ANALYTICS" | "VECTOR"
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
 }
 
 type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
@@ -10419,6 +11764,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  case_mgmt: {
+    Enums: {},
+  },
   core: {
     Enums: {
       activity_type_enum: [
@@ -11186,6 +12534,26 @@ export const Constants = {
       ],
     },
   },
+  donations: {
+    Enums: {
+      donation_intent_status: [
+        "pending",
+        "requires_payment",
+        "paid",
+        "failed",
+        "cancelled",
+      ],
+      donation_payment_status: [
+        "succeeded",
+        "requires_action",
+        "failed",
+        "refunded",
+      ],
+    },
+  },
+  hazmat: {
+    Enums: {},
+  },
   inventory: {
     Enums: {},
   },
@@ -11536,11 +12904,6 @@ export const Constants = {
         "unverified",
         "unable_to_verify",
       ],
-    },
-  },
-  storage: {
-    Enums: {
-      buckettype: ["STANDARD", "ANALYTICS", "VECTOR"],
     },
   },
 } as const
