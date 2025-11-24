@@ -57,6 +57,13 @@ const adminTasks: AdminTask[] = [
     href: '/admin/profiles',
   },
   {
+    id: 'user-management',
+    title: 'User management',
+    description: 'Browse all clients, partners, and staff with filters, pagination, and role controls.',
+    actionLabel: 'Manage users',
+    href: '/admin/users',
+  },
+  {
     id: 'organizations',
     title: 'Organizations',
     description: 'Create and verify partner organizations. Org admins stay scoped to their own records.',

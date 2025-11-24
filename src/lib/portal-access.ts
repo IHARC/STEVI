@@ -63,6 +63,11 @@ const ADMIN_NAV_BLUEPRINT: WorkspaceNavBlueprint = {
       icon: 'users',
       links: [
         {
+          href: '/admin/users',
+          label: 'Users',
+          requiresPortalRoles: ['portal_admin', 'portal_moderator'],
+        },
+        {
           href: '/admin/profiles',
           label: 'Profiles & invites',
           requiresPortalRoles: ['portal_moderator', 'portal_admin'],
