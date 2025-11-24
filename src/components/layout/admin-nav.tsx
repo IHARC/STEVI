@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -51,18 +51,7 @@ type DesktopAdminNavProps = {
 
 function DesktopAdminNav({ nav, pathname, activeGroupId }: DesktopAdminNavProps) {
   const [collapsed, setCollapsed] = useState(false);
-  const [openGroupId, setOpenGroupId] = useState<string | null>(activeGroupId ?? nav.groups[0]?.id ?? null);
-
-  useEffect(() => {
-    if (activeGroupId && activeGroupId !== openGroupId) {
-      setOpenGroupId(activeGroupId);
-      return;
-    }
-
-    if (!activeGroupId && !openGroupId && nav.groups[0]) {
-      setOpenGroupId(nav.groups[0].id);
-    }
-  }, [activeGroupId, nav.groups, openGroupId]);
+  const initialGroupId = activeGroupId ?? nav.groups[0]?.id ?? null;
 
   if (nav.groups.length === 0) return null;
 
@@ -110,8 +99,7 @@ function DesktopAdminNav({ nav, pathname, activeGroupId }: DesktopAdminNavProps)
             <NavSections
               nav={nav}
               pathname={pathname}
-              openGroupId={openGroupId}
-              onOpenChange={setOpenGroupId}
+              initialGroupId={initialGroupId}
             />
           </ScrollArea>
         )}
@@ -128,16 +116,7 @@ type MobileAdminNavProps = {
 
 function MobileAdminNav({ nav, pathname, activeGroupId }: MobileAdminNavProps) {
   const [open, setOpen] = useState(false);
-  const [openGroupId, setOpenGroupId] = useState<string | null>(activeGroupId ?? nav.groups[0]?.id ?? null);
-
-  useEffect(() => {
-    const fallbackId = nav.groups[0]?.id ?? null;
-    const next = activeGroupId ?? fallbackId;
-
-    if (next !== openGroupId) {
-      setOpenGroupId(next);
-    }
-  }, [activeGroupId, nav.groups, openGroupId]);
+  const initialGroupId = activeGroupId ?? nav.groups[0]?.id ?? null;
 
   const activeLabel = useMemo(() => {
     const match = nav.groups.flatMap((group) => group.links).find((link) => isLinkActive(link, pathname));
@@ -162,8 +141,7 @@ function MobileAdminNav({ nav, pathname, activeGroupId }: MobileAdminNavProps) {
             <NavSections
               nav={nav}
               pathname={pathname}
-              openGroupId={openGroupId}
-              onOpenChange={setOpenGroupId}
+              initialGroupId={initialGroupId}
               onNavigate={() => setOpen(false)}
             />
           </div>
@@ -177,19 +155,18 @@ type NavSectionsProps = {
   nav: WorkspaceNav;
   pathname: string;
   onNavigate?: () => void;
-  openGroupId: string | null;
-  onOpenChange: (id: string | null) => void;
+  initialGroupId: string | null;
 };
 
-function NavSections({ nav, pathname, onNavigate, openGroupId, onOpenChange }: NavSectionsProps) {
+function NavSections({ nav, pathname, onNavigate, initialGroupId }: NavSectionsProps) {
   if (nav.groups.length === 0) return null;
 
   return (
     <Accordion
+      key={initialGroupId ?? 'default-group'}
       type="single"
       collapsible
-      value={openGroupId ?? undefined}
-      onValueChange={(value) => onOpenChange(value ?? null)}
+      defaultValue={initialGroupId ?? undefined}
       className="space-y-space-2xs"
     >
       {nav.groups.map((group) => (
