@@ -59,14 +59,33 @@ const CLIENT_NAV_BLUEPRINT: PortalLinkBlueprint[] = [
   { href: '/home', label: 'Home', exact: true },
   { href: '/appointments', label: 'Appointments' },
   { href: '/documents', label: 'Documents' },
+  { href: '/cases', label: 'My cases' },
   { href: '/support', label: 'Support' },
   { href: '/profile', label: 'Profile' },
+  { href: '/profile/consents', label: 'My consents' },
 ];
 
 const ADMIN_NAV_BLUEPRINT: WorkspaceNavBlueprint = {
   id: 'admin',
   label: 'Admin workspace',
   groups: [
+    {
+      id: 'clients',
+      label: 'Clients & consents',
+      icon: 'users',
+      links: [
+        {
+          href: '/admin/clients',
+          label: 'Client directory',
+          requiresGuard: (access) => access.canManageConsents,
+        },
+        {
+          href: '/admin/consents',
+          label: 'Consent overrides',
+          requiresGuard: (access) => access.canManageConsents,
+        },
+      ],
+    },
     {
       id: 'access',
       label: 'Access & people',
@@ -221,6 +240,16 @@ const STAFF_NAV_BLUEPRINT: WorkspaceNavBlueprint = {
           label: 'Active cases',
           requiresGuard: (access) => access.canAccessStaffWorkspace,
         },
+        {
+          href: '/staff/cases',
+          label: 'All cases',
+          requiresGuard: (access) => access.canAccessStaffWorkspace,
+        },
+        {
+          href: '/staff/intake',
+          label: 'Intake queue',
+          requiresGuard: (access) => access.canAccessStaffWorkspace,
+        },
       ],
     },
     {
@@ -267,6 +296,7 @@ export type PortalAccess = {
   canViewMetrics: boolean;
   canManageWebsiteContent: boolean;
   canManageSiteFooter: boolean;
+  canManageConsents: boolean;
   canManageOrgUsers: boolean;
   canManageOrgInvites: boolean;
   canAccessStaffWorkspace: boolean;
@@ -308,6 +338,7 @@ export async function loadPortalAccess(
   const canManageNotifications = isProfileApproved && isPortalAdmin;
   const canManageWebsiteContent = isProfileApproved && isPortalAdmin;
   const canManageSiteFooter = isProfileApproved && isPortalAdmin;
+  const canManageConsents = isProfileApproved && (isPortalAdmin || isIharcAdmin);
   const canReviewProfiles = isProfileApproved && (isPortalAdmin || isIharcAdmin);
   const canViewMetrics = isProfileApproved && isPortalAdmin;
   const canManageOrgUsers = isProfileApproved && isOrgAdmin && organizationId !== null;
@@ -334,6 +365,7 @@ export async function loadPortalAccess(
     canReviewProfiles,
     canViewMetrics,
     canManageSiteFooter,
+    canManageConsents,
     canManageOrgUsers,
     canManageOrgInvites,
     canAccessStaffWorkspace,
