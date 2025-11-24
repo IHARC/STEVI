@@ -193,7 +193,7 @@ export async function uploadHeroImage(formData: FormData) {
     actorProfileId: actorProfile.id,
     action: 'marketing_hero_image_uploaded',
     entityType: 'marketing_hero_image',
-    entityId: objectPath,
+    entityId: null,
     meta: { bucket: HERO_BUCKET, path: objectPath, size: file.size },
   });
 
@@ -243,7 +243,7 @@ export async function uploadBrandingAsset(formData: FormData) {
     actorProfileId: actorProfile.id,
     action: 'marketing_branding_uploaded',
     entityType: 'marketing_branding',
-    entityId: objectPath,
+    entityId: null,
     meta: { bucket: HERO_BUCKET, path: objectPath, kind, size: file.size },
   });
 

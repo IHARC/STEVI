@@ -43,16 +43,20 @@ export async function createOrgInviteAction(formData: FormData) {
     }
 
     const portal = supabase.schema('portal');
-    const insert = await portal.from('profile_invites').insert({
-      email,
-      display_name: displayName,
-      position_title: positionTitle,
-      message,
-      affiliation_type: 'agency_partner',
-      organization_id: actorProfile.organization_id,
-      invited_by_profile_id: actorProfile.id,
-      invited_by_user_id: access.userId,
-    });
+    const insert = await portal
+      .from('profile_invites')
+      .insert({
+        email,
+        display_name: displayName,
+        position_title: positionTitle,
+        message,
+        affiliation_type: 'agency_partner',
+        organization_id: actorProfile.organization_id,
+        invited_by_profile_id: actorProfile.id,
+        invited_by_user_id: access.userId,
+      })
+      .select('id')
+      .single();
 
     if (insert.error) {
       throw insert.error;
@@ -62,8 +66,8 @@ export async function createOrgInviteAction(formData: FormData) {
       actorProfileId: actorProfile.id,
       action: 'org_invite_created',
       entityType: 'profile_invite',
-      entityId: email,
-      meta: { organization_id: actorProfile.organization_id },
+      entityId: insert.data?.id ?? null,
+      meta: { organization_id: actorProfile.organization_id, email },
     });
 
     await revalidatePath(INVITES_PATH);

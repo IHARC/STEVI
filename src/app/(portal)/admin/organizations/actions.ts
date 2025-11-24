@@ -68,8 +68,8 @@ export async function createOrganizationAction(formData: FormData): Promise<Acti
         actorProfileId: actorProfile.id,
         action: 'organization_created',
         entityType: 'organization',
-        entityId: insert.data.id,
-        meta: { name },
+        entityId: null,
+        meta: { organization_id: insert.data.id, name },
       });
     }
 

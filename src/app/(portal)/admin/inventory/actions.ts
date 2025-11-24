@@ -247,7 +247,11 @@ export async function bulkReceiveInventoryStockAction(formData: FormData): Promi
       actorProfileId: profile.id,
       action: 'inventory_bulk_receipt_processed',
       entityType: 'inventory_bulk_receipt',
-      entityId: payload.items.map((item) => item.itemId).join(','),
+      entityId: null,
+      meta: {
+        item_ids: payload.items.map((item) => item.itemId),
+        total_items: payload.items.length,
+      },
     });
   });
 }
@@ -388,7 +392,8 @@ export async function createInventoryOrganizationAction(
       actorProfileId: profile.id,
       action: 'inventory_organization_created',
       entityType: 'inventory_organization',
-      entityId: String(organization.id),
+      entityId: null,
+      meta: { organization_id: organization.id, name: organization.name },
     });
 
     return { organization };
@@ -412,7 +417,8 @@ export async function updateInventoryOrganizationAction(formData: FormData): Pro
       actorProfileId: profile.id,
       action: 'inventory_organization_updated',
       entityType: 'inventory_organization',
-      entityId: String(organizationId),
+      entityId: null,
+      meta: { organization_id: organizationId },
     });
   });
 }
@@ -430,7 +436,8 @@ export async function activateInventoryOrganizationAction(formData: FormData): P
       actorProfileId: profile.id,
       action: 'inventory_organization_activated',
       entityType: 'inventory_organization',
-      entityId: String(organizationId),
+      entityId: null,
+      meta: { organization_id: organizationId },
     });
   });
 }
@@ -448,7 +455,8 @@ export async function deactivateInventoryOrganizationAction(formData: FormData):
       actorProfileId: profile.id,
       action: 'inventory_organization_deactivated',
       entityType: 'inventory_organization',
-      entityId: String(organizationId),
+      entityId: null,
+      meta: { organization_id: organizationId },
     });
   });
 }
