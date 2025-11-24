@@ -5,6 +5,8 @@ import { ArrowRight, FileQuestion, HandHeart, LogIn, UsersRound, UserPlus } from
 import type { LucideIcon } from 'lucide-react';
 import { resolveNextPath } from '@/lib/auth';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
+import { loadPortalAccess } from '@/lib/portal-access';
+import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
 import { FormPageShell } from '@/components/layout/form-page-shell';
 import { Icon } from '@/components/ui/icon';
 
@@ -67,12 +69,16 @@ const ACTIONS: Array<{
 
 export default async function RegisterLandingPage({ searchParams }: RegisterLandingProps) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
-  const nextPath = resolveNextPath(resolvedSearchParams?.next);
+  const rawNext = resolvedSearchParams?.next;
 
   const supabase = await createSupabaseRSCClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  const portalAccess = user ? await loadPortalAccess(supabase) : null;
+  const defaultWorkspacePath = resolveDefaultWorkspacePath(portalAccess);
+  const nextPath = resolveNextPath(rawNext, defaultWorkspacePath);
 
   if (user) {
     redirect(nextPath);

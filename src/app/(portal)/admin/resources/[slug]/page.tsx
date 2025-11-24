@@ -8,6 +8,7 @@ import { loadPortalAccess } from '@/lib/portal-access';
 import { ResourceForm } from '../resource-form';
 import { deleteResourcePage, updateResourcePage } from '../actions';
 import { getResourceBySlug } from '@/lib/resources';
+import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,7 +30,7 @@ export default async function AdminResourceEditPage({ params }: { params: RouteP
   }
 
   if (!access.canManageResources) {
-    redirect('/home');
+    redirect(resolveDefaultWorkspacePath(access));
   }
 
   await ensurePortalProfile(supabase, access.userId);

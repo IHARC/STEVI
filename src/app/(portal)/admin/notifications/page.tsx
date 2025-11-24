@@ -9,6 +9,7 @@ import type {
   NotificationRecord,
 } from '@/components/admin/notifications/types';
 import type { Database } from '@/types/supabase';
+import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
 
 type MaybeArray<T> = T | T[] | null;
 
@@ -41,7 +42,7 @@ export default async function NotificationsAdminPage() {
   }
 
   if (!access.canManageNotifications) {
-    redirect('/home');
+    redirect(resolveDefaultWorkspacePath(access));
   }
 
   await ensurePortalProfile(supabase, access.userId);

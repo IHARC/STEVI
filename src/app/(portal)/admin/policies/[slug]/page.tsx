@@ -7,6 +7,7 @@ import { ensurePortalProfile } from '@/lib/profile';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { getPolicyBySlug } from '@/lib/policies';
 import { Button } from '@/components/ui/button';
+import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,7 +30,7 @@ export default async function PolicyDetailPage({ params }: { params: RouteParams
   }
 
   if (!access.canManagePolicies) {
-    redirect('/home');
+    redirect(resolveDefaultWorkspacePath(access));
   }
 
   await ensurePortalProfile(supabase, access.userId);

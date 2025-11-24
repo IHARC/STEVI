@@ -5,6 +5,7 @@ import { toggleMemberRoleAction, removeMemberAction } from './actions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
 import {
   Table,
   TableBody,
@@ -46,7 +47,7 @@ export default async function OrgMembersPage() {
   const access = await loadPortalAccess(supabase);
 
   if (!access || !access.canManageOrgUsers || !access.organizationId) {
-    redirect('/home');
+    redirect(resolveDefaultWorkspacePath(access));
   }
 
   const portal = supabase.schema('portal');

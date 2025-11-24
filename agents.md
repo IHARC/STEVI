@@ -88,11 +88,11 @@ The STEVI team should treat this briefing as a living document. Update it as fea
 ### Navigation & Workspace Blueprint (NEW)
 - Single source: `src/lib/portal-access.ts` now defines grouped workspace blueprints for navigation, user menu, and command palette. Client links live in `CLIENT_NAV_BLUEPRINT`; admin (and future org apps) live in workspace blueprints (e.g., `ADMIN_NAV_BLUEPRINT`). Each link carries its own role/IHARC-role guards or custom guard.
 - Surfaces fed by one blueprint: Top bar command palette, client nav pills, user menu, admin left rail, and admin breadcrumbs all read from these blueprints—no duplicate definitions.
-- Admin isolation: `/admin` routes use their own layout (`src/app/(portal)/admin/layout.tsx`) with left-rail nav + breadcrumbs (`src/components/shells/admin-shell.tsx`, `src/components/layout/admin-nav.tsx`, `src/components/layout/admin-breadcrumbs.tsx`). The client pill bar is hidden on admin paths to reduce clutter.
+- Admin isolation: `/admin` routes use their own layout (`src/app/(portal)/admin/layout.tsx`) with left-rail nav + breadcrumbs (`src/components/shells/workspace-shell.tsx`, `src/components/layout/admin-nav.tsx`, `src/components/layout/admin-breadcrumbs.tsx`). The client pill bar is hidden on admin paths to reduce clutter.
 - Adding a new workspace (e.g., Food Bank partner):
   1) Add a `WorkspaceNavBlueprint` entry in `src/lib/portal-access.ts` with `id`, `label`, `groups: [{ id, label, icon, links: [...] }]`. Gate each link using `requiresProfileRoles`, `requiresIharcRoles`, or `requiresGuard`.
   2) Export a resolver similar to `resolveAdminWorkspaceNav` (or reuse `resolveWorkspace`) to hydrate that blueprint for the given `portalAccess`.
-  3) Create a layout under `src/app/(portal)/<workspace>/layout.tsx` that loads `portalAccess`, calls your resolver, and wraps children with `AdminShell` (or a workspace-specific shell if needed). Redirect when resolver returns null to enforce permissions.
+  3) Create a layout under `src/app/(portal)/<workspace>/layout.tsx` that loads `portalAccess`, calls your resolver, and wraps children with `WorkspaceShell`. Redirect when resolver returns null to enforce permissions.
   4) Add a single entry in `CLIENT_NAV_BLUEPRINT` if you want the workspace reachable from client nav/command palette; otherwise expose it only via internal links.
   5) Keep server-side guards on every privileged page/API route—blueprint hiding is UI only; access control must still rely on Supabase RLS + server checks.
 - Mobile: the left rail collapses into a sheet; command palette (⌘/Ctrl+K) is the quickest cross-surface launcher.

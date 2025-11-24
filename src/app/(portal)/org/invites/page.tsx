@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
 import {
   Table,
   TableBody,
@@ -41,7 +42,7 @@ export default async function OrgInvitesPage() {
   const access = await loadPortalAccess(supabase);
 
   if (!access || !access.canManageOrgInvites || !access.organizationId) {
-    redirect('/home');
+    redirect(resolveDefaultWorkspacePath(access));
   }
 
   const handleInvite = async (formData: FormData) => {

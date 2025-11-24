@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { PendingAffiliationsSection } from '@/components/admin/profiles/pending-affiliations';
 import { InvitePartnerCard } from '@/components/admin/profiles/invite-partner-card';
+import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
 import type {
   OrganizationOption,
   PendingAffiliation,
@@ -45,7 +46,7 @@ export default async function AdminProfilesPage() {
   }
 
   if (!access.canReviewProfiles) {
-    redirect('/home');
+    redirect(resolveDefaultWorkspacePath(access));
   }
 
   await ensurePortalProfile(supabase, access.userId);

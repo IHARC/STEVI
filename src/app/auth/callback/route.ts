@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
 import { resolveNextPath, type AuthErrorCode } from '@/lib/auth';
+import { loadPortalAccess } from '@/lib/portal-access';
+import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
@@ -10,11 +12,10 @@ export async function GET(request: NextRequest) {
   const providerErrorDescription = requestUrl.searchParams.get('error_description');
   const flow = requestUrl.searchParams.get('flow') === 'register' ? 'register' : 'login';
   const rawNext = requestUrl.searchParams.get('next') ?? undefined;
-  const nextPath = resolveNextPath(rawNext);
 
   if (!code) {
     const errorCode = mapProviderErrorToCode(providerError, providerErrorDescription);
-    return redirectWithError(request, flow, nextPath, errorCode);
+    return redirectWithError(request, flow, resolveNextPath(rawNext), errorCode);
   }
 
   try {
@@ -23,14 +24,16 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('Google OAuth exchange failed', error);
-      return redirectWithError(request, flow, nextPath, 'google_auth_error');
+      return redirectWithError(request, flow, resolveNextPath(rawNext), 'google_auth_error');
     }
 
     await hydratePortalProfile(supabase);
-    return redirectToPath(request, nextPath);
+    const access = await loadPortalAccess(supabase);
+    const destination = resolveNextPath(rawNext, resolveDefaultWorkspacePath(access));
+    return redirectToPath(request, destination);
   } catch (error) {
     console.error('Unexpected error during Google OAuth exchange', error);
-    return redirectWithError(request, flow, nextPath, 'google_auth_error');
+    return redirectWithError(request, flow, resolveNextPath(rawNext), 'google_auth_error');
   }
 }
 

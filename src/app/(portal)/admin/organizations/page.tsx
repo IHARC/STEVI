@@ -17,6 +17,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,7 +38,7 @@ export default async function AdminOrganizationsPage() {
   }
 
   if (!access.canAccessAdminWorkspace) {
-    redirect('/home');
+    redirect(resolveDefaultWorkspacePath(access));
   }
 
   await ensurePortalProfile(supabase, access.userId);

@@ -5,6 +5,7 @@ import { ensurePortalProfile } from '@/lib/profile';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
 
 export const dynamic = 'force-dynamic';
 
@@ -87,7 +88,7 @@ export default async function AdminPage() {
   }
 
   if (!access.canAccessAdminWorkspace) {
-    redirect('/home');
+    redirect(resolveDefaultWorkspacePath(access));
   }
 
   await ensurePortalProfile(supabase, access.userId);

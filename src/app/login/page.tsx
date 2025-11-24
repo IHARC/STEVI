@@ -4,6 +4,8 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { LoginForm } from '@/components/auth/login-form';
 import { resolveNextPath, parseAuthErrorCode, type AuthErrorCode } from '@/lib/auth';
 import { normalizePhoneNumber } from '@/lib/phone';
+import { loadPortalAccess } from '@/lib/portal-access';
+import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,8 +28,9 @@ const INITIAL_FORM_STATE: FormState = {
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
-
-  const nextPath = resolveNextPath(resolvedSearchParams?.next);
+  const rawNextParam = Array.isArray(resolvedSearchParams?.next)
+    ? resolvedSearchParams?.next[0]
+    : resolvedSearchParams?.next;
   const authErrorCode = parseAuthErrorCode(resolvedSearchParams?.error);
   const initialError = authErrorCode ? getAuthErrorMessage(authErrorCode) : null;
 
@@ -35,6 +38,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  const portalAccess = user ? await loadPortalAccess(supabase) : null;
+  const defaultWorkspacePath = resolveDefaultWorkspacePath(portalAccess);
+  const nextPath = resolveNextPath(rawNextParam, defaultWorkspacePath);
 
   if (user) {
     redirect(nextPath);
@@ -47,6 +54,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   async function loginUser(_prevState: FormState, formData: FormData): Promise<FormState> {
     'use server';
 
+    const rawNext = (formData.get('next') as string | null) ?? undefined;
     const contactMethod = normalizeContactMethod(formData.get('contact_method'));
     const password = (formData.get('password') as string | null) ?? '';
 
@@ -66,14 +74,16 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         if (error) {
           return { error: error.message, contactMethod: 'email' };
         }
+
+        const access = await loadPortalAccess(supa);
+        const destination = resolveNextPath(rawNext, resolveDefaultWorkspacePath(access));
+        redirect(destination);
       } catch (error) {
         if (error instanceof Error) {
           return { error: error.message, contactMethod: 'email' };
         }
         return { error: 'Unable to sign you in right now.', contactMethod: 'email' };
       }
-
-      redirect(nextPath);
     }
 
     const rawPhone = (formData.get('phone') as string | null) ?? '';
@@ -91,14 +101,16 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       if (error) {
         return { error: error.message, contactMethod: 'phone' };
       }
+
+      const access = await loadPortalAccess(supa);
+      const destination = resolveNextPath(rawNext, resolveDefaultWorkspacePath(access));
+      redirect(destination);
     } catch (error) {
       if (error instanceof Error) {
         return { error: error.message, contactMethod: 'phone' };
       }
       return { error: 'Unable to sign you in right now.', contactMethod: 'phone' };
     }
-
-    redirect(nextPath);
   }
 
   return (
@@ -110,7 +122,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             Sign in to stay connected with STEVI and manage outreach updates, appointments, and resources.
           </p>
         </div>
-        <LoginForm action={loginUser} nextPath={nextPath} initialState={initialState} />
+        <LoginForm action={loginUser} nextPath={rawNextParam ?? ''} initialState={initialState} />
       </div>
     </div>
   );

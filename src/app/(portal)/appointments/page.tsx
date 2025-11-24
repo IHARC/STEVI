@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { RequestAppointmentForm } from './request-appointment-form';
 import type { AppointmentRequestState } from './types';
+import { ClientPreviewGuard } from '@/components/layout/client-preview-guard';
 
 export const dynamic = 'force-dynamic';
 
@@ -247,23 +248,25 @@ export default async function AppointmentsPage() {
       </section>
 
       <section aria-labelledby="request-heading" id="request-form">
-        <Card>
-          <CardHeader>
-            <CardTitle id="request-heading" className="text-title-lg">
-              Request a new appointment
-            </CardTitle>
-            <p className="text-body-sm text-muted-foreground">
-              Tell us what you need. The outreach coordinator will respond using your preferred
-              contact method.
-            </p>
-          </CardHeader>
-          <CardContent>
-            <RequestAppointmentForm
-              action={submitAppointmentRequest}
-              profileDisplayName={profile.display_name}
-            />
-          </CardContent>
-        </Card>
+        <ClientPreviewGuard message="Requests are disabled while you preview the client portal. Exit preview to submit.">
+          <Card>
+            <CardHeader>
+              <CardTitle id="request-heading" className="text-title-lg">
+                Request a new appointment
+              </CardTitle>
+              <p className="text-body-sm text-muted-foreground">
+                Tell us what you need. The outreach coordinator will respond using your preferred
+                contact method.
+              </p>
+            </CardHeader>
+            <CardContent>
+              <RequestAppointmentForm
+                action={submitAppointmentRequest}
+                profileDisplayName={profile.display_name}
+              />
+            </CardContent>
+          </Card>
+        </ClientPreviewGuard>
       </section>
     </div>
   );

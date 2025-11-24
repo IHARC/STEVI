@@ -4,6 +4,7 @@ import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,7 +13,7 @@ export default async function OrgHomePage() {
   const access = await loadPortalAccess(supabase);
 
   if (!access || !access.canAccessOrgWorkspace) {
-    redirect('/home');
+    redirect(resolveDefaultWorkspacePath(access));
   }
 
   const orgName = access.profile.organization_id ? access.profile.organization_id : 'your organization';

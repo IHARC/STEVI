@@ -9,6 +9,7 @@ import {
   parseJsonSetting,
 } from '@/lib/marketing/settings';
 import { SupportsForm } from './SupportsForm';
+import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,7 +24,7 @@ export default async function MarketingSupportsPage() {
   }
 
   if (!access.canManageWebsiteContent) {
-    redirect('/home');
+    redirect(resolveDefaultWorkspacePath(access));
   }
 
   await ensurePortalProfile(supabase, access.userId);

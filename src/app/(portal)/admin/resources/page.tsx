@@ -7,6 +7,7 @@ import { listResources, RESOURCE_KIND_LABELS } from '@/lib/resources';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
 import {
   Table,
   TableBody,
@@ -118,12 +119,12 @@ export default async function AdminResourcesPage({ searchParams }: { searchParam
   }
 
   if (!access.canManageResources) {
-    redirect('/home');
+    redirect(resolveDefaultWorkspacePath(access));
   }
 
   const profile = await ensurePortalProfile(supabase, access.userId);
   if (!profile) {
-    redirect('/home');
+    redirect(resolveDefaultWorkspacePath(access));
   }
 
   const page = parsePageParam(resolvedParams?.page);

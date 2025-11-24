@@ -91,7 +91,7 @@ export function CommandPalette({ items, compactTrigger = false }: CommandPalette
           <DialogHeader>
             <DialogTitle>Go anywhere</DialogTitle>
             <p className="text-body-sm text-muted-foreground">
-              Type to jump to a client or admin workspace page.
+              Type to jump to any workspace page.
             </p>
           </DialogHeader>
 

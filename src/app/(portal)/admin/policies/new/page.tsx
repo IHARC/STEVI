@@ -6,6 +6,7 @@ import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { Button } from '@/components/ui/button';
+import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
 
 export default async function NewPolicyPage() {
   const supabase = await createSupabaseRSCClient();
@@ -16,7 +17,7 @@ export default async function NewPolicyPage() {
   }
 
   if (!access.canManagePolicies) {
-    redirect('/home');
+    redirect(resolveDefaultWorkspacePath(access));
   }
 
   await ensurePortalProfile(supabase, access.userId);

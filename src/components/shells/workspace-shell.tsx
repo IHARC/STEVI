@@ -3,12 +3,12 @@ import { AdminNav } from '@/components/layout/admin-nav';
 import { AdminBreadcrumbs } from '@/components/layout/admin-breadcrumbs';
 import type { WorkspaceNav } from '@/lib/portal-access';
 
-type AdminShellProps = {
+type WorkspaceShellProps = {
   nav: WorkspaceNav;
   children: ReactNode;
 };
 
-export function AdminShell({ nav, children }: AdminShellProps) {
+export function WorkspaceShell({ nav, children }: WorkspaceShellProps) {
   return (
     <div className="mx-auto flex w-full max-w-page gap-space-lg px-space-md py-space-lg">
       <aside className="sticky top-24 hidden h-[calc(100vh-6rem)] w-64 flex-shrink-0 lg:block">
@@ -25,3 +25,5 @@ export function AdminShell({ nav, children }: AdminShellProps) {
     </div>
   );
 }
+
+export const AdminShell = WorkspaceShell;

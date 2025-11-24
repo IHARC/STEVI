@@ -40,6 +40,7 @@ export function LoginForm({ action, nextPath, initialState }: LoginFormProps) {
 
   return (
     <form action={formAction} className="grid gap-space-lg rounded-3xl border border-outline/30 bg-surface-container p-space-lg shadow-level-1">
+      <input type="hidden" name="next" value={nextPath} />
       <div className="space-y-space-sm">
         <GoogleAuthButton intent="login" nextPath={nextPath} />
         <AuthDivider />

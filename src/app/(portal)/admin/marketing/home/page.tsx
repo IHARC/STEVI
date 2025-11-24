@@ -11,6 +11,7 @@ import {
   parseJsonSetting,
 } from '@/lib/marketing/settings';
 import { HomeForm } from './HomeForm';
+import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,7 +26,7 @@ export default async function MarketingHomePage() {
   }
 
   if (!access.canManageWebsiteContent) {
-    redirect('/home');
+    redirect(resolveDefaultWorkspacePath(access));
   }
 
   await ensurePortalProfile(supabase, access.userId);

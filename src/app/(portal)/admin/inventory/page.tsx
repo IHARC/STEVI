@@ -3,6 +3,8 @@ import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { InventoryWorkspace } from '@/components/admin/inventory/inventory-workspace';
 import { ensureInventoryActor } from '@/lib/inventory/auth';
 import { fetchInventoryBootstrap } from '@/lib/inventory/service';
+import { loadPortalAccess } from '@/lib/portal-access';
+import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,7 +13,8 @@ export default async function InventoryAdminPage() {
   const { profile, roles } = await ensureInventoryActor(supabase, true);
 
   if (!profile) {
-    redirect('/home');
+    const access = await loadPortalAccess(supabase);
+    redirect(resolveDefaultWorkspacePath(access));
   }
 
   const bootstrap = await fetchInventoryBootstrap(supabase);

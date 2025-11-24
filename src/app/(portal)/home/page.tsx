@@ -5,6 +5,7 @@ import { ensurePortalProfile } from '@/lib/profile';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { ClientPreviewGuard } from '@/components/layout/client-preview-guard';
 
 export const dynamic = 'force-dynamic';
 
@@ -110,14 +111,16 @@ export default async function HomePage() {
           Track appointments, review documents, and stay in touch with outreach staff. Updates here
           sync with the STEVI Ops tools the field team uses.
         </p>
-        <div className="flex flex-wrap gap-space-md pt-space-xs">
-          <Button asChild>
-            <Link href="/appointments">Request a new appointment</Link>
-          </Button>
-          <Button variant="outline" asChild>
-            <Link href="/documents">View secure documents</Link>
-          </Button>
-        </div>
+        <ClientPreviewGuard message="You’re previewing the client portal. Requests are read-only until you exit preview.">
+          <div className="flex flex-wrap gap-space-md pt-space-xs">
+            <Button asChild>
+              <Link href="/appointments">Request a new appointment</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link href="/documents">View secure documents</Link>
+            </Button>
+          </div>
+        </ClientPreviewGuard>
       </header>
 
       <section aria-labelledby="appointments-heading" className="grid gap-space-md md:grid-cols-2">
