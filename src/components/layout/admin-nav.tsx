@@ -7,6 +7,7 @@ import { Icon } from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { resolveAppIcon } from '@/lib/app-icons';
 import { cn } from '@/lib/utils';
 import type { WorkspaceNav, PortalLink } from '@/lib/portal-access';
 
@@ -31,7 +32,7 @@ function DesktopAdminNav({ nav }: { nav: WorkspaceNav }) {
       {nav.groups.map((group) => (
         <section key={group.id} className="space-y-space-2xs">
           <div className="flex items-center gap-space-xs px-space-sm text-label-sm font-semibold uppercase text-muted-foreground">
-            <Icon icon={group.icon} size="xs" />
+            <Icon icon={resolveAppIcon(group.icon)} size="xs" />
             <span>{group.label}</span>
           </div>
           <div className="space-y-[2px]">
@@ -72,7 +73,7 @@ function MobileAdminNav({ nav }: { nav: WorkspaceNav }) {
             {nav.groups.map((group) => (
               <section key={group.id} className="space-y-space-2xs">
                 <div className="flex items-center gap-space-xs px-space-xs text-label-sm font-semibold uppercase text-muted-foreground">
-                  <Icon icon={group.icon} size="xs" />
+                  <Icon icon={resolveAppIcon(group.icon)} size="xs" />
                   <span>{group.label}</span>
                 </div>
                 <div className="space-y-[2px]">
@@ -106,19 +107,20 @@ function AdminNavLink({ link, pathname, onNavigate }: AdminNavLinkProps) {
   return (
     <Link
       href={link.href}
-      aria-current={active ? 'page' : undefined}
-      className={cn(
-        'group flex items-center gap-space-sm rounded-lg border border-transparent px-space-sm py-space-2xs text-body-md font-medium transition',
-        'state-layer-color-primary hover:state-layer-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
-        active
+    aria-current={active ? 'page' : undefined}
+    className={cn(
+      'group flex items-center gap-space-sm rounded-lg border border-transparent px-space-sm py-space-2xs text-body-md font-medium transition',
+      'state-layer-color-primary hover:state-layer-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
+      active
           ? 'border-primary/40 bg-primary/10 text-primary shadow-level-1'
           : 'text-on-surface/80 hover:bg-surface-container',
       )}
       onClick={onNavigate}
     >
-      {link.icon ? <Icon icon={link.icon} size="sm" className="text-inherit" /> : null}
+      {link.icon ? (
+        <Icon icon={resolveAppIcon(link.icon)} size="sm" className="text-inherit" />
+      ) : null}
       <span className="truncate">{link.label}</span>
     </Link>
   );
 }
-

@@ -1,5 +1,4 @@
-import type { LucideIcon } from 'lucide-react';
-import { Boxes, Globe2, Megaphone, Notebook, Users2 } from 'lucide-react';
+import type { AppIconName } from '@/lib/app-icons';
 import { ensurePortalProfile, type PortalProfile } from '@/lib/profile';
 import { type IharcRole, type PortalRole } from '@/lib/ihar-auth';
 import { INVENTORY_ALLOWED_ROLES } from '@/lib/inventory/constants';
@@ -9,7 +8,7 @@ export type PortalLink = {
   href: string;
   label: string;
   exact?: boolean;
-  icon?: LucideIcon;
+  icon?: AppIconName;
 };
 
 type LinkRequirement = {
@@ -23,7 +22,7 @@ type PortalLinkBlueprint = PortalLink & LinkRequirement;
 type NavGroupBlueprint = {
   id: string;
   label: string;
-  icon: LucideIcon;
+  icon: AppIconName;
   links: PortalLinkBlueprint[];
 };
 
@@ -36,7 +35,7 @@ type WorkspaceNavBlueprint = {
 export type NavGroup = {
   id: string;
   label: string;
-  icon: LucideIcon;
+  icon: AppIconName;
   links: PortalLink[];
 };
 
@@ -73,7 +72,7 @@ const ADMIN_NAV_BLUEPRINT: WorkspaceNavBlueprint = {
     {
       id: 'people',
       label: 'People',
-      icon: Users2,
+      icon: 'users',
       links: [
         {
           href: '/admin/profiles',
@@ -85,7 +84,7 @@ const ADMIN_NAV_BLUEPRINT: WorkspaceNavBlueprint = {
     {
       id: 'content',
       label: 'Content',
-      icon: Notebook,
+      icon: 'notebook',
       links: [
         {
           href: '/admin/resources',
@@ -102,7 +101,7 @@ const ADMIN_NAV_BLUEPRINT: WorkspaceNavBlueprint = {
     {
       id: 'website',
       label: 'Website',
-      icon: Globe2,
+      icon: 'globe',
       links: [
         {
           href: '/admin/marketing/navigation',
@@ -134,7 +133,7 @@ const ADMIN_NAV_BLUEPRINT: WorkspaceNavBlueprint = {
     {
       id: 'outreach',
       label: 'Outreach',
-      icon: Megaphone,
+      icon: 'megaphone',
       links: [
         {
           href: '/admin/notifications',
@@ -146,7 +145,7 @@ const ADMIN_NAV_BLUEPRINT: WorkspaceNavBlueprint = {
     {
       id: 'operations',
       label: 'Operations',
-      icon: Boxes,
+      icon: 'boxes',
       links: [
         {
           href: '/admin/inventory',
@@ -175,7 +174,7 @@ const ORG_NAV_BLUEPRINT: WorkspaceNavBlueprint = {
     {
       id: 'people',
       label: 'People',
-      icon: Users2,
+      icon: 'users',
       links: [
         {
           href: '/org/members',
@@ -192,7 +191,7 @@ const ORG_NAV_BLUEPRINT: WorkspaceNavBlueprint = {
     {
       id: 'settings',
       label: 'Settings',
-      icon: Boxes,
+      icon: 'boxes',
       links: [
         {
           href: '/org',

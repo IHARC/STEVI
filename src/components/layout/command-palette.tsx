@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
+import { resolveAppIcon } from '@/lib/app-icons';
 import type { CommandPaletteItem } from '@/lib/portal-access';
 import { cn } from '@/lib/utils';
 import { CornerDownLeft, Search } from 'lucide-react';
@@ -123,7 +124,7 @@ export function CommandPalette({ items, compactTrigger = false }: CommandPalette
                             className="flex w-full items-center justify-between gap-space-sm rounded-lg px-space-sm py-space-2xs text-left text-body-md text-on-surface/90 transition state-layer-color-primary hover:state-layer-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
                           >
                             <span className="flex items-center gap-space-sm">
-                              {item.icon ? <Icon icon={item.icon} size="sm" /> : null}
+                              {item.icon ? <Icon icon={resolveAppIcon(item.icon)} size="sm" /> : null}
                               {item.label}
                             </span>
                             <CornerDownLeft className="h-4 w-4 text-muted-foreground" aria-hidden />
@@ -141,4 +142,3 @@ export function CommandPalette({ items, compactTrigger = false }: CommandPalette
     </>
   );
 }
-
