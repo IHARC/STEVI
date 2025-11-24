@@ -58,20 +58,25 @@ const ADMIN_NAV_BLUEPRINT: WorkspaceNavBlueprint = {
   label: 'Admin workspace',
   groups: [
     {
-      id: 'people',
-      label: 'People',
+      id: 'access',
+      label: 'Access & people',
       icon: 'users',
       links: [
         {
           href: '/admin/profiles',
-          label: 'Profile verification',
+          label: 'Profiles & invites',
           requiresPortalRoles: ['portal_moderator', 'portal_admin'],
+        },
+        {
+          href: '/admin/organizations',
+          label: 'Organizations',
+          requiresPortalRoles: ['portal_admin'],
         },
       ],
     },
     {
       id: 'content',
-      label: 'Content',
+      label: 'Content & comms',
       icon: 'notebook',
       links: [
         {
@@ -83,6 +88,28 @@ const ADMIN_NAV_BLUEPRINT: WorkspaceNavBlueprint = {
           href: '/admin/policies',
           label: 'Policies',
           requiresPortalRoles: ['portal_admin'],
+        },
+        {
+          href: '/admin/notifications',
+          label: 'Notifications',
+          requiresPortalRoles: ['portal_admin'],
+        },
+      ],
+    },
+    {
+      id: 'operations',
+      label: 'Operations',
+      icon: 'boxes',
+      links: [
+        {
+          href: '/admin/inventory',
+          label: 'Inventory workspace',
+          requiresIharcRoles: INVENTORY_ALLOWED_ROLES,
+        },
+        {
+          href: '/admin/donations',
+          label: 'Donations catalogue',
+          requiresIharcRoles: ['iharc_admin'],
         },
       ],
     },
@@ -120,40 +147,6 @@ const ADMIN_NAV_BLUEPRINT: WorkspaceNavBlueprint = {
           href: '/admin/marketing/footer',
           label: 'Footer',
           requiresGuard: (access) => access.canManageWebsiteContent,
-        },
-      ],
-    },
-    {
-      id: 'outreach',
-      label: 'Outreach',
-      icon: 'megaphone',
-      links: [
-        {
-          href: '/admin/notifications',
-          label: 'Notifications',
-          requiresPortalRoles: ['portal_admin'],
-        },
-      ],
-    },
-    {
-      id: 'operations',
-      label: 'Operations',
-      icon: 'boxes',
-      links: [
-        {
-          href: '/admin/inventory',
-          label: 'Inventory workspace',
-          requiresIharcRoles: INVENTORY_ALLOWED_ROLES,
-        },
-        {
-          href: '/admin/donations',
-          label: 'Donations catalogue',
-          requiresIharcRoles: ['iharc_admin'],
-        },
-        {
-          href: '/admin/organizations',
-          label: 'Organizations',
-          requiresPortalRoles: ['portal_admin'],
         },
       ],
     },
