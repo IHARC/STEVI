@@ -13,10 +13,25 @@ const SEGMENT_PATHS = ['/admin/users/all', '/admin/users/clients', '/admin/users
 
 type ActionResult<T = void> = { success: true; data?: T } | { success: false; error: string };
 
+const SAFE_ERROR_MESSAGES = new Set([
+  'Sign in to continue.',
+  'Admin access is required.',
+  'Elevated admin access is required.',
+  'Profile approval required.',
+  'Profile context is missing.',
+  'Profile context is required.',
+  'Invalid role request.',
+  'Unsupported role change request.',
+  'Provide a valid email.',
+  'Profile not found.',
+]);
+
 function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) return error.message;
-  if (typeof error === 'string') return error;
-  return 'Something went wrong. Please try again.';
+  const candidate = typeof error === 'string' ? error : error instanceof Error ? error.message : '';
+  if (candidate && SAFE_ERROR_MESSAGES.has(candidate)) {
+    return candidate;
+  }
+  return 'Unable to complete that request right now. Please try again or contact support.';
 }
 
 async function revalidateUserPaths(profileId?: string) {
@@ -27,7 +42,24 @@ async function revalidateUserPaths(profileId?: string) {
   await Promise.all(Array.from(targets).map((path) => revalidatePath(path)));
 }
 
-async function requireAdminContext() {
+const ALLOWED_ROLE_NAMES = [
+  'portal_admin',
+  'portal_moderator',
+  'portal_org_admin',
+  'portal_org_rep',
+  'portal_user',
+  'iharc_admin',
+  'iharc_supervisor',
+  'iharc_staff',
+  'iharc_volunteer',
+] as const;
+
+function hasElevatedAdmin(access: Awaited<ReturnType<typeof loadPortalAccess>>): boolean {
+  if (!access) return false;
+  return access.portalRoles.includes('portal_admin') || access.iharcRoles.includes('iharc_admin');
+}
+
+async function requireAdminContext({ requireElevated = false }: { requireElevated?: boolean } = {}) {
   const supabase = await createSupabaseServerClient();
   const access = await loadPortalAccess(supabase);
 
@@ -35,13 +67,21 @@ async function requireAdminContext() {
     throw new Error('Sign in to continue.');
   }
 
+  if (!access.isProfileApproved) {
+    throw new Error('Profile approval required.');
+  }
+
   if (!access.canAccessAdminWorkspace) {
     throw new Error('Admin access is required.');
   }
 
+  if (requireElevated && !hasElevatedAdmin(access)) {
+    throw new Error('Elevated admin access is required.');
+  }
+
   const actorProfile = await ensurePortalProfile(supabase, access.userId);
 
-  return { supabase, actorProfile };
+  return { supabase, actorProfile, access };
 }
 
 async function refreshUserClaims(supabase: SupabaseServerClient, userId: string | null) {
@@ -67,7 +107,7 @@ export async function updateProfileAction(formData: FormData): Promise<ActionRes
     const organizationId = normalizeOrganizationId(formData.get('organization_id'));
     const governmentRole = parseGovernmentRole(formData.get('government_role_type') as string | null);
 
-    const { supabase, actorProfile } = await requireAdminContext();
+    const { supabase, actorProfile } = await requireAdminContext({ requireElevated: true });
     const portal = supabase.schema('portal');
 
     const updates: Record<string, unknown> = {};
@@ -124,7 +164,7 @@ export async function toggleRoleAction(formData: FormData): Promise<ActionResult
 
     const enable = enableValue === 'true';
 
-    const { supabase, actorProfile } = await requireAdminContext();
+    const { supabase, actorProfile } = await requireAdminContext({ requireElevated: true });
     const portal = supabase.schema('portal');
 
     const { data: profileRow, error: profileError } = await portal
@@ -135,6 +175,10 @@ export async function toggleRoleAction(formData: FormData): Promise<ActionResult
 
     if (profileError || !profileRow) {
       throw profileError ?? new Error('Profile not found.');
+    }
+
+    if (!ALLOWED_ROLE_NAMES.includes(roleName as (typeof ALLOWED_ROLE_NAMES)[number])) {
+      throw new Error('Unsupported role change request.');
     }
 
     const { error } = await supabase.rpc('set_profile_role', {
@@ -173,7 +217,7 @@ export async function archiveUserAction(formData: FormData): Promise<ActionResul
       throw new Error('Profile context is required.');
     }
 
-    const { supabase, actorProfile } = await requireAdminContext();
+    const { supabase, actorProfile } = await requireAdminContext({ requireElevated: true });
     const portal = supabase.schema('portal');
 
     const { data: profileRow, error: profileError } = await portal
@@ -246,7 +290,7 @@ export async function sendInviteAction(formData: FormData): Promise<ActionResult
     const organizationId = normalizeOrganizationId(formData.get('invite_organization_id'));
     const message = (formData.get('invite_message') as string | null) ?? null;
 
-    const { supabase, actorProfile } = await requireAdminContext();
+    const { supabase, actorProfile } = await requireAdminContext({ requireElevated: true });
 
     const {
       data: session,

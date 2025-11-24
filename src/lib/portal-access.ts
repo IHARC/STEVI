@@ -45,6 +45,9 @@ export type WorkspaceNav = {
   groups: NavGroup[];
 };
 
+const hasElevatedAdminAccess = (access: PortalAccess) =>
+  access.isProfileApproved && (access.portalRoles.includes('portal_admin') || access.iharcRoles.includes('iharc_admin'));
+
 const CLIENT_NAV_BLUEPRINT: PortalLinkBlueprint[] = [
   { href: '/home', label: 'Home', exact: true },
   { href: '/appointments', label: 'Appointments' },
@@ -65,17 +68,17 @@ const ADMIN_NAV_BLUEPRINT: WorkspaceNavBlueprint = {
         {
           href: '/admin/users',
           label: 'Users',
-          requiresPortalRoles: ['portal_admin', 'portal_moderator'],
+          requiresGuard: hasElevatedAdminAccess,
         },
         {
           href: '/admin/profiles',
           label: 'Profiles & invites',
-          requiresPortalRoles: ['portal_moderator', 'portal_admin'],
+          requiresGuard: hasElevatedAdminAccess,
         },
         {
           href: '/admin/organizations',
           label: 'Organizations',
-          requiresPortalRoles: ['portal_admin'],
+          requiresGuard: hasElevatedAdminAccess,
         },
       ],
     },
@@ -87,17 +90,17 @@ const ADMIN_NAV_BLUEPRINT: WorkspaceNavBlueprint = {
         {
           href: '/admin/resources',
           label: 'Resource library',
-          requiresPortalRoles: ['portal_admin'],
+          requiresGuard: hasElevatedAdminAccess,
         },
         {
           href: '/admin/policies',
           label: 'Policies',
-          requiresPortalRoles: ['portal_admin'],
+          requiresGuard: hasElevatedAdminAccess,
         },
         {
           href: '/admin/notifications',
           label: 'Notifications',
-          requiresPortalRoles: ['portal_admin'],
+          requiresGuard: hasElevatedAdminAccess,
         },
       ],
     },
@@ -238,6 +241,7 @@ export type PortalAccess = {
   userId: string;
   email: string | null;
   profile: PortalProfile;
+  isProfileApproved: boolean;
   iharcRoles: IharcRole[];
   portalRoles: PortalRole[];
   organizationId: number | null;
@@ -274,28 +278,29 @@ export async function loadPortalAccess(
   const iharcRoles = roles.filter((role): role is IharcRole => role.startsWith('iharc_'));
   const portalRoles = roles.filter((role): role is PortalRole => role.startsWith('portal_'));
   const organizationId = profile.organization_id ?? null;
+  const isProfileApproved = profile.affiliation_status === 'approved';
 
   const isPortalAdmin = portalRoles.includes('portal_admin');
-  const isPortalModerator = portalRoles.includes('portal_moderator');
+  const isIharcAdmin = iharcRoles.includes('iharc_admin');
   const isOrgAdmin = portalRoles.includes('portal_org_admin');
   const isOrgRep = portalRoles.includes('portal_org_rep');
 
-  const canAccessAdminWorkspace = isPortalAdmin || isPortalModerator;
-  const canAccessOrgWorkspace = (isOrgAdmin || isOrgRep) && organizationId !== null;
-  const canManageResources = isPortalAdmin;
-  const canManagePolicies = isPortalAdmin;
-  const canAccessInventoryWorkspace = iharcRoles.some((role) =>
+  const canAccessAdminWorkspace = isProfileApproved && (isPortalAdmin || isIharcAdmin);
+  const canAccessOrgWorkspace = isProfileApproved && (isOrgAdmin || isOrgRep) && organizationId !== null;
+  const canManageResources = isProfileApproved && isPortalAdmin;
+  const canManagePolicies = isProfileApproved && isPortalAdmin;
+  const canAccessInventoryWorkspace = isProfileApproved && iharcRoles.some((role) =>
     INVENTORY_ALLOWED_ROLES.includes(role),
   );
 
-  const canManageNotifications = isPortalAdmin;
-  const canManageWebsiteContent = isPortalAdmin;
-  const canManageSiteFooter = isPortalAdmin;
+  const canManageNotifications = isProfileApproved && isPortalAdmin;
+  const canManageWebsiteContent = isProfileApproved && isPortalAdmin;
+  const canManageSiteFooter = isProfileApproved && isPortalAdmin;
   const canReviewProfiles = canAccessAdminWorkspace;
-  const canViewMetrics = isPortalAdmin;
-  const canManageOrgUsers = isOrgAdmin && organizationId !== null;
-  const canManageOrgInvites = isOrgAdmin && organizationId !== null;
-  const canAccessStaffWorkspace = iharcRoles.some((role) =>
+  const canViewMetrics = isProfileApproved && isPortalAdmin;
+  const canManageOrgUsers = isProfileApproved && isOrgAdmin && organizationId !== null;
+  const canManageOrgInvites = isProfileApproved && isOrgAdmin && organizationId !== null;
+  const canAccessStaffWorkspace = isProfileApproved && iharcRoles.some((role) =>
     ['iharc_admin', 'iharc_supervisor', 'iharc_staff', 'iharc_volunteer'].includes(role),
   );
 
@@ -303,6 +308,7 @@ export async function loadPortalAccess(
     userId: user.id,
     email: user.email ?? null,
     profile,
+    isProfileApproved,
     iharcRoles,
     portalRoles,
     organizationId,

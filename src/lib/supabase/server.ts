@@ -19,7 +19,13 @@ export async function createSupabaseServerClient() {
       setAll(cookiesToSet: CookieBatch) {
         cookiesToSet.forEach(({ name, value, options }) => {
           try {
-            cookieStore.set(name, value, options);
+            cookieStore.set(name, value, {
+              path: '/',
+              sameSite: 'lax',
+              httpOnly: true,
+              secure: true,
+              ...options,
+            });
           } catch (error) {
             if (process.env.NODE_ENV !== 'production') {
               console.warn('Failed to set Supabase cookie', error);
