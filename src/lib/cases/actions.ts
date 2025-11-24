@@ -7,6 +7,7 @@ import { logAuditEvent } from '@/lib/audit';
 import { requirePersonForUser } from '@/lib/cases/person';
 import { fetchClientCaseDetail, fetchStaffCaseDetail } from '@/lib/cases/fetchers';
 import { processClientIntake } from '@/lib/cases/intake';
+import { createPersonGrant, revokePersonGrant, GRANT_SCOPES } from '@/lib/cases/grants';
 
 const ACTIVITIES_TABLE = 'people_activities';
 const PEOPLE_TABLE = 'people';
@@ -134,6 +135,49 @@ export async function adminOverrideConsentAction(formData: FormData): Promise<vo
     meta: { person_id: personId, data_sharing_consent: dataSharing, preferred_contact_method: preferredContact },
   });
 
+  revalidatePath('/admin/consents');
+}
+
+export async function adminCreateGrantAction(formData: FormData): Promise<void> {
+  const personId = Number.parseInt(String(formData.get('person_id') ?? ''), 10);
+  const scope = (formData.get('scope') as string | null)?.trim() ?? '';
+  const granteeUserId = (formData.get('grantee_user_id') as string | null)?.trim() || null;
+  const granteeOrgIdRaw = (formData.get('grantee_org_id') as string | null)?.trim() || null;
+  const granteeOrgId = granteeOrgIdRaw ? Number.parseInt(granteeOrgIdRaw, 10) : null;
+
+  if (!personId || Number.isNaN(personId)) throw new Error('Invalid person id.');
+  if (!GRANT_SCOPES.includes(scope as (typeof GRANT_SCOPES)[number])) throw new Error('Invalid scope.');
+  if (!granteeUserId && !granteeOrgId) throw new Error('Select a user or organization.');
+
+  const supabase = await createSupabaseServerClient();
+  const access = await loadPortalAccess(supabase);
+  if (!access || !access.canManageConsents) {
+    throw new Error('You do not have permission to manage grants.');
+  }
+
+  await createPersonGrant(supabase, {
+    personId,
+    scope: scope as (typeof GRANT_SCOPES)[number],
+    granteeUserId,
+    granteeOrgId,
+    actorProfileId: access.profile.id,
+    actorUserId: access.userId,
+  });
+
+  revalidatePath('/admin/consents');
+}
+
+export async function adminRevokeGrantAction(formData: FormData): Promise<void> {
+  const grantId = (formData.get('grant_id') as string | null)?.trim();
+  if (!grantId) throw new Error('Missing grant id.');
+
+  const supabase = await createSupabaseServerClient();
+  const access = await loadPortalAccess(supabase);
+  if (!access || !access.canManageConsents) {
+    throw new Error('You do not have permission to manage grants.');
+  }
+
+  await revokePersonGrant(supabase, { grantId, actorProfileId: access.profile.id });
   revalidatePath('/admin/consents');
 }
 

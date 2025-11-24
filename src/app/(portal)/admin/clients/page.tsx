@@ -1,8 +1,10 @@
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
 
 type PeopleListItem = {
@@ -65,6 +67,9 @@ export default async function AdminClientsPage() {
               <p>Email: {person.email ?? '—'}</p>
               <p>Phone: {person.phone ?? '—'}</p>
               <p>Data sharing: {person.data_sharing_consent ? 'Yes' : 'No'}</p>
+              <Button asChild variant="outline" className="mt-space-sm w-full">
+                <Link href={`/admin/clients/${person.id}`}>Open details</Link>
+              </Button>
             </CardContent>
           </Card>
         ))}

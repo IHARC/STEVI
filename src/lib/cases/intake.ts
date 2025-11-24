@@ -2,6 +2,7 @@ import { logAuditEvent } from '@/lib/audit';
 import { ensurePortalProfile } from '@/lib/profile';
 import type { SupabaseServerClient } from '@/lib/supabase/types';
 import type { IntakeSubmission } from '@/lib/cases/types';
+import { createPersonGrant } from '@/lib/cases/grants';
 
 const PEOPLE_TABLE = 'people';
 const CASE_TABLE = 'case_management';
@@ -83,6 +84,15 @@ export async function processClientIntake(
     throw new Error('Could not open a case for this intake.');
   }
 
+  await maybeGrantDefaults({
+    supabase,
+    personId: person.id,
+    clientUserId: intakeRow.supabase_user_id,
+    actorProfileId: actorProfile.id,
+    actorUserId,
+    actorOrgId: actorProfile.organization_id,
+  });
+
   // Optional activity log noting consent + intake capture.
   await core
     .from(ACTIVITIES_TABLE)
@@ -132,4 +142,58 @@ function derivePreferredContact(intake: IntakeSubmission): string | null {
     return choice;
   }
   return null;
+}
+
+async function maybeGrantDefaults({
+  supabase,
+  personId,
+  clientUserId,
+  actorProfileId,
+  actorUserId,
+  actorOrgId,
+}: {
+  supabase: SupabaseServerClient;
+  personId: number;
+  clientUserId: string | null;
+  actorProfileId: string;
+  actorUserId: string;
+  actorOrgId: number | null;
+}) {
+  if (clientUserId) {
+    await createPersonGrant(supabase, {
+      personId,
+      scope: 'timeline_client',
+      granteeUserId: clientUserId,
+      granteeOrgId: null,
+      actorProfileId,
+      actorUserId,
+    });
+    await createPersonGrant(supabase, {
+      personId,
+      scope: 'view',
+      granteeUserId: clientUserId,
+      granteeOrgId: null,
+      actorProfileId,
+      actorUserId,
+    });
+  }
+
+  if (actorOrgId !== null) {
+    await createPersonGrant(supabase, {
+      personId,
+      scope: 'timeline_full',
+      granteeUserId: null,
+      granteeOrgId: actorOrgId,
+      actorProfileId,
+      actorUserId,
+    });
+    await createPersonGrant(supabase, {
+      personId,
+      scope: 'write_notes',
+      granteeUserId: null,
+      granteeOrgId: actorOrgId,
+      actorProfileId,
+      actorUserId,
+    });
+  }
 }
