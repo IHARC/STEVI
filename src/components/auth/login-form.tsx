@@ -41,11 +41,6 @@ export function LoginForm({ action, nextPath, initialState }: LoginFormProps) {
   return (
     <form action={formAction} className="grid gap-space-lg rounded-3xl border border-outline/30 bg-surface-container p-space-lg shadow-level-1">
       <input type="hidden" name="next" value={nextPath} />
-      <div className="space-y-space-sm">
-        <GoogleAuthButton intent="login" nextPath={nextPath} />
-        <AuthDivider />
-      </div>
-
       <fieldset className="space-y-space-sm rounded-xl border border-outline/30 p-space-md">
         <legend className="text-body-sm font-medium text-on-surface">How would you like to sign in?</legend>
         <RadioGroup name="contact_method" value={contactMethod} onValueChange={(value) => setContactMethod(value as ContactMethod)} className="grid gap-space-sm md:grid-cols-2">
@@ -102,6 +97,11 @@ export function LoginForm({ action, nextPath, initialState }: LoginFormProps) {
             Register here
           </Link>
         </p>
+      </div>
+
+      <div className="space-y-space-sm">
+        <AuthDivider label="other sign-in options" />
+        <GoogleAuthButton intent="login" nextPath={nextPath} />
       </div>
     </form>
   );

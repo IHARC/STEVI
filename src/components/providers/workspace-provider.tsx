@@ -32,3 +32,7 @@ export function useWorkspaceContext(): WorkspaceContextValue {
 
   return value;
 }
+
+export function useOptionalWorkspaceContext(): WorkspaceContextValue | null {
+  return useContext(WorkspaceContext);
+}

@@ -4,18 +4,15 @@ import { CommandPalette } from '@/components/layout/command-palette';
 import { getUserNavigation } from '@/components/layout/user-nav';
 import { buildCommandPaletteItems, type PortalAccess } from '@/lib/portal-access';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
-import type { WorkspaceContextValue } from '@/components/providers/workspace-provider';
-import { WorkspaceSwitcher } from '@/components/layout/workspace-switcher';
+import { WorkspaceSwitcherSlot } from '@/components/layout/workspace-switcher-slot';
 
 type TopNavProps = {
   portalAccess?: PortalAccess | null;
-  workspace?: WorkspaceContextValue;
 };
 
-export async function TopNav({ portalAccess, workspace }: TopNavProps = {}) {
+export async function TopNav({ portalAccess }: TopNavProps = {}) {
   const { desktop, mobile } = await getUserNavigation(portalAccess);
   const commands = buildCommandPaletteItems(portalAccess ?? null);
-  const workspaceOptions = workspace?.availableWorkspaces ?? [];
 
   return (
     <header className="border-b border-outline/20 bg-surface/95 text-on-surface backdrop-blur supports-[backdrop-filter]:bg-surface/80">
@@ -51,15 +48,7 @@ export async function TopNav({ portalAccess, workspace }: TopNavProps = {}) {
               </span>
             </span>
           </Link>
-          {workspace && workspaceOptions.length > 1 ? (
-            <WorkspaceSwitcher
-              activeWorkspace={workspace.activeWorkspace}
-              options={workspaceOptions}
-              defaultPath={workspace.defaultPath}
-              previewExitPath={workspace.previewExitPath}
-              isClientPreview={workspace.isClientPreview}
-            />
-          ) : null}
+          <WorkspaceSwitcherSlot />
         </div>
         <div className="flex items-center gap-space-xs md:hidden">
           <CommandPalette items={commands} compactTrigger />
