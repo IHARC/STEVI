@@ -53,6 +53,7 @@ export default async function AdminOrganizationsPage() {
   }
 
   const handleCreate = async (formData: FormData) => {
+    'use server';
     const result = await createOrganizationAction(formData);
     if (!result.success) {
       throw new Error(result.error);
@@ -60,6 +61,7 @@ export default async function AdminOrganizationsPage() {
   };
 
   const handlePromote = async (formData: FormData) => {
+    'use server';
     const result = await promoteOrgAdminAction(formData);
     if (!result.success) {
       throw new Error(result.error);

@@ -3,13 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
 import { loadPortalAccess } from '@/lib/portal-access';
-import {
-  ContextCard,
-  HeroContent,
-  MARKETING_SETTINGS_KEYS,
-  BrandingAssets,
-  parseJsonSetting,
-} from '@/lib/marketing/settings';
+import { ContextCard, HeroContent, MARKETING_SETTINGS_KEYS, parseJsonSetting } from '@/lib/marketing/settings';
 import { HomeForm } from './HomeForm';
 import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
 
@@ -42,12 +36,9 @@ export default async function MarketingHomePage() {
     settings.find((row) => row.setting_key === MARKETING_SETTINGS_KEYS.hero)?.setting_value ?? null;
   const contextRaw =
     settings.find((row) => row.setting_key === MARKETING_SETTINGS_KEYS.contextCards)?.setting_value ?? null;
-  const brandingRaw =
-    settings.find((row) => row.setting_key === MARKETING_SETTINGS_KEYS.branding)?.setting_value ?? null;
 
   const hero = parseJsonSetting<HeroContent>(heroRaw, MARKETING_SETTINGS_KEYS.hero);
   const contextCards = parseJsonSetting<ContextCard[]>(contextRaw, MARKETING_SETTINGS_KEYS.contextCards);
-  const branding = brandingRaw ? parseJsonSetting<BrandingAssets>(brandingRaw, MARKETING_SETTINGS_KEYS.branding) : undefined;
 
   return (
     <div className="page-shell page-stack">
@@ -66,7 +57,7 @@ export default async function MarketingHomePage() {
           <CardDescription>CTA links must stay accurate; use concise, strengths-based language.</CardDescription>
         </CardHeader>
         <CardContent>
-          <HomeForm hero={hero} contextCards={contextCards} branding={branding} />
+          <HomeForm hero={hero} contextCards={contextCards} />
         </CardContent>
       </Card>
     </div>

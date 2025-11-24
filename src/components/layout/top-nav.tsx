@@ -5,13 +5,18 @@ import { getUserNavigation } from '@/components/layout/user-nav';
 import { buildCommandPaletteItems, type PortalAccess } from '@/lib/portal-access';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
 import { WorkspaceSwitcherSlot } from '@/components/layout/workspace-switcher-slot';
+import { getBrandingAssets } from '@/lib/marketing/branding';
 
 type TopNavProps = {
   portalAccess?: PortalAccess | null;
 };
 
 export async function TopNav({ portalAccess }: TopNavProps = {}) {
-  const { desktop, mobile } = await getUserNavigation(portalAccess);
+  const [navigation, branding] = await Promise.all([
+    getUserNavigation(portalAccess),
+    getBrandingAssets(),
+  ]);
+  const { desktop, mobile } = navigation;
   const commands = buildCommandPaletteItems(portalAccess ?? null);
 
   return (
@@ -24,7 +29,7 @@ export async function TopNav({ portalAccess }: TopNavProps = {}) {
             aria-label="STEVI home"
           >
             <Image
-              src="/logos/logo-default.png"
+              src={branding.logoLightUrl}
               alt="IHARC"
               width={72}
               height={72}
@@ -32,7 +37,7 @@ export async function TopNav({ portalAccess }: TopNavProps = {}) {
               className="h-10 w-auto dark:hidden"
             />
             <Image
-              src="/logos/logoinverted.png"
+              src={branding.logoDarkUrl}
               alt="IHARC"
               width={72}
               height={72}

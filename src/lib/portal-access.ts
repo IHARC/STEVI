@@ -97,6 +97,11 @@ const ADMIN_NAV_BLUEPRINT: WorkspaceNavBlueprint = {
           requiresGuard: (access) => access.canManageWebsiteContent,
         },
         {
+          href: '/admin/marketing/branding',
+          label: 'Branding',
+          requiresGuard: (access) => access.canManageWebsiteContent,
+        },
+        {
           href: '/admin/marketing/home',
           label: 'Home & context',
           requiresGuard: (access) => access.canManageWebsiteContent,

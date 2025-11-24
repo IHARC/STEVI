@@ -5,6 +5,7 @@ import '@/styles/main.css';
 import './globals.css';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { AnalyticsProvider } from '@/components/providers/analytics-provider';
+import { getBrandingAssets } from '@/lib/marketing/branding';
 
 const DEFAULT_APP_URL = 'https://stevi.iharc.ca';
 const appUrl =
@@ -24,35 +25,39 @@ const ANALYTICS_ENABLED = Boolean(GA_MEASUREMENT_ID) && !ANALYTICS_DISABLED;
 const OG_IMAGE_PATH = '/logo.png';
 const OG_IMAGE_ALT = 'STEVI — IHARC Client Portal';
 
-export const metadata: Metadata = {
-  metadataBase,
-  title: 'STEVI — Supportive Technology to Enable Vulnerable Individuals | IHARC Client Portal',
-  description:
-    'STEVI connects IHARC clients with outreach teams to request appointments, track progress, and access compassionate resources in Northumberland County.',
-  icons: {
-    icon: '/favicon.svg',
-  },
-  openGraph: {
-    type: 'website',
-    siteName: 'STEVI',
+export async function generateMetadata(): Promise<Metadata> {
+  const branding = await getBrandingAssets();
+
+  return {
+    metadataBase,
     title: 'STEVI — Supportive Technology to Enable Vulnerable Individuals | IHARC Client Portal',
     description:
-      'Request support, follow working plans, and collaborate with IHARC through the STEVI client portal.',
-    images: [
-      {
-        url: OG_IMAGE_PATH,
-        alt: OG_IMAGE_ALT,
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'STEVI — Supportive Technology to Enable Vulnerable Individuals | IHARC Client Portal',
-    description:
-      'Request support, follow working plans, and collaborate with IHARC through the STEVI client portal.',
-    images: [OG_IMAGE_PATH],
-  },
-};
+      'STEVI connects IHARC clients with outreach teams to request appointments, track progress, and access compassionate resources in Northumberland County.',
+    icons: {
+      icon: branding.faviconUrl,
+    },
+    openGraph: {
+      type: 'website',
+      siteName: 'STEVI',
+      title: 'STEVI — Supportive Technology to Enable Vulnerable Individuals | IHARC Client Portal',
+      description:
+        'Request support, follow working plans, and collaborate with IHARC through the STEVI client portal.',
+      images: [
+        {
+          url: OG_IMAGE_PATH,
+          alt: OG_IMAGE_ALT,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: 'STEVI — Supportive Technology to Enable Vulnerable Individuals | IHARC Client Portal',
+      description:
+        'Request support, follow working plans, and collaborate with IHARC through the STEVI client portal.',
+      images: [OG_IMAGE_PATH],
+    },
+  };
+}
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
