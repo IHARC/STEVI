@@ -7,6 +7,7 @@ import {
   coerceSegment,
   fetchAdminUserSummary,
   fetchAdminUsers,
+  parseAffiliationStatus,
   parsePageParam,
   type AdminUserSegment,
 } from '@/lib/admin-users';
@@ -143,18 +144,19 @@ export default async function AdminUsersSegmentPage({
   const organizationId = toNumber(resolvedSearch.org);
   const q = toStringParam(resolvedSearch.q);
   const sort = toStringParam(resolvedSearch.sort) === 'name' ? 'name' : 'recent';
+  const statusFilter = parseAffiliationStatus(status);
 
   const [summary, listResult, orgOptions] = await Promise.all([
     fetchAdminUserSummary(supabase),
-    fetchAdminUsers(supabase, segment, {
-      page,
-      pageSize: 25,
-      status: status as any,
-      role,
-      organizationId: organizationId ?? undefined,
-      search: q,
-      sort,
-    }),
+      fetchAdminUsers(supabase, segment, {
+        page,
+        pageSize: 25,
+        status: statusFilter,
+        role,
+        organizationId: organizationId ?? undefined,
+        search: q,
+        sort,
+      }),
     supabase
       .schema('core')
       .from('organizations')
@@ -245,7 +247,7 @@ export default async function AdminUsersSegmentPage({
                   </TableCell>
                 </TableRow>
               ) : (
-                listResult.items.map((user) => (
+                listResult.items.map((user: Awaited<ReturnType<typeof fetchAdminUsers>>['items'][number]) => (
                   <TableRow key={user.profileId}>
                     <TableCell>
                       <div className="flex flex-col">
@@ -268,12 +270,12 @@ export default async function AdminUsersSegmentPage({
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-space-2xs">
-                        {user.roles.portal.map((role) => (
+                        {user.roles.portal.map((role: string) => (
                           <Badge key={role} variant="outline" className="capitalize">
                             {role.replace('portal_', '')}
                           </Badge>
                         ))}
-                        {user.roles.iharc.map((role) => (
+                        {user.roles.iharc.map((role: string) => (
                           <Badge key={role} variant="secondary" className="capitalize">
                             {role.replace('iharc_', '')}
                           </Badge>

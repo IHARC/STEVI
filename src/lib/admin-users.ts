@@ -421,13 +421,21 @@ export async function fetchAdminUserDetail(
     throw auditError;
   }
 
+  type AuditRow = {
+    id: string;
+    action: string;
+    created_at: string;
+    actor_profile_id: string | null;
+    meta: Json;
+  };
+
   const auditEvents =
-    (auditRows ?? []).map((row: any) => ({
+    (auditRows ?? []).map((row: AuditRow) => ({
       id: row.id,
       action: row.action,
       createdAt: row.created_at,
       actorProfileId: row.actor_profile_id,
-      meta: row.meta as Json,
+      meta: row.meta,
     })) ?? [];
 
   return {

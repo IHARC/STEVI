@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { updateProfileAction, toggleRoleAction, archiveUserAction, sendInviteAction } from './actions';
+import { updateProfileAction, toggleRoleAction, archiveUserAction, sendInviteAction } from '../actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -179,7 +179,7 @@ export default async function AdminUserDetailPage({
                   className="w-full rounded-lg border border-outline/30 bg-surface px-space-sm py-space-2xs text-body-sm"
                 >
                   <option value="">No organization</option>
-                  {organizations.map((org) => (
+                  {organizations.map((org: { id: number; name: string }) => (
                     <option key={org.id} value={org.id}>
                       {org.name}
                     </option>
@@ -336,7 +336,7 @@ export default async function AdminUserDetailPage({
                       className="w-full rounded-lg border border-outline/30 bg-surface px-space-sm py-space-2xs text-body-sm"
                     >
                       <option value="">No organization</option>
-                      {organizations.map((org) => (
+                      {organizations.map((org: { id: number; name: string }) => (
                         <option key={org.id} value={org.id}>
                           {org.name}
                         </option>
