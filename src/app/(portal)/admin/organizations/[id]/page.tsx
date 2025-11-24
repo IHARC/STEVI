@@ -63,7 +63,7 @@ type RouteParams = { id: string };
 export default async function AdminOrganizationDetailPage({
   params,
 }: {
-  params: RouteParams | Promise<RouteParams>;
+  params: Promise<RouteParams>;
 }) {
   const resolvedParams = await params;
   const organizationId = Number.parseInt(resolvedParams.id, 10);
