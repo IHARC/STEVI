@@ -29,7 +29,9 @@ export function GoogleAuthButton({ nextPath, intent }: GoogleAuthButtonProps) {
       }
 
       const callbackUrl = new URL('/auth/callback', origin);
-      callbackUrl.searchParams.set('next', nextPath);
+      if (nextPath) {
+        callbackUrl.searchParams.set('next', nextPath);
+      }
       callbackUrl.searchParams.set('flow', intent);
 
       const { data, error: oauthError } = await supabase.auth.signInWithOAuth({

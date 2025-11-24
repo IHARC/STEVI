@@ -41,10 +41,13 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   const portalAccess = user ? await loadPortalAccess(supabase) : null;
   const defaultWorkspacePath = resolveDefaultWorkspacePath(portalAccess);
-  const nextPath = resolveNextPath(rawNextParam, defaultWorkspacePath);
+
+  // Only persist an explicit next param. If none was provided, let post-auth logic
+  // choose the right workspace (so admins land in /admin instead of /home).
+  const nextPath = resolveNextPath(rawNextParam, portalAccess ? defaultWorkspacePath : '');
 
   if (user) {
-    redirect(nextPath);
+    redirect(nextPath || defaultWorkspacePath || '/home');
   }
 
   const initialState: FormState = initialError

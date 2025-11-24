@@ -19,8 +19,8 @@ export default async function PortalLayout({ children }: { children: ReactNode }
   const portalAccess = await loadPortalAccess(supabase);
   const navLinks: PortalLink[] = resolveClientNavLinks(portalAccess);
   const headerList = await headers();
-  const currentPath = headerList.get('next-url') ?? headerList.get('x-invoke-path') ?? '';
-  const activeWorkspace = inferWorkspaceFromPath(currentPath);
+  const rawUrl = headerList.get('next-url') ?? headerList.get('x-invoke-path') ?? '';
+  const activeWorkspace = inferWorkspaceFromPath(extractPathname(rawUrl));
 
   const workspaceContext: WorkspaceContextValue = {
     activeWorkspace,
@@ -39,4 +39,15 @@ export default async function PortalLayout({ children }: { children: ReactNode }
       </WorkspaceProvider>
     </PortalAccessProvider>
   );
+}
+
+function extractPathname(raw: string): string {
+  if (!raw) return '/';
+
+  try {
+    const url = raw.startsWith('http') ? new URL(raw) : new URL(raw, 'http://localhost');
+    return url.pathname || '/';
+  } catch {
+    return raw.startsWith('/') ? raw : `/${raw}`;
+  }
 }
