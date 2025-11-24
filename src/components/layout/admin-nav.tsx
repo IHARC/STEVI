@@ -3,12 +3,10 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ChevronDown } from 'lucide-react';
 import { Icon } from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { resolveAppIcon } from '@/lib/app-icons';
 import { cn } from '@/lib/utils';
 import type { WorkspaceNav, PortalLink, NavGroup } from '@/lib/portal-access';
@@ -20,38 +18,14 @@ type AdminNavProps = {
 
 export function AdminNav({ nav, variant = 'desktop' }: AdminNavProps) {
   const pathname = usePathname();
-
-  const activeGroupId = useMemo(() => findActiveGroupId(nav, pathname), [nav, pathname]);
-
-  const [openGroups, setOpenGroups] = useState<string[]>(() =>
-    getInitialOpenGroups(nav, pathname, activeGroupId),
-  );
-
-  const renderedOpenGroups = useMemo(() => {
-    const validGroups = openGroups.filter((id) => nav.groups.some((group) => group.id === id));
-
-    if (activeGroupId && !validGroups.includes(activeGroupId)) {
-      return [...validGroups, activeGroupId];
-    }
-
-    return validGroups;
-  }, [activeGroupId, nav.groups, openGroups]);
-
-  const toggleGroup = (groupId: string) => {
-    setOpenGroups((current) =>
-      current.includes(groupId)
-        ? current.filter((id) => id !== groupId)
-        : [...current, groupId],
-    );
-  };
+  const activeGroup = useMemo(() => findActiveGroup(nav, pathname), [nav, pathname]);
 
   if (variant === 'mobile') {
     return (
       <MobileAdminNav
         nav={nav}
         pathname={pathname}
-        openGroups={renderedOpenGroups}
-        onToggleGroup={toggleGroup}
+        activeGroupId={activeGroup?.id ?? null}
       />
     );
   }
@@ -60,8 +34,7 @@ export function AdminNav({ nav, variant = 'desktop' }: AdminNavProps) {
     <DesktopAdminNav
       nav={nav}
       pathname={pathname}
-      openGroups={renderedOpenGroups}
-      onToggleGroup={toggleGroup}
+      activeGroupId={activeGroup?.id ?? null}
     />
   );
 }
@@ -69,45 +42,52 @@ export function AdminNav({ nav, variant = 'desktop' }: AdminNavProps) {
 type NavListProps = {
   nav: WorkspaceNav;
   pathname: string;
-  openGroups: string[];
-  onToggleGroup: (groupId: string) => void;
+  activeGroupId: string | null;
   onNavigate?: () => void;
 };
 
-function NavList({ nav, pathname, openGroups, onToggleGroup, onNavigate }: NavListProps) {
+function NavList({ nav, pathname, activeGroupId, onNavigate }: NavListProps) {
+  const activeGroup = useMemo(() => {
+    if (activeGroupId) {
+      return nav.groups.find((group) => group.id === activeGroupId);
+    }
+    return nav.groups[0] ?? null;
+  }, [activeGroupId, nav.groups]);
+
+  if (!activeGroup) return null;
+
   return (
-    <nav aria-label={`${nav.label} sections`} className="space-y-space-2xs">
-      {nav.groups.map((group) => (
-        <NavGroupSection
-          key={group.id}
-          group={group}
-          pathname={pathname}
-          isOpen={openGroups.includes(group.id)}
-          onToggle={() => onToggleGroup(group.id)}
-          onNavigate={onNavigate}
-        />
-      ))}
-    </nav>
+    <div className="space-y-space-sm" aria-label={`${nav.label} navigation`}>
+      <ModuleSwitcher nav={nav} activeGroupId={activeGroup.id} />
+
+      <div className="space-y-[2px]" aria-label={`${activeGroup.label} links`}>
+        {activeGroup.links.map((link) => (
+          <AdminNavLink
+            key={link.href}
+            link={link}
+            pathname={pathname}
+            onNavigate={onNavigate}
+          />
+        ))}
+      </div>
+    </div>
   );
 }
 
 function DesktopAdminNav({
   nav,
   pathname,
-  openGroups,
-  onToggleGroup,
+  activeGroupId,
 }: {
   nav: WorkspaceNav;
   pathname: string;
-  openGroups: string[];
-  onToggleGroup: (groupId: string) => void;
+  activeGroupId: string | null;
 }) {
   return (
     <NavList
       nav={nav}
       pathname={pathname}
-      openGroups={openGroups}
-      onToggleGroup={onToggleGroup}
+      activeGroupId={activeGroupId}
     />
   );
 }
@@ -115,13 +95,11 @@ function DesktopAdminNav({
 function MobileAdminNav({
   nav,
   pathname,
-  openGroups,
-  onToggleGroup,
+  activeGroupId,
 }: {
   nav: WorkspaceNav;
   pathname: string;
-  openGroups: string[];
-  onToggleGroup: (groupId: string) => void;
+  activeGroupId: string | null;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -148,8 +126,7 @@ function MobileAdminNav({
             <NavList
               nav={nav}
               pathname={pathname}
-              openGroups={openGroups}
-              onToggleGroup={onToggleGroup}
+              activeGroupId={activeGroupId}
               onNavigate={() => setOpen(false)}
             />
           </div>
@@ -188,86 +165,52 @@ function AdminNavLink({ link, pathname, onNavigate }: AdminNavLinkProps) {
     </Link>
   );
 }
+type ModuleSwitcherProps = {
+  nav: WorkspaceNav;
+  activeGroupId: string;
+};
 
-function NavGroupSection({
-  group,
-  pathname,
-  isOpen,
-  onToggle,
-  onNavigate,
-}: {
-  group: NavGroup;
-  pathname: string;
-  isOpen: boolean;
-  onToggle: () => void;
-  onNavigate?: () => void;
-}) {
-  const active = group.links.some((link) => isLinkActive(pathname, link.href));
-
+function ModuleSwitcher({ nav, activeGroupId }: ModuleSwitcherProps) {
   return (
-    <Collapsible open={isOpen} onOpenChange={onToggle}>
-      <div className="rounded-xl border border-outline/12 bg-surface-container-low">
-        <CollapsibleTrigger asChild>
-          <button
-            type="button"
+    <div className="flex flex-col gap-space-2xs" role="tablist" aria-label="Admin modules">
+      {nav.groups.map((group) => {
+        const isActive = group.id === activeGroupId;
+        const targetHref = group.links[0]?.href ?? '/admin';
+
+        return (
+          <Button
+            key={group.id}
+            asChild
+            size="sm"
+            variant={isActive ? 'secondary' : 'ghost'}
             className={cn(
-              'flex w-full items-center justify-between gap-space-sm rounded-xl px-space-sm py-space-xs text-label-sm font-semibold uppercase transition-colors',
-              active ? 'text-on-surface' : 'text-muted-foreground hover:text-on-surface',
+              'w-full justify-between gap-space-xs rounded-lg border border-outline/10 px-space-sm py-space-xs text-label-md font-semibold uppercase shadow-none',
+              isActive ? 'bg-secondary-container text-on-secondary-container' : 'text-muted-foreground hover:text-on-surface',
             )}
-            aria-expanded={isOpen}
-            aria-controls={`admin-nav-${group.id}`}
+            aria-current={isActive ? 'page' : undefined}
           >
-            <span className="flex items-center gap-space-xs">
-              <Icon icon={resolveAppIcon(group.icon)} size="xs" />
-              {group.label}
-            </span>
-            <span className="flex items-center gap-space-xs">
-              <span className="rounded-full bg-surface-container-high px-2 py-[3px] text-label-xs font-semibold text-muted-foreground">
+            <Link href={targetHref}>
+              <span className="flex items-center gap-space-xs">
+                <Icon icon={resolveAppIcon(group.icon)} size="xs" />
+                {group.label}
+              </span>
+              <span className="ml-space-sm rounded-full bg-surface-container-high px-2 py-[3px] text-label-xs font-semibold text-muted-foreground">
                 {group.links.length}
               </span>
-              <Icon
-                icon={ChevronDown}
-                size="sm"
-                className={cn(
-                  'transition-transform motion-duration-short motion-ease-standard',
-                  isOpen ? 'rotate-180' : undefined,
-                )}
-              />
-            </span>
-          </button>
-        </CollapsibleTrigger>
-        <CollapsibleContent
-          id={`admin-nav-${group.id}`}
-          className="space-y-[2px] px-space-xs pb-space-sm pt-space-2xs data-[state=closed]:hidden"
-        >
-          {group.links.map((link) => (
-            <AdminNavLink
-              key={link.href}
-              link={link}
-              pathname={pathname}
-              onNavigate={onNavigate}
-            />
-          ))}
-        </CollapsibleContent>
-      </div>
-    </Collapsible>
+            </Link>
+          </Button>
+        );
+      })}
+    </div>
   );
 }
 
-function getInitialOpenGroups(nav: WorkspaceNav, pathname: string, activeGroupId: string | null) {
-  if (activeGroupId) return [activeGroupId];
-  if (nav.groups.length > 0) return [nav.groups[0].id];
-  return [];
-}
-
-function findActiveGroupId(nav: WorkspaceNav, pathname: string): string | null {
-  const group = nav.groups.find((candidate) =>
-    candidate.links.some((link) => isLinkActive(pathname, link.href)),
+function findActiveGroup(nav: WorkspaceNav, pathname: string): NavGroup | null {
+  const directMatch = nav.groups.find((candidate) =>
+    candidate.links.some((link) => pathname === link.href || pathname.startsWith(`${link.href}/`)),
   );
 
-  return group?.id ?? null;
-}
+  if (directMatch) return directMatch;
 
-function isLinkActive(pathname: string, href: string): boolean {
-  return pathname === href || pathname.startsWith(`${href}/`);
+  return nav.groups[0] ?? null;
 }
