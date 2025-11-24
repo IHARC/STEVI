@@ -39,7 +39,6 @@ const STATUS_OPTIONS = [
 
 const ROLE_OPTIONS = [
   'portal_admin',
-  'portal_moderator',
   'portal_org_admin',
   'portal_org_rep',
   'portal_user',

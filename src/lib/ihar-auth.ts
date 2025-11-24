@@ -8,7 +8,6 @@ export type IharcRole =
 
 export type PortalRole =
   | 'portal_admin'
-  | 'portal_moderator'
   | 'portal_org_admin'
   | 'portal_org_rep'
   | 'portal_user';

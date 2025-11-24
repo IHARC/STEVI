@@ -48,6 +48,13 @@ export type WorkspaceNav = {
 const hasElevatedAdminAccess = (access: PortalAccess) =>
   access.isProfileApproved && (access.portalRoles.includes('portal_admin') || access.iharcRoles.includes('iharc_admin'));
 
+const canManageUsers = (access: PortalAccess) =>
+  access.isProfileApproved && (
+    access.portalRoles.includes('portal_admin') ||
+    access.iharcRoles.includes('iharc_admin') ||
+    access.portalRoles.includes('portal_org_admin')
+  );
+
 const CLIENT_NAV_BLUEPRINT: PortalLinkBlueprint[] = [
   { href: '/home', label: 'Home', exact: true },
   { href: '/appointments', label: 'Appointments' },
@@ -68,6 +75,11 @@ const ADMIN_NAV_BLUEPRINT: WorkspaceNavBlueprint = {
         {
           href: '/admin/users',
           label: 'Users',
+          requiresGuard: canManageUsers,
+        },
+        {
+          href: '/admin/permissions',
+          label: 'Permissions',
           requiresGuard: hasElevatedAdminAccess,
         },
         {
@@ -285,7 +297,7 @@ export async function loadPortalAccess(
   const isOrgAdmin = portalRoles.includes('portal_org_admin');
   const isOrgRep = portalRoles.includes('portal_org_rep');
 
-  const canAccessAdminWorkspace = isProfileApproved && (isPortalAdmin || isIharcAdmin);
+  const canAccessAdminWorkspace = isProfileApproved && (isPortalAdmin || isIharcAdmin || isOrgAdmin);
   const canAccessOrgWorkspace = isProfileApproved && (isOrgAdmin || isOrgRep) && organizationId !== null;
   const canManageResources = isProfileApproved && isPortalAdmin;
   const canManagePolicies = isProfileApproved && isPortalAdmin;
@@ -296,7 +308,7 @@ export async function loadPortalAccess(
   const canManageNotifications = isProfileApproved && isPortalAdmin;
   const canManageWebsiteContent = isProfileApproved && isPortalAdmin;
   const canManageSiteFooter = isProfileApproved && isPortalAdmin;
-  const canReviewProfiles = canAccessAdminWorkspace;
+  const canReviewProfiles = isProfileApproved && (isPortalAdmin || isIharcAdmin);
   const canViewMetrics = isProfileApproved && isPortalAdmin;
   const canManageOrgUsers = isProfileApproved && isOrgAdmin && organizationId !== null;
   const canManageOrgInvites = isProfileApproved && isOrgAdmin && organizationId !== null;

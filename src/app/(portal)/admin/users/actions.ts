@@ -44,7 +44,6 @@ async function revalidateUserPaths(profileId?: string) {
 
 const ALLOWED_ROLE_NAMES = [
   'portal_admin',
-  'portal_moderator',
   'portal_org_admin',
   'portal_org_rep',
   'portal_user',
@@ -59,7 +58,12 @@ function hasElevatedAdmin(access: Awaited<ReturnType<typeof loadPortalAccess>>):
   return access.portalRoles.includes('portal_admin') || access.iharcRoles.includes('iharc_admin');
 }
 
-async function requireAdminContext({ requireElevated = false }: { requireElevated?: boolean } = {}) {
+function hasOrgAdmin(access: Awaited<ReturnType<typeof loadPortalAccess>>): boolean {
+  if (!access) return false;
+  return access.portalRoles.includes('portal_org_admin');
+}
+
+async function requireAdminContext({ requireElevated = false, allowOrgAdmin = false }: { requireElevated?: boolean; allowOrgAdmin?: boolean } = {}) {
   const supabase = await createSupabaseServerClient();
   const access = await loadPortalAccess(supabase);
 
@@ -77,6 +81,10 @@ async function requireAdminContext({ requireElevated = false }: { requireElevate
 
   if (requireElevated && !hasElevatedAdmin(access)) {
     throw new Error('Elevated admin access is required.');
+  }
+
+  if (!requireElevated && allowOrgAdmin && !(hasElevatedAdmin(access) || hasOrgAdmin(access))) {
+    throw new Error('Admin access is required.');
   }
 
   const actorProfile = await ensurePortalProfile(supabase, access.userId);
@@ -107,7 +115,7 @@ export async function updateProfileAction(formData: FormData): Promise<ActionRes
     const organizationId = normalizeOrganizationId(formData.get('organization_id'));
     const governmentRole = parseGovernmentRole(formData.get('government_role_type') as string | null);
 
-    const { supabase, actorProfile } = await requireAdminContext({ requireElevated: true });
+    const { supabase, actorProfile, access } = await requireAdminContext({ allowOrgAdmin: true });
     const portal = supabase.schema('portal');
 
     const updates: Record<string, unknown> = {};
@@ -120,12 +128,22 @@ export async function updateProfileAction(formData: FormData): Promise<ActionRes
 
     const { data: existing, error: fetchError } = await portal
       .from('profiles')
-      .select('user_id')
+      .select('user_id, organization_id')
       .eq('id', profileId)
       .maybeSingle();
 
     if (fetchError) {
       throw fetchError;
+    }
+
+    const isElevated = hasElevatedAdmin(access);
+    const isOrgAdmin = hasOrgAdmin(access);
+    if (isOrgAdmin && !isElevated) {
+      if (!actorProfile.organization_id || existing?.organization_id !== actorProfile.organization_id) {
+        throw new Error('Elevated admin access is required.');
+      }
+    } else if (!isElevated) {
+      throw new Error('Elevated admin access is required.');
     }
 
     const { error: updateError } = await portal.from('profiles').update(updates).eq('id', profileId);
@@ -164,12 +182,12 @@ export async function toggleRoleAction(formData: FormData): Promise<ActionResult
 
     const enable = enableValue === 'true';
 
-    const { supabase, actorProfile } = await requireAdminContext({ requireElevated: true });
+    const { supabase, actorProfile, access } = await requireAdminContext({ allowOrgAdmin: true });
     const portal = supabase.schema('portal');
 
     const { data: profileRow, error: profileError } = await portal
       .from('profiles')
-      .select('user_id')
+      .select('user_id, organization_id')
       .eq('id', profileId)
       .maybeSingle();
 
@@ -179,6 +197,30 @@ export async function toggleRoleAction(formData: FormData): Promise<ActionResult
 
     if (!ALLOWED_ROLE_NAMES.includes(roleName as (typeof ALLOWED_ROLE_NAMES)[number])) {
       throw new Error('Unsupported role change request.');
+    }
+
+    const isElevated = hasElevatedAdmin(access);
+    const isOrgAdmin = hasOrgAdmin(access);
+    if (!isElevated) {
+      if (!isOrgAdmin || !actorProfile.organization_id || actorProfile.organization_id !== profileRow.organization_id) {
+        throw new Error('Elevated admin access is required.');
+      }
+      const orgRoles = new Set(['portal_org_admin', 'portal_org_rep', 'portal_user']);
+      if (!orgRoles.has(roleName)) {
+        throw new Error('Elevated admin access is required.');
+      }
+      if (profileRow.user_id) {
+        const { data: rolesData, error: rolesError } = await supabase
+          .schema('core')
+          .from('user_roles')
+          .select('roles:roles!inner(name)')
+          .eq('user_id', profileRow.user_id);
+        if (rolesError) throw rolesError;
+        const targetRoles = new Set((rolesData ?? []).map((r: { roles: { name: string } | null }) => r.roles?.name));
+        if (targetRoles.has('portal_admin') || targetRoles.has('iharc_admin')) {
+          throw new Error('Elevated admin access is required.');
+        }
+      }
     }
 
     const { error } = await supabase.rpc('set_profile_role', {
@@ -217,17 +259,37 @@ export async function archiveUserAction(formData: FormData): Promise<ActionResul
       throw new Error('Profile context is required.');
     }
 
-    const { supabase, actorProfile } = await requireAdminContext({ requireElevated: true });
+    const { supabase, actorProfile, access } = await requireAdminContext({ allowOrgAdmin: true });
     const portal = supabase.schema('portal');
 
     const { data: profileRow, error: profileError } = await portal
       .from('profiles')
-      .select('user_id')
+      .select('user_id, organization_id')
       .eq('id', profileId)
       .maybeSingle();
 
     if (profileError || !profileRow) {
       throw profileError ?? new Error('Profile not found.');
+    }
+
+    const isElevated = hasElevatedAdmin(access);
+    const isOrgAdmin = hasOrgAdmin(access);
+    if (!isElevated) {
+      if (!isOrgAdmin || !actorProfile.organization_id || actorProfile.organization_id !== profileRow.organization_id) {
+        throw new Error('Elevated admin access is required.');
+      }
+      if (profileRow.user_id) {
+        const { data: rolesData, error: rolesError } = await supabase
+          .schema('core')
+          .from('user_roles')
+          .select('roles:roles!inner(name)')
+          .eq('user_id', profileRow.user_id);
+        if (rolesError) throw rolesError;
+        const targetRoles = new Set((rolesData ?? []).map((r: { roles: { name: string } | null }) => r.roles?.name));
+        if (targetRoles.has('portal_admin') || targetRoles.has('iharc_admin')) {
+          throw new Error('Elevated admin access is required.');
+        }
+      }
     }
 
     const now = new Date().toISOString();
@@ -290,7 +352,7 @@ export async function sendInviteAction(formData: FormData): Promise<ActionResult
     const organizationId = normalizeOrganizationId(formData.get('invite_organization_id'));
     const message = (formData.get('invite_message') as string | null) ?? null;
 
-    const { supabase, actorProfile } = await requireAdminContext({ requireElevated: true });
+    const { supabase, actorProfile, access } = await requireAdminContext({ allowOrgAdmin: true });
 
     const {
       data: session,
@@ -299,6 +361,14 @@ export async function sendInviteAction(formData: FormData): Promise<ActionResult
 
     if (sessionError || !session.session?.access_token) {
       throw sessionError ?? new Error('Missing session token. Refresh and try again.');
+    }
+
+    const isElevated = hasElevatedAdmin(access);
+    const isOrgAdmin = hasOrgAdmin(access);
+    if (!isElevated) {
+      if (!isOrgAdmin || !actorProfile.organization_id || actorProfile.organization_id !== organizationId) {
+        throw new Error('Elevated admin access is required.');
+      }
     }
 
     const response = await supabase.functions.invoke('portal-admin-invite', {

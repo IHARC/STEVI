@@ -17,7 +17,6 @@ export const dynamic = 'force-dynamic';
 
 const PORTAL_ROLES = [
   'portal_admin',
-  'portal_moderator',
   'portal_org_admin',
   'portal_org_rep',
   'portal_user',
@@ -221,13 +220,11 @@ export default async function AdminUserDetailPage({
                     <p className="text-label-sm text-muted-foreground">
                       {role === 'portal_admin'
                         ? 'Full admin workspace access'
-                        : role === 'portal_moderator'
-                          ? 'Profile verification & moderation'
-                          : role === 'portal_org_admin'
-                            ? 'Org-scoped administration'
-                            : role === 'portal_org_rep'
-                              ? 'Org member with elevated access'
-                              : 'Baseline portal user'}
+                        : role === 'portal_org_admin'
+                          ? 'Org-scoped administration'
+                          : role === 'portal_org_rep'
+                            ? 'Org member with elevated access'
+                            : 'Baseline portal user'}
                     </p>
                   </div>
                   <input type="hidden" name="profile_id" value={detail.profile.id} />
