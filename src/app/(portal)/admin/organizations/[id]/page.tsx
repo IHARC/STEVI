@@ -58,8 +58,15 @@ function statusBadgeVariant(status: Organization['status'], isActive: boolean | 
   return 'default';
 }
 
-export default async function AdminOrganizationDetailPage({ params }: { params: { id: string } }) {
-  const organizationId = Number.parseInt(params.id, 10);
+type RouteParams = { id: string };
+
+export default async function AdminOrganizationDetailPage({
+  params,
+}: {
+  params: RouteParams | Promise<RouteParams>;
+}) {
+  const resolvedParams = await params;
+  const organizationId = Number.parseInt(resolvedParams.id, 10);
   if (Number.isNaN(organizationId)) {
     redirect(LIST_PATH);
   }
@@ -68,7 +75,7 @@ export default async function AdminOrganizationDetailPage({ params }: { params: 
   const access = await loadPortalAccess(supabase);
 
   if (!access) {
-    redirect(`/login?next=${LIST_PATH}/${params.id}`);
+    redirect(`/login?next=${LIST_PATH}/${resolvedParams.id}`);
   }
 
   if (!access.canAccessAdminWorkspace || !access.portalRoles.includes('portal_admin')) {
