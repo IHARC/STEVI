@@ -1,130 +1,73 @@
 # STEVI Agent Briefing
 
-## Mission Snapshot
-- **Product name**: STEVI — Supportive Technology to Enable Vulnerable Individuals.
-- **Operator**: IHARC (Integrated Homelessness & Addictions Response Centre), a non-profit serving people experiencing homelessness and substance use challenges across Northumberland County, Ontario, Canada.
-- **Purpose**: Standalone client support portal where IHARC neighbours can manage appointments, access secure documents, review personalised updates, and stay connected with outreach teams. Supabase-backed admin tooling lives alongside the client experience to manage content that also powers the public marketing site.
-- **Primary users**: IHARC clients, outreach staff, moderators, and partner agencies. Marketing-first visitors use the separate `I.H.A.R.C-Public-Website` app.
-- **Success guardrails**: Maintain compassionate copy, WCAG-friendly patterns, and privacy/audit commitments captured in `I.H.A.R.C-Public-Website/docs/portal/architecture.md`. No regressions to Supabase RLS, audit logging, or rate limiting. Honour IHARC’s trauma-informed, harm-reduction-centred service model.
+## Ground rules
+- CLI runs in workspace-write with restricted outbound network. Prefer MCP tools (Context7 for docs/codegen, Supabase MCP for schema/RLS) and repo sources; request approval before any internet call.
+- Never add backward-compatibility shims, hidden fallbacks, or keep dead/legacy code. Ship clean, explicit fixes that honour IHARC’s trauma-informed, harm-reduction, and WCAG commitments (see marketing architecture doc referenced in the marketing repo).
+- Supabase schema is shared across STEVI, STEVI OPS, and the marketing app—do not alter it without coordination. Verify policies via Supabase MCP, not migrations alone.
+- Keep audit, privacy, and rate limits intact; every mutation should log to the audit trail and respect RLS/consent flags.
 
-## Source System Snapshot
-- Historic portal code lives inside the marketing repo (`I.H.A.R.C-Public-Website/src/app/portal/*`). That implementation focused on ideation and community moderation — we now treat it solely as a design reference.
-- Admin workflows (resources, metrics, invitations, notifications, policies, etc.) currently exist inside the same marketing repo under `src/app/command-center/*`; STEVI is now the home for those mutations.
-- Supabase functions (`portal-attachments`, `portal-moderate`, `portal-admin-invite`, etc.) and schemas (`portal`, `core`, `inventory`, `justice`) are shared across marketing, STEVI OPS, and this client portal.
+## Snapshot — 2025-11-25
+- Product: STEVI (Supportive Technology to Enable Vulnerable Individuals) operated by IHARC (Northumberland County, ON, Canada).
+- Stack: Next.js 16 (App Router, React 19, RSC), TypeScript, Tailwind with Material 3 tokens (`docs/design-tokens.md`), Radix primitives + shadcn-inspired wrappers, TipTap for rich text.
+- Hosting/build: Azure Static Web Apps. Build entry is `node build.js` (runs `eslint .` then `next build --webpack` with SWC native binary disabled). Marketing app deploys separately but shares the same Supabase project/env vars.
+- Auth/session: Supabase Auth via `@supabase/ssr` cookies. Use `createSupabaseServerClient` in actions/route handlers (can set cookies); the RSC client is read-only. Most portal routes export `dynamic = 'force-dynamic'` to respect session + RLS.
+- Data & storage: Supabase schemas in active use: `portal`, `core`, `case_mgmt`, `inventory`, `donations`. Storage bucket `portal-attachments`; Edge Function `portal-alerts` (invoked when `PORTAL_ALERTS_SECRET` is set).
+- Caching: No custom CDN layer. Use `revalidatePath`/`revalidateTag` from server actions; avoid static rendering for authed content.
 
-## Target Architecture
-- Split responsibilities:
-  - `I.H.A.R.C-Public-Website`: pure marketing experience. It becomes a read-only consumer of shared Supabase content (resources, stats, navigation copy, etc.) surfaced through RLS-safe views/functions maintained by STEVI.
-  - `STEVI`: Next.js 15 App Router application for clients + IHARC staff tools. Handles authentication, caching, admin mutations, and all Supabase write operations (appointments, documents, notifications, resources, marketing copy).
-- Supabase acts as the single source of truth that bridges STEVI and the marketing site. Admin flows in STEVI write to Supabase tables/RPCs across schemas like `portal`, `core`, `inventory`, and `justice`, and the marketing app consumes the same data via read-only channels.
-- Shared design tokens (Tailwind + CSS custom properties) remain aligned across repos. Consider formalising a shared package once both apps stabilise.
-- Azure Static Web Apps handles deployments for each repo; both point at the same Supabase project/environment variables.
+## Architecture & data flow
+- Responsibility split: STEVI owns authenticated client/staff/admin surfaces and all writes. The marketing site consumes Supabase content read-only (public settings, resources, policies, donation catalogue, stats).
+- Key tables:
+  - `portal`: `profiles`, `profile_invites`, `profile_contacts`, `resource_pages`, `policies`, `notifications`, `public_settings`, `registration_flows`, `audit_log`.
+  - `core`: `people`, `people_activities`, `person_access_grants`, `organizations`, org memberships, contact details.
+  - `case_mgmt`: `case_management` (client cases).
+  - `inventory`: `v_items_with_balances`, `locations`, stock transactions.
+  - `donations`: `catalog_items`, `catalog_item_metrics` (linked to inventory items).
+- RPCs / functions used today: `get_user_roles`, `portal_log_audit_event`, `portal_queue_notification` (+ `portal-alerts` Edge Function), `portal_check_rate_limit`, `portal_get_user_email`, `refresh_user_permissions`, `set_profile_role`, `claim_registration_flow`, `get_people_list_with_types`, `core.staff_caseload`, `core.staff_shifts_today`, `core.staff_outreach_logs`, inventory RPCs (`receive_stock`, `receive_stock_with_source`, `transfer_stock`, `adjust_stock`, `update_transaction_source`).
+- Authorization: `PortalAccess` (`src/lib/portal-access.ts`) derives capability flags exclusively from `get_user_roles` + `ensurePortalProfile`. Never rely on JWT/app_metadata fallbacks or UI hiding alone.
+- Audit/logging: Route every mutation through `logAuditEvent`; consent/person updates and grants already follow this pattern—keep it consistent.
+- Rate limiting: `portal_check_rate_limit` backs the public/registration flows. Keep it in the loop when adding new anonymous endpoints.
+- Content safety: sanitize TipTap/HTML using `sanitize-resource-html` and `sanitize-embed` before persisting.
 
-## Delivery Plan & Status
+## Navigation & workspaces
+- Single nav blueprint lives in `src/lib/portal-access.ts`. Client links cover home, appointments, documents, cases, support, profile, consents.
+- Workspaces and guards:
+  - **Admin**: clients/consents, users/permissions/profiles/organizations, resources, policies, notifications, marketing content (navigation, branding, home, supports, programs, footer), inventory, donations.
+  - **Staff**: overview, caseload, cases, intake queue, schedule, outreach log (guarded by IHARC staff/volunteer roles).
+  - **Organization**: overview, members, invites, settings (guarded by org admin/rep roles).
+- User menu, command palette, breadcrumbs, and rails all read from these blueprints. To add a surface: (1) add capability flag in `portal-access.ts`, (2) add link in the relevant blueprint, (3) guard the page/server action with the same flag, (4) ensure Supabase RLS matches.
 
-### Phase 0 — Alignment & Inventory ✅
-- Mission, success criteria, and data guardrails captured.
-- Legacy portal and admin surface audited. Supabase usage documented in `docs/migration-roadmap.md`.
+## Current surface status
+- **Client portal**: Home/support/profile/consents/cases are live and wired to Supabase (`core.people`, `case_mgmt.case_management`, grants, activities). Appointments and documents still render placeholder data; requests log audit events but are not yet backed by scheduling/storage.
+- **Registration & public flows** (`/register/*`): Get help, existing-claim, community-member, partner, volunteer, and concern-report flows write to `portal.registration_flows` (rate-limited) and call `claim_registration_flow` when applicable.
+- **Staff workspace**: Caseload, schedule, and outreach log use RPCs `core.staff_caseload`, `core.staff_shifts_today`, `core.staff_outreach_logs`. Case detail/note/consent actions write to `core.people` and `core.people_activities`; intake queue reads `portal.registration_flows`.
+- **Organization workspace**: Members/invites/settings scoped by org via `set_profile_role` and RLS. Redirects if the profile lacks an org or approval.
+- **Admin workspace**:
+  - Clients/consents/grants: `core.people`, `person_access_grants`, `get_people_list_with_types`.
+  - Users/profiles/organizations: `portal.profiles`, `portal.profile_invites`, `set_profile_role`, `refresh_user_permissions`.
+  - Resources/policies: TipTap editors persisting to `portal.resource_pages` and `portal.policies` (HTML sanitized).
+  - Notifications: `portal.notifications` + optional `portal-alerts` invocation.
+  - Marketing: `portal.public_settings` and related content powering the marketing site.
+  - Inventory: `inventory` schema RPCs/views; Donations catalogue in `donations` schema linked to inventory items.
+- **Marketing integration**: Marketing app should stay read-only; plan cache/tag/webhook invalidation so updates from STEVI propagate across apps.
 
-### Phase 1 — Foundation & Scaffolding ✅
-- Next.js 15 scaffold with shared providers, theming, and build tooling in place.
-- Supabase SSR/browser clients and middleware migrated.
-- Core navigation, layout shell, and home/appointments/documents/profile/support routes stubbed with STEVI-focused copy.
-- Follow-ups completed: `.env.example` now includes admin tooling secrets and shared Supabase notes, and runtime expectations live in `docs/backend.md`.
+## Development standards
+- Use `createSupabaseServerClient` inside actions/route handlers to set auth cookies; the RSC client is read-only and should not set cookies.
+- Keep routes dynamic unless truly static. Do not fetch roles client-side—pass `PortalAccess` down.
+- Respect RLS and consent: verify policies with Supabase MCP before shipping; UI hiding is not security.
+- Design system: stick to Material 3 tokens and shared components; avoid ad-hoc colors/spacing. Regenerate tokens with `npm run sync:tokens` after updating `tokens/material3.json`.
+- Notifications/alerts: send via `queuePortalNotification`; include `PORTAL_ALERTS_SECRET` locally only if you need to exercise the Edge Function.
+- Testing: `npm run lint`, `npm run typecheck`, `npm run test` (Vitest), `npm run e2e` (Playwright). Few tests exist—add coverage when touching flows.
+- Build/deploy: run `node build.js` (lints then builds). Azure SWA uses the generated `.next` output; keep SWC native disabled unless Azure supports it.
+- Environment: `.env.example` is currently missing—create it using the matrix in `docs/backend.md`. Required: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_SITE_URL`. Optional: `PORTAL_ALERTS_SECRET`, GA, `AZURE_STATIC_WEB_APPS_API_TOKEN`. Never commit secrets.
 
-### Phase 2 — Client Experience (🚧 in progress)
-- Replace collaboration-era modules with STEVI-specific flows:
-  - ✅ Landing, home dashboard, appointments request/history shell, document locker preview, support directory, profile management.
-  - ☐ Wire appointments, documents, and support actions to Supabase tables/RPCs (confirm schemas via MCP before touching).
-  - ☐ Implement notifications/alerts UI once schema confirmed.
-  - ☐ Add Vitest/Playwright coverage for critical journeys.
+## Outstanding work (prioritised)
+1. Wire appointments and document locker to real Supabase tables/RPCs and `portal-attachments` signed URLs; add staff-side management to replace placeholders.
+2. Add cache revalidation/webhook strategy so marketing and STEVI stay in sync after admin updates.
+3. Metrics/governance surfaces (if still required) are not built—confirm scope, add capability flag, and align RLS.
+4. Add `.env.example` and refresh `README.md` to reflect Next.js 16/React 19, current commands, and required env vars.
+5. Increase automated coverage (Vitest + Playwright) for registration flows, consents, cases, notifications, inventory/donations.
+6. Mirror or pipeline Supabase Edge Functions (`portal-alerts`, `portal-admin-invite`, etc.) into this repo or clearly document their external home.
 
-### Phase 3 — Admin Workspace Migration (🚧 starting now)
-- Extract admin tools from marketing repo, re-scope to STEVI (all backed by Supabase mutations and audit logs):
-  - ✅ Profile verification & invitations (Supabase `portal.profiles`, `portal.profile_invites`, RLS-protected RPCs).
-  - ✅ Resource/report library management (`portal.resource_pages`, attachments, embed helpers) now managed in STEVI under `/admin/resources`. Marketing site continues to read published rows.
-  - ✅ Policies module (`portal.policies`, new enums/status) managed at `/admin/policies`, using TipTap rich text, RLS respecting roles, audit logging, and marketing cache revalidation.
-  - ✅ Notifications queue + templates (`portal.notifications`, existing edge functions) to broadcast outreach updates.
-  - ☐ Metrics ingestion controls (if still required) and any governance settings surfaced to staff (`portal.metric_catalog`, `portal.metric_daily`, etc.).
-- Lock down the marketing app to read-only access patterns by exposing pre-approved SQL views or RPCs. Ensure STEVI admin revalidation triggers cover both apps (`/admin`, marketing routes, sitemap, etc.) so Supabase updates propagate everywhere.
-
-### Phase 4 — Integration & Hardening (⬜ pending)
-- Confirm cache invalidation strategy (reuse `src/lib/cache/*` tagging helpers).
-- Validate Supabase RLS/auth contexts across server actions and API routes.
-- Fill `docs/backend.md` with table/policy references gathered via Supabase MCP, plus environment setup instructions.
-- Add regression tests and lint/typecheck gates.
-
-### Phase 5 — Marketing Separation & Launch (⬜ pending)
-- Update marketing repo to consume shared content via read-only APIs (no portal code).
-- Set up redirects and comms for launch.
-- Run coordinated release checklist with outreach/marketing teams.
-
-## Supabase & Backend Expectations
-- Continue using existing schemas (`portal`, `core`, etc.) and edge functions.
-- All new functionality must respect RLS policies — confirm via MCP tools rather than migrations alone.
-- Document environment variables, storage buckets, and function dependencies in STEVI docs.
-
-## Current Deliverables & Milestones
-- ✅ Repo scaffolding + base layout.
-- 🚧 Client dashboard, appointments, documents, support, profile.
-- 🚧 Admin workspace migration (resources, invites, notifications, policies, metrics).
-- ⬜ Integration testing + Supabase documentation.
-- ⬜ Marketing hand-off & dual-launch comms.
-
-The STEVI team should treat this briefing as a living document. Update it as features ship, especially when admin tooling or Supabase dependencies change.
-
-## Supabase & Backend Preservation
-- Keep the Supabase schema untouched; only augment via migrations coordinated with data team. Use Supabase MCP tool to verify existing policies before shipping.
-- Ensure Edge Functions remain in `I.H.A.R.C-Public-Website/supabase/functions` but create a plan to mirror them into STEVI repo or manage via external deploy pipeline.
-- Update environment documentation to clarify which repo holds `.env` values and how to share secrets between deployments.
-- Monitor audit logs and rate limits after launch to confirm service continuity.
-
-### Access Control Implementation Notes
-- `src/lib/portal-access.ts` is the single source of truth for role/feature gates. Any new privileged surface (profile verification, notifications, metrics, etc.) must register a boolean there (`canManageNotifications`, `canViewMetrics`, etc.) so UI and server actions stay aligned.
-- `(portal)/layout.tsx` now wraps every route with `PortalAccessProvider`. Client components should call `usePortalAccess()` instead of re-fetching Supabase to check roles or feature access. Server components should accept `portalAccess` props from parents or reuse the shared helper sparingly.
-- Navigation (PortalNav, TopNav, user menus) only renders links from the centralized blueprint so community members never see admin or staff-only destinations. Maintain that pattern whenever you introduce new menu links.
-- When scoping future admin features, hide the corresponding cards/sections unless the current profile passes the relevant gate from `portal-access.ts`. This mirrors the RLS-enforced server checks and prevents accidental privilege escalation.
-
-### Navigation & Workspace Blueprint (NEW)
-- Single source: `src/lib/portal-access.ts` now defines grouped workspace blueprints for navigation, user menu, and command palette. Client links live in `CLIENT_NAV_BLUEPRINT`; admin (and future org apps) live in workspace blueprints (e.g., `ADMIN_NAV_BLUEPRINT`). Each link carries its own role/IHARC-role guards or custom guard.
-- Surfaces fed by one blueprint: Top bar command palette, client nav pills, user menu, admin left rail, and admin breadcrumbs all read from these blueprints—no duplicate definitions.
-- Admin isolation: `/admin` routes use their own layout (`src/app/(portal)/admin/layout.tsx`) with left-rail nav + breadcrumbs (`src/components/shells/workspace-shell.tsx`, `src/components/layout/admin-nav.tsx`, `src/components/layout/admin-breadcrumbs.tsx`). The client pill bar is hidden on admin paths to reduce clutter.
-- Adding a new workspace (e.g., Food Bank partner):
-  1) Add a `WorkspaceNavBlueprint` entry in `src/lib/portal-access.ts` with `id`, `label`, `groups: [{ id, label, icon, links: [...] }]`. Gate each link using `requiresProfileRoles`, `requiresIharcRoles`, or `requiresGuard`.
-  2) Export a resolver similar to `resolveAdminWorkspaceNav` (or reuse `resolveWorkspace`) to hydrate that blueprint for the given `portalAccess`.
-  3) Create a layout under `src/app/(portal)/<workspace>/layout.tsx` that loads `portalAccess`, calls your resolver, and wraps children with `WorkspaceShell`. Redirect when resolver returns null to enforce permissions.
-  4) Add a single entry in `CLIENT_NAV_BLUEPRINT` if you want the workspace reachable from client nav/command palette; otherwise expose it only via internal links.
-  5) Keep server-side guards on every privileged page/API route—blueprint hiding is UI only; access control must still rely on Supabase RLS + server checks.
-- Mobile: the left rail collapses into a sheet; command palette (⌘/Ctrl+K) is the quickest cross-surface launcher.
-
-### Role & Permission System (Authoritative Flow)
-- Roles come **only** from Supabase `get_user_roles(user_uuid)`; JWT/app_metadata fallbacks are removed. If a role is missing, fix the DB role bindings (core.roles / core.user_roles) or the `refresh_user_permissions` RPC, not the app.
-- `PortalAccess` derives capability flags (`canAccessAdminWorkspace`, `canManageResources`, `canManageWebsiteContent`, `canManageOrgUsers/Invites`, `canManageNotifications`, etc.) from that RPC result. UI links, server pages, and actions must gate on these flags—never on raw role strings.
-- Adding a new role/feature:
-  1) Create/assign the role and permissions in Supabase (`core.roles`, `core.permissions`, `core.role_permissions`, `core.user_roles`).
-  2) Add a capability flag in `src/lib/portal-access.ts` that checks the role/permission you just added.
-  3) Gate new pages/actions/components using the capability flag and, if needed, add nav links via the workspace blueprints in `portal-access.ts`.
-  4) Ensure RLS/policies for the target tables or RPCs enforce the same role; never rely on UI hiding.
-- Organization-specific flows should use the same pattern: org roles live in Supabase, capability flags in `PortalAccess`, links in `resolveOrgWorkspaceNav`, and server actions must call `loadPortalAccess` instead of parsing JWT metadata.
-
-## Marketing Site Follow-Up
-- After extraction, re-centre marketing copy on awareness, petitions, and contact info while pointing action CTAs to STEVI.
-- Maintain snapshot stats (read-only) on marketing pages using small fetchers or static content so the marketing app no longer needs heavy portal dependencies.
-- Document marketing/portal integration points in `I.H.A.R.C-Public-Website/docs/hand-off.md`.
-
-## Deliverables & Milestones
-- ✅ Inventory & architecture briefing (this document).
-- 🟡 STEVI repo scaffolding & shared resource migration.
-- 🟡 Portal route parity with legacy experience.
-- 🟡 Client-centric upgrades and QA sign-off with outreach team.
-- 🟡 Marketing site cleanup, redirects, and dual-launch comms.
-
-The STEVI team should treat this briefing as the living source of truth—update it as plans solidify, especially when Supabase schema or shared infrastructure changes.
-
-
-NOTES: 
-Always use context7 when I need code generation, setup or configuration steps, or
-library/API documentation. This means you should automatically use the Context7 MCP
-tools to resolve library id and get library docs without me having to explicitly ask.
-
-Always use the supabase mcp tool to view existing implementation. Follow existing patterns already implemented, i.e use of schemas outside of "public" such as "core", "inventory", "justice", etc. Always check first and do not rely on migration files as a reference. 
+## Tooling notes
+- Default to MCP. Use Context7 for any library/API documentation or codegen steps; use Supabase MCP to inspect live schema/RLS instead of guessing from migrations.
+- MCP resources/templates are not configured—do not rely on them. Avoid outbound web requests unless approved.

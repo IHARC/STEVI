@@ -1,37 +1,41 @@
 # STEVI — Supportive Technology to Enable Vulnerable Individuals
 
-STEVI is the standalone client portal for the Integrated Homelessness and Addictions Response Centre (IHARC). It will
-serve neighbours at `https://stevi.iharc.ca`, giving clients and outreach staff a secure space to request
-appointments, track plans, sign petitions, and access tailored resources. The marketing site at `https://iharc.ca`
-remains focused on public storytelling while this repo carries the authenticated experience.
+STEVI is the standalone client portal for the Integrated Homelessness and Addictions Response Centre (IHARC). It serves
+neighbours at `https://stevi.iharc.ca`, giving clients and outreach staff a secure space to request appointments, track
+plans, access documents, and receive outreach updates. The marketing site at `https://iharc.ca` stays public and
+read-only; both apps share the same Supabase project.
 
 ## Getting Started
 
-- **Prerequisites**: Node.js 20.x (npm 10+). Use `nvm use` to stay aligned with production.
+- **Prerequisites**: Node.js 20.x (npm 10+). Run `nvm use` if you have it installed.
+- **Configure env**: Copy `.env.example` to `.env.local` and fill the Supabase + app URLs (see below).
 - **Install dependencies**: `npm install`
-- **Run locally**: `npm run dev` (defaults to <http://localhost:3000>)
+- **Run locally**: `npm run dev` (http://localhost:3000)
 - **Type checks**: `npm run typecheck`
 - **Linting**: `npm run lint`
 - **Unit tests**: `npm run test`
 - **E2E tests**: `npm run e2e`
 
-Copy `.env.example` (to be added in a future step) into `.env.local` and supply Supabase credentials, analytics flags,
-and the canonical app URL (`NEXT_PUBLIC_APP_URL=https://stevi.iharc.ca`) before hitting live data.
+Environment variables (full notes in `docs/backend.md`):
+- Required: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_SITE_URL`
+- Optional: `PORTAL_ALERTS_SECRET` (Edge Function trigger), `NEXT_PUBLIC_GA4_ID`, `NEXT_PUBLIC_ANALYTICS_DISABLED`, `SUPABASE_SERVICE_ROLE_KEY` (local scripts only), `AZURE_STATIC_WEB_APPS_API_TOKEN` (CI)
 
 ## Tech Stack
 
-- Next.js 15 App Router with React Server Components
-- TypeScript + Tailwind CSS tokens (Material 3-aligned), Radix UI primitives, shadcn-inspired component wrappers
-- Supabase Auth/Database/Edge Functions shared with the IHARC marketing portal
-- Vitest + Testing Library for unit coverage, Playwright for end-to-end flows
-- Azure Static Web Apps deployment (Azure workflow authored manually outside this repo)
+- Next.js 16 App Router with React Server Components (React 19)
+- TypeScript + Tailwind CSS with Material 3 tokens (`docs/design-tokens.md`), Radix primitives, shadcn-inspired wrappers, TipTap for rich text
+- Supabase Auth/Database/Edge Functions shared with the marketing portal (schemas: `portal`, `core`, `case_mgmt`, `inventory`, `donations`)
+- Vitest + Testing Library for unit coverage; Playwright for end-to-end flows
+- Azure Static Web Apps deployment (build entry `node build.js`; SWC native disabled)
 
 ## Migration Status
 
-- ✅ Next.js scaffold ported with shared layout, providers, and design tokens
-- ✅ Tailwind/PostCSS/ESLint/TS configs aligned to IHARC standards
-- ✅ Placeholder landing screen wired with STEVI metadata
-- 🚧 Portal routes, cached Supabase loaders, server actions, and edge-function adapters pending migration
-- 🚧 Documentation & environment samples in progress
+- ✅ Next.js scaffold, shared layout/providers, Material 3 tokens
+- ✅ Supabase clients (server + RSC), auth middleware, nav/workspace blueprints
+- ✅ Client portal shells: home, appointments, documents, cases, support, profile, consents (appointments/documents currently read from placeholders)
+- ✅ Admin workspaces: profiles/invites, resources, policies, notifications, marketing content, inventory, donations
+- ✅ Staff workspace: caseload, schedule, outreach log; Organization workspace: members/invites/settings
+- 🚧 Wire appointments + documents to Supabase tables/storage; add cache revalidation/webhooks
+- 🚧 Fill out test coverage (Vitest + Playwright) and metrics/governance surfaces if required
 
-See `agents.md` for the full extraction and enhancement strategy.
+See `agents.md` for the latest operator briefing and outstanding work.
