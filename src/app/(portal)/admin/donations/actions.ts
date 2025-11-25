@@ -2,8 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { ensurePortalProfile } from '@/lib/profile';
-import { getIharcRoles } from '@/lib/ihar-auth';
+import { loadPortalAccess } from '@/lib/portal-access';
 import { logAuditEvent } from '@/lib/audit';
 
 type AdminContext = {
@@ -23,22 +22,17 @@ function normalizeSlug(input: string): string {
 
 async function requirePortalAdmin(): Promise<AdminContext> {
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
+  const access = await loadPortalAccess(supabase);
 
-  if (error || !user) {
-    throw error ?? new Error('Sign in to continue.');
+  if (!access) {
+    throw new Error('Sign in to continue.');
   }
 
-  const roles = getIharcRoles(user);
-  if (!roles.includes('iharc_admin')) {
+  if (!access.iharcRoles.includes('iharc_admin')) {
     throw new Error('IHARC admin access is required.');
   }
 
-  const profile = await ensurePortalProfile(supabase, user.id);
-  return { supabase, donationsClient: supabase.schema('donations'), actorProfileId: profile.id };
+  return { supabase, donationsClient: supabase.schema('donations'), actorProfileId: access.profile.id };
 }
 
 export async function saveCatalogItem(formData: FormData) {

@@ -2,25 +2,109 @@ import type { SupabaseAnyServerClient } from '@/lib/supabase/types';
 import type { PersonRecord } from '@/lib/cases/types';
 
 const PEOPLE_TABLE = 'people';
+const GRANTS_TABLE = 'person_access_grants';
+const USER_PEOPLE_TABLE = 'user_people';
+const GRANT_SCOPES = ['view', 'timeline_client', 'timeline_full', 'write_notes', 'manage_consents'] as const;
+
+async function findPersonViaUserLink(
+  supabase: SupabaseAnyServerClient,
+  userId: string,
+): Promise<PersonRecord | null> {
+  const core = supabase.schema('core');
+
+  const { data: linkRow, error: linkError } = await core
+    .from(USER_PEOPLE_TABLE)
+    .select('person_id')
+    .eq('user_id', userId)
+    .limit(1)
+    .maybeSingle();
+
+  if (linkError) {
+    throw new Error('Unable to resolve your client link right now.');
+  }
+
+  if (!linkRow?.person_id) {
+    return null;
+  }
+
+  const { data: person, error: personError } = await core
+    .from(PEOPLE_TABLE)
+    .select('*')
+    .eq('id', linkRow.person_id)
+    .maybeSingle();
+
+  if (personError) {
+    throw new Error('Unable to load linked client record.');
+  }
+
+  return person ?? null;
+}
+
+async function findPersonViaGrant(
+  supabase: SupabaseAnyServerClient,
+  userId: string,
+): Promise<PersonRecord | null> {
+  const core = supabase.schema('core');
+
+  const { data: grantRow, error: grantError } = await core
+    .from(GRANTS_TABLE)
+    .select('person_id')
+    .eq('grantee_user_id', userId)
+    .in('scope', GRANT_SCOPES as unknown as string[])
+    .order('granted_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (grantError) {
+    throw new Error('Unable to resolve access grants right now.');
+  }
+
+  if (!grantRow?.person_id) {
+    return null;
+  }
+
+  const { data: person, error: personError } = await core
+    .from(PEOPLE_TABLE)
+    .select('*')
+    .eq('id', grantRow.person_id)
+    .maybeSingle();
+
+  if (personError) {
+    throw new Error('Unable to load linked client record.');
+  }
+
+  return person ?? null;
+}
+
+async function upsertUserPersonLink(
+  supabase: SupabaseAnyServerClient,
+  userId: string,
+  personId: number,
+) {
+  const core = supabase.schema('core');
+  await core.from(USER_PEOPLE_TABLE).upsert(
+    {
+      user_id: userId,
+      person_id: personId,
+    },
+    { onConflict: 'user_id' },
+  );
+}
 
 export async function findPersonForUser(
   supabase: SupabaseAnyServerClient,
   userId: string,
 ): Promise<PersonRecord | null> {
-  const core = supabase.schema('core');
-  const { data, error } = await core
-    .from(PEOPLE_TABLE)
-    .select('*')
-    .eq('created_by', userId)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  const viaLink = await findPersonViaUserLink(supabase, userId);
+  if (viaLink) return viaLink;
 
-  if (error) {
-    throw new Error('Unable to resolve your person record right now.');
+  const viaGrant = await findPersonViaGrant(supabase, userId);
+  if (viaGrant) {
+    await upsertUserPersonLink(supabase, userId, viaGrant.id);
+    return viaGrant;
   }
 
-  return data ?? null;
+  return null;
 }
 
 export async function requirePersonForUser(

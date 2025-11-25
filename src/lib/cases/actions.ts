@@ -44,6 +44,8 @@ export async function submitClientCaseUpdateAction(formData: FormData): Promise<
     staff_member: access.profile.display_name,
     metadata: { client_visible: true, submitted_via: 'portal' },
     created_by: access.userId,
+    provider_profile_id: access.profile.id,
+    provider_org_id: access.organizationId,
   });
 
   if (error) {
@@ -212,6 +214,8 @@ export async function staffAddCaseNoteAction(formData: FormData): Promise<void> 
     staff_member: access.profile.display_name,
     metadata: { client_visible: false },
     created_by: access.userId,
+    provider_profile_id: access.profile.id,
+    provider_org_id: access.organizationId,
   });
 
   if (error) throw new Error('Unable to add note.');

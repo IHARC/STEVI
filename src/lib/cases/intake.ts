@@ -66,6 +66,21 @@ export async function processClientIntake(
     throw new Error('Could not create a person record for this intake.');
   }
 
+  // Link the authenticated user (if any) to the new person record for deterministic resolution.
+  if (intakeRow.supabase_user_id) {
+    await core
+      .from('user_people')
+      .upsert(
+        {
+          user_id: intakeRow.supabase_user_id,
+          profile_id: intakeRow.profile_id ?? null,
+          person_id: person.id,
+        },
+        { onConflict: 'user_id' },
+      )
+      .throwOnError();
+  }
+
   const caseInsert = {
     person_id: person.id,
     case_manager_name: actorProfile.display_name,
@@ -111,6 +126,8 @@ export async function processClientIntake(
         client_visible: false,
       },
       created_by: actorUserId,
+      provider_profile_id: actorProfile.id,
+      provider_org_id: actorProfile.organization_id,
     })
     .throwOnError();
 

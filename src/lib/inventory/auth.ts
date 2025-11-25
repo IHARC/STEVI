@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
-import { ensurePortalProfile } from '@/lib/profile';
 import type { PortalProfile } from '@/lib/profile';
-import { getIharcRoles, type IharcRole } from '@/lib/ihar-auth';
+import { loadPortalAccess } from '@/lib/portal-access';
+import type { IharcRole } from '@/lib/ihar-auth';
 import { INVENTORY_ALLOWED_ROLES } from '@/lib/inventory/constants';
 import type { SupabaseAnyServerClient } from '@/lib/supabase/types';
 
@@ -41,17 +41,22 @@ export async function ensureInventoryActor(
     throw new InventoryAccessError('Sign in to continue.');
   }
 
-  const roles = getIharcRoles(user);
-  if (!hasRequiredRole(roles)) {
+  const access = await loadPortalAccess(supabase);
+  if (!access) {
+    if (redirectOnFailure) {
+      redirect('/login?next=/admin/inventory');
+    }
+    throw new InventoryAccessError('Sign in to continue.');
+  }
+
+  if (!access.canAccessInventoryWorkspace || !hasRequiredRole(access.iharcRoles)) {
     if (redirectOnFailure) {
       redirect('/admin');
     }
     throw new InventoryAccessError('IHARC inventory access is restricted to staff accounts.');
   }
 
-  const profile = await ensurePortalProfile(supabase, user.id);
-
-  return { profile, roles };
+  return { profile: access.profile, roles: access.iharcRoles };
 }
 
 export function requireInventoryAdmin(roles: IharcRole[]): void {

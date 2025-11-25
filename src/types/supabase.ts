@@ -4026,6 +4026,52 @@ export type Database = {
           },
         ]
       }
+      user_people: {
+        Row: {
+          id: string
+          user_id: string
+          profile_id: string | null
+          person_id: number
+          linked_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          profile_id?: string | null
+          person_id: number
+          linked_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          profile_id?: string | null
+          person_id?: number
+          linked_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_people_person_fk"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_people_profile_fk"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_people_user_fk"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       people_activities: {
         Row: {
           activity_date: string
@@ -4049,6 +4095,8 @@ export type Database = {
           outcome: string | null
           person_id: number
           priority: string | null
+          provider_org_id: number | null
+          provider_profile_id: string | null
           staff_member: string
           tags: string[] | null
           title: string
@@ -4077,6 +4125,8 @@ export type Database = {
           outcome?: string | null
           person_id: number
           priority?: string | null
+          provider_org_id?: number | null
+          provider_profile_id?: string | null
           staff_member: string
           tags?: string[] | null
           title: string
@@ -4105,6 +4155,8 @@ export type Database = {
           outcome?: string | null
           person_id?: number
           priority?: string | null
+          provider_org_id?: number | null
+          provider_profile_id?: string | null
           staff_member?: string
           tags?: string[] | null
           title?: string
@@ -4117,6 +4169,20 @@ export type Database = {
             columns: ["address_id"]
             isOneToOne: false
             referencedRelation: "addresses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "people_activities_provider_org_fk"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "people_activities_provider_profile_fk"
+            columns: ["provider_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]

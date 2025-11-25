@@ -382,7 +382,19 @@ async function fetchUserRoles(
     throw new Error('Unable to load your roles right now. Please try again or contact support.');
   }
 
-  return data ?? [];
+  if (!Array.isArray(data)) {
+    return [];
+  }
+
+  return data
+    .map((entry) => {
+      if (typeof entry === 'string') return entry;
+      if (entry && typeof entry === 'object' && 'role_name' in entry && typeof entry.role_name === 'string') {
+        return entry.role_name;
+      }
+      return null;
+    })
+    .filter((role): role is string => Boolean(role));
 }
 
 function linkIsAllowed(blueprint: PortalLinkBlueprint, access: PortalAccess): boolean {
