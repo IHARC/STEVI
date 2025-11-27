@@ -1,6 +1,13 @@
 import { type NextRequest } from 'next/server';
 import { updateSession } from '@/lib/supabase/middleware';
 
+const GA_HOSTS = [
+  'https://www.googletagmanager.com',
+  'https://www.google-analytics.com',
+];
+
+const SUPABASE_HOST = "https://*.supabase.co";
+
 const SECURITY_HEADERS: Record<string, string> = {
   'Content-Security-Policy': [
     "default-src 'self'",
@@ -8,11 +15,15 @@ const SECURITY_HEADERS: Record<string, string> = {
     "form-action 'self'",
     "frame-ancestors 'none'",
     "object-src 'none'",
-    "script-src 'self' 'unsafe-inline' https://*.supabase.co",
-    "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: https://*.supabase.co",
+    // Inline scripts avoided; allow GA + Supabase + nonce'd inlined snippets if present
+    `script-src 'self' ${GA_HOSTS.join(' ')} ${SUPABASE_HOST}`,
+    `style-src 'self' 'unsafe-inline'`,
+    `img-src 'self' data: ${SUPABASE_HOST} ${GA_HOSTS.join(' ')}`,
     "font-src 'self' data:",
-    "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+    `connect-src 'self' ${SUPABASE_HOST} wss://*.supabase.co ${GA_HOSTS.join(' ')}`,
+    "media-src 'self'",
+    "frame-src 'none'",
+    "worker-src 'self'",
   ].join('; '),
   'Referrer-Policy': 'strict-origin-when-cross-origin',
   'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=()',
