@@ -94,3 +94,12 @@ export async function fetchClientInboxItems(
 
   return items.slice(0, 8);
 }
+
+export async function fetchWorkspaceInbox(
+  supabase: SupabaseAnyServerClient,
+  access: PortalAccess,
+  _workspace: 'client' | 'staff' | 'org' | 'admin',
+): Promise<InboxItem[]> {
+  // For now reuse client-centric inbox to surface time-sensitive items; extend per workspace later.
+  return fetchClientInboxItems(supabase, access);
+}

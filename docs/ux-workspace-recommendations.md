@@ -42,4 +42,4 @@ Purpose: track implementation of workspace UX upgrades while honoring STEVI grou
 - Marketing cache: when admin surfaces touch marketing content, ensure revalidation/tag hooks are wired; avoid static caches for authed data.
 
 ## Current Work Focus
-- Active phases: 1 (Navigation) and 2 (Client Portal). Deliver incrementally; keep audit/RLS/preview and Material 3 adherence in every PR.
+- Phase 3 next (Staff workspace tables/peek/today/shortcuts) while maintaining audit/RLS/preview and Material 3 adherence. Phases 1–2 completed.

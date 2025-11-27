@@ -14,6 +14,7 @@ import { listResources } from '@/lib/resources';
 import { loadPortalAccess } from '@/lib/portal-access';
 import type { Resource } from '@/lib/resources';
 import type { Database } from '@/types/supabase';
+import { fetchClientAppointments } from '@/lib/appointments/queries';
 type PeopleListItem = Database['core']['Tables']['people']['Row'] & { email?: string | null; phone?: string | null };
 
 type TopNavProps = {
@@ -149,6 +150,20 @@ async function buildEntityCommands(
     } catch (error) {
       console.warn('Command palette clients unavailable', error);
     }
+  }
+
+  // Client portal entities
+  try {
+    const { upcoming, past } = await fetchClientAppointments(supabase, access.profile.id);
+    [...upcoming, ...past].slice(0, 5).forEach((appt) => {
+      commands.push({
+        href: '/appointments',
+        label: appt.title ?? 'Appointment',
+        group: 'My appointments',
+      });
+    });
+  } catch (error) {
+    console.warn('Command palette appointments unavailable', error);
   }
 
   return commands;

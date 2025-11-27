@@ -5,6 +5,10 @@ import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess, resolveAdminWorkspaceNav } from '@/lib/portal-access';
 import { WorkspaceShell } from '@/components/shells/workspace-shell';
 import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
+import { InboxPanel } from '@/components/layout/inbox-panel';
+import { fetchWorkspaceInbox } from '@/lib/inbox';
+import { resolveWorkspaceQuickActions } from '@/lib/workspaces';
+import { Button } from '@/components/ui/button';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,5 +31,22 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     redirect(resolveDefaultWorkspacePath(access));
   }
 
-  return <WorkspaceShell nav={adminNav}>{children}</WorkspaceShell>;
+  const inboxItems = await fetchWorkspaceInbox(supabase, access, 'admin');
+  const quickActions = resolveWorkspaceQuickActions(access, 'admin').filter((action) => !action.disabled);
+
+  const stickyHeader = quickActions.length ? (
+    <div className="flex flex-wrap items-center gap-space-sm">
+      {quickActions.map((action) => (
+        <Button key={action.id} asChild size="sm" variant="secondary">
+          <a href={action.href}>{action.label}</a>
+        </Button>
+      ))}
+    </div>
+  ) : null;
+
+  return (
+    <WorkspaceShell nav={adminNav} stickyHeader={stickyHeader} inboxSlot={<InboxPanel items={inboxItems} />}>
+      {children}
+    </WorkspaceShell>
+  );
 }
