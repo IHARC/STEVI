@@ -27,7 +27,7 @@ Purpose: track implementation of workspace UX upgrades while honoring STEVI grou
 5. Empty/loading states for appointments/documents: skeletons + expectation text for slow connections. **Status:** Done
 
 ### Phase 3 — Staff Workspace (later)
-- Cases table with saved views; peek panel; "Today" strip; fast outreach entry; keyboard shortcuts (N, /, Shift+Cmd/Ctrl+W). **Status:** Pending (not started)
+- Cases table with saved views; peek panel; "Today" strip; fast outreach entry; keyboard shortcuts (N, /, Shift+Cmd/Ctrl+W). **Status:** Done
 
 ### Phase 4 — Organization Workspace (later)
 - Org dashboard metrics; invite side-sheet with rate-limit preview; role clarity toggles; settings cards with toasts. **Status:** Pending
