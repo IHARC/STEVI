@@ -38,8 +38,6 @@ function formatDate(value: string | null) {
   }
 }
 
-type ProfileOption = { id: string; label: string };
-
 function StaffScheduleForm({
   appointment,
   onConfirm,
