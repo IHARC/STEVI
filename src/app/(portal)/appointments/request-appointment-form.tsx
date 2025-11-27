@@ -4,6 +4,13 @@ import { useFormState } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import type { AppointmentRequestState } from './types';
 
 type RequestAppointmentFormProps = {
@@ -55,6 +62,31 @@ export function RequestAppointmentForm({ action, profileDisplayName }: RequestAp
           name="staff_preference"
           placeholder="Example: Jordan, Morgan, peer navigator, or whoever is available"
         />
+      </div>
+      <div className="grid gap-space-sm sm:grid-cols-2">
+        <div className="space-y-1.5">
+          <label className="text-body-md font-semibold text-on-surface" htmlFor="location-type">
+            Meeting type
+          </label>
+          <Select name="location_type" defaultValue="in_person">
+            <SelectTrigger id="location-type">
+              <SelectValue placeholder="Select a meeting type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="in_person">In person</SelectItem>
+              <SelectItem value="phone">Phone</SelectItem>
+              <SelectItem value="video">Video</SelectItem>
+              <SelectItem value="field">Field / outreach</SelectItem>
+              <SelectItem value="other">Other</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1.5">
+          <label className="text-body-md font-semibold text-on-surface" htmlFor="meeting-url">
+            Meeting link or phone (optional)
+          </label>
+          <Input id="meeting-url" name="meeting_url" placeholder="Zoom/Teams link or call-back number" />
+        </div>
       </div>
       <p className="text-body-md text-muted-foreground">
         Submitting will notify the outreach coordination queue linked with STEVI Ops for {profileLabel}.

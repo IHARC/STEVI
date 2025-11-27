@@ -141,6 +141,11 @@ const ADMIN_NAV_BLUEPRINT: WorkspaceNavBlueprint = {
       icon: 'boxes',
       links: [
         {
+          href: '/admin/appointments',
+          label: 'Appointments',
+          requiresGuard: hasElevatedAdminAccess,
+        },
+        {
           href: '/admin/inventory',
           label: 'Inventory workspace',
           requiresIharcRoles: INVENTORY_ALLOWED_ROLES,
@@ -216,6 +221,11 @@ const ORG_NAV_BLUEPRINT: WorkspaceNavBlueprint = {
           label: 'Settings',
           requiresGuard: (access) => access.canManageOrgUsers,
         },
+        {
+          href: '/org/appointments',
+          label: 'Appointments',
+          requiresGuard: (access) => access.canAccessOrgWorkspace,
+        },
       ],
     },
   ],
@@ -257,6 +267,11 @@ const STAFF_NAV_BLUEPRINT: WorkspaceNavBlueprint = {
       label: 'Operations',
       icon: 'boxes',
       links: [
+        {
+          href: '/staff/appointments',
+          label: 'Appointments',
+          requiresGuard: (access) => access.canAccessStaffWorkspace,
+        },
         {
           href: '/staff/schedule',
           label: 'Schedule',

@@ -4,17 +4,22 @@ import type { PortalAccess } from '@/lib/portal-access';
 import type { PortalProfile } from '@/lib/profile';
 import type { SupabaseAnyServerClient } from '@/lib/supabase/types';
 
-const redirectMock = vi.fn((path: string) => {
-  const error = new Error(`redirect:${path}`);
-  error.name = 'NextRedirect';
-  throw error;
-});
+const { redirectMock } = vi.hoisted(() => ({
+  redirectMock: vi.fn((path: string) => {
+    const error = new Error(`redirect:${path}`);
+    error.name = 'NextRedirect';
+    throw error;
+  }),
+}));
 
 vi.mock('next/navigation', () => ({
   redirect: redirectMock,
 }));
 
-const loadPortalAccess = vi.fn();
+const { loadPortalAccess } = vi.hoisted(() => ({
+  loadPortalAccess: vi.fn(),
+}));
+
 vi.mock('@/lib/portal-access', () => ({
   loadPortalAccess: (...args: unknown[]) => loadPortalAccess(...args),
 }));

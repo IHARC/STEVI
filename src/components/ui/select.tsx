@@ -5,7 +5,38 @@ import { Check, ChevronDown, ChevronUp } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Icon } from "@/components/ui/icon"
 
-const Select = SelectPrimitive.Root
+type SelectProps = React.ComponentPropsWithoutRef<typeof SelectPrimitive.Root> & {
+  name?: string
+  form?: string
+}
+
+const Select = ({ name, form, value: valueProp, defaultValue, onValueChange, children, ...props }: SelectProps) => {
+  const isControlled = valueProp !== undefined
+  const [uncontrolledValue, setUncontrolledValue] = React.useState<string | undefined>(defaultValue)
+
+  const handleChange = (val: string) => {
+    if (!isControlled) {
+      setUncontrolledValue(val)
+    }
+    onValueChange?.(val)
+  }
+
+  const currentValue = isControlled ? valueProp : uncontrolledValue
+
+  return (
+    <>
+      <SelectPrimitive.Root
+        value={isControlled ? valueProp : undefined}
+        defaultValue={isControlled ? undefined : defaultValue}
+        onValueChange={handleChange}
+        {...props}
+      >
+        {children}
+      </SelectPrimitive.Root>
+      {name ? <input type="hidden" name={name} value={currentValue ?? ''} form={form} /> : null}
+    </>
+  )
+}
 
 const SelectGroup = SelectPrimitive.Group
 

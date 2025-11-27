@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ClientPreviewGuard } from '@/components/layout/client-preview-guard';
+import { fetchClientAppointments } from '@/lib/appointments/queries';
+import type { AppointmentWithRelations } from '@/lib/appointments/types';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,6 +18,8 @@ type AppointmentPreview = {
   location: string;
   staffContact: string;
   status: 'scheduled' | 'requested' | 'completed';
+  locationType?: string;
+  meetingUrl?: string | null;
 };
 
 type SupportContact = {
@@ -26,25 +30,6 @@ type SupportContact = {
   email: string;
   available: string;
 };
-
-const fallbackAppointments: AppointmentPreview[] = [
-  {
-    id: 'sample-housing',
-    title: 'Housing support check-in',
-    occursAt: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
-    location: 'IHARC Outreach Hub — 4th floor community room',
-    staffContact: 'Tessa (case manager)',
-    status: 'scheduled',
-  },
-  {
-    id: 'sample-clinic',
-    title: 'Rapid Access Addiction Medicine follow-up',
-    occursAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 3).toISOString(),
-    location: 'Northumberland Hills Hospital',
-    staffContact: 'Dr. Sheppard',
-    status: 'requested',
-  },
-];
 
 const supportTeam: SupportContact[] = [
   {
@@ -78,11 +63,6 @@ function formatAppointmentDate(value: string) {
   }
 }
 
-async function loadUpcomingAppointments(userId: string): Promise<AppointmentPreview[]> {
-  void userId;
-  return fallbackAppointments;
-}
-
 export default async function HomePage() {
   const supabase = await createSupabaseRSCClient();
   const {
@@ -94,7 +74,17 @@ export default async function HomePage() {
   }
 
   const profile = await ensurePortalProfile(supabase, user.id);
-  const appointments = await loadUpcomingAppointments(user.id);
+  const { upcoming } = await fetchClientAppointments(supabase, profile.id);
+  const appointments: AppointmentPreview[] = upcoming.slice(0, 2).map((appt: AppointmentWithRelations) => ({
+    id: appt.id,
+    title: appt.title,
+    occursAt: appt.occurs_at ?? appt.created_at,
+    location: appt.location ?? 'To be confirmed',
+    staffContact: appt.staff?.display_name ?? 'Outreach team',
+    status: appt.status === 'scheduled' ? 'scheduled' : appt.status === 'completed' ? 'completed' : 'requested',
+    locationType: appt.location_type,
+    meetingUrl: appt.meeting_url,
+  }));
 
   const preferredName = profile.display_name || 'Community member';
 
@@ -141,23 +131,26 @@ export default async function HomePage() {
             </Button>
           </CardHeader>
           <CardContent className="flex flex-col gap-space-md">
-            {appointments.map((appointment) => (
-              <article
-                key={appointment.id}
-                className="rounded-xl border border-outline/20 bg-surface-container-low p-space-md shadow-level-1 transition state-layer-color-primary hover:border-primary hover:state-layer-hover hover:shadow-level-2"
-                aria-labelledby={`appointment-${appointment.id}`}
-              >
+            {appointments.length === 0 ? (
+              <p className="text-body-sm text-muted-foreground">No upcoming appointments. Request one to get started.</p>
+            ) : (
+              appointments.map((appointment) => (
+                <article
+                  key={appointment.id}
+                  className="rounded-xl border border-outline/20 bg-surface-container-low p-space-md shadow-level-1 transition state-layer-color-primary hover:border-primary hover:state-layer-hover hover:shadow-level-2"
+                  aria-labelledby={`appointment-${appointment.id}`}
+                >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <h3 id={`appointment-${appointment.id}`} className="text-title-md font-medium text-on-surface">
                     {appointment.title}
                   </h3>
                   <Badge
-                    variant={appointment.status === 'completed' ? 'secondary' : 'default'}
-                    className="capitalize"
-                  >
-                    {appointment.status}
-                  </Badge>
-                </div>
+                      variant={appointment.status === 'completed' ? 'secondary' : 'default'}
+                      className="capitalize"
+                    >
+                      {appointment.status}
+                    </Badge>
+                  </div>
                 <dl className="mt-space-xs space-y-[0.35rem] text-body-sm text-on-surface/80">
                   <div className="flex flex-wrap gap-1">
                     <dt className="font-medium text-on-surface/70">When:</dt>
@@ -166,14 +159,28 @@ export default async function HomePage() {
                   <div className="flex flex-wrap gap-1">
                     <dt className="font-medium text-on-surface/70">Where:</dt>
                     <dd>{appointment.location}</dd>
+                    {appointment.locationType ? (
+                      <dd className="text-on-surface/60">({appointment.locationType.replaceAll('_', ' ')})</dd>
+                    ) : null}
                   </div>
                   <div className="flex flex-wrap gap-1">
                     <dt className="font-medium text-on-surface/70">With:</dt>
                     <dd>{appointment.staffContact}</dd>
                   </div>
+                  {appointment.meetingUrl ? (
+                    <div className="flex flex-wrap gap-1">
+                      <dt className="font-medium text-on-surface/70">Join:</dt>
+                      <dd>
+                        <a className="text-primary underline-offset-4 hover:underline" href={appointment.meetingUrl} target="_blank" rel="noreferrer">
+                          Meeting link
+                        </a>
+                      </dd>
+                    </div>
+                  ) : null}
                 </dl>
               </article>
-            ))}
+            ))
+          )}
             <p className="text-body-sm text-muted-foreground">
               Need to change something?{' '}
               <Link href="/support" className="text-primary underline-offset-4 hover:underline">
