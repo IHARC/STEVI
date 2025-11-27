@@ -4,6 +4,7 @@ import { ensurePortalProfile } from '@/lib/profile';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { ComposeNotificationForm } from '@/components/admin/notifications/compose-form';
 import { RecentNotifications } from '@/components/admin/notifications/recent-notifications';
+import { RelaySettingsCard } from '@/components/admin/notifications/relay-settings-card';
 import type {
   NotificationRecipient,
   NotificationRecord,
@@ -141,6 +142,8 @@ export default async function NotificationsAdminPage() {
       </header>
 
       <ComposeNotificationForm recipients={recipients} />
+
+      <RelaySettingsCard />
 
       <RecentNotifications notifications={notifications} />
     </div>

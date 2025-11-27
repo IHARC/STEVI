@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { AvailabilityPicker } from '@/components/appointments/availability-picker';
 import { generateAvailabilitySlots } from '@/lib/appointments/slots';
 import { CancelAppointmentForm } from '../../appointments/cancel-appointment-form';
+import { ProfileSearch } from '@/components/appointments/profile-search';
 import {
   cancelAppointmentAsStaff,
   completeAppointment,
@@ -36,6 +37,8 @@ function formatDate(value: string | null) {
     return value;
   }
 }
+
+type ProfileOption = { id: string; label: string };
 
 function StaffScheduleForm({
   appointment,
@@ -134,17 +137,14 @@ function StaffScheduleForm({
         </div>
       </div>
       <AvailabilityPicker slots={quickSlots} targetInputId={`occurs-${appointment.id}`} />
-      <div className="space-y-space-2xs">
-        <label className="text-label-sm text-on-surface/80" htmlFor={`staff-${appointment.id}`}>
-          Assign staff (profile UUID, defaults to you)
-        </label>
-        <Input
-          id={`staff-${appointment.id}`}
-          name="staff_profile_id"
-          placeholder="Leave blank to assign to you"
-          defaultValue={appointment.staff_profile_id ?? ''}
-        />
-      </div>
+      <ProfileSearch
+        name="staff_profile_id"
+        label="Assign staff (optional)"
+        scope="staff"
+        defaultValue={appointment.staff_profile_id ?? ''}
+        placeholder="Search staff"
+        helperText="Leave blank to stay assigned to you."
+      />
       <div className="flex flex-wrap gap-space-sm">
         <Button type="submit" size="sm">
           Confirm & schedule
@@ -237,18 +237,13 @@ export default async function StaffAppointmentsPage() {
               className="grid gap-space-sm"
             >
               <div className="grid gap-space-sm sm:grid-cols-2">
-                <div className="space-y-space-2xs">
-                  <label className="text-label-sm text-on-surface/80" htmlFor="offline-client-id">
-                    Client profile ID
-                  </label>
-                  <Input
-                    id="offline-client-id"
-                    name="client_profile_id"
-                    placeholder="Paste profile UUID"
-                    required
-                    className="sm:w-full"
-                  />
-                </div>
+                <ProfileSearch
+                  name="client_profile_id"
+                  label="Client"
+                  scope="client"
+                  placeholder="Search clients by name"
+                  required
+                />
                 <div className="space-y-space-2xs">
                   <label className="text-label-sm text-on-surface/80" htmlFor="offline-occurs">
                     Date & time (optional)
@@ -277,7 +272,13 @@ export default async function StaffAppointmentsPage() {
                 <Input name="meeting_url" placeholder="Meeting link / phone (optional)" />
               </div>
               <AvailabilityPicker slots={quickSlots} targetInputId="offline-occurs" label="Suggested slots" />
-              <Input name="staff_profile_id" placeholder="Assign to staff profile (optional)" />
+              <ProfileSearch
+                name="staff_profile_id"
+                label="Assign staff (optional)"
+                scope="staff"
+                placeholder="Search staff"
+                helperText="Leave blank to assign yourself."
+              />
               <Button type="submit" className="w-fit" size="sm">
                 Create appointment
               </Button>

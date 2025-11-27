@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ProfileSearch } from '@/components/appointments/profile-search';
 import { AvailabilityPicker } from '@/components/appointments/availability-picker';
 import { generateAvailabilitySlots } from '@/lib/appointments/slots';
 import { fetchScopedAppointments } from '@/lib/appointments/queries';
@@ -65,7 +66,14 @@ function AdminConfirmForm({
         </SelectContent>
       </Select>
       <Input name="meeting_url" placeholder="Meeting link / phone" defaultValue={appointment.meeting_url ?? ''} />
-      <Input name="staff_profile_id" placeholder="Assign staff profile (optional)" defaultValue={appointment.staff_profile_id ?? ''} />
+      <ProfileSearch
+        name="staff_profile_id"
+        label="Assign staff (optional)"
+        scope="staff"
+        defaultValue={appointment.staff_profile_id ?? ''}
+        placeholder="Search staff"
+        helperText="Leave blank to stay unassigned."
+      />
       <AvailabilityPicker slots={quickSlots} targetInputId={`occurs-${appointment.id}`} />
       <Button type="submit" size="sm" className="md:col-span-3 w-fit">
         Confirm

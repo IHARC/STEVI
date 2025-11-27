@@ -7,6 +7,7 @@ import { queuePortalNotification } from '@/lib/notifications';
 import { getUserEmailForProfile } from '@/lib/profile';
 import { ensurePortalProfile } from '@/lib/profile';
 import { loadPortalAccess } from '@/lib/portal-access';
+import type { SupabaseServerClient } from '@/lib/supabase/types';
 
 const ADMIN_PATHS = ['/admin', '/admin/notifications'] as const;
 
@@ -66,6 +67,80 @@ async function requireAdminContext() {
   const actorProfile = await ensurePortalProfile(supabase, access.userId);
 
   return { supabase, actorProfile };
+}
+
+type RelayPayload = {
+  channel: 'email' | 'sms';
+  provider: string;
+  apiUrl?: string | null;
+  apiKey?: string | null;
+  fromEmail?: string | null;
+  fromPhone?: string | null;
+  isActive?: boolean;
+};
+
+function sanitizeRelayPayload(formData: FormData): RelayPayload {
+  const channel = (readString(formData, 'channel') as RelayPayload['channel']) ?? 'email';
+  const provider = readString(formData, 'provider');
+  if (!provider) {
+    throw new Error('Provider name is required.');
+  }
+
+  return {
+    channel,
+    provider,
+    apiUrl: readString(formData, 'api_url'),
+    apiKey: readString(formData, 'api_key'),
+    fromEmail: readString(formData, 'from_email'),
+    fromPhone: readString(formData, 'from_phone'),
+    isActive: readString(formData, 'is_active') === 'true',
+  };
+}
+
+async function upsertRelay(supabase: SupabaseServerClient, payload: RelayPayload) {
+  const { error } = await supabase
+    .schema('portal')
+    .from('notification_relays')
+    .upsert(
+      {
+        channel: payload.channel,
+        provider: payload.provider,
+        api_url: payload.apiUrl,
+        api_key: payload.apiKey,
+        from_email: payload.fromEmail,
+        from_phone: payload.fromPhone,
+        is_active: payload.isActive ?? true,
+      },
+      { onConflict: 'channel' },
+    );
+
+  if (error) {
+    throw error;
+  }
+}
+
+export async function upsertRelayAction(formData: FormData): Promise<ActionResult> {
+  try {
+    const { supabase, actorProfile } = await requireAdminContext();
+    const payload = sanitizeRelayPayload(formData);
+
+    await upsertRelay(supabase, payload);
+
+    await logAuditEvent(supabase, {
+      actorProfileId: actorProfile.id,
+      action: 'notification_relay_saved',
+      entityType: 'notification_relay',
+      entityId: null,
+      meta: { channel: payload.channel, provider: payload.provider },
+    });
+
+    await Promise.all(ADMIN_PATHS.map((path) => revalidatePath(path)));
+
+    return { success: true };
+  } catch (error) {
+    console.error('upsertRelayAction error', error);
+    return { success: false, error: getErrorMessage(error) };
+  }
 }
 
 export async function sendNotificationAction(formData: FormData): Promise<ActionResult> {
