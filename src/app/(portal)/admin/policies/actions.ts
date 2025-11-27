@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { logAuditEvent } from '@/lib/audit';
+import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 import { sanitizeResourceHtml } from '@/lib/sanitize-resource-html';
 import { ensurePortalProfile } from '@/lib/profile';
 import { normalizePolicySlug, type PolicyCategory, type PolicyStatus } from '@/lib/policies';
@@ -124,7 +124,7 @@ export async function createPolicy(formData: FormData) {
     actorProfileId: actorProfile.id,
     action: 'policy_created',
     entityType: 'policy',
-    entityId: inserted?.id ?? null,
+    entityRef: buildEntityRef({ schema: 'portal', table: 'policies', id: inserted?.id ?? null }),
     meta: {
       slug,
       status,
@@ -208,7 +208,7 @@ export async function updatePolicy(formData: FormData) {
     actorProfileId: actorProfile.id,
     action: 'policy_updated',
     entityType: 'policy',
-    entityId: policyId,
+    entityRef: buildEntityRef({ schema: 'portal', table: 'policies', id: policyId }),
     meta: {
       slug,
       status,
@@ -252,7 +252,7 @@ export async function deletePolicy(formData: FormData) {
     actorProfileId: actorProfile.id,
     action: 'policy_deleted',
     entityType: 'policy',
-    entityId: policyId,
+    entityRef: buildEntityRef({ schema: 'portal', table: 'policies', id: policyId }),
     meta: {
       slug: policySlug,
     },

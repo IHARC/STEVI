@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
 import { loadPortalAccess } from '@/lib/portal-access';
-import { logAuditEvent } from '@/lib/audit';
+import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 import {
   MARKETING_SETTINGS_KEYS,
   BrandingAssets,
@@ -76,7 +76,7 @@ export async function saveBrandingSettings(formData: FormData) {
     actorProfileId: actorProfile.id,
     action: 'marketing_branding_updated',
     entityType: 'marketing_branding',
-    entityId: null,
+    entityRef: buildEntityRef({ schema: 'portal', table: 'public_settings', id: MARKETING_SETTINGS_KEYS.branding }),
     meta: {
       has_light: Boolean(branding.logoLightUrl),
       has_dark: Boolean(branding.logoDarkUrl),
@@ -122,7 +122,7 @@ export async function uploadBrandingAsset(formData: FormData) {
     actorProfileId: actorProfile.id,
     action: 'marketing_branding_uploaded',
     entityType: 'marketing_branding_asset',
-    entityId: null,
+    entityRef: buildEntityRef({ schema: 'storage', table: BRANDING_BUCKET, id: objectPath }),
     meta: { bucket: BRANDING_BUCKET, path: objectPath, kind, size: file.size },
   });
 

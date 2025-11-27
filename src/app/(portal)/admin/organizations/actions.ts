@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
-import { logAuditEvent } from '@/lib/audit';
+import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 import { loadPortalAccess } from '@/lib/portal-access';
 import {
   mergeFeatureFlagsIntoTags,
@@ -184,8 +184,8 @@ export async function createOrganizationAction(formData: FormData): Promise<Acti
         actorProfileId: actorProfile.id,
         action: 'organization_created',
         entityType: 'organization',
-        entityId: null,
-        meta: { organization_id: insert.data.id, name, status, features },
+        entityRef: buildEntityRef({ schema: 'core', table: 'organizations', id: insert.data.id }),
+        meta: { pk_int: insert.data.id, name, status, features },
       });
     }
 
@@ -282,8 +282,8 @@ export async function updateOrganizationAction(formData: FormData): Promise<Acti
       actorProfileId: actorProfile.id,
       action: 'organization_updated',
       entityType: 'organization',
-      entityId: null,
-      meta: { organization_id: organizationId, status, is_active: isActive, features },
+      entityRef: buildEntityRef({ schema: 'core', table: 'organizations', id: organizationId }),
+      meta: { pk_int: organizationId, status, is_active: isActive, features },
     });
 
     await Promise.all([revalidatePath(LIST_PATH), revalidatePath(detailPath(organizationId))]);
@@ -342,8 +342,8 @@ export async function deleteOrganizationAction(formData: FormData): Promise<Acti
       actorProfileId: actorProfile.id,
       action: 'organization_deleted',
       entityType: 'organization',
-      entityId: null,
-      meta: { organization_id: organizationId },
+      entityRef: buildEntityRef({ schema: 'core', table: 'organizations', id: organizationId }),
+      meta: { pk_int: organizationId },
     });
 
     await revalidatePath(LIST_PATH);
@@ -408,7 +408,7 @@ export async function attachOrgMemberAction(formData: FormData): Promise<ActionR
       actorProfileId: actorProfile.id,
       action: 'org_member_attached',
       entityType: 'profile',
-      entityId: profileId,
+      entityRef: buildEntityRef({ schema: 'portal', table: 'profiles', id: profileId }),
       meta: { organization_id: organizationId, make_admin: makeAdmin, make_rep: makeRep },
     });
 
@@ -459,7 +459,7 @@ export async function adminToggleOrgMemberRoleAction(formData: FormData): Promis
       actorProfileId: actorProfile.id,
       action: enable ? 'org_role_granted' : 'org_role_revoked',
       entityType: 'profile',
-      entityId: profileId,
+      entityRef: buildEntityRef({ schema: 'portal', table: 'profiles', id: profileId }),
       meta: { organization_id: organizationId, role: roleName },
     });
 
@@ -522,7 +522,7 @@ export async function adminRemoveOrgMemberAction(formData: FormData): Promise<Ac
       actorProfileId: actorProfile.id,
       action: 'org_member_removed',
       entityType: 'profile',
-      entityId: profileId,
+      entityRef: buildEntityRef({ schema: 'portal', table: 'profiles', id: profileId }),
       meta: { organization_id: organizationId },
     });
 

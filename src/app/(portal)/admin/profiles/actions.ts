@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { logAuditEvent } from '@/lib/audit';
+import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 import { NO_ORGANIZATION_VALUE } from '@/lib/constants';
 import { ensurePortalProfile, type PortalProfile } from '@/lib/profile';
 import { loadPortalAccess } from '@/lib/portal-access';
@@ -207,16 +207,16 @@ export async function approveAffiliationAction(formData: FormData): Promise<Acti
 
     await syncOrgRepRole(supabase, profileId, elevateRole);
 
-    await logAuditEvent(supabase, {
-      actorProfileId: actorProfile.id,
-      action: 'profile_affiliation_approved',
-      entityType: 'profile',
-      entityId: profileId,
-      meta: {
-        affiliation_type: pendingProfile.affiliation_type,
-        organization_id: organizationId,
-        government_role: governmentRole,
-      },
+  await logAuditEvent(supabase, {
+    actorProfileId: actorProfile.id,
+    action: 'profile_affiliation_approved',
+    entityType: 'profile',
+    entityRef: buildEntityRef({ schema: 'portal', table: 'profiles', id: profileId }),
+    meta: {
+      affiliation_type: pendingProfile.affiliation_type,
+      organization_id: organizationId,
+      government_role: governmentRole,
+    },
     });
 
     await revalidateAdminPaths();
@@ -274,12 +274,12 @@ export async function declineAffiliationAction(formData: FormData): Promise<Acti
       });
     }
 
-    await logAuditEvent(supabase, {
-      actorProfileId: actorProfile.id,
-      action: 'profile_affiliation_declined',
-      entityType: 'profile',
-      entityId: profileId,
-    });
+  await logAuditEvent(supabase, {
+    actorProfileId: actorProfile.id,
+    action: 'profile_affiliation_declined',
+    entityType: 'profile',
+    entityRef: buildEntityRef({ schema: 'portal', table: 'profiles', id: profileId }),
+  });
 
     await revalidateAdminPaths();
 

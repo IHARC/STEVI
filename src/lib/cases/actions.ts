@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { loadPortalAccess } from '@/lib/portal-access';
-import { logAuditEvent } from '@/lib/audit';
+import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 import { requirePersonForUser } from '@/lib/cases/person';
 import { fetchClientCaseDetail, fetchStaffCaseDetail } from '@/lib/cases/fetchers';
 import { processClientIntake } from '@/lib/cases/intake';
@@ -56,8 +56,11 @@ export async function submitClientCaseUpdateAction(formData: FormData): Promise<
     actorProfileId: access.profile.id,
     action: 'client_update_submitted',
     entityType: 'case_management',
-    entityId: null,
-    meta: { case_id: caseId, person_id: caseDetail.personId },
+    entityRef: null,
+    meta: {
+      case_id: caseId,
+      person_id: caseDetail.personId,
+    },
   });
 
   revalidatePath(`/cases/${caseId}`);
@@ -94,8 +97,8 @@ export async function updateConsentsAction(formData: FormData): Promise<void> {
     actorProfileId: access.profile.id,
     action: 'consent_updated',
     entityType: 'people',
-    entityId: String(person.id),
-    meta: { data_sharing_consent: dataSharing, preferred_contact_method: preferredContact },
+    entityRef: buildEntityRef({ schema: 'core', table: 'people', id: person.id }),
+    meta: { pk_int: person.id, data_sharing_consent: dataSharing, preferred_contact_method: preferredContact },
   });
 
   revalidatePath('/profile/consents');
@@ -133,8 +136,8 @@ export async function adminOverrideConsentAction(formData: FormData): Promise<vo
     actorProfileId: access.profile.id,
     action: 'consent_overridden',
     entityType: 'people',
-    entityId: null,
-    meta: { person_id: personId, data_sharing_consent: dataSharing, preferred_contact_method: preferredContact },
+    entityRef: buildEntityRef({ schema: 'core', table: 'people', id: personId }),
+    meta: { pk_int: personId, data_sharing_consent: dataSharing, preferred_contact_method: preferredContact },
   });
 
   revalidatePath('/admin/consents');
@@ -224,7 +227,7 @@ export async function staffAddCaseNoteAction(formData: FormData): Promise<void> 
     actorProfileId: access.profile.id,
     action: 'case_note_added',
     entityType: 'case_management',
-    entityId: null,
+    entityRef: null,
     meta: { case_id: caseId, person_id: detail.personId },
   });
 

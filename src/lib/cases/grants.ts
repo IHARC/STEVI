@@ -1,4 +1,4 @@
-import { logAuditEvent } from '@/lib/audit';
+import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 import type { SupabaseServerClient } from '@/lib/supabase/types';
 
 export const GRANT_SCOPES = [
@@ -107,8 +107,8 @@ export async function createPersonGrant(
     actorProfileId,
     action: 'person_access_grant_added',
     entityType: 'people',
-    entityId: String(personId),
-    meta: { scope, grantee_user_id: granteeUserId, grantee_org_id: granteeOrgId },
+    entityRef: buildEntityRef({ schema: 'core', table: 'people', id: personId }),
+    meta: { pk_int: personId, scope, grantee_user_id: granteeUserId, grantee_org_id: granteeOrgId },
   });
 }
 
@@ -127,7 +127,7 @@ export async function revokePersonGrant(
     actorProfileId,
     action: 'person_access_grant_revoked',
     entityType: 'people',
-    entityId: data ? String(data.person_id) : null,
-    meta: { grant_id: grantId },
+    entityRef: data ? buildEntityRef({ schema: 'core', table: 'people', id: data.person_id }) : null,
+    meta: { grant_id: grantId, person_id: data?.person_id ?? null },
   });
 }

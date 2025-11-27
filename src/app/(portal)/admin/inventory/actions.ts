@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { logAuditEvent } from '@/lib/audit';
+import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 import { ensureInventoryActor, InventoryAccessError, requireInventoryAdmin } from '@/lib/inventory/auth';
 import {
   adjustInventoryStock,
@@ -141,7 +141,7 @@ export async function createInventoryItemAction(
       actorProfileId: profile.id,
       action: 'inventory_item_created',
       entityType: 'inventory_item',
-      entityId: item.id,
+      entityRef: buildEntityRef({ schema: 'inventory', table: 'items', id: item.id }),
       meta: {
         name: item.name,
         category: item.category,
@@ -171,7 +171,7 @@ export async function updateInventoryItemAction(formData: FormData): Promise<Act
       actorProfileId: profile.id,
       action: 'inventory_item_updated',
       entityType: 'inventory_item',
-      entityId: itemId,
+      entityRef: buildEntityRef({ schema: 'inventory', table: 'items', id: itemId }),
     });
   });
 }
@@ -186,7 +186,7 @@ export async function deleteInventoryItemAction(formData: FormData): Promise<Act
       actorProfileId: profile.id,
       action: 'inventory_item_deleted',
       entityType: 'inventory_item',
-      entityId: itemId,
+      entityRef: buildEntityRef({ schema: 'inventory', table: 'items', id: itemId }),
     });
   });
 }
@@ -202,7 +202,7 @@ export async function toggleInventoryItemStatusAction(formData: FormData): Promi
       actorProfileId: profile.id,
       action: active ? 'inventory_item_activated' : 'inventory_item_deactivated',
       entityType: 'inventory_item',
-      entityId: itemId,
+      entityRef: buildEntityRef({ schema: 'inventory', table: 'items', id: itemId }),
     });
   });
 }
@@ -225,7 +225,11 @@ export async function receiveInventoryStockAction(formData: FormData): Promise<A
       actorProfileId: profile.id,
       action: 'inventory_stock_received',
       entityType: 'inventory_item',
-      entityId: getRequiredString(formData, 'item_id', 'Select an item to receive stock for.'),
+      entityRef: buildEntityRef({
+        schema: 'inventory',
+        table: 'items',
+        id: getRequiredString(formData, 'item_id', 'Select an item to receive stock for.'),
+      }),
     });
   });
 }
@@ -247,7 +251,7 @@ export async function bulkReceiveInventoryStockAction(formData: FormData): Promi
       actorProfileId: profile.id,
       action: 'inventory_bulk_receipt_processed',
       entityType: 'inventory_bulk_receipt',
-      entityId: null,
+      entityRef: null,
       meta: {
         item_ids: payload.items.map((item) => item.itemId),
         total_items: payload.items.length,
@@ -270,7 +274,11 @@ export async function transferInventoryStockAction(formData: FormData): Promise<
       actorProfileId: profile.id,
       action: 'inventory_stock_transferred',
       entityType: 'inventory_item',
-      entityId: getRequiredString(formData, 'item_id', 'Select an item.'),
+      entityRef: buildEntityRef({
+        schema: 'inventory',
+        table: 'items',
+        id: getRequiredString(formData, 'item_id', 'Select an item.'),
+      }),
     });
   });
 }
@@ -290,7 +298,11 @@ export async function adjustInventoryStockAction(formData: FormData): Promise<Ac
       actorProfileId: profile.id,
       action: 'inventory_stock_adjusted',
       entityType: 'inventory_item',
-      entityId: getRequiredString(formData, 'item_id', 'Select an item.'),
+      entityRef: buildEntityRef({
+        schema: 'inventory',
+        table: 'items',
+        id: getRequiredString(formData, 'item_id', 'Select an item.'),
+      }),
     });
   });
 }
@@ -313,7 +325,7 @@ export async function createInventoryLocationAction(
       actorProfileId: profile.id,
       action: 'inventory_location_created',
       entityType: 'inventory_location',
-      entityId: location.id,
+      entityRef: buildEntityRef({ schema: 'inventory', table: 'locations', id: location.id }),
     });
 
     return { location };
@@ -338,7 +350,7 @@ export async function updateInventoryLocationAction(formData: FormData): Promise
       actorProfileId: profile.id,
       action: 'inventory_location_updated',
       entityType: 'inventory_location',
-      entityId: locationId,
+      entityRef: buildEntityRef({ schema: 'inventory', table: 'locations', id: locationId }),
     });
   });
 }
@@ -356,7 +368,7 @@ export async function toggleInventoryLocationAction(formData: FormData): Promise
       actorProfileId: profile.id,
       action: active ? 'inventory_location_activated' : 'inventory_location_deactivated',
       entityType: 'inventory_location',
-      entityId: locationId,
+      entityRef: buildEntityRef({ schema: 'inventory', table: 'locations', id: locationId }),
     });
   });
 }
@@ -373,7 +385,7 @@ export async function deleteInventoryLocationAction(formData: FormData): Promise
       actorProfileId: profile.id,
       action: 'inventory_location_deleted',
       entityType: 'inventory_location',
-      entityId: locationId,
+      entityRef: buildEntityRef({ schema: 'inventory', table: 'locations', id: locationId }),
     });
   });
 }
@@ -392,8 +404,8 @@ export async function createInventoryOrganizationAction(
       actorProfileId: profile.id,
       action: 'inventory_organization_created',
       entityType: 'inventory_organization',
-      entityId: null,
-      meta: { organization_id: organization.id, name: organization.name },
+      entityRef: buildEntityRef({ schema: 'inventory', table: 'organizations', id: organization.id }),
+      meta: { pk_int: organization.id, name: organization.name },
     });
 
     return { organization };
@@ -417,8 +429,8 @@ export async function updateInventoryOrganizationAction(formData: FormData): Pro
       actorProfileId: profile.id,
       action: 'inventory_organization_updated',
       entityType: 'inventory_organization',
-      entityId: null,
-      meta: { organization_id: organizationId },
+      entityRef: buildEntityRef({ schema: 'inventory', table: 'organizations', id: organizationId }),
+      meta: { pk_int: organizationId },
     });
   });
 }
@@ -436,8 +448,8 @@ export async function activateInventoryOrganizationAction(formData: FormData): P
       actorProfileId: profile.id,
       action: 'inventory_organization_activated',
       entityType: 'inventory_organization',
-      entityId: null,
-      meta: { organization_id: organizationId },
+      entityRef: buildEntityRef({ schema: 'inventory', table: 'organizations', id: organizationId }),
+      meta: { pk_int: organizationId },
     });
   });
 }
@@ -455,8 +467,8 @@ export async function deactivateInventoryOrganizationAction(formData: FormData):
       actorProfileId: profile.id,
       action: 'inventory_organization_deactivated',
       entityType: 'inventory_organization',
-      entityId: null,
-      meta: { organization_id: organizationId },
+      entityRef: buildEntityRef({ schema: 'inventory', table: 'organizations', id: organizationId }),
+      meta: { pk_int: organizationId },
     });
   });
 }
@@ -483,7 +495,7 @@ export async function updateInventoryTransactionSourceAction(
       actorProfileId: profile.id,
       action: 'inventory_receipt_source_updated',
       entityType: 'inventory_receipt',
-      entityId: transactionId,
+      entityRef: buildEntityRef({ schema: 'inventory', table: 'receipts', id: transactionId }),
     });
 
     return { receipt: receipt ?? null };

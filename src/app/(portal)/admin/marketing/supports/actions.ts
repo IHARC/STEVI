@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
 import { loadPortalAccess } from '@/lib/portal-access';
-import { logAuditEvent } from '@/lib/audit';
+import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 import {
   MARKETING_SETTINGS_KEYS,
   SupportEntry,
@@ -132,7 +132,7 @@ export async function saveSupports(formData: FormData) {
     actorProfileId: actorProfile.id,
     action: 'marketing_supports_updated',
     entityType: 'marketing_supports',
-    entityId: null,
+    entityRef: buildEntityRef({ schema: 'portal', table: 'public_settings', id: MARKETING_SETTINGS_KEYS.supportsUrgent }),
     meta: { urgent: urgent.length, mutual_aid: mutualAid.length },
   });
 

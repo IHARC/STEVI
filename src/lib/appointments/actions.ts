@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
 import { loadPortalAccess } from '@/lib/portal-access';
-import { logAuditEvent } from '@/lib/audit';
+import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 import type { AppointmentRequestState } from '@/app/(portal)/appointments/types';
 import type { AppointmentChannel, AppointmentStatus } from './types';
 
@@ -40,6 +40,76 @@ function parseLocationType(value: string | null): AppointmentChannel {
   return allowed.includes(normalized) ? normalized : 'in_person';
 }
 
+const ALLOWED_MEETING_PROTOCOLS = new Set(['http:', 'https:', 'tel:', 'mailto:']);
+
+function sanitizeMeetingUrl(value: string | null): string | null {
+  if (!value) return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  try {
+    const url = new URL(trimmed);
+    return ALLOWED_MEETING_PROTOCOLS.has(url.protocol) ? url.toString() : null;
+  } catch {
+    return null;
+  }
+}
+
+type AppointmentScopeRow = {
+  id: string;
+  client_profile_id: string;
+  organization_id: number | null;
+  staff_profile_id: string | null;
+};
+
+function isIharcAdmin(access: Awaited<ReturnType<typeof loadPortalAccess>>): boolean {
+  return access?.iharcRoles.includes('iharc_admin') ?? false;
+}
+
+async function fetchAppointmentScope(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  appointmentId: string,
+): Promise<AppointmentScopeRow> {
+  const { data, error } = await supabase
+    .schema('portal')
+    .from('appointments')
+    .select('id, client_profile_id, organization_id, staff_profile_id')
+    .eq('id', appointmentId)
+    .maybeSingle();
+
+  if (error || !data) {
+    throw new Error('Appointment not found or unavailable.');
+  }
+
+  return data as AppointmentScopeRow;
+}
+
+function assertCanActOnAppointment(
+  appointment: AppointmentScopeRow,
+  access: NonNullable<Awaited<ReturnType<typeof loadPortalAccess>>>,
+  context: 'client' | 'staff',
+) {
+  if (isIharcAdmin(access)) {
+    return;
+  }
+
+  const sameOrg = appointment.organization_id !== null && appointment.organization_id === access.organizationId;
+
+  if (context === 'client') {
+    if (appointment.client_profile_id === access.profile.id) return;
+    throw new Error('You do not have permission to modify this appointment.');
+  }
+
+  // staff/org/admin context
+  const isAssignedStaff = appointment.staff_profile_id === access.profile.id;
+  const isOrgScoped = access.canAccessOrgWorkspace && sameOrg;
+  const isStaffScoped = access.canAccessStaffWorkspace && (sameOrg || isAssignedStaff);
+  const isPortalAdminScoped = access.canAccessAdminWorkspace && sameOrg;
+
+  if (isStaffScoped || isOrgScoped || isPortalAdminScoped) return;
+
+  throw new Error('You do not have permission to modify this appointment.');
+}
+
 async function touchAppointmentListings() {
   revalidatePath('/appointments');
   revalidatePath('/home');
@@ -57,7 +127,7 @@ export async function requestAppointmentAction(
     const requestedWindow = readString(formData, 'preferred_date');
     const staffPreference = readString(formData, 'staff_preference');
     const locationType = parseLocationType(readString(formData, 'location_type'));
-    const meetingUrl = readString(formData, 'meeting_url');
+    const meetingUrl = sanitizeMeetingUrl(readString(formData, 'meeting_url'));
 
     if (!title || title.length < 6) {
       return { status: 'error', message: 'Share a short note (at least 6 characters).' };
@@ -100,7 +170,7 @@ export async function requestAppointmentAction(
       actorProfileId: profile.id,
       action: 'appointment_requested',
       entityType: 'appointment',
-      entityId: data.id,
+      entityRef: buildEntityRef({ schema: 'portal', table: 'appointments', id: data.id }),
       meta: {
         requested_window: requestedWindow,
         staff_preference: staffPreference,
@@ -137,6 +207,10 @@ export async function cancelAppointmentAsClient(formData: FormData): Promise<Act
     if (!user) throw new Error('Sign in to cancel an appointment.');
 
     const profile = await ensurePortalProfile(supabase, user.id);
+    const access = await loadPortalAccess(supabase);
+    if (!access) throw new Error('Sign in to cancel an appointment.');
+    const appointment = await fetchAppointmentScope(supabase, appointmentId);
+    assertCanActOnAppointment(appointment, { ...access, profile }, 'client');
 
     const { error } = await supabase
       .schema('portal')
@@ -146,7 +220,8 @@ export async function cancelAppointmentAsClient(formData: FormData): Promise<Act
         canceled_at: new Date().toISOString(),
         cancellation_reason: reason ?? 'Client cancelled via portal',
       })
-      .eq('id', appointmentId);
+      .eq('id', appointmentId)
+      .eq('client_profile_id', profile.id);
 
     if (error) {
       throw error;
@@ -156,7 +231,7 @@ export async function cancelAppointmentAsClient(formData: FormData): Promise<Act
       actorProfileId: profile.id,
       action: 'appointment_cancelled_by_client',
       entityType: 'appointment',
-      entityId: appointmentId,
+      entityRef: buildEntityRef({ schema: 'portal', table: 'appointments', id: appointmentId }),
       meta: { cancellation_reason: reason },
     });
 
@@ -174,7 +249,7 @@ export async function requestRescheduleAsClient(formData: FormData): Promise<Act
     const appointmentId = readString(formData, 'appointment_id');
     const requestedWindow = readString(formData, 'requested_window');
     const locationType = parseLocationType(readString(formData, 'location_type'));
-    const meetingUrl = readString(formData, 'meeting_url');
+    const meetingUrl = sanitizeMeetingUrl(readString(formData, 'meeting_url'));
     const preferredLocation = readString(formData, 'location');
 
     if (!appointmentId) throw new Error('Missing appointment id.');
@@ -186,6 +261,10 @@ export async function requestRescheduleAsClient(formData: FormData): Promise<Act
     if (!user) throw new Error('Sign in to request a change.');
 
     const profile = await ensurePortalProfile(supabase, user.id);
+    const access = await loadPortalAccess(supabase);
+    if (!access) throw new Error('Sign in to request a change.');
+    const appointment = await fetchAppointmentScope(supabase, appointmentId);
+    assertCanActOnAppointment(appointment, { ...access, profile }, 'client');
 
     const { error } = await supabase
       .schema('portal')
@@ -198,7 +277,8 @@ export async function requestRescheduleAsClient(formData: FormData): Promise<Act
         meeting_url: meetingUrl,
         location: preferredLocation,
       })
-      .eq('id', appointmentId);
+      .eq('id', appointmentId)
+      .eq('client_profile_id', profile.id);
 
     if (error) {
       throw error;
@@ -208,7 +288,7 @@ export async function requestRescheduleAsClient(formData: FormData): Promise<Act
       actorProfileId: profile.id,
       action: 'appointment_reschedule_requested',
       entityType: 'appointment',
-      entityId: appointmentId,
+      entityRef: buildEntityRef({ schema: 'portal', table: 'appointments', id: appointmentId }),
       meta: { requested_window: requestedWindow },
     });
 
@@ -228,7 +308,7 @@ export async function confirmAppointment(formData: FormData): Promise<ActionResu
     const durationInput = readString(formData, 'duration_minutes');
     const location = readString(formData, 'location');
     const locationType = parseLocationType(readString(formData, 'location_type'));
-    const meetingUrl = readString(formData, 'meeting_url');
+    const meetingUrl = sanitizeMeetingUrl(readString(formData, 'meeting_url'));
     const notes = readString(formData, 'notes');
     const staffProfileId = readString(formData, 'staff_profile_id');
 
@@ -246,6 +326,8 @@ export async function confirmAppointment(formData: FormData): Promise<ActionResu
     }
 
     const actorProfile = await ensurePortalProfile(supabase, access.userId);
+    const appointment = await fetchAppointmentScope(supabase, appointmentId);
+    assertCanActOnAppointment(appointment, { ...access, profile: actorProfile }, 'staff');
 
     const { error } = await supabase
       .schema('portal')
@@ -262,7 +344,8 @@ export async function confirmAppointment(formData: FormData): Promise<ActionResu
         confirmed_by_profile_id: actorProfile.id,
         reschedule_note: notes,
       })
-      .eq('id', appointmentId);
+      .eq('id', appointmentId)
+      .eq('organization_id', appointment.organization_id);
 
     if (error) {
       throw error;
@@ -272,7 +355,7 @@ export async function confirmAppointment(formData: FormData): Promise<ActionResu
       actorProfileId: actorProfile.id,
       action: 'appointment_confirmed',
       entityType: 'appointment',
-      entityId: appointmentId,
+      entityRef: buildEntityRef({ schema: 'portal', table: 'appointments', id: appointmentId }),
       meta: { occurs_at: occursAt, duration_minutes: durationMinutes, location, location_type: locationType },
     });
 
@@ -292,7 +375,7 @@ export async function createOfflineAppointment(formData: FormData): Promise<Acti
     const occursAt = parseDateTime(readString(formData, 'occurs_at'));
     const location = readString(formData, 'location');
     const locationType = parseLocationType(readString(formData, 'location_type'));
-    const meetingUrl = readString(formData, 'meeting_url');
+    const meetingUrl = sanitizeMeetingUrl(readString(formData, 'meeting_url'));
     const durationMinutes = parseInteger(readString(formData, 'duration_minutes'), 60);
     const staffProfileId = readString(formData, 'staff_profile_id');
 
@@ -336,7 +419,7 @@ export async function createOfflineAppointment(formData: FormData): Promise<Acti
       actorProfileId: actorProfile.id,
       action: 'appointment_created_offline',
       entityType: 'appointment',
-      entityId: data.id,
+      entityRef: buildEntityRef({ schema: 'portal', table: 'appointments', id: data.id }),
       meta: {
         occurs_at: occursAt,
         client_profile_id: clientProfileId,
@@ -365,6 +448,8 @@ export async function completeAppointment(formData: FormData): Promise<ActionRes
     }
 
     const actorProfile = await ensurePortalProfile(supabase, access.userId);
+    const appointment = await fetchAppointmentScope(supabase, appointmentId);
+    assertCanActOnAppointment(appointment, { ...access, profile: actorProfile }, 'staff');
 
     const { error } = await supabase
       .schema('portal')
@@ -373,7 +458,8 @@ export async function completeAppointment(formData: FormData): Promise<ActionRes
         status: 'completed' as AppointmentStatus,
         outcome_notes: outcomeNotes,
       })
-      .eq('id', appointmentId);
+      .eq('id', appointmentId)
+      .eq('organization_id', appointment.organization_id);
 
     if (error) throw error;
 
@@ -381,7 +467,7 @@ export async function completeAppointment(formData: FormData): Promise<ActionRes
       actorProfileId: actorProfile.id,
       action: 'appointment_completed',
       entityType: 'appointment',
-      entityId: appointmentId,
+      entityRef: buildEntityRef({ schema: 'portal', table: 'appointments', id: appointmentId }),
       meta: { outcome_notes: outcomeNotes },
     });
 
@@ -407,6 +493,8 @@ export async function cancelAppointmentAsStaff(formData: FormData): Promise<Acti
     }
 
     const actorProfile = await ensurePortalProfile(supabase, access.userId);
+    const appointment = await fetchAppointmentScope(supabase, appointmentId);
+    assertCanActOnAppointment(appointment, { ...access, profile: actorProfile }, 'staff');
 
     const { error } = await supabase
       .schema('portal')
@@ -416,7 +504,8 @@ export async function cancelAppointmentAsStaff(formData: FormData): Promise<Acti
         canceled_at: new Date().toISOString(),
         cancellation_reason: reason ?? 'Cancelled by staff',
       })
-      .eq('id', appointmentId);
+      .eq('id', appointmentId)
+      .eq('organization_id', appointment.organization_id);
 
     if (error) throw error;
 
@@ -424,7 +513,7 @@ export async function cancelAppointmentAsStaff(formData: FormData): Promise<Acti
       actorProfileId: actorProfile.id,
       action: 'appointment_cancelled_by_staff',
       entityType: 'appointment',
-      entityId: appointmentId,
+      entityRef: buildEntityRef({ schema: 'portal', table: 'appointments', id: appointmentId }),
       meta: { cancellation_reason: reason },
     });
 

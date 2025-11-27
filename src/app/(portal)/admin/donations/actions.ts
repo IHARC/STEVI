@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { loadPortalAccess } from '@/lib/portal-access';
-import { logAuditEvent } from '@/lib/audit';
+import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 
 type AdminContext = {
   supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>;
@@ -96,8 +96,8 @@ export async function saveCatalogItem(formData: FormData) {
     actorProfileId,
     action: id ? 'donation_catalog_updated' : 'donation_catalog_created',
     entityType: 'donation_catalog_item',
-    entityId: data?.id ?? null,
-    meta: { slug, title: rawTitle },
+    entityRef: buildEntityRef({ schema: 'donations', table: 'catalog_items', id: data?.id ?? null }),
+    meta: { pk_uuid: data?.id ?? null, slug, title: rawTitle },
   });
 
   await revalidatePath('/admin/donations');
@@ -118,8 +118,8 @@ export async function toggleCatalogItem(formData: FormData) {
     actorProfileId,
     action: 'donation_catalog_status_changed',
     entityType: 'donation_catalog_item',
-    entityId: id,
-    meta: { is_active: nextState },
+    entityRef: buildEntityRef({ schema: 'donations', table: 'catalog_items', id }),
+    meta: { pk_uuid: id, is_active: nextState },
   });
 
   await revalidatePath('/admin/donations');
@@ -187,8 +187,8 @@ export async function importInventoryItem(formData: FormData) {
     actorProfileId,
     action: 'donation_catalog_imported',
     entityType: 'donation_catalog_item',
-    entityId: inserted?.id ?? null,
-    meta: { inventory_item_id: inventoryItemId, title },
+    entityRef: buildEntityRef({ schema: 'donations', table: 'catalog_items', id: inserted?.id ?? null }),
+    meta: { pk_uuid: inserted?.id ?? null, inventory_item_id: inventoryItemId, title },
   });
 
   await revalidatePath('/admin/donations');

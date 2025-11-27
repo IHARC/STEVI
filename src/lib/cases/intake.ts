@@ -1,4 +1,4 @@
-import { logAuditEvent } from '@/lib/audit';
+import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 import { ensurePortalProfile } from '@/lib/profile';
 import type { SupabaseServerClient } from '@/lib/supabase/types';
 import type { IntakeSubmission } from '@/lib/cases/types';
@@ -144,8 +144,8 @@ export async function processClientIntake(
     actorProfileId: actorProfile.id,
     action: 'intake_processed',
     entityType: 'registration_flow',
-    entityId: intakeRow.id,
-    meta: { person_id: person.id, case_id: caseRow.id },
+    entityRef: buildEntityRef({ schema: 'portal', table: REGISTRATION_TABLE, id: intakeRow.id }),
+    meta: { pk_uuid: intakeRow.id, person_id: person.id, case_id: caseRow.id },
   });
 
   return { personId: person.id, caseId: caseRow.id };

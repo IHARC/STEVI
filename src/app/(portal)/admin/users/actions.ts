@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
 import { loadPortalAccess } from '@/lib/portal-access';
-import { logAuditEvent } from '@/lib/audit';
+import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 import { normalizeOrganizationId, parseAffiliationStatus, parseAffiliationType, parseGovernmentRole } from '@/lib/admin-users';
 import type { SupabaseServerClient } from '@/lib/supabase/types';
 
@@ -157,7 +157,7 @@ export async function updateProfileAction(formData: FormData): Promise<ActionRes
       actorProfileId: actorProfile.id,
       action: 'admin_user_updated',
       entityType: 'profile',
-      entityId: profileId,
+      entityRef: buildEntityRef({ schema: 'portal', table: 'profiles', id: profileId }),
       meta: updates,
     });
 
@@ -239,7 +239,7 @@ export async function toggleRoleAction(formData: FormData): Promise<ActionResult
       actorProfileId: actorProfile.id,
       action: enable ? 'admin_role_granted' : 'admin_role_revoked',
       entityType: 'profile',
-      entityId: profileId,
+      entityRef: buildEntityRef({ schema: 'portal', table: 'profiles', id: profileId }),
       meta: { role: roleName },
     });
 
@@ -326,7 +326,7 @@ export async function archiveUserAction(formData: FormData): Promise<ActionResul
       actorProfileId: actorProfile.id,
       action: 'admin_user_archived',
       entityType: 'profile',
-      entityId: profileId,
+      entityRef: buildEntityRef({ schema: 'portal', table: 'profiles', id: profileId }),
     });
 
     await revalidateUserPaths(profileId);
@@ -392,7 +392,7 @@ export async function sendInviteAction(formData: FormData): Promise<ActionResult
       actorProfileId: actorProfile.id,
       action: 'admin_invite_sent',
       entityType: 'profile_invite',
-      entityId: null,
+      entityRef: buildEntityRef({ schema: 'portal', table: 'profile_invites', id: email }),
       meta: { email, affiliationType, organizationId },
     });
 

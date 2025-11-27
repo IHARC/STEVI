@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
 import { loadPortalAccess } from '@/lib/portal-access';
-import { logAuditEvent } from '@/lib/audit';
+import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 import {
   MARKETING_SETTINGS_KEYS,
   ContextCard,
@@ -134,7 +134,7 @@ export async function saveHomeSettings(formData: FormData) {
     actorProfileId: actorProfile.id,
     action: 'marketing_home_updated',
     entityType: 'marketing_home',
-    entityId: null,
+    entityRef: buildEntityRef({ schema: 'portal', table: 'public_settings', id: MARKETING_SETTINGS_KEYS.contextCards }),
     meta: { context_cards: contextCards.length },
   });
 
@@ -173,7 +173,7 @@ export async function uploadHeroImage(formData: FormData) {
     actorProfileId: actorProfile.id,
     action: 'marketing_hero_image_uploaded',
     entityType: 'marketing_hero_image',
-    entityId: null,
+    entityRef: buildEntityRef({ schema: 'storage', table: HERO_BUCKET, id: objectPath }),
     meta: { bucket: HERO_BUCKET, path: objectPath, size: file.size },
   });
 

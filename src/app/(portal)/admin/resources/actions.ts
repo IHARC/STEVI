@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { logAuditEvent } from '@/lib/audit';
+import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 import { RESOURCE_KIND_LABELS, normalizeResourceSlug, type Resource, type ResourceEmbedPlacement } from '@/lib/resources';
 import { sanitizeResourceHtml } from '@/lib/sanitize-resource-html';
 import { buildResourceEmbedPayload, parseResourceAttachmentsInput, parseResourceTagsInput } from './resource-utils';
@@ -114,7 +114,7 @@ export async function createResourcePage(formData: FormData) {
     actorProfileId: actorProfile.id,
     action: 'resource_page_created',
     entityType: 'resource_page',
-    entityId: inserted?.id ?? null,
+    entityRef: buildEntityRef({ schema: 'portal', table: 'resource_pages', id: inserted?.id ?? null }),
     meta: {
       slug,
       kind,
@@ -216,7 +216,7 @@ export async function updateResourcePage(formData: FormData) {
     actorProfileId: actorProfile.id,
     action: 'resource_page_updated',
     entityType: 'resource_page',
-    entityId: resourceId,
+    entityRef: buildEntityRef({ schema: 'portal', table: 'resource_pages', id: resourceId }),
     meta: {
       slug,
       kind,
@@ -261,7 +261,7 @@ export async function deleteResourcePage(formData: FormData) {
     actorProfileId: actorProfile.id,
     action: 'resource_page_deleted',
     entityType: 'resource_page',
-    entityId: resourceId,
+    entityRef: buildEntityRef({ schema: 'portal', table: 'resource_pages', id: resourceId }),
     meta: {
       slug: resourceSlug,
     },

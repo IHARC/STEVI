@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { ensurePortalProfile } from '@/lib/profile';
-import { logAuditEvent } from '@/lib/audit';
+import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 
 const PATH = '/admin/permissions';
 
@@ -69,7 +69,7 @@ export async function togglePermissionAction(formData: FormData) {
       actorProfileId: actorProfile.id,
       action: enable ? 'admin_permission_granted' : 'admin_permission_revoked',
       entityType: 'role_permission',
-      entityId: null,
+      entityRef: buildEntityRef({ schema: 'core', table: 'role_permissions', id: `${roleId}_${permissionId}` }),
       meta: { roleId, permissionId },
     });
 
@@ -107,7 +107,7 @@ export async function createPermissionAction(formData: FormData) {
       actorProfileId: actorProfile.id,
       action: 'admin_permission_created',
       entityType: 'permission',
-      entityId: null,
+      entityRef: buildEntityRef({ schema: 'core', table: 'permissions', id: name }),
       meta: { name, domain, category },
     });
 

@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
-import { logAuditEvent } from '@/lib/audit';
+import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 import { loadPortalAccess } from '@/lib/portal-access';
 
 const INVITES_PATH = '/org/invites';
@@ -62,13 +62,13 @@ export async function createOrgInviteAction(formData: FormData) {
       throw insert.error;
     }
 
-    await logAuditEvent(supabase, {
-      actorProfileId: actorProfile.id,
-      action: 'org_invite_created',
-      entityType: 'profile_invite',
-      entityId: insert.data?.id ?? null,
-      meta: { organization_id: actorProfile.organization_id, email },
-    });
+  await logAuditEvent(supabase, {
+    actorProfileId: actorProfile.id,
+    action: 'org_invite_created',
+    entityType: 'profile_invite',
+    entityRef: buildEntityRef({ schema: 'portal', table: 'profile_invites', id: insert.data?.id ?? null }),
+    meta: { organization_id: actorProfile.organization_id, email },
+  });
 
     await revalidatePath(INVITES_PATH);
 

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { logAuditEvent } from '@/lib/audit';
+import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 import { ensurePortalProfile } from '@/lib/profile';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { MARKETING_SETTINGS_KEYS } from '@/lib/marketing/settings';
@@ -93,7 +93,7 @@ export async function updateSiteFooterAction(formData: FormData): Promise<void> 
       actorProfileId: actorProfile.id,
       action: 'marketing_footer_updated',
       entityType: 'site_footer',
-      entityId: null,
+      entityRef: buildEntityRef({ schema: 'portal', table: 'public_settings', id: MARKETING_SETTINGS_KEYS.footerPrimary }),
       meta: {
         has_secondary: Boolean(secondaryText),
       },

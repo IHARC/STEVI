@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { logAuditEvent } from '@/lib/audit';
+import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 import { queuePortalNotification } from '@/lib/notifications';
 import { getUserEmailForProfile } from '@/lib/profile';
 import { ensurePortalProfile } from '@/lib/profile';
@@ -126,13 +126,13 @@ export async function upsertRelayAction(formData: FormData): Promise<ActionResul
 
     await upsertRelay(supabase, payload);
 
-    await logAuditEvent(supabase, {
-      actorProfileId: actorProfile.id,
-      action: 'notification_relay_saved',
-      entityType: 'notification_relay',
-      entityId: null,
-      meta: { channel: payload.channel, provider: payload.provider },
-    });
+  await logAuditEvent(supabase, {
+    actorProfileId: actorProfile.id,
+    action: 'notification_relay_saved',
+    entityType: 'notification_relay',
+    entityRef: buildEntityRef({ schema: 'portal', table: 'notifications', id: payload.channel }),
+    meta: { channel: payload.channel, provider: payload.provider },
+  });
 
     await Promise.all(ADMIN_PATHS.map((path) => revalidatePath(path)));
 
@@ -185,7 +185,7 @@ export async function sendNotificationAction(formData: FormData): Promise<Action
       actorProfileId: actorProfile.id,
       action: 'notification_queued',
       entityType: 'notification',
-      entityId: null,
+      entityRef: null,
       meta: {
         recipient_profile_id: recipientProfileId,
         recipient_email: recipientEmail,

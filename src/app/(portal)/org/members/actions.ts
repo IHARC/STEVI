@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
-import { logAuditEvent } from '@/lib/audit';
+import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 import { loadPortalAccess } from '@/lib/portal-access';
 import type { SupabaseServerClient } from '@/lib/supabase/types';
 
@@ -86,13 +86,13 @@ export async function toggleMemberRoleAction(formData: FormData): Promise<Action
 
     await setRole(supabase, { profileId, roleName: roleName as ToggleRolePayload['roleName'], enable });
 
-    await logAuditEvent(supabase, {
-      actorProfileId: actorProfile.id,
-      action: enable ? 'org_role_granted' : 'org_role_revoked',
-      entityType: 'profile',
-      entityId: profileId,
-      meta: { role: roleName, organization_id: actorProfile.organization_id },
-    });
+  await logAuditEvent(supabase, {
+    actorProfileId: actorProfile.id,
+    action: enable ? 'org_role_granted' : 'org_role_revoked',
+    entityType: 'profile',
+    entityRef: buildEntityRef({ schema: 'portal', table: 'profiles', id: profileId }),
+    meta: { role: roleName, organization_id: actorProfile.organization_id },
+  });
 
     await revalidatePath(MEMBERS_PATH);
 
@@ -143,13 +143,13 @@ export async function removeMemberAction(formData: FormData): Promise<ActionResu
       .eq('id', profileId);
     if (clearOrg.error) throw clearOrg.error;
 
-    await logAuditEvent(supabase, {
-      actorProfileId: actorProfile.id,
-      action: 'org_member_removed',
-      entityType: 'profile',
-      entityId: profileId,
-      meta: { organization_id: actorProfile.organization_id },
-    });
+  await logAuditEvent(supabase, {
+    actorProfileId: actorProfile.id,
+    action: 'org_member_removed',
+    entityType: 'profile',
+    entityRef: buildEntityRef({ schema: 'portal', table: 'profiles', id: profileId }),
+    meta: { organization_id: actorProfile.organization_id },
+  });
 
     await revalidatePath(MEMBERS_PATH);
 
