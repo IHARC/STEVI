@@ -5,6 +5,7 @@ import { WorkspaceContextProvider } from '@/components/providers/workspace-conte
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess, resolveClientNavLinks, type PortalLink } from '@/lib/portal-access';
 import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
+import { fetchClientInboxItems } from '@/lib/inbox';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,11 +14,12 @@ export default async function PortalLayout({ children }: { children: ReactNode }
   const portalAccess = await loadPortalAccess(supabase);
   const navLinks: PortalLink[] = resolveClientNavLinks(portalAccess);
   const defaultWorkspacePath = resolveDefaultWorkspacePath(portalAccess);
+  const inboxItems = portalAccess ? await fetchClientInboxItems(supabase, portalAccess) : [];
 
   return (
     <PortalAccessProvider access={portalAccess}>
       <WorkspaceContextProvider access={portalAccess} defaultPath={defaultWorkspacePath}>
-        <PortalShell navLinks={navLinks} portalAccess={portalAccess}>
+        <PortalShell navLinks={navLinks} portalAccess={portalAccess} inboxItems={inboxItems}>
           {children}
         </PortalShell>
       </WorkspaceContextProvider>

@@ -4,6 +4,7 @@ import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { SupportComposer } from './support-composer';
 
 export const dynamic = 'force-dynamic';
 
@@ -146,6 +147,10 @@ export default async function SupportPage() {
           </CardContent>
         </Card>
       </section>
+
+      <div id="message-tray" aria-label="Message the team">
+        <SupportComposer />
+      </div>
     </div>
   );
 }

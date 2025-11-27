@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { ClientPreviewGuard } from '@/components/layout/client-preview-guard';
 import { fetchClientAppointments } from '@/lib/appointments/queries';
 import type { AppointmentWithRelations } from '@/lib/appointments/types';
+import { findPersonForUser } from '@/lib/cases/person';
 
 export const dynamic = 'force-dynamic';
 
@@ -74,29 +75,48 @@ export default async function HomePage() {
   }
 
   const profile = await ensurePortalProfile(supabase, user.id);
-  const { upcoming } = await fetchClientAppointments(supabase, profile.id);
-  const appointments: AppointmentPreview[] = upcoming.slice(0, 2).map((appt: AppointmentWithRelations) => ({
+  const person = await findPersonForUser(supabase, user.id);
+  const { upcoming, past } = await fetchClientAppointments(supabase, profile.id);
+  const timelineSource = [...upcoming, ...past]
+    .sort((a, b) => new Date(a.occurs_at ?? a.created_at ?? 0).getTime() - new Date(b.occurs_at ?? b.created_at ?? 0).getTime())
+    .slice(0, 4);
+  const appointments: AppointmentPreview[] = timelineSource.map((appt: AppointmentWithRelations) => ({
     id: appt.id,
     title: appt.title,
     occursAt: appt.occurs_at ?? appt.created_at,
     location: appt.location ?? 'To be confirmed',
     staffContact: appt.staff?.display_name ?? 'Outreach team',
-    status: appt.status === 'scheduled' ? 'scheduled' : appt.status === 'completed' ? 'completed' : 'requested',
+    status:
+      appt.status === 'scheduled'
+        ? 'scheduled'
+        : appt.status === 'completed'
+          ? 'completed'
+          : 'requested',
     locationType: appt.location_type,
     meetingUrl: appt.meeting_url,
   }));
 
   const preferredName = profile.display_name || 'Community member';
+  const preferredPronouns = person?.preferred_pronouns ?? 'Not provided';
+  const preferredContact = person?.preferred_contact_method ?? 'Not provided';
 
   return (
     <div className="page-shell page-stack">
-      <header className="flex flex-col gap-space-xs">
-        <p className="text-label-sm font-medium uppercase text-muted-foreground">
-          Welcome back
-        </p>
-        <h1 className="text-headline-lg text-on-surface sm:text-display-sm">
-          Hi {preferredName}, you’re connected to STEVI
-        </h1>
+      <header className="flex flex-col gap-space-sm rounded-2xl border border-outline/20 bg-surface-container-low p-space-md shadow-level-1">
+        <div className="flex flex-col gap-space-2xs sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-label-sm font-medium uppercase text-muted-foreground">Welcome back</p>
+            <h1 className="text-headline-lg text-on-surface sm:text-display-sm">
+              Hi {preferredName}, you’re connected to STEVI
+            </h1>
+          </div>
+          <div className="space-y-space-2xs rounded-xl bg-surface/70 px-space-md py-space-sm text-body-sm">
+            <p className="text-label-sm text-muted-foreground">Your preferences</p>
+            <p><span className="text-muted-foreground">Pronouns:</span> {preferredPronouns}</p>
+            <p><span className="text-muted-foreground">Preferred contact:</span> {preferredContact}</p>
+            <Link href="/profile" className="text-primary underline-offset-4 hover:underline">Update in profile</Link>
+          </div>
+        </div>
         <p className="max-w-2xl text-body-md text-muted-foreground sm:text-body-lg">
           Track appointments, review documents, and stay in touch with outreach staff. Updates here
           sync with the STEVI Ops tools the field team uses.
@@ -118,10 +138,10 @@ export default async function HomePage() {
           <CardHeader className="flex flex-col gap-space-sm sm:flex-row sm:items-center sm:justify-between">
             <div>
               <CardTitle id="appointments-heading" className="text-title-lg">
-                Your next steps
+                Your timeline
               </CardTitle>
               <p className="text-body-sm text-muted-foreground">
-                Upcoming meetings and check-ins from your outreach plan.
+                Upcoming and recent appointments in one view. We respond within one business day.
               </p>
             </div>
             <Button variant="ghost" asChild className="text-label-md font-medium">
@@ -132,7 +152,7 @@ export default async function HomePage() {
           </CardHeader>
           <CardContent className="flex flex-col gap-space-md">
             {appointments.length === 0 ? (
-              <p className="text-body-sm text-muted-foreground">No upcoming appointments. Request one to get started.</p>
+              <p className="text-body-sm text-muted-foreground">No appointments yet. Request one to get started.</p>
             ) : (
               appointments.map((appointment) => (
                 <article
@@ -140,47 +160,47 @@ export default async function HomePage() {
                   className="rounded-xl border border-outline/20 bg-surface-container-low p-space-md shadow-level-1 transition state-layer-color-primary hover:border-primary hover:state-layer-hover hover:shadow-level-2"
                   aria-labelledby={`appointment-${appointment.id}`}
                 >
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <h3 id={`appointment-${appointment.id}`} className="text-title-md font-medium text-on-surface">
-                    {appointment.title}
-                  </h3>
-                  <Badge
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <h3 id={`appointment-${appointment.id}`} className="text-title-md font-medium text-on-surface">
+                      {appointment.title}
+                    </h3>
+                    <Badge
                       variant={appointment.status === 'completed' ? 'secondary' : 'default'}
                       className="capitalize"
                     >
                       {appointment.status}
                     </Badge>
                   </div>
-                <dl className="mt-space-xs space-y-[0.35rem] text-body-sm text-on-surface/80">
-                  <div className="flex flex-wrap gap-1">
-                    <dt className="font-medium text-on-surface/70">When:</dt>
-                    <dd>{formatAppointmentDate(appointment.occursAt)}</dd>
-                  </div>
-                  <div className="flex flex-wrap gap-1">
-                    <dt className="font-medium text-on-surface/70">Where:</dt>
-                    <dd>{appointment.location}</dd>
-                    {appointment.locationType ? (
-                      <dd className="text-on-surface/60">({appointment.locationType.replaceAll('_', ' ')})</dd>
-                    ) : null}
-                  </div>
-                  <div className="flex flex-wrap gap-1">
-                    <dt className="font-medium text-on-surface/70">With:</dt>
-                    <dd>{appointment.staffContact}</dd>
-                  </div>
-                  {appointment.meetingUrl ? (
+                  <dl className="mt-space-xs space-y-[0.35rem] text-body-sm text-on-surface/80">
                     <div className="flex flex-wrap gap-1">
-                      <dt className="font-medium text-on-surface/70">Join:</dt>
-                      <dd>
-                        <a className="text-primary underline-offset-4 hover:underline" href={appointment.meetingUrl} target="_blank" rel="noreferrer">
-                          Meeting link
-                        </a>
-                      </dd>
+                      <dt className="font-medium text-on-surface/70">When:</dt>
+                      <dd>{formatAppointmentDate(appointment.occursAt)}</dd>
                     </div>
-                  ) : null}
-                </dl>
-              </article>
-            ))
-          )}
+                    <div className="flex flex-wrap gap-1">
+                      <dt className="font-medium text-on-surface/70">Where:</dt>
+                      <dd>{appointment.location}</dd>
+                      {appointment.locationType ? (
+                        <dd className="text-on-surface/60">({appointment.locationType.replaceAll('_', ' ')})</dd>
+                      ) : null}
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      <dt className="font-medium text-on-surface/70">With:</dt>
+                      <dd>{appointment.staffContact}</dd>
+                    </div>
+                    {appointment.meetingUrl ? (
+                      <div className="flex flex-wrap gap-1">
+                        <dt className="font-medium text-on-surface/70">Join:</dt>
+                        <dd>
+                          <a className="text-primary underline-offset-4 hover:underline" href={appointment.meetingUrl} target="_blank" rel="noreferrer">
+                            Meeting link
+                          </a>
+                        </dd>
+                      </div>
+                    ) : null}
+                  </dl>
+                </article>
+              ))
+            )}
             <p className="text-body-sm text-muted-foreground">
               Need to change something?{' '}
               <Link href="/support" className="text-primary underline-offset-4 hover:underline">

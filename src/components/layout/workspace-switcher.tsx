@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Icon } from '@/components/ui/icon';
 import { trackEvent } from '@/lib/analytics';
+import { cn } from '@/lib/utils';
 import type { WorkspaceId, WorkspaceOption } from '@/lib/workspaces';
 import { Check, ChevronDown, Eye, SwitchCamera } from 'lucide-react';
 
@@ -92,15 +93,30 @@ export function WorkspaceSwitcher({
           disabled={!current}
           className="inline-flex items-center gap-space-xs rounded-full bg-surface-container-high text-body-sm font-medium text-on-surface state-layer-color-primary"
         >
-          <span className="rounded-full bg-primary/10 px-space-xs py-[2px] text-label-sm text-primary">
-            {current?.label ?? 'Workspace'}
-          </span>
-          {isClientPreview ? (
-            <span className="flex items-center gap-1 text-label-sm text-amber-600">
-              <Icon icon={Eye} size="sm" />
-              Preview
+          <span className="flex flex-col items-start">
+            <span className="rounded-full bg-primary/10 px-space-xs py-[2px] text-label-sm text-primary">
+              {current?.label ?? 'Workspace'}
             </span>
-          ) : null}
+            <span className="flex items-center gap-space-2xs text-label-sm text-muted-foreground">
+              {current?.roleLabel ? <span>{current.roleLabel}</span> : null}
+              {current?.statusLabel ? (
+                <span
+                  className={cn(
+                    'rounded-full px-space-2xs py-px text-label-xs font-semibold',
+                    statusToneClass(current.statusTone),
+                  )}
+                >
+                  {current.statusLabel}
+                </span>
+              ) : null}
+              {isClientPreview ? (
+                <span className="flex items-center gap-1 rounded-full bg-amber-50 px-space-2xs py-px text-label-xs font-semibold text-amber-700">
+                  <Icon icon={Eye} size="sm" />
+                  Preview
+                </span>
+              ) : null}
+            </span>
+          </span>
           <Icon icon={ChevronDown} size="sm" className="text-muted-foreground" />
         </Button>
       </DropdownMenuTrigger>
@@ -123,6 +139,19 @@ export function WorkspaceSwitcher({
           >
             <span className="space-y-space-3xs">
               <span className="block text-body-md font-medium text-on-surface">{option.label}</span>
+              <span className="flex items-center gap-space-2xs text-label-sm text-muted-foreground">
+                {option.roleLabel ? <span>{option.roleLabel}</span> : null}
+                {option.statusLabel ? (
+                  <span
+                    className={cn(
+                      'rounded-full px-space-2xs py-px text-label-xs font-semibold',
+                      statusToneClass(option.statusTone),
+                    )}
+                  >
+                    {option.statusLabel}
+                  </span>
+                ) : null}
+              </span>
               {option.description ? (
                 <span className="block text-body-sm text-muted-foreground">{option.description}</span>
               ) : null}
@@ -149,4 +178,11 @@ export function WorkspaceSwitcher({
       </DropdownMenuContent>
     </DropdownMenu>
   );
+}
+
+function statusToneClass(tone: WorkspaceOption['statusTone']) {
+  if (tone === 'success') return 'bg-emerald-50 text-emerald-800';
+  if (tone === 'warning') return 'bg-amber-50 text-amber-800';
+  if (tone === 'critical') return 'bg-rose-50 text-rose-800';
+  return 'bg-outline/10 text-on-surface/80';
 }

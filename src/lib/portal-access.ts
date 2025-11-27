@@ -538,7 +538,10 @@ export function buildUserMenuLinks(access: PortalAccess): PortalLink[] {
 
 export type CommandPaletteItem = PortalLink & { group: string };
 
-export function buildCommandPaletteItems(access: PortalAccess | null): CommandPaletteItem[] {
+export function buildCommandPaletteItems(
+  access: PortalAccess | null,
+  extraItems: CommandPaletteItem[] = [],
+): CommandPaletteItem[] {
   if (!access) return [];
 
   const clientCommands = CLIENT_NAV_BLUEPRINT.filter((entry) => linkIsAllowed(entry, access)).map(
@@ -571,5 +574,6 @@ export function buildCommandPaletteItems(access: PortalAccess | null): CommandPa
     ...adminCommands,
     ...staffCommands,
     ...orgCommands,
+    ...extraItems,
   ]);
 }
