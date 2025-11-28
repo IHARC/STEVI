@@ -544,6 +544,8 @@ export function buildCommandPaletteItems(
 ): CommandPaletteItem[] {
   if (!access) return [];
 
+  const MAX_ITEMS = 20;
+
   const clientCommands = CLIENT_NAV_BLUEPRINT.filter((entry) => linkIsAllowed(entry, access)).map(
     ({ href, label, icon }) => ({ href, label, icon, group: 'Client' }),
   );
@@ -569,11 +571,15 @@ export function buildCommandPaletteItems(
       )
     : [];
 
-  return dedupeLinks<CommandPaletteItem>([
+  // Prioritise contextual actions/entities first, then workspace navigation links; cap to keep palette fast.
+  const ordered = [
+    ...extraItems,
     ...clientCommands,
     ...adminCommands,
     ...staffCommands,
     ...orgCommands,
-    ...extraItems,
-  ]);
+  ];
+
+  const unique = dedupeLinks<CommandPaletteItem>(ordered);
+  return unique.slice(0, MAX_ITEMS);
 }

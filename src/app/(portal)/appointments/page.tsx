@@ -130,6 +130,7 @@ export default async function AppointmentsPage() {
                 <p className="mt-space-2xs">
                   Send us your availability and preferred contact method. The outreach coordinator will confirm and add the visit here.
                 </p>
+                <p className="mt-space-2xs text-label-sm">We aim to respond within one business day and log updates for your record.</p>
                 <div className="mt-space-sm flex flex-wrap gap-space-sm">
                   <Button asChild size="sm">
                     <a href="#request-form">Request an appointment</a>

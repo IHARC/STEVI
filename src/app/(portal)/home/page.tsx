@@ -9,6 +9,12 @@ import { ClientPreviewGuard } from '@/components/layout/client-preview-guard';
 import { fetchClientAppointments } from '@/lib/appointments/queries';
 import type { AppointmentWithRelations } from '@/lib/appointments/types';
 import { findPersonForUser } from '@/lib/cases/person';
+import { RequestRescheduleForm } from '@/app/(portal)/appointments/request-reschedule-form';
+import { CancelAppointmentForm } from '@/app/(portal)/appointments/cancel-appointment-form';
+import {
+  cancelAppointmentAsClient,
+  requestRescheduleAsClient,
+} from '@/lib/appointments/actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -62,6 +68,10 @@ function formatAppointmentDate(value: string) {
   } catch {
     return value;
   }
+}
+
+function isActionable(status: AppointmentPreview['status']): boolean {
+  return !['completed'].includes(status);
 }
 
 export default async function HomePage() {
@@ -198,6 +208,21 @@ export default async function HomePage() {
                       </div>
                     ) : null}
                   </dl>
+                  {isActionable(appointment.status) ? (
+                    <ClientPreviewGuard message="Requests are disabled while you preview the client portal. Exit preview to submit.">
+                      <div className="mt-space-sm space-y-space-2xs">
+                        <RequestRescheduleForm
+                          action={requestRescheduleAsClient}
+                          appointmentId={appointment.id}
+                        />
+                        <CancelAppointmentForm
+                          action={cancelAppointmentAsClient}
+                          appointmentId={appointment.id}
+                          variant="outline"
+                        />
+                      </div>
+                    </ClientPreviewGuard>
+                  ) : null}
                 </article>
               ))
             )}

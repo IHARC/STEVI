@@ -76,6 +76,7 @@ export function DocumentsList({ documents, onRequestLink, onExtendAccess }: Docu
         <div className="rounded-xl border border-dashed border-outline/30 bg-surface-container-low p-space-md text-body-sm text-muted-foreground">
           <p className="font-medium text-on-surface">No documents yet</p>
           <p className="mt-space-2xs">Ask your outreach worker to share files here. You can also request a link below.</p>
+          <p className="mt-space-2xs text-label-sm">When you request a link we’ll refresh it within one business day and log it in your audit trail.</p>
         </div>
       ) : (
         <div className="grid gap-space-md md:grid-cols-2">
