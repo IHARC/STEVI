@@ -152,9 +152,14 @@ export async function sendNotificationAction(formData: FormData): Promise<Action
     const payloadInput = readString(formData, 'payload_json');
     const recipientProfileId = readString(formData, 'recipient_profile_id');
     const providedEmail = readString(formData, 'recipient_email');
+    const isTest = readString(formData, 'is_test') === 'true';
 
     if (!recipientProfileId && !providedEmail) {
       throw new Error('Select a recipient or provide an email address.');
+    }
+
+    if (isTest && !process.env.PORTAL_ALERTS_SECRET) {
+      throw new Error('Configure PORTAL_ALERTS_SECRET before sending test notifications.');
     }
 
     const { supabase, actorProfile } = await requireAdminContext();
@@ -171,13 +176,16 @@ export async function sendNotificationAction(formData: FormData): Promise<Action
 
     const payload = parsePayload(payloadInput);
 
+    const finalSubject = isTest ? `[TEST] ${subject}` : subject;
+    const finalType = isTest ? 'test' : notificationType;
+
     await queuePortalNotification(supabase, {
       profileId: recipientProfileId,
       email: recipientEmail,
-      subject,
+      subject: finalSubject,
       bodyText,
       bodyHtml: bodyHtml ?? undefined,
-      type: notificationType,
+      type: finalType,
       payload: payload ?? undefined,
     });
 
@@ -189,7 +197,8 @@ export async function sendNotificationAction(formData: FormData): Promise<Action
       meta: {
         recipient_profile_id: recipientProfileId,
         recipient_email: recipientEmail,
-        notification_type: notificationType,
+        notification_type: finalType,
+        is_test: isTest,
       },
     });
 

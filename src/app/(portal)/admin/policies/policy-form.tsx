@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { ResourceRichTextEditor } from '@/components/admin/resource-rich-text-editor';
+import { PolicyAutosaveClient } from './policy-autosave-client';
 import { POLICY_CATEGORY_LABELS, type Policy } from '@/lib/policies';
 
 const STATUS_OPTIONS = [
@@ -170,7 +171,10 @@ export function PolicyForm({ mode, action, onDeleteAction, policy }: PolicyFormP
           label="Body content"
           defaultValue={bodyDefault}
           description="Use headings, bullet lists, and links. Avoid personal health details or identifying information."
+          showPreview
         />
+
+        {isEdit && policy?.id ? <PolicyAutosaveClient policyId={policy.id} /> : null}
 
         <div className="rounded-2xl border border-outline/15 bg-surface-container-low p-space-sm text-body-sm text-on-surface/80">
           Visibility is controlled by the <strong>Status</strong> field above. Policies set to “Published” appear on the

@@ -3,88 +3,29 @@ import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
 import { loadPortalAccess } from '@/lib/portal-access';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 
 export const dynamic = 'force-dynamic';
 
-type AdminTask = {
-  id: string;
-  title: string;
-  description: string;
-  actionLabel: string;
-  href: string;
+type MetricCard = { id: string; label: string; value: string; tone?: 'default' | 'warning' | 'info' };
+
+type OpsSnapshot = {
+  pendingProfiles: number;
+  pendingInvites: number;
+  notifications7d: number;
+  openCases: number;
+  resourcesPublished: number;
+  policiesPublished: number;
 };
 
-const adminTasks: AdminTask[] = [
-  {
-    id: 'inventory',
-    title: 'Inventory workspace',
-    description:
-      'Track stock levels, receive donations, and manage partner organisations across IHARC locations.',
-    actionLabel: 'Open inventory tools',
-    href: '/admin/inventory',
-  },
-  {
-    id: 'resources',
-    title: 'Resource library',
-    description:
-      'Publish delegations, policy briefs, and outreach reports that power the marketing site and STEVI resources.',
-    actionLabel: 'Manage resources',
-    href: '/admin/resources',
-  },
-  {
-    id: 'policies',
-    title: 'Policies & procedures',
-    description: 'Manage IHARC policies / SOPs for public transparency and STEVI client guidance in one place.',
-    actionLabel: 'Manage policies',
-    href: '/admin/policies',
-  },
-  {
-    id: 'marketing-footer',
-    title: 'Public site footer',
-    description: 'Update the footer text displayed on every page of the public IHARC marketing site.',
-    actionLabel: 'Edit footer copy',
-    href: '/admin/marketing/footer',
-  },
-  {
-    id: 'profile-verification',
-    title: 'Profile verification queue',
-    description:
-      'Approve new agency and government partner requests so they can access STEVI documents and appointments.',
-    actionLabel: 'Review pending profiles',
-    href: '/admin/profiles',
-  },
-  {
-    id: 'user-management',
-    title: 'User management',
-    description: 'Browse all clients, partners, and staff with filters, pagination, and role controls.',
-    actionLabel: 'Manage users',
-    href: '/admin/users',
-  },
-  {
-    id: 'organizations',
-    title: 'Organizations',
-    description: 'Create and verify partner organizations. Org admins stay scoped to their own records.',
-    actionLabel: 'Manage organizations',
-    href: '/admin/organizations',
-  },
-  {
-    id: 'documents',
-    title: 'Secure document locker',
-    description: 'Upload or expire shared files. Use this to deliver housing documents or consent forms.',
-    actionLabel: 'Open document tools',
-    href: '#documents',
-  },
-  {
-    id: 'notifications',
-    title: 'Notifications & outreach',
-    description: 'Send appointment reminders or community alerts. Messages sync with STEVI Ops activity logs.',
-    actionLabel: 'Compose message',
-    href: '/admin/notifications',
-  },
-];
+function formatCount(value: number): string {
+  return value.toLocaleString('en-CA');
+}
 
 export default async function AdminPage() {
   const supabase = await createSupabaseRSCClient();
@@ -100,154 +41,184 @@ export default async function AdminPage() {
 
   await ensurePortalProfile(supabase, access.userId);
 
+  const portal = supabase.schema('portal');
+  const caseMgmt = supabase.schema('case_mgmt');
+
+  const [pendingProfilesCount, pendingInvitesCount, notificationsCount, openCasesCount, resourcesCount, policiesCount, notificationsTrend] =
+    await Promise.all([
+      portal.from('profiles').select('id', { count: 'exact', head: true }).eq('affiliation_status', 'pending'),
+      portal.from('profile_invites').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+      portal
+        .from('notifications')
+        .select('id', { count: 'exact', head: true })
+        .gte('created_at', sevenDaysAgoIso()),
+      caseMgmt.from('case_management').select('id', { count: 'exact', head: true }).not('status', 'eq', 'closed'),
+      portal.from('resource_pages').select('id', { count: 'exact', head: true }).eq('is_published', true),
+      portal.from('policies').select('id', { count: 'exact', head: true }).eq('status', 'published'),
+      portal
+        .from('notifications')
+        .select('id, created_at')
+        .gte('created_at', sevenDaysAgoIso())
+        .order('created_at'),
+    ]);
+
+  const snapshot: OpsSnapshot = {
+    pendingProfiles: pendingProfilesCount.count ?? 0,
+    pendingInvites: pendingInvitesCount.count ?? 0,
+    notifications7d: notificationsCount.count ?? 0,
+    openCases: openCasesCount.count ?? 0,
+    resourcesPublished: resourcesCount.count ?? 0,
+    policiesPublished: policiesCount.count ?? 0,
+  };
+
+  const metricCards: MetricCard[] = [
+    { id: 'pending-profiles', label: 'Pending approvals', value: formatCount(snapshot.pendingProfiles), tone: snapshot.pendingProfiles > 0 ? 'warning' : 'default' },
+    { id: 'pending-invites', label: 'Open invites', value: formatCount(snapshot.pendingInvites) },
+    { id: 'open-cases', label: 'Open cases', value: formatCount(snapshot.openCases) },
+    { id: 'notifications', label: 'Notifications (7d)', value: formatCount(snapshot.notifications7d) },
+    { id: 'resources', label: 'Published resources', value: formatCount(snapshot.resourcesPublished) },
+    { id: 'policies', label: 'Published policies', value: formatCount(snapshot.policiesPublished) },
+  ];
+
+  type NotificationTrendRow = { created_at: string };
+  type NotificationTrendEntry = { day: string; count: number };
+  const notificationTrendData: NotificationTrendEntry[] = (notificationsTrend.data ?? []).map((row: NotificationTrendRow) => ({
+    day: new Date(row.created_at).toLocaleDateString('en-CA', { weekday: 'short' }),
+    count: 1,
+  }));
+
+  const dayKeys: string[] = Array.from(new Set(notificationTrendData.map((d: NotificationTrendEntry) => d.day)));
+  const trendSeries = dayKeys.map((day) => ({
+    name: day,
+    value: notificationTrendData.filter((d: NotificationTrendEntry) => d.day === day).length,
+  }));
+
+  const shortcuts = [
+    { label: 'Approve profiles', href: '/admin/profiles', badge: snapshot.pendingProfiles ? `${snapshot.pendingProfiles} pending` : null },
+    { label: 'User management', href: '/admin/users', badge: 'Search + peek' },
+    { label: 'Resources', href: '/admin/resources', badge: `${snapshot.resourcesPublished} live` },
+    { label: 'Policies', href: '/admin/policies', badge: `${snapshot.policiesPublished} live` },
+    { label: 'Notifications', href: '/admin/notifications', badge: 'Templates + test' },
+  ];
+
   return (
     <div className="page-shell page-stack">
       <header className="flex flex-col gap-space-xs">
-        <p className="text-label-sm font-medium uppercase text-muted-foreground">Team tools</p>
-        <h1 className="text-headline-lg text-on-surface sm:text-display-sm">STEVI admin workspace</h1>
-        <p className="max-w-3xl text-body-md text-muted-foreground sm:text-body-lg">
-          Manage profile access, documents, and notifications for neighbours using the STEVI client portal. These tools
-          mirror the admin capabilities that previously lived inside the marketing site.
+        <p className="text-label-sm font-medium uppercase text-muted-foreground">Operations</p>
+        <h1 className="text-headline-lg text-on-surface sm:text-display-sm">Admin workspace overview</h1>
+        <p className="max-w-4xl text-body-md text-muted-foreground sm:text-body-lg">
+          Track approvals, notifications, and content at a glance. All counts respect Supabase RLS and audit logging.
         </p>
+        <div className="flex flex-wrap gap-space-sm">
+          {shortcuts.map((item) => (
+            <Button key={item.href} asChild variant="outline" size="sm" className="gap-space-2xs">
+              <Link href={item.href}>
+                <span>{item.label}</span>
+                {item.badge ? <Badge variant="secondary" className="ml-space-2xs">{item.badge}</Badge> : null}
+              </Link>
+            </Button>
+          ))}
+        </div>
       </header>
 
-      <section className="grid gap-space-md md:grid-cols-3">
-        {adminTasks.map((task) => (
-          <Card key={task.id}>
-            <CardHeader>
-              <CardTitle className="text-title-md">{task.title}</CardTitle>
-              <CardDescription>{task.description}</CardDescription>
+      <section className="grid gap-space-md md:grid-cols-3 lg:grid-cols-6">
+        {metricCards.map((card) => (
+          <Card
+            key={card.id}
+            className={card.tone === 'warning' ? 'border-amber-400/60 bg-amber-50 text-amber-900' : 'border-outline/20'}
+          >
+            <CardHeader className="space-y-space-3xs">
+              <CardTitle className="text-label-sm font-medium uppercase text-muted-foreground">{card.label}</CardTitle>
+              <p className="text-headline-sm font-semibold text-on-surface">{card.value}</p>
             </CardHeader>
-            <CardContent>
-              <Button variant="outline" asChild className="w-full">
-                <Link href={task.href}>{task.actionLabel}</Link>
-              </Button>
-            </CardContent>
           </Card>
         ))}
       </section>
 
-      <section id="resources">
-        <Card>
-          <CardHeader className="flex flex-col gap-space-sm sm:flex-row sm:items-start sm:justify-between">
+      <section className="grid gap-space-md lg:grid-cols-[1.8fr,1.2fr]">
+        <Card className="h-full">
+          <CardHeader className="flex items-start justify-between gap-space-sm">
             <div>
-              <CardTitle className="text-title-lg">Resource management</CardTitle>
-              <CardDescription>
-                Publish or update the reports and guides neighbours rely on. Changes sync to the marketing site and STEVI
-                client resource directory.
-              </CardDescription>
+              <CardTitle className="text-title-lg">Notifications (7 days)</CardTitle>
+              <CardDescription>Sent and queued notifications grouped by day.</CardDescription>
             </div>
-            <Button asChild variant="outline" size="sm">
-              <Link href="/admin/resources">Open resource library</Link>
-            </Button>
+            <Badge variant="outline">{formatCount(snapshot.notifications7d)} total</Badge>
           </CardHeader>
-          <CardContent className="space-y-space-sm text-body-sm text-muted-foreground">
-            <p>
-              We migrated the resource management tools from the marketing repo. Use the resource library to create new
-              posts, update drafts, and retire outdated content without leaving STEVI.
-            </p>
-            <p>
-              Publishing here revalidates both the STEVI portal and the marketing experience so clients and the public
-              see updates right away.
-            </p>
+          <CardContent>
+            {trendSeries.length === 0 ? (
+              <p className="text-body-sm text-muted-foreground">No notifications sent in the last week.</p>
+            ) : (
+              <ChartContainer
+                config={{ notifications: { label: 'Notifications', color: 'rgb(var(--md-sys-color-primary))' } }}
+                className="h-64"
+              >
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={trendSeries}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid-color)" />
+                    <XAxis dataKey="name" stroke="var(--chart-axis-color)" tickLine={false} axisLine={false} />
+                    <YAxis allowDecimals={false} stroke="var(--chart-axis-color)" tickLine={false} axisLine={false} />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Bar dataKey="value" fill="var(--color-notifications)" radius={[6, 6, 6, 6]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </ChartContainer>
+            )}
           </CardContent>
         </Card>
-      </section>
 
-      <section id="profiles" className="grid gap-space-md lg:grid-cols-2">
-        <Card>
-          <CardHeader className="flex flex-col gap-space-sm">
-            <div>
-              <CardTitle className="text-title-lg">Verification workspace</CardTitle>
-              <CardDescription>
-                Review pending agency and government affiliations, assign organizations, and refresh role claims in one place.
-              </CardDescription>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-space-sm text-body-sm text-muted-foreground">
-            <p>
-              Moderators can now approve or decline requests directly within STEVI. Approvals auto-refresh Supabase role claims,
-              revalidate caches, and log every decision for auditing.
-            </p>
-            <ul className="list-disc space-y-space-xs pl-5">
-              <li>Assign verified community organizations or government teams before approving.</li>
-              <li>Automatically grant or revoke <code className="rounded bg-surface-container-low px-1">org_rep</code> roles.</li>
-              <li>Keep partner history tidy by clearing requested organization/government details after review.</li>
-            </ul>
-          </CardContent>
-          <CardFooter>
-            <Button asChild variant="outline">
-              <Link href="/admin/profiles">Open verification workspace</Link>
-            </Button>
-          </CardFooter>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-col gap-space-sm">
-            <div>
-              <CardTitle className="text-title-lg">Direct invitations</CardTitle>
-              <CardDescription>
-                Send secure invitations with optional context that lands in partners’ inboxes within seconds.
-              </CardDescription>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-space-sm text-body-sm text-muted-foreground">
-            <p>
-              The invitation form now lives in STEVI. It invokes the <code className="rounded bg-surface-container-low px-1">portal-admin-invite</code>{' '}
-              Edge Function so Supabase audit logs stay intact and delivery mirrors the marketing site.
-            </p>
-            <p>Recent invitations appear alongside the form with status badges (pending, accepted, expired, cancelled) for quick follow-up.</p>
-          </CardContent>
-          <CardFooter>
-            <Button asChild>
-              <Link href="/admin/profiles">Manage invites</Link>
-            </Button>
-          </CardFooter>
-        </Card>
-      </section>
-
-      <section id="documents">
-        <Card>
+        <Card className="h-full">
           <CardHeader>
-            <CardTitle className="text-title-lg">Document locker</CardTitle>
-            <CardDescription>
-              Upload files to the <code>portal-attachments</code> bucket with per-client expiry rules.
-            </CardDescription>
+            <CardTitle className="text-title-lg">Attention queue</CardTitle>
+            <CardDescription>Work the highest-risk items first.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-space-sm text-body-sm text-muted-foreground">
-            <p>Document tools will surface here as we migrate the moderation and attachment flows.</p>
-            <p>
-              In the interim, use the STEVI Ops attachment uploader. We’ll wire this page to the same Supabase edge
-              functions so clients can receive files in their locker.
-            </p>
+          <CardContent className="space-y-space-sm">
+            <AttentionItem
+              label="Pending profile approvals"
+              count={snapshot.pendingProfiles}
+              href="/admin/profiles"
+              tone={snapshot.pendingProfiles > 0 ? 'warning' : 'default'}
+            />
+            <AttentionItem
+              label="Pending org invites"
+              count={snapshot.pendingInvites}
+              href="/admin/profiles"
+            />
+            <AttentionItem
+              label="Open cases"
+              count={snapshot.openCases}
+              href="/admin/appointments"
+            />
+            <AttentionItem
+              label="Content to review"
+              count={snapshot.resourcesPublished + snapshot.policiesPublished}
+              href="/admin/resources"
+            />
           </CardContent>
-        </Card>
-      </section>
-
-      <section id="notifications">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-title-lg">Notifications</CardTitle>
-            <CardDescription>
-              Queue SMS or email notifications using the existing Supabase stored procedures.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-space-sm text-body-sm text-muted-foreground">
-            <p>
-              The notifications workspace now lives in STEVI. It calls <code className="rounded bg-surface-container-low px-1">portal_queue_notification</code> and triggers the{' '}
-              <code className="rounded bg-surface-container-low px-1">portal-alerts</code> Edge Function automatically when delivery secrets are configured.
-            </p>
-            <p>
-              Compose messages with HTML or JSON payloads, respect each profile’s consent flags, and review delivery logs pulled straight from{' '}
-              <code className="rounded bg-surface-container-low px-1">portal.notifications</code>.
-            </p>
-          </CardContent>
-          <CardFooter>
-            <Button asChild variant="outline">
-              <Link href="/admin/notifications">Open notifications workspace</Link>
-            </Button>
-          </CardFooter>
         </Card>
       </section>
     </div>
   );
+}
+
+function AttentionItem({ label, count, href, tone = 'default' }: { label: string; count: number; href: string; tone?: 'default' | 'warning' }) {
+  return (
+    <div className="flex items-center justify-between gap-space-sm rounded-2xl border border-outline/20 bg-surface-container-low px-space-md py-space-sm">
+      <div>
+        <p className="text-body-sm text-on-surface">{label}</p>
+        <p className="text-label-sm text-muted-foreground">RLS enforced in destination workspace.</p>
+      </div>
+      <div className="flex items-center gap-space-sm">
+        <Badge variant={tone === 'warning' ? 'destructive' : 'secondary'}>{formatCount(count)}</Badge>
+        <Button asChild variant="outline" size="sm">
+          <Link href={href}>Open</Link>
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function sevenDaysAgoIso() {
+  const now = new Date();
+  now.setDate(now.getDate() - 7);
+  return now.toISOString();
 }

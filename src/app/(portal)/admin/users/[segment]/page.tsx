@@ -12,6 +12,8 @@ import {
   type AdminUserSegment,
 } from '@/lib/admin-users';
 import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
+import { UserSavedSearches } from '../user-saved-searches';
+import { UserPeekSheet } from '../user-peek-sheet';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -180,6 +182,7 @@ export default async function AdminUsersSegmentPage({
   if (q) paramsForLinks.set('q', q);
   if (sort === 'name') paramsForLinks.set('sort', 'name');
   paramsForLinks.set('page', String(page));
+  const paramsString = paramsForLinks.toString();
 
   return (
     <div className="page-shell page-stack">
@@ -208,6 +211,8 @@ export default async function AdminUsersSegmentPage({
       </section>
 
       <SegmentTabs active={segment} params={paramsForLinks} />
+
+      <UserSavedSearches segment={segment} currentParams={paramsString} />
 
       <FilterBar
         segment={segment}
@@ -289,7 +294,8 @@ export default async function AdminUsersSegmentPage({
                     <TableCell className="text-sm text-muted-foreground">
                       {user.lastSeenAt ? new Date(user.lastSeenAt).toLocaleString('en-CA', { dateStyle: 'medium', timeStyle: 'short' }) : '—'}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="flex justify-end gap-space-xs">
+                      <UserPeekSheet user={user} />
                       <Button asChild size="sm" variant="outline">
                         <Link href={`/admin/users/${user.profileId}`}>View</Link>
                       </Button>

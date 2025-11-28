@@ -40,9 +40,11 @@ type ResourceRichTextEditorProps = {
   label?: string;
   description?: string;
   defaultValue?: string;
+  onChange?: (value: string) => void;
+  showPreview?: boolean;
 };
 
-export function ResourceRichTextEditor({ name, label, description, defaultValue }: ResourceRichTextEditorProps) {
+export function ResourceRichTextEditor({ name, label, description, defaultValue, onChange, showPreview }: ResourceRichTextEditorProps) {
   const [serialized, setSerialized] = useState(defaultValue ?? '');
   const [linkDialogOpen, setLinkDialogOpen] = useState(false);
   const [linkUrl, setLinkUrl] = useState('');
@@ -72,6 +74,7 @@ export function ResourceRichTextEditor({ name, label, description, defaultValue 
     content: defaultValue ?? '',
     onUpdate({ editor: instance }: { editor: Editor }) {
       setSerialized(instance.getHTML());
+      onChange?.(instance.getHTML());
     },
     editorProps: {
       attributes: {
@@ -343,6 +346,12 @@ export function ResourceRichTextEditor({ name, label, description, defaultValue 
         </div>
       </div>
       <input type="hidden" name={name} value={serialized} />
+      {showPreview ? (
+        <div className="rounded-2xl border border-outline/15 bg-surface-container-low px-space-md py-space-sm">
+          <p className="text-label-sm font-semibold uppercase text-muted-foreground">Preview</p>
+          <div className="prose prose-sm max-w-none text-on-surface" dangerouslySetInnerHTML={{ __html: serialized }} />
+        </div>
+      ) : null}
     </div>
   );
 }

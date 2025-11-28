@@ -128,6 +128,8 @@ export default async function NotificationsAdminPage() {
     };
   });
 
+  const hasAlertsSecret = Boolean(process.env.PORTAL_ALERTS_SECRET);
+
   return (
     <div className="page-shell page-stack">
       <header className="flex flex-col gap-space-xs">
@@ -141,7 +143,7 @@ export default async function NotificationsAdminPage() {
         </p>
       </header>
 
-      <ComposeNotificationForm recipients={recipients} />
+      <ComposeNotificationForm recipients={recipients} hasAlertsSecret={hasAlertsSecret} />
 
       <RelaySettingsCard />
 

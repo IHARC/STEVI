@@ -242,6 +242,48 @@ export async function updateResourcePage(formData: FormData) {
   );
 }
 
+export async function updateResourceDraftAction(formData: FormData) {
+  try {
+    const { supabase: supa, portalClient, actorProfile } = await requireAdminContext();
+    const resourceId = formData.get('resource_id') as string | null;
+    if (!resourceId) {
+      throw new Error('Resource context missing.');
+    }
+
+    const bodyHtmlRaw = (formData.get('body_html') as string | null) ?? '';
+    const summaryRaw = (formData.get('summary') as string | null) ?? null;
+    const summary = summaryRaw?.trim() || null;
+    const sanitized = sanitizeResourceHtml(bodyHtmlRaw);
+
+    const { error } = await portalClient
+      .from('resource_pages')
+      .update({
+        body_html: sanitized,
+        summary,
+        updated_by_profile_id: actorProfile.id,
+      })
+      .eq('id', resourceId);
+
+    if (error) {
+      throw error;
+    }
+
+    await logAuditEvent(supa, {
+      actorProfileId: actorProfile.id,
+      action: 'resource_page_autosaved',
+      entityType: 'resource_page',
+      entityRef: buildEntityRef({ schema: 'portal', table: 'resource_pages', id: resourceId }),
+      meta: { fields: ['body_html', 'summary'] },
+    });
+
+    return { success: true } as const;
+  } catch (error) {
+    console.error('updateResourceDraftAction error', error);
+    const message = error instanceof Error ? error.message : 'Unable to autosave right now.';
+    return { success: false, error: message } as const;
+  }
+}
+
 export async function deleteResourcePage(formData: FormData) {
   const resourceId = formData.get('resource_id') as string | null;
   const resourceSlug = (formData.get('resource_slug') as string | null)?.trim() ?? null;

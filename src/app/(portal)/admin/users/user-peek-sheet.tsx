@@ -1,0 +1,156 @@
+'use client';
+
+import { useMemo, useState, useTransition } from 'react';
+import Link from 'next/link';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { useToast } from '@/components/ui/use-toast';
+import { toggleRoleAction, updateProfileAction } from './actions';
+import type { AdminUserListItem } from '@/lib/admin-users';
+
+type UserPeekSheetProps = {
+  user: AdminUserListItem;
+};
+
+export function UserPeekSheet({ user }: UserPeekSheetProps) {
+  const { toast } = useToast();
+  const [open, setOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const roles = useMemo(() => new Set([...(user.roles.portal ?? []), ...(user.roles.iharc ?? [])]), [user.roles]);
+
+  const handleRoleToggle = (role: string, enable: boolean) => {
+    startTransition(async () => {
+      const formData = new FormData();
+      formData.append('profile_id', user.profileId);
+      formData.append('role_name', role);
+      formData.append('enable', String(enable));
+      const result = await toggleRoleAction(formData);
+      if (!result.success) {
+        toast({ title: 'Role update failed', description: result.error, variant: 'destructive' });
+      } else {
+        toast({ title: enable ? 'Role granted' : 'Role removed', description: role });
+      }
+    });
+  };
+
+  const handleApprove = () => {
+    startTransition(async () => {
+      const formData = new FormData();
+      formData.append('profile_id', user.profileId);
+      formData.append('affiliation_status', 'approved');
+      const result = await updateProfileAction(formData);
+      if (!result.success) {
+        toast({ title: 'Approval failed', description: result.error, variant: 'destructive' });
+      } else {
+        toast({ title: 'Profile approved', description: 'Status set to approved.' });
+      }
+    });
+  };
+
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button variant="outline" size="sm">Peek</Button>
+      </SheetTrigger>
+      <SheetContent side="right" className="w-full max-w-[520px] overflow-y-auto">
+        <SheetHeader className="text-left">
+          <SheetTitle className="text-title-lg">{user.displayName}</SheetTitle>
+          <p className="text-label-sm text-muted-foreground">{user.email ?? 'No email on file'}</p>
+        </SheetHeader>
+        <div className="mt-space-md space-y-space-md text-body-sm">
+          <div className="flex flex-wrap gap-space-2xs">
+            <Badge variant="secondary" className="capitalize">{user.affiliationType.replace('_', ' ')}</Badge>
+            <Badge variant={user.affiliationStatus === 'approved' ? 'default' : user.affiliationStatus === 'pending' ? 'outline' : 'secondary'}>
+              {user.affiliationStatus}
+            </Badge>
+            {user.organizationName ? (
+              <Badge variant="outline">{user.organizationName}</Badge>
+            ) : (
+              <Badge variant="outline">No org</Badge>
+            )}
+          </div>
+
+          <div className="space-y-space-2xs">
+            <p className="text-label-sm text-muted-foreground">Roles</p>
+            <div className="flex flex-wrap gap-space-2xs">
+              {Array.from(roles).map((role) => (
+                <Badge key={role} variant={role.startsWith('portal_') ? 'outline' : 'secondary'} className="capitalize">
+                  {role.replace('portal_', '').replace('iharc_', '')}
+                </Badge>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-space-xs rounded-2xl border border-outline/15 bg-surface-container-low p-space-sm">
+            <div className="flex items-center justify-between gap-space-sm">
+              <div>
+                <p className="text-body-sm font-medium text-on-surface">Approve profile</p>
+                <p className="text-label-sm text-muted-foreground">Sets status to approved and refreshes permissions.</p>
+              </div>
+              <Button size="sm" onClick={handleApprove} disabled={isPending || user.affiliationStatus === 'approved'}>
+                Approve
+              </Button>
+            </div>
+            <Separator />
+            <div className="flex flex-col gap-space-xs">
+              <RoleToggle
+                label="Org admin"
+                checked={roles.has('portal_org_admin')}
+                onChange={(checked) => handleRoleToggle('portal_org_admin', checked)}
+                disabled={isPending}
+              />
+              <RoleToggle
+                label="Org rep"
+                checked={roles.has('portal_org_rep')}
+                onChange={(checked) => handleRoleToggle('portal_org_rep', checked)}
+                disabled={isPending}
+              />
+              <RoleToggle
+                label="IHARC staff"
+                checked={roles.has('iharc_staff')}
+                onChange={(checked) => handleRoleToggle('iharc_staff', checked)}
+                disabled={isPending}
+              />
+              <RoleToggle
+                label="IHARC volunteer"
+                checked={roles.has('iharc_volunteer')}
+                onChange={(checked) => handleRoleToggle('iharc_volunteer', checked)}
+                disabled={isPending}
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-space-sm">
+            <Button asChild variant="outline" size="sm">
+              <Link href={`/admin/users/${user.profileId}`}>Open full profile</Link>
+            </Button>
+          </div>
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+type RoleToggleProps = {
+  label: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  disabled?: boolean;
+};
+
+function RoleToggle({ label, checked, onChange, disabled }: RoleToggleProps) {
+  return (
+    <label className="flex items-center justify-between gap-space-sm rounded-xl border border-outline/15 bg-surface px-space-sm py-space-2xs text-body-sm text-on-surface">
+      <span>{label}</span>
+      <input
+        type="checkbox"
+        className="h-4 w-4 rounded border border-outline"
+        checked={checked}
+        onChange={(event) => onChange(event.target.checked)}
+        disabled={disabled}
+      />
+    </label>
+  );
+}

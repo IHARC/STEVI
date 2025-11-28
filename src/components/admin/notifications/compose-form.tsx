@@ -4,6 +4,7 @@ import { FormEvent, useMemo, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -14,6 +15,7 @@ import type { NotificationRecipient } from './types';
 
 type ComposeNotificationFormProps = {
   recipients: NotificationRecipient[];
+  hasAlertsSecret: boolean;
 };
 
 const NOTIFICATION_TYPES = [
@@ -21,14 +23,51 @@ const NOTIFICATION_TYPES = [
   { value: 'appointment', label: 'Appointment reminder' },
   { value: 'alert', label: 'Urgent alert' },
   { value: 'case_note', label: 'Case note / follow-up' },
+  { value: 'test', label: 'Test message' },
 ];
 
-export function ComposeNotificationForm({ recipients }: ComposeNotificationFormProps) {
+const TEMPLATES = [
+  {
+    id: 'appt-reminder',
+    label: 'Appointment reminder',
+    type: 'appointment',
+    subject: 'Reminder: your upcoming appointment',
+    bodyText: 'Hi there, this is a reminder about your upcoming appointment. Reply if you need to reschedule.',
+  },
+  {
+    id: 'case-followup',
+    label: 'Case follow-up',
+    type: 'case_note',
+    subject: 'Checking in on next steps',
+    bodyText: 'Hi, following up on our last conversation. Let us know if you need support before the next visit.',
+  },
+  {
+    id: 'general-update',
+    label: 'General update',
+    type: 'general',
+    subject: 'Update from the STEVI team',
+    bodyText: 'Hi, we have a quick update to share. Reply here if you have questions.',
+  },
+  {
+    id: 'test-send',
+    label: 'Test message',
+    type: 'test',
+    subject: '[TEST] Notification delivery check',
+    bodyText: 'This is a test message to confirm notification delivery from STEVI.',
+  },
+];
+
+export function ComposeNotificationForm({ recipients, hasAlertsSecret }: ComposeNotificationFormProps) {
   const router = useRouter();
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
   const [selectedRecipient, setSelectedRecipient] = useState<string>('');
   const [emailValue, setEmailValue] = useState('');
+  const [templateId, setTemplateId] = useState<string>('');
+  const [notificationType, setNotificationType] = useState<string>('general');
+  const [subjectValue, setSubjectValue] = useState('');
+  const [bodyTextValue, setBodyTextValue] = useState('');
+  const [isTestSend, setIsTestSend] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const recipientLookup = useMemo(() => {
@@ -52,17 +91,37 @@ export function ComposeNotificationForm({ recipients }: ComposeNotificationFormP
     }
     const formData = new FormData(event.currentTarget);
 
+    if (isTestSend && !hasAlertsSecret) {
+      toast({ title: 'Test send blocked', description: 'Configure PORTAL_ALERTS_SECRET to send tests.', variant: 'destructive' });
+      return;
+    }
+
+    formData.append('is_test', String(isTestSend));
+
     const result = await sendNotificationAction(formData);
     if (!result.success) {
       toast({ title: 'Notification error', description: result.error, variant: 'destructive' });
       return;
     }
 
-    toast({ title: 'Notification queued', description: 'Delivery will start shortly.' });
+    toast({ title: isTestSend ? 'Test queued' : 'Notification queued', description: 'Delivery will start shortly.' });
     formRef.current?.reset();
     setSelectedRecipient('');
     setEmailValue('');
+    setTemplateId('');
+    setNotificationType('general');
+    setSubjectValue('');
+    setBodyTextValue('');
     startTransition(() => router.refresh());
+  };
+
+  const applyTemplate = (id: string) => {
+    const template = TEMPLATES.find((t) => t.id === id);
+    setTemplateId(id);
+    if (!template) return;
+    setNotificationType(template.type);
+    setSubjectValue(template.subject);
+    setBodyTextValue(template.bodyText);
   };
 
   return (
@@ -75,6 +134,12 @@ export function ComposeNotificationForm({ recipients }: ComposeNotificationFormP
     </CardHeader>
     <CardContent>
       <form ref={formRef} onSubmit={handleSubmit} className="grid gap-space-md">
+          <div className="flex flex-wrap items-center gap-space-sm rounded-xl border border-outline/15 bg-surface-container-low px-space-sm py-space-2xs text-label-sm text-muted-foreground">
+            <Badge variant={hasAlertsSecret ? 'secondary' : 'destructive'}>
+              {hasAlertsSecret ? 'Edge function ready' : 'Configure PORTAL_ALERTS_SECRET for sends'}
+            </Badge>
+            <Badge variant="outline">Consent enforced server-side</Badge>
+          </div>
           <div className="grid gap-space-sm md:grid-cols-2">
             <Label className="grid gap-1 text-body-sm text-on-surface">
               <span className="text-label-sm uppercase text-muted-foreground">
@@ -104,7 +169,7 @@ export function ComposeNotificationForm({ recipients }: ComposeNotificationFormP
               <span className="text-label-sm uppercase text-muted-foreground">
                 Notification type
               </span>
-              <Select name="notification_type" defaultValue="general" disabled={isPending}>
+              <Select name="notification_type" value={notificationType} onValueChange={setNotificationType} disabled={isPending}>
                 <SelectTrigger aria-label="Notification type">
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
@@ -147,8 +212,32 @@ export function ComposeNotificationForm({ recipients }: ComposeNotificationFormP
           </div>
 
           <Label className="grid gap-1 text-body-sm text-on-surface">
+            <span className="text-label-sm uppercase text-muted-foreground">Template</span>
+            <Select value={templateId} onValueChange={applyTemplate} disabled={isPending}>
+              <SelectTrigger aria-label="Template">
+                <SelectValue placeholder="Select template" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">No template</SelectItem>
+                {TEMPLATES.map((template) => (
+                  <SelectItem key={template.id} value={template.id}>
+                    {template.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </Label>
+
+          <Label className="grid gap-1 text-body-sm text-on-surface">
             <span className="text-label-sm uppercase text-muted-foreground">Subject</span>
-            <Input name="subject" placeholder="Reminder: upcoming appointment" required disabled={isPending} />
+            <Input
+              name="subject"
+              placeholder="Reminder: upcoming appointment"
+              required
+              disabled={isPending}
+              value={subjectValue}
+              onChange={(event) => setSubjectValue(event.target.value)}
+            />
           </Label>
 
           <Label className="grid gap-1 text-body-sm text-on-surface">
@@ -161,6 +250,8 @@ export function ComposeNotificationForm({ recipients }: ComposeNotificationFormP
               placeholder="Hi Jordan, this is a reminder for tomorrow’s appointment..."
               className="min-h-[140px]"
               disabled={isPending}
+              value={bodyTextValue}
+              onChange={(event) => setBodyTextValue(event.target.value)}
             />
           </Label>
 
@@ -176,9 +267,19 @@ export function ComposeNotificationForm({ recipients }: ComposeNotificationFormP
             />
           </Label>
 
-          <div className="flex justify-end">
-            <Button type="submit" disabled={isPending}>
-              Queue notification
+          <div className="flex flex-wrap items-center justify-between gap-space-sm">
+            <label className="flex items-center gap-space-2xs text-label-sm text-muted-foreground">
+              <input
+                type="checkbox"
+                checked={isTestSend}
+                onChange={(event) => setIsTestSend(event.target.checked)}
+                className="h-4 w-4 rounded border border-outline"
+                disabled={isPending}
+              />
+              <span>Test send (uses templates; requires secret)</span>
+            </label>
+            <Button type="submit" disabled={isPending || (isTestSend && !hasAlertsSecret)}>
+              {isTestSend ? 'Send test' : 'Queue notification'}
             </Button>
           </div>
         </form>

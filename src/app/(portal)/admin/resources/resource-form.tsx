@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ResourceRichTextEditor } from '@/components/admin/resource-rich-text-editor';
+import { ResourceAutosaveClient } from './resource-autosave-client';
 import { RESOURCE_KIND_LABELS, type Resource } from '@/lib/resources';
 import { attachmentsToTextarea, getResourceEmbedDefaults } from './resource-utils';
 
@@ -217,7 +218,10 @@ export function ResourceForm({ mode, action, onDeleteAction, resource }: Resourc
           label="Body content"
           defaultValue={bodyHtmlDefault}
           description="Use headings, bullet lists, and links so neighbours can scan actions quickly."
+          showPreview
         />
+
+        {isEdit && resource?.id ? <ResourceAutosaveClient resourceId={resource.id} /> : null}
 
         <div className="flex items-center gap-space-xs">
           <Checkbox id="resource_is_published" name="is_published" defaultChecked={publishDefault} />
