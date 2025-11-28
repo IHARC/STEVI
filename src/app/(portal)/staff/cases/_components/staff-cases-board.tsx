@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useRef, useState, type ComponentType } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,7 +13,7 @@ import { QuickOutreachForm } from '../../_components/quick-outreach-form';
 import type { ClientCaseDetail } from '@/lib/cases/types';
 import type { StaffShift } from '@/lib/staff/fetchers';
 import { cn } from '@/lib/utils';
-import { CalendarClock, Clock4, Compass, Filter, Search, Sparkles } from 'lucide-react';
+import { CalendarClock, Clock4, Compass, Filter, Search, Sparkles, type LucideIcon } from 'lucide-react';
 
 type CaseWithContext = ClientCaseDetail & {
   clientName?: string | null;
@@ -315,7 +315,7 @@ function StripCard({
   value: string;
   detail: string;
   meta?: string;
-  icon: ComponentType<{ size?: number | string }>;
+  icon: LucideIcon;
 }) {
   return (
     <div className="flex items-start gap-space-sm rounded-2xl border border-outline/20 bg-surface-container-high p-space-md shadow-sm">

@@ -30,7 +30,7 @@ Purpose: track implementation of workspace UX upgrades while honoring STEVI grou
 - Cases table with saved views; peek panel; "Today" strip; fast outreach entry; keyboard shortcuts (N, /, Shift+Cmd/Ctrl+W). **Status:** Done
 
 ### Phase 4 — Organization Workspace (later)
-- Org dashboard metrics; invite side-sheet with rate-limit preview; role clarity toggles; settings cards with toasts. **Status:** Pending
+- Org dashboard metrics; invite side-sheet with rate-limit preview; role clarity toggles; settings cards with toasts. **Status:** Done
 
 ### Phase 5 — Admin Workspace (later)
 - Operations dashboard; nav favorites/recents; user mgmt saved searches + side-sheet actions; resources/policies autosave + preview; notification templates with test send + consent/secret gating. **Status:** Pending
@@ -42,4 +42,4 @@ Purpose: track implementation of workspace UX upgrades while honoring STEVI grou
 - Marketing cache: when admin surfaces touch marketing content, ensure revalidation/tag hooks are wired; avoid static caches for authed data.
 
 ## Current Work Focus
-- Phase 3 next (Staff workspace tables/peek/today/shortcuts) while maintaining audit/RLS/preview and Material 3 adherence. Phases 1–2 completed.
+- Phase 5 next (Admin workspace dashboards, saved searches, autosave/preview) while maintaining audit/RLS/preview and Material 3 adherence. Phases 1–4 completed.

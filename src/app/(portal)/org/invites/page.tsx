@@ -2,11 +2,9 @@ import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
+import { fetchOrgInvites, type OrgInviteRecord } from '@/lib/org/fetchers';
 import {
   Table,
   TableBody,
@@ -15,17 +13,11 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { createOrgInviteAction } from './actions';
+import { checkRateLimit, type RateLimitResult } from '@/lib/rate-limit';
+import { InviteSheet } from './invite-sheet';
+import { ORG_INVITE_EVENT, ORG_INVITE_RATE_LIMIT } from './constants';
 
 export const dynamic = 'force-dynamic';
-
-type InviteRow = {
-  id: string;
-  email: string;
-  display_name: string | null;
-  status: string;
-  created_at: string;
-};
 
 const dateFormatter = new Intl.DateTimeFormat('en-CA', { dateStyle: 'medium', timeStyle: 'short' });
 
@@ -45,74 +37,38 @@ export default async function OrgInvitesPage() {
     redirect(resolveDefaultWorkspacePath(access));
   }
 
-  const handleInvite = async (formData: FormData) => {
-    const result = await createOrgInviteAction(formData);
-    if (!result.success) {
-      throw new Error(result.error);
-    }
-  };
-
-  const portal = supabase.schema('portal');
-  const { data: invites, error } = await portal
-    .from('profile_invites')
-    .select('id, email, display_name, status, created_at')
-    .eq('organization_id', access.organizationId)
-    .order('created_at', { ascending: false })
-    .limit(50);
-
-  if (error) {
-    throw error;
-  }
+  const [invites, rateLimit]: [OrgInviteRecord[], RateLimitResult] = await Promise.all([
+    fetchOrgInvites(supabase, access.organizationId, 50),
+    checkRateLimit({
+      supabase,
+      type: ORG_INVITE_EVENT,
+      limit: ORG_INVITE_RATE_LIMIT.limit,
+      cooldownMs: ORG_INVITE_RATE_LIMIT.cooldownMs,
+    }),
+  ]);
 
   return (
-    <div className="space-y-space-lg">
-      <header className="space-y-space-xs">
-        <p className="text-label-sm font-medium uppercase text-muted-foreground">Organization</p>
-        <h1 className="text-headline-lg">Invitations</h1>
-        <p className="max-w-2xl text-body-md text-muted-foreground">
-          Invitations are scoped to your organization. Recipients will be linked to your org when they accept.
-        </p>
+    <div className="page-shell page-stack">
+      <header className="flex flex-wrap items-start justify-between gap-space-md">
+        <div className="space-y-space-2xs">
+          <p className="text-label-sm font-medium uppercase text-muted-foreground">Organization</p>
+          <h1 className="text-headline-lg text-on-surface sm:text-display-sm">Invitations</h1>
+          <p className="max-w-3xl text-body-md text-muted-foreground">
+            Invitations stay locked to your organization by Supabase RLS. Rate limits keep accidental resends in check.
+          </p>
+        </div>
+        <InviteSheet rateLimit={rateLimit} />
       </header>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Send invite</CardTitle>
-          <CardDescription>Creates a pending invitation locked to your organization.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form className="grid gap-space-md md:grid-cols-2" action={handleInvite}>
-            <div className="space-y-space-xs">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" name="email" type="email" required placeholder="person@example.org" />
-            </div>
-            <div className="space-y-space-xs">
-              <Label htmlFor="display_name">Display name (optional)</Label>
-              <Input id="display_name" name="display_name" placeholder="Jordan Smith" />
-            </div>
-            <div className="space-y-space-xs md:col-span-2">
-              <Label htmlFor="position_title">Role or title (optional)</Label>
-              <Input id="position_title" name="position_title" placeholder="Coordinator" />
-            </div>
-            <div className="space-y-space-xs md:col-span-2">
-              <Label htmlFor="message">Message (optional)</Label>
-              <textarea
-                id="message"
-                name="message"
-                className="min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm"
-                placeholder="Add context for this invite"
-              />
-            </div>
-            <div className="md:col-span-2 flex justify-end">
-              <Button type="submit">Send invite</Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent invites</CardTitle>
-          <CardDescription>Showing last 50 invites tied to your organization.</CardDescription>
+        <CardHeader className="flex flex-wrap items-start justify-between gap-space-sm">
+          <div>
+            <CardTitle>Recent invites</CardTitle>
+            <CardDescription>Showing the last 50 invitations tied to your organization.</CardDescription>
+          </div>
+          <Badge variant={rateLimit.allowed ? 'secondary' : 'destructive'} className="capitalize">
+            {rateLimit.allowed ? 'Limit clear' : 'Rate limited'}
+          </Badge>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           <Table>
@@ -120,15 +76,17 @@ export default async function OrgInvitesPage() {
               <TableRow>
                 <TableHead>Email</TableHead>
                 <TableHead>Name</TableHead>
+                <TableHead>Role</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Created</TableHead>
+                <TableHead>Sent</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {(invites as InviteRow[] | null)?.map((invite) => (
+              {invites.map((invite) => (
                 <TableRow key={invite.id}>
-                  <TableCell>{invite.email}</TableCell>
+                  <TableCell className="text-on-surface">{invite.email}</TableCell>
                   <TableCell>{invite.display_name ?? '—'}</TableCell>
+                  <TableCell className="text-muted-foreground">{invite.position_title ?? '—'}</TableCell>
                   <TableCell>
                     <Badge variant={invite.status === 'pending' ? 'secondary' : 'default'} className="capitalize">
                       {invite.status}

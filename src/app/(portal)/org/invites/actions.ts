@@ -5,8 +5,16 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
 import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 import { loadPortalAccess } from '@/lib/portal-access';
+import { checkRateLimit } from '@/lib/rate-limit';
+import { ORG_INVITE_EVENT, ORG_INVITE_RATE_LIMIT, formatInviteCooldown } from './constants';
 
 const INVITES_PATH = '/org/invites';
+
+export type OrgInviteFormState = {
+  status: 'idle' | 'success' | 'error';
+  message?: string;
+  retryInMs?: number;
+};
 
 function readString(formData: FormData, key: string): string | null {
   const value = formData.get(key);
@@ -15,7 +23,10 @@ function readString(formData: FormData, key: string): string | null {
   return trimmed.length ? trimmed : null;
 }
 
-export async function createOrgInviteAction(formData: FormData) {
+export async function createOrgInviteAction(
+  _prevState: OrgInviteFormState,
+  formData: FormData,
+): Promise<OrgInviteFormState> {
   try {
     const email = readString(formData, 'email');
     const displayName = readString(formData, 'display_name');
@@ -23,23 +34,38 @@ export async function createOrgInviteAction(formData: FormData) {
     const message = readString(formData, 'message');
 
     if (!email || !email.includes('@')) {
-      throw new Error('Enter a valid email.');
+      return { status: 'error', message: 'Enter a valid email address.' };
     }
 
     const supabase = await createSupabaseServerClient();
     const access = await loadPortalAccess(supabase);
 
     if (!access) {
-      throw new Error('Sign in to continue.');
+      return { status: 'error', message: 'Sign in to continue.' };
     }
 
-    if (!access.canManageOrgInvites) {
-      throw new Error('Organization admin access is required.');
+    if (!access.canManageOrgInvites || !access.organizationId) {
+      return { status: 'error', message: 'Organization admin access is required.' };
+    }
+
+    const rateLimit = await checkRateLimit({
+      supabase,
+      type: ORG_INVITE_EVENT,
+      limit: ORG_INVITE_RATE_LIMIT.limit,
+      cooldownMs: ORG_INVITE_RATE_LIMIT.cooldownMs,
+    });
+
+    if (!rateLimit.allowed) {
+      return {
+        status: 'error',
+        message: formatInviteCooldown(rateLimit.retryInMs),
+        retryInMs: rateLimit.retryInMs,
+      };
     }
 
     const actorProfile = await ensurePortalProfile(supabase, access.userId);
     if (!actorProfile.organization_id) {
-      throw new Error('Organization admin access is required.');
+      return { status: 'error', message: 'Organization admin access is required.' };
     }
 
     const portal = supabase.schema('portal');
@@ -62,20 +88,20 @@ export async function createOrgInviteAction(formData: FormData) {
       throw insert.error;
     }
 
-  await logAuditEvent(supabase, {
-    actorProfileId: actorProfile.id,
-    action: 'org_invite_created',
-    entityType: 'profile_invite',
-    entityRef: buildEntityRef({ schema: 'portal', table: 'profile_invites', id: insert.data?.id ?? null }),
-    meta: { organization_id: actorProfile.organization_id, email },
-  });
+    await logAuditEvent(supabase, {
+      actorProfileId: actorProfile.id,
+      action: 'org_invite_created',
+      entityType: 'profile_invite',
+      entityRef: buildEntityRef({ schema: 'portal', table: 'profile_invites', id: insert.data?.id ?? null }),
+      meta: { organization_id: actorProfile.organization_id, email },
+    });
 
     await revalidatePath(INVITES_PATH);
 
-    return { success: true } as const;
+    return { status: 'success', message: 'Invitation sent. Recipients receive a secure link.' };
   } catch (error) {
     console.error('createOrgInviteAction error', error);
     const message = error instanceof Error ? error.message : 'Unable to create invite.';
-    return { success: false, error: message } as const;
+    return { status: 'error', message };
   }
 }

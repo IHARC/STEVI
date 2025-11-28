@@ -10,7 +10,8 @@ type RateLimitEvent =
   | 'idea_update'
   | 'registration_intake'
   | 'registration_claim'
-  | 'registration_concern';
+  | 'registration_concern'
+  | 'org_invite';
 
 type RateLimitParams = {
   supabase: SupabaseAnyServerClient;
