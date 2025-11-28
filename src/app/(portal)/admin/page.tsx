@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import nextDynamic from 'next/dynamic';
 import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
@@ -8,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
+import { NotificationsChart } from './notifications-chart';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,14 +25,6 @@ type OpsSnapshot = {
 function formatCount(value: number): string {
   return value.toLocaleString('en-CA');
 }
-
-const NotificationsChart = nextDynamic(
-  () => import('./notifications-chart').then((mod) => mod.NotificationsChart),
-  {
-    ssr: false,
-    loading: () => <p className="text-body-sm text-muted-foreground">Loading chart...</p>,
-  }
-);
 
 export default async function AdminPage() {
   const supabase = await createSupabaseRSCClient();
