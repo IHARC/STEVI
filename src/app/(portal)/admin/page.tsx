@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import nextDynamic from 'next/dynamic';
 import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
@@ -7,8 +8,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,6 +25,14 @@ type OpsSnapshot = {
 function formatCount(value: number): string {
   return value.toLocaleString('en-CA');
 }
+
+const NotificationsChart = nextDynamic(
+  () => import('./notifications-chart').then((mod) => mod.NotificationsChart),
+  {
+    ssr: false,
+    loading: () => <p className="text-body-sm text-muted-foreground">Loading chart...</p>,
+  }
+);
 
 export default async function AdminPage() {
   const supabase = await createSupabaseRSCClient();
@@ -148,20 +155,7 @@ export default async function AdminPage() {
             {trendSeries.length === 0 ? (
               <p className="text-body-sm text-muted-foreground">No notifications sent in the last week.</p>
             ) : (
-              <ChartContainer
-                config={{ notifications: { label: 'Notifications', color: 'rgb(var(--md-sys-color-primary))' } }}
-                className="h-64"
-              >
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={trendSeries}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid-color)" />
-                    <XAxis dataKey="name" stroke="var(--chart-axis-color)" tickLine={false} axisLine={false} />
-                    <YAxis allowDecimals={false} stroke="var(--chart-axis-color)" tickLine={false} axisLine={false} />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Bar dataKey="value" fill="var(--color-notifications)" radius={[6, 6, 6, 6]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </ChartContainer>
+              <NotificationsChart data={trendSeries} />
             )}
           </CardContent>
         </Card>
