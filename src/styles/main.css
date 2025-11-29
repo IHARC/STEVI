@@ -116,6 +116,10 @@
   --md-sys-typescale-label-small-line-height: 1rem;
   --md-sys-typescale-label-small-weight: 500;
   --md-sys-typescale-label-small-tracking: 0.03125rem;
+  --md-sys-typescale-label-extra-small-size: 0.625rem;
+  --md-sys-typescale-label-extra-small-line-height: 0.875rem;
+  --md-sys-typescale-label-extra-small-weight: 500;
+  --md-sys-typescale-label-extra-small-tracking: 0.03125rem;
   --md-sys-spacing-3xs: 0.125rem;
   --md-sys-spacing-2xs: 0.25rem;
   --md-sys-spacing-xs: 0.5rem;

@@ -107,11 +107,11 @@ const config: Config = {
       },
       fontSize: {
         xs: [
-          'var(--md-sys-typescale-label-small-size)',
+          'var(--md-sys-typescale-label-extra-small-size)',
           {
-            lineHeight: 'var(--md-sys-typescale-label-small-line-height)',
-            letterSpacing: 'var(--md-sys-typescale-label-small-tracking)',
-            fontWeight: 'var(--md-sys-typescale-label-small-weight)',
+            lineHeight: 'var(--md-sys-typescale-label-extra-small-line-height)',
+            letterSpacing: 'var(--md-sys-typescale-label-extra-small-tracking)',
+            fontWeight: 'var(--md-sys-typescale-label-extra-small-weight)',
           },
         ],
         sm: [
@@ -330,12 +330,20 @@ const config: Config = {
             fontWeight: 'var(--md-sys-typescale-label-small-weight)',
           },
         ],
-        'label-xs': [
-          'var(--md-sys-typescale-label-small-size)',
+        'label-2xs': [
+          'var(--md-sys-typescale-label-extra-small-size)',
           {
-            lineHeight: 'var(--md-sys-typescale-label-small-line-height)',
-            letterSpacing: 'var(--md-sys-typescale-label-small-tracking)',
-            fontWeight: 'var(--md-sys-typescale-label-small-weight)',
+            lineHeight: 'var(--md-sys-typescale-label-extra-small-line-height)',
+            letterSpacing: 'var(--md-sys-typescale-label-extra-small-tracking)',
+            fontWeight: 'var(--md-sys-typescale-label-extra-small-weight)',
+          },
+        ],
+        'label-xs': [
+          'var(--md-sys-typescale-label-extra-small-size)',
+          {
+            lineHeight: 'var(--md-sys-typescale-label-extra-small-line-height)',
+            letterSpacing: 'var(--md-sys-typescale-label-extra-small-tracking)',
+            fontWeight: 'var(--md-sys-typescale-label-extra-small-weight)',
           },
         ],
       },
