@@ -60,15 +60,15 @@ function DesktopAdminNav({ nav, pathname, activeGroupId }: DesktopAdminNavProps)
     <TooltipProvider delayDuration={150} skipDelayDuration={0}>
       <div
         className={cn(
-          'flex h-full flex-col rounded-2xl border border-outline/12 bg-surface-container-high shadow-md transition-[width] motion-duration-medium motion-ease-standard text-body-sm',
-          collapsed ? 'w-[76px] px-space-2xs' : 'w-full px-space-sm',
+          'flex h-full flex-col rounded-2xl border border-outline/12 bg-surface-container-high shadow-md transition-[width] motion-duration-medium motion-ease-standard text-label-sm',
+          collapsed ? 'w-[68px] px-space-2xs' : 'w-64 px-space-xs',
         )}
         data-collapsed={collapsed}
         aria-label={`${nav.label} navigation`}
       >
-        <div className={cn('flex items-center py-space-sm', collapsed ? 'justify-center' : 'justify-between')}>
+        <div className={cn('flex items-center py-space-xs', collapsed ? 'justify-center' : 'justify-between')}>
           {!collapsed ? (
-            <div className="px-space-2xs text-label-sm font-semibold uppercase text-muted-foreground">
+            <div className="px-space-2xs text-label-xs font-semibold uppercase text-muted-foreground tracking-[0.08em]">
               {nav.label}
             </div>
           ) : (
@@ -96,7 +96,7 @@ function DesktopAdminNav({ nav, pathname, activeGroupId }: DesktopAdminNavProps)
         {collapsed ? (
           <CollapsedNavGroups nav={nav} pathname={pathname} />
         ) : (
-          <ScrollArea className="flex-1 pr-[2px] space-y-space-sm">
+          <ScrollArea className="flex-1 pr-[2px] space-y-space-xs">
             <PinnedSection title="Favorites" items={favorites} />
             <PinnedSection title="Recents" items={recents} icon={Clock} />
             <NavSections
@@ -174,7 +174,7 @@ function NavSections({ nav, pathname, onNavigate, initialGroupId, onToggleFavori
       type="single"
       collapsible
       defaultValue={initialGroupId ?? undefined}
-      className="space-y-space-2xs"
+      className="space-y-space-3xs"
     >
       {nav.groups.map((group) => (
         <AccordionItem
@@ -182,7 +182,7 @@ function NavSections({ nav, pathname, onNavigate, initialGroupId, onToggleFavori
           value={group.id}
           className="rounded-xl border border-outline/12 bg-surface-container p-space-2xs shadow-sm"
         >
-          <AccordionTrigger className="rounded-lg px-space-sm py-space-xs text-label-sm font-semibold uppercase text-muted-foreground hover:no-underline">
+          <AccordionTrigger className="rounded-lg px-space-sm py-space-2xs text-label-xs font-semibold uppercase text-muted-foreground hover:no-underline tracking-[0.08em]">
             <div className="flex items-center gap-space-xs">
               <Icon icon={resolveAppIcon(group.icon)} size="sm" />
               <span>{group.label}</span>
@@ -220,19 +220,19 @@ type PinnedSectionProps = {
 function PinnedSection({ title, items, icon: IconComponent }: PinnedSectionProps) {
   if (!items.length) return null;
   return (
-    <div className="space-y-space-2xs">
-      <div className="flex items-center gap-space-2xs px-space-2xs text-label-sm uppercase text-muted-foreground">
+    <div className="space-y-space-3xs">
+      <div className="flex items-center gap-space-2xs px-space-2xs text-label-xs uppercase text-muted-foreground tracking-[0.08em]">
         {IconComponent ? <Icon icon={IconComponent} size="xs" /> : null}
         <span>{title}</span>
       </div>
-      <div className="flex flex-wrap gap-space-2xs">
+      <div className="flex flex-wrap gap-space-3xs">
         {items.map((item) => (
           <Link
             key={item.href}
             href={item.href}
-            className="flex items-center gap-space-2xs rounded-full border border-outline/20 bg-surface-container px-space-sm py-[6px] text-label-sm text-on-surface hover:border-outline/40"
+            className="flex items-center gap-space-2xs rounded-full border border-outline/20 bg-surface-container px-space-2xs py-space-3xs text-label-xs text-on-surface hover:border-outline/40"
           >
-            <span className="truncate max-w-[180px]">{item.label}</span>
+            <span className="truncate max-w-[160px]">{item.label}</span>
           </Link>
         ))}
       </div>
@@ -305,7 +305,7 @@ function CollapsedNavGroups({ nav, pathname }: CollapsedNavGroupsProps) {
             variant={isActive ? 'secondary' : 'ghost'}
             size="icon"
                 className={cn(
-                  'h-10 w-10 rounded-lg text-muted-foreground',
+                  'h-9 w-9 rounded-lg text-muted-foreground',
                   isActive && 'bg-secondary-container text-on-secondary-container',
                 )}
             aria-label={`${group.label} links`}
@@ -313,15 +313,15 @@ function CollapsedNavGroups({ nav, pathname }: CollapsedNavGroupsProps) {
             <Icon icon={resolveAppIcon(group.icon)} size="sm" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent side="right" align="start" className="w-64 p-space-sm text-body-sm">
-          <div className="flex items-center gap-space-xs pb-space-xs">
+        <PopoverContent side="right" align="start" className="w-60 p-space-sm text-label-sm">
+          <div className="flex items-center gap-space-xs pb-space-2xs">
             <Icon icon={resolveAppIcon(group.icon)} size="sm" />
-            <div className="text-label-sm font-semibold">{group.label}</div>
+            <div className="text-label-sm font-semibold uppercase text-muted-foreground tracking-[0.08em]">{group.label}</div>
             <span className="ml-auto text-label-xs text-muted-foreground">
               {group.links.length}
                 </span>
               </div>
-              <div className="space-y-[2px]">
+              <div className="space-y-space-3xs">
                 {group.links.map((link) => (
                   <AdminNavLink key={link.href} link={link} pathname={pathname} />
                 ))}
@@ -348,7 +348,7 @@ function AdminNavLink({ link, pathname, onNavigate, onToggleFavorite, isFavorite
   return (
     <div
       className={cn(
-        'group flex items-center gap-space-xs rounded-lg px-space-sm py-space-3xs text-body-sm transition-colors',
+        'group flex items-center gap-space-xs rounded-lg px-space-xs py-space-3xs text-label-sm transition-colors',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
         active ? 'bg-primary/10 text-primary ring-1 ring-primary/40 shadow-level-1' : 'text-on-surface/80 hover:bg-surface-container',
       )}
