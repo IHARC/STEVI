@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
 /* @tokens:start */
 :root {
   color-scheme: light;
@@ -205,6 +206,7 @@
   --shadow-level-2: 0 8px 16px rgba(0, 0, 0, 0.38), 0 4px 6px rgba(0, 0, 0, 0.24);
 }
 /* @tokens:end */
+}
 
 /* Font display optimization */
 @font-face {
