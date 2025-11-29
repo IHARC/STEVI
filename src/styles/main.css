@@ -121,6 +121,7 @@
   --md-sys-typescale-label-extra-small-line-height: 0.875rem;
   --md-sys-typescale-label-extra-small-weight: 500;
   --md-sys-typescale-label-extra-small-tracking: 0.03125rem;
+  --md-sys-typescale-label-uppercase-tracking: 0.08em;
   --md-sys-spacing-3xs: 0.125rem;
   --md-sys-spacing-2xs: 0.25rem;
   --md-sys-spacing-xs: 0.5rem;
@@ -223,11 +224,8 @@
 
 @layer base {
   html {
-    /* Lock the root size to the design baseline to avoid upstream overrides/zoom compounding across surfaces */
     font-size: 16px;
-    font-family: var(--md-sys-typescale-body-font);
-    background-color: rgb(var(--md-sys-color-background) / 1);
-    color: rgb(var(--md-sys-color-on-background) / 1);
+    @apply font-body bg-background text-on-background;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -235,77 +233,44 @@
 
   body {
     min-height: 100dvh;
-    background-color: rgb(var(--md-sys-color-surface) / 1);
-    color: rgb(var(--md-sys-color-on-surface) / 1);
-    font-family: var(--md-sys-typescale-body-font);
-    font-size: var(--md-sys-typescale-body-medium-size);
-    line-height: var(--md-sys-typescale-body-medium-line-height);
-    letter-spacing: var(--md-sys-typescale-body-medium-tracking);
+    @apply bg-background text-on-background font-body text-body-md;
   }
 
   h1, h2, h3, h4, h5, h6 {
     color: inherit;
-    font-family: var(--md-sys-typescale-headline-font);
   }
 
   h1 {
-    font-size: var(--md-sys-typescale-headline-large-size);
-    line-height: var(--md-sys-typescale-headline-large-line-height);
-    letter-spacing: var(--md-sys-typescale-headline-large-tracking);
-    font-weight: var(--md-sys-typescale-headline-large-weight);
+    @apply text-headline-lg font-heading;
   }
 
   h2 {
-    font-size: var(--md-sys-typescale-headline-medium-size);
-    line-height: var(--md-sys-typescale-headline-medium-line-height);
-    letter-spacing: var(--md-sys-typescale-headline-medium-tracking);
-    font-weight: var(--md-sys-typescale-headline-medium-weight);
+    @apply text-headline-md font-heading;
   }
 
   h3 {
-    font-size: var(--md-sys-typescale-headline-small-size);
-    line-height: var(--md-sys-typescale-headline-small-line-height);
-    letter-spacing: var(--md-sys-typescale-headline-small-tracking);
-    font-weight: var(--md-sys-typescale-headline-small-weight);
+    @apply text-headline-sm font-heading;
   }
 
   h4 {
-    font-size: var(--md-sys-typescale-title-large-size);
-    line-height: var(--md-sys-typescale-title-large-line-height);
-    letter-spacing: var(--md-sys-typescale-title-large-tracking);
-    font-weight: var(--md-sys-typescale-title-large-weight);
-    font-family: var(--md-sys-typescale-body-font);
+    @apply text-title-lg font-body;
   }
 
   h5 {
-    font-size: var(--md-sys-typescale-title-medium-size);
-    line-height: var(--md-sys-typescale-title-medium-line-height);
-    letter-spacing: var(--md-sys-typescale-title-medium-tracking);
-    font-weight: var(--md-sys-typescale-title-medium-weight);
-    font-family: var(--md-sys-typescale-body-font);
+    @apply text-title-md font-body;
   }
 
   h6 {
-    font-size: var(--md-sys-typescale-title-small-size);
-    line-height: var(--md-sys-typescale-title-small-line-height);
-    letter-spacing: var(--md-sys-typescale-title-small-tracking);
-    font-weight: var(--md-sys-typescale-title-small-weight);
-    font-family: var(--md-sys-typescale-body-font);
+    @apply text-title-sm font-body;
   }
 
   p,
   li {
-    font-family: var(--md-sys-typescale-body-font);
-    font-size: var(--md-sys-typescale-body-medium-size);
-    line-height: var(--md-sys-typescale-body-medium-line-height);
-    letter-spacing: var(--md-sys-typescale-body-medium-tracking);
+    @apply font-body text-body-md text-on-surface;
   }
 
   small {
-    font-family: var(--md-sys-typescale-body-font);
-    font-size: var(--md-sys-typescale-body-small-size);
-    line-height: var(--md-sys-typescale-body-small-line-height);
-    letter-spacing: var(--md-sys-typescale-body-small-tracking);
+    @apply font-body text-body-sm;
   }
 
   a {
@@ -341,21 +306,6 @@
 }
 
 @layer components {
-  /* Ensure admin nav labels always use the smallest label token, even if Tailwind pruning misses the utility */
-  .admin-nav-label {
-    font-size: var(--md-sys-typescale-label-extra-small-size, 0.625rem);
-    line-height: var(--md-sys-typescale-label-extra-small-line-height, 0.875rem);
-    letter-spacing: var(--md-sys-typescale-label-extra-small-tracking, 0.03125rem);
-    font-weight: var(--md-sys-typescale-label-extra-small-weight, 500);
-  }
-
-  /* Inherit the same scale through descendants to avoid conflicting font-size sources */
-  .admin-nav-label * {
-    font-size: inherit;
-    line-height: inherit;
-    letter-spacing: inherit;
-  }
-
   .container {
     width: min(100%, var(--md-sys-layout-max-width));
     margin-inline: auto;

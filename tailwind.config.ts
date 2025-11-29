@@ -4,6 +4,344 @@ import animatePlugin from 'tailwindcss-animate';
 
 const materialColor = (token: string) => `rgb(var(${token}) / <alpha-value>)`;
 
+const tokenColors = {
+  transparent: 'transparent',
+  current: 'currentColor',
+  border: materialColor('--md-sys-color-outline'),
+  input: materialColor('--md-sys-color-outline'),
+  ring: materialColor('--md-sys-color-primary'),
+  background: materialColor('--md-sys-color-surface'),
+  foreground: materialColor('--md-sys-color-on-surface'),
+  card: {
+    DEFAULT: materialColor('--md-sys-color-surface-container-high'),
+    foreground: materialColor('--md-sys-color-on-surface'),
+  },
+  popover: {
+    DEFAULT: materialColor('--md-sys-color-surface-container-high'),
+    foreground: materialColor('--md-sys-color-on-surface'),
+  },
+  primary: {
+    DEFAULT: materialColor('--md-sys-color-primary'),
+    foreground: materialColor('--md-sys-color-on-primary'),
+  },
+  secondary: {
+    DEFAULT: materialColor('--md-sys-color-secondary'),
+    foreground: materialColor('--md-sys-color-on-secondary'),
+  },
+  destructive: {
+    DEFAULT: materialColor('--md-sys-color-error'),
+    foreground: materialColor('--md-sys-color-on-error'),
+  },
+  muted: {
+    DEFAULT: materialColor('--md-sys-color-surface-variant'),
+    foreground: materialColor('--md-sys-color-on-surface-variant'),
+  },
+  accent: {
+    DEFAULT: materialColor('--md-sys-color-secondary-container'),
+    foreground: materialColor('--md-sys-color-on-secondary-container'),
+  },
+  'accent-variant': {
+    DEFAULT: materialColor('--md-sys-color-tertiary-container'),
+    foreground: materialColor('--md-sys-color-on-tertiary-container'),
+  },
+  warning: {
+    DEFAULT: materialColor('--md-sys-color-primary-container'),
+    foreground: materialColor('--md-sys-color-on-primary-container'),
+  },
+  info: {
+    DEFAULT: materialColor('--md-sys-color-secondary-container'),
+    foreground: materialColor('--md-sys-color-on-secondary-container'),
+  },
+  brand: materialColor('--md-sys-color-primary'),
+  'brand-strong': materialColor('--md-sys-color-primary-container'),
+  'brand-soft': materialColor('--md-sys-color-primary-container'),
+  'primary-dark': materialColor('--md-sys-color-primary'),
+  'on-primary': materialColor('--md-sys-color-on-primary'),
+  'primary-container': materialColor('--md-sys-color-primary-container'),
+  'on-primary-container': materialColor('--md-sys-color-on-primary-container'),
+  'primary-foreground': materialColor('--md-sys-color-on-primary'),
+  'secondary-container': materialColor('--md-sys-color-secondary-container'),
+  'on-secondary-container': materialColor('--md-sys-color-on-secondary-container'),
+  'secondary-foreground': materialColor('--md-sys-color-on-secondary'),
+  tertiary: materialColor('--md-sys-color-tertiary'),
+  'on-tertiary': materialColor('--md-sys-color-on-tertiary'),
+  'tertiary-container': materialColor('--md-sys-color-tertiary-container'),
+  'on-tertiary-container': materialColor('--md-sys-color-on-tertiary-container'),
+  'tertiary-foreground': materialColor('--md-sys-color-on-tertiary'),
+  error: materialColor('--md-sys-color-error'),
+  'on-error': materialColor('--md-sys-color-on-error'),
+  'error-container': materialColor('--md-sys-color-error-container'),
+  'on-error-container': materialColor('--md-sys-color-on-error-container'),
+  'error-foreground': materialColor('--md-sys-color-on-error'),
+  'on-background': materialColor('--md-sys-color-on-background'),
+  surface: materialColor('--md-sys-color-surface'),
+  'surface-dim': materialColor('--md-sys-color-surface-dim'),
+  'surface-bright': materialColor('--md-sys-color-surface-bright'),
+  'surface-container-lowest': materialColor('--md-sys-color-surface-container-lowest'),
+  'surface-container-low': materialColor('--md-sys-color-surface-container-low'),
+  'surface-container': materialColor('--md-sys-color-surface-container'),
+  'surface-container-high': materialColor('--md-sys-color-surface-container-high'),
+  'surface-container-highest': materialColor('--md-sys-color-surface-container-highest'),
+  'surface-variant': materialColor('--md-sys-color-surface-variant'),
+  'on-surface': materialColor('--md-sys-color-on-surface'),
+  'on-surface-variant': materialColor('--md-sys-color-on-surface-variant'),
+  'inverse-surface': materialColor('--md-sys-color-inverse-surface'),
+  'inverse-on-surface': materialColor('--md-sys-color-inverse-on-surface'),
+  'inverse-primary': materialColor('--md-sys-color-inverse-primary'),
+  outline: materialColor('--md-sys-color-outline'),
+  'outline-variant': materialColor('--md-sys-color-outline-variant'),
+  scrim: materialColor('--md-sys-color-scrim'),
+  shadow: materialColor('--md-sys-color-shadow'),
+  'neutral-black': 'rgb(18 13 13 / <alpha-value>)',
+  'neutral-white': 'rgb(255 255 255 / <alpha-value>)',
+  'neutral-gray': 'rgb(200 192 192 / <alpha-value>)',
+};
+
+const fontSizes: Config['theme']['fontSize'] = {
+  // Compatibility with Tailwind defaults mapped to Material 3 tokens
+  xs: [
+    'var(--md-sys-typescale-label-extra-small-size)',
+    {
+      lineHeight: 'var(--md-sys-typescale-label-extra-small-line-height)',
+      letterSpacing: 'var(--md-sys-typescale-label-extra-small-tracking)',
+      fontWeight: 'var(--md-sys-typescale-label-extra-small-weight)',
+    },
+  ],
+  sm: [
+    'var(--md-sys-typescale-body-medium-size)',
+    {
+      lineHeight: 'var(--md-sys-typescale-body-medium-line-height)',
+      letterSpacing: 'var(--md-sys-typescale-body-medium-tracking)',
+      fontWeight: 'var(--md-sys-typescale-body-medium-weight)',
+    },
+  ],
+  base: [
+    'var(--md-sys-typescale-body-large-size)',
+    {
+      lineHeight: 'var(--md-sys-typescale-body-large-line-height)',
+      letterSpacing: 'var(--md-sys-typescale-body-large-tracking)',
+      fontWeight: 'var(--md-sys-typescale-body-large-weight)',
+    },
+  ],
+  lg: [
+    'var(--md-sys-typescale-title-small-size)',
+    {
+      lineHeight: 'var(--md-sys-typescale-title-small-line-height)',
+      letterSpacing: 'var(--md-sys-typescale-title-small-tracking)',
+      fontWeight: 'var(--md-sys-typescale-title-small-weight)',
+    },
+  ],
+  xl: [
+    'var(--md-sys-typescale-title-medium-size)',
+    {
+      lineHeight: 'var(--md-sys-typescale-title-medium-line-height)',
+      letterSpacing: 'var(--md-sys-typescale-title-medium-tracking)',
+      fontWeight: 'var(--md-sys-typescale-title-medium-weight)',
+    },
+  ],
+  '2xl': [
+    'var(--md-sys-typescale-title-large-size)',
+    {
+      lineHeight: 'var(--md-sys-typescale-title-large-line-height)',
+      letterSpacing: 'var(--md-sys-typescale-title-large-tracking)',
+      fontWeight: 'var(--md-sys-typescale-title-large-weight)',
+    },
+  ],
+  '3xl': [
+    'var(--md-sys-typescale-headline-small-size)',
+    {
+      lineHeight: 'var(--md-sys-typescale-headline-small-line-height)',
+      letterSpacing: 'var(--md-sys-typescale-headline-small-tracking)',
+      fontWeight: 'var(--md-sys-typescale-headline-small-weight)',
+    },
+  ],
+  '4xl': [
+    'var(--md-sys-typescale-headline-medium-size)',
+    {
+      lineHeight: 'var(--md-sys-typescale-headline-medium-line-height)',
+      letterSpacing: 'var(--md-sys-typescale-headline-medium-tracking)',
+      fontWeight: 'var(--md-sys-typescale-headline-medium-weight)',
+    },
+  ],
+  '5xl': [
+    'var(--md-sys-typescale-headline-large-size)',
+    {
+      lineHeight: 'var(--md-sys-typescale-headline-large-line-height)',
+      letterSpacing: 'var(--md-sys-typescale-headline-large-tracking)',
+      fontWeight: 'var(--md-sys-typescale-headline-large-weight)',
+    },
+  ],
+  '6xl': [
+    'var(--md-sys-typescale-display-small-size)',
+    {
+      lineHeight: 'var(--md-sys-typescale-display-small-line-height)',
+      letterSpacing: 'var(--md-sys-typescale-display-small-tracking)',
+      fontWeight: 'var(--md-sys-typescale-display-small-weight)',
+    },
+  ],
+  '7xl': [
+    'var(--md-sys-typescale-display-medium-size)',
+    {
+      lineHeight: 'var(--md-sys-typescale-display-medium-line-height)',
+      letterSpacing: 'var(--md-sys-typescale-display-medium-tracking)',
+      fontWeight: 'var(--md-sys-typescale-display-medium-weight)',
+    },
+  ],
+  '8xl': [
+    'var(--md-sys-typescale-display-large-size)',
+    {
+      lineHeight: 'var(--md-sys-typescale-display-large-line-height)',
+      letterSpacing: 'var(--md-sys-typescale-display-large-tracking)',
+      fontWeight: 'var(--md-sys-typescale-display-large-weight)',
+    },
+  ],
+  // Semantic token aliases
+  'label-2xs': [
+    'var(--md-sys-typescale-label-extra-small-size)',
+    {
+      lineHeight: 'var(--md-sys-typescale-label-extra-small-line-height)',
+      letterSpacing: 'var(--md-sys-typescale-label-extra-small-tracking)',
+      fontWeight: 'var(--md-sys-typescale-label-extra-small-weight)',
+    },
+  ],
+  'label-xs': [
+    'var(--md-sys-typescale-label-extra-small-size)',
+    {
+      lineHeight: 'var(--md-sys-typescale-label-extra-small-line-height)',
+      letterSpacing: 'var(--md-sys-typescale-label-extra-small-tracking)',
+      fontWeight: 'var(--md-sys-typescale-label-extra-small-weight)',
+    },
+  ],
+  'label-sm': [
+    'var(--md-sys-typescale-label-small-size)',
+    {
+      lineHeight: 'var(--md-sys-typescale-label-small-line-height)',
+      letterSpacing: 'var(--md-sys-typescale-label-small-tracking)',
+      fontWeight: 'var(--md-sys-typescale-label-small-weight)',
+    },
+  ],
+  'label-md': [
+    'var(--md-sys-typescale-label-medium-size)',
+    {
+      lineHeight: 'var(--md-sys-typescale-label-medium-line-height)',
+      letterSpacing: 'var(--md-sys-typescale-label-medium-tracking)',
+      fontWeight: 'var(--md-sys-typescale-label-medium-weight)',
+    },
+  ],
+  'label-lg': [
+    'var(--md-sys-typescale-label-large-size)',
+    {
+      lineHeight: 'var(--md-sys-typescale-label-large-line-height)',
+      letterSpacing: 'var(--md-sys-typescale-label-large-tracking)',
+      fontWeight: 'var(--md-sys-typescale-label-large-weight)',
+    },
+  ],
+  'body-xs': [
+    'var(--md-sys-typescale-body-small-size)',
+    {
+      lineHeight: 'var(--md-sys-typescale-body-small-line-height)',
+      letterSpacing: 'var(--md-sys-typescale-body-small-tracking)',
+      fontWeight: 'var(--md-sys-typescale-body-small-weight)',
+    },
+  ],
+  'body-sm': [
+    'var(--md-sys-typescale-body-small-size)',
+    {
+      lineHeight: 'var(--md-sys-typescale-body-small-line-height)',
+      letterSpacing: 'var(--md-sys-typescale-body-small-tracking)',
+      fontWeight: 'var(--md-sys-typescale-body-small-weight)',
+    },
+  ],
+  'body-md': [
+    'var(--md-sys-typescale-body-medium-size)',
+    {
+      lineHeight: 'var(--md-sys-typescale-body-medium-line-height)',
+      letterSpacing: 'var(--md-sys-typescale-body-medium-tracking)',
+      fontWeight: 'var(--md-sys-typescale-body-medium-weight)',
+    },
+  ],
+  'body-lg': [
+    'var(--md-sys-typescale-body-large-size)',
+    {
+      lineHeight: 'var(--md-sys-typescale-body-large-line-height)',
+      letterSpacing: 'var(--md-sys-typescale-body-large-tracking)',
+      fontWeight: 'var(--md-sys-typescale-body-large-weight)',
+    },
+  ],
+  'title-sm': [
+    'var(--md-sys-typescale-title-small-size)',
+    {
+      lineHeight: 'var(--md-sys-typescale-title-small-line-height)',
+      letterSpacing: 'var(--md-sys-typescale-title-small-tracking)',
+      fontWeight: 'var(--md-sys-typescale-title-small-weight)',
+    },
+  ],
+  'title-md': [
+    'var(--md-sys-typescale-title-medium-size)',
+    {
+      lineHeight: 'var(--md-sys-typescale-title-medium-line-height)',
+      letterSpacing: 'var(--md-sys-typescale-title-medium-tracking)',
+      fontWeight: 'var(--md-sys-typescale-title-medium-weight)',
+    },
+  ],
+  'title-lg': [
+    'var(--md-sys-typescale-title-large-size)',
+    {
+      lineHeight: 'var(--md-sys-typescale-title-large-line-height)',
+      letterSpacing: 'var(--md-sys-typescale-title-large-tracking)',
+      fontWeight: 'var(--md-sys-typescale-title-large-weight)',
+    },
+  ],
+  'headline-sm': [
+    'var(--md-sys-typescale-headline-small-size)',
+    {
+      lineHeight: 'var(--md-sys-typescale-headline-small-line-height)',
+      letterSpacing: 'var(--md-sys-typescale-headline-small-tracking)',
+      fontWeight: 'var(--md-sys-typescale-headline-small-weight)',
+    },
+  ],
+  'headline-md': [
+    'var(--md-sys-typescale-headline-medium-size)',
+    {
+      lineHeight: 'var(--md-sys-typescale-headline-medium-line-height)',
+      letterSpacing: 'var(--md-sys-typescale-headline-medium-tracking)',
+      fontWeight: 'var(--md-sys-typescale-headline-medium-weight)',
+    },
+  ],
+  'headline-lg': [
+    'var(--md-sys-typescale-headline-large-size)',
+    {
+      lineHeight: 'var(--md-sys-typescale-headline-large-line-height)',
+      letterSpacing: 'var(--md-sys-typescale-headline-large-tracking)',
+      fontWeight: 'var(--md-sys-typescale-headline-large-weight)',
+    },
+  ],
+  'display-sm': [
+    'var(--md-sys-typescale-display-small-size)',
+    {
+      lineHeight: 'var(--md-sys-typescale-display-small-line-height)',
+      letterSpacing: 'var(--md-sys-typescale-display-small-tracking)',
+      fontWeight: 'var(--md-sys-typescale-display-small-weight)',
+    },
+  ],
+  'display-md': [
+    'var(--md-sys-typescale-display-medium-size)',
+    {
+      lineHeight: 'var(--md-sys-typescale-display-medium-line-height)',
+      letterSpacing: 'var(--md-sys-typescale-display-medium-tracking)',
+      fontWeight: 'var(--md-sys-typescale-display-medium-weight)',
+    },
+  ],
+  'display-lg': [
+    'var(--md-sys-typescale-display-large-size)',
+    {
+      lineHeight: 'var(--md-sys-typescale-display-large-line-height)',
+      letterSpacing: 'var(--md-sys-typescale-display-large-tracking)',
+      fontWeight: 'var(--md-sys-typescale-display-large-weight)',
+    },
+  ],
+};
+
 const config: Config = {
   content: [
     './src/app/**/*.{ts,tsx}',
@@ -22,339 +360,22 @@ const config: Config = {
   ],
   darkMode: ['class'],
   theme: {
+    colors: tokenColors,
+    fontSize: fontSizes,
+    boxShadow: {
+      sm: 'var(--shadow-level-1)',
+      DEFAULT: 'var(--shadow-level-1)',
+      md: 'var(--shadow-level-1)',
+      lg: 'var(--shadow-level-2)',
+      xl: 'var(--shadow-level-2)',
+      '2xl': 'var(--shadow-level-2)',
+      'level-1': 'var(--shadow-level-1)',
+      'level-2': 'var(--shadow-level-2)',
+      // Alias for rare callers expecting a higher tier; re-use level-2 until a Material token is added.
+      'level-3': 'var(--shadow-level-2)',
+      none: 'none',
+    },
     extend: {
-      colors: {
-        border: materialColor('--md-sys-color-outline'),
-        input: materialColor('--md-sys-color-outline'),
-        ring: materialColor('--md-sys-color-primary'),
-        background: materialColor('--md-sys-color-surface'),
-        foreground: materialColor('--md-sys-color-on-surface'),
-        card: {
-          DEFAULT: materialColor('--md-sys-color-surface-container-high'),
-          foreground: materialColor('--md-sys-color-on-surface'),
-        },
-        popover: {
-          DEFAULT: materialColor('--md-sys-color-surface-container-high'),
-          foreground: materialColor('--md-sys-color-on-surface'),
-        },
-        primary: {
-          DEFAULT: materialColor('--md-sys-color-primary'),
-          foreground: materialColor('--md-sys-color-on-primary'),
-        },
-        secondary: {
-          DEFAULT: materialColor('--md-sys-color-secondary'),
-          foreground: materialColor('--md-sys-color-on-secondary'),
-        },
-        destructive: {
-          DEFAULT: materialColor('--md-sys-color-error'),
-          foreground: materialColor('--md-sys-color-on-error'),
-        },
-        muted: {
-          DEFAULT: materialColor('--md-sys-color-surface-variant'),
-          foreground: materialColor('--md-sys-color-on-surface-variant'),
-        },
-        accent: {
-          DEFAULT: materialColor('--md-sys-color-secondary-container'),
-          foreground: materialColor('--md-sys-color-on-secondary-container'),
-        },
-        'accent-variant': {
-          DEFAULT: materialColor('--md-sys-color-tertiary-container'),
-          foreground: materialColor('--md-sys-color-on-tertiary-container'),
-        },
-        warning: {
-          DEFAULT: materialColor('--md-sys-color-primary-container'),
-          foreground: materialColor('--md-sys-color-on-primary-container'),
-        },
-        info: {
-          DEFAULT: materialColor('--md-sys-color-secondary-container'),
-          foreground: materialColor('--md-sys-color-on-secondary-container'),
-        },
-        brand: materialColor('--md-sys-color-primary'),
-        'brand-strong': materialColor('--md-sys-color-primary-container'),
-        'brand-soft': materialColor('--md-sys-color-primary-container'),
-        'primary-dark': materialColor('--md-sys-color-primary'),
-        'on-primary': materialColor('--md-sys-color-on-primary'),
-        'primary-container': materialColor('--md-sys-color-primary-container'),
-        'on-primary-container': materialColor('--md-sys-color-on-primary-container'),
-        'primary-foreground': materialColor('--md-sys-color-on-primary'),
-        'secondary-container': materialColor('--md-sys-color-secondary-container'),
-        'on-secondary-container': materialColor('--md-sys-color-on-secondary-container'),
-        'secondary-foreground': materialColor('--md-sys-color-on-secondary'),
-        tertiary: materialColor('--md-sys-color-tertiary'),
-        'on-tertiary': materialColor('--md-sys-color-on-tertiary'),
-        'tertiary-container': materialColor('--md-sys-color-tertiary-container'),
-        'on-tertiary-container': materialColor('--md-sys-color-on-tertiary-container'),
-        'tertiary-foreground': materialColor('--md-sys-color-on-tertiary'),
-        error: materialColor('--md-sys-color-error'),
-        'on-error': materialColor('--md-sys-color-on-error'),
-        'error-container': materialColor('--md-sys-color-error-container'),
-        'on-error-container': materialColor('--md-sys-color-on-error-container'),
-        'error-foreground': materialColor('--md-sys-color-on-error'),
-        'on-background': materialColor('--md-sys-color-on-background'),
-        surface: materialColor('--md-sys-color-surface'),
-        'surface-dim': materialColor('--md-sys-color-surface-dim'),
-        'surface-bright': materialColor('--md-sys-color-surface-bright'),
-        'surface-container-lowest': materialColor('--md-sys-color-surface-container-lowest'),
-        'surface-container-low': materialColor('--md-sys-color-surface-container-low'),
-        'surface-container': materialColor('--md-sys-color-surface-container'),
-        'surface-container-high': materialColor('--md-sys-color-surface-container-high'),
-        'surface-container-highest': materialColor('--md-sys-color-surface-container-highest'),
-        'surface-variant': materialColor('--md-sys-color-surface-variant'),
-        'on-surface': materialColor('--md-sys-color-on-surface'),
-        'on-surface-variant': materialColor('--md-sys-color-on-surface-variant'),
-        'inverse-surface': materialColor('--md-sys-color-inverse-surface'),
-        'inverse-on-surface': materialColor('--md-sys-color-inverse-on-surface'),
-        'inverse-primary': materialColor('--md-sys-color-inverse-primary'),
-        outline: materialColor('--md-sys-color-outline'),
-        'outline-variant': materialColor('--md-sys-color-outline-variant'),
-        scrim: materialColor('--md-sys-color-scrim'),
-        shadow: materialColor('--md-sys-color-shadow'),
-        'neutral-black': 'rgb(18 13 13 / <alpha-value>)',
-        'neutral-white': 'rgb(255 255 255 / <alpha-value>)',
-        'neutral-gray': 'rgb(200 192 192 / <alpha-value>)',
-      },
-      fontSize: {
-        xs: [
-          'var(--md-sys-typescale-label-extra-small-size)',
-          {
-            lineHeight: 'var(--md-sys-typescale-label-extra-small-line-height)',
-            letterSpacing: 'var(--md-sys-typescale-label-extra-small-tracking)',
-            fontWeight: 'var(--md-sys-typescale-label-extra-small-weight)',
-          },
-        ],
-        sm: [
-          'var(--md-sys-typescale-body-medium-size)',
-          {
-            lineHeight: 'var(--md-sys-typescale-body-medium-line-height)',
-            letterSpacing: 'var(--md-sys-typescale-body-medium-tracking)',
-            fontWeight: 'var(--md-sys-typescale-body-medium-weight)',
-          },
-        ],
-        base: [
-          'var(--md-sys-typescale-body-large-size)',
-          {
-            lineHeight: 'var(--md-sys-typescale-body-large-line-height)',
-            letterSpacing: 'var(--md-sys-typescale-body-large-tracking)',
-            fontWeight: 'var(--md-sys-typescale-body-large-weight)',
-          },
-        ],
-        lg: [
-          'var(--md-sys-typescale-title-small-size)',
-          {
-            lineHeight: 'var(--md-sys-typescale-title-small-line-height)',
-            letterSpacing: 'var(--md-sys-typescale-title-small-tracking)',
-            fontWeight: 'var(--md-sys-typescale-title-small-weight)',
-          },
-        ],
-        xl: [
-          'var(--md-sys-typescale-title-medium-size)',
-          {
-            lineHeight: 'var(--md-sys-typescale-title-medium-line-height)',
-            letterSpacing: 'var(--md-sys-typescale-title-medium-tracking)',
-            fontWeight: 'var(--md-sys-typescale-title-medium-weight)',
-          },
-        ],
-        '2xl': [
-          'var(--md-sys-typescale-title-large-size)',
-          {
-            lineHeight: 'var(--md-sys-typescale-title-large-line-height)',
-            letterSpacing: 'var(--md-sys-typescale-title-large-tracking)',
-            fontWeight: 'var(--md-sys-typescale-title-large-weight)',
-          },
-        ],
-        '3xl': [
-          'var(--md-sys-typescale-headline-small-size)',
-          {
-            lineHeight: 'var(--md-sys-typescale-headline-small-line-height)',
-            letterSpacing: 'var(--md-sys-typescale-headline-small-tracking)',
-            fontWeight: 'var(--md-sys-typescale-headline-small-weight)',
-          },
-        ],
-        '4xl': [
-          'var(--md-sys-typescale-headline-medium-size)',
-          {
-            lineHeight: 'var(--md-sys-typescale-headline-medium-line-height)',
-            letterSpacing: 'var(--md-sys-typescale-headline-medium-tracking)',
-            fontWeight: 'var(--md-sys-typescale-headline-medium-weight)',
-          },
-        ],
-        '5xl': [
-          'var(--md-sys-typescale-headline-large-size)',
-          {
-            lineHeight: 'var(--md-sys-typescale-headline-large-line-height)',
-            letterSpacing: 'var(--md-sys-typescale-headline-large-tracking)',
-            fontWeight: 'var(--md-sys-typescale-headline-large-weight)',
-          },
-        ],
-        '6xl': [
-          'var(--md-sys-typescale-display-small-size)',
-          {
-            lineHeight: 'var(--md-sys-typescale-display-small-line-height)',
-            letterSpacing: 'var(--md-sys-typescale-display-small-tracking)',
-            fontWeight: 'var(--md-sys-typescale-display-small-weight)',
-          },
-        ],
-        '7xl': [
-          'var(--md-sys-typescale-display-medium-size)',
-          {
-            lineHeight: 'var(--md-sys-typescale-display-medium-line-height)',
-            letterSpacing: 'var(--md-sys-typescale-display-medium-tracking)',
-            fontWeight: 'var(--md-sys-typescale-display-medium-weight)',
-          },
-        ],
-        '8xl': [
-          'var(--md-sys-typescale-display-large-size)',
-          {
-            lineHeight: 'var(--md-sys-typescale-display-large-line-height)',
-            letterSpacing: 'var(--md-sys-typescale-display-large-tracking)',
-            fontWeight: 'var(--md-sys-typescale-display-large-weight)',
-          },
-        ],
-        'display-lg': [
-          'var(--md-sys-typescale-display-large-size)',
-          {
-            lineHeight: 'var(--md-sys-typescale-display-large-line-height)',
-            letterSpacing: 'var(--md-sys-typescale-display-large-tracking)',
-            fontWeight: 'var(--md-sys-typescale-display-large-weight)',
-          },
-        ],
-        'display-md': [
-          'var(--md-sys-typescale-display-medium-size)',
-          {
-            lineHeight: 'var(--md-sys-typescale-display-medium-line-height)',
-            letterSpacing: 'var(--md-sys-typescale-display-medium-tracking)',
-            fontWeight: 'var(--md-sys-typescale-display-medium-weight)',
-          },
-        ],
-        'display-sm': [
-          'var(--md-sys-typescale-display-small-size)',
-          {
-            lineHeight: 'var(--md-sys-typescale-display-small-line-height)',
-            letterSpacing: 'var(--md-sys-typescale-display-small-tracking)',
-            fontWeight: 'var(--md-sys-typescale-display-small-weight)',
-          },
-        ],
-        'headline-lg': [
-          'var(--md-sys-typescale-headline-large-size)',
-          {
-            lineHeight: 'var(--md-sys-typescale-headline-large-line-height)',
-            letterSpacing: 'var(--md-sys-typescale-headline-large-tracking)',
-            fontWeight: 'var(--md-sys-typescale-headline-large-weight)',
-          },
-        ],
-        'headline-md': [
-          'var(--md-sys-typescale-headline-medium-size)',
-          {
-            lineHeight: 'var(--md-sys-typescale-headline-medium-line-height)',
-            letterSpacing: 'var(--md-sys-typescale-headline-medium-tracking)',
-            fontWeight: 'var(--md-sys-typescale-headline-medium-weight)',
-          },
-        ],
-        'headline-sm': [
-          'var(--md-sys-typescale-headline-small-size)',
-          {
-            lineHeight: 'var(--md-sys-typescale-headline-small-line-height)',
-            letterSpacing: 'var(--md-sys-typescale-headline-small-tracking)',
-            fontWeight: 'var(--md-sys-typescale-headline-small-weight)',
-          },
-        ],
-        'title-lg': [
-          'var(--md-sys-typescale-title-large-size)',
-          {
-            lineHeight: 'var(--md-sys-typescale-title-large-line-height)',
-            letterSpacing: 'var(--md-sys-typescale-title-large-tracking)',
-            fontWeight: 'var(--md-sys-typescale-title-large-weight)',
-          },
-        ],
-        'title-md': [
-          'var(--md-sys-typescale-title-medium-size)',
-          {
-            lineHeight: 'var(--md-sys-typescale-title-medium-line-height)',
-            letterSpacing: 'var(--md-sys-typescale-title-medium-tracking)',
-            fontWeight: 'var(--md-sys-typescale-title-medium-weight)',
-          },
-        ],
-        'title-sm': [
-          'var(--md-sys-typescale-title-small-size)',
-          {
-            lineHeight: 'var(--md-sys-typescale-title-small-line-height)',
-            letterSpacing: 'var(--md-sys-typescale-title-small-tracking)',
-            fontWeight: 'var(--md-sys-typescale-title-small-weight)',
-          },
-        ],
-        'body-lg': [
-          'var(--md-sys-typescale-body-large-size)',
-          {
-            lineHeight: 'var(--md-sys-typescale-body-large-line-height)',
-            letterSpacing: 'var(--md-sys-typescale-body-large-tracking)',
-            fontWeight: 'var(--md-sys-typescale-body-large-weight)',
-          },
-        ],
-        'body-md': [
-          'var(--md-sys-typescale-body-medium-size)',
-          {
-            lineHeight: 'var(--md-sys-typescale-body-medium-line-height)',
-            letterSpacing: 'var(--md-sys-typescale-body-medium-tracking)',
-            fontWeight: 'var(--md-sys-typescale-body-medium-weight)',
-          },
-        ],
-        'body-sm': [
-          'var(--md-sys-typescale-body-small-size)',
-          {
-            lineHeight: 'var(--md-sys-typescale-body-small-line-height)',
-            letterSpacing: 'var(--md-sys-typescale-body-small-tracking)',
-            fontWeight: 'var(--md-sys-typescale-body-small-weight)',
-          },
-        ],
-        'body-xs': [
-          'var(--md-sys-typescale-body-small-size)',
-          {
-            lineHeight: 'var(--md-sys-typescale-body-small-line-height)',
-            letterSpacing: 'var(--md-sys-typescale-body-small-tracking)',
-            fontWeight: 'var(--md-sys-typescale-body-small-weight)',
-          },
-        ],
-        'label-lg': [
-          'var(--md-sys-typescale-label-large-size)',
-          {
-            lineHeight: 'var(--md-sys-typescale-label-large-line-height)',
-            letterSpacing: 'var(--md-sys-typescale-label-large-tracking)',
-            fontWeight: 'var(--md-sys-typescale-label-large-weight)',
-          },
-        ],
-        'label-md': [
-          'var(--md-sys-typescale-label-medium-size)',
-          {
-            lineHeight: 'var(--md-sys-typescale-label-medium-line-height)',
-            letterSpacing: 'var(--md-sys-typescale-label-medium-tracking)',
-            fontWeight: 'var(--md-sys-typescale-label-medium-weight)',
-          },
-        ],
-        'label-sm': [
-          'var(--md-sys-typescale-label-small-size)',
-          {
-            lineHeight: 'var(--md-sys-typescale-label-small-line-height)',
-            letterSpacing: 'var(--md-sys-typescale-label-small-tracking)',
-            fontWeight: 'var(--md-sys-typescale-label-small-weight)',
-          },
-        ],
-        'label-2xs': [
-          'var(--md-sys-typescale-label-extra-small-size)',
-          {
-            lineHeight: 'var(--md-sys-typescale-label-extra-small-line-height)',
-            letterSpacing: 'var(--md-sys-typescale-label-extra-small-tracking)',
-            fontWeight: 'var(--md-sys-typescale-label-extra-small-weight)',
-          },
-        ],
-        'label-xs': [
-          'var(--md-sys-typescale-label-extra-small-size)',
-          {
-            lineHeight: 'var(--md-sys-typescale-label-extra-small-line-height)',
-            letterSpacing: 'var(--md-sys-typescale-label-extra-small-tracking)',
-            fontWeight: 'var(--md-sys-typescale-label-extra-small-weight)',
-          },
-        ],
-      },
       spacing: {
         'space-3xs': 'var(--md-sys-spacing-3xs)',
         '0.5': 'calc(var(--md-sys-spacing-2xs) / 2)',
@@ -389,12 +410,14 @@ const config: Config = {
         page: 'min(100%, var(--md-sys-layout-max-width))',
       },
       boxShadow: {
-        'level-1': 'var(--shadow-level-1)',
-        'level-2': 'var(--shadow-level-2)',
       },
       fontFamily: {
+        sans: ['var(--md-ref-typeface-plain)', 'Roboto', 'system-ui', 'sans-serif'],
         heading: ['var(--md-ref-typeface-brand)', 'Roboto Flex', 'Roboto', 'system-ui', 'sans-serif'],
         body: ['var(--md-ref-typeface-plain)', 'Roboto', 'system-ui', 'sans-serif'],
+      },
+      letterSpacing: {
+        'label-uppercase': 'var(--md-sys-typescale-label-uppercase-tracking, 0.08em)',
       },
       borderRadius: {
         '3xl': 'var(--md-sys-shape-corner-extra-large)',
