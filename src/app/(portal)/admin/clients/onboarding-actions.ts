@@ -44,7 +44,7 @@ export async function resetOnboardingAction(formData: FormData): Promise<AdminAc
     consent_confirmed: false,
     privacy_acknowledged: false,
     intake_date: now.slice(0, 10),
-    intake_worker: `${access.profile.display_name ?? 'Admin'} (reset)`,
+    intake_worker: access.profile.id,
     general_notes: 'Onboarding reset by admin; previous consent superseded.',
   });
 

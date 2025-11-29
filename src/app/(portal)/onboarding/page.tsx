@@ -78,14 +78,31 @@ export default async function OnboardingPage({ searchParams }: PageProps) {
   ]);
 
   const prefill = buildPrefill({ person: personDetail, draft: registrationDraft, fallbackName: access.profile.display_name });
+  const partnerBlockedReason =
+    actor !== 'partner'
+      ? null
+      : !personId
+        ? 'Partner assistance requires an existing client record created by IHARC staff.'
+        : prefill.dataSharingConsent === true
+          ? null
+          : 'This client has not opted into partner sharing. Ask IHARC staff or the client to update sharing before assisting.';
 
   return (
     <div className="page-shell page-stack">
+      {(access.canManagePolicies || access.canAccessAdminWorkspace) && (!servicePolicy || !privacyPolicy) ? (
+        <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-space-md text-body-sm text-destructive">
+          Policy copy missing: publish both “Client Service Agreement” and “Privacy & Data Protection Notice” in Admin → Policies to unblock onboarding.
+        </div>
+      ) : null}
+      {(access.canManagePolicies || access.canAccessAdminWorkspace) && !registrationDraft ? (
+        <div className="rounded-2xl border border-outline/40 bg-surface-container-low p-space-md text-body-sm text-on-surface/80">
+          No registration draft found for this account. Prefill may be empty; this is expected for staff-assisted onboarding.
+        </div>
+      ) : null}
       <OnboardingWizard
         initialStatus={status}
         prefill={prefill}
         personId={personId}
-        profileId={access.profile.id}
         actor={actor as OnboardingActor}
         nextPath={nextPath}
         hasAccountLink={accountLink}
@@ -107,6 +124,7 @@ export default async function OnboardingPage({ searchParams }: PageProps) {
               }
             : null,
         }}
+        partnerBlockedReason={partnerBlockedReason}
       />
     </div>
   );

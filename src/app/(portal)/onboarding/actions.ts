@@ -310,6 +310,10 @@ export async function saveBasicInfoAction(_prev: OnboardingActionState, formData
     personId = personRow.id;
     personCreated = true;
   } else {
+    if (actor === 'partner' && personRow.data_sharing_consent !== true) {
+      return errorState('Partner assistance is allowed only when the client has opted to share with partners.');
+    }
+
     const core = supabase.schema('core');
     const { error } = await core
       .from('people')
@@ -381,6 +385,11 @@ export async function recordConsentsAction(
     return errorState('Sign in to record consents.');
   }
 
+  const actor = resolveOnboardingActor(access);
+  if (actor === 'partner') {
+    return errorState('Partners can review onboarding but cannot capture consents. Ask the client or IHARC staff to proceed.');
+  }
+
   const personId = parseNumber(formData.get('person_id'));
   const consentServiceAgreement = parseBoolean(formData.get('consent_service_agreement'));
   const consentPrivacy = parseBoolean(formData.get('consent_privacy'));
@@ -420,7 +429,7 @@ export async function recordConsentsAction(
       consent_confirmed: consentServiceAgreement,
       privacy_acknowledged: consentPrivacy,
       intake_date: now.toISOString().slice(0, 10),
-      intake_worker: access.profile.display_name ?? 'Portal',
+      intake_worker: access.profile.id,
       general_notes: generalNotes,
     })
     .select('id')

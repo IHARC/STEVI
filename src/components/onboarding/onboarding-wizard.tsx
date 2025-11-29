@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, type ReactNode } from 'react';
 import { useFormState, useFormStatus } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
@@ -51,7 +50,6 @@ type OnboardingWizardProps = {
   initialStatus: OnboardingStatus;
   prefill: OnboardingPrefill;
   personId: number | null;
-  profileId: string | null;
   actor: OnboardingActor;
   nextPath?: string | null;
   hasAccountLink?: boolean;
@@ -59,6 +57,7 @@ type OnboardingWizardProps = {
     service: PolicyContent | null;
     privacy: PolicyContent | null;
   };
+  partnerBlockedReason?: string | null;
 };
 
 type StepState = 'pending' | 'ready' | 'done';
@@ -67,51 +66,30 @@ export function OnboardingWizard({
   initialStatus,
   prefill,
   personId: initialPersonId,
-  profileId,
   actor,
   nextPath,
   hasAccountLink: initialHasAccountLink = false,
   policies,
+  partnerBlockedReason,
 }: OnboardingWizardProps) {
   const router = useRouter();
-  const [status, setStatus] = useState<OnboardingStatus>(initialStatus);
-  const [personId, setPersonId] = useState<number | null>(initialPersonId ?? null);
-  const [hasAccountLink, setHasAccountLink] = useState<boolean>(initialHasAccountLink);
-
   const [basicState, basicAction] = useFormState(saveBasicInfoAction, INITIAL_ONBOARDING_ACTION_STATE);
   const [consentState, consentAction] = useFormState(recordConsentsAction, INITIAL_ONBOARDING_ACTION_STATE);
   const [sharingState, sharingAction] = useFormState(saveSharingPreferenceAction, INITIAL_ONBOARDING_ACTION_STATE);
   const [linkState, linkAction] = useFormState(linkAccountToPersonAction, INITIAL_ONBOARDING_ACTION_STATE);
 
-  useEffect(() => {
-    if (basicState.personId !== undefined) {
-      setPersonId(basicState.personId ?? null);
-    }
-    if (basicState.nextStatus) {
-      setStatus(basicState.nextStatus);
-    }
-  }, [basicState]);
+  const status = linkState.nextStatus
+    ? linkState.nextStatus
+    : sharingState.nextStatus
+      ? sharingState.nextStatus
+      : consentState.nextStatus
+        ? consentState.nextStatus
+        : basicState.nextStatus
+          ? basicState.nextStatus
+          : initialStatus;
 
-  useEffect(() => {
-    if (consentState.nextStatus) {
-      setStatus(consentState.nextStatus);
-    }
-  }, [consentState]);
-
-  useEffect(() => {
-    if (sharingState.nextStatus) {
-      setStatus(sharingState.nextStatus);
-    }
-  }, [sharingState]);
-
-  useEffect(() => {
-    if (linkState.nextStatus) {
-      setStatus(linkState.nextStatus);
-    }
-    if (linkState.status === 'success') {
-      setHasAccountLink(true);
-    }
-  }, [linkState]);
+  const personId = basicState.personId ?? initialPersonId ?? null;
+  const hasAccountLink = initialHasAccountLink || linkState.status === 'success';
 
   useEffect(() => {
     if (actor !== 'client') return;
@@ -133,6 +111,7 @@ export function OnboardingWizard({
   }, [status]);
 
   const progressValue = Math.round((completionCount / 3) * 100);
+  const blocked = Boolean(partnerBlockedReason);
 
   const steps: Array<{ id: string; label: string; state: StepState; description: string }> = [
     {
@@ -202,6 +181,11 @@ export function OnboardingWizard({
             We need to connect your login to an IHARC record before continuing. Please contact support if you were invited but do not see your record.
           </p>
         ) : null}
+        {blocked ? (
+          <p className="mt-space-sm rounded-lg border border-destructive/30 bg-destructive/10 px-space-sm py-space-2xs text-body-sm text-destructive">
+            {partnerBlockedReason}
+          </p>
+        ) : null}
       </header>
 
       {status.status === 'COMPLETED' ? (
@@ -232,13 +216,14 @@ export function OnboardingWizard({
             state={basicState}
             personId={personId}
             prefill={prefill}
+            disabled={blocked}
           />
           <ConsentCard
             onSubmit={consentAction}
             state={consentState}
             personId={personId}
             policies={policies}
-            disabled={!personId}
+            disabled={!personId || blocked}
           />
           <SharingCard
             onSubmit={sharingAction}
@@ -246,7 +231,7 @@ export function OnboardingWizard({
             personId={personId}
             dataSharingConsent={prefill.dataSharingConsent}
             actor={actor}
-            disabled={!personId}
+            disabled={!personId || blocked}
           />
           <LinkCard
             onSubmit={linkAction}
@@ -254,7 +239,7 @@ export function OnboardingWizard({
             personId={personId}
             hasAccountLink={hasAccountLink}
             actor={actor}
-            disabled={!personId}
+            disabled={!personId || blocked}
           />
         </div>
 
@@ -289,11 +274,13 @@ function BasicInfoCard({
   state,
   personId,
   prefill,
+  disabled,
 }: {
   onSubmit: (formData: FormData) => void;
   state: OnboardingActionState;
   personId: number | null;
   prefill: OnboardingPrefill;
+  disabled?: boolean;
 }) {
   return (
     <Card className="border-outline/30 bg-surface">
@@ -304,60 +291,62 @@ function BasicInfoCard({
       <CardContent>
         <form action={onSubmit} className="space-y-space-md">
           <input type="hidden" name="person_id" value={personId ?? ''} />
-          <div className="grid gap-space-sm md:grid-cols-2">
-            <Field label="Name to use" name="chosen_name" defaultValue={prefill.chosenName} required />
-            <Field label="Legal name (optional)" name="legal_name" defaultValue={prefill.legalName ?? ''} />
-            <Field label="Pronouns" name="pronouns" defaultValue={prefill.pronouns ?? ''} />
-            <Field label="Postal code (optional)" name="postal_code" defaultValue={prefill.postalCode ?? ''} />
-          </div>
+          <fieldset disabled={disabled} className="space-y-space-md">
+            <div className="grid gap-space-sm md:grid-cols-2">
+              <Field label="Name to use" name="chosen_name" defaultValue={prefill.chosenName} required />
+              <Field label="Legal name (optional)" name="legal_name" defaultValue={prefill.legalName ?? ''} />
+              <Field label="Pronouns" name="pronouns" defaultValue={prefill.pronouns ?? ''} />
+              <Field label="Postal code (optional)" name="postal_code" defaultValue={prefill.postalCode ?? ''} />
+            </div>
 
-          <div className="grid gap-space-sm md:grid-cols-2">
-            <Field label="Email" name="contact_email" type="email" defaultValue={prefill.email ?? ''} />
-            <Field label="Phone" name="contact_phone" defaultValue={prefill.phone ?? ''} />
-          </div>
+            <div className="grid gap-space-sm md:grid-cols-2">
+              <Field label="Email" name="contact_email" type="email" defaultValue={prefill.email ?? ''} />
+              <Field label="Phone" name="contact_phone" defaultValue={prefill.phone ?? ''} />
+            </div>
 
-          <div className="grid gap-space-sm md:grid-cols-2">
+            <div className="grid gap-space-sm md:grid-cols-2">
+              <div className="space-y-space-2xs">
+                <Label className="text-label-sm text-on-surface">Preferred contact</Label>
+                <select
+                  name="preferred_contact_method"
+                  defaultValue={prefill.preferredContactMethod ?? 'email'}
+                  className="w-full rounded-md border border-outline/40 bg-surface px-space-sm py-space-2xs text-body-sm"
+                >
+                  <option value="email">Email</option>
+                  <option value="phone">Phone</option>
+                  <option value="both">Email or phone</option>
+                  <option value="none">Do not contact</option>
+                </select>
+              </div>
+              <Field label="Safe contact window (optional)" name="contact_window" defaultValue={prefill.contactWindow ?? ''} />
+            </div>
+
+            <div className="grid gap-space-sm md:grid-cols-2">
+              <div className="space-y-space-2xs">
+                <Label className="text-label-sm text-on-surface">Birth month</Label>
+                <Input name="dob_month" type="number" min={1} max={12} defaultValue={prefill.dobMonth ?? ''} />
+              </div>
+              <div className="space-y-space-2xs">
+                <Label className="text-label-sm text-on-surface">Birth year</Label>
+                <Input name="dob_year" type="number" min={1900} max={new Date().getFullYear()} defaultValue={prefill.dobYear ?? ''} />
+              </div>
+            </div>
+
             <div className="space-y-space-2xs">
-              <Label className="text-label-sm text-on-surface">Preferred contact</Label>
-              <select
-                name="preferred_contact_method"
-                defaultValue={prefill.preferredContactMethod ?? 'email'}
-                className="w-full rounded-md border border-outline/40 bg-surface px-space-sm py-space-2xs text-body-sm"
-              >
-                <option value="email">Email</option>
-                <option value="phone">Phone</option>
-                <option value="both">Email or phone</option>
-                <option value="none">Do not contact</option>
-              </select>
+              <Label className="text-label-sm text-on-surface">Safe contact channels</Label>
+              <div className="flex flex-wrap gap-space-md">
+                <CheckboxField id="safe_call" label="Voice calls are okay" defaultChecked={prefill.safeCall} />
+                <CheckboxField id="safe_text" label="Text messages are okay" defaultChecked={prefill.safeText} />
+                <CheckboxField id="safe_voicemail" label="Voicemail is okay" defaultChecked={prefill.safeVoicemail} />
+              </div>
             </div>
-            <Field label="Safe contact window (optional)" name="contact_window" defaultValue={prefill.contactWindow ?? ''} />
-          </div>
-
-          <div className="grid gap-space-sm md:grid-cols-2">
-            <div className="space-y-space-2xs">
-              <Label className="text-label-sm text-on-surface">Birth month</Label>
-              <Input name="dob_month" type="number" min={1} max={12} defaultValue={prefill.dobMonth ?? ''} />
-            </div>
-            <div className="space-y-space-2xs">
-              <Label className="text-label-sm text-on-surface">Birth year</Label>
-              <Input name="dob_year" type="number" min={1900} max={new Date().getFullYear()} defaultValue={prefill.dobYear ?? ''} />
-            </div>
-          </div>
-
-          <div className="space-y-space-2xs">
-            <Label className="text-label-sm text-on-surface">Safe contact channels</Label>
-            <div className="flex flex-wrap gap-space-md">
-              <CheckboxField id="safe_call" label="Voice calls are okay" defaultChecked={prefill.safeCall} />
-              <CheckboxField id="safe_text" label="Text messages are okay" defaultChecked={prefill.safeText} />
-              <CheckboxField id="safe_voicemail" label="Voicemail is okay" defaultChecked={prefill.safeVoicemail} />
-            </div>
-          </div>
+          </fieldset>
 
           {state.status === 'error' ? <ErrorMessage message={state.message ?? 'Unable to save right now.'} /> : null}
           {state.status === 'success' ? <SuccessMessage message="Saved. Continue with consents next." /> : null}
 
           <div className="flex flex-wrap gap-space-sm">
-            <FormSubmit pendingLabel="Saving…">
+            <FormSubmit pendingLabel="Saving…" disabled={disabled}>
               {personId ? 'Save changes' : 'Save and create record'}
             </FormSubmit>
           </div>
