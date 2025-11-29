@@ -298,6 +298,14 @@ const config: Config = {
             fontWeight: 'var(--md-sys-typescale-body-small-weight)',
           },
         ],
+        'body-xs': [
+          'var(--md-sys-typescale-body-small-size)',
+          {
+            lineHeight: 'var(--md-sys-typescale-body-small-line-height)',
+            letterSpacing: 'var(--md-sys-typescale-body-small-tracking)',
+            fontWeight: 'var(--md-sys-typescale-body-small-weight)',
+          },
+        ],
         'label-lg': [
           'var(--md-sys-typescale-label-large-size)',
           {
@@ -322,8 +330,17 @@ const config: Config = {
             fontWeight: 'var(--md-sys-typescale-label-small-weight)',
           },
         ],
+        'label-xs': [
+          'var(--md-sys-typescale-label-small-size)',
+          {
+            lineHeight: 'var(--md-sys-typescale-label-small-line-height)',
+            letterSpacing: 'var(--md-sys-typescale-label-small-tracking)',
+            fontWeight: 'var(--md-sys-typescale-label-small-weight)',
+          },
+        ],
       },
       spacing: {
+        'space-3xs': 'var(--md-sys-spacing-3xs)',
         '0.5': 'calc(var(--md-sys-spacing-2xs) / 2)',
         '1': 'var(--md-sys-spacing-2xs)',
         '1.5': 'calc(var(--md-sys-spacing-xs) - (var(--md-sys-spacing-2xs) / 2))',
