@@ -282,3 +282,148 @@ export async function getOnboardingStatusForPerson(
 ): Promise<OnboardingStatus> {
   return getOnboardingStatus({ personId }, supabaseClient);
 }
+
+type UserPersonLinkSnapshot = Pick<Database['core']['Tables']['user_people']['Row'], 'person_id' | 'profile_id' | 'linked_at'>;
+
+type RegistrationFlowRow = Pick<Database['portal']['Tables']['registration_flows']['Row'], 'profile_id' | 'updated_at' | 'created_at'>;
+
+export async function getOnboardingStatusForPeople(
+  personIds: number[],
+  supabaseClient?: SupabaseAnyServerClient,
+): Promise<Record<number, OnboardingStatus>> {
+  if (personIds.length === 0) {
+    return {};
+  }
+
+  const supabase = supabaseClient ?? (await createSupabaseRSCClient());
+
+  const core = supabase.schema(CORE_SCHEMA);
+  const caseMgmt = supabase.schema(CASE_MGMT_SCHEMA);
+
+  const [peopleResult, intakeResult, linkResult] = await Promise.all([
+    core
+      .from(PEOPLE_TABLE)
+      .select('id, status, data_sharing_consent, updated_at, created_at')
+      .in('id', personIds),
+    caseMgmt
+      .from(CLIENT_INTAKES_TABLE)
+      .select('id, person_id, consent_confirmed, privacy_acknowledged, created_at')
+      .in('person_id', personIds)
+      .order('created_at', { ascending: false }),
+    core
+      .from(USER_PEOPLE_TABLE)
+      .select('person_id, profile_id, linked_at')
+      .in('person_id', personIds)
+      .order('linked_at', { ascending: false }),
+  ]);
+
+  if (peopleResult.error) throw peopleResult.error;
+  if (intakeResult.error) throw intakeResult.error;
+  if (linkResult.error) throw linkResult.error;
+
+  const people = (peopleResult.data ?? []) as PersonSnapshot[];
+  const intakes = (intakeResult.data ?? []) as Array<IntakeSnapshot & { person_id: number }>;
+  const links = (linkResult.data ?? []) as UserPersonLinkSnapshot[];
+
+  const personMap = new Map<number, PersonSnapshot>(people.map((row) => [row.id, row]));
+
+  const latestIntakeByPerson = new Map<number, IntakeSnapshot>();
+  for (const row of intakes) {
+    if (!latestIntakeByPerson.has(row.person_id)) {
+      latestIntakeByPerson.set(row.person_id, {
+        id: row.id,
+        consent_confirmed: row.consent_confirmed,
+        privacy_acknowledged: row.privacy_acknowledged,
+        created_at: row.created_at,
+      });
+    }
+  }
+
+  const latestLinkByPerson = new Map<
+    number,
+    { profileId: string | null; linkedAt: string | null }
+  >();
+  const profileIds: string[] = [];
+
+  for (const row of links) {
+    if (!latestLinkByPerson.has(row.person_id)) {
+      latestLinkByPerson.set(row.person_id, {
+        profileId: row.profile_id ?? null,
+        linkedAt: row.linked_at ?? null,
+      });
+      if (row.profile_id) {
+        profileIds.push(row.profile_id);
+      }
+    }
+  }
+
+  let latestRegistrationByProfile = new Map<string, string>();
+  if (profileIds.length > 0) {
+    const portal = supabase.schema(PORTAL_SCHEMA);
+    const { data: registrationRows, error: registrationError } = await portal
+      .from(REGISTRATION_FLOWS_TABLE)
+      .select('profile_id, updated_at, created_at')
+      .in('profile_id', profileIds)
+      .order('updated_at', { ascending: false });
+
+    if (registrationError) {
+      throw registrationError;
+    }
+
+    latestRegistrationByProfile = new Map<string, string>();
+
+    for (const row of (registrationRows ?? []) as RegistrationFlowRow[]) {
+      const profileId = row.profile_id as string | null;
+      const timestamp = row.updated_at ?? row.created_at ?? null;
+      if (!profileId || !timestamp) continue;
+      if (!latestRegistrationByProfile.has(profileId)) {
+        latestRegistrationByProfile.set(profileId, timestamp);
+      }
+    }
+  }
+
+  const result: Record<number, OnboardingStatus> = {};
+
+  for (const personId of personIds) {
+    const person = personMap.get(personId) ?? null;
+    const intake = latestIntakeByPerson.get(personId) ?? null;
+    const link = latestLinkByPerson.get(personId) ?? null;
+    const registrationUpdatedAt =
+      link?.profileId && latestRegistrationByProfile.has(link.profileId)
+        ? latestRegistrationByProfile.get(link.profileId) ?? null
+        : null;
+
+    const hasPerson = person ? person.status !== PERSON_STATUS_INACTIVE : false;
+    const hasServiceAgreementConsent = intake?.consent_confirmed === true;
+    const hasPrivacyAcknowledgement = intake?.privacy_acknowledged === true;
+    const hasDataSharingPreference = typeof person?.data_sharing_consent === 'boolean';
+
+    const status: OnboardingStatusState = !hasPerson
+      ? 'NOT_STARTED'
+      : hasServiceAgreementConsent && hasPrivacyAcknowledgement && hasDataSharingPreference
+        ? 'COMPLETED'
+        : 'NEEDS_CONSENTS';
+
+    const lastUpdatedAt = pickLatestTimestamp(
+      person?.updated_at,
+      person?.created_at,
+      intake?.created_at,
+      link?.linkedAt ?? null,
+      registrationUpdatedAt,
+    );
+
+    result[personId] = {
+      status,
+      hasPerson,
+      hasIntake: Boolean(intake),
+      hasServiceAgreementConsent,
+      hasPrivacyAcknowledgement,
+      hasDataSharingPreference,
+      personId: person?.id ?? personId ?? null,
+      profileId: link?.profileId ?? null,
+      lastUpdatedAt,
+    };
+  }
+
+  return result;
+}

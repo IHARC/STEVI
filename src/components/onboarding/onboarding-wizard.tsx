@@ -290,7 +290,7 @@ function BasicInfoCard({
   personId,
   prefill,
 }: {
-  onSubmit: (prev: typeof INITIAL_ONBOARDING_ACTION_STATE, formData: FormData) => void;
+  onSubmit: (formData: FormData) => void;
   state: OnboardingActionState;
   personId: number | null;
   prefill: OnboardingPrefill;
@@ -374,7 +374,7 @@ function ConsentCard({
   policies,
   disabled,
 }: {
-  onSubmit: (prev: typeof INITIAL_ONBOARDING_ACTION_STATE, formData: FormData) => void;
+  onSubmit: (formData: FormData) => void;
   state: OnboardingActionState;
   personId: number | null;
   policies: { service: PolicyContent | null; privacy: PolicyContent | null };
@@ -429,7 +429,7 @@ function SharingCard({
   actor,
   disabled,
 }: {
-  onSubmit: (prev: typeof INITIAL_ONBOARDING_ACTION_STATE, formData: FormData) => void;
+  onSubmit: (formData: FormData) => void;
   state: OnboardingActionState;
   personId: number | null;
   dataSharingConsent: boolean | null;
@@ -506,7 +506,7 @@ function LinkCard({
   actor,
   disabled,
 }: {
-  onSubmit: (prev: typeof INITIAL_ONBOARDING_ACTION_STATE, formData: FormData) => void;
+  onSubmit: (formData: FormData) => void;
   state: OnboardingActionState;
   personId: number | null;
   hasAccountLink: boolean;

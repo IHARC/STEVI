@@ -40,6 +40,7 @@ Partner-org assistance is permissible only when data sharing = IHARC + partners.
 ## Enforcement expectations
 - Routing guard: clients hitting the portal are redirected to the wizard until `status === COMPLETED` from the onboarding status service.
 - Backend checks: sensitive actions (e.g., partner sharing, certain case actions) must verify onboarding status server-side; UI hiding is insufficient.
+- Current enforcement coverage: support requests, document requests, appointment requests/changes, client case updates, and consent edits all call the onboarding guard before mutating data.
 - Rate limiting: public/token flows call `portal_check_rate_limit`.
 - Audit: all mutations use `portal_log_audit_event` and include actor, person_id, step, and previous values where available.
 
@@ -60,4 +61,5 @@ Partner-org assistance is permissible only when data sharing = IHARC + partners.
 - Write actions: server actions/route handlers wrap person upsert, consent capture, sharing update, and account link; all return fresh status and log audit events. Use `createSupabaseServerClient` and honor RLS.
 - Wizard: single component configured by actor type; staff/partner paths still onboard the client, not the staff/partner.
 - Status resolver: implemented at `src/lib/onboarding/status.ts`; read-only, treats `status !== inactive` as active, pulls latest intake consent flags plus data sharing preference, and surfaces the freshest timestamp across intake, person updates, user-person link, or registration flow metadata as `lastUpdatedAt`.
-- Portal guard: `(portal)/layout.tsx` redirects clients to `/onboarding` until `status === COMPLETED`; support, document, and appointment client actions enforce onboarding server-side to prevent bypassing consent rules.
+- Portal guard: `(portal)/layout.tsx` redirects clients to `/onboarding` until `status === COMPLETED`; support, document, appointment, case update, and consent edit actions enforce onboarding server-side to prevent bypassing consent rules.
+- Staff/admin visibility: `getOnboardingStatusForPeople` batches status lookups for directory views; admin client directory shows onboarding badges + filters, and the admin client detail page includes an onboarding history timeline.

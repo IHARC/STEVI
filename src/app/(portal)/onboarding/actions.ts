@@ -39,7 +39,7 @@ function parseNumber(value: FormDataEntryValue | null, min?: number, max?: numbe
 }
 
 function parseBoolean(value: FormDataEntryValue | null): boolean {
-  return value === 'on' || value === 'true' || value === true;
+  return value === 'on' || value === 'true';
 }
 
 function sanitizeShortText(value: FormDataEntryValue | null, max = 160): string | null {
@@ -134,7 +134,9 @@ async function upsertRegistrationDraft(
   } else {
     const insertPayload: Database['portal']['Tables']['registration_flows']['Insert'] = {
       ...basePayload,
-      id: undefined,
+      chosen_name: chosenName,
+      flow_type: 'client_onboarding',
+      status: 'in_progress',
       created_at: now,
       created_by_user_id: userId,
     };

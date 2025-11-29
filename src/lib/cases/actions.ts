@@ -8,6 +8,7 @@ import { requirePersonForUser } from '@/lib/cases/person';
 import { fetchClientCaseDetail, fetchStaffCaseDetail } from '@/lib/cases/fetchers';
 import { processClientIntake } from '@/lib/cases/intake';
 import { createPersonGrant, revokePersonGrant, GRANT_SCOPES } from '@/lib/cases/grants';
+import { assertOnboardingComplete } from '@/lib/onboarding/guard';
 
 const ACTIVITIES_TABLE = 'people_activities';
 const PEOPLE_TABLE = 'people';
@@ -25,6 +26,8 @@ export async function submitClientCaseUpdateAction(formData: FormData): Promise<
   const supabase = await createSupabaseServerClient();
   const access = await loadPortalAccess(supabase);
   if (!access) throw new Error('Sign in to send an update.');
+
+  await assertOnboardingComplete(supabase, access.userId);
 
   const caseDetail = await fetchClientCaseDetail(supabase, access.userId, caseId);
   if (!caseDetail) throw new Error('Case not found.');
@@ -74,6 +77,8 @@ export async function updateConsentsAction(formData: FormData): Promise<void> {
   const supabase = await createSupabaseServerClient();
   const access = await loadPortalAccess(supabase);
   if (!access) throw new Error('Sign in to update consents.');
+
+  await assertOnboardingComplete(supabase, access.userId);
 
   const person = await requirePersonForUser(supabase, access.userId);
   const core = supabase.schema('core');
