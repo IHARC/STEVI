@@ -9,19 +9,30 @@ import { loadPortalAccess, resolveClientNavLinks, type PortalLink } from '@/lib/
 import { inferWorkspaceFromPath, resolveDefaultWorkspacePath } from '@/lib/workspaces';
 import { fetchClientInboxItems } from '@/lib/inbox';
 import { getOnboardingStatusForUser } from '@/lib/onboarding/status';
+import { normalizePathFromHeader } from '@/lib/paths';
 
 export const dynamic = 'force-dynamic';
 
 export default async function PortalLayout({ children }: { children: ReactNode }) {
   const headerList = await headers();
-  const currentPath = headerList.get('x-invoke-path') ?? headerList.get('next-url') ?? '/';
-  const activeWorkspace = inferWorkspaceFromPath(currentPath);
+  const { pathname: currentPathname, path: currentPath } = normalizePathFromHeader(
+    headerList.get('x-invoke-path') ?? headerList.get('next-url'),
+    '/',
+  );
+  const activeWorkspace = inferWorkspaceFromPath(currentPathname);
   const supabase = await createSupabaseRSCClient();
   const portalAccess = await loadPortalAccess(supabase);
 
-  if (portalAccess && activeWorkspace === 'client') {
+  const shouldGateOnboarding =
+    portalAccess &&
+    !portalAccess.canAccessAdminWorkspace &&
+    !portalAccess.canAccessOrgWorkspace &&
+    !portalAccess.canAccessStaffWorkspace &&
+    activeWorkspace === 'client';
+
+  if (shouldGateOnboarding) {
     const onboardingStatus = await getOnboardingStatusForUser(portalAccess.userId, supabase);
-    const isOnboardingRoute = currentPath.startsWith('/onboarding');
+    const isOnboardingRoute = currentPathname.startsWith('/onboarding');
 
     if (onboardingStatus.status !== 'COMPLETED' && !isOnboardingRoute) {
       const nextParam = encodeURIComponent(currentPath || '/home');

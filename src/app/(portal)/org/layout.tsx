@@ -9,6 +9,7 @@ import { InboxPanel } from '@/components/layout/inbox-panel';
 import { fetchWorkspaceInbox, type InboxItem } from '@/lib/inbox';
 import { resolveWorkspaceQuickActions } from '@/lib/workspaces';
 import { Button } from '@/components/ui/button';
+import { normalizePathFromHeader } from '@/lib/paths';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,7 +17,10 @@ export default async function OrgLayout({ children }: { children: ReactNode }) {
   const supabase = await createSupabaseRSCClient();
   const access = await loadPortalAccess(supabase);
   const headerList = await headers();
-  const currentPath = headerList.get('next-url') ?? headerList.get('x-invoke-path') ?? '/';
+  const { path: currentPath } = normalizePathFromHeader(
+    headerList.get('next-url') ?? headerList.get('x-invoke-path'),
+    '/org',
+  );
 
   if (!access) {
     redirect(`/login?next=${encodeURIComponent(currentPath)}`);
