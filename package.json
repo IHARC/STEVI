@@ -77,6 +77,7 @@
     "@typescript-eslint/eslint-plugin": "^8.12.1",
     "@typescript-eslint/parser": "^8.12.1",
     "autoprefixer": "^10.4.19",
+    "baseline-browser-mapping": "^2.8.32",
     "es-abstract": "^1.23.3",
     "eslint": "^9.11.1",
     "eslint-config-next": "16.0.1",
