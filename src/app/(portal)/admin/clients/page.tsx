@@ -77,7 +77,7 @@ export default async function AdminClientsPage({ searchParams }: PageProps) {
     <div className="page-shell page-stack">
       <header className="space-y-space-2xs">
         <p className="text-label-sm font-semibold uppercase text-muted-foreground">Clients</p>
-        <h1 className="text-headline-lg text-on-surface sm:text-display-sm">Client directory</h1>
+        <h1 className="text-headline-md text-on-surface sm:text-headline-lg">Client directory</h1>
         <p className="max-w-3xl text-body-md text-muted-foreground sm:text-body-lg">
           RLS-limited view of people records. Use consent overrides to align sharing with client wishes.
         </p>

@@ -60,7 +60,7 @@ function DesktopAdminNav({ nav, pathname, activeGroupId }: DesktopAdminNavProps)
     <TooltipProvider delayDuration={150} skipDelayDuration={0}>
       <div
         className={cn(
-          'flex h-full flex-col rounded-2xl border border-outline/12 bg-surface-container-high shadow-md transition-[width] motion-duration-medium motion-ease-standard',
+          'flex h-full flex-col rounded-2xl border border-outline/12 bg-surface-container-high shadow-md transition-[width] motion-duration-medium motion-ease-standard text-body-sm',
           collapsed ? 'w-[76px] px-space-2xs' : 'w-full px-space-sm',
         )}
         data-collapsed={collapsed}
@@ -299,26 +299,26 @@ function CollapsedNavGroups({ nav, pathname }: CollapsedNavGroupsProps) {
       {nav.groups.map((group) => {
         const isActive = group.links.some((link) => isLinkActive(link, pathname));
         return (
-          <Popover key={group.id}>
-            <PopoverTrigger asChild>
-              <Button
-                variant={isActive ? 'secondary' : 'ghost'}
-                size="icon"
+      <Popover key={group.id}>
+        <PopoverTrigger asChild>
+          <Button
+            variant={isActive ? 'secondary' : 'ghost'}
+            size="icon"
                 className={cn(
                   'h-10 w-10 rounded-lg text-muted-foreground',
                   isActive && 'bg-secondary-container text-on-secondary-container',
                 )}
-                aria-label={`${group.label} links`}
-              >
-                <Icon icon={resolveAppIcon(group.icon)} size="sm" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent side="right" align="start" className="w-64 p-space-sm">
-              <div className="flex items-center gap-space-xs pb-space-xs">
-                <Icon icon={resolveAppIcon(group.icon)} size="sm" />
-                <div className="text-label-sm font-semibold">{group.label}</div>
-                <span className="ml-auto text-label-xs text-muted-foreground">
-                  {group.links.length}
+            aria-label={`${group.label} links`}
+          >
+            <Icon icon={resolveAppIcon(group.icon)} size="sm" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent side="right" align="start" className="w-64 p-space-sm text-body-sm">
+          <div className="flex items-center gap-space-xs pb-space-xs">
+            <Icon icon={resolveAppIcon(group.icon)} size="sm" />
+            <div className="text-label-sm font-semibold">{group.label}</div>
+            <span className="ml-auto text-label-xs text-muted-foreground">
+              {group.links.length}
                 </span>
               </div>
               <div className="space-y-[2px]">
@@ -348,7 +348,7 @@ function AdminNavLink({ link, pathname, onNavigate, onToggleFavorite, isFavorite
   return (
     <div
       className={cn(
-        'group flex items-center gap-space-xs rounded-lg px-space-sm py-space-2xs transition-colors',
+        'group flex items-center gap-space-xs rounded-lg px-space-sm py-space-2xs text-body-sm transition-colors',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
         active ? 'bg-primary/10 text-primary ring-1 ring-primary/40 shadow-level-1' : 'text-on-surface/80 hover:bg-surface-container',
       )}

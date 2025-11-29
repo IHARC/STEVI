@@ -45,7 +45,7 @@ export default async function PolicyDetailPage({ params }: { params: RouteParams
       <header className="flex flex-col gap-space-sm sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-space-xs">
           <p className="text-label-sm font-medium uppercase text-muted-foreground">Policies</p>
-          <h1 className="text-headline-lg text-on-surface sm:text-display-sm">Edit policy</h1>
+          <h1 className="text-headline-md text-on-surface sm:text-headline-lg">Edit policy</h1>
           <p className="max-w-3xl text-body-md text-muted-foreground sm:text-body-lg">
             Update public copy, categories, and publication status. Publishing makes this policy visible on the marketing site after cache refresh.
           </p>

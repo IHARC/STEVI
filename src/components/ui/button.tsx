@@ -23,9 +23,9 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline focus-visible:ring-transparent",
       },
       size: {
-        default: "h-10 px-space-lg",
-        sm: "h-9 px-space-md text-label-md",
-        lg: "h-12 px-space-xl text-label-lg",
+        default: "h-10 px-space-md",
+        sm: "h-8 px-space-sm text-label-md",
+        lg: "h-11 px-space-lg text-label-lg",
         icon: "h-10 w-10",
       },
     },

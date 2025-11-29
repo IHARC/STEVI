@@ -183,7 +183,7 @@ export default async function AdminUsersSegmentPage({
         <p className="text-label-sm font-medium uppercase text-muted-foreground">Admin · Access</p>
         <div className="flex flex-col gap-space-sm sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-space-2xs">
-            <h1 className="text-headline-lg text-on-surface sm:text-display-sm">User management</h1>
+            <h1 className="text-headline-md text-on-surface sm:text-headline-lg">User management</h1>
             <p className="max-w-3xl text-body-md text-muted-foreground sm:text-body-lg">
               Review clients, partners, and IHARC staff at scale. Filter, paginate, and jump into detail pages for profile updates, roles, and history.
             </p>

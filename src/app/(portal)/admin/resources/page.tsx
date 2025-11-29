@@ -139,7 +139,7 @@ export default async function AdminResourcesPage({ searchParams }: { searchParam
       <header className="flex flex-col gap-space-sm sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-space-xs">
           <p className="text-label-sm font-medium uppercase text-muted-foreground">Resource library</p>
-          <h1 className="text-headline-lg text-on-surface sm:text-display-sm">
+          <h1 className="text-headline-md text-on-surface sm:text-headline-lg">
             Manage public resources and reports
           </h1>
           <p className="max-w-3xl text-body-md text-muted-foreground sm:text-body-lg">

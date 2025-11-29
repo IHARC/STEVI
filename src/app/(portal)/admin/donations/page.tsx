@@ -24,7 +24,7 @@ export default async function DonationsAdminPage() {
     <div className="page-shell page-stack">
       <header className="flex flex-col gap-space-xs">
         <p className="text-label-sm font-medium uppercase text-muted-foreground">Donations</p>
-        <h1 className="text-headline-lg text-on-surface sm:text-display-sm">Donation catalogue</h1>
+        <h1 className="text-headline-md text-on-surface sm:text-headline-lg">Donation catalogue</h1>
         <p className="max-w-3xl text-body-md text-muted-foreground sm:text-body-lg">
           Manage the public donation catalogue, link items to inventory, and keep live metrics in sync with the marketing
           site. All payment logic stays inside STEVI and Supabase.

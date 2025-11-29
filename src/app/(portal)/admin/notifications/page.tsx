@@ -136,7 +136,7 @@ export default async function NotificationsAdminPage() {
         <p className="text-label-sm font-medium uppercase text-muted-foreground">
           Outreach messaging
         </p>
-        <h1 className="text-headline-lg text-on-surface sm:text-display-sm">Notifications workspace</h1>
+        <h1 className="text-headline-md text-on-surface sm:text-headline-lg">Notifications workspace</h1>
         <p className="max-w-3xl text-body-md text-muted-foreground sm:text-body-lg">
           Send reminders and alerts that respect each neighbour’s consent preferences. Delivery runs
           through Supabase notifications and the existing portal-alerts Edge Function.

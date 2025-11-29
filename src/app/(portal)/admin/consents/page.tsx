@@ -41,7 +41,7 @@ export default async function AdminConsentsPage() {
     <div className="page-shell page-stack">
       <header className="space-y-space-2xs">
         <p className="text-label-sm font-semibold uppercase text-muted-foreground">Consents</p>
-        <h1 className="text-headline-lg text-on-surface sm:text-display-sm">Consent overrides</h1>
+        <h1 className="text-headline-md text-on-surface sm:text-headline-lg">Consent overrides</h1>
         <p className="max-w-3xl text-body-md text-muted-foreground sm:text-body-lg">
           Adjust sharing and contact preferences when requested by the client. Every change is audited.
         </p>

@@ -44,7 +44,7 @@ export default async function AdminPoliciesPage() {
       <header className="flex flex-col gap-space-sm sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-space-xs">
           <p className="text-label-sm font-medium uppercase text-muted-foreground">Policies & procedures</p>
-          <h1 className="text-headline-lg text-on-surface sm:text-display-sm">Manage public-facing policies</h1>
+          <h1 className="text-headline-md text-on-surface sm:text-headline-lg">Manage public-facing policies</h1>
           <p className="max-w-3xl text-body-md text-muted-foreground sm:text-body-lg">
             Create, edit, and publish IHARC policies that appear on the public transparency hub. Status controls
             visibility: published policies are automatically visible on marketing pages.
