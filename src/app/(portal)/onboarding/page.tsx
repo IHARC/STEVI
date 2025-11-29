@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { resolveNextPath } from '@/lib/auth';
@@ -8,6 +9,7 @@ import { OnboardingWizard, type OnboardingPrefill } from '@/components/onboardin
 import { getPolicyBySlug } from '@/lib/policies';
 import { normalizePostalCode } from '@/lib/registration';
 import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
+import { Button } from '@/components/ui/button';
 import type { Database } from '@/types/supabase';
 
 export const dynamic = 'force-dynamic';
@@ -97,6 +99,33 @@ export default async function OnboardingPage({ searchParams }: PageProps) {
 
   return (
     <div className="page-shell page-stack">
+      {actor === 'staff' ? (
+        <div className="rounded-2xl border border-primary/20 bg-surface-container-low p-space-md shadow-level-1">
+          <p className="text-label-sm font-semibold uppercase text-primary/80">Assisted onboarding</p>
+          <p className="mt-space-2xs text-body-sm text-on-surface/80">
+            Use this wizard while you’re with the client. Start a new record with basic info below, or open an existing
+            client to continue their onboarding where they left off.
+          </p>
+          <div className="mt-space-sm flex flex-wrap gap-space-sm">
+            {access.canAccessAdminWorkspace ? (
+              <Button asChild size="sm" variant="secondary">
+                <Link href="/admin/clients">Find existing client</Link>
+              </Button>
+            ) : null}
+            {access.canAccessStaffWorkspace ? (
+              <Button asChild size="sm" variant="outline">
+                <Link href="/staff/intake">View intake queue</Link>
+              </Button>
+            ) : null}
+            {personId ? (
+              <Button size="sm" variant="ghost" disabled>
+                Working on client #{personId}
+              </Button>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
+
       {(access.canManagePolicies || access.canAccessAdminWorkspace) && (!servicePolicy || !privacyPolicy) ? (
         <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-space-md text-body-sm text-destructive">
           Policy copy missing: publish both “Client Service Agreement” and “Privacy & Data Protection Notice” in Admin → Policies to unblock onboarding.

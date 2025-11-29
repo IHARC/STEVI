@@ -43,15 +43,18 @@ export async function ensurePortalProfile(
   defaults?: Partial<PortalProfile>,
 ) {
   const portal = supabase.schema('portal');
+  const duplicateProfileError = () =>
+    new Error(
+      'Multiple profiles are linked to this account. Please contact an administrator to resolve the duplicate profile before continuing.',
+    );
+
   const fetchProfileByUserId = async (): Promise<PortalProfile | null> => {
-    const { data, error } = await portal
-      .from('profiles')
-      .select('*')
-      .eq('user_id', userId)
-      .limit(1)
-      .maybeSingle();
+    const { data, error } = await portal.from('profiles').select('*').eq('user_id', userId).maybeSingle();
 
     if (error) {
+      if (isPostgrestErrorLike(error) && error.code === '406') {
+        throw duplicateProfileError();
+      }
       if (isPostgrestErrorLike(error)) {
         throw makeProfileError('fetch your profile', error);
       }
@@ -102,6 +105,23 @@ export async function ensurePortalProfile(
     return ensureCommunityMemberTitle(existingProfile);
   }
 
+  // Guard against rare race where a duplicate is created between fetch and insert.
+  const { count: existingCount, error: countError } = await portal
+    .from('profiles')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', userId);
+
+  if (countError) {
+    if (isPostgrestErrorLike(countError)) {
+      throw makeProfileError('check your profile', countError);
+    }
+    throw countError;
+  }
+
+  if ((existingCount ?? 0) > 0) {
+    throw duplicateProfileError();
+  }
+
   const affiliationType = defaults?.affiliation_type ?? 'community_member';
   const isCommunityMember = affiliationType === 'community_member';
   const affiliationStatus = defaults?.affiliation_status ?? (isCommunityMember ? 'approved' : 'pending');
@@ -145,6 +165,10 @@ export async function ensurePortalProfile(
       if (profile) {
         return ensureCommunityMemberTitle(profile);
       }
+    }
+
+    if (isPostgrestErrorLike(insertError) && insertError.code === '406') {
+      throw duplicateProfileError();
     }
 
     if (isPostgrestErrorLike(insertError)) {
