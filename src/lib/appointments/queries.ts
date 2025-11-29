@@ -8,8 +8,7 @@ const APPOINTMENT_SELECT = `
   canceled_at, cancellation_reason, reschedule_note, outcome_notes, created_at, updated_at,
   client:client_profile_id ( id, display_name, organization_id ),
   requester:requester_profile_id ( id, display_name ),
-  staff:staff_profile_id ( id, display_name ),
-  organization:organization_id ( id, name )
+  staff:staff_profile_id ( id, display_name )
 `;
 
 function splitAppointments(records: AppointmentWithRelations[]) {
