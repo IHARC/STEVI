@@ -1,4 +1,5 @@
 import { notFound, redirect } from 'next/navigation';
+import type { ReactNode } from 'react';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
 import {
@@ -13,6 +14,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
 import type { Database } from '@/types/supabase';
+import { getOnboardingStatus, type OnboardingStatus } from '@/lib/onboarding/status';
+import { resetOnboardingAction, resendOnboardingLinkAction } from './onboarding-actions';
+import { Badge } from '@/components/ui/badge';
 
 type PersonRow = Pick<
   Database['core']['Tables']['people']['Row'],
@@ -50,9 +54,10 @@ export default async function AdminPersonDetailPage({ params }: PageProps) {
   const person = await loadPerson(supabase, id);
   if (!person) notFound();
 
-  const [grants, organizations] = await Promise.all([
+  const [grants, organizations, onboardingStatus] = await Promise.all([
     fetchPersonGrants(supabase, id),
     loadOrganizations(supabase),
+    getOnboardingStatus({ personId: id }, supabase),
   ]);
 
   return (
@@ -66,6 +71,8 @@ export default async function AdminPersonDetailPage({ params }: PageProps) {
           Manage consents and granular access grants. All actions are audited.
         </p>
       </header>
+
+      <OnboardingStatusCard personId={person.id} onboardingStatus={onboardingStatus} />
 
       <div className="grid gap-space-lg lg:grid-cols-[2fr,1fr]">
         <Card>
@@ -227,5 +234,67 @@ function GrantList({ grants }: { grants: PersonGrant[] }) {
         ))}
       </ul>
     </div>
+  );
+}
+
+function OnboardingStatusCard({
+  personId,
+  onboardingStatus,
+}: {
+  personId: number;
+  onboardingStatus: OnboardingStatus;
+}) {
+  const lastUpdated = onboardingStatus.lastUpdatedAt
+    ? new Date(onboardingStatus.lastUpdatedAt).toLocaleString()
+    : 'Not recorded';
+
+  return (
+    <Card>
+      <CardHeader className="space-y-space-2xs">
+        <CardTitle className="text-title-md">Onboarding status</CardTitle>
+        <CardDescription>Audit the consent checklist and trigger resets or reminders.</CardDescription>
+        <div className="flex flex-wrap items-center gap-space-sm">
+          <Badge variant={onboardingStatus.status === 'COMPLETED' ? 'default' : 'secondary'}>
+            {onboardingStatus.status.toLowerCase()}
+          </Badge>
+          <p className="text-body-xs text-muted-foreground">Last touch: {lastUpdated}</p>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-space-sm">
+        <ul className="space-y-space-2xs text-body-sm text-on-surface/80">
+          <StatusItem done={onboardingStatus.hasPerson}>Active person record</StatusItem>
+          <StatusItem done={onboardingStatus.hasServiceAgreementConsent}>Service agreement captured</StatusItem>
+          <StatusItem done={onboardingStatus.hasPrivacyAcknowledgement}>Privacy acknowledgement captured</StatusItem>
+          <StatusItem done={onboardingStatus.hasDataSharingPreference}>
+            Sharing preference: {onboardingStatus.hasDataSharingPreference ? 'set' : 'missing'}
+          </StatusItem>
+        </ul>
+
+        <div className="flex flex-wrap gap-space-sm">
+          <form action={resetOnboardingAction}>
+            <input type="hidden" name="person_id" value={personId} />
+            <Button type="submit" variant="secondary">Reset onboarding</Button>
+          </form>
+          <form action={resendOnboardingLinkAction}>
+            <input type="hidden" name="person_id" value={personId} />
+            <Button type="submit" variant="outline">Resend onboarding link</Button>
+          </form>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function StatusItem({ done, children }: { done: boolean; children: React.ReactNode }) {
+  return (
+    <li className="flex items-center gap-space-2xs">
+      <span
+        className={`inline-flex h-4 w-4 items-center justify-center rounded-full ${done ? 'bg-primary text-on-primary' : 'bg-outline/30 text-on-surface'}`}
+        aria-hidden
+      >
+        {done ? '✓' : ''}
+      </span>
+      <span className={done ? 'text-on-surface' : 'text-muted-foreground'}>{children}</span>
+    </li>
   );
 }

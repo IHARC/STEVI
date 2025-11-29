@@ -7,6 +7,7 @@ import { loadPortalAccess } from '@/lib/portal-access';
 import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 import type { AppointmentRequestState } from '@/app/(portal)/appointments/types';
 import type { AppointmentChannel, AppointmentStatus } from './types';
+import { assertOnboardingComplete } from '@/lib/onboarding/guard';
 
 type ActionResult = { success: true } | { success: false; error: string };
 
@@ -143,6 +144,14 @@ export async function requestAppointmentAction(
     }
 
     const profile = await ensurePortalProfile(supabase, user.id);
+    try {
+      await assertOnboardingComplete(supabase, user.id);
+    } catch (error) {
+      return {
+        status: 'error',
+        message: error instanceof Error ? error.message : 'Finish onboarding before requesting appointments.',
+      };
+    }
 
     const { data, error } = await supabase
       .schema('portal')
@@ -209,6 +218,7 @@ export async function cancelAppointmentAsClient(formData: FormData): Promise<Act
     const profile = await ensurePortalProfile(supabase, user.id);
     const access = await loadPortalAccess(supabase);
     if (!access) throw new Error('Sign in to cancel an appointment.');
+    await assertOnboardingComplete(supabase, user.id);
     const appointment = await fetchAppointmentScope(supabase, appointmentId);
     assertCanActOnAppointment(appointment, { ...access, profile }, 'client');
 
@@ -263,6 +273,7 @@ export async function requestRescheduleAsClient(formData: FormData): Promise<Act
     const profile = await ensurePortalProfile(supabase, user.id);
     const access = await loadPortalAccess(supabase);
     if (!access) throw new Error('Sign in to request a change.');
+    await assertOnboardingComplete(supabase, user.id);
     const appointment = await fetchAppointmentScope(supabase, appointmentId);
     assertCanActOnAppointment(appointment, { ...access, profile }, 'client');
 

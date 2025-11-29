@@ -60,3 +60,4 @@ Partner-org assistance is permissible only when data sharing = IHARC + partners.
 - Write actions: server actions/route handlers wrap person upsert, consent capture, sharing update, and account link; all return fresh status and log audit events. Use `createSupabaseServerClient` and honor RLS.
 - Wizard: single component configured by actor type; staff/partner paths still onboard the client, not the staff/partner.
 - Status resolver: implemented at `src/lib/onboarding/status.ts`; read-only, treats `status !== inactive` as active, pulls latest intake consent flags plus data sharing preference, and surfaces the freshest timestamp across intake, person updates, user-person link, or registration flow metadata as `lastUpdatedAt`.
+- Portal guard: `(portal)/layout.tsx` redirects clients to `/onboarding` until `status === COMPLETED`; support, document, and appointment client actions enforce onboarding server-side to prevent bypassing consent rules.

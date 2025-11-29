@@ -25,11 +25,11 @@ Guide implementation of a unified onboarding/consent experience that honours IHA
 | Phase | Goal | Status | Notes |
 | --- | --- | --- | --- |
 | 1. Contract & flows | Freeze definitions, actor matrix, and wizard spine; map policy copy to admin-managed content | **Completed** | Contract published (`docs/onboarding-contract.md`), policy slugs set, actor matrix defined. |
-| 2. Onboarding status service | Central resolver that answers “what’s missing” using existing tables | **In progress** | Resolver implemented in `src/lib/onboarding/status.ts` with unit tests; integration into routes/wizard still pending. |
-| 3. Write actions (APIs) | Stable server actions for info upsert, consent capture, sharing choice, account link; each returns status | Not started | Must audit-log and respect RLS/rate limits. |
-| 4. Unified wizard | Single configurable wizard for self/staff/partner using status + actions; pulls live policy copy | Not started | Minimal fields per step; accessible patterns. |
-| 5. Enforcement | Routing guard + action gating so incomplete onboarding cannot bypass consent rules | Not started | Use status service on entry and in sensitive backend actions. |
-| 6. Admin tools | Durable admin surfaces to view/reset onboarding and edit consent copy | Not started | Reuse admin/policies; add reset/resend flows. |
+| 2. Onboarding status service | Central resolver that answers “what’s missing” using existing tables | **Completed** | Resolver implemented in `src/lib/onboarding/status.ts` with unit tests; wired into portal layout guard and onboarding prefill. |
+| 3. Write actions (APIs) | Stable server actions for info upsert, consent capture, sharing choice, account link; each returns status | **Completed** | Server actions added in `app/(portal)/onboarding/actions.ts` with audit logging, registration draft updates, and user-person linking. |
+| 4. Unified wizard | Single configurable wizard for self/staff/partner using status + actions; pulls live policy copy | **Completed** | `/onboarding` wizard ships with actor-aware steps, live policy content, and progress tracking. |
+| 5. Enforcement | Routing guard + action gating so incomplete onboarding cannot bypass consent rules | **In progress** | Portal layout redirects incomplete clients; support/document/appointment client actions now enforce onboarding. Further mutation sweep still required. |
+| 6. Admin tools | Durable admin surfaces to view/reset onboarding and edit consent copy | **In progress** | Admin client view shows onboarding status + reset/resend actions; broader history/export + marketing cache tasks outstanding. |
 
 ## Phase details & acceptance criteria
 ### Phase 1 – Contract & flows
@@ -77,6 +77,7 @@ Guide implementation of a unified onboarding/consent experience that honours IHA
 - 2025-11-29: Created living plan, aligned phases to STEVI standards, mandated admin-managed policy copy. Chose policy slugs (`client-service-agreement`, `client-privacy-notice`) and confirmed legacy registration flows will be replaced by the full consent-enabled wizard.
 - 2025-11-29: Published contract (`docs/onboarding-contract.md`), defined actor matrix, set default partner-org grant scopes (view, update_contact only) when sharing is enabled.
 - 2025-11-29: Began Phase 2 by adding the read-only onboarding status resolver (`src/lib/onboarding/status.ts`) that derives completion state from `core.user_people`, `core.people`, `case_mgmt.client_intakes`, and recent `portal.registration_flows`; covered with unit tests.
+- 2025-11-29: Completed phases 2–4 by wiring the status resolver into the portal guard, building `/onboarding` wizard (actor-aware, policy-backed), and adding write actions for basic info, consents, sharing, and account linking. Added enforcement hooks to support/document/appointment client actions and admin status/reset/resend tools.
 
 ## Open questions / decisions needed
 (None outstanding.)

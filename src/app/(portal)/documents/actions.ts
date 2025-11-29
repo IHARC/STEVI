@@ -5,6 +5,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { queuePortalNotification } from '@/lib/notifications';
 import { logAuditEvent, buildEntityRef } from '@/lib/audit';
+import { assertOnboardingComplete } from '@/lib/onboarding/guard';
 
 type ActionResult = { success: boolean; message?: string; error?: string };
 
@@ -20,6 +21,15 @@ async function baseAction(formData: FormData, action: 'request_link' | 'extend_a
 
   if (!access) {
     return { success: false, error: 'You need to sign in to request document updates.' };
+  }
+
+  try {
+    await assertOnboardingComplete(supabase, access.userId);
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Finish onboarding before requesting documents.',
+    };
   }
 
   const path = readValue(formData, 'path');
