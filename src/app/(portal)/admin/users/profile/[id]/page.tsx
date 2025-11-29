@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
 import { loadPortalAccess } from '@/lib/portal-access';
-import { fetchAdminUserDetail } from '@/lib/admin-users';
+import { fetchAdminUserDetail, loadProfileEnums } from '@/lib/admin-users';
 import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,16 +11,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { updateProfileAction, toggleRoleAction, archiveUserAction, sendInviteAction } from '../actions';
+import { updateProfileAction, toggleRoleAction, archiveUserAction, sendInviteAction } from '../../actions';
+import { getPortalRoles, formatEnumLabel } from '@/lib/enum-values';
 
 export const dynamic = 'force-dynamic';
-
-const PORTAL_ROLES = [
-  'portal_admin',
-  'portal_org_admin',
-  'portal_org_rep',
-  'portal_user',
-] as const;
 
 type RouteParams = { id: string };
 
@@ -29,12 +23,12 @@ export default async function AdminUserDetailPage({
 }: {
   params: Promise<RouteParams>;
 }) {
-  const { id } = await params;
+  const { id: profileId } = await params;
   const supabase = await createSupabaseRSCClient();
   const access = await loadPortalAccess(supabase);
 
   if (!access) {
-    redirect(`/login?next=/admin/users/${id}`);
+    redirect(`/login?next=/admin/users/profile/${profileId}`);
   }
   if (!access.canAccessAdminWorkspace) {
     redirect(resolveDefaultWorkspacePath(access));
@@ -42,12 +36,13 @@ export default async function AdminUserDetailPage({
 
   await ensurePortalProfile(supabase, access.userId);
 
-  const detail = await fetchAdminUserDetail(supabase, id);
+  const detail = await fetchAdminUserDetail(supabase, profileId);
 
   if (!detail) {
-    redirect('/admin/users');
+    redirect('/admin/users/all');
   }
 
+  const profileEnums = await loadProfileEnums(supabase);
   const orgOptionsResponse = await supabase
     .schema('core')
     .from('organizations')
@@ -63,6 +58,8 @@ export default async function AdminUserDetailPage({
       id: org.id,
       name: org.name,
     })) ?? [];
+
+  const portalRoles = await getPortalRoles(supabase);
 
   const isInvitedOnly = !detail.profile.user_id;
 
@@ -151,9 +148,11 @@ export default async function AdminUserDetailPage({
                   defaultValue={detail.profile.affiliation_type}
                   className="w-full rounded-lg border border-outline/30 bg-surface px-space-sm py-space-2xs text-body-sm"
                 >
-                  <option value="community_member">Client / community member</option>
-                  <option value="agency_partner">Agency partner</option>
-                  <option value="government_partner">Government partner</option>
+                  {profileEnums.affiliationTypes.map((value) => (
+                    <option key={value} value={value}>
+                      {formatEnumLabel(value.replace('_', ' '))}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="space-y-space-2xs">
@@ -164,9 +163,11 @@ export default async function AdminUserDetailPage({
                   defaultValue={detail.profile.affiliation_status}
                   className="w-full rounded-lg border border-outline/30 bg-surface px-space-sm py-space-2xs text-body-sm"
                 >
-                  <option value="approved">Approved</option>
-                  <option value="pending">Pending</option>
-                  <option value="revoked">Revoked</option>
+                  {profileEnums.affiliationStatuses.map((value) => (
+                    <option key={value} value={value}>
+                      {formatEnumLabel(value)}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="space-y-space-2xs">
@@ -194,8 +195,11 @@ export default async function AdminUserDetailPage({
                   className="w-full rounded-lg border border-outline/30 bg-surface px-space-sm py-space-2xs text-body-sm"
                 >
                   <option value="">Not applicable</option>
-                  <option value="staff">Staff</option>
-                  <option value="politician">Politician</option>
+                  {profileEnums.governmentRoleTypes.map((value) => (
+                    <option key={value} value={value}>
+                      {formatEnumLabel(value)}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="md:col-span-2 flex justify-end gap-space-xs">
@@ -211,21 +215,14 @@ export default async function AdminUserDetailPage({
             <CardDescription>Grant or revoke portal roles with audit logging.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-space-sm">
-            {PORTAL_ROLES.map((role) => {
+            {portalRoles.map((role) => {
               const hasRole = detail.roles.portal.includes(role);
+              const label = formatEnumLabel(role.replace(/^portal_/, ''));
               return (
                 <form key={role} action={toggleRole} className="flex items-center justify-between gap-space-xs rounded-xl border border-outline/12 px-space-sm py-space-2xs">
                   <div>
-                    <p className="text-body-md font-medium text-on-surface">{role}</p>
-                    <p className="text-label-sm text-muted-foreground">
-                      {role === 'portal_admin'
-                        ? 'Full admin workspace access'
-                        : role === 'portal_org_admin'
-                          ? 'Org-scoped administration'
-                          : role === 'portal_org_rep'
-                            ? 'Org member with elevated access'
-                            : 'Baseline portal user'}
-                    </p>
+                    <p className="text-body-md font-medium text-on-surface">{label}</p>
+                    <p className="text-label-sm text-muted-foreground">Portal role: {role}</p>
                   </div>
                   <input type="hidden" name="profile_id" value={detail.profile.id} />
                   <input type="hidden" name="role_name" value={role} />
@@ -313,17 +310,19 @@ export default async function AdminUserDetailPage({
                   </div>
                   <div className="space-y-space-2xs">
                     <Label htmlFor="invite_affiliation_type">Affiliation</Label>
-                    <select
-                      id="invite_affiliation_type"
-                      name="invite_affiliation_type"
-                      defaultValue={detail.profile.affiliation_type}
-                      className="w-full rounded-lg border border-outline/30 bg-surface px-space-sm py-space-2xs text-body-sm"
-                    >
-                      <option value="community_member">Client / community member</option>
-                      <option value="agency_partner">Agency partner</option>
-                      <option value="government_partner">Government partner</option>
-                    </select>
-                  </div>
+                  <select
+                    id="invite_affiliation_type"
+                    name="invite_affiliation_type"
+                    defaultValue={detail.profile.affiliation_type}
+                    className="w-full rounded-lg border border-outline/30 bg-surface px-space-sm py-space-2xs text-body-sm"
+                  >
+                    {profileEnums.affiliationTypes.map((value) => (
+                      <option key={value} value={value}>
+                        {formatEnumLabel(value.replace('_', ' '))}
+                      </option>
+                    ))}
+                  </select>
+                </div>
                   <div className="space-y-space-2xs">
                     <Label htmlFor="invite_organization_id">Organization</Label>
                     <select

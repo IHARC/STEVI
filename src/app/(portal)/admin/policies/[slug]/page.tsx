@@ -5,7 +5,7 @@ import { deletePolicy, updatePolicy } from '@/app/(portal)/admin/policies/action
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
 import { loadPortalAccess } from '@/lib/portal-access';
-import { getPolicyBySlug } from '@/lib/policies';
+import { getPolicyBySlug, fetchPolicyEnumOptions } from '@/lib/policies';
 import { Button } from '@/components/ui/button';
 import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
 
@@ -38,6 +38,7 @@ export default async function PolicyDetailPage({ params }: { params: RouteParams
   if (!policy) {
     notFound();
   }
+  const enumOptions = await fetchPolicyEnumOptions();
 
   return (
     <div className="page-shell page-stack">
@@ -59,6 +60,8 @@ export default async function PolicyDetailPage({ params }: { params: RouteParams
         action={updatePolicy}
         onDeleteAction={deletePolicy}
         policy={policy}
+        statusOptions={enumOptions.statuses}
+        categoryOptions={enumOptions.categories}
       />
     </div>
   );

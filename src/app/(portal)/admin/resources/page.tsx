@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
 import { loadPortalAccess } from '@/lib/portal-access';
-import { listResources, RESOURCE_KIND_LABELS } from '@/lib/resources';
+import { listResources, formatResourceKindLabel } from '@/lib/resources';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -224,7 +224,7 @@ export default async function AdminResourcesPage({ searchParams }: { searchParam
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline">{RESOURCE_KIND_LABELS[resource.kind]}</Badge>
+                      <Badge variant="outline">{formatResourceKindLabel(resource.kind)}</Badge>
                     </TableCell>
                     <TableCell>
                       {resource.isPublished ? <Badge>Published</Badge> : <Badge variant="secondary">Draft</Badge>}

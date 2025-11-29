@@ -2,7 +2,6 @@ import { redirect } from 'next/navigation';
 import type { PortalProfile } from '@/lib/profile';
 import { loadPortalAccess } from '@/lib/portal-access';
 import type { IharcRole } from '@/lib/ihar-auth';
-import { INVENTORY_ALLOWED_ROLES } from '@/lib/inventory/constants';
 import type { SupabaseAnyServerClient } from '@/lib/supabase/types';
 
 export type InventoryActorContext = {
@@ -15,10 +14,6 @@ export class InventoryAccessError extends Error {
     super(message);
     this.name = 'InventoryAccessError';
   }
-}
-
-function hasRequiredRole(roles: IharcRole[]): boolean {
-  return roles.some((role) => INVENTORY_ALLOWED_ROLES.includes(role));
 }
 
 export function isInventoryAdmin(roles: IharcRole[]): boolean {
@@ -49,7 +44,7 @@ export async function ensureInventoryActor(
     throw new InventoryAccessError('Sign in to continue.');
   }
 
-  if (!access.canAccessInventoryWorkspace || !hasRequiredRole(access.iharcRoles)) {
+  if (!access.canAccessInventoryWorkspace) {
     if (redirectOnFailure) {
       redirect('/admin');
     }

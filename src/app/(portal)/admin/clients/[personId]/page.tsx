@@ -6,7 +6,7 @@ import {
   adminOverrideConsentAction,
   adminRevokeGrantAction,
 } from '@/lib/cases/actions';
-import { fetchPersonGrants, GRANT_SCOPES, type PersonGrant } from '@/lib/cases/grants';
+import { fetchPersonGrants, type PersonGrant } from '@/lib/cases/grants';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -16,6 +16,7 @@ import type { Database } from '@/types/supabase';
 import { getOnboardingStatus, type OnboardingStatus } from '@/lib/onboarding/status';
 import { resetOnboardingAction, resendOnboardingLinkAction } from '../onboarding-actions';
 import { Badge } from '@/components/ui/badge';
+import { getGrantScopes } from '@/lib/enum-values';
 
 async function resetOnboardingFormAction(formData: FormData) {
   'use server';
@@ -64,10 +65,11 @@ export default async function AdminPersonDetailPage({ params }: PageProps) {
   const person = await loadPerson(supabase, id);
   if (!person) notFound();
 
-  const [grants, organizations, onboardingStatus] = await Promise.all([
+  const [grants, organizations, onboardingStatus, grantScopes] = await Promise.all([
     fetchPersonGrants(supabase, id),
     loadOrganizations(supabase),
     getOnboardingStatus({ personId: id }, supabase),
+    getGrantScopes(supabase),
   ]);
   const onboardingHistory = await loadOnboardingHistory(supabase, person, onboardingStatus.profileId);
 
@@ -103,7 +105,7 @@ export default async function AdminPersonDetailPage({ params }: PageProps) {
             <CardDescription>Grant orgs or users scoped access; revoke when no longer needed.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-space-md">
-            <GrantForm personId={person.id} organizations={organizations} />
+            <GrantForm personId={person.id} organizations={organizations} scopes={grantScopes} />
             <GrantList grants={grants} />
           </CardContent>
         </Card>
@@ -281,7 +283,7 @@ function ConsentForm({ person }: { person: PersonRow }) {
   );
 }
 
-function GrantForm({ personId, organizations }: { personId: number; organizations: OrganizationOption[] }) {
+function GrantForm({ personId, organizations, scopes }: { personId: number; organizations: OrganizationOption[]; scopes: string[] }) {
   return (
     <form action={adminCreateGrantAction} className="space-y-space-sm">
       <input type="hidden" name="person_id" value={personId} />
@@ -293,9 +295,13 @@ function GrantForm({ personId, organizations }: { personId: number; organization
           className="w-full rounded-md border border-outline/40 bg-surface px-space-sm py-space-2xs text-body-sm"
           defaultValue="view"
         >
-          {GRANT_SCOPES.map((scope) => (
-            <option key={scope} value={scope}>{scope}</option>
-          ))}
+          {scopes.length === 0 ? (
+            <option value="">No scopes configured</option>
+          ) : (
+            scopes.map((scope) => (
+              <option key={scope} value={scope}>{scope}</option>
+            ))
+          )}
         </select>
       </div>
       <div className="space-y-space-2xs">

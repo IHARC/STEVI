@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
 import { loadPortalAccess } from '@/lib/portal-access';
-import { listPolicies, POLICY_CATEGORY_LABELS } from '@/lib/policies';
+import { listPolicies, formatPolicyCategoryLabel } from '@/lib/policies';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -120,7 +120,7 @@ export default async function AdminPoliciesPage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline">{POLICY_CATEGORY_LABELS[policy.category]}</Badge>
+                      <Badge variant="outline">{formatPolicyCategoryLabel(policy.category)}</Badge>
                     </TableCell>
                     <TableCell>
                       {policy.status === 'published' ? (

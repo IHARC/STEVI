@@ -1,10 +1,10 @@
 import type { SupabaseAnyServerClient } from '@/lib/supabase/types';
 import type { PersonRecord } from '@/lib/cases/types';
+import { getGrantScopes } from '@/lib/enum-values';
 
 const PEOPLE_TABLE = 'people';
 const GRANTS_TABLE = 'person_access_grants';
 const USER_PEOPLE_TABLE = 'user_people';
-const GRANT_SCOPES = ['view', 'timeline_client', 'timeline_full', 'write_notes', 'manage_consents'] as const;
 
 async function findPersonViaUserLink(
   supabase: SupabaseAnyServerClient,
@@ -46,11 +46,16 @@ async function findPersonViaGrant(
 ): Promise<PersonRecord | null> {
   const core = supabase.schema('core');
 
+  const grantScopes = await getGrantScopes(supabase);
+  if (grantScopes.length === 0) {
+    return null;
+  }
+
   const { data: grantRow, error: grantError } = await core
     .from(GRANTS_TABLE)
     .select('person_id')
     .eq('grantee_user_id', userId)
-    .in('scope', GRANT_SCOPES as unknown as string[])
+    .in('scope', grantScopes as string[])
     .order('granted_at', { ascending: false })
     .limit(1)
     .maybeSingle();

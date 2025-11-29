@@ -14,11 +14,7 @@ import {
   NO_ORGANIZATION_VALUE,
   PUBLIC_MEMBER_ROLE_LABEL,
 } from '@/lib/constants';
-import {
-  LIVED_EXPERIENCE_COPY,
-  LIVED_EXPERIENCE_OPTIONS,
-  type LivedExperienceStatus,
-} from '@/lib/lived-experience';
+import type { LivedExperienceStatus } from '@/lib/lived-experience';
 
 export type ProfileDetailsFormState = {
   status: 'idle' | 'success';
@@ -34,8 +30,6 @@ type Organization = {
 type AffiliationType = Database['portal']['Enums']['affiliation_type'];
 type AffiliationStatus = Database['portal']['Enums']['affiliation_status'];
 
-const ALLOWED_AFFILIATIONS: readonly AffiliationType[] = ['community_member', 'agency_partner'];
-
 type ProfileDetailsFormProps = {
   organizations: Organization[];
   initialState: ProfileDetailsFormState;
@@ -50,6 +44,8 @@ type ProfileDetailsFormProps = {
     affiliationStatus: AffiliationStatus;
     requestedOrganizationName: string | null;
   };
+  affiliationOptions: { value: AffiliationType; label: string }[];
+  livedExperienceOptions: { value: LivedExperienceStatus; label: string; description: string }[];
 };
 
 export function ProfileDetailsForm({
@@ -57,6 +53,8 @@ export function ProfileDetailsForm({
   initialState,
   action,
   initialValues,
+  affiliationOptions,
+  livedExperienceOptions,
 }: ProfileDetailsFormProps) {
   const [state, formAction] = useActionState(action, initialState);
 
@@ -64,10 +62,11 @@ export function ProfileDetailsForm({
     initialValues.organizationId ??
     (initialValues.requestedOrganizationName ? NEW_ORGANIZATION_VALUE : NO_ORGANIZATION_VALUE);
 
+  const allowedAffiliationSet = new Set(affiliationOptions.map((opt) => opt.value));
   const [selectedOrg, setSelectedOrg] = useState(initialOrgSelection);
-  const initialAffiliation = ALLOWED_AFFILIATIONS.includes(initialValues.affiliationType)
+  const initialAffiliation = allowedAffiliationSet.has(initialValues.affiliationType)
     ? initialValues.affiliationType
-    : 'agency_partner';
+    : affiliationOptions[0]?.value ?? 'community_member';
   const [affiliationType, setAffiliationType] = useState<AffiliationType>(initialAffiliation);
   const [homelessnessExperience, setHomelessnessExperience] = useState<LivedExperienceStatus>(
     initialValues.homelessnessExperience,
@@ -84,7 +83,7 @@ export function ProfileDetailsForm({
     }
   }, [affiliationType]);
 
-  const isAgencyPartner = affiliationType === 'agency_partner';
+  const isAgencyPartner = affiliationType !== 'community_member';
   const requestingNewOrganization = selectedOrg === NEW_ORGANIZATION_VALUE;
   const organizationMap = new Map(organizations.map((org) => [org.id, org.name]));
   const hideRoleField = affiliationType === 'community_member';
@@ -150,18 +149,15 @@ export function ProfileDetailsForm({
           onValueChange={(value) => setAffiliationType(value as AffiliationType)}
           className="grid gap-space-sm md:grid-cols-2"
         >
-          <AffiliationOption
-            id="profile-affiliation-community"
-            value="community_member"
-            title="Community member"
-            description="Share ideas, support plans, and collaborate as a neighbour."
-          />
-          <AffiliationOption
-            id="profile-affiliation-agency"
-            value="agency_partner"
-            title="IHARC staff or partner"
-            description="Request verified publishing on behalf of outreach teams or trusted partners."
-          />
+          {affiliationOptions.map((option) => (
+            <AffiliationOption
+              key={option.value}
+              id={`profile-affiliation-${option.value}`}
+              value={option.value}
+              title={option.label}
+              description={`Collaborate as ${option.label}.`}
+            />
+          ))}
         </RadioGroup>
       </div>
 
@@ -239,14 +235,14 @@ export function ProfileDetailsForm({
             <SelectValue placeholder="Select lived experience" />
           </SelectTrigger>
           <SelectContent>
-            {LIVED_EXPERIENCE_OPTIONS.map((option) => (
+            {livedExperienceOptions.map((option) => (
               <SelectItem key={option.value} value={option.value}>
                 {option.label}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        <ExperienceHelper selectedValue={homelessnessExperience} />
+        <ExperienceHelper selectedValue={homelessnessExperience} options={livedExperienceOptions} />
       </div>
 
       <div className="grid gap-space-xs">
@@ -260,14 +256,14 @@ export function ProfileDetailsForm({
             <SelectValue placeholder="Select lived experience" />
           </SelectTrigger>
           <SelectContent>
-            {LIVED_EXPERIENCE_OPTIONS.map((option) => (
+            {livedExperienceOptions.map((option) => (
               <SelectItem key={option.value} value={option.value}>
                 {option.label}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        <ExperienceHelper selectedValue={substanceUseExperience} />
+        <ExperienceHelper selectedValue={substanceUseExperience} options={livedExperienceOptions} />
       </div>
 
       <div className="flex justify-end">
@@ -313,10 +309,11 @@ function SubmitButton() {
 
 type ExperienceHelperProps = {
   selectedValue: LivedExperienceStatus;
+  options: { value: LivedExperienceStatus; description: string }[];
 };
 
-function ExperienceHelper({ selectedValue }: ExperienceHelperProps) {
-  const copy = LIVED_EXPERIENCE_COPY[selectedValue];
+function ExperienceHelper({ selectedValue, options }: ExperienceHelperProps) {
+  const copy = options.find((option) => option.value === selectedValue);
   if (!copy) {
     return null;
   }

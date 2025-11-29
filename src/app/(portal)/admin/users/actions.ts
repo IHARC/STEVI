@@ -5,7 +5,14 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { logAuditEvent, buildEntityRef } from '@/lib/audit';
-import { normalizeOrganizationId, parseAffiliationStatus, parseAffiliationType, parseGovernmentRole } from '@/lib/admin-users';
+import {
+  loadProfileEnums,
+  normalizeOrganizationId,
+  parseAffiliationStatus,
+  parseAffiliationType,
+  parseGovernmentRole,
+} from '@/lib/admin-users';
+import { getIharcRoles, getPortalRoles } from '@/lib/enum-values';
 import type { SupabaseServerClient } from '@/lib/supabase/types';
 
 const LIST_ROOT = '/admin/users';
@@ -37,21 +44,18 @@ function getErrorMessage(error: unknown): string {
 async function revalidateUserPaths(profileId?: string) {
   const targets = new Set<string>([LIST_ROOT, ...SEGMENT_PATHS]);
   if (profileId) {
-    targets.add(`${LIST_ROOT}/${profileId}`);
+    targets.add(`${LIST_ROOT}/profile/${profileId}`);
   }
   await Promise.all(Array.from(targets).map((path) => revalidatePath(path)));
 }
 
-const ALLOWED_ROLE_NAMES = [
-  'portal_admin',
-  'portal_org_admin',
-  'portal_org_rep',
-  'portal_user',
-  'iharc_admin',
-  'iharc_supervisor',
-  'iharc_staff',
-  'iharc_volunteer',
-] as const;
+async function loadAssignableRoles(supabase: SupabaseServerClient): Promise<Set<string>> {
+  const [portalRoles, iharcRoles] = await Promise.all([
+    getPortalRoles(supabase),
+    getIharcRoles(supabase),
+  ]);
+  return new Set([...portalRoles, ...iharcRoles]);
+}
 
 function hasElevatedAdmin(access: Awaited<ReturnType<typeof loadPortalAccess>>): boolean {
   if (!access) return false;
@@ -108,14 +112,15 @@ export async function updateProfileAction(formData: FormData): Promise<ActionRes
       throw new Error('Profile context is missing.');
     }
 
+    const { supabase, actorProfile, access } = await requireAdminContext({ allowOrgAdmin: true });
+    const profileEnums = await loadProfileEnums(supabase);
+
     const displayName = formData.get('display_name');
     const positionTitle = formData.get('position_title');
-    const affiliationType = parseAffiliationType(formData.get('affiliation_type') as string | null);
-    const affiliationStatus = parseAffiliationStatus(formData.get('affiliation_status') as string | null);
+    const affiliationType = parseAffiliationType(formData.get('affiliation_type') as string | null, profileEnums);
+    const affiliationStatus = parseAffiliationStatus(formData.get('affiliation_status') as string | null, profileEnums);
     const organizationId = normalizeOrganizationId(formData.get('organization_id'));
-    const governmentRole = parseGovernmentRole(formData.get('government_role_type') as string | null);
-
-    const { supabase, actorProfile, access } = await requireAdminContext({ allowOrgAdmin: true });
+    const governmentRole = parseGovernmentRole(formData.get('government_role_type') as string | null, profileEnums);
     const portal = supabase.schema('portal');
 
     const updates: Record<string, unknown> = {};
@@ -183,6 +188,7 @@ export async function toggleRoleAction(formData: FormData): Promise<ActionResult
     const enable = enableValue === 'true';
 
     const { supabase, actorProfile, access } = await requireAdminContext({ allowOrgAdmin: true });
+    const assignableRoles = await loadAssignableRoles(supabase);
     const portal = supabase.schema('portal');
 
     const { data: profileRow, error: profileError } = await portal
@@ -195,7 +201,7 @@ export async function toggleRoleAction(formData: FormData): Promise<ActionResult
       throw profileError ?? new Error('Profile not found.');
     }
 
-    if (!ALLOWED_ROLE_NAMES.includes(roleName as (typeof ALLOWED_ROLE_NAMES)[number])) {
+    if (!assignableRoles.has(roleName)) {
       throw new Error('Unsupported role change request.');
     }
 
@@ -345,14 +351,15 @@ export async function sendInviteAction(formData: FormData): Promise<ActionResult
       throw new Error('Provide a valid email.');
     }
 
+    const { supabase, actorProfile, access } = await requireAdminContext({ allowOrgAdmin: true });
+    const profileEnums = await loadProfileEnums(supabase);
+
     const displayName = (formData.get('invite_display_name') as string | null) ?? null;
     const positionTitle = (formData.get('invite_position_title') as string | null) ?? null;
     const affiliationType =
-      parseAffiliationType(formData.get('invite_affiliation_type') as string | null) ?? 'community_member';
+      parseAffiliationType(formData.get('invite_affiliation_type') as string | null, profileEnums) ?? 'community_member';
     const organizationId = normalizeOrganizationId(formData.get('invite_organization_id'));
     const message = (formData.get('invite_message') as string | null) ?? null;
-
-    const { supabase, actorProfile, access } = await requireAdminContext({ allowOrgAdmin: true });
 
     const {
       data: session,

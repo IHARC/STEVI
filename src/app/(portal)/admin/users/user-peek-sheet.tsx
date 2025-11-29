@@ -12,9 +12,10 @@ import type { AdminUserListItem } from '@/lib/admin-users';
 
 type UserPeekSheetProps = {
   user: AdminUserListItem;
+  roleOptions: { value: string; label: string }[];
 };
 
-export function UserPeekSheet({ user }: UserPeekSheetProps) {
+export function UserPeekSheet({ user, roleOptions }: UserPeekSheetProps) {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -95,36 +96,21 @@ export function UserPeekSheet({ user }: UserPeekSheetProps) {
             </div>
             <Separator />
             <div className="flex flex-col gap-space-xs">
-              <RoleToggle
-                label="Org admin"
-                checked={roles.has('portal_org_admin')}
-                onChange={(checked) => handleRoleToggle('portal_org_admin', checked)}
-                disabled={isPending}
-              />
-              <RoleToggle
-                label="Org rep"
-                checked={roles.has('portal_org_rep')}
-                onChange={(checked) => handleRoleToggle('portal_org_rep', checked)}
-                disabled={isPending}
-              />
-              <RoleToggle
-                label="IHARC staff"
-                checked={roles.has('iharc_staff')}
-                onChange={(checked) => handleRoleToggle('iharc_staff', checked)}
-                disabled={isPending}
-              />
-              <RoleToggle
-                label="IHARC volunteer"
-                checked={roles.has('iharc_volunteer')}
-                onChange={(checked) => handleRoleToggle('iharc_volunteer', checked)}
-                disabled={isPending}
-              />
+              {roleOptions.map((role) => (
+                <RoleToggle
+                  key={role.value}
+                  label={role.label}
+                  checked={roles.has(role.value)}
+                  onChange={(checked) => handleRoleToggle(role.value, checked)}
+                  disabled={isPending}
+                />
+              ))}
             </div>
           </div>
 
           <div className="flex flex-wrap gap-space-sm">
             <Button asChild variant="outline" size="sm">
-              <Link href={`/admin/users/${user.profileId}`}>Open full profile</Link>
+              <Link href={`/admin/users/profile/${user.profileId}`}>Open full profile</Link>
             </Button>
           </div>
         </div>

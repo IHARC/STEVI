@@ -7,7 +7,8 @@ import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 import { requirePersonForUser } from '@/lib/cases/person';
 import { fetchClientCaseDetail, fetchStaffCaseDetail } from '@/lib/cases/fetchers';
 import { processClientIntake } from '@/lib/cases/intake';
-import { createPersonGrant, revokePersonGrant, GRANT_SCOPES } from '@/lib/cases/grants';
+import { createPersonGrant, revokePersonGrant } from '@/lib/cases/grants';
+import { getGrantScopes } from '@/lib/enum-values';
 import { assertOnboardingComplete } from '@/lib/onboarding/guard';
 
 const ACTIVITIES_TABLE = 'people_activities';
@@ -156,7 +157,6 @@ export async function adminCreateGrantAction(formData: FormData): Promise<void> 
   const granteeOrgId = granteeOrgIdRaw ? Number.parseInt(granteeOrgIdRaw, 10) : null;
 
   if (!personId || Number.isNaN(personId)) throw new Error('Invalid person id.');
-  if (!GRANT_SCOPES.includes(scope as (typeof GRANT_SCOPES)[number])) throw new Error('Invalid scope.');
   if (!granteeUserId && !granteeOrgId) throw new Error('Select a user or organization.');
 
   const supabase = await createSupabaseServerClient();
@@ -165,9 +165,14 @@ export async function adminCreateGrantAction(formData: FormData): Promise<void> 
     throw new Error('You do not have permission to manage grants.');
   }
 
+  const allowedScopes = await getGrantScopes(supabase);
+  if (!allowedScopes.includes(scope)) {
+    throw new Error('Invalid scope.');
+  }
+
   await createPersonGrant(supabase, {
     personId,
-    scope: scope as (typeof GRANT_SCOPES)[number],
+    scope,
     granteeUserId,
     granteeOrgId,
     actorProfileId: access.profile.id,

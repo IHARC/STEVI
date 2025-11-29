@@ -7,7 +7,7 @@ import { ensurePortalProfile } from '@/lib/profile';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { ResourceForm } from '../resource-form';
 import { deleteResourcePage, updateResourcePage } from '../actions';
-import { getResourceBySlug } from '@/lib/resources';
+import { getResourceBySlug, fetchResourceEnumOptions } from '@/lib/resources';
 import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
 
 export const dynamic = 'force-dynamic';
@@ -38,6 +38,7 @@ export default async function AdminResourceEditPage({ params }: { params: RouteP
   if (!resource) {
     notFound();
   }
+  const enumOptions = await fetchResourceEnumOptions();
 
   return (
     <div className="page-shell page-stack text-on-surface">
@@ -73,6 +74,7 @@ export default async function AdminResourceEditPage({ params }: { params: RouteP
             action={updateResourcePage}
             onDeleteAction={deleteResourcePage}
             resource={resource}
+            kindOptions={enumOptions.kinds}
           />
         </CardContent>
       </Card>

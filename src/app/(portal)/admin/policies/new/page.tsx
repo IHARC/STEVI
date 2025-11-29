@@ -7,6 +7,7 @@ import { ensurePortalProfile } from '@/lib/profile';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { Button } from '@/components/ui/button';
 import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
+import { fetchPolicyEnumOptions } from '@/lib/policies';
 
 export default async function NewPolicyPage() {
   const supabase = await createSupabaseRSCClient();
@@ -21,6 +22,7 @@ export default async function NewPolicyPage() {
   }
 
   await ensurePortalProfile(supabase, access.userId);
+  const enumOptions = await fetchPolicyEnumOptions();
   return (
     <div className="page-shell page-stack">
       <header className="flex flex-col gap-space-sm sm:flex-row sm:items-start sm:justify-between">
@@ -37,7 +39,7 @@ export default async function NewPolicyPage() {
         </Button>
       </header>
 
-      <PolicyForm mode="create" action={createPolicy} />
+      <PolicyForm mode="create" action={createPolicy} statusOptions={enumOptions.statuses} categoryOptions={enumOptions.categories} />
     </div>
   );
 }

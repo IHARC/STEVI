@@ -10,7 +10,9 @@ import {
   parseAffiliationStatus,
   parsePageParam,
   type AdminUserSegment,
+  loadProfileEnums,
 } from '@/lib/admin-users';
+import { getIharcRoles, getPortalRoles, toOptions, formatEnumLabel } from '@/lib/enum-values';
 import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
 import { UserSavedSearches } from '../user-saved-searches';
 import { UserPeekSheet } from '../user-peek-sheet';
@@ -31,24 +33,6 @@ import {
 export const dynamic = 'force-dynamic';
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
-
-const STATUS_OPTIONS = [
-  { value: '', label: 'Any status' },
-  { value: 'approved', label: 'Approved' },
-  { value: 'pending', label: 'Pending' },
-  { value: 'revoked', label: 'Revoked' },
-] as const;
-
-const ROLE_OPTIONS = [
-  'portal_admin',
-  'portal_org_admin',
-  'portal_org_rep',
-  'portal_user',
-  'iharc_admin',
-  'iharc_supervisor',
-  'iharc_staff',
-  'iharc_volunteer',
-] as const;
 
 const SEGMENT_LABELS: Record<AdminUserSegment, string> = {
   all: 'All users',
@@ -138,6 +122,8 @@ export default async function AdminUsersSegmentPage({
 
   await ensurePortalProfile(supabase, access.userId);
 
+  const profileEnums = await loadProfileEnums(supabase);
+
   const resolvedSearch = searchParams ? await searchParams : {};
   const page = parsePageParam(resolvedSearch.page);
   const status = toStringParam(resolvedSearch.status);
@@ -145,24 +131,25 @@ export default async function AdminUsersSegmentPage({
   const organizationId = toNumber(resolvedSearch.org);
   const q = toStringParam(resolvedSearch.q);
   const sort = toStringParam(resolvedSearch.sort) === 'name' ? 'name' : 'recent';
-  const statusFilter = parseAffiliationStatus(status);
-
-  const [summary, listResult, orgOptions] = await Promise.all([
+  const statusFilter = parseAffiliationStatus(status, profileEnums);
+  const [summary, listResult, orgOptions, portalRoleOptions, iharcRoleOptions] = await Promise.all([
     fetchAdminUserSummary(supabase),
-      fetchAdminUsers(supabase, segment, {
-        page,
-        pageSize: 25,
-        status: statusFilter,
-        role,
-        organizationId: organizationId ?? undefined,
-        search: q,
-        sort,
-      }),
+    fetchAdminUsers(supabase, segment, {
+      page,
+      pageSize: 25,
+      status: statusFilter,
+      role,
+      organizationId: organizationId ?? undefined,
+      search: q,
+      sort,
+    }),
     supabase
       .schema('core')
       .from('organizations')
       .select('id, name')
       .order('name'),
+    getPortalRoles(supabase),
+    getIharcRoles(supabase),
   ]);
 
   if (orgOptions.error) {
@@ -174,6 +161,12 @@ export default async function AdminUsersSegmentPage({
       id: org.id,
       name: org.name,
     })) ?? [];
+
+  const roleOptions = [...portalRoleOptions, ...iharcRoleOptions]
+    .map((value) => ({ value, label: formatEnumLabel(value.replace(/^portal_/, '').replace(/^iharc_/, '')) }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+
+  const statusOptions = [{ value: '', label: 'Any status' }, ...toOptions(profileEnums.affiliationStatuses)];
 
   const paramsForLinks = new URLSearchParams();
   if (status) paramsForLinks.set('status', status);
@@ -218,6 +211,8 @@ export default async function AdminUsersSegmentPage({
         segment={segment}
         organizations={organizations}
         params={paramsForLinks}
+        statusOptions={statusOptions}
+        roleOptions={roleOptions}
       />
 
       <Card className="border-outline/20 bg-surface-container">
@@ -295,9 +290,9 @@ export default async function AdminUsersSegmentPage({
                       {user.lastSeenAt ? new Date(user.lastSeenAt).toLocaleString('en-CA', { dateStyle: 'medium', timeStyle: 'short' }) : '—'}
                     </TableCell>
                     <TableCell className="flex justify-end gap-space-xs">
-                      <UserPeekSheet user={user} />
+                      <UserPeekSheet user={user} roleOptions={roleOptions} />
                       <Button asChild size="sm" variant="outline">
-                        <Link href={`/admin/users/${user.profileId}`}>View</Link>
+                        <Link href={`/admin/users/profile/${user.profileId}`}>View</Link>
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -356,10 +351,14 @@ function FilterBar({
   segment,
   organizations,
   params,
+  statusOptions,
+  roleOptions,
 }: {
   segment: AdminUserSegment;
   organizations: { id: number; name: string }[];
   params: URLSearchParams;
+  statusOptions: { value: string; label: string }[];
+  roleOptions: { value: string; label: string }[];
 }) {
   const currentStatus = params.get('status') ?? '';
   const currentRole = params.get('role') ?? '';
@@ -381,7 +380,7 @@ function FilterBar({
           defaultValue={currentStatus}
           className="w-full rounded-lg border border-outline/30 bg-surface px-space-sm py-space-2xs text-body-sm"
         >
-          {STATUS_OPTIONS.map((option) => (
+          {statusOptions.map((option) => (
             <option key={option.value || 'any'} value={option.value}>
               {option.label}
             </option>
@@ -397,9 +396,9 @@ function FilterBar({
           className="w-full rounded-lg border border-outline/30 bg-surface px-space-sm py-space-2xs text-body-sm capitalize"
         >
           <option value="">Any role</option>
-          {ROLE_OPTIONS.map((role) => (
-            <option key={role} value={role}>
-              {role}
+          {roleOptions.map((role) => (
+            <option key={role.value} value={role.value}>
+              {role.label}
             </option>
           ))}
         </select>

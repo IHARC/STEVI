@@ -1,10 +1,9 @@
 import type { Database } from '@/types/supabase';
+import { formatEnumLabel } from '@/lib/enum-values';
 
 export type LivedExperienceStatus = Database['portal']['Enums']['lived_experience_status'];
 
-export const LIVED_EXPERIENCE_VALUES = ['none', 'current', 'former', 'prefer_not_to_share'] as const satisfies LivedExperienceStatus[];
-
-export const LIVED_EXPERIENCE_COPY: Record<LivedExperienceStatus, { label: string; description: string }> = {
+export const DEFAULT_LIVED_EXPERIENCE_COPY: Partial<Record<LivedExperienceStatus, { label: string; description: string }>> = {
   none: {
     label: 'No lived experience to share',
     description: 'Keeps collaboration focused on community building without adding personal context.',
@@ -23,22 +22,27 @@ export const LIVED_EXPERIENCE_COPY: Record<LivedExperienceStatus, { label: strin
   },
 };
 
-export const LIVED_EXPERIENCE_OPTIONS = LIVED_EXPERIENCE_VALUES.map((value) => ({
-  value,
-  label: LIVED_EXPERIENCE_COPY[value].label,
-  description: LIVED_EXPERIENCE_COPY[value].description,
-}));
+export function buildLivedExperienceOptions(values: string[]) {
+  return values.map((value) => {
+    const copy = DEFAULT_LIVED_EXPERIENCE_COPY[value as LivedExperienceStatus];
+    return {
+      value,
+      label: copy?.label ?? formatEnumLabel(value),
+      description: copy?.description ?? '',
+    };
+  });
+}
 
-export function normalizeLivedExperience(value: string | null | undefined): LivedExperienceStatus {
+export function normalizeLivedExperience(value: string | null | undefined, allowedValues: string[]): LivedExperienceStatus {
   if (!value) {
-    return 'none';
+    return (allowedValues[0] as LivedExperienceStatus) ?? 'none';
   }
 
-  if (LIVED_EXPERIENCE_VALUES.includes(value as LivedExperienceStatus)) {
+  if (allowedValues.includes(value)) {
     return value as LivedExperienceStatus;
   }
 
-  return 'none';
+  return (allowedValues[0] as LivedExperienceStatus) ?? 'none';
 }
 
 export function getHomelessnessBadgeLabel(status: LivedExperienceStatus): string | null {

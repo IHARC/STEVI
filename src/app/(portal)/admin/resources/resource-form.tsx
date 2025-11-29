@@ -7,7 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ResourceRichTextEditor } from '@/components/admin/resource-rich-text-editor';
 import { ResourceAutosaveClient } from './resource-autosave-client';
-import { RESOURCE_KIND_LABELS, type Resource } from '@/lib/resources';
+import type { Resource } from '@/lib/resources';
+import { formatEnumLabel } from '@/lib/enum-values';
 import { attachmentsToTextarea, getResourceEmbedDefaults } from './resource-utils';
 
 type ResourceFormProps = {
@@ -15,9 +16,10 @@ type ResourceFormProps = {
   action: (formData: FormData) => Promise<void>;
   onDeleteAction?: (formData: FormData) => Promise<void>;
   resource?: Resource | null;
+  kindOptions: { value: string; label: string }[];
 };
 
-export function ResourceForm({ mode, action, onDeleteAction, resource }: ResourceFormProps) {
+export function ResourceForm({ mode, action, onDeleteAction, resource, kindOptions }: ResourceFormProps) {
   const isEdit = mode === 'edit' && resource;
 
   const embedDefaults = resource ? getResourceEmbedDefaults(resource) : { type: 'none', url: '', provider: 'youtube', label: '', html: '' };
@@ -28,6 +30,7 @@ export function ResourceForm({ mode, action, onDeleteAction, resource }: Resourc
   const locationDefault = resource?.location ?? '';
   const publishDefault = resource?.isPublished ?? true;
   const embedPlacementDefault = resource?.embedPlacement ?? 'above';
+  const defaultKind = resource?.kind ?? kindOptions[0]?.value ?? '';
 
   return (
     <div className="space-y-space-lg">
@@ -71,14 +74,14 @@ export function ResourceForm({ mode, action, onDeleteAction, resource }: Resourc
           </div>
           <div className="grid gap-space-xs">
             <Label htmlFor="resource_kind">Resource type</Label>
-            <Select name="kind" defaultValue={resource?.kind ?? 'report'} required>
+            <Select name="kind" defaultValue={defaultKind} required>
               <SelectTrigger id="resource_kind">
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
               <SelectContent>
-                {(Object.keys(RESOURCE_KIND_LABELS) as Array<keyof typeof RESOURCE_KIND_LABELS>).map((value) => (
-                  <SelectItem key={value} value={value}>
-                    {RESOURCE_KIND_LABELS[value]}
+                {kindOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label || formatEnumLabel(option.value)}
                   </SelectItem>
                 ))}
               </SelectContent>

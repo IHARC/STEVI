@@ -1,19 +1,8 @@
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import type { Database, Json } from '@/types/supabase';
+import { formatEnumLabel, getResourceKinds, toOptions } from '@/lib/enum-values';
 
-export const RESOURCE_KIND_LABELS = {
-  delegation: 'Delegation',
-  report: 'Report',
-  presentation: 'Presentation',
-  policy: 'Policy Brief',
-  press: 'Press',
-  dataset: 'Dataset',
-  other: 'Other Resource',
-} as const;
-
-type ResourceKindMap = typeof RESOURCE_KIND_LABELS;
-
-export type ResourceKind = keyof ResourceKindMap;
+export type ResourceKind = NonNullable<Database['portal']['Tables']['resource_pages']['Row']['kind']>;
 
 export type ResourceAttachment = {
   label: string;
@@ -90,6 +79,20 @@ export type ResourceListResult = {
   pageSize: number;
   hasMore: boolean;
 };
+
+export type ResourceEnumOptions = {
+  kinds: { value: string; label: string }[];
+};
+
+export async function fetchResourceEnumOptions(): Promise<ResourceEnumOptions> {
+  const supabase = await createSupabaseRSCClient();
+  const kinds = await getResourceKinds(supabase);
+  return { kinds: toOptions(kinds) };
+}
+
+export function formatResourceKindLabel(kind: string): string {
+  return formatEnumLabel(kind);
+}
 
 const DEFAULT_PAGE_SIZE = 50;
 const MAX_PAGE_SIZE = 200;
@@ -224,10 +227,6 @@ export function normalizeFilters(filters: ResourceFilters): NormalizedResourceFi
     year: filters.year?.toString().trim() || null,
   } as NormalizedResourceFilters;
 
-  if (normalized.kind && !Object.hasOwn(RESOURCE_KIND_LABELS, normalized.kind)) {
-    normalized.kind = null;
-  }
-
   if (normalized.year && !/^\d{4}$/.test(normalized.year)) {
     normalized.year = null;
   }
@@ -288,7 +287,7 @@ export function assertAllowedEmbedUrl(rawUrl: string, context: string) {
 }
 
 export function getKindLabel(kind: ResourceKind) {
-  return RESOURCE_KIND_LABELS[kind];
+  return formatResourceKindLabel(kind);
 }
 
 export function normalizeResourceSlug(input: string): string {

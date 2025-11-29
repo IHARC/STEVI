@@ -1,17 +1,9 @@
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import type { Database } from '@/types/supabase';
 import { sanitizeResourceHtml } from '@/lib/sanitize-resource-html';
+import { formatEnumLabel, getPolicyCategories, getPolicyStatuses, toOptions } from '@/lib/enum-values';
 
-export const POLICY_CATEGORY_LABELS = {
-  client_rights: 'Client rights',
-  safety: 'Safety & risk',
-  staff: 'Staff guidance',
-  governance: 'Governance',
-  operations: 'Operations',
-  finance: 'Finance & procurement',
-} as const;
-
-export type PolicyCategory = keyof typeof POLICY_CATEGORY_LABELS;
+export type PolicyCategory = NonNullable<Database['portal']['Tables']['policies']['Row']['category']>;
 export type PolicyStatus = Database['portal']['Enums']['policy_status'];
 
 export type Policy = {
@@ -35,6 +27,24 @@ export type Policy = {
 export type PolicyListOptions = {
   includeUnpublished?: boolean;
 };
+
+export type PolicyEnumOptions = {
+  categories: { value: string; label: string }[];
+  statuses: { value: string; label: string }[];
+};
+
+export async function fetchPolicyEnumOptions(): Promise<PolicyEnumOptions> {
+  const supabase = await createSupabaseRSCClient();
+  const [categories, statuses] = await Promise.all([getPolicyCategories(supabase), getPolicyStatuses(supabase)]);
+  return {
+    categories: toOptions(categories),
+    statuses: toOptions(statuses),
+  };
+}
+
+export function formatPolicyCategoryLabel(category: string): string {
+  return formatEnumLabel(category);
+}
 
 const POLICY_SELECT = `
   id,

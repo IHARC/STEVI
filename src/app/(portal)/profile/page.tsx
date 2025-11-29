@@ -19,6 +19,10 @@ import {
   PUBLIC_MEMBER_ROLE_LABEL,
 } from '@/lib/constants';
 import type { Database } from '@/types/supabase';
+import { loadProfileEnums } from '@/lib/admin-users';
+import { getLivedExperienceStatuses } from '@/lib/enum-values';
+import { buildLivedExperienceOptions } from '@/lib/lived-experience';
+import { formatEnumLabel } from '@/lib/enum-values';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,8 +32,6 @@ type Organization = {
 };
 
 type AffiliationType = Database['portal']['Enums']['affiliation_type'];
-
-const ALLOWED_AFFILIATIONS: AffiliationType[] = ['community_member', 'agency_partner'];
 
 const INITIAL_PROFILE_STATE: ProfileDetailsFormState = { status: 'idle' };
 const INITIAL_EMAIL_STATE: EmailFormState = { status: 'idle' };
@@ -52,9 +54,6 @@ export default async function PortalProfilePage() {
   }
 
   const profile = await ensurePortalProfile(supabase, user.id);
-  const currentAffiliation = ALLOWED_AFFILIATIONS.includes(profile.affiliation_type as AffiliationType)
-    ? (profile.affiliation_type as AffiliationType)
-    : 'agency_partner';
   const { data: organizationRowsRaw } = await supabase
     .schema('core')
     .from('organizations')
@@ -70,13 +69,20 @@ export default async function PortalProfilePage() {
   const initialOrganizationId = organizations.some((org) => Number(org.id) === Number(profile.organization_id))
     ? String(profile.organization_id)
     : null;
+  const profileEnums = await loadProfileEnums(supabase);
+  const allowedAffiliations = profileEnums.affiliationTypes;
+  const livedExperienceValues = await getLivedExperienceStatuses(supabase);
+  const livedExperienceOptions = buildLivedExperienceOptions(livedExperienceValues);
+  const currentAffiliation = allowedAffiliations.includes(profile.affiliation_type as AffiliationType)
+    ? (profile.affiliation_type as AffiliationType)
+    : allowedAffiliations[0] ?? 'community_member';
   const initialValues = {
     displayName: profile.display_name ?? 'Community member',
     organizationId: initialOrganizationId,
     positionTitle: profile.position_title,
     affiliationType: currentAffiliation,
-    homelessnessExperience: profile.homelessness_experience ?? 'none',
-    substanceUseExperience: profile.substance_use_experience ?? 'none',
+    homelessnessExperience: normalizeLivedExperience(profile.homelessness_experience ?? null, livedExperienceValues),
+    substanceUseExperience: normalizeLivedExperience(profile.substance_use_experience ?? null, livedExperienceValues),
     affiliationStatus: profile.affiliation_status,
     requestedOrganizationName: profile.requested_organization_name,
   };
@@ -92,16 +98,16 @@ export default async function PortalProfilePage() {
 
     const displayName = (formData.get('display_name') as string | null)?.trim();
     const rawAffiliation = (formData.get('affiliation_type') as string | null)?.trim() ?? currentAffiliation;
-    let affiliationType = ALLOWED_AFFILIATIONS.includes(rawAffiliation as AffiliationType)
+    let affiliationType = allowedAffiliations.includes(rawAffiliation as AffiliationType)
       ? (rawAffiliation as AffiliationType)
       : currentAffiliation;
     const rawAgencyOrganizationId = (formData.get('agency_organization_id') as string | null)?.trim() ?? null;
     const newOrganizationName = (formData.get('new_organization_name') as string | null)?.trim() ?? null;
     const positionTitleInput = (formData.get('position_title') as string | null)?.trim() ?? null;
-    const rawHomelessnessExperience = (formData.get('homelessness_experience') as string | null) ?? 'none';
-    const rawSubstanceUseExperience = (formData.get('substance_use_experience') as string | null) ?? 'none';
-    const homelessnessExperience = normalizeLivedExperience(rawHomelessnessExperience);
-    const substanceUseExperience = normalizeLivedExperience(rawSubstanceUseExperience);
+    const rawHomelessnessExperience = (formData.get('homelessness_experience') as string | null) ?? livedExperienceValues[0] ?? 'none';
+    const rawSubstanceUseExperience = (formData.get('substance_use_experience') as string | null) ?? livedExperienceValues[0] ?? 'none';
+    const homelessnessExperience = normalizeLivedExperience(rawHomelessnessExperience, livedExperienceValues);
+    const substanceUseExperience = normalizeLivedExperience(rawSubstanceUseExperience, livedExperienceValues);
 
     let organizationId: number | null = null;
     let requestedOrganizationName: string | null = null;
@@ -432,6 +438,11 @@ export default async function PortalProfilePage() {
         action={updateProfileDetails}
         initialState={INITIAL_PROFILE_STATE}
         initialValues={initialValues}
+        affiliationOptions={profileEnums.affiliationTypes.map((value) => ({
+          value: value as AffiliationType,
+          label: formatEnumLabel(value),
+        }))}
+        livedExperienceOptions={livedExperienceOptions as Array<{ value: Database['portal']['Enums']['lived_experience_status']; label: string; description: string }>}
       />
 
       <ProfileContactCard

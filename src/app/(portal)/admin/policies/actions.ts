@@ -7,6 +7,8 @@ import { sanitizeResourceHtml } from '@/lib/sanitize-resource-html';
 import { ensurePortalProfile } from '@/lib/profile';
 import { normalizePolicySlug, type PolicyCategory, type PolicyStatus } from '@/lib/policies';
 import { loadPortalAccess } from '@/lib/portal-access';
+import { getPolicyCategories, getPolicyStatuses } from '@/lib/enum-values';
+import type { SupabaseServerClient } from '@/lib/supabase/types';
 
 async function revalidatePaths(...paths: Array<string | null | undefined>): Promise<void> {
   const unique = Array.from(
@@ -38,25 +40,19 @@ async function requireAdminContext() {
   return { supabase, portalClient: supabase.schema('portal'), actorProfile };
 }
 
-function parseStatus(value: string | null): PolicyStatus {
-  if (value === 'published' || value === 'archived' || value === 'draft') {
-    return value;
-  }
-  return 'draft';
+async function parseStatus(supabase: SupabaseServerClient, value: string | null): Promise<PolicyStatus> {
+  const allowed = await getPolicyStatuses(supabase);
+  if (value && allowed.includes(value)) return value as PolicyStatus;
+  return (allowed[0] as PolicyStatus) ?? 'draft';
 }
 
-function parseCategory(value: string | null): PolicyCategory {
-  if (
-    value === 'client_rights' ||
-    value === 'safety' ||
-    value === 'staff' ||
-    value === 'governance' ||
-    value === 'operations' ||
-    value === 'finance'
-  ) {
-    return value;
-  }
-  return 'governance';
+async function parseCategory(
+  supabase: SupabaseServerClient,
+  value: string | null,
+): Promise<PolicyCategory> {
+  const allowed = await getPolicyCategories(supabase);
+  if (value && allowed.includes(value)) return value as PolicyCategory;
+  return (allowed[0] as PolicyCategory) ?? 'governance';
 }
 
 function parseDate(value: string | null): string | null {
@@ -79,8 +75,8 @@ export async function createPolicy(formData: FormData) {
   const slugInput = (formData.get('slug') as string | null)?.trim() ?? '';
   const slug = normalizePolicySlug(slugInput || title);
 
-  const category = parseCategory((formData.get('category') as string | null)?.trim() ?? null);
-  const status = parseStatus((formData.get('status') as string | null)?.trim() ?? 'draft');
+  const category = await parseCategory(supa, (formData.get('category') as string | null)?.trim() ?? null);
+  const status = await parseStatus(supa, (formData.get('status') as string | null)?.trim() ?? 'draft');
 
   const shortSummary = (formData.get('short_summary') as string | null)?.trim() ?? '';
   if (!shortSummary) {
@@ -165,8 +161,8 @@ export async function updatePolicy(formData: FormData) {
   const slugInput = (formData.get('slug') as string | null)?.trim() ?? '';
   const slug = normalizePolicySlug(slugInput || title) || existing.slug;
 
-  const category = parseCategory((formData.get('category') as string | null)?.trim() ?? null);
-  const status = parseStatus((formData.get('status') as string | null)?.trim() ?? 'draft');
+  const category = await parseCategory(supa, (formData.get('category') as string | null)?.trim() ?? null);
+  const status = await parseStatus(supa, (formData.get('status') as string | null)?.trim() ?? 'draft');
 
   const shortSummary = (formData.get('short_summary') as string | null)?.trim() ?? '';
   if (!shortSummary) {

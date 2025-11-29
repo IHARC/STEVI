@@ -75,6 +75,7 @@ const baseAccess: PortalAccess = {
   canManageOrgUsers: false,
   canManageOrgInvites: false,
   canAccessStaffWorkspace: true,
+  inventoryAllowedRoles: ['iharc_staff'],
 };
 
 const createSupabase = (user: Record<string, unknown> | null, error: Error | null = null): SupabaseAnyServerClient =>

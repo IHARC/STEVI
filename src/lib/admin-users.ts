@@ -1,5 +1,11 @@
 import type { SupabaseAnyServerClient } from '@/lib/supabase/types';
 import type { Database, Json } from '@/types/supabase';
+import {
+  getAffiliationStatuses,
+  getAffiliationTypes,
+  getGovernmentRoleTypes,
+  getIharcRoles,
+} from '@/lib/enum-values';
 
 type PortalProfile = Database['portal']['Tables']['profiles']['Row'];
 type AffiliationStatus = Database['portal']['Enums']['affiliation_status'];
@@ -69,7 +75,26 @@ export type AdminUserDetail = {
 const DEFAULT_PAGE_SIZE = 25;
 const MAX_PAGE_SIZE = 100;
 const PARTNER_AFFILIATIONS: AffiliationType[] = ['agency_partner', 'government_partner'];
-const STAFF_ROLES = ['iharc_admin', 'iharc_supervisor', 'iharc_staff', 'iharc_volunteer'] as const;
+
+export type ProfileEnumSet = {
+  affiliationTypes: AffiliationType[];
+  affiliationStatuses: AffiliationStatus[];
+  governmentRoleTypes: GovernmentRoleType[];
+};
+
+export async function loadProfileEnums(supabase: SupabaseAnyServerClient): Promise<ProfileEnumSet> {
+  const [affiliationTypes, affiliationStatuses, governmentRoleTypes] = await Promise.all([
+    getAffiliationTypes(supabase),
+    getAffiliationStatuses(supabase),
+    getGovernmentRoleTypes(supabase),
+  ]);
+
+  return {
+    affiliationTypes: affiliationTypes as AffiliationType[],
+    affiliationStatuses: affiliationStatuses as AffiliationStatus[],
+    governmentRoleTypes: governmentRoleTypes as GovernmentRoleType[],
+  };
+}
 
 function parsePageNumber(value: number | string | undefined, fallback = 1): number {
   if (typeof value === 'string') {
@@ -134,10 +159,16 @@ async function resolveRoleFilteredUserIds(
   segment: AdminUserSegment,
   roleFilter: string | null,
 ): Promise<Set<string> | null> {
-  const roleNames = [
-    ...(segment === 'staff' ? Array.from(STAFF_ROLES) : []),
-    ...(roleFilter ? [roleFilter] : []),
-  ];
+  const roleNames: string[] = [];
+
+  if (segment === 'staff') {
+    const iharcRoles = await getIharcRoles(supabase);
+    roleNames.push(...iharcRoles);
+  }
+
+  if (roleFilter) {
+    roleNames.push(roleFilter);
+  }
 
   if (roleNames.length === 0) {
     return null;
@@ -339,6 +370,7 @@ export async function fetchAdminUserSummary(
   supabase: SupabaseAnyServerClient,
 ): Promise<AdminUserSummary> {
   const portal = supabase.schema('portal');
+  const iharcRolesPromise = getIharcRoles(supabase);
 
   const [all, clients, partners, pending, revoked, staffIds] = await Promise.all([
     portal.from('profiles').select('id', { count: 'exact', head: true }),
@@ -358,7 +390,7 @@ export async function fetchAdminUserSummary(
       .from('profiles')
       .select('id', { count: 'exact', head: true })
       .eq('affiliation_status', 'revoked'),
-    fetchUserIdsForRoles(supabase, Array.from(STAFF_ROLES)),
+    iharcRolesPromise.then((roles) => fetchUserIdsForRoles(supabase, roles)),
   ]);
 
   return {
@@ -455,22 +487,19 @@ export function normalizeOrganizationId(value: FormDataEntryValue | null): numbe
   return Number.isNaN(parsed) ? null : parsed;
 }
 
-export function parseAffiliationType(value: string | null): AffiliationType | null {
+export function parseAffiliationType(value: string | null, enums: ProfileEnumSet): AffiliationType | null {
   if (!value) return null;
-  const allowed: AffiliationType[] = ['community_member', 'agency_partner', 'government_partner'];
-  return allowed.includes(value as AffiliationType) ? (value as AffiliationType) : null;
+  return enums.affiliationTypes.includes(value as AffiliationType) ? (value as AffiliationType) : null;
 }
 
-export function parseAffiliationStatus(value: string | null): AffiliationStatus | null {
+export function parseAffiliationStatus(value: string | null, enums: ProfileEnumSet): AffiliationStatus | null {
   if (!value) return null;
-  const allowed: AffiliationStatus[] = ['approved', 'pending', 'revoked'];
-  return allowed.includes(value as AffiliationStatus) ? (value as AffiliationStatus) : null;
+  return enums.affiliationStatuses.includes(value as AffiliationStatus) ? (value as AffiliationStatus) : null;
 }
 
-export function parseGovernmentRole(value: string | null): GovernmentRoleType | null {
+export function parseGovernmentRole(value: string | null, enums: ProfileEnumSet): GovernmentRoleType | null {
   if (!value) return null;
-  const allowed: GovernmentRoleType[] = ['staff', 'politician'];
-  return allowed.includes(value as GovernmentRoleType) ? (value as GovernmentRoleType) : null;
+  return enums.governmentRoleTypes.includes(value as GovernmentRoleType) ? (value as GovernmentRoleType) : null;
 }
 
 export function coerceSegment(value: string | null | undefined): AdminUserSegment {

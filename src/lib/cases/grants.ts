@@ -1,16 +1,8 @@
 import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 import type { SupabaseServerClient } from '@/lib/supabase/types';
+import { getGrantScopes } from '@/lib/enum-values';
 
-export const GRANT_SCOPES = [
-  'view',
-  'update_contact',
-  'timeline_client',
-  'timeline_full',
-  'write_notes',
-  'manage_consents',
-] as const;
-
-export type GrantScope = (typeof GRANT_SCOPES)[number];
+export type GrantScope = string;
 
 export type PersonGrant = {
   id: string;
@@ -81,7 +73,8 @@ export async function createPersonGrant(
     actorUserId: string;
   },
 ) {
-  if (!GRANT_SCOPES.includes(scope)) {
+  const grantScopes = await getGrantScopes(supabase);
+  if (!grantScopes.includes(scope)) {
     throw new Error('Invalid scope.');
   }
   if (!granteeUserId && !granteeOrgId) {

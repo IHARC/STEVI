@@ -6,22 +6,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { ResourceRichTextEditor } from '@/components/admin/resource-rich-text-editor';
 import { PolicyAutosaveClient } from './policy-autosave-client';
-import { POLICY_CATEGORY_LABELS, type Policy } from '@/lib/policies';
-
-const STATUS_OPTIONS = [
-  { value: 'draft', label: 'Draft' },
-  { value: 'published', label: 'Published' },
-  { value: 'archived', label: 'Archived' },
-] as const;
+import { type Policy } from '@/lib/policies';
 
 type PolicyFormProps = {
   mode: 'create' | 'edit';
   action: (formData: FormData) => Promise<void>;
   onDeleteAction?: (formData: FormData) => Promise<void>;
   policy?: Policy | null;
+  statusOptions: { value: string; label: string }[];
+  categoryOptions: { value: string; label: string }[];
 };
 
-export function PolicyForm({ mode, action, onDeleteAction, policy }: PolicyFormProps) {
+export function PolicyForm({ mode, action, onDeleteAction, policy, statusOptions, categoryOptions }: PolicyFormProps) {
   const isEdit = mode === 'edit' && policy;
 
   const bodyDefault = policy?.bodyHtml ?? '';
@@ -81,9 +77,9 @@ export function PolicyForm({ mode, action, onDeleteAction, policy }: PolicyFormP
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
               <SelectContent>
-                {(Object.keys(POLICY_CATEGORY_LABELS) as Array<keyof typeof POLICY_CATEGORY_LABELS>).map((value) => (
-                  <SelectItem key={value} value={value}>
-                    {POLICY_CATEGORY_LABELS[value]}
+                {categoryOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -99,7 +95,7 @@ export function PolicyForm({ mode, action, onDeleteAction, policy }: PolicyFormP
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
               <SelectContent>
-                {STATUS_OPTIONS.map((option) => (
+                {statusOptions.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
                   </SelectItem>

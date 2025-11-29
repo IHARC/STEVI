@@ -3,11 +3,12 @@
 import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { logAuditEvent, buildEntityRef } from '@/lib/audit';
-import { RESOURCE_KIND_LABELS, normalizeResourceSlug, type Resource, type ResourceEmbedPlacement } from '@/lib/resources';
+import { normalizeResourceSlug, type Resource, type ResourceEmbedPlacement } from '@/lib/resources';
 import { sanitizeResourceHtml } from '@/lib/sanitize-resource-html';
 import { buildResourceEmbedPayload, parseResourceAttachmentsInput, parseResourceTagsInput } from './resource-utils';
 import { ensurePortalProfile } from '@/lib/profile';
 import { loadPortalAccess } from '@/lib/portal-access';
+import { getResourceEmbedPlacements, getResourceKinds } from '@/lib/enum-values';
 
 async function revalidatePaths(
   ...paths: Array<string | null | undefined>
@@ -56,7 +57,8 @@ export async function createResourcePage(formData: FormData) {
   }
 
   const kindInput = (formData.get('kind') as string | null)?.trim() ?? '';
-  if (!kindInput || !Object.hasOwn(RESOURCE_KIND_LABELS, kindInput)) {
+  const allowedKinds = await getResourceKinds(supa);
+  if (!kindInput || !allowedKinds.includes(kindInput)) {
     throw new Error('Select a valid resource type.');
   }
   const kind = kindInput as Resource['kind'];
@@ -79,7 +81,10 @@ export async function createResourcePage(formData: FormData) {
     html: (formData.get('embed_html') as string | null) ?? '',
   });
   const embedPlacementInput = (formData.get('embed_placement') as string | null)?.trim() ?? 'above';
-  const embedPlacement: ResourceEmbedPlacement = embedPlacementInput === 'below' ? 'below' : 'above';
+  const allowedPlacements = await getResourceEmbedPlacements(supa);
+  const embedPlacement: ResourceEmbedPlacement = (allowedPlacements.includes(embedPlacementInput)
+    ? embedPlacementInput
+    : allowedPlacements[0] || 'above') as ResourceEmbedPlacement;
 
   const bodyHtmlRaw = (formData.get('body_html') as string | null) ?? '';
   const bodyHtml = sanitizeResourceHtml(bodyHtmlRaw);
@@ -160,7 +165,8 @@ export async function updateResourcePage(formData: FormData) {
   }
 
   const kindInput = (formData.get('kind') as string | null)?.trim() ?? '';
-  if (!kindInput || !Object.hasOwn(RESOURCE_KIND_LABELS, kindInput)) {
+  const allowedKinds = await getResourceKinds(supa);
+  if (!kindInput || !allowedKinds.includes(kindInput)) {
     throw new Error('Select a valid resource type.');
   }
   const kind = kindInput as Resource['kind'];
@@ -183,7 +189,10 @@ export async function updateResourcePage(formData: FormData) {
     html: (formData.get('embed_html') as string | null) ?? '',
   });
   const embedPlacementInput = (formData.get('embed_placement') as string | null)?.trim() ?? 'above';
-  const embedPlacement: ResourceEmbedPlacement = embedPlacementInput === 'below' ? 'below' : 'above';
+  const allowedPlacements = await getResourceEmbedPlacements(supa);
+  const embedPlacement: ResourceEmbedPlacement = (allowedPlacements.includes(embedPlacementInput)
+    ? embedPlacementInput
+    : allowedPlacements[0] || 'above') as ResourceEmbedPlacement;
 
   const bodyHtmlRaw = (formData.get('body_html') as string | null) ?? '';
   const bodyHtml = sanitizeResourceHtml(bodyHtmlRaw);

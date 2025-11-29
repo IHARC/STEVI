@@ -24,6 +24,7 @@ const baseAccess: PortalAccess = {
   canAccessStaffWorkspace: false,
   canReviewProfiles: false,
   canViewMetrics: false,
+  inventoryAllowedRoles: [],
 };
 
 describe('resolveOnboardingActor', () => {

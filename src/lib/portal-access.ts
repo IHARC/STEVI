@@ -1,8 +1,8 @@
 import type { AppIconName } from '@/lib/app-icons';
 import { ensurePortalProfile, type PortalProfile } from '@/lib/profile';
 import { type IharcRole, type PortalRole } from '@/lib/ihar-auth';
-import { INVENTORY_ALLOWED_ROLES } from '@/lib/inventory/constants';
 import type { SupabaseAnyServerClient } from '@/lib/supabase/types';
+import { getInventoryRoles } from '@/lib/enum-values';
 
 export type PortalLink = {
   href: string;
@@ -148,7 +148,7 @@ const ADMIN_NAV_BLUEPRINT: WorkspaceNavBlueprint = {
         {
           href: '/admin/inventory',
           label: 'Inventory workspace',
-          requiresIharcRoles: INVENTORY_ALLOWED_ROLES,
+          requiresGuard: (access) => access.canAccessInventoryWorkspace,
         },
         {
           href: '/admin/donations',
@@ -315,6 +315,7 @@ export type PortalAccess = {
   canManageOrgUsers: boolean;
   canManageOrgInvites: boolean;
   canAccessStaffWorkspace: boolean;
+  inventoryAllowedRoles: IharcRole[];
 };
 
 export async function loadPortalAccess(
@@ -334,6 +335,9 @@ export async function loadPortalAccess(
 
   const iharcRoles = roles.filter((role): role is IharcRole => role.startsWith('iharc_'));
   const portalRoles = roles.filter((role): role is PortalRole => role.startsWith('portal_'));
+  const inventoryAllowedRoles = (await getInventoryRoles(supabase)).filter((role): role is IharcRole =>
+    role.startsWith('iharc_'),
+  );
   const organizationId = profile.organization_id ?? null;
   const isProfileApproved = profile.affiliation_status === 'approved';
 
@@ -347,7 +351,7 @@ export async function loadPortalAccess(
   const canManageResources = isProfileApproved && isPortalAdmin;
   const canManagePolicies = isProfileApproved && isPortalAdmin;
   const canAccessInventoryWorkspace = isProfileApproved && iharcRoles.some((role) =>
-    INVENTORY_ALLOWED_ROLES.includes(role),
+    inventoryAllowedRoles.includes(role),
   );
 
   const canManageNotifications = isProfileApproved && isPortalAdmin;
@@ -384,6 +388,7 @@ export async function loadPortalAccess(
     canManageOrgUsers,
     canManageOrgInvites,
     canAccessStaffWorkspace,
+    inventoryAllowedRoles,
   };
 }
 

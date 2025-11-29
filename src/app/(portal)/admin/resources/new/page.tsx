@@ -8,6 +8,7 @@ import { loadPortalAccess } from '@/lib/portal-access';
 import { ResourceForm } from '../resource-form';
 import { createResourcePage } from '../actions';
 import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
+import { fetchResourceEnumOptions } from '@/lib/resources';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,6 +25,7 @@ export default async function AdminResourceNewPage() {
   }
 
   await ensurePortalProfile(supabase, access.userId);
+  const enumOptions = await fetchResourceEnumOptions();
 
   return (
     <div className="page-shell page-stack text-on-surface">
@@ -45,7 +47,7 @@ export default async function AdminResourceNewPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-space-lg">
-          <ResourceForm mode="create" action={createResourcePage} />
+          <ResourceForm mode="create" action={createResourcePage} kindOptions={enumOptions.kinds} />
         </CardContent>
       </Card>
     </div>
