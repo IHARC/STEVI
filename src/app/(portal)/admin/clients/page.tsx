@@ -21,10 +21,11 @@ type PeopleListItem = {
 
 export const dynamic = 'force-dynamic';
 
-type PageProps = { searchParams?: Record<string, string | string[] | undefined> };
+type PageProps = { searchParams?: Promise<Record<string, string | string[] | undefined>> };
 
 export default async function AdminClientsPage({ searchParams }: PageProps) {
-  const filterParam = searchParams?.filter;
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const filterParam = resolvedSearchParams?.filter;
   const statusFilter = Array.isArray(filterParam) ? filterParam[0] : filterParam ?? 'all';
 
   const supabase = await createSupabaseRSCClient();
