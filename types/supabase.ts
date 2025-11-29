@@ -1099,6 +1099,71 @@ export type Database = {
   }
   case_mgmt: {
     Tables: {
+      case_management: {
+        Row: {
+          id: number
+          person_id: number
+          case_manager_name: string
+          case_manager_contact: string | null
+          agency: string | null
+          case_number: string | null
+          start_date: string | null
+          end_date: string | null
+          status: string | null
+          case_type: string | null
+          priority: string | null
+          notes: string | null
+          created_at: string | null
+          updated_at: string | null
+          created_by: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          id?: number
+          person_id: number
+          case_manager_name: string
+          case_manager_contact?: string | null
+          agency?: string | null
+          case_number?: string | null
+          start_date?: string | null
+          end_date?: string | null
+          status?: string | null
+          case_type?: string | null
+          priority?: string | null
+          notes?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+          created_by?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          id?: number
+          person_id?: number
+          case_manager_name?: string
+          case_manager_contact?: string | null
+          agency?: string | null
+          case_number?: string | null
+          start_date?: string | null
+          end_date?: string | null
+          status?: string | null
+          case_type?: string | null
+          priority?: string | null
+          notes?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+          created_by?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "case_management_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       calls_for_service: {
         Row: {
           anonymous_reporter: boolean | null

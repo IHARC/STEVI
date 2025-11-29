@@ -87,8 +87,6 @@ export async function processClientIntake(
     case_manager_contact: intakeRow.contact_email,
     case_number: null,
     case_type: 'intake',
-    priority: 'standard',
-    status: 'active',
     start_date: new Date().toISOString(),
     created_by: actorUserId,
   } as const;

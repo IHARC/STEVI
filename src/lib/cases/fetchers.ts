@@ -10,6 +10,7 @@ import type {
 import type { Database } from '@/types/supabase';
 import type { SupabaseAnyServerClient } from '@/lib/supabase/types';
 
+const CASE_SCHEMA = 'case_mgmt';
 const CASE_TABLE = 'case_management';
 const ACTIVITIES_TABLE = 'people_activities';
 const REGISTRATION_TABLE = 'registration_flows';
@@ -23,7 +24,7 @@ export async function fetchClientCases(
   const person = await findPersonForUser(supabase, userId);
   if (!person) return [];
 
-  const caseMgmt = supabase.schema('case_mgmt');
+  const caseMgmt = supabase.schema(CASE_SCHEMA);
   const { data, error } = await caseMgmt
     .from(CASE_TABLE)
     .select('*')
@@ -31,6 +32,7 @@ export async function fetchClientCases(
     .order('start_date', { ascending: false });
 
   if (error) {
+    console.error('Failed to load client cases', { userId, personId: person.id, error });
     throw new Error('Unable to load your cases right now.');
   }
 
@@ -45,7 +47,7 @@ export async function fetchClientCaseDetail(
   const person = await findPersonForUser(supabase, userId);
   if (!person) return null;
 
-  const caseMgmt = supabase.schema('case_mgmt');
+  const caseMgmt = supabase.schema(CASE_SCHEMA);
   const { data, error } = await caseMgmt
     .from(CASE_TABLE)
     .select('*')
@@ -54,6 +56,7 @@ export async function fetchClientCaseDetail(
     .maybeSingle();
 
   if (error) {
+    console.error('Failed to load client case detail', { userId, caseId, error });
     throw new Error('Unable to load that case.');
   }
 
@@ -115,7 +118,7 @@ export async function fetchStaffCases(
   supabase: SupabaseAnyServerClient,
   limit = 50,
 ): Promise<ClientCaseDetail[]> {
-  const caseMgmt = supabase.schema('case_mgmt');
+  const caseMgmt = supabase.schema(CASE_SCHEMA);
   const { data, error } = await caseMgmt
     .from(CASE_TABLE)
     .select('*')
@@ -123,6 +126,7 @@ export async function fetchStaffCases(
     .limit(limit);
 
   if (error) {
+    console.error('Failed to load staff cases', { error });
     throw new Error('Unable to load cases.');
   }
 
@@ -133,7 +137,7 @@ export async function fetchStaffCaseDetail(
   supabase: SupabaseAnyServerClient,
   caseId: number,
 ): Promise<ClientCaseDetail | null> {
-  const caseMgmt = supabase.schema('case_mgmt');
+  const caseMgmt = supabase.schema(CASE_SCHEMA);
   const { data, error } = await caseMgmt
     .from(CASE_TABLE)
     .select('*')
@@ -141,6 +145,7 @@ export async function fetchStaffCaseDetail(
     .maybeSingle();
 
   if (error) {
+    console.error('Failed to load staff case detail', { caseId, error });
     throw new Error('Unable to load that case.');
   }
 
@@ -164,6 +169,7 @@ export async function fetchStaffCaseActivities(
     .limit(limit);
 
   if (error) {
+    console.error('Failed to load staff case activities', { personId, error });
     throw new Error('Unable to load activity.');
   }
 

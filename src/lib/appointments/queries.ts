@@ -68,6 +68,7 @@ export async function fetchClientAppointments(
     .order('created_at', { ascending: false });
 
   if (error) {
+    console.error('Failed to load client appointments', { profileId, error });
     throw new Error('Unable to load your appointments right now.');
   }
 
@@ -122,6 +123,7 @@ export async function fetchScopedAppointments(
   const { data, error } = await query;
 
   if (error) {
+    console.error('Failed to load scoped appointments', { userId: access.userId, options, error });
     throw new Error('Unable to load appointments.');
   }
 
