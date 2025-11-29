@@ -240,28 +240,8 @@
     color: inherit;
   }
 
-  h1 {
-    @apply text-headline-lg font-heading;
-  }
-
-  h2 {
-    @apply text-headline-md font-heading;
-  }
-
-  h3 {
-    @apply text-headline-sm font-heading;
-  }
-
-  h4 {
-    @apply text-title-lg font-body;
-  }
-
-  h5 {
-    @apply text-title-md font-body;
-  }
-
-  h6 {
-    @apply text-title-sm font-body;
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
   }
 
   p,

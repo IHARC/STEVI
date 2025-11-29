@@ -97,7 +97,7 @@ const tokenColors = {
   'neutral-gray': 'rgb(200 192 192 / <alpha-value>)',
 };
 
-const fontSizes: Config['theme']['fontSize'] = {
+const fontSizes: NonNullable<Config['theme']>['fontSize'] = {
   // Compatibility with Tailwind defaults mapped to Material 3 tokens
   xs: [
     'var(--md-sys-typescale-label-extra-small-size)',
