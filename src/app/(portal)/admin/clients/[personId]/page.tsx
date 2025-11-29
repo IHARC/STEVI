@@ -77,7 +77,7 @@ export default async function AdminPersonDetailPage({ params }: PageProps) {
     <div className="page-shell page-stack">
       <header className="space-y-space-2xs">
         <p className="text-label-sm font-semibold uppercase text-muted-foreground">Client access</p>
-        <h1 className="text-headline-md text-on-surface sm:text-headline-lg">
+        <h1 className="text-title-lg text-on-surface sm:text-headline-sm">
           {person.first_name ?? 'Person'} {person.last_name ?? ''}
         </h1>
         <p className="max-w-3xl text-body-md text-muted-foreground sm:text-body-lg">

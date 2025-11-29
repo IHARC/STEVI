@@ -104,7 +104,7 @@ export default async function AdminPage() {
     <div className="page-shell page-stack">
       <header className="flex flex-col gap-space-xs">
         <p className="text-label-sm font-medium uppercase text-muted-foreground">Operations</p>
-        <h1 className="text-headline-md text-on-surface sm:text-headline-lg">Admin workspace overview</h1>
+        <h1 className="text-title-lg text-on-surface sm:text-headline-sm">Admin workspace overview</h1>
         <p className="max-w-4xl text-body-md text-muted-foreground sm:text-body-lg">
           Track approvals, notifications, and content at a glance. All counts respect Supabase RLS and audit logging.
         </p>

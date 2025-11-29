@@ -348,7 +348,7 @@ function AdminNavLink({ link, pathname, onNavigate, onToggleFavorite, isFavorite
   return (
     <div
       className={cn(
-        'group flex items-center gap-space-xs rounded-lg px-space-sm py-space-2xs text-body-sm transition-colors',
+        'group flex items-center gap-space-xs rounded-lg px-space-sm py-space-3xs text-body-sm transition-colors',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
         active ? 'bg-primary/10 text-primary ring-1 ring-primary/40 shadow-level-1' : 'text-on-surface/80 hover:bg-surface-container',
       )}

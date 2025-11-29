@@ -230,9 +230,9 @@
     background-color: rgb(var(--md-sys-color-surface) / 1);
     color: rgb(var(--md-sys-color-on-surface) / 1);
     font-family: var(--md-sys-typescale-body-font);
-    font-size: var(--md-sys-typescale-body-large-size);
-    line-height: var(--md-sys-typescale-body-large-line-height);
-    letter-spacing: var(--md-sys-typescale-body-large-tracking);
+    font-size: var(--md-sys-typescale-body-medium-size);
+    line-height: var(--md-sys-typescale-body-medium-line-height);
+    letter-spacing: var(--md-sys-typescale-body-medium-tracking);
   }
 
   h1, h2, h3, h4, h5, h6 {

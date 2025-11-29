@@ -160,7 +160,7 @@ export default async function AdminProfilesPage() {
         <p className="text-label-sm font-medium uppercase text-muted-foreground">
           Access &amp; verification
         </p>
-        <h1 className="text-headline-md text-on-surface sm:text-headline-lg">Profile verification &amp; invitations</h1>
+        <h1 className="text-title-lg text-on-surface sm:text-headline-sm">Profile verification &amp; invitations</h1>
         <p className="max-w-3xl text-body-md text-muted-foreground sm:text-body-lg">
           Approve partner affiliations, refresh organization links, and send invitations so trusted collaborators can
           reach STEVI in seconds.

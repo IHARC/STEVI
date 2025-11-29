@@ -98,7 +98,7 @@ export default async function PermissionsPage() {
     <div className="page-shell page-stack">
       <header className="flex flex-col gap-space-xs">
         <p className="text-label-sm font-medium uppercase text-muted-foreground">Admin · Permissions</p>
-        <h1 className="text-headline-md text-on-surface sm:text-headline-lg">Permissions control</h1>
+        <h1 className="text-title-lg text-on-surface sm:text-headline-sm">Permissions control</h1>
         <p className="max-w-3xl text-body-md text-muted-foreground sm:text-body-lg">
           Manage granular permissions for roles. Changes take effect immediately and refresh user claims on next refresh.
         </p>

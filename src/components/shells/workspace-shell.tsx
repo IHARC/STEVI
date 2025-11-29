@@ -13,7 +13,7 @@ type WorkspaceShellProps = {
 export function WorkspaceShell({ nav, children, stickyHeader, inboxSlot }: WorkspaceShellProps) {
   return (
     <div className="mx-auto flex w-full max-w-page gap-space-lg px-space-md py-space-lg">
-      <aside className="sticky top-24 hidden h-[calc(100vh-6rem)] w-72 flex-shrink-0 lg:block">
+      <aside className="sticky top-24 hidden h-[calc(100vh-6rem)] w-64 flex-shrink-0 lg:block">
         <AdminNav nav={nav} />
       </aside>
 
