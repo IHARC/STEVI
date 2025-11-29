@@ -34,7 +34,8 @@ export default async function AdminClientsPage({ searchParams }: PageProps) {
   if (!access) redirect('/login?next=/admin/clients');
   if (!access.canManageConsents) redirect(resolveDefaultWorkspacePath(access));
 
-  const { data, error } = await supabase.rpc('get_people_list_with_types', {
+  const core = supabase.schema('core');
+  const { data, error } = await core.rpc('get_people_list_with_types', {
     p_page: 1,
     p_page_size: 50,
     p_person_types: null,

@@ -295,7 +295,8 @@ async function syncOrgRepRole(
   profileId: string,
   elevate: boolean,
 ) {
-  const { error } = await supabase.rpc('set_profile_role', {
+  const portal = supabase.schema('portal');
+  const { error } = await portal.rpc('set_profile_role', {
     p_profile_id: profileId,
     p_role_name: 'portal_org_rep',
     p_enable: elevate,

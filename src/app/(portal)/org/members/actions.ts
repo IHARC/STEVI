@@ -42,7 +42,8 @@ async function setRole(
   supabase: SupabaseServerClient,
   payload: ToggleRolePayload,
 ) {
-  const { error } = await supabase.rpc('set_profile_role', {
+  const portal = supabase.schema('portal');
+  const { error } = await portal.rpc('set_profile_role', {
     p_profile_id: payload.profileId,
     p_role_name: payload.roleName,
     p_enable: payload.enable,

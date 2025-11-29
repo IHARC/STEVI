@@ -117,7 +117,8 @@ async function setRole(
   roleName: 'portal_org_admin' | 'portal_org_rep',
   enable: boolean,
 ) {
-  const { error } = await supabase.rpc('set_profile_role', {
+  const portal = supabase.schema('portal');
+  const { error } = await portal.rpc('set_profile_role', {
     p_profile_id: profileId,
     p_role_name: roleName,
     p_enable: enable,

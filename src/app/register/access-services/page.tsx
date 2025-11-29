@@ -193,7 +193,8 @@ export default async function ClientClaimPage({ searchParams }: ClientClaimPageP
 
     if (sessionAvailable && profileId) {
       try {
-        const { data, error } = await supabase.rpc('claim_registration_flow', rpcArgs);
+        const portalSchema = supabase.schema('portal');
+        const { data, error } = await portalSchema.rpc('claim_registration_flow', rpcArgs);
 
         if (error) {
           console.error('claim_registration_flow error', error);

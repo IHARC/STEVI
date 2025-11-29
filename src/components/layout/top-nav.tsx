@@ -131,7 +131,8 @@ async function buildEntityCommands(
 
   if (access.canManageConsents || access.canManageOrgUsers || access.canAccessStaffWorkspace) {
     try {
-      const { data, error } = await supabase.rpc('get_people_list_with_types', {
+      const core = supabase.schema('core');
+      const { data, error } = await core.rpc('get_people_list_with_types', {
         p_page: 1,
         p_page_size: 15,
         p_person_types: null,

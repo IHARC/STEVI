@@ -24,17 +24,20 @@ export type OutreachLog = {
   occurredAt: string;
 };
 
-const CASELOAD_RPC = 'core.staff_caseload';
-const SHIFTS_RPC = 'core.staff_shifts_today';
-const OUTREACH_RPC = 'core.staff_outreach_logs';
+const CORE_SCHEMA = 'core';
+const CASELOAD_RPC = 'staff_caseload';
+const SHIFTS_RPC = 'staff_shifts_today';
+const OUTREACH_RPC = 'staff_outreach_logs';
 
 export async function fetchStaffCaseload(
   supabase: SupabaseAnyServerClient,
   staffUserId: string,
 ): Promise<StaffCase[]> {
-  const { data, error } = await supabase.rpc(CASELOAD_RPC, { staff_uuid: staffUserId });
+  const core = supabase.schema(CORE_SCHEMA);
+  const { data, error } = await core.rpc(CASELOAD_RPC, { staff_uuid: staffUserId });
 
   if (error) {
+    console.error('Failed to load staff caseload', error);
     throw new Error('Unable to load caseload right now.');
   }
 
@@ -51,11 +54,13 @@ export async function fetchStaffShifts(
   supabase: SupabaseAnyServerClient,
   staffUserId: string,
 ): Promise<StaffShift[]> {
-  const { data, error } = await supabase.rpc(SHIFTS_RPC, {
+  const core = supabase.schema(CORE_SCHEMA);
+  const { data, error } = await core.rpc(SHIFTS_RPC, {
     staff_uuid: staffUserId,
   });
 
   if (error) {
+    console.error('Failed to load staff shifts', error);
     throw new Error('Unable to load today’s shifts right now.');
   }
 
@@ -73,12 +78,14 @@ export async function fetchOutreachLogs(
   staffUserId: string,
   limit = 20,
 ): Promise<OutreachLog[]> {
-  const { data, error } = await supabase.rpc(OUTREACH_RPC, {
+  const core = supabase.schema(CORE_SCHEMA);
+  const { data, error } = await core.rpc(OUTREACH_RPC, {
     staff_uuid: staffUserId,
     limit_rows: limit,
   });
 
   if (error) {
+    console.error('Failed to load staff outreach logs', error);
     throw new Error('Unable to load outreach logs right now.');
   }
 

@@ -229,7 +229,7 @@ export async function toggleRoleAction(formData: FormData): Promise<ActionResult
       }
     }
 
-    const { error } = await supabase.rpc('set_profile_role', {
+    const { error } = await portal.rpc('set_profile_role', {
       p_profile_id: profileId,
       p_role_name: roleName,
       p_enable: enable,
@@ -316,7 +316,7 @@ export async function archiveUserAction(formData: FormData): Promise<ActionResul
 
     for (const roleName of ['portal_org_admin', 'portal_org_rep'] as const) {
       try {
-        await supabase.rpc('set_profile_role', {
+        await portal.rpc('set_profile_role', {
           p_profile_id: profileId,
           p_role_name: roleName,
           p_enable: false,
