@@ -12,6 +12,14 @@ const config: Config = {
     './src/lib/**/*.{ts,tsx}',
     './src/styles/**/*.{ts,tsx}',
   ],
+  safelist: [
+    // Ensure label scale utilities are always emitted (used in nav + chips)
+    'text-label-2xs',
+    'text-label-xs',
+    'text-label-sm',
+    'text-label-md',
+    'text-label-lg',
+  ],
   darkMode: ['class'],
   theme: {
     extend: {

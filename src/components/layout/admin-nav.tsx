@@ -60,7 +60,7 @@ function DesktopAdminNav({ nav, pathname, activeGroupId }: DesktopAdminNavProps)
     <TooltipProvider delayDuration={150} skipDelayDuration={0}>
       <div
         className={cn(
-          'flex h-full flex-col rounded-2xl border border-outline/12 bg-surface-container-high shadow-md transition-[width] motion-duration-medium motion-ease-standard text-label-2xs',
+          'admin-nav-label flex h-full flex-col rounded-2xl border border-outline/12 bg-surface-container-high shadow-md transition-[width] motion-duration-medium motion-ease-standard',
           collapsed ? 'w-[68px] px-space-2xs' : 'w-64 px-space-xs',
         )}
         data-collapsed={collapsed}
@@ -174,7 +174,7 @@ function NavSections({ nav, pathname, onNavigate, initialGroupId, onToggleFavori
       type="single"
       collapsible
       defaultValue={initialGroupId ?? undefined}
-      className="space-y-space-3xs"
+      className="admin-nav-label space-y-space-3xs"
     >
       {nav.groups.map((group) => (
         <AccordionItem
@@ -182,12 +182,12 @@ function NavSections({ nav, pathname, onNavigate, initialGroupId, onToggleFavori
           value={group.id}
           className="rounded-xl border border-outline/12 bg-surface-container p-space-2xs shadow-sm"
         >
-          <AccordionTrigger className="rounded-lg px-space-sm py-space-2xs text-label-2xs font-semibold uppercase text-muted-foreground hover:no-underline tracking-[0.08em]">
+          <AccordionTrigger className="rounded-lg px-space-sm py-space-2xs font-semibold uppercase text-muted-foreground hover:no-underline tracking-[0.08em]">
             <div className="flex items-center gap-space-xs">
               <Icon icon={resolveAppIcon(group.icon)} size="sm" />
               <span>{group.label}</span>
             </div>
-            <span className="rounded-full bg-surface-container-low px-2 py-[3px] text-label-xs font-semibold text-muted-foreground">
+            <span className="rounded-full bg-surface-container-low px-2 py-[3px] font-semibold text-muted-foreground">
               {group.links.length}
             </span>
           </AccordionTrigger>
@@ -221,7 +221,7 @@ function PinnedSection({ title, items, icon: IconComponent }: PinnedSectionProps
   if (!items.length) return null;
   return (
     <div className="space-y-space-3xs">
-      <div className="flex items-center gap-space-2xs px-space-2xs text-label-xs uppercase text-muted-foreground tracking-[0.08em]">
+      <div className="flex items-center gap-space-2xs px-space-2xs uppercase text-muted-foreground tracking-[0.08em]">
         {IconComponent ? <Icon icon={IconComponent} size="xs" /> : null}
         <span>{title}</span>
       </div>
@@ -230,7 +230,7 @@ function PinnedSection({ title, items, icon: IconComponent }: PinnedSectionProps
           <Link
             key={item.href}
             href={item.href}
-            className="flex items-center gap-space-2xs rounded-full border border-outline/20 bg-surface-container px-space-2xs py-space-3xs text-label-xs text-on-surface hover:border-outline/40"
+            className="flex items-center gap-space-2xs rounded-full border border-outline/20 bg-surface-container px-space-2xs py-space-3xs text-on-surface hover:border-outline/40"
           >
             <span className="truncate max-w-[160px]">{item.label}</span>
           </Link>
@@ -295,7 +295,7 @@ type CollapsedNavGroupsProps = {
 
 function CollapsedNavGroups({ nav, pathname }: CollapsedNavGroupsProps) {
   return (
-      <div className="flex flex-col items-center gap-space-2xs pb-space-sm text-label-2xs">
+      <div className="admin-nav-label flex flex-col items-center gap-space-2xs pb-space-sm">
       {nav.groups.map((group) => {
         const isActive = group.links.some((link) => isLinkActive(link, pathname));
         return (
@@ -313,7 +313,7 @@ function CollapsedNavGroups({ nav, pathname }: CollapsedNavGroupsProps) {
             <Icon icon={resolveAppIcon(group.icon)} size="sm" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent side="right" align="start" className="w-60 p-space-sm text-label-2xs">
+        <PopoverContent side="right" align="start" className="admin-nav-label w-60 p-space-sm">
           <div className="flex items-center gap-space-xs pb-space-2xs">
             <Icon icon={resolveAppIcon(group.icon)} size="sm" />
             <div className="text-label-sm font-semibold uppercase text-muted-foreground tracking-[0.08em]">{group.label}</div>
@@ -348,7 +348,7 @@ function AdminNavLink({ link, pathname, onNavigate, onToggleFavorite, isFavorite
   return (
     <div
       className={cn(
-        'group flex items-center gap-space-xs rounded-lg px-space-xs py-space-3xs text-label-2xs transition-colors',
+        'group flex items-center gap-space-xs rounded-lg px-space-xs py-space-3xs transition-colors',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
         active ? 'bg-primary/10 text-primary ring-1 ring-primary/40 shadow-level-1' : 'text-on-surface/80 hover:bg-surface-container',
       )}

@@ -223,6 +223,8 @@
 
 @layer base {
   html {
+    /* Lock the root size to the design baseline to avoid upstream overrides/zoom compounding across surfaces */
+    font-size: 16px;
     font-family: var(--md-sys-typescale-body-font);
     background-color: rgb(var(--md-sys-color-background) / 1);
     color: rgb(var(--md-sys-color-on-background) / 1);
@@ -339,6 +341,21 @@
 }
 
 @layer components {
+  /* Ensure admin nav labels always use the smallest label token, even if Tailwind pruning misses the utility */
+  .admin-nav-label {
+    font-size: var(--md-sys-typescale-label-extra-small-size, 0.625rem);
+    line-height: var(--md-sys-typescale-label-extra-small-line-height, 0.875rem);
+    letter-spacing: var(--md-sys-typescale-label-extra-small-tracking, 0.03125rem);
+    font-weight: var(--md-sys-typescale-label-extra-small-weight, 500);
+  }
+
+  /* Inherit the same scale through descendants to avoid conflicting font-size sources */
+  .admin-nav-label * {
+    font-size: inherit;
+    line-height: inherit;
+    letter-spacing: inherit;
+  }
+
   .container {
     width: min(100%, var(--md-sys-layout-max-width));
     margin-inline: auto;

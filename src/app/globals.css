@@ -3,7 +3,7 @@ html {
 }
 
 body {
-  @apply min-h-screen bg-background text-on-background text-body-md antialiased;
+  @apply min-h-screen bg-background text-on-background antialiased;
 }
 
 .focus-outline {
