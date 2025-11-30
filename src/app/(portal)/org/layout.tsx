@@ -10,6 +10,7 @@ import { fetchWorkspaceInbox, type InboxItem } from '@/lib/inbox';
 import { resolveWorkspaceQuickActions } from '@/lib/workspaces';
 import { Button } from '@/components/ui/button';
 import { normalizePathFromHeader } from '@/lib/paths';
+import type { WorkspaceId } from '@/lib/workspaces';
 
 export const dynamic = 'force-dynamic';
 
@@ -49,7 +50,13 @@ export default async function OrgLayout({ children }: { children: ReactNode }) {
   ) : null;
 
   return (
-    <WorkspaceShell nav={nav} stickyHeader={stickyHeader} inboxSlot={<InboxPanel items={inboxItems} />}>
+    <WorkspaceShell
+      nav={nav}
+      stickyHeader={stickyHeader}
+      inboxSlot={<InboxPanel items={inboxItems} />}
+      portalAccess={access}
+      activeWorkspace={'org' satisfies WorkspaceId}
+    >
       {children}
     </WorkspaceShell>
   );

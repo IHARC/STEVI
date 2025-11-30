@@ -20,9 +20,9 @@ export function buildPrimaryNavItems(access: PortalAccess | null): PrimaryNavIte
       id: 'home',
       label: 'Home',
       description: 'Overview & start',
-      href: '/',
+      href: '/home',
       icon: 'home',
-      match: ['/'],
+      match: ['/home'],
     },
     {
       id: 'client',
