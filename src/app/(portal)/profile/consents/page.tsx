@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { fetchPersonConsents } from '@/lib/cases/fetchers';
@@ -9,6 +10,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
+import { PageHeader } from '@/components/layout/page-header';
+import { Checkbox } from '@/components/ui/checkbox';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,13 +26,16 @@ export default async function ConsentsPage() {
 
   return (
     <div className="page-shell page-stack">
-      <header className="space-y-space-2xs">
-        <p className="text-label-sm font-semibold uppercase text-muted-foreground">Privacy & contact</p>
-        <h1 className="text-headline-lg text-on-surface sm:text-display-sm">My consents</h1>
-        <p className="max-w-3xl text-body-md text-muted-foreground sm:text-body-lg">
-          Choose who can access your information and how IHARC can reach you. Changes are logged for safety.
-        </p>
-      </header>
+      <PageHeader
+        eyebrow="Privacy & contact"
+        title="My consents"
+        description="Choose who can access your information and how IHARC can reach you. Changes are logged for safety."
+        actions={
+          <Button asChild variant="secondary" size="sm">
+            <Link href="/support">Need help? Message support</Link>
+          </Button>
+        }
+      />
 
       {!consentData ? (
         <Card className="border-dashed border-outline/60">
@@ -79,22 +85,43 @@ function ConsentForm({
     <form action={action} className="space-y-space-lg">
       <input type="hidden" name="person_id" value={personId} />
 
-      <div className="space-y-space-2xs">
-        <Label className="text-title-sm">Data sharing</Label>
-        <p className="text-body-sm text-muted-foreground">Allow IHARC to share your information with partners directly involved in your support.</p>
-        <div className="flex items-center gap-space-sm">
-          <input type="checkbox" id="data_sharing" name="data_sharing" defaultChecked={dataSharing} className="h-4 w-4 rounded border-outline/60" />
-          <Label htmlFor="data_sharing">I consent to data sharing for my care.</Label>
+      <section className="space-y-space-sm rounded-2xl border border-outline/12 bg-surface-container-low p-space-md">
+        <div className="space-y-space-2xs">
+          <p className="text-title-sm font-semibold text-on-surface">Data sharing</p>
+          <p className="text-body-sm text-muted-foreground">
+            Allow IHARC to share your information with partners directly involved in your support.
+          </p>
         </div>
-      </div>
+        <div className="max-h-48 overflow-auto rounded-xl border border-outline/10 bg-surface p-space-sm text-body-sm text-on-surface/85">
+          <p className="text-body-sm text-on-surface/80">
+            We only share details that are necessary to coordinate care, such as appointment notes, safety considerations,
+            and contact information. Sharing helps speed up referrals and keeps your support circle aligned.
+          </p>
+          <ul className="mt-space-2xs list-disc space-y-space-2xs pl-5 text-body-sm text-on-surface/80">
+            <li>Partners must follow IHARC privacy standards and delete data on request.</li>
+            <li>You can revoke consent anytime; changes are logged for safety.</li>
+            <li>We never sell or publish your information.</li>
+          </ul>
+        </div>
+        <label className="flex items-start gap-space-sm">
+          <Checkbox id="data_sharing" name="data_sharing" defaultChecked={dataSharing} />
+          <div className="space-y-space-3xs">
+            <span className="text-label-md font-medium text-on-surface">I consent to data sharing for my care.</span>
+            <p className="text-body-sm text-muted-foreground">This keeps referrals moving; you can change this anytime.</p>
+          </div>
+        </label>
+      </section>
 
-      <div className="space-y-space-2xs">
-        <Label className="text-title-sm">Preferred contact</Label>
+      <section className="space-y-space-sm rounded-2xl border border-outline/12 bg-surface-container-low p-space-md">
+        <div className="space-y-space-2xs">
+          <p className="text-title-sm font-semibold text-on-surface">Preferred contact</p>
+          <p className="text-body-sm text-muted-foreground">Choose how IHARC should reach you for updates and check-ins.</p>
+        </div>
         <RadioGroup defaultValue={preferredContact || 'email'} name="preferred_contact" className="grid gap-space-sm md:grid-cols-2">
           {['email', 'phone', 'both', 'none'].map((option) => (
             <label
               key={option}
-              className="flex cursor-pointer items-start gap-space-sm rounded-xl border border-outline/40 bg-surface-container p-space-sm text-left text-on-surface shadow-subtle state-layer-color-primary hover:border-primary"
+              className="flex cursor-pointer items-start gap-space-sm rounded-xl border border-outline/20 bg-surface px-space-sm py-space-sm text-left text-on-surface shadow-level-1 state-layer-color-primary hover:border-primary"
             >
               <RadioGroupItem value={option} />
               <div>
@@ -110,21 +137,23 @@ function ConsentForm({
             </label>
           ))}
         </RadioGroup>
-      </div>
+      </section>
 
-      <div className="space-y-space-2xs">
-        <Label htmlFor="privacy_restrictions" className="text-title-sm">Privacy notes</Label>
+      <section className="space-y-space-2xs rounded-2xl border border-outline/12 bg-surface-container-low p-space-md">
+        <Label htmlFor="privacy_restrictions" className="text-title-sm">
+          Privacy notes
+        </Label>
         <p className="text-body-sm text-muted-foreground">Add safety notes or restrictions (e.g., “Do not leave voicemail”).</p>
         <Textarea
           id="privacy_restrictions"
           name="privacy_restrictions"
           defaultValue={privacyRestrictions}
-          rows={3}
+          rows={4}
           placeholder="Any limits we must follow when contacting you."
         />
-      </div>
+      </section>
 
-      <Button type="submit" className="w-full">Save preferences</Button>
+      <Button type="submit" className="w-fit px-space-lg">Save preferences</Button>
     </form>
   );
 }

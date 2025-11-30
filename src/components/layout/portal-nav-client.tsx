@@ -35,7 +35,7 @@ export function PortalNavClient({ links, variant = 'bar', className }: PortalNav
     <nav
       aria-label="Portal navigation"
       className={cn(
-        'border-b border-outline/12 bg-surface-container-high/95 text-on-surface shadow-level-1 backdrop-blur-lg supports-[backdrop-filter]:bg-surface-container-high/85',
+        'border-b border-outline/12 bg-surface text-on-surface shadow-level-1',
         className,
       )}
     >

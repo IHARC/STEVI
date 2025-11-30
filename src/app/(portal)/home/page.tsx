@@ -15,6 +15,7 @@ import {
   cancelAppointmentAsClient,
   requestRescheduleAsClient,
 } from '@/lib/appointments/actions';
+import { PageHeader } from '@/components/layout/page-header';
 
 export const dynamic = 'force-dynamic';
 
@@ -112,39 +113,26 @@ export default async function HomePage() {
 
   return (
     <div className="page-shell page-stack">
-      <header className="flex flex-col gap-space-sm rounded-2xl border border-outline/20 bg-surface-container-low p-space-md shadow-level-1">
-        <div className="flex flex-col gap-space-2xs sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-label-sm font-medium uppercase text-muted-foreground">Welcome back</p>
-            <h1 className="text-headline-lg text-on-surface sm:text-display-sm">
-              Hi {preferredName}, you’re connected to STEVI
-            </h1>
-          </div>
-          <div className="space-y-space-2xs rounded-xl bg-surface/70 px-space-md py-space-sm text-body-sm">
-            <p className="text-label-sm text-muted-foreground">Your preferences</p>
-            <p><span className="text-muted-foreground">Pronouns:</span> {preferredPronouns}</p>
-            <p><span className="text-muted-foreground">Preferred contact:</span> {preferredContact}</p>
-            <Link href="/profile" className="text-primary underline-offset-4 hover:underline">Update in profile</Link>
-          </div>
-        </div>
-        <p className="max-w-2xl text-body-md text-muted-foreground sm:text-body-lg">
-          Track appointments, review documents, and stay in touch with outreach staff. Updates here
-          sync with the STEVI Ops tools the field team uses.
-        </p>
-        <ClientPreviewGuard message="You’re previewing the client portal. Requests are read-only until you exit preview.">
-          <div className="flex flex-wrap gap-space-md pt-space-xs">
-            <Button asChild>
-              <Link href="/appointments">Request a new appointment</Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link href="/documents">View secure documents</Link>
-            </Button>
-          </div>
-        </ClientPreviewGuard>
-      </header>
+      <PageHeader
+        eyebrow="Client workspace"
+        title={`Hi ${preferredName}, you’re connected to STEVI`}
+        description="Track appointments, review documents, and stay in touch with outreach staff. Updates here sync with the STEVI Ops tools the field team uses."
+        actions={
+          <ClientPreviewGuard message="You’re previewing the client portal. Requests are read-only until you exit preview.">
+            <div className="flex flex-wrap gap-space-sm">
+              <Button asChild>
+                <Link href="/appointments">Request a new appointment</Link>
+              </Button>
+              <Button variant="outline" asChild>
+                <Link href="/documents">View secure documents</Link>
+              </Button>
+            </div>
+          </ClientPreviewGuard>
+        }
+      />
 
-      <section aria-labelledby="appointments-heading" className="grid gap-space-md md:grid-cols-2">
-        <Card className="md:col-span-2">
+      <div className="grid gap-space-lg lg:grid-cols-[1.15fr_0.85fr]">
+        <Card className="lg:col-span-1">
           <CardHeader className="flex flex-col gap-space-sm sm:flex-row sm:items-center sm:justify-between">
             <div>
               <CardTitle id="appointments-heading" className="text-title-lg">
@@ -154,24 +142,24 @@ export default async function HomePage() {
                 Upcoming and recent appointments in one view. We respond within one business day.
               </p>
             </div>
-            <Button variant="ghost" asChild className="text-label-md font-medium">
-              <Link href="/appointments">
-                Manage appointments
-              </Link>
+            <Button variant="ghost" asChild size="sm" className="text-label-md font-medium">
+              <Link href="/appointments">Manage appointments</Link>
             </Button>
           </CardHeader>
           <CardContent className="flex flex-col gap-space-md">
             {appointments.length === 0 ? (
-              <p className="text-body-sm text-muted-foreground">No appointments yet. Request one to get started.</p>
+              <p className="text-body-sm text-muted-foreground">
+                No appointments yet. Request one to get started.
+              </p>
             ) : (
               appointments.map((appointment) => (
                 <article
                   key={appointment.id}
-                  className="rounded-xl border border-outline/20 bg-surface-container-low p-space-md shadow-level-1 transition state-layer-color-primary hover:border-primary hover:state-layer-hover hover:shadow-level-2"
+                  className="rounded-2xl border border-outline/16 bg-surface-container-low p-space-md shadow-level-1 transition motion-duration-short motion-ease-standard state-layer-color-primary hover:-translate-y-[1px] hover:border-primary hover:shadow-level-2"
                   aria-labelledby={`appointment-${appointment.id}`}
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <h3 id={`appointment-${appointment.id}`} className="text-title-md font-medium text-on-surface">
+                    <h3 id={`appointment-${appointment.id}`} className="text-title-md font-semibold text-on-surface">
                       {appointment.title}
                     </h3>
                     <Badge
@@ -201,7 +189,12 @@ export default async function HomePage() {
                       <div className="flex flex-wrap gap-1">
                         <dt className="font-medium text-on-surface/70">Join:</dt>
                         <dd>
-                          <a className="text-primary underline-offset-4 hover:underline" href={appointment.meetingUrl} target="_blank" rel="noreferrer">
+                          <a
+                            className="text-primary underline-offset-4 hover:underline"
+                            href={appointment.meetingUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
                             Meeting link
                           </a>
                         </dd>
@@ -211,10 +204,7 @@ export default async function HomePage() {
                   {isActionable(appointment.status) ? (
                     <ClientPreviewGuard message="Requests are disabled while you preview the client portal. Exit preview to submit.">
                       <div className="mt-space-sm space-y-space-2xs">
-                        <RequestRescheduleForm
-                          action={requestRescheduleAsClient}
-                          appointmentId={appointment.id}
-                        />
+                        <RequestRescheduleForm action={requestRescheduleAsClient} appointmentId={appointment.id} />
                         <CancelAppointmentForm
                           action={cancelAppointmentAsClient}
                           appointmentId={appointment.id}
@@ -236,85 +226,115 @@ export default async function HomePage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-title-md">Support contacts</CardTitle>
-            <p className="text-body-sm text-muted-foreground">
-              Reach out when you need to reschedule, request supplies, or connect with services.
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-space-md">
-            {supportTeam.map((contact) => (
-              <article key={contact.id} className="rounded-xl border border-outline/20 p-space-md">
-                <header>
-                  <p className="text-title-sm font-medium text-on-surface">{contact.name}</p>
-                  <p className="text-body-sm text-muted-foreground">{contact.role}</p>
-                </header>
-                <dl className="mt-space-sm space-y-[0.35rem] text-body-sm">
-                  <div className="flex flex-wrap gap-1">
-                    <dt className="font-medium text-on-surface/70">Phone:</dt>
-                    <dd>
-                      <a href={`tel:${contact.phone}`} className="text-primary underline-offset-4 hover:underline">
-                        {contact.phone}
-                      </a>
-                    </dd>
-                  </div>
-                  <div className="flex flex-wrap gap-1">
-                    <dt className="font-medium text-on-surface/70">Email:</dt>
-                    <dd>
-                      <a href={`mailto:${contact.email}`} className="text-primary underline-offset-4 hover:underline">
-                        {contact.email}
-                      </a>
-                    </dd>
-                  </div>
-                  <div className="flex flex-wrap gap-1">
-                    <dt className="font-medium text-on-surface/70">Availability:</dt>
-                    <dd>{contact.available}</dd>
-                  </div>
-                </dl>
-              </article>
-            ))}
-          </CardContent>
-        </Card>
+        <div className="space-y-space-lg">
+          <Card>
+            <CardHeader className="pb-space-xs">
+              <CardTitle className="text-title-md">My details</CardTitle>
+              <p className="text-body-sm text-muted-foreground">
+                Key preferences IHARC uses to contact you.
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-space-sm">
+              <dl className="grid gap-space-sm sm:grid-cols-2 text-body-sm">
+                <div className="rounded-xl bg-surface-container-low px-space-sm py-space-sm">
+                  <dt className="text-label-sm uppercase tracking-label-uppercase text-muted-foreground">Pronouns</dt>
+                  <dd className="text-title-sm text-on-surface">{preferredPronouns}</dd>
+                </div>
+                <div className="rounded-xl bg-surface-container-low px-space-sm py-space-sm">
+                  <dt className="text-label-sm uppercase tracking-label-uppercase text-muted-foreground">Preferred contact</dt>
+                  <dd className="text-title-sm text-on-surface">{preferredContact}</dd>
+                </div>
+              </dl>
+              <Button variant="outline" size="sm" asChild className="w-fit">
+                <Link href="/profile">Update in profile</Link>
+              </Button>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-title-md">Focus areas</CardTitle>
-            <p className="text-body-sm text-muted-foreground">
-              Snapshot of your current goals. Staff update these as part of outreach notes.
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-space-md">
-            <article className="rounded-xl border border-outline/20 p-space-md">
-              <div className="flex items-center justify-between">
-                <p className="text-title-sm font-medium text-on-surface">Housing application</p>
-                <Badge variant="secondary">In review</Badge>
-              </div>
-              <p className="mt-space-xs text-body-sm text-muted-foreground">
-                Ontario Works packet submitted last week. Awaiting confirmation from housing help centre.
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-title-md">Support contacts</CardTitle>
+              <p className="text-body-sm text-muted-foreground">
+                Reach out when you need to reschedule, request supplies, or connect with services.
               </p>
-            </article>
-            <article className="rounded-xl border border-outline/20 p-space-md">
-              <div className="flex items-center justify-between">
-                <p className="text-title-sm font-medium text-on-surface">Health supports</p>
-                <Badge variant="outline">Active</Badge>
-              </div>
-              <p className="mt-space-xs text-body-sm text-muted-foreground">
-                Harm reduction supplies packaged for pickup at the outreach hub. Check in with Morgan if plans change.
+            </CardHeader>
+            <CardContent className="space-y-space-md">
+              {supportTeam.map((contact) => (
+                <article
+                  key={contact.id}
+                  className="rounded-2xl border border-outline/14 bg-surface-container-low p-space-md shadow-level-1"
+                >
+                  <header className="flex flex-wrap items-center justify-between gap-space-2xs">
+                    <div>
+                      <p className="text-title-sm font-semibold text-on-surface">{contact.name}</p>
+                      <p className="text-body-sm text-muted-foreground">{contact.role}</p>
+                    </div>
+                    <Badge variant="secondary" className="bg-surface-container-high text-on-surface">
+                      {contact.available}
+                    </Badge>
+                  </header>
+                  <dl className="mt-space-sm space-y-[0.35rem] text-body-sm">
+                    <div className="flex flex-wrap gap-1">
+                      <dt className="font-medium text-on-surface/70">Phone:</dt>
+                      <dd>
+                        <a href={`tel:${contact.phone}`} className="text-primary underline-offset-4 hover:underline">
+                          {contact.phone}
+                        </a>
+                      </dd>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      <dt className="font-medium text-on-surface/70">Email:</dt>
+                      <dd>
+                        <a href={`mailto:${contact.email}`} className="text-primary underline-offset-4 hover:underline">
+                          {contact.email}
+                        </a>
+                      </dd>
+                    </div>
+                  </dl>
+                </article>
+              ))}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-title-md">Focus areas</CardTitle>
+              <p className="text-body-sm text-muted-foreground">
+                Snapshot of your current goals. Staff update these as part of outreach notes.
               </p>
-            </article>
-            <article className="rounded-xl border border-outline/20 p-space-md">
-              <div className="flex items-center justify-between">
-                <p className="text-title-sm font-medium text-on-surface">Income stabilization</p>
-                <Badge>New</Badge>
-              </div>
-              <p className="mt-space-xs text-body-sm text-muted-foreground">
-                Let the team know if you want help with part-time gig matching or training stipends.
-              </p>
-            </article>
-          </CardContent>
-        </Card>
-      </section>
+            </CardHeader>
+            <CardContent className="space-y-space-md">
+              <article className="rounded-2xl border border-outline/14 bg-surface-container-low p-space-md shadow-level-1">
+                <div className="flex items-center justify-between">
+                  <p className="text-title-sm font-medium text-on-surface">Housing application</p>
+                  <Badge variant="secondary">In review</Badge>
+                </div>
+                <p className="mt-space-xs text-body-sm text-muted-foreground">
+                  Ontario Works packet submitted last week. Awaiting confirmation from housing help centre.
+                </p>
+              </article>
+              <article className="rounded-2xl border border-outline/14 bg-surface-container-low p-space-md shadow-level-1">
+                <div className="flex items-center justify-between">
+                  <p className="text-title-sm font-medium text-on-surface">Health supports</p>
+                  <Badge variant="outline">Active</Badge>
+                </div>
+                <p className="mt-space-xs text-body-sm text-muted-foreground">
+                  Harm reduction supplies packaged for pickup at the outreach hub. Check in with Morgan if plans change.
+                </p>
+              </article>
+              <article className="rounded-2xl border border-outline/14 bg-surface-container-low p-space-md shadow-level-1">
+                <div className="flex items-center justify-between">
+                  <p className="text-title-sm font-medium text-on-surface">Income stabilization</p>
+                  <Badge>New</Badge>
+                </div>
+                <p className="mt-space-xs text-body-sm text-muted-foreground">
+                  Let the team know if you want help with part-time gig matching or training stipends.
+                </p>
+              </article>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }

@@ -45,9 +45,14 @@ export default async function PortalLayout({ children }: { children: ReactNode }
   const inboxItems = portalAccess ? await fetchClientInboxItems(supabase, portalAccess) : [];
 
   return (
-    <PortalAccessProvider access={portalAccess}>
+        <PortalAccessProvider access={portalAccess}>
       <WorkspaceContextProvider access={portalAccess} defaultPath={defaultWorkspacePath}>
-        <PortalShell navLinks={navLinks} portalAccess={portalAccess} inboxItems={inboxItems}>
+        <PortalShell
+          navLinks={navLinks}
+          portalAccess={portalAccess}
+          inboxItems={inboxItems}
+          activeWorkspace={activeWorkspace}
+        >
           {children}
         </PortalShell>
       </WorkspaceContextProvider>

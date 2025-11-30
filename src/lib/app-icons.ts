@@ -1,7 +1,27 @@
 import type { LucideIcon } from 'lucide-react';
-import { Boxes, Globe2, Megaphone, Notebook, Users2 } from 'lucide-react';
+import {
+  BarChart3,
+  Boxes,
+  BriefcaseBusiness,
+  Building2,
+  Globe2,
+  Home,
+  LayoutDashboard,
+  Megaphone,
+  Notebook,
+  Settings2,
+  ShieldCheck,
+  Users2,
+} from 'lucide-react';
 
 const APP_ICON_MAP = {
+  home: Home,
+  dashboard: LayoutDashboard,
+  shield: ShieldCheck,
+  chart: BarChart3,
+  settings: Settings2,
+  building: Building2,
+  briefcase: BriefcaseBusiness,
   users: Users2,
   notebook: Notebook,
   globe: Globe2,

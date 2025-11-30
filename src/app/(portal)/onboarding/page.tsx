@@ -10,6 +10,8 @@ import { getPolicyBySlug } from '@/lib/policies';
 import { normalizePostalCode } from '@/lib/registration';
 import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
 import { Button } from '@/components/ui/button';
+import { PageHeader } from '@/components/layout/page-header';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Database } from '@/types/supabase';
 
 export const dynamic = 'force-dynamic';
@@ -99,14 +101,23 @@ export default async function OnboardingPage({ searchParams }: PageProps) {
 
   return (
     <div className="page-shell page-stack">
+      <PageHeader
+        eyebrow="Onboarding"
+        title={actor === 'staff' ? 'Assist a client with onboarding' : 'Share your details to get support'}
+        description="We keep this process calm and concise. You can save and return anytime; changes respect IHARC’s consent and privacy settings."
+        padded
+      />
+
       {actor === 'staff' ? (
-        <div className="rounded-3xl border border-outline/12 bg-surface p-space-lg shadow-level-2">
-          <p className="text-label-sm font-semibold uppercase tracking-label-uppercase text-muted-foreground">Assisted onboarding</p>
-          <p className="mt-space-2xs text-body-md text-on-surface/80">
-            Use this wizard while you’re with the client. Start a new record with basic info below, or open an existing
-            client to continue their onboarding where they left off.
-          </p>
-          <div className="mt-space-sm flex flex-wrap gap-space-sm">
+        <Card className="border-outline/14 bg-surface shadow-level-1">
+          <CardHeader className="gap-space-2xs">
+            <CardTitle className="text-title-md">Assisted onboarding</CardTitle>
+            <CardDescription>
+              Use this wizard while you’re with the client. Start a new record with basic info below, or open an existing
+              client to continue their onboarding where they left off.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-wrap gap-space-sm pt-space-xs">
             {access.canAccessAdminWorkspace ? (
               <Button asChild size="sm" variant="secondary">
                 <Link href="/admin/clients">Find existing client</Link>
@@ -122,8 +133,8 @@ export default async function OnboardingPage({ searchParams }: PageProps) {
                 Working on client #{personId}
               </Button>
             ) : null}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       ) : null}
 
       {(access.canManagePolicies || access.canAccessAdminWorkspace) && (!servicePolicy || !privacyPolicy) ? (

@@ -15,13 +15,16 @@ import { loadPortalAccess } from '@/lib/portal-access';
 import type { Resource } from '@/lib/resources';
 import type { Database } from '@/types/supabase';
 import { fetchClientAppointments } from '@/lib/appointments/queries';
+import { PrimaryNavBar, PrimaryNavMobile } from '@/components/layout/primary-nav';
+import type { PrimaryNavItem } from '@/lib/primary-nav';
 type PeopleListItem = Database['core']['Tables']['people']['Row'] & { email?: string | null; phone?: string | null };
 
 type TopNavProps = {
   portalAccess?: PortalAccess | null;
+  primaryNavItems?: PrimaryNavItem[];
 };
 
-export async function TopNav({ portalAccess }: TopNavProps = {}) {
+export async function TopNav({ portalAccess, primaryNavItems = [] }: TopNavProps = {}) {
   const supabase = await createSupabaseRSCClient();
   const access = portalAccess ?? (await loadPortalAccess(supabase));
 
@@ -40,9 +43,12 @@ export async function TopNav({ portalAccess }: TopNavProps = {}) {
   const commands = buildCommandPaletteItems(access ?? null, [...quickActions, ...entityCommands]);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-outline/16 bg-surface-container-high/95 text-on-surface shadow-level-2 backdrop-blur-xl supports-[backdrop-filter]:bg-surface-container-high/85">
-      <div className="mx-auto flex w-full max-w-page items-center justify-between gap-space-md px-space-md py-space-sm md:py-space-md">
+    <header className="sticky top-0 z-50 border-b border-outline/14 bg-surface/95 text-on-surface shadow-level-2 backdrop-blur-xl supports-[backdrop-filter]:bg-surface/85">
+      <div className="mx-auto flex w-full max-w-page items-center justify-between gap-space-sm px-space-lg py-space-sm md:py-space-md">
         <div className="flex items-center gap-space-sm">
+          <div className="md:hidden">
+            <PrimaryNavMobile items={primaryNavItems} />
+          </div>
           <Link
             href="/"
             className="inline-flex items-center gap-space-sm rounded-2xl border border-transparent px-space-sm py-space-2xs transition-colors hover:border-outline/30 hover:bg-surface-container-low focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
@@ -69,9 +75,11 @@ export async function TopNav({ portalAccess }: TopNavProps = {}) {
               <span className="block text-title-sm font-semibold text-on-surface">Client Support Portal</span>
             </span>
           </Link>
-          <WorkspaceSwitcherSlot />
+          <div className="hidden md:block">
+            <WorkspaceSwitcherSlot />
+          </div>
         </div>
-        <div className="flex items-center gap-space-xs md:hidden">
+        <div className="flex items-center gap-space-2xs md:hidden">
           <QuickCreateButton />
           <CommandPalette items={commands} compactTrigger />
           {mobile}
@@ -84,6 +92,7 @@ export async function TopNav({ portalAccess }: TopNavProps = {}) {
           {desktop}
         </div>
       </div>
+      <PrimaryNavBar items={primaryNavItems} className="md:px-space-lg md:pb-space-xs md:pt-0" />
     </header>
   );
 }
