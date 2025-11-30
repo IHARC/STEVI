@@ -29,13 +29,14 @@ export function PortalShell({
   const showClientNav = activeWorkspace === 'client' && navLinks.length > 0;
   const showInbox = inboxItems.length > 0;
   const primaryNavItems = buildPrimaryNavItems(portalAccess);
+  const showClientPreviewBanner = activeWorkspace === 'client';
 
   return (
     <div className="flex min-h-screen bg-surface-container-lowest text-on-background">
       <PrimaryNavRail items={primaryNavItems} />
       <div className="flex min-h-screen flex-1 flex-col">
         <TopNav portalAccess={portalAccess} primaryNavItems={primaryNavItems} />
-        <ClientPreviewBanner />
+        {showClientPreviewBanner ? <ClientPreviewBanner /> : null}
         {showClientNav ? (
           <div className="sticky top-[4.75rem] z-30 bg-surface-container-low/90 backdrop-blur-xl supports-[backdrop-filter]:bg-surface-container-low/75">
             <WorkspaceClientNav links={navLinks} />

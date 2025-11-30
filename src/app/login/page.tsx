@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
@@ -6,8 +7,8 @@ import { resolveNextPath, parseAuthErrorCode, type AuthErrorCode } from '@/lib/a
 import { normalizePhoneNumber } from '@/lib/phone';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
-import { PageHeader } from '@/components/layout/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { getBrandingAssets } from '@/lib/marketing/branding';
 
 export const dynamic = 'force-dynamic';
 
@@ -55,6 +56,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const initialState: FormState = initialError
     ? { ...INITIAL_FORM_STATE, error: initialError }
     : INITIAL_FORM_STATE;
+
+  const branding = await getBrandingAssets();
 
   async function loginUser(_prevState: FormState, formData: FormData): Promise<FormState> {
     'use server';
@@ -119,59 +122,52 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   }
 
   return (
-    <div className="relative isolate min-h-screen overflow-hidden bg-surface text-on-surface">
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_12%_18%,rgba(var(--md-sys-color-primary)/0.18),transparent_42%),radial-gradient(circle_at_82%_12%,rgba(34,90,126,0.14),transparent_38%),radial-gradient(circle_at_48%_92%,rgba(36,36,42,0.12),transparent_38%)]" aria-hidden />
-      <div className="page-shell relative">
-        <div className="mx-auto grid w-full max-w-6xl items-start gap-space-xl lg:grid-cols-[1.05fr_0.95fr]">
-          <div className="space-y-space-lg">
-            <PageHeader
-              eyebrow="STEVI secure sign-in"
-              title="Sign in to STEVI"
-              description="Access appointments, documents, outreach updates, and staff tooling in one calm, secure space."
-              padded
+    <div className="flex min-h-screen items-center justify-center bg-surface text-on-surface">
+      <div className="w-full max-w-[440px] space-y-space-lg px-space-lg py-space-2xl">
+        <div className="flex flex-col items-center gap-space-sm text-center">
+          <div className="flex items-center gap-space-sm rounded-2xl bg-surface-container-low px-space-md py-space-sm shadow-level-1">
+            <Image
+              src={branding.logoLightUrl}
+              alt="IHARC"
+              width={120}
+              height={48}
+              className="h-12 w-auto dark:hidden"
+              priority
             />
-            <div className="grid gap-space-sm sm:grid-cols-2 lg:max-w-4xl">
-              {[
-                {
-                  title: 'Appointments & outreach',
-                  body: 'Request, reschedule, and keep two-way updates with IHARC staff.',
-                },
-                {
-                  title: 'Documents & consents',
-                  body: 'Review agreements, share files, and control privacy preferences.',
-                },
-                {
-                  title: 'Staff & admin tools',
-                  body: 'Caseloads, intake, notifications, and inventory for authorized roles.',
-                },
-                {
-                  title: 'Built for accessibility',
-                  body: 'WCAG-friendly, trauma-informed flows with clear focus and spacing.',
-                },
-              ].map((item) => (
-                <div
-                  key={item.title}
-                  className="rounded-2xl border border-outline/12 bg-surface-container-low p-space-md shadow-level-1"
-                >
-                  <p className="text-title-sm font-semibold text-on-surface">{item.title}</p>
-                  <p className="mt-space-2xs text-body-sm text-muted-foreground">{item.body}</p>
-                </div>
-              ))}
+            <Image
+              src={branding.logoDarkUrl}
+              alt="IHARC"
+              width={120}
+              height={48}
+              className="hidden h-12 w-auto dark:block"
+              priority
+            />
+            <div className="text-left">
+              <p className="text-label-sm font-semibold uppercase tracking-label-uppercase text-primary">STEVI</p>
+              <p className="text-title-sm font-semibold text-on-surface">Client Support Portal</p>
             </div>
           </div>
-
-          <Card className="w-full max-w-form-md justify-self-end border-outline/12 bg-surface-container-high shadow-level-2 backdrop-blur-md">
-            <CardHeader className="gap-space-2xs pb-space-sm">
-              <CardTitle className="text-title-lg">Enter your credentials</CardTitle>
-              <CardDescription className="text-body-sm text-muted-foreground">
-                Use the email or phone number you registered with.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-space-xs">
-              <LoginForm action={loginUser} nextPath={rawNextParam ?? ''} initialState={initialState} />
-            </CardContent>
-          </Card>
+          <h1 className="text-headline-sm font-semibold">Sign in to STEVI</h1>
+          <p className="max-w-md text-body-md text-muted-foreground">
+            Access appointments, documents, and outreach updates securely.
+          </p>
         </div>
+
+        <Card className="border-outline/12 bg-surface-container-high shadow-level-2">
+          <CardHeader className="gap-space-2xs pb-space-sm">
+            <CardTitle className="text-title-lg">Welcome back</CardTitle>
+            <CardDescription className="text-body-sm text-muted-foreground">
+              Use the email or phone number you registered with.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-space-md pt-space-xs">
+            <LoginForm action={loginUser} nextPath={rawNextParam ?? ''} initialState={initialState} />
+          </CardContent>
+        </Card>
+
+        <p className="text-center text-label-sm text-muted-foreground">
+          Need help signing in? Contact your IHARC outreach worker or administrator.
+        </p>
       </div>
     </div>
   );

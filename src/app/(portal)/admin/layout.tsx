@@ -3,14 +3,15 @@ import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess, resolveAdminWorkspaceNav } from '@/lib/portal-access';
-import { WorkspaceShell } from '@/components/shells/workspace-shell';
+import { PortalShell } from '@/components/shells/portal-shell';
 import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
-import { InboxPanel } from '@/components/layout/inbox-panel';
 import { fetchWorkspaceInbox } from '@/lib/inbox';
 import { resolveWorkspaceQuickActions } from '@/lib/workspaces';
 import { Button } from '@/components/ui/button';
 import { normalizePathFromHeader } from '@/lib/paths';
 import type { WorkspaceId } from '@/lib/workspaces';
+import { AdminNav } from '@/components/layout/admin-nav';
+import { AdminBreadcrumbs } from '@/components/layout/admin-breadcrumbs';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,14 +51,30 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   ) : null;
 
   return (
-    <WorkspaceShell
-      nav={adminNav}
-      stickyHeader={stickyHeader}
-      inboxSlot={<InboxPanel items={inboxItems} />}
+    <PortalShell
+      navLinks={[]}
       portalAccess={access}
+      inboxItems={inboxItems}
       activeWorkspace={'admin' satisfies WorkspaceId}
     >
-      {children}
-    </WorkspaceShell>
+      <div className="flex gap-space-lg max-lg:flex-col">
+        <aside className="sticky top-24 hidden h-[calc(100vh-9rem)] w-64 flex-shrink-0 lg:block">
+          <AdminNav nav={adminNav} />
+        </aside>
+
+        <div className="min-w-0 flex-1 space-y-space-lg">
+          <div className="lg:hidden">
+            <AdminNav nav={adminNav} variant="mobile" />
+          </div>
+          <AdminBreadcrumbs nav={adminNav} />
+          {stickyHeader ? (
+            <div className="sticky top-24 z-10 -mx-space-xl mb-space-sm border-b border-outline/12 bg-surface px-space-xl py-space-sm shadow-level-1 backdrop-blur supports-[backdrop-filter]:backdrop-blur-md">
+              {stickyHeader}
+            </div>
+          ) : null}
+          {children}
+        </div>
+      </div>
+    </PortalShell>
   );
 }
