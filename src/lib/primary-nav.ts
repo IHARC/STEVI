@@ -30,7 +30,9 @@ export function buildPrimaryNavItems(access: PortalAccess | null): PrimaryNavIte
       description: 'Appointments, documents, cases',
       href: '/home',
       icon: 'dashboard',
-      match: ['/home', '/appointments', '/documents', '/cases', '/support'],
+      // Keep the link pointing at the client landing page but only mark as active
+      // for the workspace-specific sections to avoid double-highlighting with Home.
+      match: ['/appointments', '/documents', '/cases', '/support'],
     },
   ];
 

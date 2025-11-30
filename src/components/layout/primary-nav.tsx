@@ -14,9 +14,15 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 
 function isActive(item: PrimaryNavItem, pathname: string): boolean {
   const matchPrefixes = item.match ?? [];
-  if (matchPrefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))) {
-    return true;
+  // If explicit match prefixes are provided, use them exclusively to avoid
+  // double-highlighting when two nav items share the same href (e.g., Home and
+  // Client workspace both pointing to /home).
+  if (matchPrefixes.length > 0) {
+    return matchPrefixes.some(
+      (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+    );
   }
+
   if (pathname === item.href) return true;
   return pathname.startsWith(`${item.href}/`);
 }
