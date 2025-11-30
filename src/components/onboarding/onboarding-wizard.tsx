@@ -142,11 +142,13 @@ export function OnboardingWizard({
 
   return (
     <div className="space-y-space-lg">
-      <header className="rounded-2xl border border-primary/20 bg-surface-container-low p-space-lg shadow-level-2">
+      <header className="rounded-3xl border border-outline/12 bg-surface p-space-lg shadow-level-2">
         <div className="flex flex-wrap items-center justify-between gap-space-sm">
           <div>
-            <p className="text-label-sm font-semibold uppercase text-primary/80">Onboarding</p>
-            <h1 className="text-headline-lg text-on-surface sm:text-display-sm">Finish onboarding to use STEVI</h1>
+            <span className="inline-flex items-center gap-space-2xs rounded-full border border-primary/25 bg-primary/10 px-space-sm py-space-3xs text-label-sm font-semibold uppercase tracking-label-uppercase text-primary">
+              Onboarding
+            </span>
+            <h1 className="mt-space-xs text-headline-lg font-semibold text-on-surface sm:text-display-sm">Finish onboarding to use STEVI</h1>
             <p className="max-w-3xl text-body-md text-muted-foreground">
               We need consent and a sharing choice before unlocking appointments, documents, and cases. You can pause and resume at any time.
             </p>
@@ -243,7 +245,7 @@ export function OnboardingWizard({
           />
         </div>
 
-        <aside className="space-y-space-md rounded-2xl border border-outline/30 bg-surface p-space-lg shadow-level-1">
+        <aside className="space-y-space-md rounded-3xl border border-outline/12 bg-surface-container-high p-space-lg shadow-level-1">
           <div>
             <p className="text-label-sm font-semibold uppercase text-muted-foreground">Status</p>
             <h2 className="text-title-lg text-on-surface">What’s left</h2>
@@ -283,7 +285,7 @@ function BasicInfoCard({
   disabled?: boolean;
 }) {
   return (
-    <Card className="border-outline/30 bg-surface">
+    <Card className="border-outline/16 bg-surface">
       <CardHeader>
         <CardTitle className="text-title-lg">1. Basic info</CardTitle>
         <CardDescription>Choose the name we should use and how to reach you safely.</CardDescription>
@@ -372,7 +374,7 @@ function ConsentCard({
   const policyMissing = !policies.service || !policies.privacy;
 
   return (
-    <Card className="border-outline/30 bg-surface">
+    <Card className="border-outline/16 bg-surface">
       <CardHeader>
         <CardTitle className="text-title-lg">2. Service agreement & privacy</CardTitle>
         <CardDescription>Review the current IHARC policies and confirm you agree.</CardDescription>
@@ -428,7 +430,7 @@ function SharingCard({
   const partnerBlocked = actor === 'partner';
 
   return (
-    <Card className="border-outline/30 bg-surface">
+    <Card className="border-outline/16 bg-surface">
       <CardHeader>
         <CardTitle className="text-title-lg">3. Data sharing</CardTitle>
         <CardDescription>Choose whether IHARC can share with partner organizations.</CardDescription>
@@ -505,7 +507,7 @@ function LinkCard({
   const clientMode = actor === 'client';
 
   return (
-    <Card className="border-outline/30 bg-surface">
+    <Card className="border-outline/16 bg-surface">
       <CardHeader>
         <CardTitle className="text-title-lg">4. Account link</CardTitle>
         <CardDescription>
@@ -599,7 +601,7 @@ function CheckboxField({
 
 function PolicyBlock({ title, summary, bodyHtml }: { title: string; summary: string; bodyHtml: string }) {
   return (
-    <div className="space-y-space-2xs rounded-lg border border-outline/30 bg-surface-container-low p-space-md">
+    <div className="space-y-space-2xs rounded-2xl border border-outline/16 bg-surface-container-high p-space-md">
       <p className="text-label-sm font-semibold uppercase text-muted-foreground">{title}</p>
       <p className="text-body-sm text-on-surface/80">{summary}</p>
       <details className="group">
@@ -614,11 +616,11 @@ function PolicyBlock({ title, summary, bodyHtml }: { title: string; summary: str
 }
 
 function ErrorMessage({ message }: { message: string }) {
-  return <p className="rounded-md border border-destructive/30 bg-destructive/10 px-space-sm py-space-2xs text-body-sm text-destructive">{message}</p>;
+  return <p className="rounded-xl border border-destructive/30 bg-destructive/10 px-space-sm py-space-2xs text-body-sm text-destructive">{message}</p>;
 }
 
 function SuccessMessage({ message }: { message: string }) {
-  return <p className="rounded-md border border-primary/30 bg-primary/10 px-space-sm py-space-2xs text-body-sm text-primary">{message}</p>;
+  return <p className="rounded-xl border border-primary/25 bg-primary/10 px-space-sm py-space-2xs text-body-sm text-primary">{message}</p>;
 }
 
 function ChecklistItem({ done, children }: { done: boolean; children: ReactNode }) {

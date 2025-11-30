@@ -82,7 +82,7 @@ export function QuickCreateButton() {
                 <span className="block text-body-sm text-muted-foreground">{action.description}</span>
               ) : null}
               {action.disabled ? (
-                <span className="text-label-sm text-amber-700">Exit preview to use this action</span>
+                <span className="text-label-sm text-primary">Exit preview to use this action</span>
               ) : null}
             </span>
           </DropdownMenuItem>

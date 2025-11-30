@@ -60,16 +60,17 @@ function DesktopAdminNav({ nav, pathname, activeGroupId }: DesktopAdminNavProps)
     <TooltipProvider delayDuration={150} skipDelayDuration={0}>
       <div
         className={cn(
-          'flex h-full flex-col rounded-2xl border border-outline/12 bg-surface-container-high text-label-sm shadow-md transition-[width] motion-duration-medium motion-ease-standard',
-          collapsed ? 'w-[68px] px-space-2xs' : 'w-64 px-space-xs',
+          'flex h-full flex-col rounded-3xl border border-outline/12 bg-surface-container-high text-label-sm shadow-level-2 transition-[width] motion-duration-medium motion-ease-standard',
+          collapsed ? 'w-[76px] px-space-2xs py-space-sm' : 'w-64 px-space-sm py-space-sm',
         )}
         data-collapsed={collapsed}
         aria-label={`${nav.label} navigation`}
       >
-        <div className={cn('flex items-center py-space-xs', collapsed ? 'justify-center' : 'justify-between')}>
+        <div className={cn('flex items-center gap-space-xs pb-space-sm', collapsed ? 'justify-center' : 'justify-between')}>
           {!collapsed ? (
-            <div className="px-space-2xs text-label-xs font-semibold uppercase text-muted-foreground tracking-label-uppercase">
-              {nav.label}
+            <div className="flex items-center gap-space-xs rounded-xl bg-surface-container-low px-space-sm py-space-2xs text-label-xs font-semibold uppercase text-muted-foreground tracking-label-uppercase">
+              <Icon icon={ChevronRight} size="xs" className="rotate-180 text-outline" />
+              <span>{nav.label}</span>
             </div>
           ) : (
             <span className="sr-only">{nav.label}</span>
@@ -79,7 +80,7 @@ function DesktopAdminNav({ nav, pathname, activeGroupId }: DesktopAdminNavProps)
               <Button
                 size="icon"
                 variant="ghost"
-                className="h-8 w-8 rounded-full text-muted-foreground hover:text-on-surface"
+                className="h-9 w-9 rounded-full text-muted-foreground hover:text-on-surface"
                 onClick={() => setCollapsed((prev) => !prev)}
                 aria-pressed={collapsed}
                 aria-label={collapsed ? 'Expand navigation' : 'Collapse navigation'}
@@ -96,7 +97,7 @@ function DesktopAdminNav({ nav, pathname, activeGroupId }: DesktopAdminNavProps)
         {collapsed ? (
           <CollapsedNavGroups nav={nav} pathname={pathname} />
         ) : (
-          <ScrollArea className="flex-1 pr-[2px] space-y-space-xs">
+          <ScrollArea className="flex-1 space-y-space-md pr-[2px]">
             <PinnedSection title="Favorites" items={favorites} />
             <PinnedSection title="Recents" items={recents} icon={Clock} />
             <NavSections
@@ -174,35 +175,35 @@ function NavSections({ nav, pathname, onNavigate, initialGroupId, onToggleFavori
       type="single"
       collapsible
       defaultValue={initialGroupId ?? undefined}
-      className="space-y-space-3xs text-label-sm"
+      className="space-y-space-sm text-label-sm"
     >
       {nav.groups.map((group) => (
         <AccordionItem
           key={group.id}
           value={group.id}
-          className="rounded-xl border border-outline/12 bg-surface-container p-space-2xs shadow-sm"
+          className="rounded-2xl border border-outline/12 bg-surface-container-high px-space-2xs py-space-2xs shadow-sm"
         >
-          <AccordionTrigger className="rounded-lg px-space-sm py-space-2xs font-semibold uppercase text-muted-foreground hover:no-underline tracking-label-uppercase text-label-sm">
-            <div className="flex items-center gap-space-xs">
+          <AccordionTrigger className="rounded-xl px-space-sm py-space-2xs font-semibold uppercase text-muted-foreground tracking-label-uppercase transition-colors hover:bg-surface-container-low hover:no-underline text-label-sm">
+            <div className="flex items-center gap-space-xs text-on-surface">
               <Icon icon={resolveAppIcon(group.icon)} size="sm" />
               <span>{group.label}</span>
             </div>
-            <span className="rounded-full bg-surface-container-low px-2 py-space-3xs font-semibold text-label-xs text-muted-foreground">
+            <span className="rounded-full bg-surface-container-low px-2 py-space-3xs text-label-xs font-semibold text-muted-foreground">
               {group.links.length}
             </span>
           </AccordionTrigger>
           <AccordionContent className="px-space-xs">
-            <div className="space-y-[2px] pb-space-sm">
-                {group.links.map((link) => (
-                  <AdminNavLink
-                    key={link.href}
-                    link={link}
-                    pathname={pathname}
-                    onNavigate={onNavigate}
-                    onToggleFavorite={onToggleFavorite}
-                    isFavorite={favorites?.some((fav) => fav.href === link.href)}
-                  />
-                ))}
+            <div className="space-y-space-2xs pb-space-sm pt-space-2xs">
+              {group.links.map((link) => (
+                <AdminNavLink
+                  key={link.href}
+                  link={link}
+                  pathname={pathname}
+                  onNavigate={onNavigate}
+                  onToggleFavorite={onToggleFavorite}
+                  isFavorite={favorites?.some((fav) => fav.href === link.href)}
+                />
+              ))}
             </div>
           </AccordionContent>
         </AccordionItem>
@@ -230,7 +231,7 @@ function PinnedSection({ title, items, icon: IconComponent }: PinnedSectionProps
           <Link
             key={item.href}
             href={item.href}
-            className="flex items-center gap-space-2xs rounded-full border border-outline/20 bg-surface-container px-space-2xs py-space-3xs text-label-sm text-on-surface hover:border-outline/40"
+            className="flex items-center gap-space-2xs rounded-full border border-outline/16 bg-surface-container px-space-2xs py-space-3xs text-label-sm text-on-surface transition-colors hover:border-outline/32 hover:bg-surface-container-high"
           >
             <span className="truncate max-w-[160px]">{item.label}</span>
           </Link>
@@ -295,33 +296,33 @@ type CollapsedNavGroupsProps = {
 
 function CollapsedNavGroups({ nav, pathname }: CollapsedNavGroupsProps) {
   return (
-      <div className="flex flex-col items-center gap-space-2xs pb-space-sm text-label-sm">
+    <div className="flex flex-col items-center gap-space-2xs pb-space-sm text-label-sm">
       {nav.groups.map((group) => {
         const isActive = group.links.some((link) => isLinkActive(link, pathname));
         return (
-      <Popover key={group.id}>
-        <PopoverTrigger asChild>
-          <Button
-            variant={isActive ? 'secondary' : 'ghost'}
-            size="icon"
+          <Popover key={group.id}>
+            <PopoverTrigger asChild>
+              <Button
+                variant={isActive ? 'secondary' : 'ghost'}
+                size="icon"
                 className={cn(
-                  'h-9 w-9 rounded-lg text-muted-foreground',
+                  'h-10 w-10 rounded-xl text-muted-foreground hover:text-on-surface',
                   isActive && 'bg-secondary-container text-on-secondary-container',
                 )}
-            aria-label={`${group.label} links`}
-          >
-            <Icon icon={resolveAppIcon(group.icon)} size="sm" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent side="right" align="start" className="w-60 p-space-sm text-label-sm">
-          <div className="flex items-center gap-space-xs pb-space-2xs">
-            <Icon icon={resolveAppIcon(group.icon)} size="sm" />
-            <div className="font-semibold uppercase text-label-sm text-muted-foreground tracking-label-uppercase">{group.label}</div>
-            <span className="ml-auto text-label-xs text-muted-foreground">
-              {group.links.length}
+                aria-label={`${group.label} links`}
+              >
+                <Icon icon={resolveAppIcon(group.icon)} size="sm" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent side="right" align="start" className="w-64 border border-outline/12 bg-surface-container-high p-space-sm text-label-sm shadow-level-2">
+              <div className="flex items-center gap-space-xs pb-space-2xs text-on-surface">
+                <Icon icon={resolveAppIcon(group.icon)} size="sm" />
+                <div className="font-semibold uppercase tracking-label-uppercase text-label-sm text-muted-foreground">{group.label}</div>
+                <span className="ml-auto rounded-full bg-surface-container-low px-2 py-space-3xs text-label-xs text-muted-foreground">
+                  {group.links.length}
                 </span>
               </div>
-              <div className="space-y-space-3xs">
+              <div className="space-y-space-2xs">
                 {group.links.map((link) => (
                   <AdminNavLink key={link.href} link={link} pathname={pathname} />
                 ))}
@@ -348,9 +349,11 @@ function AdminNavLink({ link, pathname, onNavigate, onToggleFavorite, isFavorite
   return (
     <div
       className={cn(
-        'group flex items-center gap-space-xs rounded-lg px-space-xs py-space-3xs transition-colors text-label-sm',
+        'group flex items-center gap-space-sm rounded-2xl px-space-sm py-space-2xs text-label-md transition-colors motion-duration-short motion-ease-standard',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
-        active ? 'bg-primary/10 text-primary ring-1 ring-primary/40 shadow-level-1' : 'text-on-surface/80 hover:bg-surface-container',
+        active
+          ? 'bg-primary text-on-primary shadow-level-1'
+          : 'bg-surface-container hover:bg-surface-container-high text-on-surface/80',
       )}
     >
       <Link
@@ -360,14 +363,14 @@ function AdminNavLink({ link, pathname, onNavigate, onToggleFavorite, isFavorite
         onClick={onNavigate}
       >
         {link.icon ? <Icon icon={resolveAppIcon(link.icon)} size="sm" className="text-inherit" /> : null}
-        <span className="truncate text-label-sm">{link.label}</span>
+        <span className="truncate text-label-md">{link.label}</span>
       </Link>
       <button
         type="button"
         aria-label={isFavorite ? 'Unpin from favorites' : 'Pin to favorites'}
         className={cn(
-          'flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground/80 transition-colors hover:text-primary',
-          active && 'text-primary hover:text-primary',
+          'flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground/80 transition-colors hover:text-on-primary',
+          active && 'text-on-primary hover:text-on-primary',
         )}
         onClick={() => onToggleFavorite?.(link)}
       >

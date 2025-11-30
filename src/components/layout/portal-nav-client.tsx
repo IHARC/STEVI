@@ -19,7 +19,7 @@ export function PortalNavClient({ links }: PortalNavClientProps) {
   return (
     <nav
       aria-label="Portal navigation"
-      className="border-b border-outline/10 bg-surface-container text-on-surface"
+      className="border-b border-outline/12 bg-surface text-on-surface shadow-sm"
     >
       <div className="mx-auto w-full max-w-page px-space-md">
         <div className="relative -mx-space-md">
@@ -31,14 +31,6 @@ export function PortalNavClient({ links }: PortalNavClientProps) {
               <PortalNavLink key={link.href} link={link} pathname={pathname} />
             ))}
           </div>
-          <div
-            className="pointer-events-none absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-surface-container to-transparent sm:hidden"
-            aria-hidden
-          />
-          <div
-            className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-surface-container to-transparent sm:hidden"
-            aria-hidden
-          />
         </div>
       </div>
     </nav>

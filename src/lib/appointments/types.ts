@@ -39,4 +39,5 @@ export type AppointmentWithRelations = AppointmentRecord & {
   client?: { id: string; display_name: string | null; organization_id: number | null } | null;
   requester?: { id: string; display_name: string | null } | null;
   staff?: { id: string; display_name: string | null } | null;
+  organization?: { id: number | null; name: string | null } | null;
 };

@@ -27,21 +27,23 @@ export function AdminBreadcrumbs({ nav }: AdminBreadcrumbsProps) {
 
   return (
     <nav aria-label="Admin breadcrumbs" className="text-label-sm text-muted-foreground">
-      <ol className="flex flex-wrap items-center gap-space-2xs">
+      <ol className="flex flex-wrap items-center gap-space-2xs rounded-2xl border border-outline/12 bg-surface-container-high px-space-sm py-space-2xs shadow-sm">
         {trail.map((item, index) => (
           <li key={`${item.label}-${index}`} className="flex items-center gap-space-2xs">
             {item.href ? (
-              <Link href={item.href} className="hover:text-primary hover:underline">
+              <Link
+                href={item.href}
+                className="rounded-lg px-space-2xs py-space-3xs text-on-surface transition-colors hover:bg-surface-container-low hover:text-primary"
+              >
                 {item.label}
               </Link>
             ) : (
-              <span>{item.label}</span>
+              <span className="rounded-lg bg-surface-container px-space-2xs py-space-3xs text-on-surface">{item.label}</span>
             )}
-            {index < trail.length - 1 ? <span aria-hidden>•</span> : null}
+            {index < trail.length - 1 ? <span aria-hidden className="text-outline">/</span> : null}
           </li>
         ))}
       </ol>
     </nav>
   );
 }
-

@@ -39,9 +39,9 @@ export function LoginForm({ action, nextPath, initialState }: LoginFormProps) {
   }, [state.contactMethod, contactMethod]);
 
   return (
-    <form action={formAction} className="grid gap-space-lg rounded-3xl border border-outline/30 bg-surface-container p-space-lg shadow-level-1">
+    <form action={formAction} className="grid gap-space-lg">
       <input type="hidden" name="next" value={nextPath} />
-      <fieldset className="space-y-space-sm rounded-xl border border-outline/30 p-space-md">
+      <fieldset className="space-y-space-sm rounded-2xl border border-outline/16 bg-surface p-space-md shadow-level-1">
         <legend className="text-body-sm font-medium text-on-surface">How would you like to sign in?</legend>
         <RadioGroup name="contact_method" value={contactMethod} onValueChange={(value) => setContactMethod(value as ContactMethod)} className="grid gap-space-sm md:grid-cols-2">
           <ContactOption
@@ -87,13 +87,13 @@ export function LoginForm({ action, nextPath, initialState }: LoginFormProps) {
         <SubmitButton />
         <p className="text-body-sm text-muted-foreground">
           Forgot your password?{' '}
-          <Link href="/reset-password" className="text-brand underline">
+          <Link href="/reset-password" className="text-primary underline">
             Reset it here
           </Link>
         </p>
         <p className="text-body-sm text-muted-foreground">
           Need an account?{' '}
-          <Link href="/register" className="text-brand underline">
+          <Link href="/register" className="text-primary underline">
             Register here
           </Link>
         </p>
@@ -118,7 +118,7 @@ function ContactOption({ id, value, title, description }: ContactOptionProps) {
   return (
     <label
       htmlFor={id}
-      className="flex cursor-pointer items-start gap-space-sm rounded-xl border border-outline/40 bg-surface-container p-space-md text-body-sm font-medium text-on-surface shadow-level-1 transition state-layer-color-primary hover:border-primary hover:state-layer-hover focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:state-layer-focus"
+      className="flex cursor-pointer items-start gap-space-sm rounded-2xl border border-outline/16 bg-surface-container-high p-space-md text-body-sm font-medium text-on-surface shadow-level-1 transition state-layer-color-primary hover:border-primary hover:state-layer-hover focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:state-layer-focus"
     >
       <RadioGroupItem id={id} value={value} className="mt-1" />
       <span>

@@ -16,14 +16,18 @@ type PortalShellProps = {
 
 export function PortalShell({ children, navLinks, portalAccess, inboxItems = [] }: PortalShellProps) {
   return (
-    <div className="flex min-h-screen flex-col bg-background text-on-background">
+    <div className="flex min-h-screen flex-col bg-surface-container-lowest text-on-background">
       <TopNav portalAccess={portalAccess} />
       <ClientPreviewBanner />
       <WorkspaceClientNav links={navLinks} />
-      <main id="main-content" className="flex-1 bg-background">
-        <div className="mx-auto flex w-full max-w-page gap-space-lg px-space-md py-space-lg">
-          <div className="flex-1 min-w-0">{children}</div>
-          <InboxPanel items={inboxItems} />
+      <main id="main-content" className="flex-1 bg-surface-container-lowest">
+        <div className="mx-auto w-full max-w-page px-space-md py-space-lg">
+          <div className="rounded-3xl border border-outline/12 bg-surface px-space-lg py-space-lg shadow-level-1">
+            <div className="flex w-full gap-space-lg max-lg:flex-col">
+              <div className="flex-1 min-w-0">{children}</div>
+              <InboxPanel items={inboxItems} />
+            </div>
+          </div>
         </div>
       </main>
       <SiteFooter />

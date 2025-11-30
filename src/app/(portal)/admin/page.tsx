@@ -124,7 +124,7 @@ export default async function AdminPage() {
         {metricCards.map((card) => (
           <Card
             key={card.id}
-            className={card.tone === 'warning' ? 'border-amber-400/60 bg-amber-50 text-amber-900' : 'border-outline/20'}
+            className={card.tone === 'warning' ? 'border-primary/30 bg-primary-container text-on-primary-container' : 'border-outline/20'}
           >
             <CardHeader className="space-y-space-3xs">
               <CardTitle className="text-label-sm font-medium uppercase text-muted-foreground">{card.label}</CardTitle>
@@ -188,7 +188,7 @@ export default async function AdminPage() {
 
 function AttentionItem({ label, count, href, tone = 'default' }: { label: string; count: number; href: string; tone?: 'default' | 'warning' }) {
   return (
-    <div className="flex items-center justify-between gap-space-sm rounded-2xl border border-outline/20 bg-surface-container-low px-space-md py-space-sm">
+    <div className="flex items-center justify-between gap-space-sm rounded-2xl border border-outline/12 bg-surface-container-high px-space-md py-space-sm">
       <div>
         <p className="text-body-sm text-on-surface">{label}</p>
         <p className="text-label-sm text-muted-foreground">RLS enforced in destination workspace.</p>

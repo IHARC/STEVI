@@ -69,11 +69,11 @@ export function DocumentsList({ documents, onRequestLink, onExtendAccess }: Docu
 
       {documents === null ? (
         <div className="space-y-space-sm">
-          <Skeleton className="h-20 rounded-xl" />
-          <Skeleton className="h-20 rounded-xl" />
+          <Skeleton className="h-20 rounded-2xl" />
+          <Skeleton className="h-20 rounded-2xl" />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-outline/30 bg-surface-container-low p-space-md text-body-sm text-muted-foreground">
+        <div className="rounded-2xl border border-dashed border-outline/20 bg-surface-container-high p-space-md text-body-sm text-muted-foreground">
           <p className="font-medium text-on-surface">No documents yet</p>
           <p className="mt-space-2xs">Ask your outreach worker to share files here. You can also request a link below.</p>
           <p className="mt-space-2xs text-label-sm">When you request a link we’ll refresh it within one business day and log it in your audit trail.</p>
@@ -81,7 +81,7 @@ export function DocumentsList({ documents, onRequestLink, onExtendAccess }: Docu
       ) : (
         <div className="grid gap-space-md md:grid-cols-2">
           {filtered.map((doc) => (
-            <article key={doc.path} className="flex h-full flex-col justify-between rounded-xl border border-outline/20 bg-surface-container-low p-space-md shadow-level-1">
+            <article key={doc.path} className="flex h-full flex-col justify-between rounded-2xl border border-outline/12 bg-surface-container-high p-space-md shadow-level-1">
               <div className="space-y-space-xs">
                 <div className="flex items-center justify-between gap-2">
                   <h2 className="text-title-md font-medium text-on-surface">{doc.name}</h2>
@@ -91,7 +91,7 @@ export function DocumentsList({ documents, onRequestLink, onExtendAccess }: Docu
                   {doc.lastModified ? `Updated ${new Date(doc.lastModified).toLocaleDateString()}` : 'Updated recently'}
                 </p>
                 {doc.expiresAt ? (
-                  <p className="text-label-sm text-amber-700">Expires {new Date(doc.expiresAt).toLocaleDateString()}</p>
+                  <p className="text-label-sm text-primary">Expires {new Date(doc.expiresAt).toLocaleDateString()}</p>
                 ) : (
                   <p className="text-label-sm text-muted-foreground">Link expires after 30 minutes once opened.</p>
                 )}

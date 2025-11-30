@@ -40,12 +40,12 @@ export async function TopNav({ portalAccess }: TopNavProps = {}) {
   const commands = buildCommandPaletteItems(access ?? null, [...quickActions, ...entityCommands]);
 
   return (
-    <header className="border-b border-outline/20 bg-surface/95 text-on-surface backdrop-blur supports-[backdrop-filter]:bg-surface/80">
-      <div className="mx-auto flex w-full max-w-page items-center justify-between gap-space-sm px-space-md py-space-md">
+    <header className="border-b border-outline/12 bg-surface text-on-surface shadow-level-1">
+      <div className="mx-auto flex w-full max-w-page items-center justify-between gap-space-md px-space-md py-space-md">
         <div className="flex items-center gap-space-sm">
           <Link
             href="/"
-            className="inline-flex items-center gap-space-sm rounded-lg px-space-sm py-space-2xs focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+            className="inline-flex items-center gap-space-sm rounded-xl px-space-sm py-space-2xs transition-colors hover:bg-surface-container-low focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
             aria-label="STEVI home"
           >
             <Image
@@ -65,12 +65,8 @@ export async function TopNav({ portalAccess }: TopNavProps = {}) {
               className="hidden h-10 w-auto dark:block"
             />
             <span className="text-left">
-              <span className="block text-label-sm font-medium uppercase text-muted-foreground">
-                STEVI
-              </span>
-              <span className="block text-title-sm font-medium text-on-surface">
-                Client Support Portal
-              </span>
+              <span className="block text-label-sm font-semibold uppercase tracking-label-uppercase text-muted-foreground">STEVI</span>
+              <span className="block text-title-sm font-semibold text-on-surface">Client Support Portal</span>
             </span>
           </Link>
           <WorkspaceSwitcherSlot />

@@ -129,11 +129,11 @@ function TonePill({ tone }: { tone?: InboxItem['tone'] }) {
   const icon = tone === 'success' ? CheckCircle2 : tone === 'warning' ? Clock3 : tone === 'critical' ? AlertCircle : Bell;
   const toneClass =
     tone === 'success'
-      ? 'bg-emerald-50 text-emerald-800'
+      ? 'bg-secondary-container text-on-secondary-container'
       : tone === 'warning'
-        ? 'bg-amber-50 text-amber-800'
+        ? 'bg-primary-container text-on-primary-container'
         : tone === 'critical'
-          ? 'bg-rose-50 text-rose-800'
+          ? 'bg-error-container text-on-error-container'
           : 'bg-primary/10 text-primary';
   return (
     <div className={`mt-space-xs inline-flex items-center gap-space-2xs rounded-full px-space-2xs py-px text-label-xs font-semibold ${toneClass}`}>

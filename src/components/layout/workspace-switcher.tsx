@@ -110,7 +110,7 @@ export function WorkspaceSwitcher({
                 </span>
               ) : null}
               {isClientPreview ? (
-                <span className="flex items-center gap-1 rounded-full bg-amber-50 px-space-2xs py-px text-label-xs font-semibold text-amber-700">
+                <span className="flex items-center gap-1 rounded-full bg-primary/10 px-space-2xs py-px text-label-xs font-semibold text-primary">
                   <Icon icon={Eye} size="sm" />
                   Preview
                 </span>
@@ -181,8 +181,8 @@ export function WorkspaceSwitcher({
 }
 
 function statusToneClass(tone: WorkspaceOption['statusTone']) {
-  if (tone === 'success') return 'bg-emerald-50 text-emerald-800';
-  if (tone === 'warning') return 'bg-amber-50 text-amber-800';
-  if (tone === 'critical') return 'bg-rose-50 text-rose-800';
-  return 'bg-outline/10 text-on-surface/80';
+  if (tone === 'success') return 'bg-secondary-container text-on-secondary-container';
+  if (tone === 'warning') return 'bg-primary-container text-on-primary-container';
+  if (tone === 'critical') return 'bg-error-container text-on-error-container';
+  return 'bg-surface-container-low text-muted-foreground';
 }

@@ -100,9 +100,9 @@ export default async function OnboardingPage({ searchParams }: PageProps) {
   return (
     <div className="page-shell page-stack">
       {actor === 'staff' ? (
-        <div className="rounded-2xl border border-primary/20 bg-surface-container-low p-space-md shadow-level-1">
-          <p className="text-label-sm font-semibold uppercase text-primary/80">Assisted onboarding</p>
-          <p className="mt-space-2xs text-body-sm text-on-surface/80">
+        <div className="rounded-3xl border border-outline/12 bg-surface p-space-lg shadow-level-2">
+          <p className="text-label-sm font-semibold uppercase tracking-label-uppercase text-muted-foreground">Assisted onboarding</p>
+          <p className="mt-space-2xs text-body-md text-on-surface/80">
             Use this wizard while you’re with the client. Start a new record with basic info below, or open an existing
             client to continue their onboarding where they left off.
           </p>
@@ -127,12 +127,12 @@ export default async function OnboardingPage({ searchParams }: PageProps) {
       ) : null}
 
       {(access.canManagePolicies || access.canAccessAdminWorkspace) && (!servicePolicy || !privacyPolicy) ? (
-        <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-space-md text-body-sm text-destructive">
+        <div className="rounded-3xl border border-destructive/30 bg-destructive/10 p-space-md text-body-sm text-destructive shadow-level-1">
           Policy copy missing: publish both “Client Service Agreement” and “Privacy & Data Protection Notice” in Admin → Policies to unblock onboarding.
         </div>
       ) : null}
       {(access.canManagePolicies || access.canAccessAdminWorkspace) && !registrationDraft ? (
-        <div className="rounded-2xl border border-outline/40 bg-surface-container-low p-space-md text-body-sm text-on-surface/80">
+        <div className="rounded-3xl border border-outline/16 bg-surface-container-low p-space-md text-body-sm text-on-surface/80 shadow-level-1">
           No registration draft found for this account. Prefill may be empty; this is expected for staff-assisted onboarding.
         </div>
       ) : null}

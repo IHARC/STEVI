@@ -18,7 +18,7 @@ export function ClientPreviewGuard({ children, message }: ClientPreviewGuardProp
 
   return (
     <div className="space-y-space-sm">
-      <Alert className="border-amber-200 bg-amber-50 text-amber-900">
+      <Alert className="border-primary/30 bg-primary/10 text-on-surface">
         <AlertTitle className="text-label-sm font-semibold uppercase">Client preview</AlertTitle>
         <AlertDescription className="text-body-sm">
           {message ?? 'Actions are disabled while you are previewing the client portal. Exit preview to continue.'}

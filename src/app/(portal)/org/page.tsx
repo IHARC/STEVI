@@ -153,7 +153,7 @@ export default async function OrgHomePage() {
         {summaryCards.map((card) => (
           <Card
             key={card.id}
-            className={card.tone === 'warning' ? 'border-amber-400/50 bg-amber-50 text-amber-900' : ''}
+            className={card.tone === 'warning' ? 'border-primary/30 bg-primary-container text-on-primary-container' : ''}
           >
             <CardHeader>
               <CardTitle className="text-label-sm font-medium uppercase text-muted-foreground">{card.label}</CardTitle>
@@ -215,7 +215,7 @@ export default async function OrgHomePage() {
           </CardHeader>
           <CardContent className="space-y-space-sm">
             {accessHealth.length === 0 ? (
-              <div className="rounded-lg border border-outline/15 bg-surface-container-low px-space-md py-space-sm text-body-sm text-on-surface">
+              <div className="rounded-2xl border border-outline/12 bg-surface-container-high px-space-md py-space-sm text-body-sm text-on-surface">
                 <p className="font-medium">All set</p>
                 <p className="text-muted-foreground">You have admins, reps, and contact details in place.</p>
               </div>
@@ -224,7 +224,7 @@ export default async function OrgHomePage() {
                 {accessHealth.map((item) => (
                   <li
                     key={item.id}
-                    className="flex items-start gap-space-sm rounded-lg border border-outline/15 bg-surface-container-low px-space-md py-space-sm"
+                    className="flex items-start gap-space-sm rounded-2xl border border-outline/12 bg-surface-container-high px-space-md py-space-sm"
                   >
                     <Badge variant={item.tone === 'warning' ? 'destructive' : 'secondary'} className="mt-0.5">
                       {item.tone === 'warning' ? 'Action' : 'Info'}

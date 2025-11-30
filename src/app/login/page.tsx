@@ -117,15 +117,18 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   }
 
   return (
-    <div className="page-shell">
-      <div className="mx-auto w-full max-w-[min(100%,32rem)] space-y-space-sm">
-        <div className="space-y-space-xs">
-          <h1 className="text-headline-md text-on-surface">Welcome back</h1>
-          <p className="text-body-sm text-on-surface/70">
-            Sign in to stay connected with STEVI and manage outreach updates, appointments, and resources.
+    <div className="min-h-screen bg-surface px-space-md py-space-3xl">
+      <div className="mx-auto w-full max-w-form-lg space-y-space-lg">
+        <header className="space-y-space-2xs text-center">
+          <p className="text-label-sm font-semibold uppercase tracking-label-uppercase text-muted-foreground">Secure sign-in</p>
+          <h1 className="text-headline-lg font-semibold text-on-surface sm:text-display-sm">Welcome back to STEVI</h1>
+          <p className="text-body-md text-muted-foreground">
+            Sign in to manage outreach updates, appointments, documents, and resources — all in one place.
           </p>
+        </header>
+        <div className="rounded-3xl border border-outline/12 bg-surface-container-high p-space-lg shadow-level-1">
+          <LoginForm action={loginUser} nextPath={rawNextParam ?? ''} initialState={initialState} />
         </div>
-        <LoginForm action={loginUser} nextPath={rawNextParam ?? ''} initialState={initialState} />
       </div>
     </div>
   );
