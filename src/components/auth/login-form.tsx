@@ -39,11 +39,18 @@ export function LoginForm({ action, nextPath, initialState }: LoginFormProps) {
   }, [state.contactMethod, contactMethod]);
 
   return (
-    <form action={formAction} className="grid gap-space-lg">
+    <form action={formAction} className="grid gap-space-md">
       <input type="hidden" name="next" value={nextPath} />
-      <fieldset className="space-y-space-sm rounded-2xl border border-outline/16 bg-surface p-space-md shadow-level-1">
-        <legend className="text-body-sm font-medium text-on-surface">How would you like to sign in?</legend>
-        <RadioGroup name="contact_method" value={contactMethod} onValueChange={(value) => setContactMethod(value as ContactMethod)} className="grid gap-space-sm md:grid-cols-2">
+      <fieldset className="space-y-space-sm rounded-2xl border border-outline/12 bg-surface-container-low/90 p-space-md shadow-level-1">
+        <legend className="text-label-sm font-semibold uppercase tracking-label-uppercase text-muted-foreground">
+          How would you like to sign in?
+        </legend>
+        <RadioGroup
+          name="contact_method"
+          value={contactMethod}
+          onValueChange={(value) => setContactMethod(value as ContactMethod)}
+          className="grid gap-space-sm md:grid-cols-2"
+        >
           <ContactOption
             id="login-contact-email"
             value="email"
@@ -62,18 +69,42 @@ export function LoginForm({ action, nextPath, initialState }: LoginFormProps) {
       {contactMethod === 'email' ? (
         <div className="grid gap-space-xs">
           <Label htmlFor="email">Email</Label>
-          <Input id="email" name="email" type="email" autoComplete="email" required placeholder="you@example.ca" />
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            required
+            placeholder="you@example.ca"
+            className="bg-surface"
+          />
         </div>
       ) : (
         <div className="grid gap-space-xs">
           <Label htmlFor="phone">Phone number</Label>
-          <Input id="phone" name="phone" type="tel" autoComplete="tel" inputMode="tel" required placeholder="+16475551234" />
+          <Input
+            id="phone"
+            name="phone"
+            type="tel"
+            autoComplete="tel"
+            inputMode="tel"
+            required
+            placeholder="+16475551234"
+            className="bg-surface"
+          />
         </div>
       )}
 
       <div className="grid gap-space-xs">
         <Label htmlFor="password">Password</Label>
-        <Input id="password" name="password" type="password" autoComplete="current-password" required />
+        <Input
+          id="password"
+          name="password"
+          type="password"
+          autoComplete="current-password"
+          required
+          className="bg-surface"
+        />
       </div>
 
       {state.error ? (
@@ -87,13 +118,13 @@ export function LoginForm({ action, nextPath, initialState }: LoginFormProps) {
         <SubmitButton />
         <p className="text-body-sm text-muted-foreground">
           Forgot your password?{' '}
-          <Link href="/reset-password" className="text-primary underline">
+          <Link href="/reset-password" className="text-primary underline-offset-4 hover:underline">
             Reset it here
           </Link>
         </p>
         <p className="text-body-sm text-muted-foreground">
           Need an account?{' '}
-          <Link href="/register" className="text-primary underline">
+          <Link href="/register" className="text-primary underline-offset-4 hover:underline">
             Register here
           </Link>
         </p>
@@ -118,7 +149,7 @@ function ContactOption({ id, value, title, description }: ContactOptionProps) {
   return (
     <label
       htmlFor={id}
-      className="flex cursor-pointer items-start gap-space-sm rounded-2xl border border-outline/16 bg-surface-container-high p-space-md text-body-sm font-medium text-on-surface shadow-level-1 transition state-layer-color-primary hover:border-primary hover:state-layer-hover focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:state-layer-focus"
+      className="flex cursor-pointer items-start gap-space-sm rounded-2xl border border-outline/12 bg-surface p-space-md text-body-sm font-medium text-on-surface shadow-level-1 transition state-layer-color-primary hover:border-primary/50 hover:shadow-level-2 hover:state-layer-hover focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2 focus-within:ring-offset-surface focus-within:state-layer-focus"
     >
       <RadioGroupItem id={id} value={value} className="mt-1" />
       <span>
@@ -132,7 +163,7 @@ function ContactOption({ id, value, title, description }: ContactOptionProps) {
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" disabled={pending} className="w-full justify-center">
+    <Button type="submit" disabled={pending} className="w-full justify-center text-label-lg font-semibold">
       {pending ? 'Signing in...' : 'Sign in'}
     </Button>
   );

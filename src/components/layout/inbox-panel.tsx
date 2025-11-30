@@ -3,7 +3,6 @@
 import { useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Icon } from '@/components/ui/icon';
@@ -37,19 +36,23 @@ export function InboxPanel({ items }: InboxPanelProps) {
 
   return (
     <>
-      <aside className="sticky top-24 hidden h-[calc(100vh-6rem)] w-80 flex-shrink-0 lg:block">
-        <Card className="h-full border-outline/20">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-space-xs text-title-sm">
+      <aside className="sticky top-28 hidden h-[calc(100vh-9rem)] w-full max-w-[24rem] flex-shrink-0 lg:block">
+        <div className="flex h-full flex-col gap-space-sm rounded-3xl border border-outline/10 bg-surface/92 p-space-md shadow-level-2 backdrop-blur-md">
+          <div className="flex items-center justify-between gap-space-sm">
+            <p className="flex items-center gap-space-2xs text-title-sm font-semibold text-on-surface">
               <Icon icon={Bell} size="sm" /> Inbox
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="h-full p-0">
-            <ScrollArea className="h-full px-space-sm pb-space-md">
-              <InboxList items={visibleItems} onDismiss={handleDismiss} />
-            </ScrollArea>
-          </CardContent>
-        </Card>
+            </p>
+            <Badge variant="outline" className="rounded-full bg-primary/12 text-label-sm font-semibold text-primary">
+              Live
+            </Badge>
+          </div>
+          <p className="text-body-sm text-muted-foreground">
+            Time-sensitive approvals, notifications, and expiring documents.
+          </p>
+          <ScrollArea className="flex-1 pr-space-2xs">
+            <InboxList items={visibleItems} onDismiss={handleDismiss} />
+          </ScrollArea>
+        </div>
       </aside>
 
       <Sheet open={open} onOpenChange={setOpen}>
@@ -58,7 +61,7 @@ export function InboxPanel({ items }: InboxPanelProps) {
             type="button"
             variant="secondary"
             size="sm"
-            className="fixed bottom-4 right-4 z-40 gap-space-2xs rounded-full shadow-level-3 lg:hidden"
+            className="fixed bottom-4 right-4 z-40 gap-space-2xs rounded-full border border-outline/20 shadow-level-3 backdrop-blur-md lg:hidden"
           >
             <Icon icon={Bell} size="sm" />
             Inbox
@@ -86,7 +89,10 @@ function InboxList({ items, onDismiss }: { items: InboxItem[]; onDismiss: (id: s
   return (
     <ul className="space-y-space-sm">
       {items.map((item) => (
-        <li key={item.id} className="rounded-lg border border-outline/10 bg-surface-container-low p-space-sm">
+        <li
+          key={item.id}
+          className="rounded-2xl border border-outline/12 bg-surface-container-low/90 p-space-md shadow-level-1 transition state-layer-color-primary hover:border-primary/40 hover:shadow-level-2"
+        >
           <div className="flex items-start justify-between gap-space-sm">
             <div className="space-y-space-2xs">
               <p className="text-body-md font-medium text-on-surface">

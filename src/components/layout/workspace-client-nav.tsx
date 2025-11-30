@@ -15,5 +15,5 @@ export function WorkspaceClientNav({ links }: WorkspaceClientNavProps) {
     return null;
   }
 
-  return <PortalNavClient links={links} />;
+  return <PortalNavClient links={links} className="lg:hidden" />;
 }

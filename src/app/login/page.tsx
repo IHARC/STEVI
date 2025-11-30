@@ -117,17 +117,34 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-surface px-space-md py-space-3xl">
-      <div className="mx-auto w-full max-w-form-lg space-y-space-lg">
-        <header className="space-y-space-2xs text-center">
-          <p className="text-label-sm font-semibold uppercase tracking-label-uppercase text-muted-foreground">Secure sign-in</p>
-          <h1 className="text-headline-lg font-semibold text-on-surface sm:text-display-sm">Welcome back to STEVI</h1>
-          <p className="text-body-md text-muted-foreground">
-            Sign in to manage outreach updates, appointments, documents, and resources — all in one place.
-          </p>
-        </header>
-        <div className="rounded-3xl border border-outline/12 bg-surface-container-high p-space-lg shadow-level-1">
-          <LoginForm action={loginUser} nextPath={rawNextParam ?? ''} initialState={initialState} />
+    <div className="relative isolate min-h-screen overflow-hidden bg-surface">
+      <div
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_18%_20%,rgba(var(--md-sys-color-primary)/0.14),transparent_45%),radial-gradient(circle_at_82%_12%,rgba(var(--md-sys-color-secondary)/0.12),transparent_40%),radial-gradient(circle_at_50%_92%,rgba(var(--md-sys-color-tertiary)/0.08),transparent_42%)]"
+        aria-hidden
+      />
+      <div className="page-shell relative">
+        <div className="mx-auto grid w-full max-w-5xl items-start gap-space-xl lg:grid-cols-[1fr_0.95fr]">
+          <div className="space-y-space-md">
+            <div className="inline-flex items-center gap-space-2xs rounded-full border border-outline/12 bg-surface-container-low/80 px-space-sm py-space-2xs text-label-sm font-semibold text-primary shadow-level-1">
+              STEVI secure sign-in
+            </div>
+            <header className="space-y-space-sm">
+              <p className="text-label-sm font-semibold uppercase tracking-label-uppercase text-muted-foreground">Client & staff portal</p>
+              <h1 className="text-display-sm font-semibold text-on-surface sm:text-display-md">Sign in to STEVI</h1>
+              <p className="max-w-2xl text-body-lg text-muted-foreground">
+                Manage appointments, documents, and outreach updates securely in one place.
+              </p>
+            </header>
+          </div>
+
+          <div className="w-full max-w-form-md justify-self-end rounded-3xl border border-outline/10 bg-surface-container-high/90 p-space-xl shadow-level-2 backdrop-blur-md">
+            <div className="mb-space-md space-y-space-2xs">
+              <p className="text-label-sm font-semibold uppercase tracking-label-uppercase text-muted-foreground">Sign in</p>
+              <p className="text-title-lg font-semibold text-on-surface">Enter your credentials</p>
+              <p className="text-body-sm text-muted-foreground">Use the email or phone number you registered with.</p>
+            </div>
+            <LoginForm action={loginUser} nextPath={rawNextParam ?? ''} initialState={initialState} />
+          </div>
         </div>
       </div>
     </div>
