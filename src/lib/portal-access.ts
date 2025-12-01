@@ -45,6 +45,8 @@ export type WorkspaceNav = {
   groups: NavGroup[];
 };
 
+type WorkspaceId = 'client' | 'admin' | 'org' | 'staff';
+
 const hasElevatedAdminAccess = (access: PortalAccess) =>
   access.isProfileApproved && (access.portalRoles.includes('portal_admin') || access.iharcRoles.includes('iharc_admin'));
 
@@ -492,6 +494,20 @@ export function resolveOrgWorkspaceNav(access: PortalAccess | null): WorkspaceNa
 export function resolveStaffWorkspaceNav(access: PortalAccess | null): WorkspaceNav | null {
   if (!access || !access.canAccessStaffWorkspace) return null;
   return resolveWorkspace(access, 'staff');
+}
+
+export function resolveWorkspaceNavForShell(
+  access: PortalAccess | null,
+  workspaceId: WorkspaceId,
+): WorkspaceNav | null {
+  if (!access) return null;
+  if (workspaceId === 'client') return null;
+
+  if (workspaceId === 'admin' && !access.canAccessAdminWorkspace) return null;
+  if (workspaceId === 'org' && !access.canAccessOrgWorkspace) return null;
+  if (workspaceId === 'staff' && !access.canAccessStaffWorkspace) return null;
+
+  return resolveWorkspace(access, workspaceId);
 }
 
 const PUBLIC_CLIENT_LINKS: PortalLink[] = CLIENT_NAV_BLUEPRINT.filter(

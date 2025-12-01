@@ -6,10 +6,8 @@ import { WorkspaceContextProvider } from '@/components/providers/workspace-conte
 import { getPortalRequestContext } from '@/components/providers/portal-request-context';
 import {
   buildCommandPaletteItems,
-  resolveAdminWorkspaceNav,
   resolveClientNavLinks,
-  resolveOrgWorkspaceNav,
-  resolveStaffWorkspaceNav,
+  resolveWorkspaceNavForShell,
   type PortalLink,
 } from '@/lib/portal-access';
 import {
@@ -34,14 +32,7 @@ export default async function PortalLayout({ children }: { children: ReactNode }
     currentPathname,
     supabase,
   } = await getPortalRequestContext();
-  const workspaceNav =
-    activeWorkspace === 'admin'
-      ? resolveAdminWorkspaceNav(portalAccess)
-      : activeWorkspace === 'org'
-        ? resolveOrgWorkspaceNav(portalAccess)
-        : activeWorkspace === 'staff'
-          ? resolveStaffWorkspaceNav(portalAccess)
-          : null;
+  const workspaceNav = resolveWorkspaceNavForShell(portalAccess, activeWorkspace);
 
   if (activeWorkspace !== 'client' && !workspaceNav) {
     redirect(defaultWorkspacePath);
@@ -86,7 +77,8 @@ export default async function PortalLayout({ children }: { children: ReactNode }
     <PortalAccessProvider access={portalAccess}>
       <WorkspaceContextProvider access={portalAccess} defaultPath={defaultWorkspacePath}>
         <AppShell
-          primaryNavItems={primaryNavItems}
+          workspaceNav={workspaceNav}
+          globalNavItems={primaryNavItems}
           clientNavLinks={navLinks}
           inboxItems={inboxItems}
           activeWorkspace={activeWorkspace}

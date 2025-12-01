@@ -32,13 +32,23 @@ export default async function StaffHomePage() {
 
   return (
     <div className="page-shell page-stack">
-      <header className="space-y-space-xs">
-        <p className="text-label-sm font-medium uppercase text-muted-foreground">{roleLabel}</p>
-        <h1 className="text-headline-lg text-on-surface sm:text-display-sm">Staff workspace</h1>
-        <p className="max-w-3xl text-body-md text-muted-foreground sm:text-body-lg">
-          Move between caseload, shifts, and outreach logging without landing in the client portal first. All actions
-          respect Supabase RLS and audit logging.
-        </p>
+      <header className="flex flex-wrap items-start justify-between gap-space-md">
+        <div className="space-y-space-2xs">
+          <p className="text-label-sm font-semibold uppercase text-muted-foreground">{roleLabel}</p>
+          <h1 className="text-headline-md text-on-surface sm:text-display-sm">Staff workspace</h1>
+          <p className="max-w-3xl text-body-lg text-muted-foreground">
+            Move between caseload, shifts, and outreach logging without landing in the client portal first. All actions
+            respect Supabase RLS and audit logging.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-space-xs">
+          <Button asChild>
+            <Link href="/staff/caseload">Open caseload</Link>
+          </Button>
+          <Button asChild variant="secondary">
+            <Link href="/staff/outreach">Log outreach</Link>
+          </Button>
+        </div>
       </header>
 
       <section className="grid gap-space-md md:grid-cols-3">

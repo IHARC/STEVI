@@ -92,45 +92,29 @@ export default async function AdminPage() {
     value: notificationTrendData.filter((d: NotificationTrendEntry) => d.day === day).length,
   }));
 
-  const shortcuts = [
-    { label: 'Approve profiles', href: '/admin/profiles', badge: snapshot.pendingProfiles ? `${snapshot.pendingProfiles} pending` : null },
-    { label: 'User management', href: '/admin/users', badge: 'Search + peek' },
-    { label: 'Resources', href: '/admin/resources', badge: `${snapshot.resourcesPublished} live` },
-    { label: 'Policies', href: '/admin/policies', badge: `${snapshot.policiesPublished} live` },
-    { label: 'Notifications', href: '/admin/notifications', badge: 'Templates + test' },
-  ];
-
   return (
     <div className="page-shell page-stack">
-      <header className="flex flex-col gap-space-xs">
-        <p className="text-label-sm font-medium uppercase text-muted-foreground">Operations</p>
-        <h1 className="text-title-lg text-on-surface sm:text-headline-sm">Admin workspace overview</h1>
-        <p className="max-w-4xl text-body-md text-muted-foreground sm:text-body-lg">
-          Track approvals, notifications, and content at a glance. All counts respect Supabase RLS and audit logging.
-        </p>
-        <div className="flex flex-wrap gap-space-sm">
-          {shortcuts.map((item) => (
-            <Button key={item.href} asChild variant="outline" size="sm" className="gap-space-2xs">
-              <Link href={item.href}>
-                <span>{item.label}</span>
-                {item.badge ? <Badge variant="secondary" className="ml-space-2xs">{item.badge}</Badge> : null}
-              </Link>
-            </Button>
-          ))}
+      <header className="flex flex-wrap items-start justify-between gap-space-md">
+        <div className="space-y-space-2xs">
+          <p className="text-label-sm font-semibold uppercase text-muted-foreground">Admin workspace</p>
+          <h1 className="text-headline-md text-on-surface sm:text-display-sm">Operations overview</h1>
+          <p className="max-w-3xl text-body-lg text-muted-foreground">
+            Monitor approvals, notifications, and content at a glance. All counts respect Supabase RLS and audit logging.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-space-xs">
+          <Button asChild>
+            <Link href="/admin/profiles">Review approvals</Link>
+          </Button>
+          <Button asChild variant="secondary">
+            <Link href="/admin/notifications">Send notification</Link>
+          </Button>
         </div>
       </header>
 
-      <section className="grid gap-space-md md:grid-cols-3 lg:grid-cols-6">
+      <section className="grid gap-space-sm sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {metricCards.map((card) => (
-          <Card
-            key={card.id}
-            className={card.tone === 'warning' ? 'border-primary/30 bg-primary-container text-on-primary-container' : 'border-outline/20'}
-          >
-            <CardHeader className="space-y-space-3xs">
-              <CardTitle className="text-label-sm font-medium uppercase text-muted-foreground">{card.label}</CardTitle>
-              <p className="text-headline-sm font-semibold text-on-surface">{card.value}</p>
-            </CardHeader>
-          </Card>
+          <StatTile key={card.id} label={card.label} value={card.value} tone={card.tone} />
         ))}
       </section>
 
@@ -207,4 +191,20 @@ function sevenDaysAgoIso() {
   const now = new Date();
   now.setDate(now.getDate() - 7);
   return now.toISOString();
+}
+
+function StatTile({ label, value, tone = 'default' }: { label: string; value: string; tone?: 'default' | 'warning' | 'info' }) {
+  const toneClasses =
+    tone === 'warning'
+      ? 'border-primary/24 bg-primary-container text-on-primary-container'
+      : tone === 'info'
+        ? 'border-outline/12 bg-secondary-container text-on-secondary-container'
+        : 'border-outline/12 bg-surface text-on-surface';
+
+  return (
+    <div className={`rounded-xl px-space-md py-space-md shadow-level-1 ${toneClasses}`}>
+      <p className="text-label-lg text-muted-foreground">{label}</p>
+      <p className="text-headline-md font-semibold">{value}</p>
+    </div>
+  );
 }

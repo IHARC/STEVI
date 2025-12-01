@@ -3,9 +3,9 @@ import { TopNav } from '@/components/layout/top-nav';
 import { SiteFooter } from '@/components/SiteFooter';
 import { ClientPreviewBanner } from '@/components/layout/client-preview-banner';
 import { WorkspaceClientNav } from '@/components/layout/workspace-client-nav';
-import { PrimaryNavRail } from '@/components/layout/primary-nav';
 import { InboxPanel } from '@/components/layout/inbox-panel';
-import type { PortalLink, CommandPaletteItem } from '@/lib/portal-access';
+import { WorkspaceDrawerDesktop } from '@/components/layout/workspace-drawer';
+import type { PortalLink, CommandPaletteItem, WorkspaceNav } from '@/lib/portal-access';
 import type { InboxItem } from '@/lib/inbox';
 import { cn } from '@/lib/utils';
 import type { PrimaryNavItem } from '@/lib/primary-nav';
@@ -15,7 +15,8 @@ import type { UserNavigation } from '@/components/layout/user-nav';
 
 type AppShellProps = {
   children: ReactNode;
-  primaryNavItems: PrimaryNavItem[];
+  workspaceNav: WorkspaceNav | null;
+  globalNavItems: PrimaryNavItem[];
   clientNavLinks: PortalLink[];
   inboxItems: InboxItem[];
   activeWorkspace: WorkspaceId;
@@ -26,7 +27,8 @@ type AppShellProps = {
 
 export function AppShell({
   children,
-  primaryNavItems,
+  workspaceNav,
+  globalNavItems,
   clientNavLinks,
   inboxItems,
   activeWorkspace,
@@ -37,16 +39,21 @@ export function AppShell({
   const showClientNav = activeWorkspace === 'client' && clientNavLinks.length > 0;
   const showInbox = inboxItems.length > 0;
   const showClientPreviewBanner = activeWorkspace === 'client';
+  const drawerGlobalItems = activeWorkspace === 'client' ? [] : globalNavItems;
+  const showWorkspaceDrawer = workspaceNav && activeWorkspace !== 'client';
 
   return (
     <div className="flex min-h-screen bg-surface-container-lowest text-on-background">
-      <PrimaryNavRail items={primaryNavItems} />
+      {showWorkspaceDrawer ? (
+        <WorkspaceDrawerDesktop workspaceNav={workspaceNav} globalItems={drawerGlobalItems} />
+      ) : null}
       <div className="flex min-h-screen flex-1 flex-col">
         <TopNav
           branding={branding}
           navigation={navigation}
           commands={commandPaletteItems}
-          primaryNavItems={primaryNavItems}
+          workspaceNav={showWorkspaceDrawer ? workspaceNav : null}
+          globalNavItems={drawerGlobalItems}
         />
         {showClientPreviewBanner ? <ClientPreviewBanner /> : null}
         {showClientNav ? (
@@ -62,8 +69,8 @@ export function AppShell({
                 showInbox ? 'xl:grid-cols-[minmax(0,1fr)_22rem]' : 'grid-cols-1',
               )}
             >
-              <section className="min-w-0 rounded-3xl border border-outline/12 bg-surface shadow-level-1">
-                <div className="space-y-space-xl p-space-xl [&_.page-shell]:!w-full [&_.page-shell]:!max-w-none [&_.page-shell]:!p-0 [&_.page-stack]:!gap-space-xl">
+              <section className="min-w-0">
+                <div className="space-y-space-xl [&_.page-shell]:!w-full [&_.page-shell]:!max-w-none [&_.page-shell]:!p-0 [&_.page-stack]:!gap-space-xl">
                   {children}
                 </div>
               </section>

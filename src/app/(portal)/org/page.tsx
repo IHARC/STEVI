@@ -83,7 +83,9 @@ export default async function OrgHomePage() {
   const orgName = organization?.name ?? 'your organization';
   const lastSeenLabel = lastSeenTimestamp ? formatDate(new Date(lastSeenTimestamp).toISOString()) : 'No recent activity';
 
-  const summaryCards = [
+  type OrgSummaryCard = { id: string; label: string; value: string; tone?: 'default' | 'neutral' | 'warning' };
+
+  const summaryCards: OrgSummaryCard[] = [
     { id: 'members', label: 'Approved members', value: approvedMembers.length.toLocaleString() },
     { id: 'admins', label: 'Org admins', value: adminCount.toLocaleString() },
     { id: 'reps', label: 'Org reps', value: repCount.toLocaleString() },
@@ -120,10 +122,10 @@ export default async function OrgHomePage() {
   return (
     <div className="page-shell page-stack">
       <header className="flex flex-wrap items-start justify-between gap-space-md">
-        <div className="space-y-space-xs">
-          <p className="text-label-sm font-medium uppercase text-muted-foreground">Organization workspace</p>
-          <h1 className="text-headline-lg text-on-surface sm:text-display-sm">Manage {orgName}</h1>
-          <p className="max-w-4xl text-body-md text-muted-foreground sm:text-body-lg">
+        <div className="space-y-space-2xs">
+          <p className="text-label-sm font-semibold uppercase text-muted-foreground">Organization workspace</p>
+          <h1 className="text-headline-md text-on-surface sm:text-display-sm">Manage {orgName}</h1>
+          <p className="max-w-4xl text-body-lg text-muted-foreground">
             Track how your team is using STEVI, keep member access healthy, and jump into invites or settings without
             leaving the organization workspace. All data respects Supabase RLS for your organization.
           </p>
@@ -139,32 +141,19 @@ export default async function OrgHomePage() {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-space-sm">
-          <Button asChild variant="outline">
-            <Link href="/org/members">Manage members</Link>
-          </Button>
+        <div className="flex flex-wrap gap-space-xs">
           <Button asChild>
             <Link href="/org/invites">Invite members</Link>
+          </Button>
+          <Button asChild variant="secondary">
+            <Link href="/org/members">Manage members</Link>
           </Button>
         </div>
       </header>
 
-      <section className="grid gap-space-md lg:grid-cols-4">
+      <section className="grid gap-space-sm sm:grid-cols-2 lg:grid-cols-4">
         {summaryCards.map((card) => (
-          <Card
-            key={card.id}
-            className={card.tone === 'warning' ? 'border-primary/30 bg-primary-container text-on-primary-container' : ''}
-          >
-            <CardHeader>
-              <CardTitle className="text-label-sm font-medium uppercase text-muted-foreground">{card.label}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-headline-sm font-semibold text-on-surface">{card.value}</p>
-              {card.id === 'invites' ? (
-                <p className="text-label-sm text-muted-foreground">Pending invites across your organization.</p>
-              ) : null}
-            </CardContent>
-          </Card>
+          <StatTile key={card.id} label={card.label} value={card.value} tone={card.tone} />
         ))}
       </section>
 
@@ -326,6 +315,28 @@ export default async function OrgHomePage() {
           </CardContent>
         </Card>
       </section>
+    </div>
+  );
+}
+
+function StatTile({
+  label,
+  value,
+  tone = 'default',
+}: {
+  label: string;
+  value: string;
+  tone?: 'default' | 'warning' | 'neutral';
+}) {
+  const toneClasses =
+    tone === 'warning'
+      ? 'border-primary/24 bg-primary-container text-on-primary-container'
+      : 'border-outline/12 bg-surface text-on-surface';
+
+  return (
+    <div className={`rounded-xl px-space-md py-space-md shadow-level-1 ${toneClasses}`}>
+      <p className="text-label-lg text-muted-foreground">{label}</p>
+      <p className="text-headline-md font-semibold">{value}</p>
     </div>
   );
 }

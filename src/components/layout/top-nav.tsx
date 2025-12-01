@@ -4,28 +4,29 @@ import { CommandPalette } from '@/components/layout/command-palette';
 import { QuickCreateButton } from '@/components/layout/quick-create-button';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
 import { WorkspaceSwitcherSlot } from '@/components/layout/workspace-switcher-slot';
-import { PrimaryNavBar, PrimaryNavMobile } from '@/components/layout/primary-nav';
+import { WorkspaceDrawerMobile } from '@/components/layout/workspace-drawer';
 import type { PrimaryNavItem } from '@/lib/primary-nav';
-import type { CommandPaletteItem } from '@/lib/portal-access';
+import type { CommandPaletteItem, WorkspaceNav } from '@/lib/portal-access';
 import type { ResolvedBrandingAssets } from '@/lib/marketing/branding';
 import type { UserNavigation } from '@/components/layout/user-nav';
 
 type TopNavProps = {
-  primaryNavItems: PrimaryNavItem[];
+  workspaceNav: WorkspaceNav | null;
+  globalNavItems: PrimaryNavItem[];
   commands: CommandPaletteItem[];
   navigation: UserNavigation;
   branding: ResolvedBrandingAssets;
 };
 
-export function TopNav({ primaryNavItems, commands, navigation, branding }: TopNavProps) {
+export function TopNav({ workspaceNav, globalNavItems, commands, navigation, branding }: TopNavProps) {
   const { desktop, mobile } = navigation;
 
   return (
     <header className="sticky top-0 z-50 border-b border-outline/14 bg-surface/95 text-on-surface shadow-level-2 backdrop-blur-xl supports-[backdrop-filter]:bg-surface/85">
       <div className="mx-auto flex w-full max-w-page items-center justify-between gap-space-sm px-space-lg py-space-sm md:py-space-md">
         <div className="flex items-center gap-space-sm">
-          <div className="md:hidden">
-            <PrimaryNavMobile items={primaryNavItems} />
+          <div className="lg:hidden">
+            <WorkspaceDrawerMobile workspaceNav={workspaceNav} globalItems={globalNavItems} />
           </div>
           <Link
             href="/"
@@ -53,9 +54,7 @@ export function TopNav({ primaryNavItems, commands, navigation, branding }: TopN
               <span className="block text-title-sm font-semibold text-on-surface">Client Support Portal</span>
             </span>
           </Link>
-          <div className="hidden md:block">
-            <WorkspaceSwitcherSlot />
-          </div>
+          <WorkspaceSwitcherSlot />
         </div>
         <div className="flex items-center gap-space-2xs md:hidden">
           <QuickCreateButton />
@@ -70,7 +69,6 @@ export function TopNav({ primaryNavItems, commands, navigation, branding }: TopN
           {desktop}
         </div>
       </div>
-      <PrimaryNavBar items={primaryNavItems} className="md:px-space-lg md:pb-space-xs md:pt-0" />
     </header>
   );
 }
