@@ -1,14 +1,11 @@
 import type { ReactNode } from 'react';
-import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { AppShell } from '@/components/shells/app-shell';
 import { PortalAccessProvider } from '@/components/providers/portal-access-provider';
 import { WorkspaceContextProvider } from '@/components/providers/workspace-context-provider';
-import { PortalRequestProvider } from '@/components/providers/portal-request-context';
-import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
+import { getPortalRequestContext } from '@/components/providers/portal-request-context';
 import {
   buildCommandPaletteItems,
-  loadPortalAccess,
   resolveAdminWorkspaceNav,
   resolveClientNavLinks,
   resolveOrgWorkspaceNav,
@@ -16,15 +13,11 @@ import {
   type PortalLink,
 } from '@/lib/portal-access';
 import {
-  inferWorkspaceFromPath,
   isClientPreview,
-  resolveDefaultWorkspacePath,
   resolveWorkspaceQuickActions,
-  type WorkspaceId,
 } from '@/lib/workspaces';
 import { fetchWorkspaceInbox } from '@/lib/inbox';
 import { getOnboardingStatusForUser } from '@/lib/onboarding/status';
-import { normalizePathFromHeader } from '@/lib/paths';
 import { buildPrimaryNavItems } from '@/lib/primary-nav';
 import { getBrandingAssetsWithClient } from '@/lib/marketing/branding';
 import { getUserNavigation } from '@/components/layout/user-nav';
@@ -33,21 +26,14 @@ import { buildEntityCommandPaletteItems } from '@/lib/command-palette';
 export const dynamic = 'force-dynamic';
 
 export default async function PortalLayout({ children }: { children: ReactNode }) {
-  const headerList = headers();
-  const { pathname: currentPathname, path: currentPath } = normalizePathFromHeader(
-    headerList.get('x-invoke-path') ?? headerList.get('next-url'),
-    '/',
-  );
-  const activeWorkspace: WorkspaceId = inferWorkspaceFromPath(currentPathname);
-  const supabase = await createSupabaseRSCClient();
-  const portalAccess = await loadPortalAccess(supabase);
-
-  if (!portalAccess) {
-    const nextParam = encodeURIComponent(currentPath || '/home');
-    redirect(`/login?next=${nextParam}`);
-  }
-
-  const defaultWorkspacePath = resolveDefaultWorkspacePath(portalAccess);
+  const {
+    portalAccess,
+    defaultWorkspacePath,
+    activeWorkspace,
+    currentPath,
+    currentPathname,
+    supabase,
+  } = await getPortalRequestContext();
   const workspaceNav =
     activeWorkspace === 'admin'
       ? resolveAdminWorkspaceNav(portalAccess)
@@ -97,28 +83,20 @@ export default async function PortalLayout({ children }: { children: ReactNode }
   ]);
 
   return (
-    <PortalRequestProvider
-      value={{
-        portalAccess,
-        defaultWorkspacePath,
-        activeWorkspace,
-      }}
-    >
-      <PortalAccessProvider access={portalAccess}>
-        <WorkspaceContextProvider access={portalAccess} defaultPath={defaultWorkspacePath}>
-          <AppShell
-            primaryNavItems={primaryNavItems}
-            clientNavLinks={navLinks}
-            inboxItems={inboxItems}
-            activeWorkspace={activeWorkspace}
-            navigation={navigation}
-            branding={branding}
-            commandPaletteItems={commandPaletteItems}
-          >
-            {children}
-          </AppShell>
-        </WorkspaceContextProvider>
-      </PortalAccessProvider>
-    </PortalRequestProvider>
+    <PortalAccessProvider access={portalAccess}>
+      <WorkspaceContextProvider access={portalAccess} defaultPath={defaultWorkspacePath}>
+        <AppShell
+          primaryNavItems={primaryNavItems}
+          clientNavLinks={navLinks}
+          inboxItems={inboxItems}
+          activeWorkspace={activeWorkspace}
+          navigation={navigation}
+          branding={branding}
+          commandPaletteItems={commandPaletteItems}
+        >
+          {children}
+        </AppShell>
+      </WorkspaceContextProvider>
+    </PortalAccessProvider>
   );
 }

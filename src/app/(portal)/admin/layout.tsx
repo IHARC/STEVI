@@ -1,14 +1,14 @@
 import type { ReactNode } from 'react';
 import { redirect } from 'next/navigation';
 import { WorkspaceSectionLayout } from '@/components/layout/workspace-section-layout';
-import { usePortalRequestContext } from '@/components/providers/portal-request-context';
+import { getPortalRequestContext } from '@/components/providers/portal-request-context';
 import { resolveAdminWorkspaceNav } from '@/lib/portal-access';
 import { resolveWorkspaceQuickActions } from '@/lib/workspaces';
 
 export const dynamic = 'force-dynamic';
 
-export default function AdminLayout({ children }: { children: ReactNode }) {
-  const { portalAccess, defaultWorkspacePath } = usePortalRequestContext();
+export default async function AdminLayout({ children }: { children: ReactNode }) {
+  const { portalAccess, defaultWorkspacePath } = await getPortalRequestContext();
   const adminNav = resolveAdminWorkspaceNav(portalAccess);
 
   if (!adminNav) {
