@@ -29,7 +29,7 @@ export function WorkspaceDrawerDesktop({ workspaceNav, globalItems, className }:
     <nav
       aria-label="Workspace navigation"
       className={cn(
-        'sticky top-0 hidden h-screen w-72 shrink-0 flex-col border-r border-outline/10 bg-surface-container-lowest text-on-surface shadow-level-1 lg:flex',
+        'sticky top-0 hidden h-screen w-72 shrink-0 flex-col border-r border-outline/12 bg-surface-container-lowest text-on-surface shadow-level-1 lg:flex',
         className,
       )}
     >
@@ -86,7 +86,7 @@ type DrawerContentProps = {
 
 function DrawerContent({ workspaceNav, globalItems, pathname, onNavigate }: DrawerContentProps) {
   const groups = workspaceNav?.groups ?? [];
-  const headerLabel = workspaceNav?.label ?? 'Navigation';
+  const headerLabel = workspaceNav?.label ?? 'Workspace';
 
   return (
     <div className="flex h-full flex-col">
@@ -96,36 +96,36 @@ function DrawerContent({ workspaceNav, globalItems, pathname, onNavigate }: Draw
         </p>
         <p className="text-title-lg font-semibold text-on-surface">Navigation</p>
       </div>
-      <div className="flex-1 space-y-space-sm overflow-y-auto px-space-md pb-space-md">
-        {groups.map((group) => (
-          <div
-            key={group.id}
-            className="rounded-2xl border border-outline/12 bg-surface-container-high p-space-sm shadow-level-1"
-          >
-            <div className="flex items-center gap-space-xs pb-space-2xs text-label-sm font-semibold uppercase text-muted-foreground tracking-label-uppercase">
-              <Icon icon={resolveAppIcon(group.icon)} size="sm" className="text-on-surface" />
-              <span>{group.label}</span>
+      <div className="flex-1 overflow-y-auto px-space-sm pb-space-sm">
+        <div className="space-y-space-sm">
+          {groups.map((group) => (
+            <div
+              key={group.id}
+              className="rounded-2xl bg-surface-container-low px-space-sm py-space-xs shadow-level-1"
+            >
+              <div className="flex items-center gap-space-xs pb-space-2xs text-label-sm font-semibold uppercase tracking-label-uppercase text-muted-foreground">
+                {group.icon ? <Icon icon={resolveAppIcon(group.icon)} size="sm" className="text-on-surface/80" /> : null}
+                <span>{group.label}</span>
+              </div>
+              <div className="space-y-space-2xs">
+                {group.items.map((link) => (
+                  <DrawerLink
+                    key={link.href}
+                    link={link}
+                    pathname={pathname}
+                    onNavigate={onNavigate}
+                  />
+                ))}
+              </div>
             </div>
-            <div className="space-y-space-2xs pt-space-2xs">
-              {group.links.map((link) => (
-                <DrawerLink
-                  key={link.href}
-                  link={link}
-                  pathname={pathname}
-                  onNavigate={onNavigate}
-                />
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-      <div className="mt-auto border-t border-outline/12 px-space-md pt-space-sm">
-        <div className="flex items-center justify-between gap-space-xs pb-space-2xs">
-          <p className="text-label-sm font-semibold uppercase tracking-label-uppercase text-muted-foreground">
-            Global
-          </p>
+          ))}
         </div>
-        <div className="flex flex-col gap-space-2xs pb-space-lg pt-space-2xs">
+      </div>
+      <div className="mt-auto border-t border-outline/12 px-space-md py-space-sm">
+        <p className="text-label-sm font-semibold uppercase tracking-label-uppercase text-muted-foreground">
+          Global
+        </p>
+        <div className="mt-space-2xs flex flex-col gap-space-2xs pb-space-sm">
           {globalItems.map((item) => (
             <DrawerGlobalLink
               key={item.id}
@@ -147,7 +147,7 @@ type DrawerLinkProps = {
 };
 
 function DrawerLink({ link, pathname, onNavigate }: DrawerLinkProps) {
-  const active = pathname === link.href || pathname.startsWith(`${link.href}/`);
+  const active = isLinkActive(link, pathname);
 
   return (
     <Link
@@ -155,13 +155,22 @@ function DrawerLink({ link, pathname, onNavigate }: DrawerLinkProps) {
       aria-current={active ? 'page' : undefined}
       onClick={onNavigate}
       className={cn(
-        'flex items-center gap-space-sm rounded-xl px-space-sm py-space-2xs text-body-sm font-medium transition-colors motion-duration-short motion-ease-standard focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
+        'group flex items-center gap-space-sm rounded-2xl px-space-sm py-space-2xs text-body-md font-medium transition-colors motion-duration-short motion-ease-standard focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
         active
-          ? 'bg-primary text-on-primary shadow-level-1'
-          : 'bg-surface text-on-surface hover:bg-surface-container-high',
+          ? 'bg-secondary-container text-on-secondary-container shadow-level-1'
+          : 'text-on-surface hover:bg-surface-container state-layer-color-primary',
       )}
     >
-      {link.icon ? <Icon icon={resolveAppIcon(link.icon)} size="sm" className={cn('text-inherit', active ? 'text-on-primary' : 'text-on-surface/70')} /> : null}
+      {link.icon ? (
+        <Icon
+          icon={resolveAppIcon(link.icon)}
+          size="sm"
+          className={cn(
+            'text-inherit transition-colors',
+            active ? 'text-on-secondary-container' : 'text-on-surface/70',
+          )}
+        />
+      ) : null}
       <span className="truncate">{link.label}</span>
     </Link>
   );
@@ -174,7 +183,7 @@ type DrawerGlobalLinkProps = {
 };
 
 function DrawerGlobalLink({ item, pathname, onNavigate }: DrawerGlobalLinkProps) {
-  const active = isActive(item, pathname);
+  const active = isLinkActive(item, pathname);
 
   return (
     <Link
@@ -182,22 +191,22 @@ function DrawerGlobalLink({ item, pathname, onNavigate }: DrawerGlobalLinkProps)
       aria-current={active ? 'page' : undefined}
       onClick={onNavigate}
       className={cn(
-        'flex items-center justify-between gap-space-sm rounded-xl px-space-sm py-space-2xs text-body-sm font-medium transition-colors motion-duration-short motion-ease-standard focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
+        'flex items-center justify-between gap-space-sm rounded-2xl px-space-sm py-space-2xs text-body-md font-medium transition-colors motion-duration-short motion-ease-standard focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
         active
-          ? 'bg-primary text-on-primary shadow-level-1'
-          : 'bg-surface-container text-on-surface hover:bg-surface-container-high',
+          ? 'bg-secondary-container text-on-secondary-container shadow-level-1'
+          : 'text-on-surface hover:bg-surface-container state-layer-color-secondary',
       )}
     >
       <div className="flex items-center gap-space-sm">
         <Icon
           icon={resolveAppIcon(item.icon)}
           size="sm"
-          className={cn('text-inherit', active ? 'text-on-primary' : 'text-on-surface/70')}
+          className={cn('text-inherit', active ? 'text-on-secondary-container' : 'text-on-surface/70')}
         />
         <span className="truncate">{item.label}</span>
       </div>
       {item.description ? (
-        <span className={cn('text-label-sm', active ? 'text-on-primary/85' : 'text-muted-foreground')}>
+        <span className={cn('text-label-sm', active ? 'text-on-secondary-container/80' : 'text-muted-foreground')}>
           {item.description}
         </span>
       ) : null}
@@ -205,14 +214,19 @@ function DrawerGlobalLink({ item, pathname, onNavigate }: DrawerGlobalLinkProps)
   );
 }
 
-function isActive(item: PrimaryNavItem, pathname: string): boolean {
-  const matchPrefixes = item.match ?? [];
+function isLinkActive(
+  link: Pick<PortalLink, 'href' | 'match' | 'exact'> | PrimaryNavItem,
+  pathname: string,
+): boolean {
+  const matchPrefixes = link.match ?? [];
   if (matchPrefixes.length > 0) {
-    return matchPrefixes.some(
-      (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
-    );
+    return matchPrefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
   }
 
-  if (pathname === item.href) return true;
-  return pathname.startsWith(`${item.href}/`);
+  if ('exact' in link && link.exact) {
+    return pathname === link.href;
+  }
+
+  if (pathname === link.href) return true;
+  return pathname.startsWith(`${link.href}/`);
 }

@@ -1,6 +1,8 @@
 import type { PortalAccess } from '@/lib/portal-access';
+import { getWorkspaceNavBlueprint } from '@/lib/workspace-nav-blueprints';
+import type { WorkspaceId as WorkspaceIdentifier } from '@/lib/workspace-types';
 
-export type WorkspaceId = 'client' | 'admin' | 'org' | 'staff';
+export type WorkspaceId = WorkspaceIdentifier;
 
 export type WorkspaceOption = {
   id: WorkspaceId;
@@ -23,6 +25,25 @@ export type WorkspaceQuickAction = {
 
 const WORKSPACE_PRIORITY: WorkspaceId[] = ['admin', 'org', 'staff', 'client'];
 
+function workspaceEntryPath(workspaceId: WorkspaceId): string {
+  const blueprint = getWorkspaceNavBlueprint(workspaceId);
+  if (blueprint?.defaultRoute) {
+    return blueprint.defaultRoute;
+  }
+
+  switch (workspaceId) {
+    case 'admin':
+      return '/admin';
+    case 'org':
+      return '/org';
+    case 'staff':
+      return '/staff';
+    case 'client':
+    default:
+      return '/home';
+  }
+}
+
 export function resolveWorkspaceOptions(access: PortalAccess | null): WorkspaceOption[] {
   if (!access) {
     return [clientWorkspace()];
@@ -40,7 +61,7 @@ export function resolveWorkspaceOptions(access: PortalAccess | null): WorkspaceO
     options.push({
       id: 'admin',
       label: 'Admin workspace',
-      href: '/admin',
+      href: workspaceEntryPath('admin'),
       description: 'Team tooling for moderation, content, and operations.',
       roleLabel: resolveRoleLabel(access, 'admin'),
       statusLabel: resolveStatusLabel(access),
@@ -52,7 +73,7 @@ export function resolveWorkspaceOptions(access: PortalAccess | null): WorkspaceO
     options.push({
       id: 'org',
       label: 'Organization workspace',
-      href: '/org',
+      href: workspaceEntryPath('org'),
       description: 'Org-scoped controls for members, invites, and settings.',
       roleLabel: resolveRoleLabel(access, 'org'),
       statusLabel: resolveStatusLabel(access),
@@ -64,7 +85,7 @@ export function resolveWorkspaceOptions(access: PortalAccess | null): WorkspaceO
     options.push({
       id: 'staff',
       label: 'Staff workspace',
-      href: '/staff',
+      href: workspaceEntryPath('staff'),
       description: 'IHARC staff and volunteer caseload + outreach tools.',
       roleLabel: resolveRoleLabel(access, 'staff'),
       statusLabel: resolveStatusLabel(access),
@@ -212,7 +233,7 @@ function clientWorkspace(overrides: Partial<WorkspaceOption> = {}): WorkspaceOpt
   return {
     id: 'client',
     label: 'Client portal',
-    href: '/home',
+    href: workspaceEntryPath('client'),
     description: 'Client-facing navigation for neighbours using STEVI.',
     roleLabel: 'Client',
     statusLabel: 'Approved',

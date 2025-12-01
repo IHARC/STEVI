@@ -2,10 +2,9 @@ import type { ReactNode } from 'react';
 import { TopNav } from '@/components/layout/top-nav';
 import { SiteFooter } from '@/components/SiteFooter';
 import { ClientPreviewBanner } from '@/components/layout/client-preview-banner';
-import { WorkspaceClientNav } from '@/components/layout/workspace-client-nav';
 import { InboxPanel } from '@/components/layout/inbox-panel';
 import { WorkspaceDrawerDesktop } from '@/components/layout/workspace-drawer';
-import type { PortalLink, CommandPaletteItem, WorkspaceNav } from '@/lib/portal-access';
+import type { CommandPaletteItem, WorkspaceNav } from '@/lib/portal-access';
 import type { InboxItem } from '@/lib/inbox';
 import { cn } from '@/lib/utils';
 import type { PrimaryNavItem } from '@/lib/primary-nav';
@@ -17,7 +16,6 @@ type AppShellProps = {
   children: ReactNode;
   workspaceNav: WorkspaceNav | null;
   globalNavItems: PrimaryNavItem[];
-  clientNavLinks: PortalLink[];
   inboxItems: InboxItem[];
   activeWorkspace: WorkspaceId;
   navigation: UserNavigation;
@@ -29,18 +27,16 @@ export function AppShell({
   children,
   workspaceNav,
   globalNavItems,
-  clientNavLinks,
   inboxItems,
   activeWorkspace,
   navigation,
   branding,
   commandPaletteItems,
 }: AppShellProps) {
-  const showClientNav = activeWorkspace === 'client' && clientNavLinks.length > 0;
+  const showWorkspaceDrawer = Boolean(workspaceNav?.groups.length);
   const showInbox = inboxItems.length > 0;
   const showClientPreviewBanner = activeWorkspace === 'client';
-  const drawerGlobalItems = activeWorkspace === 'client' ? [] : globalNavItems;
-  const showWorkspaceDrawer = workspaceNav && activeWorkspace !== 'client';
+  const drawerGlobalItems = globalNavItems;
 
   return (
     <div className="flex min-h-screen bg-surface-container-lowest text-on-background">
@@ -56,11 +52,6 @@ export function AppShell({
           globalNavItems={drawerGlobalItems}
         />
         {showClientPreviewBanner ? <ClientPreviewBanner /> : null}
-        {showClientNav ? (
-          <div className="sticky top-[4.5rem] z-30 border-b border-outline/10 bg-surface-container-low/90 backdrop-blur-xl supports-[backdrop-filter]:bg-surface-container-low/75">
-            <WorkspaceClientNav links={clientNavLinks} />
-          </div>
-        ) : null}
         <main id="main-content" className="flex-1">
           <div className="mx-auto w-full max-w-page px-space-lg py-space-xl">
             <div

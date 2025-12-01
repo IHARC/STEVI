@@ -18,10 +18,10 @@ export function buildPrimaryNavItems(access: PortalAccess | null): PrimaryNavIte
   const items: PrimaryNavItem[] = [];
 
   if (access?.canAccessAdminWorkspace || access?.canAccessStaffWorkspace) {
-    const reportsHref = access?.canAccessAdminWorkspace ? '/admin/appointments' : '/staff/caseload';
+    const reportsHref = access?.canAccessAdminWorkspace ? '/admin/operations' : '/staff/overview';
     const reportMatches = access?.canAccessAdminWorkspace
-      ? ['/admin/appointments', '/admin/clients', '/admin/consents']
-      : ['/staff/caseload', '/staff/cases', '/staff/intake'];
+      ? ['/admin/operations', '/admin/approvals', '/admin/appointments']
+      : ['/staff/overview', '/staff/caseload', '/staff/tasks', '/staff/schedule'];
 
     items.push({
       id: 'reports',

@@ -1,0 +1,74 @@
+import type { ReactNode } from 'react';
+import Link from 'next/link';
+import type { LucideIcon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Icon } from '@/components/ui/icon';
+import { cn } from '@/lib/utils';
+
+type HeaderAction = {
+  label: string;
+  href: string;
+  icon?: LucideIcon;
+  ariaLabel?: string;
+};
+
+type WorkspacePageHeaderProps = {
+  eyebrow?: string;
+  title: string;
+  description?: ReactNode;
+  primaryAction?: HeaderAction;
+  secondaryAction?: HeaderAction;
+  align?: 'start' | 'center';
+  children?: ReactNode;
+};
+
+export function WorkspacePageHeader({
+  eyebrow,
+  title,
+  description,
+  primaryAction,
+  secondaryAction,
+  align = 'start',
+  children,
+}: WorkspacePageHeaderProps) {
+  const alignment = align === 'center' ? 'items-center text-center' : 'items-start text-left';
+  const widthClass = align === 'center' ? 'max-w-3xl' : 'max-w-4xl';
+
+  return (
+    <header className={cn('flex flex-wrap gap-space-md rounded-3xl bg-surface px-space-lg py-space-md shadow-level-1', alignment)}>
+      <div className={cn('space-y-space-2xs', widthClass)}>
+        {eyebrow ? (
+          <p className="inline-flex items-center gap-space-2xs rounded-full bg-surface-container-low px-space-sm py-space-3xs text-label-sm font-semibold uppercase tracking-label-uppercase text-primary">
+            {eyebrow}
+          </p>
+        ) : null}
+        <h1 className="text-headline-md text-on-surface sm:text-display-sm">{title}</h1>
+        {description ? (
+          <div className="text-body-md text-muted-foreground sm:text-body-lg">{description}</div>
+        ) : null}
+        {children}
+      </div>
+      {primaryAction || secondaryAction ? (
+        <div className="flex flex-wrap items-center gap-space-xs">
+          {primaryAction ? (
+            <Button asChild>
+              <Link href={primaryAction.href} aria-label={primaryAction.ariaLabel ?? primaryAction.label}>
+                {primaryAction.icon ? <Icon icon={primaryAction.icon} size="sm" className="mr-space-2xs" /> : null}
+                {primaryAction.label}
+              </Link>
+            </Button>
+          ) : null}
+          {secondaryAction ? (
+            <Button asChild variant="secondary">
+              <Link href={secondaryAction.href} aria-label={secondaryAction.ariaLabel ?? secondaryAction.label}>
+                {secondaryAction.icon ? <Icon icon={secondaryAction.icon} size="sm" className="mr-space-2xs" /> : null}
+                {secondaryAction.label}
+              </Link>
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
+    </header>
+  );
+}
+

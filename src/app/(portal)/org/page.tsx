@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
 import { fetchOrgInvites, fetchOrgMembersWithRoles, type OrgInviteRecord, type OrgMemberRecord } from '@/lib/org/fetchers';
 import type { Database } from '@/types/supabase';
+import { WorkspacePageHeader } from '@/components/layout/workspace-page-header';
+import { StatTile } from '@/components/ui/stat-tile';
 
 export const dynamic = 'force-dynamic';
 
@@ -83,7 +85,7 @@ export default async function OrgHomePage() {
   const orgName = organization?.name ?? 'your organization';
   const lastSeenLabel = lastSeenTimestamp ? formatDate(new Date(lastSeenTimestamp).toISOString()) : 'No recent activity';
 
-  type OrgSummaryCard = { id: string; label: string; value: string; tone?: 'default' | 'neutral' | 'warning' };
+  type OrgSummaryCard = { id: string; label: string; value: string; tone?: 'default' | 'warning' | 'info' };
 
   const summaryCards: OrgSummaryCard[] = [
     { id: 'members', label: 'Approved members', value: approvedMembers.length.toLocaleString() },
@@ -93,7 +95,7 @@ export default async function OrgHomePage() {
       id: 'invites',
       label: 'Pending invites',
       value: pendingInvites.toLocaleString(),
-      tone: pendingInvites > 0 ? 'warning' : 'neutral',
+      tone: pendingInvites > 0 ? 'warning' : 'default',
     },
   ];
 
@@ -121,35 +123,24 @@ export default async function OrgHomePage() {
 
   return (
     <div className="page-shell page-stack">
-      <header className="flex flex-wrap items-start justify-between gap-space-md">
-        <div className="space-y-space-2xs">
-          <p className="text-label-sm font-semibold uppercase text-muted-foreground">Organization workspace</p>
-          <h1 className="text-headline-md text-on-surface sm:text-display-sm">Manage {orgName}</h1>
-          <p className="max-w-4xl text-body-lg text-muted-foreground">
-            Track how your team is using STEVI, keep member access healthy, and jump into invites or settings without
-            leaving the organization workspace. All data respects Supabase RLS for your organization.
-          </p>
-          <div className="flex flex-wrap gap-space-xs">
-            {organization?.status ? (
-              <Badge variant={STATUS_VARIANT[organization.status] ?? 'outline'} className="capitalize">
-                {organization.status.replaceAll('_', ' ')}
-              </Badge>
-            ) : null}
-            <Badge variant="secondary" className="capitalize">
-              {access.portalRoles.includes('portal_org_admin') ? 'Org admin' : 'Org representative'}
-            </Badge>
-          </div>
-        </div>
-
+      <WorkspacePageHeader
+        eyebrow="Organization workspace"
+        title={`Manage ${orgName}`}
+        description="Track how your team is using STEVI, keep member access healthy, and jump into invites or settings without leaving the organization workspace. All data respects Supabase RLS for your organization."
+        primaryAction={{ label: 'Invite members', href: '/org/invites' }}
+        secondaryAction={{ label: 'Manage members', href: '/org/members' }}
+      >
         <div className="flex flex-wrap gap-space-xs">
-          <Button asChild>
-            <Link href="/org/invites">Invite members</Link>
-          </Button>
-          <Button asChild variant="secondary">
-            <Link href="/org/members">Manage members</Link>
-          </Button>
+          {organization?.status ? (
+            <Badge variant={STATUS_VARIANT[organization.status] ?? 'outline'} className="capitalize">
+              {organization.status.replaceAll('_', ' ')}
+            </Badge>
+          ) : null}
+          <Badge variant="secondary" className="capitalize">
+            {access.portalRoles.includes('portal_org_admin') ? 'Org admin' : 'Org representative'}
+          </Badge>
         </div>
-      </header>
+      </WorkspacePageHeader>
 
       <section className="grid gap-space-sm sm:grid-cols-2 lg:grid-cols-4">
         {summaryCards.map((card) => (
@@ -315,28 +306,6 @@ export default async function OrgHomePage() {
           </CardContent>
         </Card>
       </section>
-    </div>
-  );
-}
-
-function StatTile({
-  label,
-  value,
-  tone = 'default',
-}: {
-  label: string;
-  value: string;
-  tone?: 'default' | 'warning' | 'neutral';
-}) {
-  const toneClasses =
-    tone === 'warning'
-      ? 'border-primary/24 bg-primary-container text-on-primary-container'
-      : 'border-outline/12 bg-surface text-on-surface';
-
-  return (
-    <div className={`rounded-xl px-space-md py-space-md shadow-level-1 ${toneClasses}`}>
-      <p className="text-label-lg text-muted-foreground">{label}</p>
-      <p className="text-headline-md font-semibold">{value}</p>
     </div>
   );
 }
