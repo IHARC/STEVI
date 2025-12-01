@@ -4,46 +4,58 @@ import { SiteFooter } from '@/components/SiteFooter';
 import { ClientPreviewBanner } from '@/components/layout/client-preview-banner';
 import { WorkspaceClientNav } from '@/components/layout/workspace-client-nav';
 import { PrimaryNavRail } from '@/components/layout/primary-nav';
-import type { PortalLink, PortalAccess } from '@/lib/portal-access';
 import { InboxPanel } from '@/components/layout/inbox-panel';
+import type { PortalLink, CommandPaletteItem } from '@/lib/portal-access';
 import type { InboxItem } from '@/lib/inbox';
 import { cn } from '@/lib/utils';
-import { buildPrimaryNavItems } from '@/lib/primary-nav';
+import type { PrimaryNavItem } from '@/lib/primary-nav';
 import type { WorkspaceId } from '@/lib/workspaces';
+import type { ResolvedBrandingAssets } from '@/lib/marketing/branding';
+import type { UserNavigation } from '@/components/layout/user-nav';
 
-type PortalShellProps = {
+type AppShellProps = {
   children: ReactNode;
-  navLinks: PortalLink[];
-  portalAccess: PortalAccess | null;
-  inboxItems?: InboxItem[];
+  primaryNavItems: PrimaryNavItem[];
+  clientNavLinks: PortalLink[];
+  inboxItems: InboxItem[];
   activeWorkspace: WorkspaceId;
+  navigation: UserNavigation;
+  branding: ResolvedBrandingAssets;
+  commandPaletteItems: CommandPaletteItem[];
 };
 
-export function PortalShell({
+export function AppShell({
   children,
-  navLinks,
-  portalAccess,
-  inboxItems = [],
+  primaryNavItems,
+  clientNavLinks,
+  inboxItems,
   activeWorkspace,
-}: PortalShellProps) {
-  const showClientNav = activeWorkspace === 'client' && navLinks.length > 0;
+  navigation,
+  branding,
+  commandPaletteItems,
+}: AppShellProps) {
+  const showClientNav = activeWorkspace === 'client' && clientNavLinks.length > 0;
   const showInbox = inboxItems.length > 0;
-  const primaryNavItems = buildPrimaryNavItems(portalAccess);
   const showClientPreviewBanner = activeWorkspace === 'client';
 
   return (
     <div className="flex min-h-screen bg-surface-container-lowest text-on-background">
       <PrimaryNavRail items={primaryNavItems} />
       <div className="flex min-h-screen flex-1 flex-col">
-        <TopNav portalAccess={portalAccess} primaryNavItems={primaryNavItems} />
+        <TopNav
+          branding={branding}
+          navigation={navigation}
+          commands={commandPaletteItems}
+          primaryNavItems={primaryNavItems}
+        />
         {showClientPreviewBanner ? <ClientPreviewBanner /> : null}
         {showClientNav ? (
-          <div className="sticky top-[4.75rem] z-30 bg-surface-container-low/90 backdrop-blur-xl supports-[backdrop-filter]:bg-surface-container-low/75">
-            <WorkspaceClientNav links={navLinks} />
+          <div className="sticky top-[4.5rem] z-30 border-b border-outline/10 bg-surface-container-low/90 backdrop-blur-xl supports-[backdrop-filter]:bg-surface-container-low/75">
+            <WorkspaceClientNav links={clientNavLinks} />
           </div>
         ) : null}
         <main id="main-content" className="flex-1">
-          <div className="mx-auto w-full max-w-[1440px] px-space-lg py-space-xl">
+          <div className="mx-auto w-full max-w-page px-space-lg py-space-xl">
             <div
               className={cn(
                 'grid gap-space-xl',

@@ -1,5 +1,6 @@
 import { cache } from 'react';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
+import type { SupabaseAnyServerClient } from '@/lib/supabase/types';
 import {
   BrandingAssets,
   MARKETING_SETTINGS_KEYS,
@@ -24,8 +25,9 @@ function assertBrandingComplete(branding: BrandingAssets): ResolvedBrandingAsset
   return { logoLightUrl, logoDarkUrl, faviconUrl };
 }
 
-export const getBrandingAssets = cache(async (): Promise<ResolvedBrandingAssets> => {
-  const supabase = await createSupabaseRSCClient();
+export async function getBrandingAssetsWithClient(
+  supabase: SupabaseAnyServerClient,
+): Promise<ResolvedBrandingAssets> {
   const portal = supabase.schema('portal');
 
   const { data, error } = await portal
@@ -44,4 +46,9 @@ export const getBrandingAssets = cache(async (): Promise<ResolvedBrandingAssets>
   );
 
   return assertBrandingComplete(branding);
+}
+
+export const getBrandingAssets = cache(async (): Promise<ResolvedBrandingAssets> => {
+  const supabase = await createSupabaseRSCClient();
+  return getBrandingAssetsWithClient(supabase);
 });

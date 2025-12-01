@@ -1,30 +1,67 @@
 import type { ReactNode } from 'react';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { PortalShell } from '@/components/shells/portal-shell';
+import { AppShell } from '@/components/shells/app-shell';
 import { PortalAccessProvider } from '@/components/providers/portal-access-provider';
 import { WorkspaceContextProvider } from '@/components/providers/workspace-context-provider';
+import { PortalRequestProvider } from '@/components/providers/portal-request-context';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
-import { loadPortalAccess, resolveClientNavLinks, type PortalLink } from '@/lib/portal-access';
-import { inferWorkspaceFromPath, resolveDefaultWorkspacePath } from '@/lib/workspaces';
-import { fetchClientInboxItems } from '@/lib/inbox';
+import {
+  buildCommandPaletteItems,
+  loadPortalAccess,
+  resolveAdminWorkspaceNav,
+  resolveClientNavLinks,
+  resolveOrgWorkspaceNav,
+  resolveStaffWorkspaceNav,
+  type PortalLink,
+} from '@/lib/portal-access';
+import {
+  inferWorkspaceFromPath,
+  isClientPreview,
+  resolveDefaultWorkspacePath,
+  resolveWorkspaceQuickActions,
+  type WorkspaceId,
+} from '@/lib/workspaces';
+import { fetchWorkspaceInbox } from '@/lib/inbox';
 import { getOnboardingStatusForUser } from '@/lib/onboarding/status';
 import { normalizePathFromHeader } from '@/lib/paths';
+import { buildPrimaryNavItems } from '@/lib/primary-nav';
+import { getBrandingAssetsWithClient } from '@/lib/marketing/branding';
+import { getUserNavigation } from '@/components/layout/user-nav';
+import { buildEntityCommandPaletteItems } from '@/lib/command-palette';
 
 export const dynamic = 'force-dynamic';
 
 export default async function PortalLayout({ children }: { children: ReactNode }) {
-  const headerList = await headers();
+  const headerList = headers();
   const { pathname: currentPathname, path: currentPath } = normalizePathFromHeader(
     headerList.get('x-invoke-path') ?? headerList.get('next-url'),
     '/',
   );
-  const activeWorkspace = inferWorkspaceFromPath(currentPathname);
+  const activeWorkspace: WorkspaceId = inferWorkspaceFromPath(currentPathname);
   const supabase = await createSupabaseRSCClient();
   const portalAccess = await loadPortalAccess(supabase);
 
+  if (!portalAccess) {
+    const nextParam = encodeURIComponent(currentPath || '/home');
+    redirect(`/login?next=${nextParam}`);
+  }
+
+  const defaultWorkspacePath = resolveDefaultWorkspacePath(portalAccess);
+  const workspaceNav =
+    activeWorkspace === 'admin'
+      ? resolveAdminWorkspaceNav(portalAccess)
+      : activeWorkspace === 'org'
+        ? resolveOrgWorkspaceNav(portalAccess)
+        : activeWorkspace === 'staff'
+          ? resolveStaffWorkspaceNav(portalAccess)
+          : null;
+
+  if (activeWorkspace !== 'client' && !workspaceNav) {
+    redirect(defaultWorkspacePath);
+  }
+
   const shouldGateOnboarding =
-    portalAccess &&
     !portalAccess.canAccessAdminWorkspace &&
     !portalAccess.canAccessOrgWorkspace &&
     !portalAccess.canAccessStaffWorkspace &&
@@ -41,25 +78,47 @@ export default async function PortalLayout({ children }: { children: ReactNode }
   }
 
   const navLinks: PortalLink[] = resolveClientNavLinks(portalAccess);
-  const defaultWorkspacePath = resolveDefaultWorkspacePath(portalAccess);
-  const inboxItems = portalAccess ? await fetchClientInboxItems(supabase, portalAccess) : [];
+  const primaryNavItems = buildPrimaryNavItems(portalAccess);
+  const branding = await getBrandingAssetsWithClient(supabase);
+  const navigation = await getUserNavigation(portalAccess);
+
+  const previewingClient = isClientPreview(portalAccess, activeWorkspace);
+  const quickActions = resolveWorkspaceQuickActions(portalAccess, activeWorkspace, {
+    isPreview: previewingClient,
+  });
+  const inboxItems = await fetchWorkspaceInbox(supabase, portalAccess, activeWorkspace);
+  const actionCommands = quickActions
+    .filter((action) => !action.disabled)
+    .map((action) => ({ href: action.href, label: action.label, group: 'Actions' }));
+  const entityCommands = await buildEntityCommandPaletteItems(supabase, portalAccess);
+  const commandPaletteItems = buildCommandPaletteItems(portalAccess, [
+    ...actionCommands,
+    ...entityCommands,
+  ]);
 
   return (
-    <PortalAccessProvider access={portalAccess}>
-      <WorkspaceContextProvider access={portalAccess} defaultPath={defaultWorkspacePath}>
-        {activeWorkspace === 'client' ? (
-          <PortalShell
-            navLinks={navLinks}
-            portalAccess={portalAccess}
+    <PortalRequestProvider
+      value={{
+        portalAccess,
+        defaultWorkspacePath,
+        activeWorkspace,
+      }}
+    >
+      <PortalAccessProvider access={portalAccess}>
+        <WorkspaceContextProvider access={portalAccess} defaultPath={defaultWorkspacePath}>
+          <AppShell
+            primaryNavItems={primaryNavItems}
+            clientNavLinks={navLinks}
             inboxItems={inboxItems}
             activeWorkspace={activeWorkspace}
+            navigation={navigation}
+            branding={branding}
+            commandPaletteItems={commandPaletteItems}
           >
             {children}
-          </PortalShell>
-        ) : (
-          children
-        )}
-      </WorkspaceContextProvider>
-    </PortalAccessProvider>
+          </AppShell>
+        </WorkspaceContextProvider>
+      </PortalAccessProvider>
+    </PortalRequestProvider>
   );
 }

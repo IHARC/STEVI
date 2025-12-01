@@ -4,11 +4,11 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { WorkspaceNav } from '@/lib/portal-access';
 
-type AdminBreadcrumbsProps = {
+type WorkspaceBreadcrumbsProps = {
   nav: WorkspaceNav;
 };
 
-export function AdminBreadcrumbs({ nav }: AdminBreadcrumbsProps) {
+export function WorkspaceBreadcrumbs({ nav }: WorkspaceBreadcrumbsProps) {
   const pathname = usePathname();
 
   const match = nav.groups
@@ -16,7 +16,7 @@ export function AdminBreadcrumbs({ nav }: AdminBreadcrumbsProps) {
     .find(({ link }) => pathname === link.href || pathname.startsWith(`${link.href}/`));
 
   const trail = [
-    { label: nav.label, href: '/admin' },
+    { label: nav.label, href: `/${nav.id}` },
     match?.group ? { label: match.group } : null,
     match?.link ? { label: match.link.label } : null,
   ].filter(Boolean) as { label: string; href?: string }[];
@@ -26,7 +26,7 @@ export function AdminBreadcrumbs({ nav }: AdminBreadcrumbsProps) {
   }
 
   return (
-    <nav aria-label="Admin breadcrumbs" className="text-label-sm text-muted-foreground">
+    <nav aria-label={`${nav.label} breadcrumbs`} className="text-label-sm text-muted-foreground">
       <ol className="flex flex-wrap items-center gap-space-2xs rounded-2xl border border-outline/12 bg-surface-container-high px-space-sm py-space-2xs shadow-sm">
         {trail.map((item, index) => (
           <li key={`${item.label}-${index}`} className="flex items-center gap-space-2xs">

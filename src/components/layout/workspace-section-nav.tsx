@@ -15,18 +15,18 @@ import { resolveAppIcon } from '@/lib/app-icons';
 import { cn } from '@/lib/utils';
 import type { WorkspaceNav, PortalLink, NavGroup } from '@/lib/portal-access';
 
-type AdminNavProps = {
+type WorkspaceSectionNavProps = {
   nav: WorkspaceNav;
   variant?: 'desktop' | 'mobile';
 };
 
-export function AdminNav({ nav, variant = 'desktop' }: AdminNavProps) {
+export function WorkspaceSectionNav({ nav, variant = 'desktop' }: WorkspaceSectionNavProps) {
   const pathname = usePathname();
   const activeGroup = useMemo(() => findActiveGroup(nav, pathname), [nav, pathname]);
 
   if (variant === 'mobile') {
     return (
-      <MobileAdminNav
+      <WorkspaceSectionNavMobile
         nav={nav}
         pathname={pathname}
         activeGroupId={activeGroup?.id ?? null}
@@ -35,7 +35,7 @@ export function AdminNav({ nav, variant = 'desktop' }: AdminNavProps) {
   }
 
   return (
-    <DesktopAdminNav
+    <WorkspaceSectionNavDesktop
       nav={nav}
       pathname={pathname}
       activeGroupId={activeGroup?.id ?? null}
@@ -43,13 +43,17 @@ export function AdminNav({ nav, variant = 'desktop' }: AdminNavProps) {
   );
 }
 
-type DesktopAdminNavProps = {
+type WorkspaceSectionNavDesktopProps = {
   nav: WorkspaceNav;
   pathname: string;
   activeGroupId: string | null;
 };
 
-function DesktopAdminNav({ nav, pathname, activeGroupId }: DesktopAdminNavProps) {
+function WorkspaceSectionNavDesktop({
+  nav,
+  pathname,
+  activeGroupId,
+}: WorkspaceSectionNavDesktopProps) {
   const [collapsed, setCollapsed] = useState(false);
   const initialGroupId = activeGroupId ?? nav.groups[0]?.id ?? null;
   const { favorites, recents, toggleFavorite } = useNavMemory(nav, pathname);
@@ -114,20 +118,24 @@ function DesktopAdminNav({ nav, pathname, activeGroupId }: DesktopAdminNavProps)
   );
 }
 
-type MobileAdminNavProps = {
+type WorkspaceSectionNavMobileProps = {
   nav: WorkspaceNav;
   pathname: string;
   activeGroupId: string | null;
 };
 
-function MobileAdminNav({ nav, pathname, activeGroupId }: MobileAdminNavProps) {
+function WorkspaceSectionNavMobile({
+  nav,
+  pathname,
+  activeGroupId,
+}: WorkspaceSectionNavMobileProps) {
   const [open, setOpen] = useState(false);
   const initialGroupId = activeGroupId ?? nav.groups[0]?.id ?? null;
 
   const activeLabel = useMemo(() => {
     const match = nav.groups.flatMap((group) => group.links).find((link) => isLinkActive(link, pathname));
-    return match?.label ?? 'Admin navigation';
-  }, [nav.groups, pathname]);
+    return match?.label ?? `${nav.label} navigation`;
+  }, [nav.groups, nav.label, pathname]);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -195,7 +203,7 @@ function NavSections({ nav, pathname, onNavigate, initialGroupId, onToggleFavori
           <AccordionContent className="px-space-xs">
             <div className="space-y-space-2xs pb-space-sm pt-space-2xs">
               {group.links.map((link) => (
-                <AdminNavLink
+                <WorkspaceSectionNavLink
                   key={link.href}
                   link={link}
                   pathname={pathname}
@@ -242,8 +250,9 @@ function PinnedSection({ title, items, icon: IconComponent }: PinnedSectionProps
 }
 
 function useNavMemory(nav: WorkspaceNav, pathname: string) {
-  const FAVORITES_KEY = 'stevi-admin-favorites';
-  const RECENTS_KEY = 'stevi-admin-recents';
+  const storageNamespace = `stevi-workspace-${nav.id}`;
+  const FAVORITES_KEY = `${storageNamespace}-favorites`;
+  const RECENTS_KEY = `${storageNamespace}-recents`;
   const allLinks = useMemo(() => nav.groups.flatMap((g) => g.links), [nav.groups]);
 
   const [favorites, setFavorites] = useState<PortalLink[]>(() => {
@@ -275,7 +284,7 @@ function useNavMemory(nav: WorkspaceNav, pathname: string) {
         return next;
       });
     });
-  }, [pathname, allLinks]);
+  }, [pathname, allLinks, RECENTS_KEY]);
 
   const toggleFavorite = (link: PortalLink) => {
     setFavorites((prev) => {
@@ -324,7 +333,7 @@ function CollapsedNavGroups({ nav, pathname }: CollapsedNavGroupsProps) {
               </div>
               <div className="space-y-space-2xs">
                 {group.links.map((link) => (
-                  <AdminNavLink key={link.href} link={link} pathname={pathname} />
+                  <WorkspaceSectionNavLink key={link.href} link={link} pathname={pathname} />
                 ))}
               </div>
             </PopoverContent>
@@ -335,7 +344,7 @@ function CollapsedNavGroups({ nav, pathname }: CollapsedNavGroupsProps) {
   );
 }
 
-type AdminNavLinkProps = {
+type WorkspaceSectionNavLinkProps = {
   link: PortalLink;
   pathname: string;
   onNavigate?: () => void;
@@ -343,7 +352,13 @@ type AdminNavLinkProps = {
   isFavorite?: boolean;
 };
 
-function AdminNavLink({ link, pathname, onNavigate, onToggleFavorite, isFavorite }: AdminNavLinkProps) {
+function WorkspaceSectionNavLink({
+  link,
+  pathname,
+  onNavigate,
+  onToggleFavorite,
+  isFavorite,
+}: WorkspaceSectionNavLinkProps) {
   const active = isLinkActive(link, pathname);
 
   return (

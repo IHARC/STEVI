@@ -6,7 +6,7 @@ import { buildUserMenuLinks, loadPortalAccess, type PortalAccess } from '@/lib/p
 import { AuthLinks } from '@/components/layout/auth-links';
 import { UserMenu } from '@/components/layout/user-menu';
 
-type UserNavigation = {
+export type UserNavigation = {
   desktop: ReactNode;
   mobile: ReactNode;
 };
