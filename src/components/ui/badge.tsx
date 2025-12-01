@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils"
 import { getStateLayerClasses, type StateLayerTone } from "@/lib/state-layer"
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-label-sm transition-colors motion-duration-short motion-ease-standard focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  "inline-flex items-center rounded-[var(--md-sys-shape-corner-extra-small)] border px-2.5 py-0.5 text-label-sm transition-colors motion-duration-short motion-ease-standard focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
   {
     variants: {
       variant: {

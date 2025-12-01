@@ -55,7 +55,7 @@ export function QuickCreateButton() {
         <Button
           type="button"
           size="sm"
-          className="gap-space-2xs rounded-full"
+          className="gap-space-2xs"
           disabled={availableActions.length === 0}
         >
           <Icon icon={Plus} size="sm" />

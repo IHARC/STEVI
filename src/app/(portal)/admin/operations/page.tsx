@@ -10,6 +10,7 @@ import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
 import { NotificationsChart } from '../notifications-chart';
 import { WorkspacePageHeader } from '@/components/layout/workspace-page-header';
 import { StatTile } from '@/components/ui/stat-tile';
+import { cn } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -116,7 +117,7 @@ export default async function AdminOperationsPage() {
         secondaryAction={{ label: 'Send notification', href: '/admin/notifications' }}
       />
 
-      <section className="grid gap-space-sm sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      <section className="grid gap-space-md sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {metricCards.map((card) => (
           <StatTile key={card.id} label={card.label} value={card.value} tone={card.tone} />
         ))}
@@ -145,7 +146,7 @@ export default async function AdminOperationsPage() {
             <CardTitle className="text-title-lg">Attention queue</CardTitle>
             <CardDescription>Work the highest-risk items first.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-space-sm">
+          <CardContent className="space-y-space-xs">
             <AttentionItem
               label="Pending profile approvals"
               count={snapshot.pendingProfiles}
@@ -178,13 +179,22 @@ function AttentionItem({
   tone?: 'default' | 'warning';
 }) {
   return (
-    <div className="flex items-center justify-between gap-space-sm rounded-2xl border border-outline/12 bg-surface-container-high px-space-md py-space-sm">
-      <div>
-        <p className="text-body-sm text-on-surface">{label}</p>
-        <p className="text-label-sm text-muted-foreground">RLS enforced in destination workspace.</p>
+    <div className="flex items-center justify-between gap-space-sm rounded-[var(--md-sys-shape-corner-small)] px-space-sm py-space-sm transition-colors state-layer-color-neutral hover:bg-surface-container">
+      <div className="space-y-space-3xs">
+        <p className="text-body-md font-medium text-on-surface">{label}</p>
+        <p className="text-label-sm text-on-surface-variant">RLS enforced in destination workspace.</p>
       </div>
       <div className="flex items-center gap-space-sm">
-        <Badge variant={tone === 'warning' ? 'destructive' : 'secondary'}>{formatCount(count)}</Badge>
+        <Badge
+          variant={tone === 'warning' ? 'secondary' : 'outline'}
+          className={cn(
+            tone === 'warning'
+              ? 'border-primary/20 bg-primary-container text-on-primary-container'
+              : 'border-outline/30 text-on-surface-variant',
+          )}
+        >
+          {formatCount(count)}
+        </Badge>
         <Button asChild variant="outline" size="sm">
           <Link href={href}>Open</Link>
         </Button>
@@ -198,4 +208,3 @@ function sevenDaysAgoIso() {
   now.setDate(now.getDate() - 7);
   return now.toISOString();
 }
-

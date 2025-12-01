@@ -19,7 +19,6 @@ type AppShellProps = {
   workspaceOptions: WorkspaceOption[];
   inboxItems: InboxItem[];
   activeWorkspace: WorkspaceId;
-  currentPath: string;
   isClientPreview: boolean;
   navigation: UserNavigation;
   branding: ResolvedBrandingAssets;
@@ -33,7 +32,6 @@ export function AppShell({
   workspaceOptions,
   inboxItems,
   activeWorkspace,
-  currentPath,
   isClientPreview,
   navigation,
   branding,
@@ -46,7 +44,7 @@ export function AppShell({
   return (
     <div className="flex min-h-screen bg-surface-container-lowest text-on-background">
       {showWorkspaceDrawer ? (
-        <WorkspaceDrawerDesktop workspaceNav={workspaceNav} />
+        <WorkspaceDrawerDesktop workspaceNav={workspaceNav} globalNavItems={globalNavItems} />
       ) : null}
       <div className="flex min-h-screen flex-1 flex-col">
         <TopNav
@@ -57,20 +55,19 @@ export function AppShell({
           globalNavItems={globalNavItems}
           workspaceOptions={workspaceOptions}
           activeWorkspace={activeWorkspace}
-          currentPath={currentPath}
           isClientPreview={isClientPreview}
         />
         {showClientPreviewBanner ? <ClientPreviewBanner /> : null}
         <main id="main-content" className="flex-1">
-          <div className="mx-auto w-full max-w-page px-space-lg py-space-xl">
+          <div className="mx-auto w-full max-w-page px-space-lg py-space-lg">
             <div
               className={cn(
-                'grid gap-space-xl',
+                'grid gap-space-lg',
                 showInbox ? 'xl:grid-cols-[minmax(0,1fr)_22rem]' : 'grid-cols-1',
               )}
             >
               <section className="min-w-0">
-                <div className="space-y-space-xl [&_.page-shell]:!w-full [&_.page-shell]:!max-w-none [&_.page-shell]:!p-0 [&_.page-stack]:!gap-space-xl">
+                <div className="space-y-space-lg [&_.page-shell]:!w-full [&_.page-shell]:!max-w-none [&_.page-shell]:!p-0 [&_.page-stack]:!gap-space-lg">
                   {children}
                 </div>
               </section>

@@ -51,7 +51,7 @@ export function ThemeToggle() {
         <Button
           variant="ghost"
           size="icon"
-          className="h-10 w-10 rounded-full bg-transparent text-on-surface transition-colors motion-duration-short motion-ease-standard hover:bg-surface-container focus-visible:ring-primary"
+          className="h-10 w-10 rounded-[var(--md-sys-shape-corner-extra-small)] bg-transparent text-on-surface transition-colors motion-duration-short motion-ease-standard hover:bg-surface-container focus-visible:ring-primary"
           aria-label="Toggle color theme"
         >
           <Icon icon={ActiveIcon} size="md" aria-hidden />

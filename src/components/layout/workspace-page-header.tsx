@@ -31,20 +31,25 @@ export function WorkspacePageHeader({
   align = 'start',
   children,
 }: WorkspacePageHeaderProps) {
-  const alignment = align === 'center' ? 'items-center text-center' : 'items-start text-left';
+  const alignment = align === 'center' ? 'items-center justify-center text-center' : 'items-start justify-between text-left';
   const widthClass = align === 'center' ? 'max-w-3xl' : 'max-w-4xl';
 
   return (
-    <header className={cn('flex flex-wrap gap-space-md rounded-3xl bg-surface px-space-lg py-space-md shadow-level-1', alignment)}>
+    <header
+      className={cn(
+        'flex flex-wrap gap-space-md border-b border-outline/12 pb-space-md pt-space-sm',
+        alignment,
+      )}
+    >
       <div className={cn('space-y-space-2xs', widthClass)}>
         {eyebrow ? (
-          <p className="inline-flex items-center gap-space-2xs rounded-full bg-surface-container-low px-space-sm py-space-3xs text-label-sm font-semibold uppercase tracking-label-uppercase text-primary">
+          <p className="text-label-sm font-medium text-on-surface-variant">
             {eyebrow}
           </p>
         ) : null}
-        <h1 className="text-headline-md text-on-surface sm:text-display-sm">{title}</h1>
+        <h1 className="text-headline-sm text-on-surface sm:text-headline-md">{title}</h1>
         {description ? (
-          <div className="text-body-md text-muted-foreground sm:text-body-lg">{description}</div>
+          <div className="text-body-md text-on-surface-variant sm:text-body-lg">{description}</div>
         ) : null}
         {children}
       </div>
@@ -71,4 +76,3 @@ export function WorkspacePageHeader({
     </header>
   );
 }
-

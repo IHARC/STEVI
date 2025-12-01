@@ -81,7 +81,6 @@ export default async function PortalLayout({ children }: { children: ReactNode }
           workspaceOptions={workspaceOptions}
           inboxItems={inboxItems}
           activeWorkspace={activeWorkspace}
-          currentPath={currentPathname}
           isClientPreview={previewingClient}
           navigation={navigation}
           branding={branding}

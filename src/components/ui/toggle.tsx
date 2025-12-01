@@ -5,18 +5,18 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const toggleVariants = cva(
-  "inline-flex items-center justify-center rounded-md text-body-md font-medium ring-offset-background transition-colors hover:bg-muted hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-accent data-[state=on]:text-accent-foreground",
+  "inline-flex items-center justify-center rounded-[var(--md-sys-shape-corner-small)] text-label-md font-semibold text-on-surface-variant transition-colors motion-duration-short motion-ease-standard ring-offset-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-secondary-container data-[state=on]:text-on-secondary-container",
   {
     variants: {
       variant: {
-        default: "bg-transparent",
+        default: "bg-transparent hover:bg-surface-container",
         outline:
-          "border border-input bg-transparent hover:bg-accent hover:text-accent-foreground",
+          "border border-outline/40 bg-surface-container-low hover:bg-surface-container",
       },
       size: {
         default: "h-10 px-space-sm",
-        sm: "h-9 px-[calc(var(--md-sys-spacing-sm)-(var(--md-sys-spacing-2xs)/2))]",
-        lg: "h-11 px-[calc(var(--md-sys-spacing-xl)-var(--md-sys-spacing-sm))]",
+        sm: "h-9 px-space-sm",
+        lg: "h-11 px-space-md",
       },
     },
     defaultVariants: {
