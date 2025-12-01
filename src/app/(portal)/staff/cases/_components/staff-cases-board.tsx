@@ -127,8 +127,8 @@ export function StaffCasesBoard({ cases, caseload, shifts }: StaffCasesBoardProp
             <div className="space-y-space-2xs">
               <CardTitle className="text-title-lg">Cases</CardTitle>
               <CardDescription>
-                Saved views filter by status, priority, and schedule. Use / to search, N to log outreach, ⇧ + ⌘/Ctrl + W
-                to switch workspaces.
+                Saved views filter by status, priority, and schedule. Use / to search, N to log outreach, and the header
+                workspace bar to change workspaces.
               </CardDescription>
             </div>
             <div className="flex w-full flex-col gap-space-2xs sm:max-w-md">

@@ -7,7 +7,7 @@ Date: 2025-12-01
 - Stack: Next.js 16 (App Router), React 19, Tailwind with Material 3 tokens. Build via `node build.js` (runs `eslint .` then `next build --webpack`).
 - Auth: use `createSupabaseServerClient` in actions/route handlers for any cookie writes; RSC client is read-only.
 - Keep surfaces dynamic (`dynamic = 'force-dynamic'`) for authed content.
-- Navigation UX principle (desktop/tablet): persistent global top bar for workspace switcher, user menu, and global tools; separate workspace-scoped left drawer showing only the active workspace’s pages. Mobile uses sheet/modal but follows the same global-vs-workspace separation.
+- Navigation UX principle (desktop/tablet): persistent global top bar with workspace tabs and global tools; separate workspace-scoped left drawer showing only the active workspace’s pages. Mobile uses sheet/modal but follows the same global-vs-workspace separation.
 
 ## Current state (audit)
 - Navigation data lives inside `src/lib/portal-access.ts` (`CLIENT_NAV_BLUEPRINT`, `ADMIN/ORG/STAFF` blueprints). Icons are required on groups; items lack per-feature flags beyond guards/roles. Blueprint does not include client workspace and is limited to existing links.
@@ -36,11 +36,10 @@ Date: 2025-12-01
 
 4) **WorkspaceDrawer redesign**
    - Implement single `WorkspaceDrawer` that renders for all authenticated workspaces (client/staff/admin). Strictly follow M3 navigation drawer spec/tokens: surface or surfaceContainerLowest background, selected state on `secondaryContainer`, text on `onSecondaryContainer`, standard drawer radius/shape, divider before global items.
-   - Drawer content is workspace-scoped only; global controls live in the top bar. Support partial path matches via `href` + `match` prefixes. Support mobile sheet toggle via existing hamburger.
-   - Keep Reports + Settings pinned to bottom from `PrimaryNavItem` list; available regardless of workspace when allowed, styled per M3.
+   - Drawer content is workspace-scoped only; global controls live in the top bar (no pinned global footer). Support partial path matches via `href` + `match` prefixes. Support mobile sheet toggle via existing hamburger.
 
 5) **Integrate top bar + drawer into AppShell**
-   - Keep a global top app bar on desktop/tablet that always shows branding, workspace switcher, user menu, command palette/quick create, and other global tools; no workspace-specific links in the top bar.
+   - Keep a global top app bar on desktop/tablet that always shows branding, workspace tabs, user menu, command palette/quick create, and other global tools; no workspace-specific links in the top bar.
    - Always render the workspace drawer for the active workspace (client/staff/admin) on desktop/tablet; hide only when the workspace has no items. Hamburger opens the same drawer on mobile.
    - Remove/replace `WorkspaceSectionLayout` usage; pages render directly within the shell and rely on the standardized page header component instead of breadcrumbs.
 
@@ -51,7 +50,7 @@ Date: 2025-12-01
    - Extract stat tile used on admin operations page into `components/ui/stat-tile.tsx` (or similar) using M3 tokens. Reuse across admin operations, admin website, admin inventory, and any new dashboards. Provide props for tone (default/warning/info) and optional icon/footnote.
 
 8) **Route selection & defaults**
-   - Use Next.js `usePathname` to compute active nav item with prefix matching (`href` or `match[]`). Define `defaultRoute` per workspace and ensure workspace switcher / redirects use it (update `resolveDefaultWorkspace` if needed). Map `/admin` to `/admin/operations` without breaking existing data fetches.
+   - Use Next.js `usePathname` to compute active nav item with prefix matching (`href` or `match[]`). Define `defaultRoute` per workspace and ensure workspace selection / redirects use it (update `resolveDefaultWorkspace` if needed). Map `/admin` to `/admin/operations` without breaking existing data fetches.
 
 9) **Cleanup**
    - Remove/deprecate components no longer needed after drawer/header changes: `WorkspaceSectionLayout`, `WorkspaceBreadcrumbs`, any unused `portal-nav*` remnants. Update imports accordingly.

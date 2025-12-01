@@ -10,6 +10,7 @@ import {
 } from '@/lib/portal-access';
 import {
   isClientPreview,
+  resolveWorkspaceOptions,
   resolveWorkspaceQuickActions,
 } from '@/lib/workspaces';
 import { fetchWorkspaceInbox } from '@/lib/inbox';
@@ -53,6 +54,7 @@ export default async function PortalLayout({ children }: { children: ReactNode }
   }
 
   const primaryNavItems = buildPrimaryNavItems(portalAccess);
+  const workspaceOptions = resolveWorkspaceOptions(portalAccess);
   const branding = await getBrandingAssetsWithClient(supabase);
   const navigation = await getUserNavigation(portalAccess);
 
@@ -76,8 +78,11 @@ export default async function PortalLayout({ children }: { children: ReactNode }
         <AppShell
           workspaceNav={workspaceNav}
           globalNavItems={primaryNavItems}
+          workspaceOptions={workspaceOptions}
           inboxItems={inboxItems}
           activeWorkspace={activeWorkspace}
+          currentPath={currentPathname}
+          isClientPreview={previewingClient}
           navigation={navigation}
           branding={branding}
           commandPaletteItems={commandPaletteItems}

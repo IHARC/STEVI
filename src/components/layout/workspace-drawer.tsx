@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu } from 'lucide-react';
 import type { WorkspaceNav, PortalLink } from '@/lib/portal-access';
-import type { PrimaryNavItem } from '@/lib/primary-nav';
 import { resolveAppIcon } from '@/lib/app-icons';
 import { cn } from '@/lib/utils';
 import { Icon } from '@/components/ui/icon';
@@ -15,13 +14,12 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 
 type WorkspaceDrawerProps = {
   workspaceNav: WorkspaceNav | null;
-  globalItems: PrimaryNavItem[];
   className?: string;
 };
 
-export function WorkspaceDrawerDesktop({ workspaceNav, globalItems, className }: WorkspaceDrawerProps) {
+export function WorkspaceDrawerDesktop({ workspaceNav, className }: WorkspaceDrawerProps) {
   const pathname = usePathname() ?? '/';
-  const hasNav = Boolean(workspaceNav?.groups.length) || globalItems.length > 0;
+  const hasNav = Boolean(workspaceNav?.groups.length);
 
   if (!hasNav) return null;
 
@@ -33,15 +31,15 @@ export function WorkspaceDrawerDesktop({ workspaceNav, globalItems, className }:
         className,
       )}
     >
-      <DrawerContent workspaceNav={workspaceNav} globalItems={globalItems} pathname={pathname} />
+      <DrawerContent workspaceNav={workspaceNav} pathname={pathname} />
     </nav>
   );
 }
 
-export function WorkspaceDrawerMobile({ workspaceNav, globalItems }: WorkspaceDrawerProps) {
+export function WorkspaceDrawerMobile({ workspaceNav }: WorkspaceDrawerProps) {
   const pathname = usePathname() ?? '/';
   const [open, setOpen] = useState(false);
-  const hasNav = Boolean(workspaceNav?.groups.length) || globalItems.length > 0;
+  const hasNav = Boolean(workspaceNav?.groups.length);
 
   if (!hasNav) return null;
 
@@ -62,12 +60,11 @@ export function WorkspaceDrawerMobile({ workspaceNav, globalItems }: WorkspaceDr
           <SheetTitle className="text-title-lg">
             {workspaceNav?.label ?? 'Navigation'}
           </SheetTitle>
-          <p className="text-body-sm text-muted-foreground">Switch sections and global tools.</p>
+          <p className="text-body-sm text-muted-foreground">Browse workspace sections.</p>
         </SheetHeader>
         <ScrollArea className="h-full px-space-lg pb-space-lg">
           <DrawerContent
             workspaceNav={workspaceNav}
-            globalItems={globalItems}
             pathname={pathname}
             onNavigate={() => setOpen(false)}
           />
@@ -79,12 +76,11 @@ export function WorkspaceDrawerMobile({ workspaceNav, globalItems }: WorkspaceDr
 
 type DrawerContentProps = {
   workspaceNav: WorkspaceNav | null;
-  globalItems: PrimaryNavItem[];
   pathname: string;
   onNavigate?: () => void;
 };
 
-function DrawerContent({ workspaceNav, globalItems, pathname, onNavigate }: DrawerContentProps) {
+function DrawerContent({ workspaceNav, pathname, onNavigate }: DrawerContentProps) {
   const groups = workspaceNav?.groups ?? [];
   const headerLabel = workspaceNav?.label ?? 'Workspace';
 
@@ -118,21 +114,6 @@ function DrawerContent({ workspaceNav, globalItems, pathname, onNavigate }: Draw
                 ))}
               </div>
             </div>
-          ))}
-        </div>
-      </div>
-      <div className="mt-auto border-t border-outline/12 px-space-md py-space-sm">
-        <p className="text-label-sm font-semibold uppercase tracking-label-uppercase text-muted-foreground">
-          Global
-        </p>
-        <div className="mt-space-2xs flex flex-col gap-space-2xs pb-space-sm">
-          {globalItems.map((item) => (
-            <DrawerGlobalLink
-              key={item.id}
-              item={item}
-              pathname={pathname}
-              onNavigate={onNavigate}
-            />
           ))}
         </div>
       </div>
@@ -176,48 +157,7 @@ function DrawerLink({ link, pathname, onNavigate }: DrawerLinkProps) {
   );
 }
 
-type DrawerGlobalLinkProps = {
-  item: PrimaryNavItem;
-  pathname: string;
-  onNavigate?: () => void;
-};
-
-function DrawerGlobalLink({ item, pathname, onNavigate }: DrawerGlobalLinkProps) {
-  const active = isLinkActive(item, pathname);
-
-  return (
-    <Link
-      href={item.href}
-      aria-current={active ? 'page' : undefined}
-      onClick={onNavigate}
-      className={cn(
-        'flex items-center justify-between gap-space-sm rounded-2xl px-space-sm py-space-2xs text-body-md font-medium transition-colors motion-duration-short motion-ease-standard focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
-        active
-          ? 'bg-secondary-container text-on-secondary-container shadow-level-1'
-          : 'text-on-surface hover:bg-surface-container state-layer-color-secondary',
-      )}
-    >
-      <div className="flex items-center gap-space-sm">
-        <Icon
-          icon={resolveAppIcon(item.icon)}
-          size="sm"
-          className={cn('text-inherit', active ? 'text-on-secondary-container' : 'text-on-surface/70')}
-        />
-        <span className="truncate">{item.label}</span>
-      </div>
-      {item.description ? (
-        <span className={cn('text-label-sm', active ? 'text-on-secondary-container/80' : 'text-muted-foreground')}>
-          {item.description}
-        </span>
-      ) : null}
-    </Link>
-  );
-}
-
-function isLinkActive(
-  link: Pick<PortalLink, 'href' | 'match' | 'exact'> | PrimaryNavItem,
-  pathname: string,
-): boolean {
+function isLinkActive(link: Pick<PortalLink, 'href' | 'match' | 'exact'>, pathname: string): boolean {
   const matchPrefixes = link.match ?? [];
   if (matchPrefixes.length > 0) {
     return matchPrefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));

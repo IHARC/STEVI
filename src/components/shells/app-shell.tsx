@@ -8,7 +8,7 @@ import type { CommandPaletteItem, WorkspaceNav } from '@/lib/portal-access';
 import type { InboxItem } from '@/lib/inbox';
 import { cn } from '@/lib/utils';
 import type { PrimaryNavItem } from '@/lib/primary-nav';
-import type { WorkspaceId } from '@/lib/workspaces';
+import type { WorkspaceId, WorkspaceOption } from '@/lib/workspaces';
 import type { ResolvedBrandingAssets } from '@/lib/marketing/branding';
 import type { UserNavigation } from '@/components/layout/user-nav';
 
@@ -16,8 +16,11 @@ type AppShellProps = {
   children: ReactNode;
   workspaceNav: WorkspaceNav | null;
   globalNavItems: PrimaryNavItem[];
+  workspaceOptions: WorkspaceOption[];
   inboxItems: InboxItem[];
   activeWorkspace: WorkspaceId;
+  currentPath: string;
+  isClientPreview: boolean;
   navigation: UserNavigation;
   branding: ResolvedBrandingAssets;
   commandPaletteItems: CommandPaletteItem[];
@@ -27,21 +30,23 @@ export function AppShell({
   children,
   workspaceNav,
   globalNavItems,
+  workspaceOptions,
   inboxItems,
   activeWorkspace,
+  currentPath,
+  isClientPreview,
   navigation,
   branding,
   commandPaletteItems,
 }: AppShellProps) {
   const showWorkspaceDrawer = Boolean(workspaceNav?.groups.length);
   const showInbox = inboxItems.length > 0;
-  const showClientPreviewBanner = activeWorkspace === 'client';
-  const drawerGlobalItems = globalNavItems;
+  const showClientPreviewBanner = isClientPreview;
 
   return (
     <div className="flex min-h-screen bg-surface-container-lowest text-on-background">
       {showWorkspaceDrawer ? (
-        <WorkspaceDrawerDesktop workspaceNav={workspaceNav} globalItems={drawerGlobalItems} />
+        <WorkspaceDrawerDesktop workspaceNav={workspaceNav} />
       ) : null}
       <div className="flex min-h-screen flex-1 flex-col">
         <TopNav
@@ -49,7 +54,11 @@ export function AppShell({
           navigation={navigation}
           commands={commandPaletteItems}
           workspaceNav={showWorkspaceDrawer ? workspaceNav : null}
-          globalNavItems={drawerGlobalItems}
+          globalNavItems={globalNavItems}
+          workspaceOptions={workspaceOptions}
+          activeWorkspace={activeWorkspace}
+          currentPath={currentPath}
+          isClientPreview={isClientPreview}
         />
         {showClientPreviewBanner ? <ClientPreviewBanner /> : null}
         <main id="main-content" className="flex-1">

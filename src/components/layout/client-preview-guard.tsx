@@ -26,7 +26,7 @@ export function ClientPreviewGuard({ children, message }: ClientPreviewGuardProp
       </Alert>
       {children}
       <p className="text-label-sm text-muted-foreground">
-        You can exit preview from the workspace switcher or banner to re-enable actions.
+        Use the workspace bar in the header or the banner to exit preview and re-enable actions.
       </p>
     </div>
   );

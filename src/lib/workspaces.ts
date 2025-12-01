@@ -1,6 +1,7 @@
 import type { PortalAccess } from '@/lib/portal-access';
 import { getWorkspaceNavBlueprint } from '@/lib/workspace-nav-blueprints';
 import type { WorkspaceId as WorkspaceIdentifier } from '@/lib/workspace-types';
+import { stripRouteGroups } from '@/lib/paths';
 
 export type WorkspaceId = WorkspaceIdentifier;
 
@@ -113,9 +114,11 @@ export function resolveDefaultWorkspacePath(access: PortalAccess | null): string
 }
 
 export function inferWorkspaceFromPath(pathname: string): WorkspaceId {
-  if (pathname.startsWith('/admin')) return 'admin';
-  if (pathname.startsWith('/org')) return 'org';
-  if (pathname.startsWith('/staff')) return 'staff';
+  const normalizedPath = stripRouteGroups(pathname);
+
+  if (normalizedPath.startsWith('/admin')) return 'admin';
+  if (normalizedPath.startsWith('/org')) return 'org';
+  if (normalizedPath.startsWith('/staff')) return 'staff';
   return 'client';
 }
 
