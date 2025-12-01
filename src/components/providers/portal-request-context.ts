@@ -5,7 +5,7 @@ import { loadPortalAccess, type PortalAccess } from '@/lib/portal-access';
 import { normalizePathFromHeader } from '@/lib/paths';
 import {
   inferWorkspaceFromPath,
-  resolveDefaultWorkspacePath,
+  resolveDefaultWorkspace,
   type WorkspaceId,
 } from '@/lib/workspaces';
 import type { SupabaseRSCClient } from '@/lib/supabase/types';
@@ -21,7 +21,7 @@ export type PortalRequestContextValue = {
 
 export async function getPortalRequestContext(): Promise<PortalRequestContextValue> {
   const headerList = await headers();
-  const { pathname: currentPathname, path: currentPath } = normalizePathFromHeader(
+  const normalizedPath = normalizePathFromHeader(
     headerList.get('x-invoke-path') ?? headerList.get('next-url'),
     '/',
   );
@@ -30,19 +30,33 @@ export async function getPortalRequestContext(): Promise<PortalRequestContextVal
   const portalAccess = await loadPortalAccess(supabase);
 
   if (!portalAccess) {
-    const nextParam = encodeURIComponent(currentPath || '/home');
+    const nextParam = encodeURIComponent(normalizedPath.path || '/home');
     redirect(`/login?next=${nextParam}`);
   }
 
-  const defaultWorkspacePath = resolveDefaultWorkspacePath(portalAccess);
-  const activeWorkspace = inferWorkspaceFromPath(currentPathname);
+  const defaultWorkspaceOption = resolveDefaultWorkspace(portalAccess);
+  const defaultWorkspacePath = defaultWorkspaceOption.href;
+
+  // If we could not reliably detect the current path (e.g., header missing),
+  // fall back to the user's highest-priority workspace so navigation matches
+  // their access level instead of defaulting to the client workspace.
+  const effectivePathname =
+    !normalizedPath.pathname || normalizedPath.pathname === '/'
+      ? defaultWorkspacePath
+      : normalizedPath.pathname;
+  const effectivePath =
+    !normalizedPath.path || normalizedPath.path === '/'
+      ? defaultWorkspacePath
+      : normalizedPath.path;
+
+  const activeWorkspace = inferWorkspaceFromPath(effectivePathname);
 
   return {
     portalAccess,
     defaultWorkspacePath,
     activeWorkspace,
-    currentPathname,
-    currentPath,
+    currentPathname: effectivePathname,
+    currentPath: effectivePath,
     supabase,
   };
 }
