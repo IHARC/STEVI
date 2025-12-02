@@ -8,7 +8,7 @@ Each phase maps to the plan outlined in `agents.md`.
 - Documented source-of-truth portal assets and Supabase dependencies.
 
 ## Phase 1 — Repo Scaffolding 🚧 (current)
-- ✅ Initialise Next.js 15 scaffold with shared layout/providers and design tokens.
+- ✅ Initialise Next.js 16 scaffold with shared layout/providers and design tokens.
 - ✅ Align tooling: Tailwind, PostCSS, ESLint, TSConfig, build script.
 - ☐ Introduce `.env.example` describing Supabase + analytics requirements.
 - ☐ Configure base routing structure (`/ideas`, `/plans`, `/progress`, etc.) with placeholders.
@@ -29,7 +29,7 @@ Each phase maps to the plan outlined in `agents.md`.
 
 ## Phase 5 — Launch Readiness ☐
 - Run full QA (lint, typecheck, unit, e2e).
-- Wire Azure Static Web Apps deployment (GitHub workflow handled separately).
+- Wire Azure App Service deployment (GitHub Actions workflow `main_stevi.yml` with publish profiles).
 - Remove portal routes from marketing repo and add cross-site redirects.
 
 Status legend: ✔ complete · 🚧 in progress · ☐ pending.

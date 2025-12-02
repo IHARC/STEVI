@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Robust build script for Next.js Azure Static Web Apps deployment
+ * Robust build script for the STEVI Next.js build (used by Azure App Service)
  */
 
 import { execSync } from 'child_process';

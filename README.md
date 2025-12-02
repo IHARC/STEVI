@@ -7,7 +7,7 @@ read-only; both apps share the same Supabase project.
 
 ## Getting Started
 
-- **Prerequisites**: Node.js 22.20.0 LTS (npm 10+). Run `nvm use` if you have it installed.
+- **Prerequisites**: Node.js 24.x LTS (npm 10+). Run `nvm use` if you have it installed.
 - **Configure env**: Copy `.env.example` to `.env.local` and fill the Supabase + app URLs (see below).
 - **Install dependencies**: `npm install`
 - **Run locally**: `npm run dev` (http://localhost:3000)
@@ -17,8 +17,8 @@ read-only; both apps share the same Supabase project.
 - **E2E tests**: `npm run e2e`
 
 Environment variables (full notes in `docs/backend.md`):
-- Required: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_SITE_URL`
-- Optional: `PORTAL_ALERTS_SECRET` (Edge Function trigger), `NEXT_PUBLIC_GA4_ID`, `NEXT_PUBLIC_ANALYTICS_DISABLED`, `SUPABASE_SERVICE_ROLE_KEY` (local scripts only), `AZURE_STATIC_WEB_APPS_API_TOKEN` (CI)
+- Required: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_SITE_URL`
+- Optional: `PORTAL_ALERTS_SECRET` (Edge Function trigger), `NEXT_PUBLIC_GA4_ID`, `NEXT_PUBLIC_ANALYTICS_DISABLED`, `SUPABASE_SERVICE_ROLE_KEY` (local scripts only)
 
 ## Tech Stack
 
@@ -26,7 +26,7 @@ Environment variables (full notes in `docs/backend.md`):
 - TypeScript + Tailwind CSS with Material 3 tokens (`docs/design-tokens.md`), Radix primitives, shadcn-inspired wrappers, TipTap for rich text
 - Supabase Auth/Database/Edge Functions shared with the marketing portal (schemas: `portal`, `core`, `case_mgmt`, `inventory`, `donations`)
 - Vitest + Testing Library for unit coverage; Playwright for end-to-end flows
-- Azure Static Web Apps deployment (build entry `node build.js`; SWC native disabled)
+- Azure App Service (Linux, Node 24) deployed via GitHub Actions (`.github/workflows/main_stevi.yml`); build entry `node build.js` keeps SWC native disabled for platform parity
 
 ## Migration Status
 

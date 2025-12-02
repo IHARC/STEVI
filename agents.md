@@ -9,7 +9,7 @@
 ## Snapshot — 2025-11-25
 - Product: STEVI (Supportive Technology to Enable Vulnerable Individuals) operated by IHARC (Northumberland County, ON, Canada).
 - Stack: Next.js 16 (App Router, React 19, RSC), TypeScript, Tailwind with Material 3 tokens (`docs/design-tokens.md`), Radix primitives + shadcn-inspired wrappers, TipTap for rich text.
-- Hosting/build: Azure Static Web Apps. Build entry is `node build.js` (runs `eslint .` then `next build --webpack` with SWC native binary disabled). Marketing app deploys separately but shares the same Supabase project/env vars.
+- Hosting/build: Azure App Service (Linux, Node 24). Build entry is `node build.js` (runs `eslint .` then `next build --webpack` with SWC native binary disabled) and deploys via GitHub Actions (`.github/workflows/main_stevi.yml`, publish-profile based). Marketing app deploys separately but shares the same Supabase project/env vars.
 - Auth/session: Supabase Auth via `@supabase/ssr` cookies. Use `createSupabaseServerClient` in actions/route handlers (can set cookies); the RSC client is read-only. Most portal routes export `dynamic = 'force-dynamic'` to respect session + RLS.
 - Data & storage: Supabase schemas in active use: `portal`, `core`, `case_mgmt`, `inventory`, `donations`. Storage bucket `portal-attachments`; Edge Function `portal-alerts` (invoked when `PORTAL_ALERTS_SECRET` is set).
 - Caching: No custom CDN layer. Use `revalidatePath`/`revalidateTag` from server actions; avoid static rendering for authed content.
@@ -57,14 +57,14 @@
 - Design system: stick to Material 3 tokens and shared components; avoid ad-hoc colors/spacing. Regenerate tokens with `npm run sync:tokens` after updating `tokens/material3.json`.
 - Notifications/alerts: send via `queuePortalNotification`; include `PORTAL_ALERTS_SECRET` locally only if you need to exercise the Edge Function.
 - Testing: `npm run lint`, `npm run typecheck`, `npm run test` (Vitest), `npm run e2e` (Playwright). Few tests exist—add coverage when touching flows.
-- Build/deploy: run `node build.js` (lints then builds). Azure SWA uses the generated `.next` output; keep SWC native disabled unless Azure supports it.
-- Environment: `.env.example` is currently missing—create it using the matrix in `docs/backend.md`. Required: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_SITE_URL`. Optional: `PORTAL_ALERTS_SECRET`, GA, `AZURE_STATIC_WEB_APPS_API_TOKEN`. Never commit secrets.
+- Build/deploy: run `node build.js` (lints then builds). Azure App Service consumes the generated `.next` output; keep SWC native disabled unless Azure supports it.
+- Environment: `.env.example` is currently missing—create it using the matrix in `docs/backend.md`. Required: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_SITE_URL`. Optional: `PORTAL_ALERTS_SECRET`, GA. Never commit secrets.
 
 ## Outstanding work (prioritised)
 1. Wire appointments and document locker to real Supabase tables/RPCs and `portal-attachments` signed URLs; add staff-side management to replace placeholders.
 2. Add cache revalidation/webhook strategy so marketing and STEVI stay in sync after admin updates.
 3. Metrics/governance surfaces (if still required) are not built—confirm scope, add capability flag, and align RLS.
-4. Add `.env.example` and refresh `README.md` to reflect Next.js 16/React 19, current commands, and required env vars.
+4. Flesh out App Service ops runbook (alerts, slot swap procedure) and keep `README.md`/`docs/backend.md` in sync with platform changes.
 5. Increase automated coverage (Vitest + Playwright) for registration flows, consents, cases, notifications, inventory/donations.
 6. Mirror or pipeline Supabase Edge Functions (`portal-alerts`, `portal-admin-invite`, etc.) into this repo or clearly document their external home.
 
