@@ -1,5 +1,6 @@
 'use client';
 
+import { startTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -35,7 +36,10 @@ export function WorkspaceSwitcher({
     if (!value || value === activeWorkspace) return;
     const target = options.find((option) => option.id === value);
     if (!target) return;
-    router.push(target.href);
+    startTransition(() => {
+      router.push(target.href);
+      router.refresh();
+    });
   }
 
   return (

@@ -40,11 +40,16 @@ export function AppShell({
   const showWorkspaceDrawer = Boolean(workspaceNav?.groups.length);
   const showInbox = inboxItems.length > 0;
   const showClientPreviewBanner = isClientPreview;
+  const workspaceKey = workspaceNav?.id ?? 'none';
 
   return (
     <div className="flex min-h-screen bg-surface-container-lowest text-on-background">
       {showWorkspaceDrawer ? (
-        <WorkspaceDrawerDesktop workspaceNav={workspaceNav} globalNavItems={globalNavItems} />
+        <WorkspaceDrawerDesktop
+          key={workspaceKey}
+          workspaceNav={workspaceNav}
+          globalNavItems={globalNavItems}
+        />
       ) : null}
       <div className="flex min-h-screen flex-1 flex-col">
         <TopNav

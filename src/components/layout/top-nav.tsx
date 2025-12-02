@@ -42,7 +42,11 @@ export function TopNav({
         <div className="flex flex-1 items-center gap-space-sm min-w-0">
           {hasWorkspaceNav ? (
             <div className="lg:hidden">
-              <WorkspaceDrawerMobile workspaceNav={workspaceNav} globalNavItems={globalNavItems} />
+              <WorkspaceDrawerMobile
+                key={workspaceNav?.id ?? 'workspace-drawer-mobile'}
+                workspaceNav={workspaceNav}
+                globalNavItems={globalNavItems}
+              />
             </div>
           ) : null}
           <Link
