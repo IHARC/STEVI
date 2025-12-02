@@ -7,7 +7,7 @@ read-only; both apps share the same Supabase project.
 
 ## Getting Started
 
-- **Prerequisites**: Node.js 24.x LTS (npm 10+). Run `nvm use` if you have it installed.
+- **Prerequisites**: Node.js 22.20.0 LTS (npm 10+). Run `nvm use` if you have it installed.
 - **Configure env**: Copy `.env.example` to `.env.local` and fill the Supabase + app URLs (see below).
 - **Install dependencies**: `npm install`
 - **Run locally**: `npm run dev` (http://localhost:3000)
