@@ -183,6 +183,26 @@ function linkIsAllowed(entry: { requires?: (access: PortalAccess) => boolean }, 
   return true;
 }
 
+const HUB_TAB_COMMANDS: { href: string; label: string; group: string; requires: (access: PortalAccess) => boolean }[] = [
+  { href: '/admin/content?tab=website', label: 'Website settings', group: 'Content & website', requires: (access) => access.canManageWebsiteContent },
+  { href: '/admin/content?tab=resources', label: 'Resource library', group: 'Content & website', requires: (access) => access.canManageResources },
+  { href: '/admin/content?tab=policies', label: 'Policies', group: 'Content & website', requires: (access) => access.canManagePolicies },
+  { href: '/admin/content?tab=notifications', label: 'Notifications', group: 'Content & website', requires: (access) => access.canManageNotifications },
+  { href: '/admin/website?tab=branding', label: 'Website · Branding', group: 'Website settings', requires: (access) => access.canManageWebsiteContent },
+  { href: '/admin/website?tab=navigation', label: 'Website · Navigation', group: 'Website settings', requires: (access) => access.canManageWebsiteContent },
+  { href: '/admin/website?tab=home', label: 'Website · Home & context', group: 'Website settings', requires: (access) => access.canManageWebsiteContent },
+  { href: '/admin/website?tab=supports', label: 'Website · Supports', group: 'Website settings', requires: (access) => access.canManageWebsiteContent },
+  { href: '/admin/website?tab=programs', label: 'Website · Programs', group: 'Website settings', requires: (access) => access.canManageWebsiteContent },
+  { href: '/admin/website?tab=footer', label: 'Website · Footer', group: 'Website settings', requires: (access) => access.canManageWebsiteContent },
+  { href: '/admin/website?tab=inventory', label: 'Website · Content inventory', group: 'Website settings', requires: (access) => access.canManageWebsiteContent },
+  { href: '/admin/people?tab=clients', label: 'People · Client directory', group: 'People & access', requires: (access) => access.canManageConsents },
+  { href: '/admin/people?tab=consents', label: 'People · Consent overrides', group: 'People & access', requires: (access) => access.canManageConsents },
+  { href: '/admin/people?tab=users', label: 'People · Users', group: 'People & access', requires: (access) => access.isProfileApproved && (access.portalRoles.includes('portal_org_admin') || access.portalRoles.includes('portal_admin') || access.iharcRoles.includes('iharc_admin')) },
+  { href: '/admin/people?tab=profiles', label: 'People · Profiles & invites', group: 'People & access', requires: (access) => access.isProfileApproved && (access.portalRoles.includes('portal_admin') || access.iharcRoles.includes('iharc_admin')) },
+  { href: '/admin/people?tab=permissions', label: 'People · Permissions', group: 'People & access', requires: (access) => access.isProfileApproved && (access.portalRoles.includes('portal_admin') || access.iharcRoles.includes('iharc_admin')) },
+  { href: '/admin/people?tab=organizations', label: 'People · Organizations', group: 'People & access', requires: (access) => access.isProfileApproved && (access.portalRoles.includes('portal_admin') || access.iharcRoles.includes('iharc_admin')) },
+];
+
 export function buildUserMenuLinks(access: PortalAccess): PortalLink[] {
   const links = USER_MENU_BLUEPRINT.filter((entry) => linkIsAllowed(entry, access)).map(
     ({ href, label }) => ({ href, label }),
@@ -203,7 +223,13 @@ export function buildCommandPaletteItems(
   const MAX_ITEMS = 20;
   const sections = navSections ?? buildPortalNav(access);
   const navCommands = flattenNavItemsForCommands(sections).map((item) => ({ ...item }));
-  const ordered = [...extraItems, ...navCommands];
+  const hubCommands = HUB_TAB_COMMANDS.filter((entry) => entry.requires(access)).map(({ href, label, group }) => ({
+    href,
+    label,
+    group,
+  }));
+
+  const ordered = [...extraItems, ...hubCommands, ...navCommands];
   const unique = dedupeLinks<CommandPaletteItem>(ordered);
   return unique.slice(0, MAX_ITEMS);
 }

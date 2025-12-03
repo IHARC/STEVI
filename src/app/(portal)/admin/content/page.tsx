@@ -84,12 +84,28 @@ export default async function AdminContentHubPage({ searchParams }: AdminContent
         eyebrow="Admin"
         title="Content & website"
         description="Manage public-facing content from one place. Access and audit are scoped by your role."
+        meta={[
+          { label: 'RLS enforced', tone: 'info' },
+          { label: 'Audit on', tone: 'success' },
+        ]}
+        helperLink={{ href: '/admin/help#content', label: 'View publishing guide' }}
       />
 
       <PageTabNav
         tabs={allowedTabs.map((tab) => ({ label: tab.label, href: `/admin/content?tab=${tab.id}` }))}
         activeHref={`/admin/content?tab=${activeTab.id}`}
       />
+
+      <div className="text-body-sm text-muted-foreground">
+        <span className="font-medium text-on-surface">What’s inside:</span>
+        <ul className="mt-space-2xs flex flex-wrap gap-space-xs" role="list">
+          {allowedTabs.map((tab) => (
+            <li key={tab.id} className="rounded-[var(--md-sys-shape-corner-small)] bg-surface-container-low px-space-sm py-space-3xs text-label-sm text-on-surface-variant">
+              {tab.label}
+            </li>
+          ))}
+        </ul>
+      </div>
 
       <Card className="max-w-4xl">
         <CardHeader>

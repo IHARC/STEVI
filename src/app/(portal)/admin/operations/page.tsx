@@ -1,11 +1,13 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { Suspense } from 'react';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { resolveLandingPath } from '@/lib/portal-navigation';
 import { NotificationsChart } from '../notifications-chart';
 import { PageHeader } from '@/components/layout/page-header';
@@ -113,6 +115,8 @@ export default async function AdminOperationsPage() {
         eyebrow="Admin"
         title="Operations overview"
         description="Monitor approvals, notifications, and content at a glance. All counts respect Supabase RLS and audit logging."
+        meta={[{ label: 'RLS enforced', tone: 'info' }, { label: 'Live metrics', tone: 'success' }]}
+        helperLink={{ href: '/admin/help', label: 'View admin help' }}
         primaryAction={{ label: 'Review approvals', href: '/admin/profiles' }}
         secondaryAction={{ label: 'Send notification', href: '/admin/notifications' }}
       />
@@ -133,11 +137,13 @@ export default async function AdminOperationsPage() {
             <Badge variant="outline">{formatCount(snapshot.notifications7d)} total</Badge>
           </CardHeader>
           <CardContent>
-            {trendSeries.length === 0 ? (
-              <p className="text-body-sm text-muted-foreground">No notifications sent in the last week.</p>
-            ) : (
-              <NotificationsChart data={trendSeries} />
-            )}
+            <Suspense fallback={<Skeleton className="h-64 w-full" />}>
+              {trendSeries.length === 0 ? (
+                <p className="text-body-sm text-muted-foreground">No notifications sent in the last week.</p>
+              ) : (
+                <NotificationsChart data={trendSeries} />
+              )}
+            </Suspense>
           </CardContent>
         </Card>
 

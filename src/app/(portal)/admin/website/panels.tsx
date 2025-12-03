@@ -1,7 +1,5 @@
+import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { BrandingForm } from '../marketing/branding/BrandingForm';
 import { NavForm } from '../marketing/navigation/NavForm';
@@ -23,9 +21,10 @@ import {
   SupportEntry,
   parseJsonSetting,
 } from '@/lib/marketing/settings';
-import { updateSiteFooterAction } from '../marketing/footer/actions';
+import { WebsiteFooterForm } from './website-footer-form';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/supabase';
+import { EmptyState } from '@/components/ui/empty-state';
 
 type PanelProps = {
   supabase: SupabaseClient<Database>;
@@ -166,42 +165,9 @@ export async function WebsiteFooterPanel({ supabase }: PanelProps) {
       <CardHeader className="space-y-space-xs">
         <CardTitle className="text-title-lg">Footer</CardTitle>
         <CardDescription>Update the copy shown on every page of the marketing site.</CardDescription>
-        {lastUpdated ? (
-          <p className="text-body-xs text-muted-foreground">Last updated {lastUpdated}</p>
-        ) : null}
       </CardHeader>
       <CardContent>
-        <form action={updateSiteFooterAction} className="space-y-space-md">
-          <div className="space-y-space-2xs">
-            <Label htmlFor="primary_text">Primary line</Label>
-            <Input
-              id="primary_text"
-              name="primary_text"
-              defaultValue={primaryText}
-              maxLength={220}
-              required
-              className="font-medium"
-            />
-            <p className="text-body-xs text-muted-foreground">Rendered after the © year on the marketing site.</p>
-          </div>
-
-          <div className="space-y-space-2xs">
-            <Label htmlFor="secondary_text">Secondary line</Label>
-            <Textarea
-              id="secondary_text"
-              name="secondary_text"
-              defaultValue={secondaryText}
-              maxLength={300}
-              spellCheck={false}
-            />
-            <p className="text-body-xs text-muted-foreground">Optional supporting statement beneath the primary line. Leave blank to hide it.</p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-space-sm">
-            <Button type="submit">Save footer</Button>
-            <p className="text-body-sm text-muted-foreground">Updates sync to the marketing site automatically after Supabase saves.</p>
-          </div>
-        </form>
+        <WebsiteFooterForm primaryText={primaryText} secondaryText={secondaryText} lastUpdatedLabel={lastUpdated} />
       </CardContent>
     </Card>
   );
@@ -214,9 +180,16 @@ export async function WebsiteContentInventoryPanel(_: PanelProps) {
         <CardTitle className="text-title-lg">Content inventory</CardTitle>
         <CardDescription>Audit public pages, resources, and policies with owners and review dates.</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-space-2xs py-space-md text-body-md text-muted-foreground">
-        <p>Map each asset to a responsible owner and next review date. Add cache revalidation hooks for the marketing app.</p>
-        <p>Keep this list in sync with audit logs and Supabase RLS.</p>
+      <CardContent>
+        <EmptyState
+          title="No inventory checklist yet"
+          description="Track ownership and review cadence for every public asset. Start with a simple list and add cache revalidation hooks."
+          action={
+            <Button asChild>
+              <Link href="/admin/help#website">View guidance</Link>
+            </Button>
+          }
+        />
       </CardContent>
     </Card>
   );

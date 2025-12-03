@@ -50,7 +50,9 @@ async function requireAdminContext() {
   return { supabase, portal: supabase.schema('portal'), actorProfile };
 }
 
-export async function updateSiteFooterAction(formData: FormData): Promise<void> {
+export type UpdateSiteFooterResult = { status: 'success' | 'error'; message?: string };
+
+export async function updateSiteFooterAction(formData: FormData): Promise<UpdateSiteFooterResult> {
   try {
     const primaryText = requireText(formData, 'primary_text', 'Add the primary footer text.');
     const secondaryText = readText(formData, 'secondary_text');
@@ -101,9 +103,9 @@ export async function updateSiteFooterAction(formData: FormData): Promise<void> 
 
     await Promise.all(ADMIN_PATHS.map((path) => revalidatePath(path)));
 
-    return;
+    return { status: 'success', message: 'Footer updated and synced.' };
   } catch (error) {
     console.error('updateSiteFooterAction error', error);
-    throw new Error(getErrorMessage(error));
+    return { status: 'error', message: getErrorMessage(error) };
   }
 }
