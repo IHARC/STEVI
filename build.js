@@ -16,11 +16,14 @@ const __dirname = path.dirname(__filename);
 console.log('🚀 Starting IHARC portal build...');
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
+// Turbopack currently skips generating the standalone entry Azure App Service expects.
+// Force webpack so `.next/standalone/server.js` is produced for `node .next/standalone/server.js` start commands.
+process.env.NEXT_FORCE_WEBPACK = '1';
 
 const steps = [
   { cmd: 'npx eslint .', label: 'Linting' },
-  // Default Next.js 16 build (Turbopack)
-  { cmd: 'npx next build', label: 'Building application' },
+  // Force webpack so we emit .next/standalone for Azure App Service
+  { cmd: 'npx next build --webpack', label: 'Building application' },
 ];
 
 for (const step of steps) {
@@ -32,6 +35,12 @@ for (const step of steps) {
 const outDir = path.join(__dirname, '.next');
 if (!fs.existsSync(outDir)) {
   console.error('❌ Build verification failed: .next directory missing');
+  process.exit(1);
+}
+
+const standaloneEntrypoint = path.join(outDir, 'standalone', 'server.js');
+if (!fs.existsSync(standaloneEntrypoint)) {
+  console.error('❌ Build verification failed: .next/standalone/server.js missing');
   process.exit(1);
 }
 
