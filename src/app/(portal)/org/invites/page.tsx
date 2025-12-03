@@ -16,6 +16,7 @@ import {
 import { checkRateLimit, type RateLimitResult } from '@/lib/rate-limit';
 import { InviteSheet } from './invite-sheet';
 import { ORG_INVITE_EVENT, ORG_INVITE_RATE_LIMIT } from './constants';
+import { OrgTabs } from '../org-tabs';
 
 export const dynamic = 'force-dynamic';
 
@@ -59,6 +60,8 @@ export default async function OrgInvitesPage() {
         </div>
         <InviteSheet rateLimit={rateLimit} />
       </header>
+
+      <OrgTabs />
 
       <Card>
         <CardHeader className="flex flex-wrap items-start justify-between gap-space-sm">

@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { resolveLandingPath } from '@/lib/portal-navigation';
 import type { Database } from '@/types/supabase';
 import { OrgContactSettingsForm, OrgNotesSettingsForm } from './org-settings-form';
+import { OrgTabs } from '../org-tabs';
 
 export const dynamic = 'force-dynamic';
 
@@ -69,6 +70,8 @@ export default async function OrgSettingsPage() {
           Update contact details and coordination notes. Changes stay scoped to your organization and are audited.
         </p>
       </header>
+
+      <OrgTabs />
 
       <Card>
         <CardHeader className="flex flex-wrap items-center justify-between gap-space-sm">

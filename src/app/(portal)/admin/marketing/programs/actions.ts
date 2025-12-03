@@ -7,7 +7,7 @@ import { loadPortalAccess } from '@/lib/portal-access';
 import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 import { MARKETING_SETTINGS_KEYS, ProgramEntry, assertNonEmpty } from '@/lib/marketing/settings';
 
-const ADMIN_PATHS = ['/admin', '/admin/marketing/programs'] as const;
+const ADMIN_PATHS = ['/admin', '/admin/website'] as const;
 
 function parsePrograms(raw: string | null): ProgramEntry[] {
   if (!raw) {

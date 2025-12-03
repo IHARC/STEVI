@@ -4,6 +4,7 @@ import { loadPortalAccess } from '@/lib/portal-access';
 import { resolveLandingPath } from '@/lib/portal-navigation';
 import { PageHeader } from '@/components/layout/page-header';
 import { Card, CardContent } from '@/components/ui/card';
+import { OutreachTabs } from '../outreach-tabs';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,11 +18,14 @@ export default async function EncampmentsPage() {
 
   return (
     <div className="page-shell page-stack">
-      <PageHeader
-        eyebrow="Staff tools"
-        title="Encampment list"
-        description="Track encampment locations, contacts, and outreach visits."
-      />
+      <div className="flex flex-col gap-space-sm">
+        <PageHeader
+          eyebrow="Staff tools"
+          title="Encampment list"
+          description="Track encampment locations, contacts, and outreach visits."
+        />
+        <OutreachTabs />
+      </div>
       <Card>
         <CardContent className="space-y-space-2xs py-space-md text-body-md text-muted-foreground">
           <p>Stub for encampment tracking. Add map pins, contact details, and visit history once data is available.</p>
@@ -31,4 +35,3 @@ export default async function EncampmentsPage() {
     </div>
   );
 }
-

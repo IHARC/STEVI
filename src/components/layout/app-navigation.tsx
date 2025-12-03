@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ChevronLeft, ChevronRight, Menu } from 'lucide-react';
@@ -33,7 +33,7 @@ export function AppNavigationDesktop({ navSections, globalNavItems = [], classNa
         aria-label="Application navigation"
         className={cn(
           'sticky top-0 hidden h-screen shrink-0 border-r border-outline/12 bg-surface-container-lowest text-on-surface shadow-level-1 xl:flex',
-          collapsed ? 'w-[84px]' : 'w-72',
+          collapsed ? 'w-[84px]' : 'w-64',
           className,
         )}
       >
@@ -41,8 +41,7 @@ export function AppNavigationDesktop({ navSections, globalNavItems = [], classNa
           <div className={cn('flex items-center gap-space-xs px-space-sm pb-space-xs pt-space-sm', collapsed && 'justify-center')}> 
             {!collapsed ? (
               <div className="flex flex-col leading-tight">
-                <span className="text-label-sm font-semibold text-on-surface">Navigation</span>
-                <span className="text-label-sm text-on-surface-variant">Workspaces</span>
+                <span className="text-label-sm font-semibold text-on-surface">Menu</span>
               </div>
             ) : null}
             <div className="ml-auto">
@@ -104,7 +103,6 @@ export function AppNavigationMobile({ navSections, globalNavItems = [] }: AppNav
               navSections={navSections}
               pathname={pathname}
               onNavigate={() => setOpen(false)}
-              showHeader={false}
               showGlobalNav
               globalNavItems={globalNavItems}
             />
@@ -120,30 +118,13 @@ type NavContentProps = {
   pathname: string;
   onNavigate?: () => void;
   globalNavItems?: PrimaryNavItem[];
-  showHeader?: boolean;
   collapsed?: boolean;
   showGlobalNav?: boolean;
 };
 
-function NavContent({ navSections, pathname, onNavigate, globalNavItems = [], showHeader = true, collapsed = false, showGlobalNav = true }: NavContentProps) {
-  const activeSectionId = useMemo(() => {
-    for (const section of navSections) {
-      for (const group of section.groups) {
-        for (const item of group.items) {
-          if (isLinkActive(item, pathname)) return section.id;
-        }
-      }
-    }
-    return navSections[0]?.id;
-  }, [navSections, pathname]);
-
+function NavContent({ navSections, pathname, onNavigate, globalNavItems = [], collapsed = false, showGlobalNav = true }: NavContentProps) {
   return (
     <div className="flex h-full flex-col bg-surface-container-lowest">
-      {showHeader ? (
-        <div className={cn('px-space-md pt-space-md pb-space-xs', collapsed && 'px-space-sm text-center')}>
-          <p className="text-label-sm font-medium text-on-surface-variant">Workspaces</p>
-        </div>
-      ) : null}
 
       <div className={cn('flex-1 overflow-y-auto px-space-sm pb-space-lg', collapsed && 'px-space-2xs')}> 
         <div className="space-y-space-sm">
@@ -151,9 +132,6 @@ function NavContent({ navSections, pathname, onNavigate, globalNavItems = [], sh
             <div key={section.id} className={cn('space-y-space-2xs rounded-[var(--md-sys-shape-corner-small)]', !collapsed && 'bg-surface-container-low p-space-2xs shadow-level-1')}>
               <div className={cn('flex items-center gap-space-xs px-space-sm pt-space-2xs text-label-sm font-semibold uppercase tracking-wide text-on-surface-variant', collapsed && 'justify-center px-space-3xs text-[11px]')}>
                 <span className={cn('truncate', collapsed && 'sr-only')}>{section.label}</span>
-                {collapsed ? null : activeSectionId === section.id ? (
-                  <span className="rounded-full bg-primary/10 px-space-2xs py-[2px] text-label-xs font-semibold text-primary">Active</span>
-                ) : null}
               </div>
               <div className="space-y-space-2xs">
                 {section.groups.map((group) => (

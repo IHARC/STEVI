@@ -4,6 +4,7 @@ import { loadPortalAccess } from '@/lib/portal-access';
 import { resolveLandingPath } from '@/lib/portal-navigation';
 import { PageHeader } from '@/components/layout/page-header';
 import { Card, CardContent } from '@/components/ui/card';
+import { OutreachTabs } from '../outreach-tabs';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,11 +18,14 @@ export default async function OutreachSchedulePage() {
 
   return (
     <div className="page-shell page-stack">
-      <PageHeader
-        eyebrow="Staff tools"
-        title="Outreach schedule"
-        description="Plan outreach routes and assignments. Bring map and shift data together here."
-      />
+      <div className="flex flex-col gap-space-sm">
+        <PageHeader
+          eyebrow="Staff tools"
+          title="Outreach schedule"
+          description="Plan outreach routes and assignments. Bring map and shift data together here."
+        />
+        <OutreachTabs />
+      </div>
       <Card>
         <CardContent className="space-y-space-2xs py-space-md text-body-md text-muted-foreground">
           <p>Stub view for scheduling outreach routes. Integrate with shifts, appointments, and geospatial data when available.</p>
@@ -31,4 +35,3 @@ export default async function OutreachSchedulePage() {
     </div>
   );
 }
-

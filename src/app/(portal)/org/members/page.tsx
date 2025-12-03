@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { resolveLandingPath } from '@/lib/portal-navigation';
 import { fetchOrgMembersWithRoles } from '@/lib/org/fetchers';
 import { OrgMembersTable } from './org-members-table';
+import { OrgTabs } from '../org-tabs';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,6 +29,8 @@ export default async function OrgMembersPage() {
           All actions respect Supabase row-level security. Use the toggles to keep roles clear and audit-friendly.
         </p>
       </header>
+
+      <OrgTabs />
 
       <div className="grid gap-space-sm md:grid-cols-2">
         <RoleCard

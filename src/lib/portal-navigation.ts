@@ -65,12 +65,11 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
     area: 'client',
     groups: [
       {
-        id: 'client-today',
-        label: 'Today',
+        id: 'client-home',
+        label: 'Overview',
         items: [
           { id: 'client-home', href: '/home', label: 'Today', icon: 'home', match: ['/home'] },
-          { id: 'client-appointments-upcoming', href: '/appointments', label: 'Upcoming appointments', icon: 'calendar', exact: true },
-          { id: 'client-appointments-past', href: '/appointments/past', label: 'Past appointments', icon: 'calendarRange', match: ['/appointments/past'] },
+          { id: 'client-appointments', href: '/appointments', label: 'Appointments', icon: 'calendar', match: ['/appointments'] },
         ],
       },
       {
@@ -129,12 +128,9 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
         id: 'staff-field',
         label: 'Field operations',
         items: [
+          { id: 'staff-outreach', href: '/staff/outreach', label: 'Outreach', icon: 'notebook', match: ['/staff/outreach'] },
           { id: 'staff-appointments', href: '/staff/appointments', label: 'Appointments', icon: 'calendar', match: ['/staff/appointments'] },
           { id: 'staff-schedule', href: '/staff/schedule', label: 'Schedule', icon: 'calendarRange', match: ['/staff/schedule'] },
-          { id: 'staff-outreach-log', href: '/staff/outreach', label: 'Outreach log', icon: 'notebook', exact: true },
-          { id: 'staff-outreach-schedule', href: '/staff/outreach/schedule', label: 'Outreach schedule', icon: 'calendarRange', match: ['/staff/outreach/schedule'] },
-          { id: 'staff-encampments', href: '/staff/outreach/encampments', label: 'Encampment list', icon: 'tent', match: ['/staff/outreach/encampments'] },
-          { id: 'staff-outreach-map', href: '/staff/outreach/map', label: 'Outreach map', icon: 'map', match: ['/staff/outreach/map'] },
         ],
       },
       {
@@ -196,14 +192,7 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
         id: 'admin-website',
         label: 'Website & marketing',
         items: [
-          { id: 'admin-website-navigation', href: '/admin/marketing/navigation', label: 'Navigation', icon: 'globe', match: ['/admin/marketing/navigation'], requires: (access) => access.canManageWebsiteContent },
-          { id: 'admin-website-branding', href: '/admin/marketing/branding', label: 'Branding', icon: 'megaphone', match: ['/admin/marketing/branding'], requires: (access) => access.canManageWebsiteContent },
-          { id: 'admin-website-home', href: '/admin/marketing/home', label: 'Home & context', icon: 'home', match: ['/admin/marketing/home'], requires: (access) => access.canManageWebsiteContent },
-          { id: 'admin-website-supports', href: '/admin/marketing/supports', label: 'Supports', icon: 'lifebuoy', match: ['/admin/marketing/supports'], requires: (access) => access.canManageWebsiteContent },
-          { id: 'admin-website-programs', href: '/admin/marketing/programs', label: 'Programs', icon: 'briefcase', match: ['/admin/marketing/programs'], requires: (access) => access.canManageWebsiteContent },
-          { id: 'admin-website-footer', href: '/admin/marketing/footer', label: 'Footer', icon: 'settings', match: ['/admin/marketing/footer'], requires: (access) => access.canManageWebsiteContent },
-          { id: 'admin-public-resources', href: '/admin/website', label: 'Public resources', icon: 'book', match: ['/admin/website'], requires: (access) => access.canManageWebsiteContent },
-          { id: 'admin-content-inventory', href: '/admin/content-inventory', label: 'Content inventory', icon: 'file', match: ['/admin/content-inventory'], requires: (access) => access.canManageWebsiteContent },
+          { id: 'admin-website-hub', href: '/admin/website', label: 'Website workspace', icon: 'globe', match: ['/admin/website'], requires: (access) => access.canManageWebsiteContent },
         ],
       },
       {
@@ -237,7 +226,6 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
         label: 'People',
         items: [
           { id: 'org-members', href: '/org/members', label: 'Members', icon: 'users', match: ['/org/members'], requires: (access) => access.canManageOrgUsers },
-          { id: 'org-invites', href: '/org/invites', label: 'Invitations', icon: 'idCard', match: ['/org/invites'], requires: (access) => access.canManageOrgInvites },
         ],
       },
       {
@@ -245,7 +233,6 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
         label: 'Settings',
         items: [
           { id: 'org-settings-general', href: '/org/settings', label: 'Settings', icon: 'settings', match: ['/org/settings'], requires: canManageOrgs },
-          { id: 'org-appointments', href: '/org/appointments', label: 'Appointments', icon: 'calendar', match: ['/org/appointments'] },
         ],
       },
     ],

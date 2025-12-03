@@ -1,33 +1,61 @@
-import { redirect } from 'next/navigation';
-import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
-import { loadPortalAccess } from '@/lib/portal-access';
-import { resolveLandingPath } from '@/lib/portal-navigation';
+import {
+  WebsiteBrandingPanel,
+  WebsiteNavigationPanel,
+  WebsiteHomePanel,
+  WebsiteSupportsPanel,
+  WebsiteProgramsPanel,
+  WebsiteFooterPanel,
+  WebsiteResourcesPanel,
+  WebsiteContentInventoryPanel,
+  buildWebsiteContext,
+} from './panels';
+import { PageTabNav } from '@/components/layout/page-tab-nav';
 import { PageHeader } from '@/components/layout/page-header';
-import { Card, CardContent } from '@/components/ui/card';
 
 export const dynamic = 'force-dynamic';
 
-export default async function AdminWebsiteResourcesPage() {
-  const supabase = await createSupabaseRSCClient();
-  const access = await loadPortalAccess(supabase);
+const TABS = [
+  { id: 'branding', label: 'Branding', component: WebsiteBrandingPanel },
+  { id: 'navigation', label: 'Navigation', component: WebsiteNavigationPanel },
+  { id: 'home', label: 'Home & context', component: WebsiteHomePanel },
+  { id: 'supports', label: 'Supports', component: WebsiteSupportsPanel },
+  { id: 'programs', label: 'Programs', component: WebsiteProgramsPanel },
+  { id: 'footer', label: 'Footer', component: WebsiteFooterPanel },
+  { id: 'resources', label: 'Public resources', component: WebsiteResourcesPanel },
+  { id: 'inventory', label: 'Content inventory', component: WebsiteContentInventoryPanel },
+];
 
-  if (!access || !access.canAccessAdminWorkspace || !access.canManageWebsiteContent) {
-    redirect(resolveLandingPath(access));
-  }
+type AdminWebsitePageProps = {
+  searchParams?: Record<string, string | string[] | undefined>;
+};
+
+export default async function AdminWebsitePage({ searchParams }: AdminWebsitePageProps) {
+  const { supabase, access } = await buildWebsiteContext();
+
+  const tabParam = Array.isArray(searchParams?.tab) ? searchParams?.tab[0] : searchParams?.tab;
+  const activeTab = TABS.find((tab) => tab.id === tabParam) ?? TABS[0];
+  const TabComponent = activeTab.component;
 
   return (
     <div className="page-shell page-stack">
       <PageHeader
-        eyebrow="Website"
-        title="Public resources"
-        description="Manage the public-facing resource library mirrored to the marketing site. Keep content WCAG-compliant and sanitized before publishing."
+        eyebrow="Admin"
+        title="Website workspace"
+        description="Manage branding, navigation, and public content for the marketing site. Changes respect audit logging and Supabase RLS."
       />
-      <Card>
-        <CardContent className="space-y-space-2xs py-space-md text-body-md text-muted-foreground">
-          <p>Wire this stub to Supabase resources intended for public display. Ensure published content is sanitized and revalidated for the marketing app.</p>
-          <p>Add cache invalidation and webhook triggers so marketing surfaces stay in sync.</p>
-        </CardContent>
-      </Card>
+
+      <PageTabNav
+        tabs={TABS.map((tab) => ({
+          label: tab.label,
+          href: `/admin/website?tab=${tab.id}`,
+        }))}
+        activeHref={`/admin/website?tab=${activeTab.id}`}
+      />
+
+      {/* Render only the active tab to avoid duplicate fetches */}
+      <div className="space-y-space-lg">
+        <TabComponent supabase={supabase} access={access} />
+      </div>
     </div>
   );
 }

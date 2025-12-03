@@ -12,7 +12,7 @@ import {
 } from '@/lib/marketing/settings';
 import { sanitizeFileName } from '@/lib/utils';
 
-const ADMIN_PATHS = ['/admin', '/admin/marketing/branding'] as const;
+const ADMIN_PATHS = ['/admin', '/admin/website'] as const;
 const BRANDING_BUCKET = 'app-branding';
 
 type BrandingKind = 'logo_light' | 'logo_dark' | 'favicon';

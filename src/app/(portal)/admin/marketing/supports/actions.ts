@@ -12,7 +12,7 @@ import {
   assertNonEmpty,
 } from '@/lib/marketing/settings';
 
-const ADMIN_PATHS = ['/admin', '/admin/marketing/supports'] as const;
+const ADMIN_PATHS = ['/admin', '/admin/website'] as const;
 
 function parseSupports(raw: string | null): SupportEntry[] {
   if (!raw) {

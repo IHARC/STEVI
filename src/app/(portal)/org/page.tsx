@@ -10,6 +10,7 @@ import { fetchOrgInvites, fetchOrgMembersWithRoles, type OrgInviteRecord, type O
 import type { Database } from '@/types/supabase';
 import { PageHeader } from '@/components/layout/page-header';
 import { StatTile } from '@/components/ui/stat-tile';
+import { OrgTabs } from './org-tabs';
 
 export const dynamic = 'force-dynamic';
 
@@ -141,6 +142,8 @@ export default async function OrgHomePage() {
           </Badge>
         </div>
       </PageHeader>
+
+      <OrgTabs />
 
       <section className="grid gap-space-sm sm:grid-cols-2 lg:grid-cols-4">
         {summaryCards.map((card) => (

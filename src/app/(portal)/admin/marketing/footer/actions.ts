@@ -7,7 +7,7 @@ import { ensurePortalProfile } from '@/lib/profile';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { MARKETING_SETTINGS_KEYS } from '@/lib/marketing/settings';
 
-const ADMIN_PATHS = ['/admin', '/admin/marketing/footer'] as const;
+const ADMIN_PATHS = ['/admin', '/admin/website'] as const;
 
 function readText(formData: FormData, key: string): string | null {
   const value = formData.get(key);

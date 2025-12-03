@@ -4,6 +4,7 @@ import { loadPortalAccess } from '@/lib/portal-access';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { resolveLandingPath } from '@/lib/portal-navigation';
 import { fetchOutreachLogs } from '@/lib/staff/fetchers';
+import { OutreachTabs } from './outreach-tabs';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,15 +19,17 @@ export default async function StaffOutreachLogPage() {
   const logs = await fetchOutreachLogs(supabase, access.userId, 10);
 
   return (
-    <div className="space-y-space-lg">
-      <header className="space-y-space-2xs">
-        <p className="text-label-sm font-semibold uppercase text-muted-foreground">Outreach</p>
-        <h1 className="text-headline-lg text-on-surface">Field log</h1>
-        <p className="max-w-3xl text-body-md text-muted-foreground">
-          Capture quick outreach notes without navigating through the client portal. Sync this surface with Supabase
-          edge functions once the schema for shared logs is finalised.
-        </p>
-      </header>
+    <div className="page-shell page-stack">
+      <div className="flex flex-col gap-space-sm">
+        <div className="flex flex-col gap-space-2xs">
+          <p className="text-label-sm font-semibold uppercase text-muted-foreground">Outreach</p>
+          <h1 className="text-headline-lg text-on-surface">Field operations</h1>
+          <p className="max-w-3xl text-body-md text-muted-foreground">
+            Capture notes and coordinate outreach in one workspace.
+          </p>
+        </div>
+        <OutreachTabs />
+      </div>
 
       <Card>
         <CardHeader>
