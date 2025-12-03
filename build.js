@@ -15,14 +15,12 @@ const __dirname = path.dirname(__filename);
 
 console.log('🚀 Starting IHARC portal build...');
 
-// Force stable webpack build on Node 24/App Service; Turbopack can fail in restricted environments.
-process.env.NEXT_USE_TURBOPACK = process.env.NEXT_USE_TURBOPACK ?? '0';
-process.env.NODE_ENV = 'production';
+process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
 const steps = [
   { cmd: 'npx eslint .', label: 'Linting' },
-  // Force webpack (Turbopack is unstable/restricted in CI/App Service envs)
-  { cmd: 'npx next build --webpack', label: 'Building application' },
+  // Default Next.js 16 build (Turbopack)
+  { cmd: 'npx next build', label: 'Building application' },
 ];
 
 for (const step of steps) {

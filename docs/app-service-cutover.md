@@ -13,7 +13,7 @@ Audience: a fresh Codex run / new engineer completing the migration from Azure S
 
 ## CI/CD shape
 - Workflow: `.github/workflows/main_stevi.yml` (push to `main` → Production slot). `workflow_dispatch` accepts `slot` (`Production` or `staging`) and fails fast if a staging publish profile is missing.
-- Build pipeline: `npm ci` → `npm run typecheck` → `npm run build` (lint + Next build, Turbopack disabled) → `npm test --if-present` → `npm prune --omit=dev` → bundle built `.next`, `public`, `node_modules`, package manifests → zip → deploy with `azure/webapps-deploy@v3`.
+- Build pipeline: `npm ci` → `npm run typecheck` → `npm run build` (lint + default Next build using Turbopack) → `npm test --if-present` → `npm prune --omit=dev` → bundle Next **standalone** output (`.next/standalone`, `.next/static`, `public`, package manifests) → zip → deploy with `azure/webapps-deploy@v3`.
 
 ## Environment variables to set on App Service
 Set in **App Settings** (and in staging slot if used):
@@ -50,7 +50,7 @@ Set in **App Settings** (and in staging slot if used):
 
 ## Operational differences vs SWA
 - **Platform config**: set `WEBSITE_NODE_DEFAULT_VERSION` to Node 24.x, `SCM_DO_BUILD_DURING_DEPLOYMENT=false` (we ship prebuilt artifacts), `WEBSITE_RUN_FROM_PACKAGE` not required.
-- **Startup**: App uses `next start` against the bundled `.next` output.
+- **Startup**: App uses Next standalone output; start command is `node .next/standalone/server.js`.
 - **Always On / warm**: enable `alwaysOn` to keep the Next.js server warm; configure `ARRAffinity` as needed for sticky sessions (Supabase auth cookies are stateless).
 - **Logging/monitoring**: enable App Insights (live metrics + traces), HTTP access logs, and set 5xx/latency alerts. SWA handled this implicitly; App Service requires explicit setup.
 - **TLS & domains**: bind custom domains and enable Managed Certificates per hostname (SWA auto-managed).

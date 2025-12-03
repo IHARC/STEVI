@@ -8,8 +8,8 @@
   },
   "scripts": {
     "dev": "next dev",
-    "start": "next start",
-    "preview": "next start -p 4321",
+    "start": "node .next/standalone/server.js",
+    "preview": "node .next/standalone/server.js",
     "build": "node build.js",
     "sync:tokens": "node scripts/generate-design-tokens.mjs",
     "lint": "eslint .",

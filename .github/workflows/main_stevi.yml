@@ -60,8 +60,8 @@ jobs:
 
       - name: Validate build artifacts
         run: |
-          if [ ! -d ".next/server" ]; then
-            echo ".next/server is missing after build" >&2
+          if [ ! -f ".next/standalone/server.js" ]; then
+            echo ".next/standalone/server.js is missing after build" >&2
             ls -la .next
             exit 1
           fi
@@ -76,9 +76,11 @@ jobs:
       - name: Create deployment bundle
         run: |
           mkdir -p deployment
-          cp -r .next deployment/.next
-          cp -r public deployment/public
-          cp -r node_modules deployment/node_modules
+          mkdir -p deployment/.next
+          mkdir -p deployment/public
+          cp -r .next/standalone deployment/.next/standalone
+          cp -r .next/static deployment/.next/static
+          cp -r public/* deployment/public/ || true
           cp package.json package-lock.json next.config.ts middleware.ts build.js deployment/
 
       - name: Upload artifact for deployment job
