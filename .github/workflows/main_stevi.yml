@@ -69,6 +69,14 @@ jobs:
             echo ".next/static is missing after build" >&2
             exit 1
           fi
+          if [ ! -d ".next/standalone/.next/static" ]; then
+            echo ".next/standalone/.next/static is missing after build (static assets must live next to the standalone server)" >&2
+            exit 1
+          fi
+          if ! ls .next/standalone/.next/static/css/*.css >/dev/null 2>&1; then
+            echo "No CSS assets found under .next/standalone/.next/static/css" >&2
+            exit 1
+          fi
 
       - name: Prune dev dependencies for deployment
         run: npm prune --omit=dev
@@ -83,12 +91,21 @@ jobs:
           cp -r public/. deployment/public/ || true
           cp package.json package-lock.json next.config.ts middleware.ts build.js deployment/
 
+          # Safety: ensure standalone bundle contains static assets where Next expects them
+          mkdir -p deployment/.next/standalone/.next
+          rm -rf deployment/.next/standalone/.next/static
+          cp -r .next/static deployment/.next/standalone/.next/static
+
           if [ ! -f "deployment/.next/standalone/server.js" ]; then
             echo "Deployment bundle validation failed: .next/standalone/server.js missing" >&2
             exit 1
           fi
           if [ ! -d "deployment/.next/static" ]; then
             echo "Deployment bundle validation failed: .next/static missing" >&2
+            exit 1
+          fi
+          if [ ! -d "deployment/.next/standalone/.next/static" ]; then
+            echo "Deployment bundle validation failed: .next/standalone/.next/static missing" >&2
             exit 1
           fi
 
@@ -120,6 +137,11 @@ jobs:
         run: |
           if ! unzip -l node-app.zip | grep -q ".next/standalone/server.js"; then
             echo "Expected .next/standalone/server.js in deployment bundle" >&2
+            unzip -l node-app.zip || true
+            exit 1
+          fi
+          if ! unzip -l node-app.zip | grep -q ".next/standalone/.next/static/css"; then
+            echo "Expected .next/standalone/.next/static assets in deployment bundle" >&2
             unzip -l node-app.zip || true
             exit 1
           fi

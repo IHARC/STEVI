@@ -44,4 +44,27 @@ if (!fs.existsSync(standaloneEntrypoint)) {
   process.exit(1);
 }
 
+// Ensure static assets are packaged alongside the standalone server. Next.js expects
+// distDir to resolve relative to .next/standalone, so .next/standalone/.next/static
+// must exist in the deployment bundle.
+const staticSrc = path.join(outDir, 'static');
+const staticDest = path.join(outDir, 'standalone', '.next', 'static');
+
+if (!fs.existsSync(staticSrc)) {
+  console.error('❌ Build verification failed: .next/static directory missing');
+  process.exit(1);
+}
+
+// Replace any stale contents to avoid nested copies on rebuilds.
+fs.rmSync(staticDest, { recursive: true, force: true });
+fs.mkdirSync(path.dirname(staticDest), { recursive: true });
+fs.cpSync(staticSrc, staticDest, { recursive: true });
+
+if (!fs.existsSync(path.join(staticDest, 'css'))) {
+  console.error('❌ Build verification failed: static assets not synced into .next/standalone/.next');
+  process.exit(1);
+}
+
+console.log('📦 Synced static assets into .next/standalone/.next/static');
+
 console.log('🎉 IHARC portal build completed successfully!');
