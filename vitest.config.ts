@@ -9,6 +9,10 @@ export default defineConfig({
   test: {
     environment: 'node',
     globals: true,
+    // Vitest 4 defaults to the new "forks" pool, which crashes our Next/Supabase
+    // tests inside worker processes. Using the legacy threads pool restores
+    // prior behavior and keeps the suite stable.
+    pool: 'threads',
   },
   resolve: {
     alias: {
