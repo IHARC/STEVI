@@ -82,6 +82,10 @@ Copy `.env.example` to `.env` and fill the required values. All variables prefix
 - GitHub Actions workflow `.github/workflows/main_stevi.yml` builds with Node 24, runs `npm run build` (lint + Next build), prunes dev dependencies, bundles `.next`, `public`, and `node_modules`, and deploys via `azure/webapps-deploy@v3` using publish profiles. Use `workflow_dispatch` with `slot=staging` to target a staging slot when `AZUREAPPSERVICE_PUBLISHPROFILE_STAGING` is configured.
 - App Service settings: set the environment variables above in App Settings (per slot). Keep `WEBSITE_NODE_DEFAULT_VERSION` aligned to Node 24, and disable platform builds if you are deploying prebuilt artifacts (`SCM_DO_BUILD_DURING_DEPLOYMENT=false`).
 - Revalidation currently relies on `revalidatePath`. When STEVI begins triggering marketing refreshes, introduce shared cache tags or webhook notifications so both apps stay in sync.
+- Operational items now required on App Service (not handled automatically like SWA):
+  - Enable `alwaysOn`, HTTP logging, and Application Insights with 5xx/latency alerts.
+  - Bind custom domains and Managed Certificates per hostname.
+  - Scale plan/instances based on observed CPU/memory; SWA’s serverless scaling no longer applies.
 
 ## Next Steps
 

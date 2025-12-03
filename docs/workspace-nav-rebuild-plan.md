@@ -4,7 +4,7 @@ Date: 2025-12-01
 
 ## Constraints / reminders
 - Respect AGENTS.md: no outbound network without approval; prefer MCP; do not change Supabase schema/RLS; keep audit + rate limits intact.
-- Stack: Next.js 16 (App Router), React 19, Tailwind with Material 3 tokens. Build via `node build.js` (runs `eslint .` then `next build --webpack`).
+- Stack: Next.js 16 (App Router), React 19, Tailwind with Material 3 tokens. Build via `node build.js` (runs `eslint .` then `next build`).
 - Auth: use `createSupabaseServerClient` in actions/route handlers for any cookie writes; RSC client is read-only.
 - Keep surfaces dynamic (`dynamic = 'force-dynamic'`) for authed content.
 - Navigation UX principle (desktop/tablet): persistent global top bar with workspace tabs and global tools; separate workspace-scoped left drawer showing only the active workspace’s pages. Mobile uses sheet/modal but follows the same global-vs-workspace separation.

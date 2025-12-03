@@ -46,7 +46,14 @@ Set in **App Settings** (and in staging slot if used):
 
 ## Rollback
 - If slots: swap back to staging (old production).
-- If single slot: redeploy last known-good artifact from Actions history or temporarily point DNS back to SWA (if still intact).
+- If single slot: redeploy last known-good artifact from Actions history or temporarily restore the previous App Service snapshot / publish profile artifact.
+
+## Operational differences vs SWA
+- **Platform config**: set `WEBSITE_NODE_DEFAULT_VERSION` to Node 24.x, `SCM_DO_BUILD_DURING_DEPLOYMENT=false` (we ship prebuilt artifacts), `WEBSITE_RUN_FROM_PACKAGE` not required.
+- **Always On / warm**: enable `alwaysOn` to keep the Next.js server warm; configure `ARRAffinity` as needed for sticky sessions (Supabase auth cookies are stateless).
+- **Logging/monitoring**: enable App Insights (live metrics + traces), HTTP access logs, and set 5xx/latency alerts. SWA handled this implicitly; App Service requires explicit setup.
+- **TLS & domains**: bind custom domains and enable Managed Certificates per hostname (SWA auto-managed).
+- **Scaling**: choose plan size/scale-out rules; SWA was serverless. Validate memory/CPU headroom under load tests.
 
 ## Notes for future tweaks
 - To run Node 25 later, use a custom container on App Service or wait for platform support; update `engines`, `.nvmrc`, and workflow accordingly.
