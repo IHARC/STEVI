@@ -9,7 +9,7 @@
 ## Snapshot — 2025-11-25
 - Product: STEVI (Supportive Technology to Enable Vulnerable Individuals) operated by IHARC (Northumberland County, ON, Canada).
 - Stack: Next.js 16 (App Router, React 19, RSC), TypeScript, Tailwind with Material 3 tokens (`docs/design-tokens.md`), Radix primitives + shadcn-inspired wrappers, TipTap for rich text.
-- Hosting/build: Azure App Service (Linux, Node 24). Build entry is `node build.js` (runs `eslint .` then `next build --webpack` with SWC native binary disabled) and deploys via GitHub Actions (`.github/workflows/main_stevi.yml`, publish-profile based). Marketing app deploys separately but shares the same Supabase project/env vars.
+- Hosting/build: Azure App Service (Linux, Node 24). Build entry is `node build.js` (runs `eslint .` then `next build`) and deploys via GitHub Actions (`.github/workflows/main_stevi.yml`, publish-profile based). Marketing app deploys separately but shares the same Supabase project/env vars.
 - Auth/session: Supabase Auth via `@supabase/ssr` cookies. Use `createSupabaseServerClient` in actions/route handlers (can set cookies); the RSC client is read-only. Most portal routes export `dynamic = 'force-dynamic'` to respect session + RLS.
 - Data & storage: Supabase schemas in active use: `portal`, `core`, `case_mgmt`, `inventory`, `donations`. Storage bucket `portal-attachments`; Edge Function `portal-alerts` (invoked when `PORTAL_ALERTS_SECRET` is set).
 - Caching: No custom CDN layer. Use `revalidatePath`/`revalidateTag` from server actions; avoid static rendering for authed content.
@@ -57,7 +57,7 @@
 - Design system: stick to Material 3 tokens and shared components; avoid ad-hoc colors/spacing. Regenerate tokens with `npm run sync:tokens` after updating `tokens/material3.json`.
 - Notifications/alerts: send via `queuePortalNotification`; include `PORTAL_ALERTS_SECRET` locally only if you need to exercise the Edge Function.
 - Testing: `npm run lint`, `npm run typecheck`, `npm run test` (Vitest), `npm run e2e` (Playwright). Few tests exist—add coverage when touching flows.
-- Build/deploy: run `node build.js` (lints then builds). Azure App Service consumes the generated `.next` output; keep SWC native disabled unless Azure supports it.
+- Build/deploy: run `node build.js` (lints then builds). Azure App Service consumes the generated `.next` output.
 - Environment: `.env.example` is currently missing—create it using the matrix in `docs/backend.md`. Required: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_SITE_URL`. Optional: `PORTAL_ALERTS_SECRET`, GA. Never commit secrets.
 
 ## Outstanding work (prioritised)

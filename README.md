@@ -26,7 +26,7 @@ Environment variables (full notes in `docs/backend.md`):
 - TypeScript + Tailwind CSS with Material 3 tokens (`docs/design-tokens.md`), Radix primitives, shadcn-inspired wrappers, TipTap for rich text
 - Supabase Auth/Database/Edge Functions shared with the marketing portal (schemas: `portal`, `core`, `case_mgmt`, `inventory`, `donations`)
 - Vitest + Testing Library for unit coverage; Playwright for end-to-end flows
-- Azure App Service (Linux, Node 24) deployed via GitHub Actions (`.github/workflows/main_stevi.yml`); build entry `node build.js` keeps SWC native disabled for platform parity
+- Azure App Service (Linux, Node 24) deployed via GitHub Actions (`.github/workflows/main_stevi.yml`); build entry `node build.js` runs lint + Next build with the default SWC pipeline
 
 ## Migration Status
 

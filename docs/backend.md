@@ -5,7 +5,7 @@ This document captures the backend expectations for running the STEVI portal alo
 ## Platform Summary
 
 - **Framework**: Next.js 16 (App Router, React 19). SSR and RSC are enabled; most routes force dynamic rendering to respect Supabase auth context.
-- **Hosting**: Azure App Service (Linux, Node 24 LTS) at `stevi.iharc.ca`, deployed via GitHub Actions workflow `.github/workflows/main_stevi.yml` using publish profiles. SWC native remains disabled for platform parity.
+- **Hosting**: Azure App Service (Linux, Node 24 LTS) at `stevi.iharc.ca`, deployed via GitHub Actions workflow `.github/workflows/main_stevi.yml` using publish profiles.
 - **Data Layer**: Shared Supabase project with the marketing site (`iharc.ca`) and STEVI OPS. Schemas of interest: `portal`, `core`, `case_mgmt`, `inventory`, `donations`.
 - **Authentication**: Supabase Auth session cookies managed via `@supabase/ssr`. The same Supabase URL and publishable key must be used across all IHARC apps.
 - **Caching**: Next.js data cache only. We rely on `revalidatePath`/`revalidateTag` for targeted busting; no Edge CDN custom layer is configured yet.

@@ -4,9 +4,14 @@ import type { PortalProfile } from '@/lib/profile';
 import type { SupabaseAnyServerClient } from '@/lib/supabase/types';
 
 const mockEnsurePortalProfile = vi.fn();
+const mockGetInventoryRoles = vi.fn().mockResolvedValue(['iharc_staff']);
 
 vi.mock('@/lib/profile', () => ({
   ensurePortalProfile: (...args: unknown[]) => mockEnsurePortalProfile(...args),
+}));
+
+vi.mock('@/lib/enum-values', () => ({
+  getInventoryRoles: (...args: unknown[]) => mockGetInventoryRoles(...args),
 }));
 
 const baseProfile: PortalProfile = {

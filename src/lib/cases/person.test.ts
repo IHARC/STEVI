@@ -4,6 +4,12 @@ import type { SupabaseAnyServerClient } from '@/lib/supabase/types';
 
 type QueryResult<T> = { data: T | null; error: Error | null };
 
+const mockGetGrantScopes = vi.fn().mockResolvedValue(['case_view']);
+
+vi.mock('@/lib/enum-values', () => ({
+  getGrantScopes: (...args: unknown[]) => mockGetGrantScopes(...args),
+}));
+
 function createQuery<T>(result: QueryResult<T>) {
   return {
     select: vi.fn().mockReturnThis(),
