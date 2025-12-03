@@ -19,6 +19,8 @@
 
 # production
 /build
+/deployment
+/node-app
 
 # misc
 .DS_Store

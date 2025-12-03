@@ -40,6 +40,8 @@ const steviConfig = [
   {
     ignores: [
       '.next/**',
+      'deployment/**',
+      'node-app/**',
       'node_modules/**',
       'dist/**',
       'coverage/**',
