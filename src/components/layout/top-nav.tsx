@@ -34,7 +34,7 @@ export function TopNav({
 }: TopNavProps) {
   const { desktop, mobile } = navigation;
   const hasWorkspaceNav = Boolean(workspaceNav?.groups.length);
-  const hasWorkspaces = workspaceOptions.length > 0;
+  const hasWorkspaces = workspaceOptions.length > 0 && activeWorkspace !== 'client';
 
   return (
     <header className="sticky top-0 z-50 border-b border-outline/12 bg-surface/92 text-on-surface shadow-level-2 backdrop-blur-xl supports-[backdrop-filter]:bg-surface/85">

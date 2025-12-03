@@ -55,6 +55,7 @@ export default async function PortalLayout({ children }: { children: ReactNode }
 
   const primaryNavItems = buildPrimaryNavItems(portalAccess);
   const workspaceOptions = resolveWorkspaceOptions(portalAccess);
+  const workspaceSwitcherOptions = workspaceOptions.filter((option) => option.id !== 'client');
   const branding = await getBrandingAssetsWithClient(supabase);
   const navigation = await getUserNavigation(portalAccess);
 
@@ -78,7 +79,7 @@ export default async function PortalLayout({ children }: { children: ReactNode }
         <AppShell
           workspaceNav={workspaceNav}
           globalNavItems={primaryNavItems}
-          workspaceOptions={workspaceOptions}
+          workspaceOptions={workspaceSwitcherOptions}
           inboxItems={inboxItems}
           activeWorkspace={activeWorkspace}
           isClientPreview={previewingClient}

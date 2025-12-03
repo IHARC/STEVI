@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { loadPortalAccess } from './portal-access';
+import { buildUserMenuLinks, loadPortalAccess } from './portal-access';
 import type { PortalProfile } from '@/lib/profile';
 import type { SupabaseAnyServerClient } from '@/lib/supabase/types';
 
@@ -97,5 +97,35 @@ describe('loadPortalAccess', () => {
     mockEnsurePortalProfile.mockResolvedValue(baseProfile);
 
     await expect(loadPortalAccess(supabase)).rejects.toThrow('Unable to load your roles right now.');
+  });
+});
+
+describe('buildUserMenuLinks', () => {
+  it('includes client preview for staff/admin users', async () => {
+    const supabase = createSupabase({
+      rpcResult: {
+        data: [{ role_name: 'iharc_staff' }],
+        error: null,
+      },
+    });
+    mockEnsurePortalProfile.mockResolvedValue(baseProfile);
+
+    const access = await loadPortalAccess(supabase);
+    const links = buildUserMenuLinks(access!);
+    expect(links.some((link) => link.href === '/home')).toBe(true);
+  });
+
+  it('omits client preview for client-only users', async () => {
+    const supabase = createSupabase({
+      rpcResult: {
+        data: [],
+        error: null,
+      },
+    });
+    mockEnsurePortalProfile.mockResolvedValue({ ...baseProfile, affiliation_status: 'approved' });
+
+    const access = await loadPortalAccess(supabase);
+    const links = buildUserMenuLinks(access!);
+    expect(links.some((link) => link.href === '/home')).toBe(false);
   });
 });

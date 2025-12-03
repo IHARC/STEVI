@@ -50,13 +50,7 @@ export function resolveWorkspaceOptions(access: PortalAccess | null): WorkspaceO
     return [clientWorkspace()];
   }
 
-  const options: WorkspaceOption[] = [
-    clientWorkspace({
-      roleLabel: resolveRoleLabel(access, 'client'),
-      statusLabel: resolveStatusLabel(access),
-      statusTone: resolveStatusTone(access),
-    }),
-  ];
+  const options: WorkspaceOption[] = [];
 
   if (access.canAccessAdminWorkspace) {
     options.push({
@@ -92,6 +86,17 @@ export function resolveWorkspaceOptions(access: PortalAccess | null): WorkspaceO
       statusLabel: resolveStatusLabel(access),
       statusTone: resolveStatusTone(access),
     });
+  }
+
+  // Keep client workspace available for people who only have client access.
+  if (options.length === 0) {
+    options.push(
+      clientWorkspace({
+        roleLabel: resolveRoleLabel(access, 'client'),
+        statusLabel: resolveStatusLabel(access),
+        statusTone: resolveStatusTone(access),
+      }),
+    );
   }
 
   return options;

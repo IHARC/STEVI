@@ -250,6 +250,11 @@ const USER_MENU_BLUEPRINT: MenuLinkBlueprint[] = [
   { href: '/profile', label: 'Profile' },
   { href: '/support', label: 'Support' },
   {
+    href: '/home',
+    label: 'Client portal preview',
+    requires: (access) => access.canAccessStaffWorkspace || access.canAccessAdminWorkspace,
+  },
+  {
     href: '/admin',
     label: 'Admin workspace',
     requires: (access) => access.canAccessAdminWorkspace,
