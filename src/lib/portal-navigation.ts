@@ -3,33 +3,39 @@ import type { PortalAccess } from '@/lib/portal-access';
 
 export type PortalArea = 'client' | 'staff' | 'admin' | 'org';
 
-export type NavItem = {
+type NavRule = (access: PortalAccess) => boolean;
+
+type NavItemDefinition = {
   id: string;
   href: string;
   label: string;
   icon?: AppIconName;
   match?: string[];
   exact?: boolean;
-  requires?: (access: PortalAccess) => boolean;
+  requires?: NavRule;
 };
 
-export type NavGroup = {
+type NavGroupDefinition = {
   id: string;
   label: string;
   description?: string;
   icon?: AppIconName;
-  items: NavItem[];
-  requires?: (access: PortalAccess) => boolean;
+  items: NavItemDefinition[];
+  requires?: NavRule;
 };
 
-export type NavSection = {
+type NavSectionDefinition = {
   id: string;
   label: string;
   description?: string;
   area: PortalArea;
-  groups: NavGroup[];
-  requires?: (access: PortalAccess) => boolean;
+  groups: NavGroupDefinition[];
+  requires?: NavRule;
 };
+
+export type NavItem = Omit<NavItemDefinition, 'requires'>;
+export type NavGroup = Omit<NavGroupDefinition, 'requires' | 'items'> & { items: NavItem[] };
+export type NavSection = Omit<NavSectionDefinition, 'requires' | 'groups'> & { groups: NavGroup[] };
 
 export type QuickAction = {
   id: string;
@@ -51,7 +57,7 @@ const canManageUsers = (access: PortalAccess) =>
 const canManageOrgs = (access: PortalAccess) =>
   isApproved(access) && (access.portalRoles.includes('portal_org_admin') || access.portalRoles.includes('portal_org_rep'));
 
-const NAV_SECTIONS: NavSection[] = [
+const NAV_SECTIONS: NavSectionDefinition[] = [
   {
     id: 'client-portal',
     label: 'Client portal',
@@ -246,15 +252,23 @@ const NAV_SECTIONS: NavSection[] = [
   },
 ];
 
-function filterItems(items: NavItem[], access: PortalAccess): NavItem[] {
-  return items.filter((item) => !item.requires || item.requires(access));
+function filterItems(items: NavItemDefinition[], access: PortalAccess): NavItem[] {
+  return items
+    .filter((item) => !item.requires || item.requires(access))
+    .map(({ requires: _requires, ...item }) => item);
 }
 
-function filterGroups(groups: NavGroup[], access: PortalAccess): NavGroup[] {
+function filterGroups(groups: NavGroupDefinition[], access: PortalAccess): NavGroup[] {
   return groups
-    .map((group) => ({ ...group, items: filterItems(group.items, access) }))
-    .filter((group) => group.items.length > 0)
-    .filter((group) => !group.requires || group.requires(access));
+    .filter((group) => !group.requires || group.requires(access))
+    .map((group) => ({
+      id: group.id,
+      label: group.label,
+      description: group.description,
+      icon: group.icon,
+      items: filterItems(group.items, access),
+    }))
+    .filter((group) => group.items.length > 0);
 }
 
 export function buildPortalNav(access: PortalAccess | null): NavSection[] {
@@ -262,7 +276,13 @@ export function buildPortalNav(access: PortalAccess | null): NavSection[] {
 
   return NAV_SECTIONS
     .filter((section) => !section.requires || section.requires(access))
-    .map((section) => ({ ...section, groups: filterGroups(section.groups, access) }))
+    .map((section) => ({
+      id: section.id,
+      label: section.label,
+      description: section.description,
+      area: section.area,
+      groups: filterGroups(section.groups, access),
+    }))
     .filter((section) => section.groups.length > 0);
 }
 

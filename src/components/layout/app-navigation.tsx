@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Menu } from 'lucide-react';
 import type { NavSection, NavItem as PortalNavItem } from '@/lib/portal-navigation';
 import type { PrimaryNavItem } from '@/lib/primary-nav';
 import { resolveAppIcon } from '@/lib/app-icons';
@@ -12,6 +12,7 @@ import { Icon } from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 type AppNavigationProps = {
   navSections: NavSection[];
@@ -22,23 +23,54 @@ type AppNavigationProps = {
 export function AppNavigationDesktop({ navSections, globalNavItems = [], className }: AppNavigationProps) {
   const pathname = usePathname() ?? '/';
   const hasNav = navSections.some((section) => section.groups.length > 0);
+  const [collapsed, setCollapsed] = useState(false);
 
   if (!hasNav) return null;
 
   return (
-    <nav
-      aria-label="Application navigation"
-      className={cn(
-        'sticky top-0 hidden h-screen w-64 shrink-0 border-r border-outline/12 bg-surface-container-lowest text-on-surface shadow-level-1 xl:flex',
-        className,
-      )}
-    >
-      <NavContent
-        navSections={navSections}
-        pathname={pathname}
-        globalNavItems={globalNavItems}
-      />
-    </nav>
+    <TooltipProvider delayDuration={0}>
+      <nav
+        aria-label="Application navigation"
+        className={cn(
+          'sticky top-0 hidden h-screen shrink-0 border-r border-outline/12 bg-surface-container-lowest text-on-surface shadow-level-1 xl:flex',
+          collapsed ? 'w-[84px]' : 'w-72',
+          className,
+        )}
+      >
+        <div className="flex h-full w-full flex-col">
+          <div className={cn('flex items-center gap-space-xs px-space-sm pb-space-xs pt-space-sm', collapsed && 'justify-center')}> 
+            {!collapsed ? (
+              <div className="flex flex-col leading-tight">
+                <span className="text-label-sm font-semibold text-on-surface">Navigation</span>
+                <span className="text-label-sm text-on-surface-variant">Workspaces</span>
+              </div>
+            ) : null}
+            <div className="ml-auto">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 rounded-[var(--md-sys-shape-corner-small)]"
+                onClick={() => setCollapsed((prev) => !prev)}
+                aria-label={collapsed ? 'Expand navigation' : 'Collapse navigation'}
+              >
+                <Icon icon={collapsed ? ChevronRight : ChevronLeft} size="sm" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-y-auto">
+            <NavContent
+              navSections={navSections}
+              pathname={pathname}
+              globalNavItems={globalNavItems}
+              collapsed={collapsed}
+              showGlobalNav={false}
+            />
+          </div>
+        </div>
+      </nav>
+    </TooltipProvider>
   );
 }
 
@@ -73,6 +105,7 @@ export function AppNavigationMobile({ navSections, globalNavItems = [] }: AppNav
               pathname={pathname}
               onNavigate={() => setOpen(false)}
               showHeader={false}
+              showGlobalNav
               globalNavItems={globalNavItems}
             />
           </ScrollArea>
@@ -88,44 +121,57 @@ type NavContentProps = {
   onNavigate?: () => void;
   globalNavItems?: PrimaryNavItem[];
   showHeader?: boolean;
+  collapsed?: boolean;
+  showGlobalNav?: boolean;
 };
 
-function NavContent({ navSections, pathname, onNavigate, globalNavItems = [], showHeader = true }: NavContentProps) {
+function NavContent({ navSections, pathname, onNavigate, globalNavItems = [], showHeader = true, collapsed = false, showGlobalNav = true }: NavContentProps) {
+  const activeSectionId = useMemo(() => {
+    for (const section of navSections) {
+      for (const group of section.groups) {
+        for (const item of group.items) {
+          if (isLinkActive(item, pathname)) return section.id;
+        }
+      }
+    }
+    return navSections[0]?.id;
+  }, [navSections, pathname]);
+
   return (
     <div className="flex h-full flex-col bg-surface-container-lowest">
       {showHeader ? (
-        <div className="px-space-lg pt-space-lg pb-space-xs">
-          <p className="text-label-sm font-medium text-on-surface-variant">App</p>
-          <p className="text-title-sm font-semibold text-on-surface">Navigation</p>
+        <div className={cn('px-space-md pt-space-md pb-space-xs', collapsed && 'px-space-sm text-center')}>
+          <p className="text-label-sm font-medium text-on-surface-variant">Workspaces</p>
         </div>
       ) : null}
 
-      <div className="flex-1 overflow-y-auto px-space-sm pb-space-lg">
-        <div className="space-y-space-lg">
+      <div className={cn('flex-1 overflow-y-auto px-space-sm pb-space-lg', collapsed && 'px-space-2xs')}> 
+        <div className="space-y-space-sm">
           {navSections.map((section) => (
-            <div key={section.id} className="space-y-space-xs">
-              <div className="flex items-center justify-between px-space-sm text-label-sm font-semibold text-on-surface">
-                <span>{section.label}</span>
-                {section.description ? (
-                  <span className="text-label-sm font-medium text-on-surface-variant">{section.description}</span>
+            <div key={section.id} className={cn('space-y-space-2xs rounded-[var(--md-sys-shape-corner-small)]', !collapsed && 'bg-surface-container-low p-space-2xs shadow-level-1')}>
+              <div className={cn('flex items-center gap-space-xs px-space-sm pt-space-2xs text-label-sm font-semibold uppercase tracking-wide text-on-surface-variant', collapsed && 'justify-center px-space-3xs text-[11px]')}>
+                <span className={cn('truncate', collapsed && 'sr-only')}>{section.label}</span>
+                {collapsed ? null : activeSectionId === section.id ? (
+                  <span className="rounded-full bg-primary/10 px-space-2xs py-[2px] text-label-xs font-semibold text-primary">Active</span>
                 ) : null}
               </div>
-              <div className="space-y-space-sm rounded-[var(--md-sys-shape-corner-small)] bg-surface-container-low p-space-2xs shadow-level-1">
+              <div className="space-y-space-2xs">
                 {section.groups.map((group) => (
-                  <div key={group.id} className="space-y-space-2xs">
-                    <div className="flex items-center gap-space-xs px-space-sm pt-space-sm text-label-sm font-medium text-on-surface-variant">
+                  <div key={group.id} className="space-y-space-3xs">
+                    <div className={cn('flex items-center gap-space-xs px-space-sm pt-space-2xs text-label-sm font-medium text-on-surface-variant', collapsed && 'sr-only')}>
                       {group.icon ? (
                         <Icon icon={resolveAppIcon(group.icon)} size="sm" className="text-on-surface/70" />
                       ) : null}
                       <span className="truncate">{group.label}</span>
                     </div>
-                    <div className="flex flex-col gap-space-3xs">
+                    <div className="flex flex-col gap-space-2xs">
                       {group.items.map((item) => (
                         <NavLink
                           key={item.href}
                           link={item}
                           pathname={pathname}
                           onNavigate={onNavigate}
+                          collapsed={collapsed}
                         />
                       ))}
                     </div>
@@ -137,7 +183,7 @@ function NavContent({ navSections, pathname, onNavigate, globalNavItems = [], sh
         </div>
       </div>
 
-      {globalNavItems.length ? (
+      {showGlobalNav && globalNavItems.length ? (
         <div className="border-t border-outline/12 px-space-sm py-space-sm">
           <p className="px-space-sm pb-space-2xs text-label-sm font-medium text-on-surface-variant">Quick links</p>
           <div className="flex flex-col gap-space-3xs">
@@ -147,6 +193,7 @@ function NavContent({ navSections, pathname, onNavigate, globalNavItems = [], sh
                 link={primaryNavToNavItem(item)}
                 pathname={pathname}
                 onNavigate={onNavigate}
+                collapsed={collapsed}
               />
             ))}
           </div>
@@ -160,18 +207,20 @@ type NavLinkProps = {
   link: Pick<PortalNavItem, 'href' | 'icon' | 'label' | 'match' | 'exact'>;
   pathname: string;
   onNavigate?: () => void;
+  collapsed?: boolean;
 };
 
-function NavLink({ link, pathname, onNavigate }: NavLinkProps) {
+function NavLink({ link, pathname, onNavigate, collapsed = false }: NavLinkProps) {
   const active = isLinkActive(link, pathname);
-
-  return (
+  const content = (
     <Link
       href={link.href}
       aria-current={active ? 'page' : undefined}
+      aria-label={collapsed ? link.label : undefined}
       onClick={onNavigate}
       className={cn(
-        'group flex h-10 items-center gap-space-sm rounded-[var(--md-sys-shape-corner-extra-small)] px-space-md text-label-md font-semibold transition-colors motion-duration-short motion-ease-standard state-layer-color-neutral focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
+        'group flex h-10 items-center gap-space-sm rounded-[var(--md-sys-shape-corner-extra-small)] text-label-md font-semibold transition-colors motion-duration-short motion-ease-standard state-layer-color-neutral focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
+        collapsed ? 'justify-center px-space-sm' : 'px-space-md',
         active
           ? 'bg-secondary-container text-on-secondary-container'
           : 'text-on-surface-variant hover:bg-surface-container',
@@ -184,8 +233,19 @@ function NavLink({ link, pathname, onNavigate }: NavLinkProps) {
           className={cn('text-inherit transition-colors', active ? 'text-on-secondary-container' : 'text-on-surface-variant')}
         />
       ) : null}
-      <span className="truncate">{link.label}</span>
+      <span className={cn('truncate', collapsed && 'sr-only')}>{link.label}</span>
     </Link>
+  );
+
+  if (!collapsed) return content;
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>{content}</TooltipTrigger>
+      <TooltipContent side="right" sideOffset={8} className="text-label-sm">
+        {link.label}
+      </TooltipContent>
+    </Tooltip>
   );
 }
 

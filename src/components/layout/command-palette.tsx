@@ -15,9 +15,10 @@ import { CornerDownLeft, Search } from 'lucide-react';
 type CommandPaletteProps = {
   items: CommandPaletteItem[];
   compactTrigger?: boolean;
+  className?: string;
 };
 
-export function CommandPalette({ items, compactTrigger = false }: CommandPaletteProps) {
+export function CommandPalette({ items, compactTrigger = false, className }: CommandPaletteProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const router = useRouter();
@@ -72,7 +73,7 @@ export function CommandPalette({ items, compactTrigger = false }: CommandPalette
         type="button"
         variant={compactTrigger ? 'ghost' : 'outline'}
         size={compactTrigger ? 'icon' : 'sm'}
-        className={cn('gap-space-xs', compactTrigger ? 'h-9 w-9' : 'hidden md:inline-flex')}
+        className={cn('gap-space-xs', compactTrigger ? 'h-9 w-9' : 'hidden md:inline-flex', className)}
         onClick={() => setOpen(true)}
         aria-label="Open command palette"
         disabled={items.length === 0}
