@@ -21,10 +21,17 @@ export type PortalRequestContextValue = {
 
 export async function getPortalRequestContext(): Promise<PortalRequestContextValue> {
   const headerList = await headers();
-  const normalizedPath = normalizePathFromHeader(
-    headerList.get('x-invoke-path') ?? headerList.get('next-url'),
-    '/',
-  );
+  const rawPath =
+    headerList.get('x-invoke-path') ??
+    headerList.get('next-url') ??
+    headerList.get('x-forwarded-path') ??
+    headerList.get('x-forwarded-uri') ??
+    headerList.get('x-original-url') ??
+    headerList.get('x-ms-original-url') ??
+    headerList.get('x-rewrite-url') ??
+    headerList.get('x-request-uri');
+
+  const normalizedPath = normalizePathFromHeader(rawPath, '/');
 
   const supabase = await createSupabaseRSCClient();
   const portalAccess = await loadPortalAccess(supabase);
