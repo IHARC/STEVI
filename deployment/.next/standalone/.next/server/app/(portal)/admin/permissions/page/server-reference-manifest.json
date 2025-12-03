@@ -1,0 +1,80 @@
+{
+  "node": {
+    "00b7ee4fee263fec1fe8acb860989f6ddb47485e3a": {
+      "workers": {
+        "app/(portal)/admin/permissions/page": {
+          "moduleId": 93125,
+          "async": false,
+          "exportedName": "$$RSC_SERVER_ACTION_0",
+          "filename": "src/components/layout/user-nav.tsx"
+        }
+      },
+      "layer": {
+        "app/(portal)/admin/permissions/page": "rsc"
+      },
+      "exportedName": "$$RSC_SERVER_ACTION_0",
+      "filename": "src/components/layout/user-nav.tsx"
+    },
+    "40255b86f275a4f4e5931b42a7dee03b78e674beb3": {
+      "workers": {
+        "app/(portal)/admin/permissions/page": {
+          "moduleId": 93125,
+          "async": false,
+          "exportedName": "$$RSC_SERVER_ACTION_1",
+          "filename": "src/app/(portal)/admin/permissions/page.tsx"
+        }
+      },
+      "layer": {
+        "app/(portal)/admin/permissions/page": "rsc"
+      },
+      "exportedName": "$$RSC_SERVER_ACTION_1",
+      "filename": "src/app/(portal)/admin/permissions/page.tsx"
+    },
+    "40db2a9b2c1420ee643287fed8911c3fa007a7519e": {
+      "workers": {
+        "app/(portal)/admin/permissions/page": {
+          "moduleId": 93125,
+          "async": false,
+          "exportedName": "$$RSC_SERVER_ACTION_0",
+          "filename": "src/app/(portal)/admin/permissions/page.tsx"
+        }
+      },
+      "layer": {
+        "app/(portal)/admin/permissions/page": "rsc"
+      },
+      "exportedName": "$$RSC_SERVER_ACTION_0",
+      "filename": "src/app/(portal)/admin/permissions/page.tsx"
+    },
+    "40dbfdb4347b69cdf097b12653aca1dd74e80eea6f": {
+      "workers": {
+        "app/(portal)/admin/permissions/page": {
+          "moduleId": 93125,
+          "async": false,
+          "exportedName": "createPermissionAction",
+          "filename": "src/app/(portal)/admin/permissions/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(portal)/admin/permissions/page": "rsc"
+      },
+      "exportedName": "createPermissionAction",
+      "filename": "src/app/(portal)/admin/permissions/actions.ts"
+    },
+    "40e87b9887494d090f534d57dfa531f3caaca5386b": {
+      "workers": {
+        "app/(portal)/admin/permissions/page": {
+          "moduleId": 93125,
+          "async": false,
+          "exportedName": "togglePermissionAction",
+          "filename": "src/app/(portal)/admin/permissions/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(portal)/admin/permissions/page": "rsc"
+      },
+      "exportedName": "togglePermissionAction",
+      "filename": "src/app/(portal)/admin/permissions/actions.ts"
+    }
+  },
+  "edge": {}
+}

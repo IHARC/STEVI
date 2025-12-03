@@ -1,0 +1,20 @@
+{
+  "node": {
+    "60f70b21a9091cec3d046b81660196c113f94efc8c": {
+      "workers": {
+        "app/register/volunteer/page": {
+          "moduleId": 71268,
+          "async": false,
+          "exportedName": "$$RSC_SERVER_ACTION_0",
+          "filename": "src/app/register/volunteer/page.tsx"
+        }
+      },
+      "layer": {
+        "app/register/volunteer/page": "rsc"
+      },
+      "exportedName": "$$RSC_SERVER_ACTION_0",
+      "filename": "src/app/register/volunteer/page.tsx"
+    }
+  },
+  "edge": {}
+}

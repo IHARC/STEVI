@@ -1,0 +1,20 @@
+{
+  "node": {
+    "60acfd63904b300cee46f34e27adb8e696b1c7d855": {
+      "workers": {
+        "app/register/partner/page": {
+          "moduleId": 25473,
+          "async": false,
+          "exportedName": "$$RSC_SERVER_ACTION_0",
+          "filename": "src/app/register/partner/page.tsx"
+        }
+      },
+      "layer": {
+        "app/register/partner/page": "rsc"
+      },
+      "exportedName": "$$RSC_SERVER_ACTION_0",
+      "filename": "src/app/register/partner/page.tsx"
+    }
+  },
+  "edge": {}
+}

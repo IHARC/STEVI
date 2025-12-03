@@ -101,6 +101,27 @@ jobs:
           name: node-app
           path: node-app
 
+      - name: Flatten artifact contents
+        shell: bash
+        run: |
+          cd node-app
+          # Move everything out of the nested deployment directory so .next sits at repo root
+          shopt -s dotglob
+          if [ -d "deployment" ]; then
+            mv deployment/* .
+            rmdir deployment
+          fi
+
+      - name: Validate package layout
+        shell: bash
+        run: |
+          cd node-app
+          if [ ! -f ".next/standalone/server.js" ]; then
+            echo "Expected .next/standalone/server.js in deployment bundle" >&2
+            find . -maxdepth 2 -type f | sed 's|^./||'
+            exit 1
+          fi
+
       - name: Resolve target slot and publish profile
         id: slot
         shell: bash

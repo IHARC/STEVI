@@ -1,0 +1,20 @@
+{
+  "node": {
+    "00b7ee4fee263fec1fe8acb860989f6ddb47485e3a": {
+      "workers": {
+        "app/(portal)/admin/inventory/donations-mapping/page": {
+          "moduleId": 13230,
+          "async": false,
+          "exportedName": "$$RSC_SERVER_ACTION_0",
+          "filename": "src/components/layout/user-nav.tsx"
+        }
+      },
+      "layer": {
+        "app/(portal)/admin/inventory/donations-mapping/page": "rsc"
+      },
+      "exportedName": "$$RSC_SERVER_ACTION_0",
+      "filename": "src/components/layout/user-nav.tsx"
+    }
+  },
+  "edge": {}
+}

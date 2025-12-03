@@ -1,0 +1,35 @@
+{
+  "node": {
+    "00b7ee4fee263fec1fe8acb860989f6ddb47485e3a": {
+      "workers": {
+        "app/(portal)/support/page": {
+          "moduleId": 64629,
+          "async": false,
+          "exportedName": "$$RSC_SERVER_ACTION_0",
+          "filename": "src/components/layout/user-nav.tsx"
+        }
+      },
+      "layer": {
+        "app/(portal)/support/page": "rsc"
+      },
+      "exportedName": "$$RSC_SERVER_ACTION_0",
+      "filename": "src/components/layout/user-nav.tsx"
+    },
+    "6098472ac8980cfadc98a560f4ba9432958505442d": {
+      "workers": {
+        "app/(portal)/support/page": {
+          "moduleId": 64629,
+          "async": false,
+          "exportedName": "submitSupportMessage",
+          "filename": "src/app/(portal)/support/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(portal)/support/page": "action-browser"
+      },
+      "exportedName": "submitSupportMessage",
+      "filename": "src/app/(portal)/support/actions.ts"
+    }
+  },
+  "edge": {}
+}

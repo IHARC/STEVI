@@ -1,0 +1,50 @@
+{
+  "node": {
+    "00b7ee4fee263fec1fe8acb860989f6ddb47485e3a": {
+      "workers": {
+        "app/(portal)/org/members/page": {
+          "moduleId": 44545,
+          "async": false,
+          "exportedName": "$$RSC_SERVER_ACTION_0",
+          "filename": "src/components/layout/user-nav.tsx"
+        }
+      },
+      "layer": {
+        "app/(portal)/org/members/page": "rsc"
+      },
+      "exportedName": "$$RSC_SERVER_ACTION_0",
+      "filename": "src/components/layout/user-nav.tsx"
+    },
+    "40c902b3dbdc60cffb63d2516810fded4652ab4135": {
+      "workers": {
+        "app/(portal)/org/members/page": {
+          "moduleId": 44545,
+          "async": false,
+          "exportedName": "removeMemberAction",
+          "filename": "src/app/(portal)/org/members/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(portal)/org/members/page": "action-browser"
+      },
+      "exportedName": "removeMemberAction",
+      "filename": "src/app/(portal)/org/members/actions.ts"
+    },
+    "405dd1f997612e490d8925326021e1036c46c9cab9": {
+      "workers": {
+        "app/(portal)/org/members/page": {
+          "moduleId": 44545,
+          "async": false,
+          "exportedName": "toggleMemberRoleAction",
+          "filename": "src/app/(portal)/org/members/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(portal)/org/members/page": "action-browser"
+      },
+      "exportedName": "toggleMemberRoleAction",
+      "filename": "src/app/(portal)/org/members/actions.ts"
+    }
+  },
+  "edge": {}
+}

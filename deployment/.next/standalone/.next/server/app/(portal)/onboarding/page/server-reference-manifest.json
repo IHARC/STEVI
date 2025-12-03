@@ -1,0 +1,95 @@
+{
+  "node": {
+    "00b7ee4fee263fec1fe8acb860989f6ddb47485e3a": {
+      "workers": {
+        "app/(portal)/onboarding/page": {
+          "moduleId": 82722,
+          "async": false,
+          "exportedName": "$$RSC_SERVER_ACTION_0",
+          "filename": "src/components/layout/user-nav.tsx"
+        }
+      },
+      "layer": {
+        "app/(portal)/onboarding/page": "rsc"
+      },
+      "exportedName": "$$RSC_SERVER_ACTION_0",
+      "filename": "src/components/layout/user-nav.tsx"
+    },
+    "7fdfda462d5dbf3f64ed9d67fd12bebaacd0576a6f": {
+      "workers": {
+        "app/(portal)/onboarding/page": {
+          "moduleId": 82722,
+          "async": false,
+          "exportedName": "INITIAL_ONBOARDING_ACTION_STATE",
+          "filename": "src/app/(portal)/onboarding/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(portal)/onboarding/page": "action-browser"
+      },
+      "exportedName": "INITIAL_ONBOARDING_ACTION_STATE",
+      "filename": "src/app/(portal)/onboarding/actions.ts"
+    },
+    "606b76070236bace9df3bb5afac565ee5a71b4e16f": {
+      "workers": {
+        "app/(portal)/onboarding/page": {
+          "moduleId": 82722,
+          "async": false,
+          "exportedName": "linkAccountToPersonAction",
+          "filename": "src/app/(portal)/onboarding/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(portal)/onboarding/page": "action-browser"
+      },
+      "exportedName": "linkAccountToPersonAction",
+      "filename": "src/app/(portal)/onboarding/actions.ts"
+    },
+    "6002a832463af9c9a310084eec0c41e03afe6fb8cc": {
+      "workers": {
+        "app/(portal)/onboarding/page": {
+          "moduleId": 82722,
+          "async": false,
+          "exportedName": "recordConsentsAction",
+          "filename": "src/app/(portal)/onboarding/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(portal)/onboarding/page": "action-browser"
+      },
+      "exportedName": "recordConsentsAction",
+      "filename": "src/app/(portal)/onboarding/actions.ts"
+    },
+    "6028260131f33144f32d3e08a5fb8607c2c113a90d": {
+      "workers": {
+        "app/(portal)/onboarding/page": {
+          "moduleId": 82722,
+          "async": false,
+          "exportedName": "saveBasicInfoAction",
+          "filename": "src/app/(portal)/onboarding/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(portal)/onboarding/page": "action-browser"
+      },
+      "exportedName": "saveBasicInfoAction",
+      "filename": "src/app/(portal)/onboarding/actions.ts"
+    },
+    "602674c5deb77e864deb7b651907c8b48140d7f1b6": {
+      "workers": {
+        "app/(portal)/onboarding/page": {
+          "moduleId": 82722,
+          "async": false,
+          "exportedName": "saveSharingPreferenceAction",
+          "filename": "src/app/(portal)/onboarding/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(portal)/onboarding/page": "action-browser"
+      },
+      "exportedName": "saveSharingPreferenceAction",
+      "filename": "src/app/(portal)/onboarding/actions.ts"
+    }
+  },
+  "edge": {}
+}

@@ -1,0 +1,80 @@
+{
+  "node": {
+    "00b7ee4fee263fec1fe8acb860989f6ddb47485e3a": {
+      "workers": {
+        "app/(portal)/admin/resources/new/page": {
+          "moduleId": 86680,
+          "async": false,
+          "exportedName": "$$RSC_SERVER_ACTION_0",
+          "filename": "src/components/layout/user-nav.tsx"
+        }
+      },
+      "layer": {
+        "app/(portal)/admin/resources/new/page": "rsc"
+      },
+      "exportedName": "$$RSC_SERVER_ACTION_0",
+      "filename": "src/components/layout/user-nav.tsx"
+    },
+    "409b772654760143dd42acb61b41d8d1c1d00d0ddf": {
+      "workers": {
+        "app/(portal)/admin/resources/new/page": {
+          "moduleId": 86680,
+          "async": false,
+          "exportedName": "updateResourceDraftAction",
+          "filename": "src/app/(portal)/admin/resources/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(portal)/admin/resources/new/page": "rsc"
+      },
+      "exportedName": "updateResourceDraftAction",
+      "filename": "src/app/(portal)/admin/resources/actions.ts"
+    },
+    "4019f6db14d508e67bd0c10f883fd9731f3da1fe8f": {
+      "workers": {
+        "app/(portal)/admin/resources/new/page": {
+          "moduleId": 86680,
+          "async": false,
+          "exportedName": "createResourcePage",
+          "filename": "src/app/(portal)/admin/resources/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(portal)/admin/resources/new/page": "rsc"
+      },
+      "exportedName": "createResourcePage",
+      "filename": "src/app/(portal)/admin/resources/actions.ts"
+    },
+    "40bb15427bdcc383201e244bb8950ff6286b2da660": {
+      "workers": {
+        "app/(portal)/admin/resources/new/page": {
+          "moduleId": 86680,
+          "async": false,
+          "exportedName": "deleteResourcePage",
+          "filename": "src/app/(portal)/admin/resources/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(portal)/admin/resources/new/page": "rsc"
+      },
+      "exportedName": "deleteResourcePage",
+      "filename": "src/app/(portal)/admin/resources/actions.ts"
+    },
+    "40d6ce552731eb3482b730ff5b50c5307350d78295": {
+      "workers": {
+        "app/(portal)/admin/resources/new/page": {
+          "moduleId": 86680,
+          "async": false,
+          "exportedName": "updateResourcePage",
+          "filename": "src/app/(portal)/admin/resources/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(portal)/admin/resources/new/page": "rsc"
+      },
+      "exportedName": "updateResourcePage",
+      "filename": "src/app/(portal)/admin/resources/actions.ts"
+    }
+  },
+  "edge": {}
+}

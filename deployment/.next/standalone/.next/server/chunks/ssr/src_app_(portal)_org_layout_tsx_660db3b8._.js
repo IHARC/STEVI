@@ -1,0 +1,3 @@
+module.exports=[98560,a=>{"use strict";var b=a.i(7997);a.i(70396);var c=a.i(73727),d=a.i(18877);async function e({children:a}){let{portalAccess:e,defaultWorkspacePath:f}=await (0,d.getPortalRequestContext)();return e.canAccessOrgWorkspace||(0,c.redirect)(f),(0,b.jsx)(b.Fragment,{children:a})}a.s(["default",()=>e,"dynamic",0,"force-dynamic"])}];
+
+//# sourceMappingURL=src_app_%28portal%29_org_layout_tsx_660db3b8._.js.map

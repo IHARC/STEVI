@@ -1,0 +1,20 @@
+{
+  "node": {
+    "60732aba7f1eb24d42257fbf7baf8919ae18e3062e": {
+      "workers": {
+        "app/register/get-help/page": {
+          "moduleId": 29732,
+          "async": false,
+          "exportedName": "$$RSC_SERVER_ACTION_0",
+          "filename": "src/app/register/get-help/page.tsx"
+        }
+      },
+      "layer": {
+        "app/register/get-help/page": "rsc"
+      },
+      "exportedName": "$$RSC_SERVER_ACTION_0",
+      "filename": "src/app/register/get-help/page.tsx"
+    }
+  },
+  "edge": {}
+}

@@ -1,0 +1,50 @@
+{
+  "node": {
+    "00b7ee4fee263fec1fe8acb860989f6ddb47485e3a": {
+      "workers": {
+        "app/(portal)/admin/marketing/branding/page": {
+          "moduleId": 26731,
+          "async": false,
+          "exportedName": "$$RSC_SERVER_ACTION_0",
+          "filename": "src/components/layout/user-nav.tsx"
+        }
+      },
+      "layer": {
+        "app/(portal)/admin/marketing/branding/page": "rsc"
+      },
+      "exportedName": "$$RSC_SERVER_ACTION_0",
+      "filename": "src/components/layout/user-nav.tsx"
+    },
+    "408fe31989ba15b47273c06aa8c184ff9ae4e1f795": {
+      "workers": {
+        "app/(portal)/admin/marketing/branding/page": {
+          "moduleId": 26731,
+          "async": false,
+          "exportedName": "saveBrandingSettings",
+          "filename": "src/app/(portal)/admin/marketing/branding/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(portal)/admin/marketing/branding/page": "action-browser"
+      },
+      "exportedName": "saveBrandingSettings",
+      "filename": "src/app/(portal)/admin/marketing/branding/actions.ts"
+    },
+    "40dc70b776e391bed6145fee4c7624c7ea2fb98a16": {
+      "workers": {
+        "app/(portal)/admin/marketing/branding/page": {
+          "moduleId": 26731,
+          "async": false,
+          "exportedName": "uploadBrandingAsset",
+          "filename": "src/app/(portal)/admin/marketing/branding/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(portal)/admin/marketing/branding/page": "action-browser"
+      },
+      "exportedName": "uploadBrandingAsset",
+      "filename": "src/app/(portal)/admin/marketing/branding/actions.ts"
+    }
+  },
+  "edge": {}
+}

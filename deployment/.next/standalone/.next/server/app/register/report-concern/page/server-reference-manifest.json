@@ -1,0 +1,20 @@
+{
+  "node": {
+    "60de36d14f354453dd00668d8fa9cf95aa06ee8681": {
+      "workers": {
+        "app/register/report-concern/page": {
+          "moduleId": 7730,
+          "async": false,
+          "exportedName": "$$RSC_SERVER_ACTION_0",
+          "filename": "src/app/register/report-concern/page.tsx"
+        }
+      },
+      "layer": {
+        "app/register/report-concern/page": "rsc"
+      },
+      "exportedName": "$$RSC_SERVER_ACTION_0",
+      "filename": "src/app/register/report-concern/page.tsx"
+    }
+  },
+  "edge": {}
+}

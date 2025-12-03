@@ -1,0 +1,50 @@
+{
+  "node": {
+    "00b7ee4fee263fec1fe8acb860989f6ddb47485e3a": {
+      "workers": {
+        "app/(portal)/documents/page": {
+          "moduleId": 92876,
+          "async": false,
+          "exportedName": "$$RSC_SERVER_ACTION_0",
+          "filename": "src/components/layout/user-nav.tsx"
+        }
+      },
+      "layer": {
+        "app/(portal)/documents/page": "rsc"
+      },
+      "exportedName": "$$RSC_SERVER_ACTION_0",
+      "filename": "src/components/layout/user-nav.tsx"
+    },
+    "60064a094b51f8ecfc5f5c740e3f053f27ad3f87ca": {
+      "workers": {
+        "app/(portal)/documents/page": {
+          "moduleId": 92876,
+          "async": false,
+          "exportedName": "requestDocumentLinkAction",
+          "filename": "src/app/(portal)/documents/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(portal)/documents/page": "rsc"
+      },
+      "exportedName": "requestDocumentLinkAction",
+      "filename": "src/app/(portal)/documents/actions.ts"
+    },
+    "60112aa4721d2d6fec86b0c8f7c46e85e37f558d2a": {
+      "workers": {
+        "app/(portal)/documents/page": {
+          "moduleId": 92876,
+          "async": false,
+          "exportedName": "extendDocumentAccessAction",
+          "filename": "src/app/(portal)/documents/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(portal)/documents/page": "rsc"
+      },
+      "exportedName": "extendDocumentAccessAction",
+      "filename": "src/app/(portal)/documents/actions.ts"
+    }
+  },
+  "edge": {}
+}

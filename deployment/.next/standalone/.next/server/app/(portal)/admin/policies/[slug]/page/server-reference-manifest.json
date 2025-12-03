@@ -1,0 +1,80 @@
+{
+  "node": {
+    "00b7ee4fee263fec1fe8acb860989f6ddb47485e3a": {
+      "workers": {
+        "app/(portal)/admin/policies/[slug]/page": {
+          "moduleId": 84130,
+          "async": false,
+          "exportedName": "$$RSC_SERVER_ACTION_0",
+          "filename": "src/components/layout/user-nav.tsx"
+        }
+      },
+      "layer": {
+        "app/(portal)/admin/policies/[slug]/page": "rsc"
+      },
+      "exportedName": "$$RSC_SERVER_ACTION_0",
+      "filename": "src/components/layout/user-nav.tsx"
+    },
+    "40613ab70c635f30df7fd1d0b88aa147d80ba2194f": {
+      "workers": {
+        "app/(portal)/admin/policies/[slug]/page": {
+          "moduleId": 84130,
+          "async": false,
+          "exportedName": "autosavePolicyAction",
+          "filename": "src/app/(portal)/admin/policies/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(portal)/admin/policies/[slug]/page": "rsc"
+      },
+      "exportedName": "autosavePolicyAction",
+      "filename": "src/app/(portal)/admin/policies/actions.ts"
+    },
+    "40165f50f992ad053d1435e8398d12755408f8f554": {
+      "workers": {
+        "app/(portal)/admin/policies/[slug]/page": {
+          "moduleId": 84130,
+          "async": false,
+          "exportedName": "deletePolicy",
+          "filename": "src/app/(portal)/admin/policies/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(portal)/admin/policies/[slug]/page": "rsc"
+      },
+      "exportedName": "deletePolicy",
+      "filename": "src/app/(portal)/admin/policies/actions.ts"
+    },
+    "406dcf9e60213fa3fa6ce8eec1f2fccc19ef6ac739": {
+      "workers": {
+        "app/(portal)/admin/policies/[slug]/page": {
+          "moduleId": 84130,
+          "async": false,
+          "exportedName": "createPolicy",
+          "filename": "src/app/(portal)/admin/policies/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(portal)/admin/policies/[slug]/page": "rsc"
+      },
+      "exportedName": "createPolicy",
+      "filename": "src/app/(portal)/admin/policies/actions.ts"
+    },
+    "40cca882723a860ea6501e7acaca2525e56af7fce1": {
+      "workers": {
+        "app/(portal)/admin/policies/[slug]/page": {
+          "moduleId": 84130,
+          "async": false,
+          "exportedName": "updatePolicy",
+          "filename": "src/app/(portal)/admin/policies/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(portal)/admin/policies/[slug]/page": "rsc"
+      },
+      "exportedName": "updatePolicy",
+      "filename": "src/app/(portal)/admin/policies/actions.ts"
+    }
+  },
+  "edge": {}
+}
