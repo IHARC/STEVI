@@ -1,3 +1,0 @@
-{
-  "/(portal)/admin/resources/[slug]/page": "app/(portal)/admin/resources/[slug]/page.js"
-}
