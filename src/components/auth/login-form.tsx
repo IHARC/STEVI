@@ -2,14 +2,14 @@
 
 import { startTransition, useActionState, useEffect, useState } from 'react';
 import { useFormStatus } from 'react-dom';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { GoogleAuthButton } from '@/components/auth/google-auth-button';
 import { AuthDivider } from '@/components/auth/auth-divider';
-import Link from 'next/link';
 
 type ContactMethod = 'email' | 'phone';
 
@@ -38,33 +38,62 @@ export function LoginForm({ action, nextPath, initialState }: LoginFormProps) {
     });
   }, [state.contactMethod, contactMethod]);
 
+  const normalizedError = state.error?.toLowerCase() ?? '';
+  const emailError = contactMethod === 'email' && normalizedError.includes('email') ? state.error : undefined;
+  const phoneError = contactMethod === 'phone' && normalizedError.includes('phone') ? state.error : undefined;
+  const passwordError = normalizedError.includes('password') ? state.error : undefined;
+  const showFormError = Boolean(state.error && !emailError && !phoneError && !passwordError);
+
   return (
-    <form action={formAction} className="grid gap-space-md">
+    <form action={formAction} className="grid gap-space-lg">
       <input type="hidden" name="next" value={nextPath} />
-      <fieldset className="space-y-space-sm rounded-2xl border border-outline/12 bg-surface-container-low/90 p-space-md shadow-level-1">
-        <legend className="text-label-sm font-semibold uppercase tracking-label-uppercase text-muted-foreground">
-          How would you like to sign in?
-        </legend>
-        <RadioGroup
+      <input type="hidden" name="contact_method" value={contactMethod} />
+
+      {showFormError ? (
+        <Alert variant="destructive" className="text-body-sm" role="status" aria-live="polite">
+          <AlertTitle>We could not sign you in</AlertTitle>
+          <AlertDescription>{state.error}</AlertDescription>
+        </Alert>
+      ) : null}
+
+      <div className="space-y-space-2xs">
+        <p className="text-label-sm font-semibold uppercase tracking-label-uppercase text-muted-foreground">
+          Sign in with
+        </p>
+        <ToggleGroup
+          type="single"
           name="contact_method"
           value={contactMethod}
-          onValueChange={(value) => setContactMethod(value as ContactMethod)}
-          className="grid gap-space-sm md:grid-cols-2"
+          onValueChange={(value) => value && setContactMethod(value as ContactMethod)}
+          className="grid gap-space-sm sm:grid-cols-2"
+          aria-label="Choose how to sign in"
         >
-          <ContactOption
-            id="login-contact-email"
+          <ToggleGroupItem
             value="email"
-            title="Email"
-            description="Use the email and password you registered with."
-          />
-          <ContactOption
-            id="login-contact-phone"
+            aria-label="Email"
+            className="h-full w-full justify-center rounded-[var(--md-sys-shape-corner-large)] bg-surface-container-low px-space-md py-space-sm text-body-md font-semibold shadow-level-1 data-[state=on]:bg-primary data-[state=on]:text-on-primary data-[state=on]:shadow-level-2"
+          >
+            <span className="flex flex-col items-center gap-space-2xs text-center">
+              <span className="text-label-lg font-semibold">Email</span>
+              <span className="text-label-sm font-normal text-on-surface-variant">
+                Use your registered email.
+              </span>
+            </span>
+          </ToggleGroupItem>
+          <ToggleGroupItem
             value="phone"
-            title="Phone"
-            description="Enter the phone number you verified at registration."
-          />
-        </RadioGroup>
-      </fieldset>
+            aria-label="Phone"
+            className="h-full w-full justify-center rounded-[var(--md-sys-shape-corner-large)] bg-surface-container-low px-space-md py-space-sm text-body-md font-semibold shadow-level-1 data-[state=on]:bg-primary data-[state=on]:text-on-primary data-[state=on]:shadow-level-2"
+          >
+            <span className="flex flex-col items-center gap-space-2xs text-center">
+              <span className="text-label-lg font-semibold">Phone</span>
+              <span className="text-label-sm font-normal text-on-surface-variant">
+                Use your verified number.
+              </span>
+            </span>
+          </ToggleGroupItem>
+        </ToggleGroup>
+      </div>
 
       {contactMethod === 'email' ? (
         <div className="grid gap-space-xs">
@@ -77,7 +106,9 @@ export function LoginForm({ action, nextPath, initialState }: LoginFormProps) {
             required
             placeholder="you@example.ca"
             className="bg-surface"
+            data-invalid={Boolean(emailError)}
           />
+          {emailError ? <p className="text-label-sm text-error">{emailError}</p> : null}
         </div>
       ) : (
         <div className="grid gap-space-xs">
@@ -91,12 +122,22 @@ export function LoginForm({ action, nextPath, initialState }: LoginFormProps) {
             required
             placeholder="+16475551234"
             className="bg-surface"
+            data-invalid={Boolean(phoneError)}
           />
+          {phoneError ? <p className="text-label-sm text-error">{phoneError}</p> : null}
         </div>
       )}
 
-      <div className="grid gap-space-xs">
-        <Label htmlFor="password">Password</Label>
+      <div className="grid gap-space-2xs">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="password">Password</Label>
+          <Link
+            href="/reset-password"
+            className="text-label-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+          >
+            Forgot password?
+          </Link>
+        </div>
         <Input
           id="password"
           name="password"
@@ -104,59 +145,28 @@ export function LoginForm({ action, nextPath, initialState }: LoginFormProps) {
           autoComplete="current-password"
           required
           className="bg-surface"
+          data-invalid={Boolean(passwordError)}
         />
+        {passwordError ? <p className="text-label-sm text-error">{passwordError}</p> : null}
       </div>
 
-      {state.error ? (
-        <Alert variant="destructive" className="text-body-sm">
-          <AlertTitle>We could not sign you in</AlertTitle>
-          <AlertDescription>{state.error}</AlertDescription>
-        </Alert>
-      ) : null}
+      <SubmitButton />
 
-      <div className="space-y-space-sm">
-        <SubmitButton />
-        <p className="text-body-sm text-muted-foreground">
-          Forgot your password?{' '}
-          <Link href="/reset-password" className="text-primary underline-offset-4 hover:underline">
-            Reset it here
-          </Link>
-        </p>
-        <p className="text-body-sm text-muted-foreground">
-          Need an account?{' '}
-          <Link href="/register" className="text-primary underline-offset-4 hover:underline">
-            Register here
-          </Link>
-        </p>
-      </div>
+      <p className="text-body-sm text-muted-foreground">
+        Need an account?{' '}
+        <Link
+          href="/register"
+          className="text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+        >
+          Register here
+        </Link>
+      </p>
 
-      <div className="space-y-space-sm">
+      <div className="space-y-space-sm pt-space-xs">
         <AuthDivider label="other sign-in options" />
         <GoogleAuthButton intent="login" nextPath={nextPath} />
       </div>
     </form>
-  );
-}
-
-type ContactOptionProps = {
-  id: string;
-  value: ContactMethod;
-  title: string;
-  description: string;
-};
-
-function ContactOption({ id, value, title, description }: ContactOptionProps) {
-  return (
-    <label
-      htmlFor={id}
-      className="flex cursor-pointer items-start gap-space-sm rounded-2xl border border-outline/12 bg-surface p-space-md text-body-sm font-medium text-on-surface shadow-level-1 transition state-layer-color-primary hover:border-primary/50 hover:shadow-level-2 hover:state-layer-hover focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2 focus-within:ring-offset-surface focus-within:state-layer-focus"
-    >
-      <RadioGroupItem id={id} value={value} className="mt-1" />
-      <span>
-        {title}
-        <span className="mt-space-2xs block text-label-sm font-normal text-muted-foreground">{description}</span>
-      </span>
-    </label>
   );
 }
 

@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
@@ -8,7 +7,6 @@ import { normalizePhoneNumber } from '@/lib/phone';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { getBrandingAssets } from '@/lib/marketing/branding';
 
 export const dynamic = 'force-dynamic';
 
@@ -56,8 +54,6 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const initialState: FormState = initialError
     ? { ...INITIAL_FORM_STATE, error: initialError }
     : INITIAL_FORM_STATE;
-
-  const branding = await getBrandingAssets();
 
   async function loginUser(_prevState: FormState, formData: FormData): Promise<FormState> {
     'use server';
@@ -122,52 +118,20 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-surface text-on-surface">
-      <div className="w-full max-w-[440px] space-y-space-lg px-space-lg py-space-2xl">
-        <div className="flex flex-col items-center gap-space-sm text-center">
-          <div className="flex items-center gap-space-sm rounded-2xl bg-surface-container-low px-space-md py-space-sm shadow-level-1">
-            <Image
-              src={branding.logoLightUrl}
-              alt="IHARC"
-              width={120}
-              height={48}
-              className="h-12 w-auto dark:hidden"
-              priority
-            />
-            <Image
-              src={branding.logoDarkUrl}
-              alt="IHARC"
-              width={120}
-              height={48}
-              className="hidden h-12 w-auto dark:block"
-              priority
-            />
-            <div className="text-left">
-              <p className="text-label-sm font-semibold uppercase tracking-label-uppercase text-primary">STEVI</p>
-              <p className="text-title-sm font-semibold text-on-surface">Client Support Portal</p>
-            </div>
-          </div>
-          <h1 className="text-headline-sm font-semibold">Sign in to STEVI</h1>
-          <p className="max-w-md text-body-md text-muted-foreground">
-            Access appointments, documents, and outreach updates securely.
-          </p>
-        </div>
-
+    <div className="flex min-h-screen items-center justify-center bg-surface-container-lowest px-space-lg py-space-xl text-on-surface">
+      <div className="w-full max-w-xl">
         <Card className="border-outline/12 bg-surface-container-high shadow-level-2">
-          <CardHeader className="gap-space-2xs pb-space-sm">
-            <CardTitle className="text-title-lg">Welcome back</CardTitle>
-            <CardDescription className="text-body-sm text-muted-foreground">
-              Use the email or phone number you registered with.
+          <CardHeader className="gap-space-2xs pb-space-md">
+            <p className="text-label-sm font-semibold uppercase tracking-label-uppercase text-primary">Welcome back</p>
+            <CardTitle className="text-headline-sm font-semibold">Sign in to STEVI</CardTitle>
+            <CardDescription className="text-body-md text-muted-foreground">
+              IHARC portal for appointments, documents, and outreach updates.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-space-md pt-space-xs">
+          <CardContent className="space-y-space-lg pt-space-sm">
             <LoginForm action={loginUser} nextPath={rawNextParam ?? ''} initialState={initialState} />
           </CardContent>
         </Card>
-
-        <p className="text-center text-label-sm text-muted-foreground">
-          Need help signing in? Contact your IHARC outreach worker or administrator.
-        </p>
       </div>
     </div>
   );
