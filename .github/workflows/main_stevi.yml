@@ -75,19 +75,33 @@ jobs:
 
       - name: Create deployment bundle
         run: |
-          mkdir -p deployment
-          mkdir -p deployment/.next
-          mkdir -p deployment/public
+          set -euo pipefail
+          mkdir -p deployment/.next deployment/public
+
           cp -r .next/standalone deployment/.next/standalone
           cp -r .next/static deployment/.next/static
-          cp -r public/* deployment/public/ || true
+          cp -r public/. deployment/public/ || true
           cp package.json package-lock.json next.config.ts middleware.ts build.js deployment/
+
+          if [ ! -f "deployment/.next/standalone/server.js" ]; then
+            echo "Deployment bundle validation failed: .next/standalone/server.js missing" >&2
+            exit 1
+          fi
+          if [ ! -d "deployment/.next/static" ]; then
+            echo "Deployment bundle validation failed: .next/static missing" >&2
+            exit 1
+          fi
+
+      - name: Archive deployment bundle
+        run: |
+          cd deployment
+          zip -r ../node-app.zip .
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: deployment
+          path: node-app.zip
 
   deploy:
     runs-on: ubuntu-latest
@@ -99,26 +113,14 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: node-app
-          path: node-app
+          path: .
 
-      - name: Flatten artifact contents
+      - name: Validate deployment bundle contents
         shell: bash
         run: |
-          cd node-app
-          # Move everything out of the nested deployment directory so .next sits at repo root
-          shopt -s dotglob
-          if [ -d "deployment" ]; then
-            mv deployment/* .
-            rmdir deployment
-          fi
-
-      - name: Validate package layout
-        shell: bash
-        run: |
-          cd node-app
-          if [ ! -f ".next/standalone/server.js" ]; then
+          if ! unzip -l node-app.zip | grep -q ".next/standalone/server.js"; then
             echo "Expected .next/standalone/server.js in deployment bundle" >&2
-            find . -maxdepth 2 -type f | sed 's|^./||'
+            unzip -l node-app.zip || true
             exit 1
           fi
 
@@ -148,8 +150,7 @@ jobs:
 
       - name: Archive package
         run: |
-          cd node-app
-          zip -r ../node-app.zip .
+          echo "node-app.zip is already packaged from the build job"
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
