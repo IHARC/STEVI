@@ -56,6 +56,14 @@ const canManageUsers = (access: PortalAccess) =>
     access.portalRoles.includes('portal_org_admin'));
 const canManageOrgs = (access: PortalAccess) =>
   isApproved(access) && (access.portalRoles.includes('portal_org_admin') || access.portalRoles.includes('portal_org_rep'));
+const canAccessContentHub = (access: PortalAccess) =>
+  isApproved(access) &&
+  (access.canManageWebsiteContent || access.canManageResources || access.canManagePolicies || access.canManageNotifications);
+const canAccessPeopleHub = (access: PortalAccess) =>
+  isApproved(access) &&
+  (access.canManageConsents || canManageUsers(access) || hasElevatedAdminAccess(access) || access.canManageOrgUsers);
+const canAccessInventoryHub = (access: PortalAccess) =>
+  access.canAccessInventoryWorkspace || access.iharcRoles.includes('iharc_admin');
 
 const NAV_SECTIONS: NavSectionDefinition[] = [
   {
@@ -153,56 +161,55 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
         id: 'admin-operations',
         label: 'Operations',
         items: [
-          { id: 'admin-operations-overview', href: '/admin/operations', label: 'Operations overview', icon: 'dashboard', match: ['/admin/operations'] },
-          { id: 'admin-approvals', href: '/admin/approvals', label: 'Approvals queue', icon: 'approval', match: ['/admin/approvals'], requires: hasElevatedAdminAccess },
-          { id: 'admin-appointments', href: '/admin/appointments', label: 'Scheduling & appointments', icon: 'calendar', match: ['/admin/appointments'] },
-          { id: 'admin-warming-room', href: '/admin/warming-room', label: 'Warming room ops', icon: 'flame', match: ['/admin/warming-room'], requires: hasElevatedAdminAccess },
-          { id: 'admin-service-rules', href: '/admin/service-rules', label: 'Service rules & algorithms', icon: 'workflow', match: ['/admin/service-rules'], requires: hasElevatedAdminAccess },
-          { id: 'admin-templates', href: '/admin/templates', label: 'Templates & tests', icon: 'lab', match: ['/admin/templates'], requires: hasElevatedAdminAccess },
+          {
+            id: 'admin-operations-overview',
+            href: '/admin/operations',
+            label: 'Operations hub',
+            icon: 'dashboard',
+            match: ['/admin/operations', '/admin/approvals', '/admin/appointments', '/admin/warming-room', '/admin/service-rules', '/admin/templates'],
+          },
         ],
       },
       {
-        id: 'admin-clients',
-        label: 'Clients & consents',
+        id: 'admin-people',
+        label: 'People & access',
         items: [
-          { id: 'admin-clients-directory', href: '/admin/clients', label: 'Client directory', icon: 'users', match: ['/admin/clients'], requires: (access) => access.canManageConsents },
-          { id: 'admin-consents', href: '/admin/consents', label: 'Consent overrides', icon: 'shield', match: ['/admin/consents'], requires: (access) => access.canManageConsents },
-        ],
-      },
-      {
-        id: 'admin-access',
-        label: 'Access & people',
-        items: [
-          { id: 'admin-users', href: '/admin/users', label: 'Users', icon: 'users', match: ['/admin/users'], requires: canManageUsers },
-          { id: 'admin-permissions', href: '/admin/permissions', label: 'Permissions', icon: 'shield', match: ['/admin/permissions'], requires: hasElevatedAdminAccess },
-          { id: 'admin-profiles', href: '/admin/profiles', label: 'Profiles & invites', icon: 'idCard', match: ['/admin/profiles'], requires: hasElevatedAdminAccess },
-          { id: 'admin-organizations', href: '/admin/organizations', label: 'Organizations', icon: 'building', match: ['/admin/organizations'], requires: hasElevatedAdminAccess },
+          {
+            id: 'admin-people-hub',
+            href: '/admin/people',
+            label: 'People & access',
+            icon: 'users',
+            match: ['/admin/people', '/admin/clients', '/admin/consents', '/admin/users', '/admin/profiles', '/admin/organizations', '/admin/permissions'],
+            requires: canAccessPeopleHub,
+          },
         ],
       },
       {
         id: 'admin-content',
-        label: 'Content & comms',
+        label: 'Content & site',
         items: [
-          { id: 'admin-resources', href: '/admin/resources', label: 'Resource library', icon: 'notebook', match: ['/admin/resources'], requires: (access) => access.canManageResources },
-          { id: 'admin-policies', href: '/admin/policies', label: 'Policies', icon: 'shield', match: ['/admin/policies'], requires: (access) => access.canManagePolicies },
-          { id: 'admin-notifications', href: '/admin/notifications', label: 'Notifications', icon: 'megaphone', match: ['/admin/notifications'], requires: (access) => access.canManageNotifications },
-        ],
-      },
-      {
-        id: 'admin-website',
-        label: 'Website & marketing',
-        items: [
-          { id: 'admin-website-hub', href: '/admin/website', label: 'Website workspace', icon: 'globe', match: ['/admin/website'], requires: (access) => access.canManageWebsiteContent },
+          {
+            id: 'admin-content-hub',
+            href: '/admin/content',
+            label: 'Content & website',
+            icon: 'notebook',
+            match: ['/admin/content', '/admin/website', '/admin/resources', '/admin/policies', '/admin/notifications'],
+            requires: canAccessContentHub,
+          },
         ],
       },
       {
         id: 'admin-inventory',
         label: 'Inventory & donations',
         items: [
-          { id: 'admin-inventory-overview', href: '/admin/inventory/overview', label: 'Inventory overview', icon: 'boxes', match: ['/admin/inventory/overview'], requires: (access) => access.canAccessInventoryWorkspace },
-          { id: 'admin-inventory-items', href: '/admin/inventory/items', label: 'Items & stock levels', icon: 'box', match: ['/admin/inventory/items'], requires: (access) => access.canAccessInventoryWorkspace },
-          { id: 'admin-inventory-donations-map', href: '/admin/inventory/donations-mapping', label: 'Donations mapping', icon: 'route', match: ['/admin/inventory/donations-mapping'], requires: (access) => access.canAccessInventoryWorkspace },
-          { id: 'admin-donations', href: '/admin/donations', label: 'Donations catalogue', icon: 'briefcase', match: ['/admin/donations'], requires: (access) => access.iharcRoles.includes('iharc_admin') },
+          {
+            id: 'admin-inventory-hub',
+            href: '/admin/inventory/overview',
+            label: 'Inventory & donations',
+            icon: 'boxes',
+            match: ['/admin/inventory/overview', '/admin/inventory/items', '/admin/inventory/donations-mapping', '/admin/donations', '/admin/inventory'],
+            requires: canAccessInventoryHub,
+          },
         ],
       },
     ],

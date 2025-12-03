@@ -3,7 +3,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { PageHeader } from '@/components/layout/page-header';
 import { BrandingForm } from '../marketing/branding/BrandingForm';
 import { NavForm } from '../marketing/navigation/NavForm';
 import { HomeForm } from '../marketing/home/HomeForm';
@@ -205,24 +204,6 @@ export async function WebsiteFooterPanel({ supabase }: PanelProps) {
         </form>
       </CardContent>
     </Card>
-  );
-}
-
-export async function WebsiteResourcesPanel(_: PanelProps) {
-  return (
-    <div className="page-stack">
-      <PageHeader
-        eyebrow="Website"
-        title="Public resources"
-        description="Manage the public-facing resource library mirrored to the marketing site. Sanitize content and revalidate caches after publishing."
-      />
-      <Card>
-        <CardContent className="space-y-space-2xs py-space-md text-body-md text-muted-foreground">
-          <p>Connect this surface to portal.resource_pages with publish flags and webhook-based cache invalidation.</p>
-          <p>Ensure all writes log to the audit trail and respect RLS.</p>
-        </CardContent>
-      </Card>
-    </div>
   );
 }
 

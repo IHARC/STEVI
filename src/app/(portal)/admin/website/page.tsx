@@ -5,7 +5,6 @@ import {
   WebsiteSupportsPanel,
   WebsiteProgramsPanel,
   WebsiteFooterPanel,
-  WebsiteResourcesPanel,
   WebsiteContentInventoryPanel,
   buildWebsiteContext,
 } from './panels';
@@ -21,18 +20,18 @@ const TABS = [
   { id: 'supports', label: 'Supports', component: WebsiteSupportsPanel },
   { id: 'programs', label: 'Programs', component: WebsiteProgramsPanel },
   { id: 'footer', label: 'Footer', component: WebsiteFooterPanel },
-  { id: 'resources', label: 'Public resources', component: WebsiteResourcesPanel },
   { id: 'inventory', label: 'Content inventory', component: WebsiteContentInventoryPanel },
 ];
 
 type AdminWebsitePageProps = {
-  searchParams?: Record<string, string | string[] | undefined>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
 export default async function AdminWebsitePage({ searchParams }: AdminWebsitePageProps) {
   const { supabase, access } = await buildWebsiteContext();
 
-  const tabParam = Array.isArray(searchParams?.tab) ? searchParams?.tab[0] : searchParams?.tab;
+  const tabParams = await searchParams;
+  const tabParam = Array.isArray(tabParams?.tab) ? tabParams.tab[0] : tabParams?.tab;
   const activeTab = TABS.find((tab) => tab.id === tabParam) ?? TABS[0];
   const TabComponent = activeTab.component;
 
@@ -40,7 +39,7 @@ export default async function AdminWebsitePage({ searchParams }: AdminWebsitePag
     <div className="page-shell page-stack">
       <PageHeader
         eyebrow="Admin"
-        title="Website workspace"
+        title="Website settings"
         description="Manage branding, navigation, and public content for the marketing site. Changes respect audit logging and Supabase RLS."
       />
 
