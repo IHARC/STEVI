@@ -63,10 +63,11 @@ jobs:
 
       - name: Create deployment bundle
         run: |
-          mkdir -p deployment
+          mkdir -p deployment/.next/static
+          mkdir -p deployment/public
           cp -r .next/standalone deployment/
-          cp -r .next/static deployment/.next/static
-          cp -r public deployment/public
+          cp -r .next/static/* deployment/.next/static/
+          cp -r public/* deployment/public/ || true
           cp package.json package-lock.json next.config.ts middleware.ts build.js deployment/
 
       - name: Upload artifact for deployment job
