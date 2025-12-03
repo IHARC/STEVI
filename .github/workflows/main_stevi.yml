@@ -58,16 +58,27 @@ jobs:
       - name: Test (if configured)
         run: npm run test --if-present
 
+      - name: Validate build artifacts
+        run: |
+          if [ ! -d ".next/server" ]; then
+            echo ".next/server is missing after build" >&2
+            ls -la .next
+            exit 1
+          fi
+          if [ ! -d ".next/static" ]; then
+            echo ".next/static is missing after build" >&2
+            exit 1
+          fi
+
       - name: Prune dev dependencies for deployment
         run: npm prune --omit=dev
 
       - name: Create deployment bundle
         run: |
-          mkdir -p deployment/.next/static
-          mkdir -p deployment/public
-          cp -r .next/standalone deployment/
-          cp -r .next/static/* deployment/.next/static/
-          cp -r public/* deployment/public/ || true
+          mkdir -p deployment
+          cp -r .next deployment/.next
+          cp -r public deployment/public
+          cp -r node_modules deployment/node_modules
           cp package.json package-lock.json next.config.ts middleware.ts build.js deployment/
 
       - name: Upload artifact for deployment job
