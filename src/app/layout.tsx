@@ -7,6 +7,8 @@ import { ThemeProvider } from '@/components/providers/theme-provider';
 import { AnalyticsProvider } from '@/components/providers/analytics-provider';
 import { getBrandingAssets } from '@/lib/marketing/branding';
 
+export const dynamic = 'force-dynamic';
+
 const DEFAULT_APP_URL = 'https://stevi.iharc.ca';
 const appUrl =
   process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? DEFAULT_APP_URL;
