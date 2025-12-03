@@ -64,8 +64,10 @@ jobs:
       - name: Create deployment bundle
         run: |
           mkdir -p deployment
-          cp -r .next public package.json package-lock.json next.config.ts middleware.ts build.js deployment/
-          cp -r node_modules deployment/
+          cp -r .next/standalone deployment/
+          cp -r .next/static deployment/.next/static
+          cp -r public deployment/public
+          cp package.json package-lock.json next.config.ts middleware.ts build.js deployment/
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
