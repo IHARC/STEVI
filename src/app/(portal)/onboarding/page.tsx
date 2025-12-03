@@ -105,7 +105,6 @@ export default async function OnboardingPage({ searchParams }: PageProps) {
         eyebrow="Onboarding"
         title={actor === 'staff' ? 'Assist a client with onboarding' : 'Share your details to get support'}
         description="We keep this process calm and concise. You can save and return anytime; changes respect IHARC’s consent and privacy settings."
-        padded
       />
 
       {actor === 'staff' ? (

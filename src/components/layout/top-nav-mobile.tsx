@@ -15,7 +15,6 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { Icon } from '@/components/ui/icon';
-import { getPublicPortalLinks } from '@/lib/portal-access';
 import { cn } from '@/lib/utils';
 import type { TopNavDropdownItem } from '@/components/layout/top-nav-dropdown';
 
@@ -42,8 +41,6 @@ type TopNavMobileProps = {
 export function TopNavMobile({ links, accountSection, quickAction }: TopNavMobileProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const onPortalRoute = pathname.startsWith('/portal');
-  const portalNavLinks = useMemo(() => getPublicPortalLinks(), []);
 
   type MobileMenuItem = {
     type: 'menu';
@@ -61,60 +58,43 @@ export function TopNavMobile({ links, accountSection, quickAction }: TopNavMobil
 
   type MobileNavItem = MobileLinkItem | MobileMenuItem;
 
-  const navSections = useMemo(
-    () => [
+  const navSections = useMemo(() => {
+    const marketingItems = links.map<MobileNavItem>((link) => {
+      if (link.type === 'link') {
+        const isHome = link.href === '/';
+        const isActive = isHome ? pathname === '/' : pathname.startsWith(link.href);
+
+        return {
+          ...link,
+          isActive,
+        };
+      }
+
+      const mappedItems = link.items.map((item: TopNavDropdownItem) => {
+        const isActive = pathname.startsWith(item.href);
+
+        return {
+          ...item,
+          isActive,
+        };
+      });
+
+      return {
+        type: 'menu' as const,
+        label: link.label,
+        items: mappedItems,
+        isActive: mappedItems.some((item) => item.isActive),
+      };
+    });
+
+    return [
       {
         id: 'marketing',
         title: 'Explore IHARC',
-        items: links.map<MobileNavItem>((link) => {
-          if (link.type === 'link') {
-            const isHome = link.href === '/';
-            const isActive = isHome ? pathname === '/' : pathname.startsWith(link.href);
-
-            return {
-              ...link,
-              isActive,
-            };
-          }
-
-          const mappedItems = link.items.map((item) => {
-            const isActive = pathname.startsWith(item.href);
-
-            return {
-              ...item,
-              isActive,
-            };
-          });
-
-          return {
-            type: 'menu',
-            label: link.label,
-            items: mappedItems,
-            isActive: mappedItems.some((item) => item.isActive),
-          };
-        }),
+        items: marketingItems,
       },
-      ...(onPortalRoute
-        ? [
-            {
-              id: 'portal',
-              title: 'Collaboration Portal',
-              items: portalNavLinks.map((link) => {
-                const isActive = link.exact ? pathname === link.href : pathname.startsWith(link.href);
-
-                return {
-                  type: 'link' as const,
-                  href: link.href,
-                  label: link.label,
-                  isActive,
-                };
-              }),
-            },
-          ]
-        : []),
-    ],
-    [links, onPortalRoute, pathname, portalNavLinks]
-  );
+    ];
+  }, [links, pathname]);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -144,7 +124,7 @@ export function TopNavMobile({ links, accountSection, quickAction }: TopNavMobil
                 <p className="text-body-md font-semibold uppercase text-on-surface/80">
                   {section.title}
                 </p>
-                {section.items.map((item) =>
+                {section.items.map((item: MobileNavItem) =>
                   item.type === 'link' ? (
                     <NavPill
                       key={item.href}

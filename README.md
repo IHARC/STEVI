@@ -31,10 +31,10 @@ Environment variables (full notes in `docs/backend.md`):
 ## Migration Status
 
 - ✅ Next.js scaffold, shared layout/providers, Material 3 tokens
-- ✅ Supabase clients (server + RSC), auth middleware, nav/workspace blueprints
+- ✅ Supabase clients (server + RSC), auth middleware, unified navigation config
 - ✅ Client portal shells: home, appointments, documents, cases, support, profile, consents (appointments/documents currently read from placeholders)
-- ✅ Admin workspaces: profiles/invites, resources, policies, notifications, marketing content, inventory, donations
-- ✅ Staff workspace: caseload, schedule, outreach log; Organization workspace: members/invites/settings
+- ✅ Admin tools: profiles/invites, resources, policies, notifications, marketing content, inventory, donations
+- ✅ Staff tools: caseload, schedule, outreach log; Organization tools: members/invites/settings
 - 🚧 Wire appointments + documents to Supabase tables/storage; add cache revalidation/webhooks
 - 🚧 Fill out test coverage (Vitest + Playwright) and metrics/governance surfaces if required
 

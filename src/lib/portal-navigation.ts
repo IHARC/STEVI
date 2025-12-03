@@ -17,6 +17,7 @@ export type NavGroup = {
   id: string;
   label: string;
   description?: string;
+  icon?: AppIconName;
   items: NavItem[];
   requires?: (access: PortalAccess) => boolean;
 };
@@ -98,7 +99,7 @@ const NAV_SECTIONS: NavSection[] = [
     label: 'Staff tools',
     description: 'Caseload, tasks, outreach, and schedules',
     area: 'staff',
-    requires: (access) => access.canAccessStaffWorkspace,
+    requires: (access) => access.canAccessStaffWorkspace || access.canAccessAdminWorkspace,
     groups: [
       {
         id: 'staff-caseload',

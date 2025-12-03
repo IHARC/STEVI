@@ -28,20 +28,22 @@
 - Rate limiting: `portal_check_rate_limit` backs the public/registration flows. Keep it in the loop when adding new anonymous endpoints.
 - Content safety: sanitize TipTap/HTML using `sanitize-resource-html` and `sanitize-embed` before persisting.
 
-## Navigation & workspaces
-- Single nav blueprint lives in `src/lib/portal-access.ts`. Client links cover home, appointments, documents, cases, support, profile, consents.
-- Workspaces and guards:
-  - **Admin**: clients/consents, users/permissions/profiles/organizations, resources, policies, notifications, marketing content (navigation, branding, home, supports, programs, footer), inventory, donations.
-  - **Staff**: overview, caseload, cases, intake queue, schedule, outreach log (guarded by IHARC staff/volunteer roles).
-  - **Organization**: overview, members, invites, settings (guarded by org admin/rep roles).
-- User menu, command palette, breadcrumbs, and rails all read from these blueprints. To add a surface: (1) add capability flag in `portal-access.ts`, (2) add link in the relevant blueprint, (3) guard the page/server action with the same flag, (4) ensure Supabase RLS matches.
+## Navigation
+- Unified navigation lives in `src/lib/portal-navigation.ts` with sections for client, staff, admin, and organization. It is role/approval-gated via existing `PortalAccess` flags—no mode switching.
+- Admin access automatically sees staff tools; staff/admin can also see client links for preview.
+- Best practice for new surfaces:
+  1. Add/adjust a capability flag in `PortalAccess` if required (reusing existing roles/RLS; do not invent new workspace concepts).
+  2. Add the link under the correct section/group in `portal-navigation.ts` with `requires` guards.
+  3. Guard the page/server action with the same capability check and ensure Supabase RLS enforces it.
+  4. Add cache invalidation/tagging as needed and update tests.
+  5. Keep UI consistent with Material 3 tokens and shared components.
 
 ## Current surface status
 - **Client portal**: Home/support/profile/consents/cases are live and wired to Supabase (`core.people`, `case_mgmt.case_management`, grants, activities). Appointments and documents still render placeholder data; requests log audit events but are not yet backed by scheduling/storage.
 - **Registration & public flows** (`/register/*`): Get help, existing-claim, community-member, partner, volunteer, and concern-report flows write to `portal.registration_flows` (rate-limited) and call `claim_registration_flow` when applicable.
-- **Staff workspace**: Caseload, schedule, and outreach log use RPCs `core.staff_caseload`, `core.staff_shifts_today`, `core.staff_outreach_logs`. Case detail/note/consent actions write to `core.people` and `core.people_activities`; intake queue reads `portal.registration_flows`.
-- **Organization workspace**: Members/invites/settings scoped by org via `set_profile_role` and RLS. Redirects if the profile lacks an org or approval.
-- **Admin workspace**:
+- **Staff tools**: Caseload, schedule, and outreach log use RPCs `core.staff_caseload`, `core.staff_shifts_today`, `core.staff_outreach_logs`. Case detail/note/consent actions write to `core.people` and `core.people_activities`; intake queue reads `portal.registration_flows`.
+- **Organization tools**: Members/invites/settings scoped by org via `set_profile_role` and RLS. Redirects if the profile lacks an org or approval.
+- **Admin tools**:
   - Clients/consents/grants: `core.people`, `person_access_grants`, `get_people_list_with_types`.
   - Users/profiles/organizations: `portal.profiles`, `portal.profile_invites`, `set_profile_role`, `refresh_user_permissions`.
   - Resources/policies: TipTap editors persisting to `portal.resource_pages` and `portal.policies` (HTML sanitized).

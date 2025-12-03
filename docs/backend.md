@@ -42,7 +42,7 @@ Copy `.env.example` to `.env` and fill the required values. All variables prefix
   - Staff views: `core.staff_caseload`, `core.staff_shifts_today`, `core.staff_outreach_logs`.
   - Inventory RPCs: `receive_stock`, `receive_stock_with_source`, `transfer_stock`, `adjust_stock`, `update_transaction_source`.
   - Edge Function `portal-alerts` is invoked from `queuePortalNotification` when `PORTAL_ALERTS_SECRET` is configured. Keep the function source in the marketing repo until consolidated.
-- **Admin workspaces**:
+- **Admin tools**:
   - `/admin/profiles` calls `portal.profiles`, `portal.profile_invites`, and `refresh_user_permissions` to approve or decline partner access, logging every decision through `portal_log_audit_event`.
   - Invitations originate from STEVI via `portal-admin-invite`; approvals refresh permissions via `refresh_user_permissions`.
   - `/admin/notifications` queues outreach updates by invoking `portal_queue_notification` and surfaces delivery history from `portal.notifications`.
@@ -66,7 +66,7 @@ Copy `.env.example` to `.env` and fill the required values. All variables prefix
 ### Adding a New Role or Privileged Feature (checklist)
 1. **Supabase first**: Create/assign the role and permissions in Supabase (`core.roles`, `core.permissions`, `core.role_permissions`, `core.user_roles`). Update any role-granting RPCs if needed.
 2. **Capability flag**: Add a boolean to `src/lib/portal-access.ts` that derives from the new role/permission (e.g., `canManageX`).
-3. **UI & routing**: Gate new pages, server actions, and nav links using that capability flag. Add links via the workspace blueprints in `portal-access.ts` instead of hard-coding paths.
+3. **UI & routing**: Gate new pages, server actions, and nav links using that capability flag. Add links via the unified nav config in `portal-navigation.ts` instead of hard-coding paths.
 4. **RLS**: Ensure the target tables/RPCs enforce the same role in their policies. Never rely solely on UI hiding.
 5. **Docs/tests**: Document the new capability in this section and add minimal tests/Playwright coverage if it introduces a new surface.
 

@@ -1,16 +1,45 @@
 import { describe, expect, it } from 'vitest';
-import {
-  buildPortalNav,
-  inferPortalAreaFromPath,
-  isClientPreview,
-  resolveLandingPath,
-} from './portal-navigation';
+import { buildPortalNav, inferPortalAreaFromPath, isClientPreview, resolveLandingPath } from './portal-navigation';
 import type { PortalAccess } from './portal-access';
+import type { PortalProfile } from './profile';
+
+function buildProfile(overrides: Partial<PortalProfile> = {}): PortalProfile {
+  const baseProfile: PortalProfile = {
+    id: '00000000-0000-0000-0000-000000000000',
+    user_id: 'user-id',
+    display_name: 'Test User',
+    avatar_url: null,
+    bio: null,
+    rules_acknowledged_at: null,
+    last_seen_at: null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    display_name_confirmed_at: null,
+    position_title: null,
+    affiliation_type: {} as PortalProfile['affiliation_type'],
+    affiliation_status: 'approved' as PortalProfile['affiliation_status'],
+    affiliation_requested_at: null,
+    affiliation_reviewed_at: null,
+    affiliation_reviewed_by: null,
+    homelessness_experience: {} as PortalProfile['homelessness_experience'],
+    substance_use_experience: {} as PortalProfile['substance_use_experience'],
+    has_signed_petition: false,
+    petition_signed_at: null,
+    government_role_type: null,
+    requested_organization_name: null,
+    requested_government_name: null,
+    requested_government_level: null,
+    requested_government_role: null,
+    organization_id: null,
+  };
+
+  return { ...baseProfile, ...overrides };
+}
 
 const baseAccess: PortalAccess = {
   userId: 'user-id',
   email: 'user@example.com',
-  profile: { id: 1, affiliation_status: 'approved' } as PortalAccess['profile'],
+  profile: buildProfile(),
   isProfileApproved: true,
   iharcRoles: [],
   portalRoles: [],

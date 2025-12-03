@@ -72,12 +72,12 @@ export async function staffLogOutreachAction(
     description: summary || null,
     location: location || null,
     staff_member: access.profile.display_name,
-    metadata: {
-      case_id: caseId,
-      client_visible: false,
-      quick_entry: true,
-      source: 'staff_workspace',
-    },
+      metadata: {
+        case_id: caseId,
+        client_visible: false,
+        quick_entry: true,
+        source: 'staff_tools',
+      },
     created_by: access.userId,
     provider_profile_id: access.profile.id,
     provider_org_id: access.organizationId,
