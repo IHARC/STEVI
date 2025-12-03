@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
-import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
-import { WorkspacePageHeader } from '@/components/layout/workspace-page-header';
+import { resolveLandingPath } from '@/lib/portal-navigation';
+import { PageHeader } from '@/components/layout/page-header';
 import { Card, CardContent } from '@/components/ui/card';
 
 export const dynamic = 'force-dynamic';
@@ -12,12 +12,12 @@ export default async function AdminWebsiteResourcesPage() {
   const access = await loadPortalAccess(supabase);
 
   if (!access || !access.canAccessAdminWorkspace || !access.canManageWebsiteContent) {
-    redirect(resolveDefaultWorkspacePath(access));
+    redirect(resolveLandingPath(access));
   }
 
   return (
     <div className="page-shell page-stack">
-      <WorkspacePageHeader
+      <PageHeader
         eyebrow="Website"
         title="Public resources"
         description="Manage the public-facing resource library mirrored to the marketing site. Keep content WCAG-compliant and sanitized before publishing."

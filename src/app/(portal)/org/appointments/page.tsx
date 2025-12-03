@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
-import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
+import { resolveLandingPath } from '@/lib/portal-navigation';
 import { ensurePortalProfile } from '@/lib/profile';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -102,7 +102,7 @@ export default async function OrgAppointmentsPage() {
   const access = await loadPortalAccess(supabase);
 
   if (!access || !access.canAccessOrgWorkspace) {
-    redirect(resolveDefaultWorkspacePath(access));
+    redirect(resolveLandingPath(access));
   }
 
   await ensurePortalProfile(supabase, access.userId);

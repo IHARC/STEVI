@@ -5,9 +5,9 @@ import { getPortalRequestContext } from '@/components/providers/portal-request-c
 export const dynamic = 'force-dynamic';
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
-  const { portalAccess, defaultWorkspacePath } = await getPortalRequestContext();
+  const { portalAccess, landingPath } = await getPortalRequestContext();
   if (!portalAccess.canAccessAdminWorkspace) {
-    redirect(defaultWorkspacePath);
+    redirect(landingPath);
   }
 
   return <>{children}</>;

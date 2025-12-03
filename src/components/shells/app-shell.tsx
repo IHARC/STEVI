@@ -3,22 +3,20 @@ import { TopNav } from '@/components/layout/top-nav';
 import { SiteFooter } from '@/components/SiteFooter';
 import { ClientPreviewBanner } from '@/components/layout/client-preview-banner';
 import { InboxPanel } from '@/components/layout/inbox-panel';
-import { WorkspaceDrawerDesktop } from '@/components/layout/workspace-drawer';
-import type { CommandPaletteItem, WorkspaceNav } from '@/lib/portal-access';
+import { AppNavigationDesktop } from '@/components/layout/app-navigation';
+import type { CommandPaletteItem } from '@/lib/portal-access';
 import type { InboxItem } from '@/lib/inbox';
 import { cn } from '@/lib/utils';
 import type { PrimaryNavItem } from '@/lib/primary-nav';
-import type { WorkspaceId, WorkspaceOption } from '@/lib/workspaces';
 import type { ResolvedBrandingAssets } from '@/lib/marketing/branding';
 import type { UserNavigation } from '@/components/layout/user-nav';
+import type { NavSection } from '@/lib/portal-navigation';
 
 type AppShellProps = {
   children: ReactNode;
-  workspaceNav: WorkspaceNav | null;
+  navSections: NavSection[];
   globalNavItems: PrimaryNavItem[];
-  workspaceOptions: WorkspaceOption[];
   inboxItems: InboxItem[];
-  activeWorkspace: WorkspaceId;
   isClientPreview: boolean;
   navigation: UserNavigation;
   branding: ResolvedBrandingAssets;
@@ -27,40 +25,30 @@ type AppShellProps = {
 
 export function AppShell({
   children,
-  workspaceNav,
+  navSections,
   globalNavItems,
-  workspaceOptions,
   inboxItems,
-  activeWorkspace,
   isClientPreview,
   navigation,
   branding,
   commandPaletteItems,
 }: AppShellProps) {
-  const showWorkspaceDrawer = Boolean(workspaceNav?.groups.length);
+  const showNavigation = navSections.length > 0;
   const showInbox = inboxItems.length > 0;
   const showClientPreviewBanner = isClientPreview;
-  const workspaceKey = workspaceNav?.id ?? 'none';
 
   return (
     <div className="flex min-h-screen bg-surface-container-lowest text-on-background">
-      {showWorkspaceDrawer ? (
-        <WorkspaceDrawerDesktop
-          key={workspaceKey}
-          workspaceNav={workspaceNav}
-          globalNavItems={globalNavItems}
-        />
+      {showNavigation ? (
+        <AppNavigationDesktop navSections={navSections} globalNavItems={globalNavItems} />
       ) : null}
       <div className="flex min-h-screen flex-1 flex-col">
         <TopNav
           branding={branding}
           navigation={navigation}
           commands={commandPaletteItems}
-          workspaceNav={showWorkspaceDrawer ? workspaceNav : null}
+          navSections={showNavigation ? navSections : []}
           globalNavItems={globalNavItems}
-          workspaceOptions={workspaceOptions}
-          activeWorkspace={activeWorkspace}
-          isClientPreview={isClientPreview}
         />
         {showClientPreviewBanner ? <ClientPreviewBanner /> : null}
         <main id="main-content" className="flex-1">

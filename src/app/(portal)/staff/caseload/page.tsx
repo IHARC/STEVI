@@ -3,7 +3,7 @@ import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
+import { resolveLandingPath } from '@/lib/portal-navigation';
 import { fetchStaffCaseload } from '@/lib/staff/fetchers';
 
 export const dynamic = 'force-dynamic';
@@ -13,7 +13,7 @@ export default async function StaffCaseloadPage() {
   const access = await loadPortalAccess(supabase);
 
   if (!access || !access.canAccessStaffWorkspace) {
-    redirect(resolveDefaultWorkspacePath(access));
+    redirect(resolveLandingPath(access));
   }
 
   const caseload = await fetchStaffCaseload(supabase, access.userId);

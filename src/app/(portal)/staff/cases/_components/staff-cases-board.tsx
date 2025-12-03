@@ -127,8 +127,8 @@ export function StaffCasesBoard({ cases, caseload, shifts }: StaffCasesBoardProp
             <div className="space-y-space-2xs">
               <CardTitle className="text-title-lg">Cases</CardTitle>
               <CardDescription>
-                Saved views filter by status, priority, and schedule. Use / to search, N to log outreach, and the header
-                workspace bar to change workspaces.
+                Saved views filter by status, priority, and schedule. Use / to search, N to log outreach, and the
+                navigation sidebar to jump between tools.
               </CardDescription>
             </div>
             <div className="flex w-full flex-col gap-space-2xs sm:max-w-md">
@@ -398,7 +398,7 @@ function CasePeekPanel({
         </Button>
         <Badge variant="outline" className="inline-flex items-center gap-space-2xs">
           <Icon icon={Compass} size="sm" />
-          Shift + ⌘/Ctrl + W to change workspace
+          Shift + ⌘/Ctrl + W to open navigation
         </Badge>
       </div>
 

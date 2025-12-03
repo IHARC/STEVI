@@ -20,7 +20,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { extractOrgFeatureFlags, ORG_FEATURE_OPTIONS } from '@/lib/organizations';
 import type { Database } from '@/types/supabase';
-import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
+import { resolveLandingPath } from '@/lib/portal-navigation';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,7 +51,7 @@ export default async function AdminOrganizationsPage() {
   }
 
   if (!access.canAccessAdminWorkspace) {
-    redirect(resolveDefaultWorkspacePath(access));
+    redirect(resolveLandingPath(access));
   }
 
   await ensurePortalProfile(supabase, access.userId);

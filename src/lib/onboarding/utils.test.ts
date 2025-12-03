@@ -30,9 +30,9 @@ const baseAccess: PortalAccess = {
 describe('resolveOnboardingActor', () => {
   it.each([
     ['client when no access', null, 'client'],
-    ['staff when staff workspace allowed', { ...baseAccess, canAccessStaffWorkspace: true }, 'staff'],
+    ['staff when staff tools allowed', { ...baseAccess, canAccessStaffWorkspace: true }, 'staff'],
     ['staff when can manage consents', { ...baseAccess, canManageConsents: true }, 'staff'],
-    ['partner when org workspace allowed', { ...baseAccess, canAccessOrgWorkspace: true }, 'partner'],
+    ['partner when org access allowed', { ...baseAccess, canAccessOrgWorkspace: true }, 'partner'],
   ])('%s', (_label, access, expected) => {
     expect(resolveOnboardingActor(access as PortalAccess | null)).toBe(expected as OnboardingActor);
   });

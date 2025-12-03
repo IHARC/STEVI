@@ -6,7 +6,7 @@ import { fetchClientCases } from '@/lib/cases/fetchers';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
+import { resolveLandingPath } from '@/lib/portal-navigation';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,7 +19,7 @@ export default async function ClientCasesPage() {
   }
 
   if (!access.isProfileApproved) {
-    redirect(resolveDefaultWorkspacePath(access));
+    redirect(resolveLandingPath(access));
   }
 
   const cases = await fetchClientCases(supabase, access.userId);

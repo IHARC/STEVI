@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
-import { WorkspacePageHeader } from '@/components/layout/workspace-page-header';
+import { PageHeader } from '@/components/layout/page-header';
 import { Card, CardContent } from '@/components/ui/card';
 
 export const dynamic = 'force-dynamic';
@@ -20,7 +20,7 @@ export default async function PastAppointmentsPage() {
 
   return (
     <div className="page-shell page-stack">
-      <WorkspacePageHeader
+      <PageHeader
         eyebrow="Appointments"
         title="Past appointments"
         description="Review completed and cancelled appointments. Filtering and exports will be added when data is connected."

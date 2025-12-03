@@ -3,17 +3,13 @@ import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess, type PortalAccess } from '@/lib/portal-access';
 import { normalizePathFromHeader } from '@/lib/paths';
-import {
-  inferWorkspaceFromPath,
-  resolveDefaultWorkspace,
-  type WorkspaceId,
-} from '@/lib/workspaces';
+import { inferPortalAreaFromPath, resolveLandingPath, type PortalArea } from '@/lib/portal-navigation';
 import type { SupabaseRSCClient } from '@/lib/supabase/types';
 
 export type PortalRequestContextValue = {
   portalAccess: PortalAccess;
-  defaultWorkspacePath: string;
-  activeWorkspace: WorkspaceId;
+  landingPath: string;
+  activeArea: PortalArea;
   currentPathname: string;
   currentPath: string | null;
   supabase: SupabaseRSCClient;
@@ -41,27 +37,26 @@ export async function getPortalRequestContext(): Promise<PortalRequestContextVal
     redirect(`/login?next=${nextParam}`);
   }
 
-  const defaultWorkspaceOption = resolveDefaultWorkspace(portalAccess);
-  const defaultWorkspacePath = defaultWorkspaceOption.href;
+  const landingPath = resolveLandingPath(portalAccess);
 
   // If we could not reliably detect the current path (e.g., header missing),
-  // fall back to the user's highest-priority workspace so navigation matches
-  // their access level instead of defaulting to the client workspace.
+  // fall back to the user's highest-priority area so navigation matches
+  // their access level instead of defaulting to the client portal.
   const effectivePathname =
     !normalizedPath.pathname || normalizedPath.pathname === '/'
-      ? defaultWorkspacePath
+      ? landingPath
       : normalizedPath.pathname;
   const effectivePath =
     !normalizedPath.path || normalizedPath.path === '/'
-      ? defaultWorkspacePath
+      ? landingPath
       : normalizedPath.path;
 
-  const activeWorkspace = inferWorkspaceFromPath(effectivePathname);
+  const activeArea = inferPortalAreaFromPath(effectivePathname);
 
   return {
     portalAccess,
-    defaultWorkspacePath,
-    activeWorkspace,
+    landingPath,
+    activeArea,
     currentPathname: effectivePathname,
     currentPath: effectivePath,
     supabase,

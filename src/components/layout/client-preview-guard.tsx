@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { useWorkspaceContext } from '@/components/providers/workspace-provider';
+import { usePortalLayout } from '@/components/providers/portal-layout-provider';
 
 type ClientPreviewGuardProps = {
   children: ReactNode;
@@ -10,7 +10,7 @@ type ClientPreviewGuardProps = {
 };
 
 export function ClientPreviewGuard({ children, message }: ClientPreviewGuardProps) {
-  const { isClientPreview } = useWorkspaceContext();
+  const { isClientPreview } = usePortalLayout();
 
   if (!isClientPreview) {
     return <>{children}</>;
@@ -26,7 +26,7 @@ export function ClientPreviewGuard({ children, message }: ClientPreviewGuardProp
       </Alert>
       {children}
       <p className="text-label-sm text-muted-foreground">
-        Use the workspace bar in the header or the banner to exit preview and re-enable actions.
+        Use the navigation links or the banner to exit preview and re-enable actions.
       </p>
     </div>
   );

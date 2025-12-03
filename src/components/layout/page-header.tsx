@@ -1,46 +1,81 @@
 import type { ReactNode } from 'react';
+import Link from 'next/link';
+import type { LucideIcon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Icon } from '@/components/ui/icon';
 import { cn } from '@/lib/utils';
+
+type HeaderAction = {
+  label: string;
+  href: string;
+  icon?: LucideIcon;
+  ariaLabel?: string;
+};
 
 type PageHeaderProps = {
   eyebrow?: string;
   title: string;
   description?: ReactNode;
-  actions?: ReactNode;
+  primaryAction?: HeaderAction;
+  secondaryAction?: HeaderAction;
   align?: 'start' | 'center';
-  padded?: boolean;
+  children?: ReactNode;
+  actions?: ReactNode;
 };
 
 export function PageHeader({
   eyebrow,
   title,
   description,
-  actions,
+  primaryAction,
+  secondaryAction,
   align = 'start',
-  padded = false,
+  children,
+  actions,
 }: PageHeaderProps) {
-  const alignment = align === 'center' ? 'items-center text-center' : 'items-start text-left';
-  const width = align === 'center' ? 'max-w-3xl' : 'max-w-4xl';
+  const alignment = align === 'center' ? 'items-center justify-center text-center' : 'items-start justify-between text-left';
+  const widthClass = align === 'center' ? 'max-w-3xl' : 'max-w-4xl';
 
   return (
     <header
       className={cn(
-        'flex w-full flex-col gap-space-2xs',
+        'flex flex-wrap gap-space-md border-b border-outline/12 pb-space-md pt-space-sm',
         alignment,
-        padded ? 'rounded-2xl border border-outline/10 bg-surface px-space-lg py-space-md shadow-level-1' : null,
       )}
     >
-      {eyebrow ? (
-        <p className="inline-flex items-center gap-space-2xs rounded-full bg-surface-container-low px-space-sm py-space-3xs text-label-sm font-semibold uppercase tracking-label-uppercase text-primary">
-          {eyebrow}
-        </p>
-      ) : null}
-      <h1 className={cn('text-headline-lg text-on-surface sm:text-display-sm', width)}>{title}</h1>
-      {description ? (
-        <div className={cn('text-body-md text-muted-foreground sm:text-body-lg', width)}>
-          {description}
+      <div className={cn('space-y-space-2xs', widthClass)}>
+        {eyebrow ? (
+          <p className="text-label-sm font-medium text-on-surface-variant">
+            {eyebrow}
+          </p>
+        ) : null}
+        <h1 className="text-headline-sm text-on-surface sm:text-headline-md">{title}</h1>
+        {description ? (
+          <div className="text-body-md text-on-surface-variant sm:text-body-lg">{description}</div>
+        ) : null}
+        {actions ? <div className="pt-space-2xs">{actions}</div> : null}
+        {children}
+      </div>
+      {primaryAction || secondaryAction ? (
+        <div className="flex flex-wrap items-center gap-space-xs">
+          {primaryAction ? (
+            <Button asChild>
+              <Link href={primaryAction.href} aria-label={primaryAction.ariaLabel ?? primaryAction.label}>
+                {primaryAction.icon ? <Icon icon={primaryAction.icon} size="sm" className="mr-space-2xs" /> : null}
+                {primaryAction.label}
+              </Link>
+            </Button>
+          ) : null}
+          {secondaryAction ? (
+            <Button asChild variant="secondary">
+              <Link href={secondaryAction.href} aria-label={secondaryAction.ariaLabel ?? secondaryAction.label}>
+                {secondaryAction.icon ? <Icon icon={secondaryAction.icon} size="sm" className="mr-space-2xs" /> : null}
+                {secondaryAction.label}
+              </Link>
+            </Button>
+          ) : null}
         </div>
       ) : null}
-      {actions ? <div className="flex flex-wrap gap-space-sm pt-space-sm">{actions}</div> : null}
     </header>
   );
 }

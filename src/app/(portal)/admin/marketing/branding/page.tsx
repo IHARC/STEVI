@@ -9,7 +9,7 @@ import {
   parseJsonSetting,
 } from '@/lib/marketing/settings';
 import { BrandingForm } from './BrandingForm';
-import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
+import { resolveLandingPath } from '@/lib/portal-navigation';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,7 +22,7 @@ export default async function MarketingBrandingPage() {
   }
 
   if (!access.canManageWebsiteContent) {
-    redirect(resolveDefaultWorkspacePath(access));
+    redirect(resolveLandingPath(access));
   }
 
   await ensurePortalProfile(supabase, access.userId);

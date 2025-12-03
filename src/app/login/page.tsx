@@ -5,7 +5,7 @@ import { LoginForm } from '@/components/auth/login-form';
 import { resolveNextPath, parseAuthErrorCode, type AuthErrorCode } from '@/lib/auth';
 import { normalizePhoneNumber } from '@/lib/phone';
 import { loadPortalAccess } from '@/lib/portal-access';
-import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
+import { resolveLandingPath } from '@/lib/portal-navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export const dynamic = 'force-dynamic';
@@ -41,14 +41,14 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   } = await supabase.auth.getUser();
 
   const portalAccess = user ? await loadPortalAccess(supabase) : null;
-  const defaultWorkspacePath = resolveDefaultWorkspacePath(portalAccess);
+  const landingPath = resolveLandingPath(portalAccess);
 
   // Only persist an explicit next param. If none was provided, let post-auth logic
-  // choose the right workspace (so admins land in /admin instead of /home).
-  const nextPath = resolveNextPath(rawNextParam, portalAccess ? defaultWorkspacePath : '');
+  // choose the right destination (so admins land in /admin instead of /home).
+  const nextPath = resolveNextPath(rawNextParam, portalAccess ? landingPath : '');
 
   if (user) {
-    redirect(nextPath || defaultWorkspacePath || '/home');
+    redirect(nextPath || landingPath || '/home');
   }
 
   const initialState: FormState = initialError
@@ -80,7 +80,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         }
 
         const access = await loadPortalAccess(supa);
-        const destination = resolveNextPath(rawNext, resolveDefaultWorkspacePath(access));
+        const destination = resolveNextPath(rawNext, resolveLandingPath(access));
         redirect(destination);
       } catch (error) {
         if (error instanceof Error) {
@@ -107,7 +107,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       }
 
       const access = await loadPortalAccess(supa);
-      const destination = resolveNextPath(rawNext, resolveDefaultWorkspacePath(access));
+      const destination = resolveNextPath(rawNext, resolveLandingPath(access));
       redirect(destination);
     } catch (error) {
       if (error instanceof Error) {
@@ -118,13 +118,15 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-surface-container-lowest px-space-lg py-space-xl text-on-surface">
+    <div className="flex min-h-screen items-center justify-center bg-surface-container-low px-space-lg py-space-xl text-on-surface">
       <div className="w-full max-w-xl">
-        <Card className="border-outline/12 bg-surface-container-high shadow-level-2">
+        <Card className="border-outline/8 bg-surface shadow-level-1">
           <CardHeader className="gap-space-2xs pb-space-md">
-            <p className="text-label-sm font-semibold uppercase tracking-label-uppercase text-primary">Welcome back</p>
+            <p className="text-label-sm font-semibold uppercase tracking-label-uppercase text-on-surface-variant">
+              Welcome back
+            </p>
             <CardTitle className="text-headline-sm font-semibold">Sign in to STEVI</CardTitle>
-            <CardDescription className="text-body-md text-muted-foreground">
+            <CardDescription className="text-body-md text-on-surface-variant">
               IHARC portal for appointments, documents, and outreach updates.
             </CardDescription>
           </CardHeader>

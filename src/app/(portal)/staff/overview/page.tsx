@@ -5,9 +5,9 @@ import { loadPortalAccess } from '@/lib/portal-access';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
+import { resolveLandingPath } from '@/lib/portal-navigation';
 import { fetchStaffCaseload, fetchStaffShifts } from '@/lib/staff/fetchers';
-import { WorkspacePageHeader } from '@/components/layout/workspace-page-header';
+import { PageHeader } from '@/components/layout/page-header';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,7 +16,7 @@ export default async function StaffOverviewPage() {
   const access = await loadPortalAccess(supabase);
 
   if (!access || !access.canAccessStaffWorkspace) {
-    redirect(resolveDefaultWorkspacePath(access));
+    redirect(resolveLandingPath(access));
   }
 
   const [caseload, shifts] = await Promise.all([
@@ -28,10 +28,10 @@ export default async function StaffOverviewPage() {
 
   return (
     <div className="page-shell page-stack">
-      <WorkspacePageHeader
+      <PageHeader
         eyebrow={roleLabel}
-        title="Staff workspace"
-        description="Move between caseload, shifts, and outreach logging without landing in the client portal first. All actions respect Supabase RLS and audit logging."
+        title="Staff overview"
+        description="Move between caseload, shifts, and outreach logging without switching modes. All actions respect Supabase RLS and audit logging."
         primaryAction={{ label: 'Open caseload', href: '/staff/caseload' }}
         secondaryAction={{ label: 'Log outreach', href: '/staff/outreach' }}
       />
@@ -109,4 +109,3 @@ export default async function StaffOverviewPage() {
     </div>
   );
 }
-

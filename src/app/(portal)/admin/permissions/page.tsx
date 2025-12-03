@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { ensurePortalProfile } from '@/lib/profile';
-import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
+import { resolveLandingPath } from '@/lib/portal-navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -55,7 +55,7 @@ export default async function PermissionsPage() {
   }
 
   if (!access.isProfileApproved || !(access.portalRoles.includes('portal_admin') || access.iharcRoles.includes('iharc_admin')) ) {
-    redirect(resolveDefaultWorkspacePath(access));
+    redirect(resolveLandingPath(access));
   }
 
   await ensurePortalProfile(supabase, access.userId);

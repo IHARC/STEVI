@@ -90,9 +90,7 @@ export function CommandPalette({ items, compactTrigger = false }: CommandPalette
         <DialogContent className="max-w-xl gap-space-sm">
           <DialogHeader>
             <DialogTitle>Go anywhere</DialogTitle>
-            <p className="text-body-sm text-muted-foreground">
-              Type to jump to any workspace page.
-            </p>
+            <p className="text-body-sm text-muted-foreground">Type to jump to any page or tool.</p>
           </DialogHeader>
 
           <div className="flex items-center gap-space-xs">

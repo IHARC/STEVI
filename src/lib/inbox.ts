@@ -1,5 +1,6 @@
 import type { SupabaseAnyServerClient } from '@/lib/supabase/types';
 import type { PortalAccess } from '@/lib/portal-access';
+import type { PortalArea } from '@/lib/portal-navigation';
 import { fetchClientAppointments } from '@/lib/appointments/queries';
 import { listClientDocuments } from '@/lib/documents';
 import { fetchStaffCaseload, fetchStaffShifts } from '@/lib/staff/fetchers';
@@ -271,20 +272,20 @@ async function fetchAdminInboxItems(
   return items.slice(0, 8);
 }
 
-export async function fetchWorkspaceInbox(
+export async function fetchPortalInbox(
   supabase: SupabaseAnyServerClient,
   access: PortalAccess,
-  workspace: 'client' | 'staff' | 'org' | 'admin',
+  area: PortalArea,
 ): Promise<InboxItem[]> {
-  if (workspace === 'staff') {
+  if (area === 'staff') {
     return fetchStaffInboxItems(supabase, access);
   }
 
-  if (workspace === 'org') {
+  if (area === 'org') {
     return fetchOrgInboxItems(supabase, access);
   }
 
-  if (workspace === 'admin') {
+  if (area === 'admin') {
     return fetchAdminInboxItems(supabase);
   }
 

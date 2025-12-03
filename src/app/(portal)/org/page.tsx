@@ -5,10 +5,10 @@ import { loadPortalAccess } from '@/lib/portal-access';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
+import { resolveLandingPath } from '@/lib/portal-navigation';
 import { fetchOrgInvites, fetchOrgMembersWithRoles, type OrgInviteRecord, type OrgMemberRecord } from '@/lib/org/fetchers';
 import type { Database } from '@/types/supabase';
-import { WorkspacePageHeader } from '@/components/layout/workspace-page-header';
+import { PageHeader } from '@/components/layout/page-header';
 import { StatTile } from '@/components/ui/stat-tile';
 
 export const dynamic = 'force-dynamic';
@@ -52,7 +52,7 @@ export default async function OrgHomePage() {
   const access = await loadPortalAccess(supabase);
 
   if (!access || !access.canAccessOrgWorkspace || !access.organizationId) {
-    redirect(resolveDefaultWorkspacePath(access));
+    redirect(resolveLandingPath(access));
   }
 
   const members: OrgMemberRecord[] = await fetchOrgMembersWithRoles(supabase, access.organizationId);
@@ -123,10 +123,10 @@ export default async function OrgHomePage() {
 
   return (
     <div className="page-shell page-stack">
-      <WorkspacePageHeader
-        eyebrow="Organization workspace"
+      <PageHeader
+        eyebrow="Organization"
         title={`Manage ${orgName}`}
-        description="Track how your team is using STEVI, keep member access healthy, and jump into invites or settings without leaving the organization workspace. All data respects Supabase RLS for your organization."
+        description="Track how your team is using STEVI, keep member access healthy, and jump into invites or settings from the same app. All data respects Supabase RLS for your organization."
         primaryAction={{ label: 'Invite members', href: '/org/invites' }}
         secondaryAction={{ label: 'Manage members', href: '/org/members' }}
       >
@@ -140,7 +140,7 @@ export default async function OrgHomePage() {
             {access.portalRoles.includes('portal_org_admin') ? 'Org admin' : 'Org representative'}
           </Badge>
         </div>
-      </WorkspacePageHeader>
+      </PageHeader>
 
       <section className="grid gap-space-sm sm:grid-cols-2 lg:grid-cols-4">
         {summaryCards.map((card) => (

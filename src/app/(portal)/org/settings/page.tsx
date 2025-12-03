@@ -3,7 +3,7 @@ import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
+import { resolveLandingPath } from '@/lib/portal-navigation';
 import type { Database } from '@/types/supabase';
 import { OrgContactSettingsForm, OrgNotesSettingsForm } from './org-settings-form';
 
@@ -38,7 +38,7 @@ export default async function OrgSettingsPage() {
   const access = await loadPortalAccess(supabase);
 
   if (!access || !access.canAccessOrgWorkspace || !access.organizationId) {
-    redirect(resolveDefaultWorkspacePath(access));
+    redirect(resolveLandingPath(access));
   }
 
   const { data: organizationRow, error } = await supabase

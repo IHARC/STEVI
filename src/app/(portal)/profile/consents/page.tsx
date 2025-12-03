@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
+import { resolveLandingPath } from '@/lib/portal-navigation';
 import { PageHeader } from '@/components/layout/page-header';
 import { Checkbox } from '@/components/ui/checkbox';
 
@@ -20,7 +20,7 @@ export default async function ConsentsPage() {
   const access = await loadPortalAccess(supabase);
 
   if (!access) redirect('/login?next=/profile/consents');
-  if (!access.isProfileApproved) redirect(resolveDefaultWorkspacePath(access));
+  if (!access.isProfileApproved) redirect(resolveLandingPath(access));
 
   const consentData = await fetchPersonConsents(supabase, access.userId);
 

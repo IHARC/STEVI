@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
-import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
+import { resolveLandingPath } from '@/lib/portal-navigation';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,7 +23,7 @@ export default async function StaffCaseDetailPage({ params }: CaseProps) {
   const supabase = await createSupabaseRSCClient();
   const access = await loadPortalAccess(supabase);
   if (!access) redirect(`/login?next=/staff/cases/${caseId}`);
-  if (!access.canAccessStaffWorkspace) redirect(resolveDefaultWorkspacePath(access));
+  if (!access.canAccessStaffWorkspace) redirect(resolveLandingPath(access));
 
   const detail = await fetchStaffCaseDetail(supabase, parsed);
   if (!detail) notFound();

@@ -2,18 +2,11 @@ import type { ReactNode } from 'react';
 import { redirect } from 'next/navigation';
 import { AppShell } from '@/components/shells/app-shell';
 import { PortalAccessProvider } from '@/components/providers/portal-access-provider';
-import { WorkspaceContextProvider } from '@/components/providers/workspace-context-provider';
+import { PortalLayoutProvider } from '@/components/providers/portal-layout-provider';
 import { getPortalRequestContext } from '@/components/providers/portal-request-context';
-import {
-  buildCommandPaletteItems,
-  resolveWorkspaceNavForShell,
-} from '@/lib/portal-access';
-import {
-  isClientPreview,
-  resolveWorkspaceOptions,
-  resolveWorkspaceQuickActions,
-} from '@/lib/workspaces';
-import { fetchWorkspaceInbox } from '@/lib/inbox';
+import { buildCommandPaletteItems } from '@/lib/portal-access';
+import { buildPortalNav, inferPortalAreaFromPath, isClientPreview, navAreaLabel, resolveQuickActions } from '@/lib/portal-navigation';
+import { fetchPortalInbox } from '@/lib/inbox';
 import { getOnboardingStatusForUser } from '@/lib/onboarding/status';
 import { buildPrimaryNavItems } from '@/lib/primary-nav';
 import { getBrandingAssetsWithClient } from '@/lib/marketing/branding';
@@ -25,23 +18,23 @@ export const dynamic = 'force-dynamic';
 export default async function PortalLayout({ children }: { children: ReactNode }) {
   const {
     portalAccess,
-    defaultWorkspacePath,
-    activeWorkspace,
+    landingPath,
+    activeArea,
     currentPath,
     currentPathname,
     supabase,
   } = await getPortalRequestContext();
-  const workspaceNav = resolveWorkspaceNavForShell(portalAccess, activeWorkspace);
+  const navSections = buildPortalNav(portalAccess);
 
-  if (!workspaceNav) {
-    redirect(defaultWorkspacePath);
+  if (navSections.length === 0) {
+    redirect(landingPath);
   }
 
   const shouldGateOnboarding =
     !portalAccess.canAccessAdminWorkspace &&
     !portalAccess.canAccessOrgWorkspace &&
     !portalAccess.canAccessStaffWorkspace &&
-    activeWorkspace === 'client';
+    activeArea === 'client';
 
   if (shouldGateOnboarding) {
     const onboardingStatus = await getOnboardingStatusForUser(portalAccess.userId, supabase);
@@ -54,34 +47,42 @@ export default async function PortalLayout({ children }: { children: ReactNode }
   }
 
   const primaryNavItems = buildPrimaryNavItems(portalAccess);
-  const workspaceOptions = resolveWorkspaceOptions(portalAccess);
-  const workspaceSwitcherOptions = workspaceOptions.filter((option) => option.id !== 'client');
   const branding = await getBrandingAssetsWithClient(supabase);
   const navigation = await getUserNavigation(portalAccess);
 
-  const previewingClient = isClientPreview(portalAccess, activeWorkspace);
-  const quickActions = resolveWorkspaceQuickActions(portalAccess, activeWorkspace, {
+  const previewingClient = isClientPreview(portalAccess, currentPathname);
+  const quickActions = resolveQuickActions(portalAccess, activeArea, {
     isPreview: previewingClient,
   });
-  const inboxItems = await fetchWorkspaceInbox(supabase, portalAccess, activeWorkspace);
+  const inboxItems = await fetchPortalInbox(supabase, portalAccess, activeArea);
   const actionCommands = quickActions
     .filter((action) => !action.disabled)
     .map((action) => ({ href: action.href, label: action.label, group: 'Actions' }));
   const entityCommands = await buildEntityCommandPaletteItems(supabase, portalAccess);
-  const commandPaletteItems = buildCommandPaletteItems(portalAccess, [
+  const commandPaletteItems = buildCommandPaletteItems(portalAccess, navSections, [
     ...actionCommands,
     ...entityCommands,
   ]);
 
+  const landingArea = inferPortalAreaFromPath(landingPath);
+  const primaryAreaLabel = navAreaLabel(landingArea);
+  const previewExitPath = landingArea === 'client' ? '/home' : landingPath;
+
   return (
     <PortalAccessProvider access={portalAccess}>
-      <WorkspaceContextProvider access={portalAccess} defaultPath={defaultWorkspacePath}>
+      <PortalLayoutProvider
+        value={{
+          activeArea,
+          landingPath,
+          isClientPreview: previewingClient,
+          clientPreviewExitPath: previewExitPath,
+          primaryAreaLabel,
+        }}
+      >
         <AppShell
-          workspaceNav={workspaceNav}
+          navSections={navSections}
           globalNavItems={primaryNavItems}
-          workspaceOptions={workspaceSwitcherOptions}
           inboxItems={inboxItems}
-          activeWorkspace={activeWorkspace}
           isClientPreview={previewingClient}
           navigation={navigation}
           branding={branding}
@@ -89,7 +90,7 @@ export default async function PortalLayout({ children }: { children: ReactNode }
         >
           {children}
         </AppShell>
-      </WorkspaceContextProvider>
+      </PortalLayoutProvider>
     </PortalAccessProvider>
   );
 }

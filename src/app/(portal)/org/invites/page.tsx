@@ -3,7 +3,7 @@ import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
+import { resolveLandingPath } from '@/lib/portal-navigation';
 import { fetchOrgInvites, type OrgInviteRecord } from '@/lib/org/fetchers';
 import {
   Table,
@@ -34,7 +34,7 @@ export default async function OrgInvitesPage() {
   const access = await loadPortalAccess(supabase);
 
   if (!access || !access.canManageOrgInvites || !access.organizationId) {
-    redirect(resolveDefaultWorkspacePath(access));
+    redirect(resolveLandingPath(access));
   }
 
   const [invites, rateLimit]: [OrgInviteRecord[], RateLimitResult] = await Promise.all([

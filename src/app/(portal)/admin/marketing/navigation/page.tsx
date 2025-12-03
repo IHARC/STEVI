@@ -5,7 +5,7 @@ import { ensurePortalProfile } from '@/lib/profile';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { MARKETING_SETTINGS_KEYS, NavItem, parseJsonSetting } from '@/lib/marketing/settings';
 import { NavForm } from './NavForm';
-import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
+import { resolveLandingPath } from '@/lib/portal-navigation';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,7 +20,7 @@ export default async function MarketingNavigationPage() {
   }
 
   if (!access.canManageWebsiteContent) {
-    redirect(resolveDefaultWorkspacePath(access));
+    redirect(resolveLandingPath(access));
   }
 
   await ensurePortalProfile(supabase, access.userId);

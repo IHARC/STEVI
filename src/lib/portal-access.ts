@@ -3,8 +3,7 @@ import { ensurePortalProfile, type PortalProfile } from '@/lib/profile';
 import { type IharcRole, type PortalRole } from '@/lib/ihar-auth';
 import type { SupabaseAnyServerClient } from '@/lib/supabase/types';
 import { getInventoryRoles } from '@/lib/enum-values';
-import { getWorkspaceNavBlueprint } from '@/lib/workspace-nav-blueprints';
-import type { WorkspaceId } from '@/lib/workspace-types';
+import { buildPortalNav, flattenNavItemsForCommands, type NavSection } from '@/lib/portal-navigation';
 
 export type PortalLink = {
   href: string;
@@ -13,22 +12,6 @@ export type PortalLink = {
   icon?: AppIconName;
   match?: string[];
 };
-
-export type NavGroup = {
-  id: string;
-  label: string;
-  icon?: AppIconName;
-  items: PortalLink[];
-};
-
-export type WorkspaceNav = {
-  id: WorkspaceId;
-  label: string;
-  defaultRoute: string;
-  groups: NavGroup[];
-};
-
-const WORKSPACE_NAV_ORDER: WorkspaceId[] = ['client', 'admin', 'staff', 'org'];
 
 export type PortalAccess = {
   userId: string;
@@ -154,120 +137,31 @@ async function fetchUserRoles(
     .filter((role): role is string => Boolean(role));
 }
 
-function workspaceIsAllowed(access: PortalAccess, workspaceId: WorkspaceId): boolean {
-  if (workspaceId === 'client') return true;
-  if (workspaceId === 'admin') return access.canAccessAdminWorkspace;
-  if (workspaceId === 'org') return access.canAccessOrgWorkspace;
-  if (workspaceId === 'staff') return access.canAccessStaffWorkspace;
-  return false;
-}
-
-type GuardedLink = { requires?: (access: PortalAccess) => boolean };
-
-function linkIsAllowed(blueprint: GuardedLink, access: PortalAccess): boolean {
-  if (blueprint.requires && !blueprint.requires(access)) {
-    return false;
-  }
-  return true;
-}
-
-function resolveWorkspace(access: PortalAccess | null, workspaceId: WorkspaceId): WorkspaceNav | null {
-  if (!access) return null;
-  if (!workspaceIsAllowed(access, workspaceId)) return null;
-
-  const blueprint = getWorkspaceNavBlueprint(workspaceId);
-  if (!blueprint) return null;
-
-  const groups = blueprint.groups
-    .map<NavGroup | null>((group) => {
-      const items = group.items
-        .filter((item) => linkIsAllowed(item, access))
-        .map(({ href, label, exact, icon, match }) => ({ href, label, exact, icon, match }));
-
-      if (items.length === 0) {
-        return null;
-      }
-
-      return { id: group.id, label: group.label, icon: group.icon, items };
-    })
-    .filter(Boolean) as NavGroup[];
-
-  if (groups.length === 0) {
-    return null;
-  }
-
-  return {
-    id: blueprint.id,
-    label: blueprint.label,
-    defaultRoute: blueprint.defaultRoute,
-    groups,
-  };
-}
-
-export function resolveClientNavLinks(access: PortalAccess | null): PortalLink[] {
-  const nav = resolveWorkspace(access, 'client');
-  if (!nav) return [];
-  return nav.groups.flatMap((group) => group.items);
-}
-
-export function resolveAdminWorkspaceNav(access: PortalAccess | null): WorkspaceNav | null {
-  return resolveWorkspace(access, 'admin');
-}
-
-export function resolveOrgWorkspaceNav(access: PortalAccess | null): WorkspaceNav | null {
-  return resolveWorkspace(access, 'org');
-}
-
-export function resolveStaffWorkspaceNav(access: PortalAccess | null): WorkspaceNav | null {
-  return resolveWorkspace(access, 'staff');
-}
-
-export function resolveWorkspaceNavForShell(
-  access: PortalAccess | null,
-  workspaceId: WorkspaceId,
-): WorkspaceNav | null {
-  return resolveWorkspace(access, workspaceId);
-}
-
-const PUBLIC_CLIENT_LINKS: PortalLink[] = (() => {
-  const blueprint = getWorkspaceNavBlueprint('client');
-  if (!blueprint) return [];
-
-  return blueprint.groups.flatMap((group) =>
-    group.items
-      .filter((item) => !item.requires)
-      .map(({ href, label, exact, icon, match }) => ({ href, label, exact, icon, match })),
-  );
-})();
-
-export function getPublicPortalLinks(): PortalLink[] {
-  return PUBLIC_CLIENT_LINKS.map((link) => ({ ...link }));
-}
-
 type MenuLinkBlueprint = PortalLink & { requires?: (access: PortalAccess) => boolean };
 
 const USER_MENU_BLUEPRINT: MenuLinkBlueprint[] = [
   { href: '/profile', label: 'Profile' },
   { href: '/support', label: 'Support' },
   {
-    href: '/home',
-    label: 'Client portal preview',
-    requires: (access) => access.canAccessStaffWorkspace || access.canAccessAdminWorkspace,
-  },
-  {
-    href: '/admin',
-    label: 'Admin workspace',
+    href: '/admin/operations',
+    label: 'Admin & operations',
     requires: (access) => access.canAccessAdminWorkspace,
   },
   {
+    href: '/staff/overview',
+    label: 'Staff tools',
+    requires: (access) => access.canAccessStaffWorkspace,
+  },
+  {
     href: '/org',
-    label: 'Organization workspace',
+    label: 'Organization settings',
     requires: (access) => access.canAccessOrgWorkspace,
   },
   {
-    href: '/staff',
-    label: 'Staff workspace',
-    requires: (access) => access.canAccessStaffWorkspace,
+    href: '/home',
+    label: 'View client portal',
+    requires: (access) =>
+      access.canAccessStaffWorkspace || access.canAccessAdminWorkspace || access.canAccessOrgWorkspace,
   },
 ];
 
@@ -282,6 +176,13 @@ function dedupeLinks<T extends { href: string }>(links: T[]): T[] {
   });
 }
 
+function linkIsAllowed(entry: { requires?: (access: PortalAccess) => boolean }, access: PortalAccess): boolean {
+  if (entry.requires && !entry.requires(access)) {
+    return false;
+  }
+  return true;
+}
+
 export function buildUserMenuLinks(access: PortalAccess): PortalLink[] {
   const links = USER_MENU_BLUEPRINT.filter((entry) => linkIsAllowed(entry, access)).map(
     ({ href, label }) => ({ href, label }),
@@ -294,24 +195,15 @@ export type CommandPaletteItem = PortalLink & { group: string };
 
 export function buildCommandPaletteItems(
   access: PortalAccess | null,
+  navSections: NavSection[] | null,
   extraItems: CommandPaletteItem[] = [],
 ): CommandPaletteItem[] {
   if (!access) return [];
 
   const MAX_ITEMS = 20;
-
-  const workspaceCommands = WORKSPACE_NAV_ORDER
-    .map((workspaceId) => resolveWorkspace(access, workspaceId))
-    .filter((nav): nav is WorkspaceNav => Boolean(nav))
-    .flatMap((nav) =>
-      nav.groups.flatMap((group) =>
-        group.items.map((item) => ({ ...item, group: group.label || nav.label })),
-      ),
-    );
-
-  // Prioritise contextual actions/entities first, then workspace navigation links; cap to keep palette fast.
-  const ordered = [...extraItems, ...workspaceCommands];
-
+  const sections = navSections ?? buildPortalNav(access);
+  const navCommands = flattenNavItemsForCommands(sections).map((item) => ({ ...item }));
+  const ordered = [...extraItems, ...navCommands];
   const unique = dedupeLinks<CommandPaletteItem>(ordered);
   return unique.slice(0, MAX_ITEMS);
 }

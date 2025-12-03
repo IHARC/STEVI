@@ -5,7 +5,7 @@ import { loadPortalAccess } from '@/lib/portal-access';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
+import { resolveLandingPath } from '@/lib/portal-navigation';
 import { getOnboardingStatusForPeople, type OnboardingStatus } from '@/lib/onboarding/status';
 
 type PeopleListItem = {
@@ -32,7 +32,7 @@ export default async function AdminClientsPage({ searchParams }: PageProps) {
   const access = await loadPortalAccess(supabase);
 
   if (!access) redirect('/login?next=/admin/clients');
-  if (!access.canManageConsents) redirect(resolveDefaultWorkspacePath(access));
+  if (!access.canManageConsents) redirect(resolveLandingPath(access));
 
   const core = supabase.schema('core');
   const { data, error } = await core.rpc('get_people_list_with_types', {

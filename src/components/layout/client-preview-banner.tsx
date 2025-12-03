@@ -3,17 +3,16 @@
 import Link from 'next/link';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { useWorkspaceContext } from '@/components/providers/workspace-provider';
+import { usePortalLayout } from '@/components/providers/portal-layout-provider';
 
 export function ClientPreviewBanner() {
-  const { isClientPreview, previewExitPath, availableWorkspaces } = useWorkspaceContext();
+  const { isClientPreview, clientPreviewExitPath, primaryAreaLabel } = usePortalLayout();
 
   if (!isClientPreview) {
     return null;
   }
 
-  const primaryWorkspace = availableWorkspaces.find((option) => option.id !== 'client');
-  const workspaceLabel = primaryWorkspace?.label ?? 'workspace';
+  const workspaceLabel = primaryAreaLabel || 'area';
 
   return (
     <Alert
@@ -29,7 +28,7 @@ export function ClientPreviewBanner() {
           </AlertDescription>
         </div>
         <Button asChild variant="outline" size="sm">
-          <Link href={previewExitPath}>Exit preview</Link>
+          <Link href={clientPreviewExitPath}>Exit preview</Link>
         </Button>
       </div>
     </Alert>

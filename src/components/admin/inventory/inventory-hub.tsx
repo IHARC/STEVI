@@ -9,7 +9,7 @@ import { InventoryLocationsSection } from './inventory-locations';
 import { InventoryOrganizationsSection } from './inventory-organizations';
 import { InventoryReceiptsSection } from './inventory-receipts';
 
-type InventoryWorkspaceProps = {
+type InventoryHubProps = {
   bootstrap: InventoryBootstrap;
   actorProfileId: string;
   canManageLocations: boolean;
@@ -17,7 +17,7 @@ type InventoryWorkspaceProps = {
 
 const DEFAULT_TAB = 'dashboard';
 
-export function InventoryWorkspace({ bootstrap, actorProfileId, canManageLocations }: InventoryWorkspaceProps) {
+export function InventoryHub({ bootstrap, actorProfileId, canManageLocations }: InventoryHubProps) {
   const [activeTab, setActiveTab] = useState<string>(DEFAULT_TAB);
 
   return (

@@ -6,7 +6,7 @@ import { processIntakeAction } from '@/lib/cases/actions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
+import { resolveLandingPath } from '@/lib/portal-navigation';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,7 +15,7 @@ export default async function IntakeQueuePage() {
   const access = await loadPortalAccess(supabase);
 
   if (!access) redirect('/login?next=/staff/intake');
-  if (!access.canAccessStaffWorkspace) redirect(resolveDefaultWorkspacePath(access));
+  if (!access.canAccessStaffWorkspace) redirect(resolveLandingPath(access));
 
   const intakes = await fetchPendingIntakes(supabase);
 

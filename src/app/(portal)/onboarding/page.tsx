@@ -8,7 +8,7 @@ import { resolveOnboardingActor, type OnboardingActor } from '@/lib/onboarding/u
 import { OnboardingWizard, type OnboardingPrefill } from '@/components/onboarding/onboarding-wizard';
 import { getPolicyBySlug } from '@/lib/policies';
 import { normalizePostalCode } from '@/lib/registration';
-import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
+import { resolveLandingPath } from '@/lib/portal-navigation';
 import { Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/layout/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -73,7 +73,7 @@ export default async function OnboardingPage({ searchParams }: PageProps) {
   // Onboarding wizard is intended for clients (self-serve) or staff/partners assisting clients.
   // IHARC admins should use admin tools instead of this flow.
   if (access.iharcRoles.includes('iharc_admin')) {
-    redirect(resolveDefaultWorkspacePath(access));
+    redirect(resolveLandingPath(access));
   }
 
   const targetPersonId = actor === 'client' ? null : requestedPersonId;

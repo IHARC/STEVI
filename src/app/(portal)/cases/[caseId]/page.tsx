@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
+import { resolveLandingPath } from '@/lib/portal-navigation';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,7 +27,7 @@ export default async function CaseDetailPage({ params }: CasePageProps) {
   const access = await loadPortalAccess(supabase);
   if (!access) redirect(`/login?next=/cases/${caseId}`);
   if (!access.isProfileApproved) {
-    redirect(resolveDefaultWorkspacePath(access));
+    redirect(resolveLandingPath(access));
   }
 
   const detail = await fetchClientCaseDetail(supabase, access.userId, parsedId);

@@ -6,9 +6,9 @@ import { loadPortalAccess } from '@/lib/portal-access';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
+import { resolveLandingPath } from '@/lib/portal-navigation';
 import { NotificationsChart } from '../notifications-chart';
-import { WorkspacePageHeader } from '@/components/layout/workspace-page-header';
+import { PageHeader } from '@/components/layout/page-header';
 import { StatTile } from '@/components/ui/stat-tile';
 import { cn } from '@/lib/utils';
 
@@ -38,7 +38,7 @@ export default async function AdminOperationsPage() {
   }
 
   if (!access.canAccessAdminWorkspace) {
-    redirect(resolveDefaultWorkspacePath(access));
+    redirect(resolveLandingPath(access));
   }
 
   await ensurePortalProfile(supabase, access.userId);
@@ -109,8 +109,8 @@ export default async function AdminOperationsPage() {
 
   return (
     <div className="page-shell page-stack">
-      <WorkspacePageHeader
-        eyebrow="Admin workspace"
+      <PageHeader
+        eyebrow="Admin"
         title="Operations overview"
         description="Monitor approvals, notifications, and content at a glance. All counts respect Supabase RLS and audit logging."
         primaryAction={{ label: 'Review approvals', href: '/admin/profiles' }}
@@ -182,7 +182,7 @@ function AttentionItem({
     <div className="flex items-center justify-between gap-space-sm rounded-[var(--md-sys-shape-corner-small)] px-space-sm py-space-sm transition-colors state-layer-color-neutral hover:bg-surface-container">
       <div className="space-y-space-3xs">
         <p className="text-body-md font-medium text-on-surface">{label}</p>
-        <p className="text-label-sm text-on-surface-variant">RLS enforced in destination workspace.</p>
+        <p className="text-label-sm text-on-surface-variant">RLS enforced in the destination area.</p>
       </div>
       <div className="flex items-center gap-space-sm">
         <Badge

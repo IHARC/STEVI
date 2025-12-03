@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
-import { WorkspacePageHeader } from '@/components/layout/workspace-page-header';
+import { PageHeader } from '@/components/layout/page-header';
 import { Card, CardContent } from '@/components/ui/card';
 
 export const dynamic = 'force-dynamic';
@@ -20,8 +20,8 @@ export default async function MessagesPage() {
 
   return (
     <div className="page-shell page-stack">
-      <WorkspacePageHeader
-        eyebrow="Client workspace"
+      <PageHeader
+        eyebrow="Client portal"
         title="Messages"
         description="Stay in touch with outreach staff. Secure messages will appear here once wired to the messaging backend."
       />
@@ -34,4 +34,3 @@ export default async function MessagesPage() {
     </div>
   );
 }
-

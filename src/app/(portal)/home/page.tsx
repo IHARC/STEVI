@@ -114,7 +114,7 @@ export default async function HomePage() {
   return (
     <div className="page-shell page-stack">
       <PageHeader
-        eyebrow="Client workspace"
+        eyebrow="Client portal"
         title={`Hi ${preferredName}, you’re connected to STEVI`}
         description="Track appointments, review documents, and stay in touch with outreach staff. Updates here sync with the STEVI Ops tools the field team uses."
         actions={

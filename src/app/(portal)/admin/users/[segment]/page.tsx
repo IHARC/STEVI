@@ -13,7 +13,7 @@ import {
   loadProfileEnums,
 } from '@/lib/admin-users';
 import { getIharcRoles, getPortalRoles, toOptions, formatEnumLabel } from '@/lib/enum-values';
-import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
+import { resolveLandingPath } from '@/lib/portal-navigation';
 import { UserSavedSearches } from '../user-saved-searches';
 import { UserPeekSheet } from '../user-peek-sheet';
 import { Badge } from '@/components/ui/badge';
@@ -117,7 +117,7 @@ export default async function AdminUsersSegmentPage({
     redirect(`/login?next=/admin/users/${rawSegment}`);
   }
   if (!access.canAccessAdminWorkspace) {
-    redirect(resolveDefaultWorkspacePath(access));
+    redirect(resolveLandingPath(access));
   }
 
   await ensurePortalProfile(supabase, access.userId);

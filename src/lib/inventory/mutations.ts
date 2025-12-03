@@ -14,7 +14,7 @@ import {
   type StockTransferInput,
 } from './types';
 
-const DEFAULT_INITIAL_STOCK_NOTES = 'Initial stock recorded in STEVI inventory workspace';
+const DEFAULT_INITIAL_STOCK_NOTES = 'Initial stock recorded in STEVI inventory tools';
 
 function normalizeLocationAddress(address?: string | null) {
   if (!address || address.trim().length === 0) {

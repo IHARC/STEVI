@@ -11,7 +11,7 @@ export function stripRouteGroups(pathname: string): string {
 /**
  * Normalize path values coming from Next.js request headers.
  * The `next-url` header may contain either a relative path or an absolute URL.
- * This helper always returns a safe, route-group-free relative path plus pathname for workspace checks.
+ * This helper always returns a safe, route-group-free relative path plus pathname for navigation checks.
  */
 export function normalizePathFromHeader(
   raw: string | null | undefined,

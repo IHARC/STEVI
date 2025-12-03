@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ClientPreviewGuard } from '@/components/layout/client-preview-guard';
 import { submitSupportMessage } from './actions';
 import { useToast } from '@/components/ui/use-toast';
-import { useWorkspaceContext } from '@/components/providers/workspace-provider';
+import { usePortalLayout } from '@/components/providers/portal-layout-provider';
 import { Icon } from '@/components/ui/icon';
 import { MessageCircle } from 'lucide-react';
 
@@ -20,7 +20,7 @@ export function SupportComposer() {
   const [open, setOpen] = useState(false);
   const [state, formAction] = useFormState(submitSupportMessage, initialState);
   const { toast } = useToast();
-  const { isClientPreview } = useWorkspaceContext();
+  const { isClientPreview } = usePortalLayout();
 
   useEffect(() => {
     if (state?.success) {

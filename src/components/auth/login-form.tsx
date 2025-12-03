@@ -7,9 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { GoogleAuthButton } from '@/components/auth/google-auth-button';
-import { AuthDivider } from '@/components/auth/auth-divider';
 
 type ContactMethod = 'email' | 'phone';
 
@@ -28,15 +28,16 @@ export function LoginForm({ action, nextPath, initialState }: LoginFormProps) {
   const [state, formAction] = useActionState(action, initialState);
   const [contactMethod, setContactMethod] = useState<ContactMethod>(initialState.contactMethod ?? 'email');
 
+  // Keep the toggle in sync with the last server response (e.g., validation error)
+  // without overriding a user-initiated switch before submit. Only react when the
+  // action state itself changes.
   useEffect(() => {
-    const nextMethod = state.contactMethod;
-    if (!nextMethod || nextMethod === contactMethod) {
-      return;
-    }
+    if (!state.contactMethod) return;
+
     startTransition(() => {
-      setContactMethod(nextMethod);
+      setContactMethod(state.contactMethod as ContactMethod);
     });
-  }, [state.contactMethod, contactMethod]);
+  }, [state.contactMethod]);
 
   const normalizedError = state.error?.toLowerCase() ?? '';
   const emailError = contactMethod === 'email' && normalizedError.includes('email') ? state.error : undefined;
@@ -57,42 +58,34 @@ export function LoginForm({ action, nextPath, initialState }: LoginFormProps) {
       ) : null}
 
       <div className="space-y-space-2xs">
-        <p className="text-label-sm font-semibold uppercase tracking-label-uppercase text-muted-foreground">
+        <p className="text-label-sm font-semibold uppercase tracking-label-uppercase text-on-surface-variant/80">
           Sign in with
         </p>
         <ToggleGroup
           type="single"
-          name="contact_method"
           value={contactMethod}
           onValueChange={(value) => value && setContactMethod(value as ContactMethod)}
-          className="grid gap-space-sm sm:grid-cols-2"
+          variant="outline"
+          size="sm"
+          className="grid gap-space-xs sm:grid-cols-2"
           aria-label="Choose how to sign in"
         >
           <ToggleGroupItem
             value="email"
             aria-label="Email"
-            className="h-full w-full justify-center rounded-[var(--md-sys-shape-corner-large)] bg-surface-container-low px-space-md py-space-sm text-body-md font-semibold shadow-level-1 data-[state=on]:bg-primary data-[state=on]:text-on-primary data-[state=on]:shadow-level-2"
+            className="w-full"
           >
-            <span className="flex flex-col items-center gap-space-2xs text-center">
-              <span className="text-label-lg font-semibold">Email</span>
-              <span className="text-label-sm font-normal text-on-surface-variant">
-                Use your registered email.
-              </span>
-            </span>
+            Email
           </ToggleGroupItem>
           <ToggleGroupItem
             value="phone"
             aria-label="Phone"
-            className="h-full w-full justify-center rounded-[var(--md-sys-shape-corner-large)] bg-surface-container-low px-space-md py-space-sm text-body-md font-semibold shadow-level-1 data-[state=on]:bg-primary data-[state=on]:text-on-primary data-[state=on]:shadow-level-2"
+            className="w-full"
           >
-            <span className="flex flex-col items-center gap-space-2xs text-center">
-              <span className="text-label-lg font-semibold">Phone</span>
-              <span className="text-label-sm font-normal text-on-surface-variant">
-                Use your verified number.
-              </span>
-            </span>
+            Phone
           </ToggleGroupItem>
         </ToggleGroup>
+        <p className="text-label-sm text-on-surface-variant">Use the email or phone you registered with.</p>
       </div>
 
       {contactMethod === 'email' ? (
@@ -129,15 +122,7 @@ export function LoginForm({ action, nextPath, initialState }: LoginFormProps) {
       )}
 
       <div className="grid gap-space-2xs">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="password">Password</Label>
-          <Link
-            href="/reset-password"
-            className="text-label-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
-          >
-            Forgot password?
-          </Link>
-        </div>
+        <Label htmlFor="password">Password</Label>
         <Input
           id="password"
           name="password"
@@ -148,6 +133,14 @@ export function LoginForm({ action, nextPath, initialState }: LoginFormProps) {
           data-invalid={Boolean(passwordError)}
         />
         {passwordError ? <p className="text-label-sm text-error">{passwordError}</p> : null}
+        <div className="flex justify-end">
+          <Link
+            href="/reset-password"
+            className="text-label-sm font-medium text-on-surface-variant underline-offset-4 hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+          >
+            Forgot password?
+          </Link>
+        </div>
       </div>
 
       <SubmitButton />
@@ -163,7 +156,11 @@ export function LoginForm({ action, nextPath, initialState }: LoginFormProps) {
       </p>
 
       <div className="space-y-space-sm pt-space-xs">
-        <AuthDivider label="other sign-in options" />
+        <div className="flex items-center gap-space-sm text-label-sm text-on-surface-variant">
+          <Separator className="flex-1 bg-outline/20" />
+          <span>Or continue with</span>
+          <Separator className="flex-1 bg-outline/20" />
+        </div>
         <GoogleAuthButton intent="login" nextPath={nextPath} />
       </div>
     </form>

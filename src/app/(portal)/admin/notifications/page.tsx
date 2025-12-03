@@ -10,7 +10,7 @@ import type {
   NotificationRecord,
 } from '@/components/admin/notifications/types';
 import type { Database } from '@/types/supabase';
-import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
+import { resolveLandingPath } from '@/lib/portal-navigation';
 
 type MaybeArray<T> = T | T[] | null;
 
@@ -43,7 +43,7 @@ export default async function NotificationsAdminPage() {
   }
 
   if (!access.canManageNotifications) {
-    redirect(resolveDefaultWorkspacePath(access));
+    redirect(resolveLandingPath(access));
   }
 
   await ensurePortalProfile(supabase, access.userId);
@@ -136,7 +136,7 @@ export default async function NotificationsAdminPage() {
         <p className="text-label-sm font-medium uppercase text-muted-foreground">
           Outreach messaging
         </p>
-        <h1 className="text-title-lg text-on-surface sm:text-headline-sm">Notifications workspace</h1>
+        <h1 className="text-title-lg text-on-surface sm:text-headline-sm">Notifications</h1>
         <p className="max-w-3xl text-body-md text-muted-foreground sm:text-body-lg">
           Send reminders and alerts that respect each neighbour’s consent preferences. Delivery runs
           through Supabase notifications and the existing portal-alerts Edge Function.

@@ -6,7 +6,7 @@ import type { LucideIcon } from 'lucide-react';
 import { resolveNextPath } from '@/lib/auth';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
-import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
+import { resolveLandingPath } from '@/lib/portal-navigation';
 import { FormPageShell } from '@/components/layout/form-page-shell';
 import { Icon } from '@/components/ui/icon';
 
@@ -77,8 +77,8 @@ export default async function RegisterLandingPage({ searchParams }: RegisterLand
   } = await supabase.auth.getUser();
 
   const portalAccess = user ? await loadPortalAccess(supabase) : null;
-  const defaultWorkspacePath = resolveDefaultWorkspacePath(portalAccess);
-  const nextPath = resolveNextPath(rawNext, defaultWorkspacePath);
+  const landingPath = resolveLandingPath(portalAccess);
+  const nextPath = resolveNextPath(rawNext, landingPath);
 
   if (user) {
     redirect(nextPath);

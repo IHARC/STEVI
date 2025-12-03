@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
-import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
-import { WorkspacePageHeader } from '@/components/layout/workspace-page-header';
+import { resolveLandingPath } from '@/lib/portal-navigation';
+import { PageHeader } from '@/components/layout/page-header';
 import { Card, CardContent } from '@/components/ui/card';
 
 export const dynamic = 'force-dynamic';
@@ -12,7 +12,7 @@ export default async function AdminTemplatesPage() {
   const access = await loadPortalAccess(supabase);
 
   if (!access || !access.canAccessAdminWorkspace) {
-    redirect(resolveDefaultWorkspacePath(access));
+    redirect(resolveLandingPath(access));
   }
 
   const elevatedAdmin =
@@ -20,13 +20,13 @@ export default async function AdminTemplatesPage() {
     (access.portalRoles.includes('portal_admin') || access.iharcRoles.includes('iharc_admin'));
 
   if (!elevatedAdmin) {
-    redirect(resolveDefaultWorkspacePath(access));
+    redirect(resolveLandingPath(access));
   }
 
   return (
     <div className="page-shell page-stack">
-      <WorkspacePageHeader
-        eyebrow="Admin workspace"
+      <PageHeader
+        eyebrow="Admin"
         title="Templates & tests"
         description="Prepare notification templates and operational test cases before releasing new workflows."
       />

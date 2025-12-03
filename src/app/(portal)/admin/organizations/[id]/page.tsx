@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
 import { loadPortalAccess } from '@/lib/portal-access';
-import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
+import { resolveLandingPath } from '@/lib/portal-navigation';
 import {
   updateOrganizationAction,
   deleteOrganizationAction,
@@ -79,7 +79,7 @@ export default async function AdminOrganizationDetailPage({
   }
 
   if (!access.canAccessAdminWorkspace || !access.portalRoles.includes('portal_admin')) {
-    redirect(resolveDefaultWorkspacePath(access));
+    redirect(resolveLandingPath(access));
   }
 
   await ensurePortalProfile(supabase, access.userId);

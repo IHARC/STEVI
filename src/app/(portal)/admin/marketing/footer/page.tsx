@@ -9,7 +9,7 @@ import { ensurePortalProfile } from '@/lib/profile';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { MARKETING_SETTINGS_KEYS } from '@/lib/marketing/settings';
 import { updateSiteFooterAction } from './actions';
-import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
+import { resolveLandingPath } from '@/lib/portal-navigation';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,7 +22,7 @@ export default async function MarketingFooterAdminPage() {
   }
 
   if (!access.canManageWebsiteContent) {
-    redirect(resolveDefaultWorkspacePath(access));
+    redirect(resolveLandingPath(access));
   }
 
   await ensurePortalProfile(supabase, access.userId);

@@ -6,8 +6,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import { usePortalAccess } from '@/components/providers/portal-access-provider';
-import { useOptionalWorkspaceContext } from '@/components/providers/workspace-provider';
-import { resolveWorkspaceQuickActions, type WorkspaceQuickAction } from '@/lib/workspaces';
+import { useOptionalPortalLayout } from '@/components/providers/portal-layout-provider';
+import { resolveQuickActions, type QuickAction } from '@/lib/portal-navigation';
 import { CalendarClock, FileText, MessageCircle, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -17,7 +17,7 @@ const QUICK_ACTION_ICONS: Record<string, typeof CalendarClock> = {
   file: FileText,
 };
 
-function actionIcon(action: WorkspaceQuickAction) {
+function actionIcon(action: QuickAction) {
   if (!action.icon) return null;
   const IconComponent = QUICK_ACTION_ICONS[action.icon];
   if (!IconComponent) return null;
@@ -28,22 +28,20 @@ export function QuickCreateButton() {
   const [open, setOpen] = useState(false);
   const router = useRouter();
   const portalAccess = usePortalAccess();
-  const workspace = useOptionalWorkspaceContext();
+  const layout = useOptionalPortalLayout();
 
   const actions = useMemo(() => {
-    if (!workspace) return [] as WorkspaceQuickAction[];
-    return resolveWorkspaceQuickActions(portalAccess, workspace.activeWorkspace, {
-      isPreview: workspace.isClientPreview,
-    });
-  }, [portalAccess, workspace]);
+    if (!layout) return [] as QuickAction[];
+    return resolveQuickActions(portalAccess, layout.activeArea, { isPreview: layout.isClientPreview });
+  }, [portalAccess, layout]);
 
   const availableActions = actions.filter((action) => !action.disabled);
 
-  if (!workspace || actions.length === 0) {
+  if (!layout || actions.length === 0) {
     return null;
   }
 
-  function handleSelect(action: WorkspaceQuickAction) {
+  function handleSelect(action: QuickAction) {
     if (action.disabled) return;
     setOpen(false);
     router.push(action.href);

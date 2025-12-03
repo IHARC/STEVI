@@ -7,7 +7,7 @@ export const ORG_FEATURE_OPTIONS = [
   { value: 'inventory', label: 'Inventory' },
   { value: 'donations', label: 'Donations' },
   { value: 'metrics', label: 'Metrics' },
-  { value: 'org_workspace', label: 'Org workspace' },
+  { value: 'org_workspace', label: 'Organization portal' },
 ] as const;
 
 export type OrgFeatureKey = (typeof ORG_FEATURE_OPTIONS)[number]['value'];

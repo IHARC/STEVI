@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
+import { resolveLandingPath } from '@/lib/portal-navigation';
 
 type ConsentRow = {
   id: number;
@@ -24,7 +24,7 @@ export default async function AdminConsentsPage() {
   const access = await loadPortalAccess(supabase);
 
   if (!access) redirect('/login?next=/admin/consents');
-  if (!access.canManageConsents) redirect(resolveDefaultWorkspacePath(access));
+  if (!access.canManageConsents) redirect(resolveLandingPath(access));
 
   const core = supabase.schema('core');
   const { data, error } = await core.rpc('get_people_list_with_types', {

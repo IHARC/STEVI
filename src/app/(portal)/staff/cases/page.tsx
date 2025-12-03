@@ -3,7 +3,7 @@ import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { fetchStaffCases } from '@/lib/cases/fetchers';
 import { fetchStaffCaseload, fetchStaffShifts } from '@/lib/staff/fetchers';
-import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
+import { resolveLandingPath } from '@/lib/portal-navigation';
 import { StaffCasesBoard } from './_components/staff-cases-board';
 
 export const dynamic = 'force-dynamic';
@@ -13,7 +13,7 @@ export default async function StaffCasesPage() {
   const access = await loadPortalAccess(supabase);
 
   if (!access) redirect('/login?next=/staff/cases');
-  if (!access.canAccessStaffWorkspace) redirect(resolveDefaultWorkspacePath(access));
+  if (!access.canAccessStaffWorkspace) redirect(resolveLandingPath(access));
 
   const [cases, caseload, shifts] = await Promise.all([
     fetchStaffCases(supabase, 160),
@@ -37,7 +37,7 @@ export default async function StaffCasesPage() {
         <p className="text-label-sm font-semibold uppercase text-muted-foreground">Caseload</p>
         <h1 className="text-headline-lg text-on-surface sm:text-display-sm">Cases</h1>
         <p className="max-w-4xl text-body-md text-muted-foreground">
-          Saved views, peek panel, and quick outreach entry keep staff aligned without leaving the workspace. RLS and audit
+          Saved views, peek panel, and quick outreach entry keep staff aligned without leaving the app. RLS and audit
           logging stay in effect.
         </p>
       </header>

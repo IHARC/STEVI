@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
+import { resolveLandingPath } from '@/lib/portal-navigation';
 import type { Database } from '@/types/supabase';
 import { getOnboardingStatus, type OnboardingStatus } from '@/lib/onboarding/status';
 import { resetOnboardingAction, resendOnboardingLinkAction } from '../onboarding-actions';
@@ -60,7 +60,7 @@ export default async function AdminPersonDetailPage({ params }: PageProps) {
   const supabase = await createSupabaseRSCClient();
   const access = await loadPortalAccess(supabase);
   if (!access) redirect('/login?next=/admin/clients');
-  if (!access.canManageConsents) redirect(resolveDefaultWorkspacePath(access));
+  if (!access.canManageConsents) redirect(resolveLandingPath(access));
 
   const person = await loadPerson(supabase, id);
   if (!person) notFound();

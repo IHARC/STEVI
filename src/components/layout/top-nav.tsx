@@ -3,50 +3,38 @@ import Link from 'next/link';
 import { CommandPalette } from '@/components/layout/command-palette';
 import { QuickCreateButton } from '@/components/layout/quick-create-button';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
-import { WorkspaceDrawerMobile } from '@/components/layout/workspace-drawer';
-import { WorkspaceSwitcher } from '@/components/layout/workspace-switcher';
-import type { CommandPaletteItem, WorkspaceNav } from '@/lib/portal-access';
+import { AppNavigationMobile } from '@/components/layout/app-navigation';
+import type { CommandPaletteItem } from '@/lib/portal-access';
 import type { ResolvedBrandingAssets } from '@/lib/marketing/branding';
 import type { UserNavigation } from '@/components/layout/user-nav';
 import type { PrimaryNavItem } from '@/lib/primary-nav';
-import type { WorkspaceId, WorkspaceOption } from '@/lib/workspaces';
+import type { NavSection } from '@/lib/portal-navigation';
 
 type TopNavProps = {
-  workspaceNav: WorkspaceNav | null;
+  navSections: NavSection[];
   globalNavItems: PrimaryNavItem[];
-  workspaceOptions: WorkspaceOption[];
-  activeWorkspace: WorkspaceId;
-  isClientPreview: boolean;
   commands: CommandPaletteItem[];
   navigation: UserNavigation;
   branding: ResolvedBrandingAssets;
 };
 
 export function TopNav({
-  workspaceNav,
+  navSections,
   globalNavItems,
-  workspaceOptions,
-  activeWorkspace,
-  isClientPreview,
   commands,
   navigation,
   branding,
 }: TopNavProps) {
   const { desktop, mobile } = navigation;
-  const hasWorkspaceNav = Boolean(workspaceNav?.groups.length);
-  const hasWorkspaces = workspaceOptions.length > 0 && activeWorkspace !== 'client';
+  const hasNav = navSections.length > 0;
 
   return (
     <header className="sticky top-0 z-50 border-b border-outline/12 bg-surface/92 text-on-surface shadow-level-2 backdrop-blur-xl supports-[backdrop-filter]:bg-surface/85">
       <div className="mx-auto flex w-full max-w-page items-center gap-space-sm px-space-lg py-space-sm">
         <div className="flex flex-1 items-center gap-space-sm min-w-0">
-          {hasWorkspaceNav ? (
+          {hasNav ? (
             <div className="lg:hidden">
-              <WorkspaceDrawerMobile
-                key={workspaceNav?.id ?? 'workspace-drawer-mobile'}
-                workspaceNav={workspaceNav}
-                globalNavItems={globalNavItems}
-              />
+              <AppNavigationMobile navSections={navSections} globalNavItems={globalNavItems} />
             </div>
           ) : null}
           <Link
@@ -75,24 +63,8 @@ export function TopNav({
               <span className="block text-label-sm text-on-surface-variant">IHARC</span>
             </span>
           </Link>
-          {hasWorkspaces ? (
-            <div className="hidden min-w-[320px] flex-1 items-center lg:flex">
-              <WorkspaceSwitcher
-                options={workspaceOptions}
-                activeWorkspace={activeWorkspace}
-                isPreview={isClientPreview}
-              />
-            </div>
-          ) : null}
         </div>
         <div className="flex items-center gap-space-2xs md:hidden">
-          {hasWorkspaces ? (
-            <WorkspaceSwitcher
-              options={workspaceOptions}
-              activeWorkspace={activeWorkspace}
-              isPreview={isClientPreview}
-            />
-          ) : null}
           <QuickCreateButton />
           <CommandPalette items={commands} compactTrigger />
           {mobile}

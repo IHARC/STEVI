@@ -3,7 +3,7 @@ import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { resolveDefaultWorkspacePath } from '@/lib/workspaces';
+import { resolveLandingPath } from '@/lib/portal-navigation';
 import { fetchOrgMembersWithRoles } from '@/lib/org/fetchers';
 import { OrgMembersTable } from './org-members-table';
 
@@ -14,7 +14,7 @@ export default async function OrgMembersPage() {
   const access = await loadPortalAccess(supabase);
 
   if (!access || !access.canManageOrgUsers || !access.organizationId) {
-    redirect(resolveDefaultWorkspacePath(access));
+    redirect(resolveLandingPath(access));
   }
 
   const members = await fetchOrgMembersWithRoles(supabase, access.organizationId);
