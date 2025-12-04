@@ -118,10 +118,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-surface-container-low px-space-lg py-space-xl text-on-surface">
-      <div className="w-full max-w-xl">
-        <Card className="border-outline/8 bg-surface shadow-level-1">
-          <CardHeader className="gap-space-2xs pb-space-md">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-surface-container-low via-surface to-surface-container-high px-space-lg py-space-2xl text-on-surface">
+      <div className="w-full max-w-form-sm">
+        <Card className="relative overflow-hidden border-outline-variant/60 bg-surface-container-high shadow-level-2">
+          <div className="h-space-xs w-full bg-primary" aria-hidden />
+          <CardHeader className="gap-space-xs pb-space-md pt-space-md">
             <p className="text-label-sm font-semibold uppercase tracking-label-uppercase text-on-surface-variant">
               Welcome back
             </p>

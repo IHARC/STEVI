@@ -57,7 +57,7 @@ export function LoginForm({ action, nextPath, initialState }: LoginFormProps) {
         </Alert>
       ) : null}
 
-      <div className="space-y-space-2xs">
+      <div className="space-y-space-sm">
         <p className="text-label-sm font-semibold uppercase tracking-label-uppercase text-on-surface-variant/80">
           Sign in with
         </p>
@@ -145,7 +145,7 @@ export function LoginForm({ action, nextPath, initialState }: LoginFormProps) {
 
       <SubmitButton />
 
-      <p className="text-body-sm text-muted-foreground">
+      <p className="text-body-sm text-on-surface-variant">
         Need an account?{' '}
         <Link
           href="/register"
@@ -157,9 +157,9 @@ export function LoginForm({ action, nextPath, initialState }: LoginFormProps) {
 
       <div className="space-y-space-sm pt-space-xs">
         <div className="flex items-center gap-space-sm text-label-sm text-on-surface-variant">
-          <Separator className="flex-1 bg-outline/20" />
+          <Separator className="flex-1 bg-outline-variant/60" />
           <span>Or continue with</span>
-          <Separator className="flex-1 bg-outline/20" />
+          <Separator className="flex-1 bg-outline-variant/60" />
         </div>
         <GoogleAuthButton intent="login" nextPath={nextPath} />
       </div>
@@ -170,7 +170,7 @@ export function LoginForm({ action, nextPath, initialState }: LoginFormProps) {
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" disabled={pending} className="w-full justify-center text-label-lg font-semibold">
+    <Button type="submit" disabled={pending} className="w-full justify-center text-label-lg font-medium">
       {pending ? 'Signing in...' : 'Sign in'}
     </Button>
   );
