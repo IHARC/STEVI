@@ -225,6 +225,7 @@
 @layer base {
   html {
     font-size: 16px;
+    scroll-behavior: smooth;
     @apply font-body bg-background text-on-background;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;

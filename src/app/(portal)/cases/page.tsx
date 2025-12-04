@@ -6,6 +6,7 @@ import { fetchClientCases } from '@/lib/cases/fetchers';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
 import { resolveLandingPath } from '@/lib/portal-navigation';
 
 export const dynamic = 'force-dynamic';
@@ -36,7 +37,20 @@ export default async function ClientCasesPage() {
       </header>
 
       {cases.length === 0 ? (
-        <EmptyState />
+        <EmptyState
+          title="No cases yet"
+          description="Your intake may be awaiting staff onboarding. You can submit a request in Support or check your consents."
+          action={(
+            <div className="flex flex-wrap justify-center gap-space-sm">
+              <Button asChild variant="default">
+                <Link href="/support">Get help</Link>
+              </Button>
+              <Button asChild variant="outline">
+                <Link href="/profile/consents">Review consents</Link>
+              </Button>
+            </div>
+          )}
+        />
       ) : (
         <div className="grid gap-space-md md:grid-cols-2">
           {cases.map((item) => (
@@ -63,26 +77,5 @@ export default async function ClientCasesPage() {
         </div>
       )}
     </div>
-  );
-}
-
-function EmptyState() {
-  return (
-    <Card className="border-dashed border-outline/60">
-      <CardHeader>
-        <CardTitle className="text-title-md">No cases yet</CardTitle>
-        <CardDescription>
-          Your intake may be awaiting staff onboarding. You can submit a request in Support or check your consents.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-wrap gap-space-sm">
-        <Button asChild variant="default">
-          <Link href="/support">Get help</Link>
-        </Button>
-        <Button asChild variant="outline">
-          <Link href="/profile/consents">Review consents</Link>
-        </Button>
-      </CardContent>
-    </Card>
   );
 }

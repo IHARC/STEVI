@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { EmptyState } from '@/components/ui/empty-state';
 import type { InventoryDashboard } from '@/lib/inventory/types';
 
 type InventoryDashboardProps = {
@@ -25,7 +26,11 @@ export function InventoryDashboardSection({ dashboard }: InventoryDashboardProps
           </CardHeader>
           <CardContent className="px-0">
             {dashboard.lowStockItems.length === 0 ? (
-              <EmptyState message="All items are currently above their minimum thresholds." />
+              <EmptyState
+                title="No low stock items"
+                description="All items are currently above their minimum thresholds."
+                className="m-4"
+              />
             ) : (
               <Table>
                 <TableHeader>
@@ -59,7 +64,11 @@ export function InventoryDashboardSection({ dashboard }: InventoryDashboardProps
           </CardHeader>
           <CardContent className="px-0">
             {dashboard.expiringItems.length === 0 ? (
-              <EmptyState message="No batches are approaching their expiry window." />
+              <EmptyState
+                title="Nothing expiring soon"
+                description="No batches are approaching their expiry window."
+                className="m-4"
+              />
             ) : (
               <Table>
                 <TableHeader>
@@ -94,7 +103,11 @@ export function InventoryDashboardSection({ dashboard }: InventoryDashboardProps
         </CardHeader>
         <CardContent className="px-0">
           {dashboard.recentReceipts.length === 0 ? (
-            <EmptyState message="No stock receipts recorded in the last few days." />
+            <EmptyState
+              title="No recent receipts"
+              description="No stock receipts recorded in the last few days."
+              className="m-4"
+            />
           ) : (
             <Table>
               <TableHeader>
@@ -145,13 +158,5 @@ function SummaryCard({ label, value, accent = false }: { label: string; value: s
         <p className="text-headline-sm font-semibold text-on-surface">{value}</p>
       </CardContent>
     </Card>
-  );
-}
-
-function EmptyState({ message }: { message: string }) {
-  return (
-    <div className="flex flex-col items-center justify-center gap-2 p-6 text-center text-body-md text-muted-foreground">
-      <p>{message}</p>
-    </div>
   );
 }

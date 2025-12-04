@@ -2,9 +2,9 @@ import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { cn } from '@/lib/utils';
 import '@/styles/main.css';
-import './globals.css';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { AnalyticsProvider } from '@/components/providers/analytics-provider';
+import { Toaster } from '@/components/ui/sonner';
 import { getBrandingAssets } from '@/lib/marketing/branding';
 
 export const dynamic = 'force-dynamic';
@@ -74,6 +74,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Suspense fallback={null}>
             <AnalyticsProvider measurementId={GA_MEASUREMENT_ID} enabled={ANALYTICS_ENABLED} />
           </Suspense>
+          <Toaster position="top-right" richColors closeButton />
           {children}
         </ThemeProvider>
       </body>
