@@ -26,7 +26,7 @@ export function FormPageShell({
   title,
   description,
   actions,
-  maxWidth = 'form-lg',
+  maxWidth = 'form-md',
   align = 'start',
   spacing = 'lg',
 }: FormPageShellProps) {

@@ -46,7 +46,7 @@ export function PageHeader({
   return (
     <header
       className={cn(
-        'flex flex-wrap gap-space-md border-b border-outline/12 pb-space-md pt-space-sm',
+        'flex flex-wrap gap-space-md border-b border-outline-variant/60 pb-space-md pt-space-sm',
         alignment,
       )}
     >

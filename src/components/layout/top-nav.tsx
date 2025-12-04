@@ -35,7 +35,7 @@ export function TopNav({
   const hasNav = navSections.length > 0;
 
   return (
-    <header className="sticky top-0 z-50 border-b border-outline/12 bg-surface/90 text-on-surface shadow-level-2 backdrop-blur-xl supports-[backdrop-filter]:bg-surface/82">
+    <header className="sticky top-0 z-50 border-b-2 border-primary bg-surface-container/90 text-on-surface shadow-level-2 backdrop-blur-xl supports-[backdrop-filter]:bg-surface-container/82">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary/10 focus:px-3 focus:py-2 focus:text-on-primary"

@@ -132,7 +132,8 @@ export default async function HomePage() {
       />
 
       <div className="grid gap-space-lg lg:grid-cols-[1.15fr_0.85fr]">
-        <Card className="lg:col-span-1">
+        <Card className="relative overflow-hidden border-outline-variant/60 bg-surface-container-high shadow-level-2 lg:col-span-1">
+          <div className="h-1 w-full bg-primary" aria-hidden />
           <CardHeader className="flex flex-col gap-space-sm sm:flex-row sm:items-center sm:justify-between">
             <div>
               <CardTitle id="appointments-heading" className="text-title-lg">
@@ -155,7 +156,7 @@ export default async function HomePage() {
               appointments.map((appointment) => (
                 <article
                   key={appointment.id}
-                  className="rounded-2xl border border-outline/16 bg-surface-container-low p-space-md shadow-level-1 transition motion-duration-short motion-ease-standard state-layer-color-primary hover:-translate-y-[1px] hover:border-primary hover:shadow-level-2"
+                  className="rounded-2xl border border-outline-variant/60 bg-surface-container p-space-md shadow-level-1 transition motion-duration-short motion-ease-standard state-layer-color-primary hover:-translate-y-[1px] hover:border-primary hover:shadow-level-2 hover:state-layer-hover"
                   aria-labelledby={`appointment-${appointment.id}`}
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
@@ -227,7 +228,8 @@ export default async function HomePage() {
         </Card>
 
         <div className="space-y-space-lg">
-          <Card>
+          <Card className="relative overflow-hidden border-outline-variant/60 bg-surface-container-high shadow-level-2">
+            <div className="h-1 w-full bg-primary" aria-hidden />
             <CardHeader className="pb-space-xs">
               <CardTitle className="text-title-md">My details</CardTitle>
               <p className="text-body-sm text-muted-foreground">
@@ -236,11 +238,11 @@ export default async function HomePage() {
             </CardHeader>
             <CardContent className="space-y-space-sm">
               <dl className="grid gap-space-sm sm:grid-cols-2 text-body-sm">
-                <div className="rounded-xl bg-surface-container-low px-space-sm py-space-sm">
+                <div className="rounded-xl bg-surface-container px-space-sm py-space-sm state-layer-color-primary hover:state-layer-hover transition motion-duration-short motion-ease-standard">
                   <dt className="text-label-sm uppercase tracking-label-uppercase text-muted-foreground">Pronouns</dt>
                   <dd className="text-title-sm text-on-surface">{preferredPronouns}</dd>
                 </div>
-                <div className="rounded-xl bg-surface-container-low px-space-sm py-space-sm">
+                <div className="rounded-xl bg-surface-container px-space-sm py-space-sm state-layer-color-primary hover:state-layer-hover transition motion-duration-short motion-ease-standard">
                   <dt className="text-label-sm uppercase tracking-label-uppercase text-muted-foreground">Preferred contact</dt>
                   <dd className="text-title-sm text-on-surface">{preferredContact}</dd>
                 </div>
@@ -251,7 +253,7 @@ export default async function HomePage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-outline-variant/60 bg-surface-container shadow-level-2">
             <CardHeader>
               <CardTitle className="text-title-md">Support contacts</CardTitle>
               <p className="text-body-sm text-muted-foreground">
@@ -262,7 +264,7 @@ export default async function HomePage() {
               {supportTeam.map((contact) => (
                 <article
                   key={contact.id}
-                  className="rounded-2xl border border-outline/14 bg-surface-container-low p-space-md shadow-level-1"
+                  className="rounded-2xl border border-outline-variant/60 bg-surface-container p-space-md shadow-level-1 state-layer-color-primary hover:state-layer-hover transition motion-duration-short motion-ease-standard"
                 >
                   <header className="flex flex-wrap items-center justify-between gap-space-2xs">
                     <div>
@@ -296,7 +298,7 @@ export default async function HomePage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-outline-variant/60 bg-surface-container shadow-level-2">
             <CardHeader>
               <CardTitle className="text-title-md">Focus areas</CardTitle>
               <p className="text-body-sm text-muted-foreground">
@@ -304,7 +306,7 @@ export default async function HomePage() {
               </p>
             </CardHeader>
             <CardContent className="space-y-space-md">
-              <article className="rounded-2xl border border-outline/14 bg-surface-container-low p-space-md shadow-level-1">
+              <article className="rounded-2xl border border-outline-variant/60 bg-surface-container p-space-md shadow-level-1 state-layer-color-primary hover:state-layer-hover transition motion-duration-short motion-ease-standard">
                 <div className="flex items-center justify-between">
                   <p className="text-title-sm font-medium text-on-surface">Housing application</p>
                   <Badge variant="secondary">In review</Badge>
@@ -313,7 +315,7 @@ export default async function HomePage() {
                   Ontario Works packet submitted last week. Awaiting confirmation from housing help centre.
                 </p>
               </article>
-              <article className="rounded-2xl border border-outline/14 bg-surface-container-low p-space-md shadow-level-1">
+              <article className="rounded-2xl border border-outline-variant/60 bg-surface-container p-space-md shadow-level-1 state-layer-color-primary hover:state-layer-hover transition motion-duration-short motion-ease-standard">
                 <div className="flex items-center justify-between">
                   <p className="text-title-sm font-medium text-on-surface">Health supports</p>
                   <Badge variant="outline">Active</Badge>
@@ -322,7 +324,7 @@ export default async function HomePage() {
                   Harm reduction supplies packaged for pickup at the outreach hub. Check in with Morgan if plans change.
                 </p>
               </article>
-              <article className="rounded-2xl border border-outline/14 bg-surface-container-low p-space-md shadow-level-1">
+              <article className="rounded-2xl border border-outline-variant/60 bg-surface-container p-space-md shadow-level-1 state-layer-color-primary hover:state-layer-hover transition motion-duration-short motion-ease-standard">
                 <div className="flex items-center justify-between">
                   <p className="text-title-sm font-medium text-on-surface">Income stabilization</p>
                   <Badge>New</Badge>

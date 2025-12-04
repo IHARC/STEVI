@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 import { getStateLayerClasses, type StateLayerTone } from "@/lib/state-layer"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-space-xs whitespace-nowrap rounded-[var(--md-sys-shape-corner-extra-small)] text-label-lg transition-colors motion-duration-short motion-ease-standard focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:pointer-events-none disabled:opacity-60 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-space-xs whitespace-nowrap rounded-[var(--md-sys-shape-corner-extra-small)] text-label-lg font-medium transition-colors motion-duration-short motion-ease-standard focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface disabled:pointer-events-none disabled:opacity-60 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
