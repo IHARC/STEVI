@@ -12,7 +12,7 @@ import { resolveLandingPath } from '@/lib/portal-navigation';
 import { NotificationsChart } from '../notifications-chart';
 import { PageHeader } from '@/components/layout/page-header';
 import { StatTile } from '@/components/ui/stat-tile';
-import { cn } from '@/lib/utils';
+import { AttentionQueue } from './attention-queue';
 
 export const dynamic = 'force-dynamic';
 
@@ -82,7 +82,7 @@ export default async function AdminOperationsPage() {
     policiesPublished: policiesCount.count ?? 0,
   };
 
-  const metricCards: MetricCard[] = [
+  const coreMetrics: MetricCard[] = [
     {
       id: 'pending-profiles',
       label: 'Pending approvals',
@@ -92,6 +92,9 @@ export default async function AdminOperationsPage() {
     { id: 'pending-invites', label: 'Open invites', value: formatCount(snapshot.pendingInvites) },
     { id: 'open-cases', label: 'Open cases', value: formatCount(snapshot.openCases) },
     { id: 'notifications', label: 'Notifications (7d)', value: formatCount(snapshot.notifications7d) },
+  ];
+
+  const contentMetrics: MetricCard[] = [
     { id: 'resources', label: 'Published resources', value: formatCount(snapshot.resourcesPublished) },
     { id: 'policies', label: 'Published policies', value: formatCount(snapshot.policiesPublished) },
   ];
@@ -112,19 +115,29 @@ export default async function AdminOperationsPage() {
   return (
     <div className="page-shell page-stack">
       <PageHeader
+        breadcrumbs={[
+          { label: 'Admin', href: '/admin/operations' },
+          { label: 'Operations overview' },
+        ]}
         eyebrow="Admin"
         title="Operations overview"
         description="Monitor approvals, notifications, and content at a glance. All counts respect Supabase RLS and audit logging."
         meta={[{ label: 'RLS enforced', tone: 'info' }, { label: 'Live metrics', tone: 'success' }]}
         helperLink={{ href: '/admin/help', label: 'View admin help' }}
-        primaryAction={{ label: 'Review approvals', href: '/admin/profiles' }}
-        secondaryAction={{ label: 'Send notification', href: '/admin/notifications' }}
+        primaryAction={{ label: 'Send notification', href: '/admin/notifications' }}
+        useSplitActions={false}
       />
 
-      <section className="grid gap-space-md sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-        {metricCards.map((card) => (
-          <StatTile key={card.id} label={card.label} value={card.value} tone={card.tone} />
-        ))}
+      <section className="space-y-space-sm">
+        <div className="flex items-center justify-between gap-space-sm">
+          <h2 className="text-title-md font-semibold text-on-surface">Operational KPIs</h2>
+          <Badge variant="outline" className="hidden sm:inline-flex">Live</Badge>
+        </div>
+        <div className="grid gap-space-md md:grid-cols-2 xl:grid-cols-3">
+          {coreMetrics.map((card) => (
+            <StatTile key={card.id} label={card.label} value={card.value} tone={card.tone} />
+          ))}
+        </div>
       </section>
 
       <section className="grid gap-space-md lg:grid-cols-[1.8fr,1.2fr]">
@@ -139,7 +152,12 @@ export default async function AdminOperationsPage() {
           <CardContent>
             <Suspense fallback={<Skeleton className="h-64 w-full" />}>
               {trendSeries.length === 0 ? (
-                <p className="text-body-sm text-muted-foreground">No notifications sent in the last week.</p>
+                <div className="space-y-space-xs text-body-sm text-muted-foreground">
+                  <p>No notifications sent in the last week.</p>
+                  <Button asChild variant="secondary" size="sm">
+                    <Link href="/admin/notifications">Send a notification</Link>
+                  </Button>
+                </div>
               ) : (
                 <NotificationsChart data={trendSeries} />
               )}
@@ -149,62 +167,55 @@ export default async function AdminOperationsPage() {
 
         <Card className="h-full">
           <CardHeader>
-            <CardTitle className="text-title-lg">Attention queue</CardTitle>
+            <CardTitle className="text-title-lg">Queues</CardTitle>
             <CardDescription>Work the highest-risk items first.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-space-xs">
-            <AttentionItem
-              label="Pending profile approvals"
-              count={snapshot.pendingProfiles}
-              href="/admin/profiles"
-              tone={snapshot.pendingProfiles > 0 ? 'warning' : 'default'}
-            />
-            <AttentionItem label="Pending org invites" count={snapshot.pendingInvites} href="/admin/profiles" />
-            <AttentionItem label="Open cases" count={snapshot.openCases} href="/admin/appointments" />
-            <AttentionItem
-              label="Content to review"
-              count={snapshot.resourcesPublished + snapshot.policiesPublished}
-              href="/admin/resources"
+            <AttentionQueue
+              items={[
+                {
+                  id: 'pending-profiles',
+                  label: 'Pending profile approvals',
+                  count: snapshot.pendingProfiles,
+                  href: '/admin/profiles',
+                  tone: snapshot.pendingProfiles > 0 ? 'warning' : 'default',
+                  description: 'Profiles awaiting approval.',
+                },
+                {
+                  id: 'pending-invites',
+                  label: 'Pending org invites',
+                  count: snapshot.pendingInvites,
+                  href: '/admin/profiles',
+                  description: 'Invites that need action.',
+                },
+                {
+                  id: 'open-cases',
+                  label: 'Open cases',
+                  count: snapshot.openCases,
+                  href: '/admin/appointments',
+                  description: 'Cases not yet closed.',
+                },
+                {
+                  id: 'content-review',
+                  label: 'Content to review',
+                  count: snapshot.resourcesPublished + snapshot.policiesPublished,
+                  href: '/admin/resources',
+                  description: 'Published resources and policies.',
+                },
+              ]}
             />
           </CardContent>
         </Card>
       </section>
-    </div>
-  );
-}
 
-function AttentionItem({
-  label,
-  count,
-  href,
-  tone = 'default',
-}: {
-  label: string;
-  count: number;
-  href: string;
-  tone?: 'default' | 'warning';
-}) {
-  return (
-    <div className="flex items-center justify-between gap-space-sm rounded-[var(--md-sys-shape-corner-small)] px-space-sm py-space-sm transition-colors state-layer-color-neutral hover:bg-surface-container">
-      <div className="space-y-space-3xs">
-        <p className="text-body-md font-medium text-on-surface">{label}</p>
-        <p className="text-label-sm text-on-surface-variant">RLS enforced in the destination area.</p>
-      </div>
-      <div className="flex items-center gap-space-sm">
-        <Badge
-          variant={tone === 'warning' ? 'secondary' : 'outline'}
-          className={cn(
-            tone === 'warning'
-              ? 'border-primary/20 bg-primary-container text-on-primary-container'
-              : 'border-outline/30 text-on-surface-variant',
-          )}
-        >
-          {formatCount(count)}
-        </Badge>
-        <Button asChild variant="outline" size="sm">
-          <Link href={href}>Open</Link>
-        </Button>
-      </div>
+      <section className="space-y-space-sm">
+        <h2 className="text-title-md font-semibold text-on-surface">Content</h2>
+        <div className="grid gap-space-md sm:grid-cols-2 lg:max-w-3xl">
+          {contentMetrics.map((card) => (
+            <StatTile key={card.id} label={card.label} value={card.value} tone="info" />
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

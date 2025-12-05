@@ -1,18 +1,21 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ChevronLeft, ChevronRight, Menu } from 'lucide-react';
 import type { NavSection, NavItem as PortalNavItem } from '@/lib/portal-navigation';
 import type { PrimaryNavItem } from '@/lib/primary-nav';
-import { resolveAppIcon } from '@/lib/app-icons';
+import { resolveAppIcon, type AppIconName } from '@/lib/app-icons';
 import { cn } from '@/lib/utils';
 import { Icon } from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { resolveQuickActions, type QuickAction } from '@/lib/portal-navigation';
+import { usePortalAccess } from '@/components/providers/portal-access-provider';
+import { useOptionalPortalLayout } from '@/components/providers/portal-layout-provider';
 
 type AppNavigationProps = {
   navSections: NavSection[];
@@ -23,7 +26,7 @@ type AppNavigationProps = {
 export function AppNavigationDesktop({ navSections, globalNavItems = [], className }: AppNavigationProps) {
   const pathname = usePathname() ?? '/';
   const hasNav = navSections.some((section) => section.groups.length > 0);
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
 
   if (!hasNav) return null;
 
@@ -122,13 +125,53 @@ type NavContentProps = {
   showGlobalNav?: boolean;
 };
 
+function quickActionIcon(icon?: QuickAction['icon']): AppIconName | undefined {
+  if (!icon) return undefined;
+  if (icon === 'chat') return 'message';
+  if (icon === 'calendar') return 'calendar';
+  if (icon === 'file') return 'file';
+  return undefined;
+}
+
 function NavContent({ navSections, pathname, onNavigate, globalNavItems = [], collapsed = false, showGlobalNav = true }: NavContentProps) {
+  const access = usePortalAccess();
+  const layout = useOptionalPortalLayout();
+
+  const quickActions = useMemo(() => {
+    if (!access || !layout) return [] as QuickAction[];
+    return resolveQuickActions(access, layout.activeArea, { isPreview: layout.isClientPreview }).filter((action) => !action.disabled);
+  }, [access, layout]);
+
+  const computedNavSections = useMemo(() => {
+    if (!quickActions.length) return navSections;
+    const quickNavSection: NavSection = {
+      id: 'quick-access',
+      label: 'Quick access',
+      area: navSections[0]?.area ?? 'client',
+      groups: [
+        {
+          id: 'quick-access-group',
+          label: 'Quick actions',
+          icon: 'dashboard',
+          items: quickActions.map((action) => ({
+            id: action.id,
+            href: action.href,
+            label: action.label,
+            icon: quickActionIcon(action.icon),
+          })),
+        },
+      ],
+    };
+
+    return [quickNavSection, ...navSections];
+  }, [navSections, quickActions]);
+
   return (
     <div className="flex h-full flex-col bg-surface-container-lowest">
 
-      <div className={cn('flex-1 overflow-y-auto px-space-sm pb-space-lg', collapsed && 'px-space-2xs')}> 
+      <div className={cn('nav-scroll flex-1 overflow-y-auto px-space-sm pb-space-lg', collapsed && 'px-space-2xs')}> 
         <div className="space-y-space-sm">
-          {navSections.map((section) => (
+          {computedNavSections.map((section) => (
             <div key={section.id} className={cn('space-y-space-2xs rounded-[var(--md-sys-shape-corner-small)]', !collapsed && 'bg-surface-container-low p-space-2xs shadow-level-1')}>
               <div className={cn('flex items-center gap-space-xs px-space-sm pt-space-2xs text-label-sm font-semibold uppercase tracking-wide text-on-surface-variant', collapsed && 'justify-center px-space-3xs text-[11px]')}>
                 <span className={cn('truncate', collapsed && 'sr-only')}>{section.label}</span>
@@ -204,13 +247,6 @@ function NavLink({ link, pathname, onNavigate, collapsed = false }: NavLinkProps
           : 'text-on-surface-variant hover:bg-surface-container',
       )}
     >
-      {link.icon ? (
-        <Icon
-          icon={resolveAppIcon(link.icon)}
-          size="sm"
-          className={cn('text-inherit transition-colors', active ? 'text-on-secondary-container' : 'text-on-surface-variant')}
-        />
-      ) : null}
       <span className={cn('truncate', collapsed && 'sr-only')}>{link.label}</span>
     </Link>
   );

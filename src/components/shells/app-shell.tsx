@@ -48,11 +48,10 @@ export function AppShell({
           navigation={navigation}
           commands={commandPaletteItems}
           navSections={showNavigation ? navSections : []}
-          globalNavItems={globalNavItems}
         />
         {showClientPreviewBanner ? <ClientPreviewBanner /> : null}
         <main id="main-content" className="flex-1">
-          <div className="mx-auto w-full max-w-page px-space-lg py-space-lg">
+          <div className="mx-auto w-full max-w-page px-space-lg py-space-md">
             <div
               className={cn(
                 'grid gap-space-lg',
