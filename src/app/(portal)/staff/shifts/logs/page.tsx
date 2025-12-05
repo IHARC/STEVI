@@ -16,14 +16,14 @@ export default async function ShiftLogsPage() {
   }
 
   return (
-    <div className="page-shell page-stack">
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
       <PageHeader
         eyebrow="Staff tools"
         title="Shift logs"
         description="Capture shift summaries, handoffs, and safety checks."
       />
       <Card>
-        <CardContent className="space-y-space-2xs py-space-md text-body-md text-muted-foreground">
+        <CardContent className="space-y-1 py-4 text-sm text-muted-foreground">
           <p>Plan to ingest shift logs from IHARC systems or allow inline entry. Keep handoff notes visible to on-call supervisors.</p>
           <p>All updates should be audited and respect staff role-based permissions.</p>
         </CardContent>

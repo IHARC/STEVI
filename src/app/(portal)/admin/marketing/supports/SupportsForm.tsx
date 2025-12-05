@@ -70,15 +70,15 @@ export function SupportsForm({ urgent, mutualAid }: Props) {
   const removeMutualAid = (index: number) => setMutualAidItems((prev) => prev.filter((_, i) => i !== index));
 
   return (
-    <form action={saveSupports} className="space-y-space-lg">
+    <form action={saveSupports} className="space-y-6">
       <input type="hidden" name="urgent_supports_json" value={serialized.urgent} />
       <input type="hidden" name="mutual_aid_json" value={serialized.mutualAid} />
 
-      <div className="space-y-space-sm">
+      <div className="space-y-3">
         {urgentSupports.map((support, index) => (
-          <div key={`${support.title}-${index}`} className="space-y-space-sm rounded-xl border border-border bg-card/40 p-space-md">
-            <div className="flex items-start justify-between gap-space-sm">
-              <div className="space-y-space-2xs flex-1">
+          <div key={`${support.title}-${index}`} className="space-y-3 rounded-xl border border-border bg-card/40 p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-1 flex-1">
                 <Label htmlFor={`title-${index}`}>Title</Label>
                 <Input
                   id={`title-${index}`}
@@ -99,7 +99,7 @@ export function SupportsForm({ urgent, mutualAid }: Props) {
                 <Trash2 className="h-4 w-4" aria-hidden />
               </Button>
             </div>
-            <div className="space-y-space-2xs">
+            <div className="space-y-1">
               <Label htmlFor={`summary-${index}`}>Summary</Label>
               <Textarea
                 id={`summary-${index}`}
@@ -109,7 +109,7 @@ export function SupportsForm({ urgent, mutualAid }: Props) {
                 rows={2}
               />
             </div>
-            <div className="space-y-space-2xs">
+            <div className="space-y-1">
               <Label htmlFor={`body-${index}`}>Body</Label>
               <Textarea
                 id={`body-${index}`}
@@ -119,7 +119,7 @@ export function SupportsForm({ urgent, mutualAid }: Props) {
                 rows={3}
               />
             </div>
-            <div className="space-y-space-2xs">
+            <div className="space-y-1">
               <div className="flex items-center justify-between">
                 <Label>Contacts</Label>
                 <Button type="button" variant="ghost" onClick={() => addContact(index)} className="gap-2">
@@ -127,9 +127,9 @@ export function SupportsForm({ urgent, mutualAid }: Props) {
                   Add contact
                 </Button>
               </div>
-              <div className="space-y-space-xs">
+              <div className="space-y-2">
                 {(support.contacts ?? []).map((contact, contactIndex) => (
-                  <div key={`${contact.label}-${contactIndex}`} className="grid gap-space-xs md:grid-cols-[1fr,1fr,auto]">
+                  <div key={`${contact.label}-${contactIndex}`} className="grid gap-2 md:grid-cols-[1fr,1fr,auto]">
                     <Input
                       placeholder="Label (e.g., Dial 2-1-1)"
                       value={contact.label}
@@ -163,20 +163,20 @@ export function SupportsForm({ urgent, mutualAid }: Props) {
         </Button>
       </div>
 
-      <div className="space-y-space-sm">
+      <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-title-md">Mutual aid notes</p>
-            <p className="text-body-sm text-muted-foreground">Shown as a list beneath urgent supports.</p>
+            <p className="text-lg">Mutual aid notes</p>
+            <p className="text-sm text-muted-foreground">Shown as a list beneath urgent supports.</p>
           </div>
           <Button type="button" variant="outline" onClick={addMutualAid} className="gap-2">
             <Plus className="h-4 w-4" aria-hidden />
             Add item
           </Button>
         </div>
-        <div className="space-y-space-xs">
+        <div className="space-y-2">
           {mutualAidItems.map((item, index) => (
-            <div key={`${item}-${index}`} className="flex items-center gap-space-xs">
+            <div key={`${item}-${index}`} className="flex items-center gap-2">
               <Input
                 value={item}
                 onChange={(e) => updateMutualAid(index, e.target.value)}
@@ -198,9 +198,9 @@ export function SupportsForm({ urgent, mutualAid }: Props) {
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-space-sm">
+      <div className="flex flex-wrap items-center gap-3">
         <Button type="submit">Save supports</Button>
-        <p className="text-body-sm text-muted-foreground">Changes appear on the public site immediately.</p>
+        <p className="text-sm text-muted-foreground">Changes appear on the public site immediately.</p>
       </div>
     </form>
   );

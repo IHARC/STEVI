@@ -7,8 +7,7 @@ import { resolveNextPath } from '@/lib/auth';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { resolveLandingPath } from '@/lib/portal-navigation';
-import { FormPageShell } from '@/components/layout/form-page-shell';
-import { Icon } from '@/components/ui/icon';
+import { FormPageShell } from '@/components/layout/form-mx-auto w-full max-w-6xl px-4 py-8 md:px-6';
 
 export const dynamic = 'force-dynamic';
 
@@ -91,26 +90,24 @@ export default async function RegisterLandingPage({ searchParams }: RegisterLand
       description="Pick the option that best matches what you need right now. Every path keeps your information private and honours your contact safety preferences."
       maxWidth="xl"
     >
-      <div className="grid gap-space-md md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2">
         {ACTIONS.map(({ title, description, href, glyph: Glyph }) => (
           <Link
             key={title}
             href={href(nextPath)}
-            className="group flex h-full flex-col justify-between rounded-2xl border border-outline/40 bg-surface p-6 shadow-subtle transition-colors motion-duration-medium motion-ease-standard hover:border-primary hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary state-layer-color-primary hover:state-layer-hover focus-visible:state-layer-focus"
+            className="group flex h-full flex-col justify-between rounded-2xl border border-border/50 bg-card p-6 shadow-sm transition duration-200 ease-out hover:border-primary/60 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           >
             <div className="space-y-3">
-              <span className="inline-flex h-11 w-11 items-center justify-center rounded-full text-primary state-layer-color-primary state-layer-hover">
-                <Icon icon={Glyph} size="md" aria-hidden />
+              <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <Glyph className="h-5 w-5" aria-hidden />
               </span>
-              <h2 className="text-title-lg font-semibold text-on-surface">{title}</h2>
-              <p className="text-body-md text-muted-foreground">{description}</p>
+              <h2 className="text-xl font-semibold text-foreground">{title}</h2>
+              <p className="text-sm text-muted-foreground">{description}</p>
             </div>
-            <span className="mt-6 inline-flex items-center text-body-md font-medium text-primary">
+            <span className="mt-6 inline-flex items-center text-sm font-medium text-primary">
               Continue
-              <Icon
-                icon={ArrowRight}
-                size="sm"
-                className="ml-2 transition-transform motion-duration-short motion-ease-standard group-hover:translate-x-1"
+              <ArrowRight
+                className="ml-2 h-4 w-4 transition-transform duration-150 ease-out group-hover:translate-x-1"
                 aria-hidden
               />
             </span>

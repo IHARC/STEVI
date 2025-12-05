@@ -32,11 +32,11 @@ export default async function StaffCasesPage() {
     .filter((entry) => Number.isFinite(entry.personId));
 
   return (
-    <div className="space-y-space-lg">
-      <header className="space-y-space-2xs">
-        <p className="text-label-sm font-semibold uppercase text-muted-foreground">Caseload</p>
-        <h1 className="text-headline-lg text-on-surface sm:text-display-sm">Cases</h1>
-        <p className="max-w-4xl text-body-md text-muted-foreground">
+    <div className="space-y-6">
+      <header className="space-y-1">
+        <p className="text-xs font-semibold uppercase text-muted-foreground">Caseload</p>
+        <h1 className="text-3xl text-foreground sm:text-4xl">Cases</h1>
+        <p className="max-w-4xl text-sm text-muted-foreground">
           Saved views, peek panel, and quick outreach entry keep staff aligned without leaving the app. RLS and audit
           logging stay in effect.
         </p>

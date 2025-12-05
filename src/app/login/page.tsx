@@ -118,20 +118,20 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-surface-container-low via-surface to-surface-container-high px-space-lg py-space-2xl text-on-surface">
-      <div className="w-full max-w-form-sm">
-        <Card className="relative overflow-hidden border-outline-variant/60 bg-surface-container-high shadow-level-2">
-          <div className="h-space-xs w-full bg-primary" aria-hidden />
-          <CardHeader className="gap-space-xs pb-space-md pt-space-md">
-            <p className="text-label-sm font-semibold uppercase tracking-label-uppercase text-on-surface-variant">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-muted/50 via-background to-card px-6 py-10 text-foreground">
+      <div className="w-full max-w-xl">
+        <Card className="relative overflow-hidden border-border/60 bg-card shadow-md">
+          <div className="h-2 w-full bg-primary" aria-hidden />
+          <CardHeader className="gap-2 pb-4 pt-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Welcome back
             </p>
-            <CardTitle className="text-headline-sm font-semibold">Sign in to STEVI</CardTitle>
-            <CardDescription className="text-body-md text-on-surface-variant">
+            <CardTitle className="text-2xl font-semibold">Sign in to STEVI</CardTitle>
+            <CardDescription className="text-sm text-muted-foreground">
               IHARC portal for appointments, documents, and outreach updates.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-space-lg pt-space-sm">
+          <CardContent className="space-y-6 pt-3">
             <LoginForm action={loginUser} nextPath={rawNextParam ?? ''} initialState={initialState} />
           </CardContent>
         </Card>

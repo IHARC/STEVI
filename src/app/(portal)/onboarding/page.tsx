@@ -100,7 +100,7 @@ export default async function OnboardingPage({ searchParams }: PageProps) {
           : 'This client has not opted into partner sharing. Ask IHARC staff or the client to update sharing before assisting.';
 
   return (
-    <div className="page-shell page-stack">
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
       <PageHeader
         eyebrow="Onboarding"
         title={actor === 'staff' ? 'Assist a client with onboarding' : 'Share your details to get support'}
@@ -108,15 +108,15 @@ export default async function OnboardingPage({ searchParams }: PageProps) {
       />
 
       {actor === 'staff' ? (
-        <Card className="border-outline/14 bg-surface shadow-level-1">
-          <CardHeader className="gap-space-2xs">
-            <CardTitle className="text-title-md">Assisted onboarding</CardTitle>
+        <Card className="border-border/14 bg-background shadow-sm">
+          <CardHeader className="gap-1">
+            <CardTitle className="text-lg">Assisted onboarding</CardTitle>
             <CardDescription>
               Use this wizard while you’re with the client. Start a new record with basic info below, or open an existing
               client to continue their onboarding where they left off.
             </CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-wrap gap-space-sm pt-space-xs">
+          <CardContent className="flex flex-wrap gap-3 pt-2">
             {access.canAccessAdminWorkspace ? (
               <Button asChild size="sm" variant="secondary">
                 <Link href="/admin/clients">Find existing client</Link>
@@ -137,12 +137,12 @@ export default async function OnboardingPage({ searchParams }: PageProps) {
       ) : null}
 
       {(access.canManagePolicies || access.canAccessAdminWorkspace) && (!servicePolicy || !privacyPolicy) ? (
-        <div className="rounded-3xl border border-destructive/30 bg-destructive/10 p-space-md text-body-sm text-destructive shadow-level-1">
+        <div className="rounded-3xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive shadow-sm">
           Policy copy missing: publish both “Client Service Agreement” and “Privacy & Data Protection Notice” in Admin → Policies to unblock onboarding.
         </div>
       ) : null}
       {(access.canManagePolicies || access.canAccessAdminWorkspace) && !registrationDraft ? (
-        <div className="rounded-3xl border border-outline/16 bg-surface-container-low p-space-md text-body-sm text-on-surface/80 shadow-level-1">
+        <div className="rounded-3xl border border-border/40 bg-muted p-4 text-sm text-foreground/80 shadow-sm">
           No registration draft found for this account. Prefill may be empty; this is expected for staff-assisted onboarding.
         </div>
       ) : null}

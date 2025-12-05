@@ -24,27 +24,27 @@ function RelayForm({ channel }: RelayFormProps) {
   return (
     <form
       action={upsertRelayAction as unknown as (formData: FormData) => Promise<void>}
-      className="space-y-space-sm"
+      className="space-y-3"
       aria-label={`${channel} relay form`}
     >
       <input type="hidden" name="channel" value={channel} />
-      <div className="grid gap-space-sm sm:grid-cols-2">
-        <div className="space-y-space-2xs">
-          <label className="text-label-sm font-semibold text-on-surface" htmlFor={`${channel}-provider`}>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="space-y-1">
+          <label className="text-xs font-semibold text-foreground" htmlFor={`${channel}-provider`}>
             Provider name
           </label>
           <Input id={`${channel}-provider`} name="provider" placeholder="e.g., SendGrid, Twilio" required />
         </div>
-        <div className="space-y-space-2xs">
-          <label className="text-label-sm font-semibold text-on-surface" htmlFor={`${channel}-api-url`}>
+        <div className="space-y-1">
+          <label className="text-xs font-semibold text-foreground" htmlFor={`${channel}-api-url`}>
             API base URL (optional)
           </label>
           <Input id={`${channel}-api-url`} name="api_url" placeholder="https://api.example.com" />
         </div>
       </div>
-      <div className="grid gap-space-sm sm:grid-cols-2">
-        <div className="space-y-space-2xs">
-          <label className="text-label-sm font-semibold text-on-surface" htmlFor={`${channel}-api-key`}>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="space-y-1">
+          <label className="text-xs font-semibold text-foreground" htmlFor={`${channel}-api-key`}>
             API key / token
           </label>
           <Input
@@ -55,8 +55,8 @@ function RelayForm({ channel }: RelayFormProps) {
             required
           />
         </div>
-        <div className="space-y-space-2xs">
-          <label className="text-label-sm font-semibold text-on-surface" htmlFor={`${channel}-active`}>
+        <div className="space-y-1">
+          <label className="text-xs font-semibold text-foreground" htmlFor={`${channel}-active`}>
             Relay status
           </label>
           <Select name="is_active" defaultValue="true">
@@ -72,15 +72,15 @@ function RelayForm({ channel }: RelayFormProps) {
       </div>
 
       {channel === 'email' ? (
-        <div className="space-y-space-2xs">
-          <label className="text-label-sm font-semibold text-on-surface" htmlFor="from-email">
+        <div className="space-y-1">
+          <label className="text-xs font-semibold text-foreground" htmlFor="from-email">
             From email (envelope)
           </label>
           <Input id="from-email" name="from_email" type="email" placeholder="notifications@iharc.ca" />
         </div>
       ) : (
-        <div className="space-y-space-2xs">
-          <label className="text-label-sm font-semibold text-on-surface" htmlFor="from-phone">
+        <div className="space-y-1">
+          <label className="text-xs font-semibold text-foreground" htmlFor="from-phone">
             From phone / sender ID
           </label>
           <Input id="from-phone" name="from_phone" placeholder="+1647xxxxxxx" />
@@ -96,14 +96,14 @@ export function RelaySettingsCard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-title-lg">Delivery relays</CardTitle>
-        <p className="text-body-sm text-muted-foreground">
+        <CardTitle className="text-xl">Delivery relays</CardTitle>
+        <p className="text-sm text-muted-foreground">
           Configure email/SMS gateways for reminders. Keys stay server-side and are restricted to IHARC and portal admins.
         </p>
       </CardHeader>
-      <CardContent className="space-y-space-md">
+      <CardContent className="space-y-4">
         <RelayForm channel="email" />
-        <div className="border-t border-outline/20" />
+        <div className="border-t border-border/40" />
         <RelayForm channel="sms" />
       </CardContent>
     </Card>

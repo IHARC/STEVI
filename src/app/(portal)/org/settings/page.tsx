@@ -62,11 +62,11 @@ export default async function OrgSettingsPage() {
   }
 
   return (
-    <div className="page-shell page-stack">
-      <header className="space-y-space-2xs">
-        <p className="text-label-sm font-medium uppercase text-muted-foreground">Organization</p>
-        <h1 className="text-headline-lg sm:text-display-sm">Settings</h1>
-        <p className="max-w-3xl text-body-md text-muted-foreground">
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
+      <header className="space-y-1">
+        <p className="text-xs font-medium uppercase text-muted-foreground">Organization</p>
+        <h1 className="text-3xl sm:text-4xl">Settings</h1>
+        <p className="max-w-3xl text-sm text-muted-foreground">
           Update contact details and coordination notes. Changes stay scoped to your organization and are audited.
         </p>
       </header>
@@ -74,9 +74,9 @@ export default async function OrgSettingsPage() {
       <OrgTabs />
 
       <Card>
-        <CardHeader className="flex flex-wrap items-center justify-between gap-space-sm">
+        <CardHeader className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <CardTitle className="text-title-md">Organization snapshot</CardTitle>
+            <CardTitle className="text-lg">Organization snapshot</CardTitle>
             <CardDescription>Reference status and type for your records.</CardDescription>
           </div>
           {organization.status ? (
@@ -86,19 +86,19 @@ export default async function OrgSettingsPage() {
           ) : null}
         </CardHeader>
         <CardContent>
-          <dl className="grid grid-cols-1 gap-space-sm text-body-sm text-on-surface sm:grid-cols-3">
+          <dl className="grid grid-cols-1 gap-3 text-sm text-foreground sm:grid-cols-3">
             <div>
-              <dt className="text-label-sm text-muted-foreground">Organization name</dt>
+              <dt className="text-xs text-muted-foreground">Organization name</dt>
               <dd className="font-medium">{organization.name}</dd>
             </div>
             <div>
-              <dt className="text-label-sm text-muted-foreground">Type</dt>
+              <dt className="text-xs text-muted-foreground">Type</dt>
               <dd className="capitalize text-muted-foreground">
                 {organization.organization_type?.replaceAll('_', ' ') ?? 'Not set'}
               </dd>
             </div>
             <div>
-              <dt className="text-label-sm text-muted-foreground">Partnership</dt>
+              <dt className="text-xs text-muted-foreground">Partnership</dt>
               <dd className="capitalize text-muted-foreground">
                 {organization.partnership_type?.replaceAll('_', ' ') ?? 'Not set'}
               </dd>
@@ -107,7 +107,7 @@ export default async function OrgSettingsPage() {
         </CardContent>
       </Card>
 
-      <div className="grid gap-space-md lg:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2">
         <OrgContactSettingsForm
           initialValues={{
             contact_person: organization.contact_person,

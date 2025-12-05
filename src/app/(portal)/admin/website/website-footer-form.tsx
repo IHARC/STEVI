@@ -40,8 +40,8 @@ export function WebsiteFooterForm({ primaryText, secondaryText, lastUpdatedLabel
   const hasError = state.status === 'error' && Boolean(state.message);
 
   return (
-    <form action={formAction} className="space-y-space-md" aria-live="polite">
-      <div className="space-y-space-2xs">
+    <form action={formAction} className="space-y-4" aria-live="polite">
+      <div className="space-y-1">
         <Label htmlFor="primary_text">Primary line</Label>
         <Input
           id="primary_text"
@@ -53,10 +53,10 @@ export function WebsiteFooterForm({ primaryText, secondaryText, lastUpdatedLabel
           aria-invalid={hasError}
           aria-describedby={hasError ? 'footer-error' : undefined}
         />
-        <p className="text-body-xs text-muted-foreground">Rendered after the © year on the marketing site.</p>
+        <p className="text-xs text-muted-foreground">Rendered after the © year on the marketing site.</p>
       </div>
 
-      <div className="space-y-space-2xs">
+      <div className="space-y-1">
         <Label htmlFor="secondary_text">Secondary line</Label>
         <Textarea
           id="secondary_text"
@@ -67,22 +67,22 @@ export function WebsiteFooterForm({ primaryText, secondaryText, lastUpdatedLabel
           aria-invalid={hasError}
           aria-describedby={hasError ? 'footer-error' : undefined}
         />
-        <p className="text-body-xs text-muted-foreground">Optional supporting statement beneath the primary line. Leave blank to hide it.</p>
+        <p className="text-xs text-muted-foreground">Optional supporting statement beneath the primary line. Leave blank to hide it.</p>
       </div>
 
       {hasError ? (
-        <p id="footer-error" className="text-body-sm text-error">
+        <p id="footer-error" className="text-sm text-error">
           {state.message}
         </p>
       ) : null}
 
-      <div className="flex flex-wrap items-center gap-space-sm">
+      <div className="flex flex-wrap items-center gap-3">
         <Button type="submit">Save</Button>
         <Button type="reset" variant="ghost">
           Cancel
         </Button>
         {lastUpdatedLabel ? (
-          <span className="text-body-sm text-muted-foreground">Last updated {lastUpdatedLabel}</span>
+          <span className="text-sm text-muted-foreground">Last updated {lastUpdatedLabel}</span>
         ) : null}
       </div>
     </form>

@@ -63,6 +63,17 @@ const steviConfig = [
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/no-explicit-any': 'warn',
       'stevi/heading-needs-text-class': 'error',
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['@/components/ui-legacy/*', '@/styles/main.css', '@/lib/state-layer'],
+              message: 'Legacy UI has been removed. Use shadcn/ui primitives from "@/components/ui".',
+            },
+          ],
+        },
+      ],
     },
   },
 ];

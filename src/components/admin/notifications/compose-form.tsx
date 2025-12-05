@@ -127,22 +127,22 @@ export function ComposeNotificationForm({ recipients, hasAlertsSecret }: Compose
   return (
     <Card className="border-border/60">
       <CardHeader>
-        <CardTitle className="text-title-lg">Compose notification</CardTitle>
+        <CardTitle className="text-xl">Compose notification</CardTitle>
       <CardDescription>
         Send trauma-informed updates. Messages respect notification consent stored with each profile.
       </CardDescription>
     </CardHeader>
     <CardContent>
-      <form ref={formRef} onSubmit={handleSubmit} className="grid gap-space-md">
-          <div className="flex flex-wrap items-center gap-space-sm rounded-xl border border-outline/15 bg-surface-container-low px-space-sm py-space-2xs text-label-sm text-muted-foreground">
+      <form ref={formRef} onSubmit={handleSubmit} className="grid gap-4">
+          <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border/15 bg-muted px-3 py-1 text-xs text-muted-foreground">
             <Badge variant={hasAlertsSecret ? 'secondary' : 'destructive'}>
               {hasAlertsSecret ? 'Edge function ready' : 'Configure PORTAL_ALERTS_SECRET for sends'}
             </Badge>
             <Badge variant="outline">Consent enforced server-side</Badge>
           </div>
-          <div className="grid gap-space-sm md:grid-cols-2">
-            <Label className="grid gap-1 text-body-sm text-on-surface">
-              <span className="text-label-sm uppercase text-muted-foreground">
+          <div className="grid gap-3 md:grid-cols-2">
+            <Label className="grid gap-1 text-sm text-foreground">
+              <span className="text-xs uppercase text-muted-foreground">
                 Recipient
               </span>
               <Select
@@ -165,8 +165,8 @@ export function ComposeNotificationForm({ recipients, hasAlertsSecret }: Compose
                 </SelectContent>
               </Select>
             </Label>
-            <Label className="grid gap-1 text-body-sm text-on-surface">
-              <span className="text-label-sm uppercase text-muted-foreground">
+            <Label className="grid gap-1 text-sm text-foreground">
+              <span className="text-xs uppercase text-muted-foreground">
                 Notification type
               </span>
               <Select name="notification_type" value={notificationType} onValueChange={setNotificationType} disabled={isPending}>
@@ -184,9 +184,9 @@ export function ComposeNotificationForm({ recipients, hasAlertsSecret }: Compose
             </Label>
           </div>
 
-          <div className="grid gap-space-sm md:grid-cols-2">
-            <Label className="grid gap-1 text-body-sm text-on-surface">
-              <span className="text-label-sm uppercase text-muted-foreground">
+          <div className="grid gap-3 md:grid-cols-2">
+            <Label className="grid gap-1 text-sm text-foreground">
+              <span className="text-xs uppercase text-muted-foreground">
                 Recipient email override
               </span>
               <Input
@@ -198,8 +198,8 @@ export function ComposeNotificationForm({ recipients, hasAlertsSecret }: Compose
                 disabled={isPending}
               />
             </Label>
-            <Label className="grid gap-1 text-body-sm text-on-surface">
-              <span className="text-label-sm uppercase text-muted-foreground">
+            <Label className="grid gap-1 text-sm text-foreground">
+              <span className="text-xs uppercase text-muted-foreground">
                 Payload (JSON, optional)
               </span>
               <Textarea
@@ -211,8 +211,8 @@ export function ComposeNotificationForm({ recipients, hasAlertsSecret }: Compose
             </Label>
           </div>
 
-          <Label className="grid gap-1 text-body-sm text-on-surface">
-            <span className="text-label-sm uppercase text-muted-foreground">Template</span>
+          <Label className="grid gap-1 text-sm text-foreground">
+            <span className="text-xs uppercase text-muted-foreground">Template</span>
             <Select value={templateId} onValueChange={applyTemplate} disabled={isPending}>
               <SelectTrigger aria-label="Template">
                 <SelectValue placeholder="Select template" />
@@ -228,8 +228,8 @@ export function ComposeNotificationForm({ recipients, hasAlertsSecret }: Compose
             </Select>
           </Label>
 
-          <Label className="grid gap-1 text-body-sm text-on-surface">
-            <span className="text-label-sm uppercase text-muted-foreground">Subject</span>
+          <Label className="grid gap-1 text-sm text-foreground">
+            <span className="text-xs uppercase text-muted-foreground">Subject</span>
             <Input
               name="subject"
               placeholder="Reminder: upcoming appointment"
@@ -240,8 +240,8 @@ export function ComposeNotificationForm({ recipients, hasAlertsSecret }: Compose
             />
           </Label>
 
-          <Label className="grid gap-1 text-body-sm text-on-surface">
-            <span className="text-label-sm uppercase text-muted-foreground">
+          <Label className="grid gap-1 text-sm text-foreground">
+            <span className="text-xs uppercase text-muted-foreground">
               Plain text body
             </span>
             <Textarea
@@ -255,8 +255,8 @@ export function ComposeNotificationForm({ recipients, hasAlertsSecret }: Compose
             />
           </Label>
 
-          <Label className="grid gap-1 text-body-sm text-on-surface">
-            <span className="text-label-sm uppercase text-muted-foreground">
+          <Label className="grid gap-1 text-sm text-foreground">
+            <span className="text-xs uppercase text-muted-foreground">
               HTML body (optional)
             </span>
             <Textarea
@@ -267,13 +267,13 @@ export function ComposeNotificationForm({ recipients, hasAlertsSecret }: Compose
             />
           </Label>
 
-          <div className="flex flex-wrap items-center justify-between gap-space-sm">
-            <label className="flex items-center gap-space-2xs text-label-sm text-muted-foreground">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <label className="flex items-center gap-1 text-xs text-muted-foreground">
               <input
                 type="checkbox"
                 checked={isTestSend}
                 onChange={(event) => setIsTestSend(event.target.checked)}
-                className="h-4 w-4 rounded border border-outline"
+                className="h-4 w-4 rounded border border-border"
                 disabled={isPending}
               />
               <span>Test send (uses templates; requires secret)</span>

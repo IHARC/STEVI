@@ -43,8 +43,8 @@ export function DocumentsList({ documents, onRequestLink, onExtendAccess }: Docu
   }, [documents, query, category]);
 
   return (
-    <div className="space-y-space-md">
-      <div className="grid gap-space-sm sm:grid-cols-[1fr,200px]">
+    <div className="space-y-4">
+      <div className="grid gap-3 sm:grid-cols-[1fr,200px]">
         <Label className="sr-only" htmlFor="doc-search">Search documents</Label>
         <Input
           id="doc-search"
@@ -68,40 +68,40 @@ export function DocumentsList({ documents, onRequestLink, onExtendAccess }: Docu
       </div>
 
       {documents === null ? (
-        <div className="space-y-space-sm">
+        <div className="space-y-3">
           <Skeleton className="h-20 rounded-2xl" />
           <Skeleton className="h-20 rounded-2xl" />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-outline/20 bg-surface-container-high p-space-md text-body-sm text-muted-foreground">
-          <p className="font-medium text-on-surface">No documents yet</p>
-          <p className="mt-space-2xs">Ask your outreach worker to share files here. You can also request a link below.</p>
-          <p className="mt-space-2xs text-label-sm">When you request a link we’ll refresh it within one business day and log it in your audit trail.</p>
+        <div className="rounded-2xl border border-dashed border-border/40 bg-card p-4 text-sm text-muted-foreground">
+          <p className="font-medium text-foreground">No documents yet</p>
+          <p className="mt-1">Ask your outreach worker to share files here. You can also request a link below.</p>
+          <p className="mt-1 text-xs">When you request a link we’ll refresh it within one business day and log it in your audit trail.</p>
         </div>
       ) : (
-        <div className="grid gap-space-md md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2">
           {filtered.map((doc) => (
-            <article key={doc.path} className="flex h-full flex-col justify-between rounded-2xl border border-outline/12 bg-surface-container-high p-space-md shadow-level-1">
-              <div className="space-y-space-xs">
+            <article key={doc.path} className="flex h-full flex-col justify-between rounded-2xl border border-border/30 bg-card p-4 shadow-sm">
+              <div className="space-y-2">
                 <div className="flex items-center justify-between gap-2">
-                  <h2 className="text-title-md font-medium text-on-surface">{doc.name}</h2>
+                  <h2 className="text-lg font-medium text-foreground">{doc.name}</h2>
                   {doc.category ? <Badge variant="secondary">{doc.category}</Badge> : null}
                 </div>
-                <p className="text-body-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                   {doc.lastModified ? `Updated ${new Date(doc.lastModified).toLocaleDateString()}` : 'Updated recently'}
                 </p>
                 {doc.expiresAt ? (
-                  <p className="text-label-sm text-primary">Expires {new Date(doc.expiresAt).toLocaleDateString()}</p>
+                  <p className="text-xs text-primary">Expires {new Date(doc.expiresAt).toLocaleDateString()}</p>
                 ) : (
-                  <p className="text-label-sm text-muted-foreground">Link expires after 30 minutes once opened.</p>
+                  <p className="text-xs text-muted-foreground">Link expires after 30 minutes once opened.</p>
                 )}
-                <p className="text-label-sm text-muted-foreground">
+                <p className="text-xs text-muted-foreground">
                   Shared by {doc.sharedBy ?? 'team'}
                   {doc.lastViewedAt ? ` • Viewed ${new Date(doc.lastViewedAt).toLocaleDateString()}` : ''}
                 </p>
               </div>
 
-              <div className="mt-space-md flex flex-wrap gap-space-sm">
+              <div className="mt-4 flex flex-wrap gap-3">
                 {doc.signedUrl ? (
                   <Button asChild className="flex-1 min-w-[140px]">
                     <a href={doc.signedUrl}>Download</a>
@@ -130,10 +130,10 @@ export function DocumentsList({ documents, onRequestLink, onExtendAccess }: Docu
               </div>
 
               {requestState?.error ? (
-                <p className="mt-space-2xs text-label-sm text-destructive">{requestState.error}</p>
+                <p className="mt-1 text-xs text-destructive">{requestState.error}</p>
               ) : null}
               {extendState?.error ? (
-                <p className="mt-space-2xs text-label-sm text-destructive">{extendState.error}</p>
+                <p className="mt-1 text-xs text-destructive">{extendState.error}</p>
               ) : null}
             </article>
           ))}

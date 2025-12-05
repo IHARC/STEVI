@@ -49,12 +49,12 @@ export default async function OrgInvitesPage() {
   ]);
 
   return (
-    <div className="page-shell page-stack">
-      <header className="flex flex-wrap items-start justify-between gap-space-md">
-        <div className="space-y-space-2xs">
-          <p className="text-label-sm font-medium uppercase text-muted-foreground">Organization</p>
-          <h1 className="text-headline-lg text-on-surface sm:text-display-sm">Invitations</h1>
-          <p className="max-w-3xl text-body-md text-muted-foreground">
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
+      <header className="flex flex-wrap items-start justify-between gap-4">
+        <div className="space-y-1">
+          <p className="text-xs font-medium uppercase text-muted-foreground">Organization</p>
+          <h1 className="text-3xl text-foreground sm:text-4xl">Invitations</h1>
+          <p className="max-w-3xl text-sm text-muted-foreground">
             Invitations stay locked to your organization by Supabase RLS. Rate limits keep accidental resends in check.
           </p>
         </div>
@@ -64,7 +64,7 @@ export default async function OrgInvitesPage() {
       <OrgTabs />
 
       <Card>
-        <CardHeader className="flex flex-wrap items-start justify-between gap-space-sm">
+        <CardHeader className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <CardTitle>Recent invites</CardTitle>
             <CardDescription>Showing the last 50 invitations tied to your organization.</CardDescription>
@@ -87,7 +87,7 @@ export default async function OrgInvitesPage() {
             <TableBody>
               {invites.map((invite) => (
                 <TableRow key={invite.id}>
-                  <TableCell className="text-on-surface">{invite.email}</TableCell>
+                  <TableCell className="text-foreground">{invite.email}</TableCell>
                   <TableCell>{invite.display_name ?? '—'}</TableCell>
                   <TableCell className="text-muted-foreground">{invite.position_title ?? '—'}</TableCell>
                   <TableCell>

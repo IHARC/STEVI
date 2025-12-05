@@ -24,19 +24,19 @@ export function InventoryHub({ bootstrap, actorProfileId, canManageLocations }: 
     <div className="space-y-6">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="flex w-full flex-wrap justify-start gap-2 bg-transparent p-0">
-          <TabsTrigger value="dashboard" className="rounded-full border px-4 py-1 text-body-md">
+          <TabsTrigger value="dashboard" className="rounded-full border px-4 py-1 text-sm">
             Dashboard
           </TabsTrigger>
-          <TabsTrigger value="items" className="rounded-full border px-4 py-1 text-body-md">
+          <TabsTrigger value="items" className="rounded-full border px-4 py-1 text-sm">
             Items
           </TabsTrigger>
-          <TabsTrigger value="locations" className="rounded-full border px-4 py-1 text-body-md">
+          <TabsTrigger value="locations" className="rounded-full border px-4 py-1 text-sm">
             Locations
           </TabsTrigger>
-          <TabsTrigger value="organizations" className="rounded-full border px-4 py-1 text-body-md">
+          <TabsTrigger value="organizations" className="rounded-full border px-4 py-1 text-sm">
             Organisations
           </TabsTrigger>
-          <TabsTrigger value="receipts" className="rounded-full border px-4 py-1 text-body-md">
+          <TabsTrigger value="receipts" className="rounded-full border px-4 py-1 text-sm">
             Receipts
           </TabsTrigger>
         </TabsList>

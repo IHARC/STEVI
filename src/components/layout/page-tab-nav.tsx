@@ -22,10 +22,10 @@ export function PageTabNav({ tabs, className, activeHref }: { tabs: PageTab[]; c
   const pathname = usePathname() ?? '/';
 
   return (
-    <div className={cn('w-full overflow-x-auto pb-space-2xs sm:pb-0', className)}>
+    <div className={cn('w-full overflow-x-auto pb-1 sm:pb-0', className)}>
       <div
         className={cn(
-          'inline-flex min-w-full flex-nowrap gap-space-2xs rounded-[var(--md-sys-shape-corner-large)] bg-surface-container-low p-space-2xs shadow-level-1 sm:min-w-0 sm:flex-wrap',
+          'inline-flex min-w-full flex-nowrap gap-1 rounded-2xl bg-muted p-1 shadow-sm sm:min-w-0 sm:flex-wrap',
         )}
         role="tablist"
         aria-label="Section navigation"
@@ -41,10 +41,10 @@ export function PageTabNav({ tabs, className, activeHref }: { tabs: PageTab[]; c
               aria-selected={active}
               aria-current={active ? 'page' : undefined}
               className={cn(
-                'relative inline-flex items-center gap-space-2xs rounded-[var(--md-sys-shape-corner-medium)] px-space-md py-space-2xs text-label-md font-semibold transition-colors motion-duration-short motion-ease-standard focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
+                'relative inline-flex items-center gap-1 rounded-xl px-4 py-1 text-xs font-semibold transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background',
                 active
-                  ? 'bg-secondary-container text-on-secondary-container'
-                  : 'text-on-surface-variant hover:bg-surface-container',
+                  ? 'bg-secondary/15 text-secondary-foreground'
+                  : 'text-muted-foreground hover:bg-card',
               )}
             >
               {tab.label}

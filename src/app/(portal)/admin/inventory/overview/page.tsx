@@ -22,7 +22,7 @@ export default async function InventoryOverviewPage() {
   const canManageLocations = roles.includes('iharc_admin');
 
   return (
-    <div className="page-shell page-stack">
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
       <PageHeader
         eyebrow="Inventory & donations"
         title="Inventory overview"

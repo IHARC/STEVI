@@ -24,14 +24,14 @@ export default async function ServiceRulesPage() {
   }
 
   return (
-    <div className="page-shell page-stack">
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
       <PageHeader
         eyebrow="Admin"
         title="Service rules & algorithms"
         description="Document allocation logic, prioritisation, and routing algorithms that guide STEVI operations."
       />
       <Card>
-        <CardContent className="space-y-space-2xs py-space-md text-body-md text-muted-foreground">
+        <CardContent className="space-y-1 py-4 text-sm text-muted-foreground">
           <p>Use this space to expose the decision logic used across scheduling, outreach, and case routing.</p>
           <p>When wiring data, keep an audit trail for rule edits and ensure WCAG-compliant formatting.</p>
         </CardContent>

@@ -16,14 +16,14 @@ export default async function InventoryItemsPage() {
   }
 
   return (
-    <div className="page-shell page-stack">
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
       <PageHeader
         eyebrow="Inventory"
         title="Items & stock levels"
         description="Review stock balances by item and location. Connect this view to the inventory RPCs and storage when ready."
       />
       <Card>
-        <CardContent className="space-y-space-2xs py-space-md text-body-md text-muted-foreground">
+        <CardContent className="space-y-1 py-4 text-sm text-muted-foreground">
           <p>Wire this page to v_items_with_balances and existing inventory RPCs. Keep adjustments audited and RLS-compliant.</p>
           <p>Consider tabs for locations, categories, and recent transactions when implementing.</p>
         </CardContent>

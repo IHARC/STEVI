@@ -40,12 +40,12 @@ export default async function AdminPoliciesPage() {
   const archivedCount = policies.filter((p) => p.status === 'archived').length;
 
   return (
-    <div className="page-shell page-stack">
-      <header className="flex flex-col gap-space-sm sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-space-xs">
-          <p className="text-label-sm font-medium uppercase text-muted-foreground">Policies & procedures</p>
-          <h1 className="text-title-lg text-on-surface sm:text-headline-sm">Manage public-facing policies</h1>
-          <p className="max-w-3xl text-body-md text-muted-foreground sm:text-body-lg">
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-2">
+          <p className="text-xs font-medium uppercase text-muted-foreground">Policies & procedures</p>
+          <h1 className="text-xl text-foreground sm:text-2xl">Manage public-facing policies</h1>
+          <p className="max-w-3xl text-sm text-muted-foreground sm:text-base">
             Create, edit, and publish IHARC policies that appear on the public transparency hub. Status controls
             visibility: published policies are automatically visible on marketing pages.
           </p>
@@ -55,43 +55,43 @@ export default async function AdminPoliciesPage() {
         </Button>
       </header>
 
-      <section className="grid gap-space-md md:grid-cols-3">
-        <Card className="border-outline/20 bg-surface-container">
+      <section className="grid gap-4 md:grid-cols-3">
+        <Card className="border-border/40 bg-card">
           <CardHeader>
-            <CardTitle className="text-body-lg text-muted-foreground">Published</CardTitle>
+            <CardTitle className="text-base text-muted-foreground">Published</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-headline-md font-semibold text-on-surface">{publishedCount}</p>
-            <p className="text-label-sm text-muted-foreground">Visible on the marketing site.</p>
+            <p className="text-3xl font-semibold text-foreground">{publishedCount}</p>
+            <p className="text-xs text-muted-foreground">Visible on the marketing site.</p>
           </CardContent>
         </Card>
-        <Card className="border-outline/20 bg-surface-container">
+        <Card className="border-border/40 bg-card">
           <CardHeader>
-            <CardTitle className="text-body-lg text-muted-foreground">Drafts</CardTitle>
+            <CardTitle className="text-base text-muted-foreground">Drafts</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-headline-md font-semibold text-on-surface">{draftCount}</p>
-            <p className="text-label-sm text-muted-foreground">Not visible to the public.</p>
+            <p className="text-3xl font-semibold text-foreground">{draftCount}</p>
+            <p className="text-xs text-muted-foreground">Not visible to the public.</p>
           </CardContent>
         </Card>
-        <Card className="border-outline/20 bg-surface-container">
+        <Card className="border-border/40 bg-card">
           <CardHeader>
-            <CardTitle className="text-body-lg text-muted-foreground">Archived</CardTitle>
+            <CardTitle className="text-base text-muted-foreground">Archived</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-headline-md font-semibold text-on-surface">{archivedCount}</p>
-            <p className="text-label-sm text-muted-foreground">Kept for reference; hidden from marketing pages.</p>
+            <p className="text-3xl font-semibold text-foreground">{archivedCount}</p>
+            <p className="text-xs text-muted-foreground">Kept for reference; hidden from marketing pages.</p>
           </CardContent>
         </Card>
       </section>
 
-      <section className="space-y-space-md">
+      <section className="space-y-4">
         {policies.length === 0 ? (
-          <Card className="border-outline/20 bg-surface-container">
+          <Card className="border-border/40 bg-card">
             <CardHeader>
-              <CardTitle className="text-title-sm text-on-surface">No policies yet</CardTitle>
+              <CardTitle className="text-base text-foreground">No policies yet</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4 text-body-md text-muted-foreground">
+            <CardContent className="space-y-4 text-sm text-muted-foreground">
               <p>Add your first policy to populate the transparency hub.</p>
               <Button asChild variant="outline">
                 <Link href="/admin/policies/new">Create policy</Link>
@@ -99,7 +99,7 @@ export default async function AdminPoliciesPage() {
             </CardContent>
           </Card>
         ) : (
-          <div className="rounded-3xl border border-outline/20 bg-surface-container">
+          <div className="rounded-3xl border border-border/40 bg-card">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -114,9 +114,9 @@ export default async function AdminPoliciesPage() {
                 {policies.map((policy) => (
                   <TableRow key={policy.id} className="bg-transparent">
                     <TableCell>
-                      <div className="flex flex-col gap-space-2xs">
-                        <span className="font-medium text-on-surface">{policy.title}</span>
-                        <span className="text-label-sm text-muted-foreground">/{policy.slug}</span>
+                      <div className="flex flex-col gap-1">
+                        <span className="font-medium text-foreground">{policy.title}</span>
+                        <span className="text-xs text-muted-foreground">/{policy.slug}</span>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -133,7 +133,7 @@ export default async function AdminPoliciesPage() {
                     </TableCell>
                     <TableCell>{formatDate(policy.lastReviewedAt)}</TableCell>
                     <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-space-xs">
+                      <div className="flex items-center justify-end gap-2">
                         <Button asChild variant="outline" size="sm">
                           <Link href={`/admin/policies/${policy.slug}`}>Edit</Link>
                         </Button>
@@ -142,7 +142,7 @@ export default async function AdminPoliciesPage() {
                             asChild
                             variant="ghost"
                             size="sm"
-                            className="text-muted-foreground hover:text-on-surface"
+                            className="text-muted-foreground hover:text-foreground"
                           >
                             <Link href={`https://iharc.ca/policies/${policy.slug}`} target="_blank" rel="noreferrer">
                               View

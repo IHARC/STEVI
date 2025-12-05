@@ -36,58 +36,58 @@ export function VolunteerApplicationForm({
   return (
     <form
       action={formAction}
-      className="space-y-space-lg rounded-3xl border border-outline/40 bg-surface p-space-lg shadow-level-1 sm:p-space-xl"
+      className="space-y-6 rounded-3xl border border-border/40 bg-background p-6 shadow-sm sm:p-8"
       noValidate
     >
       <input type="hidden" name="next" value={nextPath} />
 
-      <section className="space-y-space-sm">
+      <section className="space-y-3">
         <header>
-          <p className="text-label-sm uppercase text-outline">Volunteer onboarding</p>
-          <h1 className="text-title-lg font-medium text-on-surface">Apply as a volunteer</h1>
-          <p className="mt-space-xs text-body-sm text-muted-foreground">
+          <p className="text-xs uppercase text-muted-foreground">Volunteer onboarding</p>
+          <h1 className="text-xl font-medium text-foreground">Apply as a volunteer</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
             Tell us how you’d like to help neighbours. We’ll reach out about orientation, background checks, and shifts.
           </p>
         </header>
 
         {state.error ? (
-          <Alert variant="destructive" className="text-body-sm">
+          <Alert variant="destructive" className="text-sm">
             <AlertTitle>We couldn’t submit your application</AlertTitle>
             <AlertDescription>{state.error}</AlertDescription>
           </Alert>
         ) : null}
 
         {isSuccess && state.message ? (
-          <Alert className="border-primary bg-primary-container text-body-sm text-on-primary-container">
+          <Alert className="border-primary bg-primary/10 text-sm text-primary">
             <AlertTitle>Volunteer application received</AlertTitle>
             <AlertDescription>{state.message}</AlertDescription>
           </Alert>
         ) : null}
       </section>
 
-      <section className="space-y-space-md">
-        <div className="grid gap-space-sm md:grid-cols-2">
-          <div className="grid gap-space-xs">
+      <section className="space-y-4">
+        <div className="grid gap-3 md:grid-cols-2">
+          <div className="grid gap-2">
             <Label htmlFor="full_name">Your name *</Label>
             <Input id="full_name" name="full_name" required maxLength={120} autoComplete="name" />
           </div>
-          <div className="grid gap-space-xs">
+          <div className="grid gap-2">
             <Label htmlFor="pronouns">Pronouns (optional)</Label>
             <Input id="pronouns" name="pronouns" maxLength={80} placeholder="She/her, they/them…" />
           </div>
         </div>
 
-        <div className="grid gap-space-xs">
+        <div className="grid gap-2">
           <Label htmlFor="email">Email *</Label>
           <Input id="email" name="email" type="email" autoComplete="email" required placeholder="you@example.ca" />
         </div>
 
-        <div className="grid gap-space-xs">
+        <div className="grid gap-2">
           <Label htmlFor="phone">Phone (optional)</Label>
           <Input id="phone" name="phone" type="tel" autoComplete="tel" inputMode="tel" placeholder="+16475551234" />
         </div>
 
-        <div className="grid gap-space-xs">
+        <div className="grid gap-2">
           <Label htmlFor="interests">How would you like to help? *</Label>
           <Textarea
             id="interests"
@@ -98,7 +98,7 @@ export function VolunteerApplicationForm({
           />
         </div>
 
-        <div className="grid gap-space-xs">
+        <div className="grid gap-2">
           <Label htmlFor="availability">Availability (optional)</Label>
           <Textarea
             id="availability"
@@ -108,8 +108,8 @@ export function VolunteerApplicationForm({
           />
         </div>
 
-        <div className="grid gap-space-sm md:grid-cols-2">
-          <div className="grid gap-space-xs">
+        <div className="grid gap-3 md:grid-cols-2">
+          <div className="grid gap-2">
             <Label htmlFor="password">Create a password *</Label>
             <Input
               id="password"
@@ -121,7 +121,7 @@ export function VolunteerApplicationForm({
               placeholder="At least 12 characters"
             />
           </div>
-          <div className="grid gap-space-xs">
+          <div className="grid gap-2">
             <Label htmlFor="password_confirm">Confirm password *</Label>
             <Input
               id="password_confirm"
@@ -135,7 +135,7 @@ export function VolunteerApplicationForm({
           </div>
         </div>
 
-        <div className="space-y-space-sm rounded-xl border border-outline/30 p-space-md">
+        <div className="space-y-3 rounded-xl border border-border/30 p-4">
           <ConsentCheckbox
             id="consent_privacy_volunteer"
             name="consent_privacy"
@@ -157,8 +157,8 @@ export function VolunteerApplicationForm({
         </div>
       </section>
 
-      <div className="flex items-center justify-between gap-space-md">
-        <p className="text-label-sm text-muted-foreground">
+      <div className="flex items-center justify-between gap-4">
+        <p className="text-xs text-muted-foreground">
           Volunteers receive limited access until screening and training are complete. You can withdraw at any time.
         </p>
         <SubmitButton isSuccess={isSuccess} />
@@ -179,7 +179,7 @@ function ConsentCheckbox({
   required?: boolean;
 }) {
   return (
-    <label htmlFor={id} className="flex items-start gap-space-sm text-body-sm text-on-surface">
+    <label htmlFor={id} className="flex items-start gap-3 text-sm text-foreground">
       <Checkbox id={id} name={name} required={required} className="mt-1" />
       <span>
         {label} {required ? <span className="text-error">*</span> : null}

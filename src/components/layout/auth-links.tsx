@@ -32,14 +32,14 @@ export function AuthLinks({ layout = 'inline' }: AuthLinksProps = {}) {
   return (
     <div
       className={cn(
-        'text-body-md font-semibold text-on-surface/80',
+        'text-sm font-semibold text-foreground/80',
         isStacked ? 'flex flex-col gap-2' : 'flex items-center gap-2'
       )}
     >
       <Link
         href={`/login?next=${encodedNext}`}
         className={cn(
-          'inline-flex items-center justify-center rounded-full border border-outline/40 bg-surface text-on-surface/80 transition hover:bg-brand-soft hover:text-brand focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
+          'inline-flex items-center justify-center rounded-full border border-border/40 bg-background text-foreground/80 transition hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background',
           isStacked ? 'w-full px-4 py-2' : 'px-3 py-1'
         )}
       >
@@ -48,7 +48,7 @@ export function AuthLinks({ layout = 'inline' }: AuthLinksProps = {}) {
       <Link
         href={`/register?next=${encodedNext}`}
         className={cn(
-          'inline-flex items-center justify-center rounded-full bg-primary text-on-primary shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
+          'inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground shadow transition hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background',
           isStacked ? 'w-full px-4 py-2' : 'px-3 py-1'
         )}
       >

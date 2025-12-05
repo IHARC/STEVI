@@ -1,7 +1,8 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
+import { Inter, JetBrains_Mono } from 'next/font/google';
 import { cn } from '@/lib/utils';
-import '@/styles/main.css';
+import '@/styles/theme.css';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { AnalyticsProvider } from '@/components/providers/analytics-provider';
 import { Toaster } from '@/components/ui/sonner';
@@ -26,6 +27,18 @@ const ANALYTICS_DISABLED =
 const ANALYTICS_ENABLED = Boolean(GA_MEASUREMENT_ID) && !ANALYTICS_DISABLED;
 const OG_IMAGE_PATH = '/logo.png';
 const OG_IMAGE_ALT = 'STEVI — IHARC Client Portal';
+
+const fontSans = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-sans',
+});
+
+const fontMono = JetBrains_Mono({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-mono',
+});
 
 export async function generateMetadata(): Promise<Metadata> {
   const branding = await getBrandingAssets();
@@ -65,10 +78,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
       <body
-        className={cn('min-h-screen bg-background text-on-background antialiased font-sans')}
+        className={cn(
+          'min-h-screen bg-background font-sans text-foreground antialiased',
+          fontSans.variable,
+          fontMono.variable,
+        )}
       >
         <ThemeProvider>
-          <a href="#main-content" className="skip-link">
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:shadow-lg"
+          >
             Skip to main content
           </a>
           <Suspense fallback={null}>

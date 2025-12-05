@@ -5,7 +5,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Icon } from '@/components/ui/icon';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -118,22 +117,22 @@ export function StaffCasesBoard({ cases, caseload, shifts }: StaffCasesBoardProp
   const todayHighlights = useMemo(() => buildTodayHighlights(casesWithContext, shifts), [casesWithContext, shifts]);
 
   return (
-    <div className="space-y-space-lg">
+    <div className="space-y-6">
       <TodayStrip highlights={todayHighlights} />
 
-      <Card className="border border-outline/20 shadow-sm">
-        <CardHeader className="space-y-space-sm">
-          <div className="flex flex-col gap-space-sm lg:flex-row lg:items-center lg:justify-between">
-            <div className="space-y-space-2xs">
-              <CardTitle className="text-title-lg">Cases</CardTitle>
+      <Card className="border border-border/40 shadow-sm">
+        <CardHeader className="space-y-3">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="space-y-1">
+              <CardTitle className="text-xl">Cases</CardTitle>
               <CardDescription>
                 Saved views filter by status, priority, and schedule. Use / to search, N to log outreach, and the
                 navigation sidebar to jump between tools.
               </CardDescription>
             </div>
-            <div className="flex w-full flex-col gap-space-2xs sm:max-w-md">
+            <div className="flex w-full flex-col gap-1 sm:max-w-md">
               <div className="relative">
-                <Icon icon={Search} size="sm" className="absolute left-space-sm top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
                 <Input
                   ref={searchRef}
                   value={query}
@@ -143,16 +142,16 @@ export function StaffCasesBoard({ cases, caseload, shifts }: StaffCasesBoardProp
                   aria-label="Search cases"
                 />
               </div>
-              <div className="flex flex-wrap items-center gap-space-xs text-label-sm text-muted-foreground">
-                <span className="inline-flex items-center gap-space-2xs rounded-full bg-outline/10 px-space-xs py-px">
-                  <Icon icon={Filter} size="sm" />
+              <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                <span className="inline-flex items-center gap-1 rounded-full bg-border/10 px-2 py-px">
+                  <Filter className="h-3.5 w-3.5" aria-hidden />
                   {activeView.label}
                 </span>
-                <span className="inline-flex items-center gap-space-2xs rounded-full bg-outline/10 px-space-xs py-px">
+                <span className="inline-flex items-center gap-1 rounded-full bg-border/10 px-2 py-px">
                   <span className="font-medium">/</span>
                   Search
                 </span>
-                <span className="inline-flex items-center gap-space-2xs rounded-full bg-outline/10 px-space-xs py-px">
+                <span className="inline-flex items-center gap-1 rounded-full bg-border/10 px-2 py-px">
                   <span className="font-medium">N</span>
                   Log outreach
                 </span>
@@ -160,17 +159,17 @@ export function StaffCasesBoard({ cases, caseload, shifts }: StaffCasesBoardProp
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-space-sm">
+          <div className="flex flex-wrap items-center gap-3">
             {savedViews.map((option) => (
               <button
                 key={option.id}
                 type="button"
                 onClick={() => setViewId(option.id)}
                 className={cn(
-                  'rounded-full border px-space-sm py-space-2xs text-label-md font-medium transition state-layer-color-primary',
+                  'rounded-full border px-3 py-1 text-xs font-medium transition hover:bg-muted',
                   option.id === activeView.id
                     ? 'border-primary bg-primary/10 text-primary'
-                    : 'border-outline/40 text-on-surface/80 hover:border-outline',
+                    : 'border-border/40 text-foreground/80 hover:border-border',
                 )}
               >
                 {option.label}
@@ -178,21 +177,21 @@ export function StaffCasesBoard({ cases, caseload, shifts }: StaffCasesBoardProp
             ))}
           </div>
 
-          <p className="text-label-sm text-muted-foreground">{activeView.description}</p>
+          <p className="text-xs text-muted-foreground">{activeView.description}</p>
         </CardHeader>
 
-        <CardContent className="space-y-space-md">
-          <div className="grid gap-space-md xl:grid-cols-[1.6fr,1fr]">
-            <div className="space-y-space-sm">
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 xl:grid-cols-[1.6fr,1fr]">
+            <div className="space-y-3">
               {filteredCases.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-outline/50 bg-surface-container-low p-space-lg text-center text-body-md text-muted-foreground">
+                <div className="rounded-2xl border border-dashed border-border/50 bg-muted p-6 text-center text-sm text-muted-foreground">
                   No cases match this view yet. Try another saved view or clear your search.
                 </div>
               ) : (
-                <div className="overflow-hidden rounded-2xl border border-outline/20 bg-surface-container-low">
+                <div className="overflow-hidden rounded-2xl border border-border/40 bg-muted">
                   <Table>
                     <TableHeader>
-                      <TableRow className="bg-surface-container-high">
+                      <TableRow className="bg-card">
                         <TableHead>Case</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>Priority</TableHead>
@@ -209,7 +208,7 @@ export function StaffCasesBoard({ cases, caseload, shifts }: StaffCasesBoardProp
                             data-state={selected ? 'selected' : undefined}
                             className={cn(
                               'cursor-pointer',
-                              selected && 'bg-surface-container-high/70',
+                              selected && 'bg-card/70',
                             )}
                             onClick={() => setUserSelectedCaseId(item.id)}
                             tabIndex={0}
@@ -221,19 +220,19 @@ export function StaffCasesBoard({ cases, caseload, shifts }: StaffCasesBoardProp
                             }}
                             aria-selected={selected}
                           >
-                            <TableCell className="space-y-space-2xs">
-                              <div className="flex items-center gap-space-xs">
-                                <span className="text-body-md font-semibold text-on-surface">
+                            <TableCell className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-semibold text-foreground">
                                   {item.caseType ?? 'Support case'}
                                 </span>
-                                <Badge variant="outline" className="text-label-sm text-muted-foreground">
+                                <Badge variant="outline" className="text-xs text-muted-foreground">
                                   #{item.caseNumber ?? item.id}
                                 </Badge>
                               </div>
-                              <p className="text-body-sm text-muted-foreground">
+                              <p className="text-sm text-muted-foreground">
                                 {item.clientName ? item.clientName : `Person #${item.personId}`}
                               </p>
-                              <p className="text-label-sm text-muted-foreground">
+                              <p className="text-xs text-muted-foreground">
                                 {item.caseManagerName}
                                 {item.caseManagerContact ? ` · ${item.caseManagerContact}` : ''}
                               </p>
@@ -245,16 +244,16 @@ export function StaffCasesBoard({ cases, caseload, shifts }: StaffCasesBoardProp
                               <Badge variant={priorityVariant(item.priority)}>{formatPriority(item.priority)}</Badge>
                             </TableCell>
                             <TableCell>
-                              <div className="space-y-space-3xs">
-                                <p className="text-body-sm text-on-surface/90">
+                              <div className="space-y-0.5">
+                                <p className="text-sm text-foreground/90">
                                   {item.nextStep ?? 'Next step not recorded'}
                                 </p>
                                 {item.nextAt ? (
-                                  <p className="text-label-sm text-muted-foreground">{formatDateTime(item.nextAt)}</p>
+                                  <p className="text-xs text-muted-foreground">{formatDateTime(item.nextAt)}</p>
                                 ) : null}
                               </div>
                             </TableCell>
-                            <TableCell className="text-right text-label-sm text-muted-foreground">
+                            <TableCell className="text-right text-xs text-muted-foreground">
                               {formatDate(item.startDate)}
                             </TableCell>
                           </TableRow>
@@ -266,7 +265,7 @@ export function StaffCasesBoard({ cases, caseload, shifts }: StaffCasesBoardProp
               )}
             </div>
 
-            <div className="space-y-space-sm">
+            <div className="space-y-3">
               <CasePeekPanel selectedCase={selectedCase} focusSignal={focusSignal} />
             </div>
           </div>
@@ -279,7 +278,7 @@ export function StaffCasesBoard({ cases, caseload, shifts }: StaffCasesBoardProp
 function TodayStrip({ highlights }: { highlights: ReturnType<typeof buildTodayHighlights> }) {
   const { dueToday, newThisWeek, nextShift } = highlights;
   return (
-    <div className="grid gap-space-sm lg:grid-cols-3">
+    <div className="grid gap-3 lg:grid-cols-3">
       <StripCard
         title="Today"
         icon={CalendarClock}
@@ -309,7 +308,7 @@ function StripCard({
   value,
   detail,
   meta,
-  icon,
+  icon: IconComponent,
 }: {
   title: string;
   value: string;
@@ -318,15 +317,15 @@ function StripCard({
   icon: LucideIcon;
 }) {
   return (
-    <div className="flex items-start gap-space-sm rounded-2xl border border-outline/20 bg-surface-container-high p-space-md shadow-sm">
+    <div className="flex items-start gap-3 rounded-2xl border border-border/40 bg-card p-4 shadow-sm">
       <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-        <Icon icon={icon} size="md" />
+        <IconComponent className="h-5 w-5" aria-hidden />
       </span>
-      <div className="space-y-space-3xs">
-        <p className="text-label-sm text-muted-foreground">{title}</p>
-        <p className="text-title-md text-on-surface">{value}</p>
-        <p className="text-body-sm text-muted-foreground">{detail}</p>
-        {meta ? <p className="text-label-sm text-muted-foreground">{meta}</p> : null}
+      <div className="space-y-0.5">
+        <p className="text-xs text-muted-foreground">{title}</p>
+        <p className="text-lg text-foreground">{value}</p>
+        <p className="text-sm text-muted-foreground">{detail}</p>
+        {meta ? <p className="text-xs text-muted-foreground">{meta}</p> : null}
       </div>
     </div>
   );
@@ -341,23 +340,23 @@ function CasePeekPanel({
 }) {
   if (!selectedCase) {
     return (
-      <div className="rounded-2xl border border-dashed border-outline/50 bg-surface-container-low p-space-lg text-center">
-        <p className="text-body-md text-muted-foreground">Select a case to preview details and log outreach.</p>
+      <div className="rounded-2xl border border-dashed border-border/50 bg-muted p-6 text-center">
+        <p className="text-sm text-muted-foreground">Select a case to preview details and log outreach.</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-space-sm rounded-2xl border border-outline/20 bg-surface-container-high p-space-md shadow-sm">
-      <div className="flex items-start justify-between gap-space-sm">
-        <div className="space-y-space-2xs">
-          <p className="text-label-sm text-muted-foreground">Case #{selectedCase.caseNumber ?? selectedCase.id}</p>
-          <p className="text-title-lg text-on-surface">{selectedCase.caseType ?? 'Support case'}</p>
-          <p className="text-body-sm text-muted-foreground">
+    <div className="space-y-3 rounded-2xl border border-border/40 bg-card p-4 shadow-sm">
+      <div className="flex items-start justify-between gap-3">
+        <div className="space-y-1">
+          <p className="text-xs text-muted-foreground">Case #{selectedCase.caseNumber ?? selectedCase.id}</p>
+          <p className="text-xl text-foreground">{selectedCase.caseType ?? 'Support case'}</p>
+          <p className="text-sm text-muted-foreground">
             {selectedCase.clientName ? selectedCase.clientName : `Person #${selectedCase.personId}`}
           </p>
         </div>
-        <div className="flex flex-col items-end gap-space-2xs">
+        <div className="flex flex-col items-end gap-1">
           <Badge variant={statusVariant(selectedCase.status)}>{formatStatus(selectedCase.status)}</Badge>
           <Badge variant={priorityVariant(selectedCase.priority)}>{formatPriority(selectedCase.priority)}</Badge>
         </div>
@@ -365,39 +364,39 @@ function CasePeekPanel({
 
       <Separator />
 
-      <dl className="grid grid-cols-2 gap-space-sm text-label-sm text-muted-foreground">
-        <div className="space-y-space-3xs">
+      <dl className="grid grid-cols-2 gap-3 text-xs text-muted-foreground">
+        <div className="space-y-0.5">
           <dt>Case manager</dt>
-          <dd className="text-body-sm text-on-surface">{selectedCase.caseManagerName}</dd>
+          <dd className="text-sm text-foreground">{selectedCase.caseManagerName}</dd>
           {selectedCase.caseManagerContact ? (
-            <dd className="text-label-sm text-muted-foreground">{selectedCase.caseManagerContact}</dd>
+            <dd className="text-xs text-muted-foreground">{selectedCase.caseManagerContact}</dd>
           ) : null}
         </div>
-        <div className="space-y-space-3xs">
+        <div className="space-y-0.5">
           <dt>Opened</dt>
-          <dd className="text-body-sm text-on-surface">{formatDate(selectedCase.startDate)}</dd>
-          <dd className="text-label-sm text-muted-foreground">
+          <dd className="text-sm text-foreground">{formatDate(selectedCase.startDate)}</dd>
+          <dd className="text-xs text-muted-foreground">
             {selectedCase.endDate ? `Closed ${formatDate(selectedCase.endDate)}` : 'Open case'}
           </dd>
         </div>
       </dl>
 
-      <div className="space-y-space-2xs rounded-xl bg-surface-container-low p-space-sm">
-        <p className="text-label-sm text-muted-foreground">Next step</p>
-        <p className="text-body-md text-on-surface/90">
+      <div className="space-y-1 rounded-xl bg-muted p-3">
+        <p className="text-xs text-muted-foreground">Next step</p>
+        <p className="text-sm text-foreground/90">
           {selectedCase.nextStep ?? 'Next action not captured yet.'}
         </p>
         {selectedCase.nextAt ? (
-          <p className="text-label-sm text-muted-foreground">{formatDateTime(selectedCase.nextAt)}</p>
+          <p className="text-xs text-muted-foreground">{formatDateTime(selectedCase.nextAt)}</p>
         ) : null}
       </div>
 
-      <div className="flex flex-wrap items-center gap-space-sm">
+      <div className="flex flex-wrap items-center gap-3">
         <Button asChild size="sm" variant="secondary">
           <Link href={`/staff/cases/${selectedCase.id}`}>Open full case</Link>
         </Button>
-        <Badge variant="outline" className="inline-flex items-center gap-space-2xs">
-          <Icon icon={Compass} size="sm" />
+        <Badge variant="outline" className="inline-flex items-center gap-1">
+          <Compass className="h-4 w-4" aria-hidden />
           Shift + ⌘/Ctrl + W to open navigation
         </Badge>
       </div>

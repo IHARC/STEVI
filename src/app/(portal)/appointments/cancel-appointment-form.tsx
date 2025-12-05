@@ -29,7 +29,7 @@ export function CancelAppointmentForm({ action, appointmentId, variant }: Cancel
   return (
     <form
       action={action as unknown as (formData: FormData) => Promise<void>}
-      className="flex w-full flex-col gap-space-xs sm:w-auto sm:flex-row sm:items-center"
+      className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center"
     >
       <input type="hidden" name="appointment_id" value={appointmentId} />
       <Input

@@ -79,7 +79,7 @@ export default async function AdminContentHubPage({ searchParams }: AdminContent
   const activeTab = allowedTabs.find((tab) => tab.id === tabParam) ?? allowedTabs[0];
 
   return (
-    <div className="page-shell page-stack">
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
       <PageHeader
         eyebrow="Admin"
         title="Content & website"
@@ -96,11 +96,11 @@ export default async function AdminContentHubPage({ searchParams }: AdminContent
         activeHref={`/admin/content?tab=${activeTab.id}`}
       />
 
-      <div className="text-body-sm text-muted-foreground">
-        <span className="font-medium text-on-surface">What’s inside:</span>
-        <ul className="mt-space-2xs flex flex-wrap gap-space-xs" role="list">
+      <div className="text-sm text-muted-foreground">
+        <span className="font-medium text-foreground">What’s inside:</span>
+        <ul className="mt-1 flex flex-wrap gap-2" role="list">
           {allowedTabs.map((tab) => (
-            <li key={tab.id} className="rounded-[var(--md-sys-shape-corner-small)] bg-surface-container-low px-space-sm py-space-3xs text-label-sm text-on-surface-variant">
+            <li key={tab.id} className="rounded-lg bg-muted px-3 py-0.5 text-xs text-muted-foreground">
               {tab.label}
             </li>
           ))}
@@ -109,14 +109,14 @@ export default async function AdminContentHubPage({ searchParams }: AdminContent
 
       <Card className="max-w-4xl">
         <CardHeader>
-          <CardTitle className="text-title-lg">{activeTab.label}</CardTitle>
+          <CardTitle className="text-xl">{activeTab.label}</CardTitle>
           <CardDescription>{activeTab.description}</CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-wrap gap-space-sm">
+        <CardContent className="flex flex-wrap gap-3">
           <Button asChild>
             <Link href={activeTab.href}>Open {activeTab.label}</Link>
           </Button>
-          <p className="text-body-sm text-muted-foreground">Tab navigation keeps a single entry in the sidebar while separating responsibilities.</p>
+          <p className="text-sm text-muted-foreground">Tab navigation keeps a single entry in the sidebar while separating responsibilities.</p>
         </CardContent>
       </Card>
     </div>

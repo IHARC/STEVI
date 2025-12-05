@@ -24,12 +24,12 @@ export default async function NewPolicyPage() {
   await ensurePortalProfile(supabase, access.userId);
   const enumOptions = await fetchPolicyEnumOptions();
   return (
-    <div className="page-shell page-stack">
-      <header className="flex flex-col gap-space-sm sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-space-xs">
-          <p className="text-label-sm font-medium uppercase text-muted-foreground">Policies</p>
-          <h1 className="text-title-lg text-on-surface sm:text-headline-sm">Create a policy</h1>
-          <p className="max-w-3xl text-body-md text-muted-foreground sm:text-body-lg">
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-2">
+          <p className="text-xs font-medium uppercase text-muted-foreground">Policies</p>
+          <h1 className="text-xl text-foreground sm:text-2xl">Create a policy</h1>
+          <p className="max-w-3xl text-sm text-muted-foreground sm:text-base">
             Publish policies that surface on the public transparency hub. Status controls visibility; published items
             appear immediately after save.
           </p>

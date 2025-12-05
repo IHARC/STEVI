@@ -54,7 +54,7 @@ export async function WebsiteBrandingPanel({ supabase }: PanelProps) {
   return (
     <Card className="max-w-5xl">
       <CardHeader>
-        <CardTitle className="text-title-lg">Branding</CardTitle>
+        <CardTitle className="text-xl">Branding</CardTitle>
         <CardDescription>Manage logos and favicon used across the marketing site and portal metadata.</CardDescription>
       </CardHeader>
       <CardContent>
@@ -72,7 +72,7 @@ export async function WebsiteNavigationPanel({ supabase }: PanelProps) {
   return (
     <Card className="max-w-5xl">
       <CardHeader>
-        <CardTitle className="text-title-lg">Navigation</CardTitle>
+        <CardTitle className="text-xl">Navigation</CardTitle>
         <CardDescription>Control top navigation links and the portal call-to-action.</CardDescription>
       </CardHeader>
       <CardContent>
@@ -90,7 +90,7 @@ export async function WebsiteHomePanel({ supabase }: PanelProps) {
   return (
     <Card className="max-w-5xl">
       <CardHeader>
-        <CardTitle className="text-title-lg">Home & context</CardTitle>
+        <CardTitle className="text-xl">Home & context</CardTitle>
         <CardDescription>Update the hero and contextual story cards on the marketing home page.</CardDescription>
       </CardHeader>
       <CardContent>
@@ -108,7 +108,7 @@ export async function WebsiteSupportsPanel({ supabase }: PanelProps) {
   return (
     <Card className="max-w-5xl">
       <CardHeader>
-        <CardTitle className="text-title-lg">Supports</CardTitle>
+        <CardTitle className="text-xl">Supports</CardTitle>
         <CardDescription>Urgent supports and mutual aid text shown on Get Help.</CardDescription>
       </CardHeader>
       <CardContent>
@@ -125,7 +125,7 @@ export async function WebsiteProgramsPanel({ supabase }: PanelProps) {
   return (
     <Card className="max-w-5xl">
       <CardHeader>
-        <CardTitle className="text-title-lg">Programs</CardTitle>
+        <CardTitle className="text-xl">Programs</CardTitle>
         <CardDescription>Control program cards shown on the marketing site.</CardDescription>
       </CardHeader>
       <CardContent>
@@ -162,8 +162,8 @@ export async function WebsiteFooterPanel({ supabase }: PanelProps) {
 
   return (
     <Card className="max-w-4xl">
-      <CardHeader className="space-y-space-xs">
-        <CardTitle className="text-title-lg">Footer</CardTitle>
+      <CardHeader className="space-y-2">
+        <CardTitle className="text-xl">Footer</CardTitle>
         <CardDescription>Update the copy shown on every page of the marketing site.</CardDescription>
       </CardHeader>
       <CardContent>
@@ -177,7 +177,7 @@ export async function WebsiteContentInventoryPanel(_: PanelProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-title-lg">Content inventory</CardTitle>
+        <CardTitle className="text-xl">Content inventory</CardTitle>
         <CardDescription>Audit public pages, resources, and policies with owners and review dates.</CardDescription>
       </CardHeader>
       <CardContent>

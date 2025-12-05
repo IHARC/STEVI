@@ -31,15 +31,15 @@ export function NavForm({ initialItems, portalCtaLabel }: Props) {
   };
 
   return (
-    <form action={saveNavigationSettings} className="space-y-space-md">
+    <form action={saveNavigationSettings} className="space-y-4">
       <input type="hidden" name="items_json" value={serialize(items)} />
-      <div className="space-y-space-sm">
+      <div className="space-y-3">
         {items.map((item, index) => (
           <div
             key={`${item.label}-${index}`}
-            className="grid gap-space-xs rounded-lg border border-border bg-card/40 p-space-sm sm:grid-cols-[1fr,1fr,auto]"
+            className="grid gap-2 rounded-lg border border-border bg-card/40 p-3 sm:grid-cols-[1fr,1fr,auto]"
           >
-            <div className="space-y-space-2xs">
+            <div className="space-y-1">
               <Label htmlFor={`label-${index}`}>Label</Label>
               <Input
                 id={`label-${index}`}
@@ -49,7 +49,7 @@ export function NavForm({ initialItems, portalCtaLabel }: Props) {
                 maxLength={80}
               />
             </div>
-            <div className="space-y-space-2xs">
+            <div className="space-y-1">
               <Label htmlFor={`href-${index}`}>Href</Label>
               <Input
                 id={`href-${index}`}
@@ -79,7 +79,7 @@ export function NavForm({ initialItems, portalCtaLabel }: Props) {
         </Button>
       </div>
 
-      <div className="space-y-space-2xs">
+      <div className="space-y-1">
         <Label htmlFor="portal_cta_label">Portal CTA label</Label>
         <Input
           id="portal_cta_label"
@@ -88,14 +88,14 @@ export function NavForm({ initialItems, portalCtaLabel }: Props) {
           required
           maxLength={80}
         />
-        <p className="text-body-xs text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           Text for the STEVI portal button shown on the public top nav.
         </p>
       </div>
 
-      <div className="flex flex-wrap items-center gap-space-sm">
+      <div className="flex flex-wrap items-center gap-3">
         <Button type="submit">Save navigation</Button>
-        <p className="text-body-sm text-muted-foreground">Updates reflect on the public site immediately.</p>
+        <p className="text-sm text-muted-foreground">Updates reflect on the public site immediately.</p>
       </div>
     </form>
   );

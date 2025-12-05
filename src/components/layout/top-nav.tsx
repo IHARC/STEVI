@@ -26,15 +26,15 @@ export function TopNav({
   const hasNav = navSections.length > 0;
 
   return (
-    <header className="sticky top-0 z-50 border-b border-outline/12 bg-surface-container/80 text-on-surface shadow-level-1 backdrop-blur-xl supports-[backdrop-filter]:bg-surface-container/72">
+    <header className="sticky top-0 z-50 border-b border-border/60 bg-background/85 text-foreground shadow-sm backdrop-blur">
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary/10 focus:px-3 focus:py-2 focus:text-on-primary"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary/10 focus:px-3 focus:py-2 focus:text-primary-foreground"
       >
         Skip to content
       </a>
-      <div className="mx-auto flex w-full max-w-page items-center gap-space-sm px-space-lg py-space-3xs">
-        <div className="flex min-w-0 flex-1 items-center gap-space-sm">
+      <div className="mx-auto flex w-full max-w-6xl items-center gap-3 px-4 py-3 md:px-6">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
           {hasNav ? (
             <div className="lg:hidden">
               <AppNavigationMobile navSections={navSections} />
@@ -42,7 +42,7 @@ export function TopNav({
           ) : null}
           <Link
             href="/"
-            className="inline-flex items-center gap-space-sm rounded-[var(--md-sys-shape-corner-small)] border border-transparent px-space-sm py-space-2xs transition-colors hover:border-outline/30 hover:bg-surface-container-low focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+            className="inline-flex items-center gap-3 rounded-lg border border-transparent px-3 py-1.5 transition-colors hover:border-border/50 hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             aria-label="STEVI home"
           >
             <Image
@@ -62,18 +62,18 @@ export function TopNav({
               className="hidden h-8 w-auto dark:block"
             />
             <span className="text-left leading-tight">
-              <span className="block text-title-sm font-semibold text-on-surface">STEVI</span>
-              <span className="block text-label-sm text-on-surface-variant">Client Support Portal</span>
+              <span className="block text-base font-semibold text-foreground">STEVI</span>
+              <span className="block text-xs text-muted-foreground">Client Support Portal</span>
             </span>
           </Link>
         </div>
 
-        <div className="flex flex-1 items-center justify-end gap-space-2xs">
+        <div className="flex flex-1 items-center justify-end gap-2">
           <CommandPalette items={commands} compactTrigger className="hidden sm:flex" />
           <QuickCreateButton />
           <ThemeToggle />
-          <div className="hidden md:flex items-center gap-space-2xs">{desktop}</div>
-          <div className="flex items-center gap-space-2xs md:hidden">{mobile}</div>
+          <div className="hidden md:flex items-center gap-2">{desktop}</div>
+          <div className="flex items-center gap-2 md:hidden">{mobile}</div>
         </div>
       </div>
     </header>

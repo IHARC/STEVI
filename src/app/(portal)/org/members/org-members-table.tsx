@@ -157,14 +157,14 @@ export function OrgMembersTable({ members, currentProfileId }: OrgMembersTablePr
             <TableRow key={member.id}>
               <TableCell>
                 <div className="flex flex-col">
-                  <span className="font-medium text-on-surface">{member.display_name}</span>
+                  <span className="font-medium text-foreground">{member.display_name}</span>
                   {member.position_title ? (
-                    <span className="text-label-sm text-muted-foreground">{member.position_title}</span>
+                    <span className="text-xs text-muted-foreground">{member.position_title}</span>
                   ) : null}
                 </div>
               </TableCell>
               <TableCell>
-                <div className="flex flex-wrap items-center gap-space-2xs">
+                <div className="flex flex-wrap items-center gap-1">
                   <Badge variant={state.admin ? 'default' : state.rep ? 'secondary' : 'outline'} className="capitalize">
                     {state.admin ? 'org admin' : state.rep ? 'org rep' : 'member'}
                   </Badge>
@@ -175,7 +175,7 @@ export function OrgMembersTable({ members, currentProfileId }: OrgMembersTablePr
               </TableCell>
               <TableCell>{formatDate(member.last_seen_at)}</TableCell>
               <TableCell className="text-right">
-                <div className="flex flex-col items-end gap-space-2xs text-left">
+                <div className="flex flex-col items-end gap-1 text-left">
                   <RoleToggle
                     id={`admin-${member.id}`}
                     label="Org admin"
@@ -222,11 +222,11 @@ type RoleToggleProps = {
 
 function RoleToggle({ id, label, description, checked, disabled, onChange }: RoleToggleProps) {
   return (
-    <label htmlFor={id} className="flex max-w-[320px] items-start gap-space-sm text-left">
+    <label htmlFor={id} className="flex max-w-[320px] items-start gap-3 text-left">
       <Switch id={id} checked={checked} disabled={disabled} onCheckedChange={onChange} />
-      <div className="space-y-space-3xs">
-        <p className="text-body-sm font-medium text-on-surface">{label}</p>
-        <p className="text-label-sm text-muted-foreground">{description}</p>
+      <div className="space-y-0.5">
+        <p className="text-sm font-medium text-foreground">{label}</p>
+        <p className="text-xs text-muted-foreground">{description}</p>
       </div>
     </label>
   );

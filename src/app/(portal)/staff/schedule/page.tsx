@@ -18,35 +18,35 @@ export default async function StaffSchedulePage() {
   const shifts = await fetchStaffShifts(supabase, access.userId);
 
   return (
-    <div className="space-y-space-lg">
-      <header className="space-y-space-2xs">
-        <p className="text-label-sm font-semibold uppercase text-muted-foreground">Schedule</p>
-        <h1 className="text-headline-lg text-on-surface">Today’s coverage</h1>
-        <p className="max-w-3xl text-body-md text-muted-foreground">
+    <div className="space-y-6">
+      <header className="space-y-1">
+        <p className="text-xs font-semibold uppercase text-muted-foreground">Schedule</p>
+        <h1 className="text-3xl text-foreground">Today’s coverage</h1>
+        <p className="max-w-3xl text-sm text-muted-foreground">
           Wire this view to Supabase once the shift + assignment schemas are confirmed. For now it demonstrates the
           layout and Material 3 treatment.
         </p>
       </header>
 
-      <div className="grid gap-space-md md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2">
         {shifts.map((shift) => (
           <Card key={shift.id} className="h-full">
             <CardHeader>
-              <CardTitle className="text-title-md">{shift.title}</CardTitle>
+              <CardTitle className="text-lg">{shift.title}</CardTitle>
               <CardDescription>{shift.location}</CardDescription>
             </CardHeader>
-            <CardContent className="text-body-sm text-on-surface/80">
+            <CardContent className="text-sm text-foreground/80">
               <p>
                 {shift.startsAt}–{shift.endsAt}
               </p>
-              <p className="mt-space-2xs text-muted-foreground">Assignments and checklists will render here.</p>
+              <p className="mt-1 text-muted-foreground">Assignments and checklists will render here.</p>
             </CardContent>
           </Card>
         ))}
         {shifts.length === 0 ? (
           <Card>
             <CardHeader>
-              <CardTitle className="text-title-md">No shifts scheduled</CardTitle>
+              <CardTitle className="text-lg">No shifts scheduled</CardTitle>
               <CardDescription>When shifts are assigned, they will appear here automatically.</CardDescription>
             </CardHeader>
           </Card>

@@ -63,17 +63,17 @@ export function ResetPasswordForm({ action, initialState }: ResetPasswordFormPro
   }, [otpPending, state.maskedPhone, state.phone, phoneInput]);
 
   return (
-    <form action={formAction} className="grid gap-6 rounded-2xl border border-outline/20 bg-surface p-6 shadow-subtle">
+    <form action={formAction} className="grid gap-6 rounded-2xl border border-border/40 bg-background p-6 shadow-sm">
       <div className="space-y-2">
-        <h1 className="text-headline-md font-semibold text-on-surface">Reset your password</h1>
-        <p className="text-body-md text-on-surface/70">
+        <h1 className="text-3xl font-semibold text-foreground">Reset your password</h1>
+        <p className="text-sm text-foreground/70">
           Choose how you would like to verify your identity. We will send a secure link or code before you set a new
           password.
         </p>
       </div>
 
-      <fieldset className="space-y-3 rounded-xl border border-outline/25 p-4">
-        <legend className="text-body-md font-semibold text-on-surface">Choose verification method</legend>
+      <fieldset className="space-y-3 rounded-xl border border-border/25 p-4">
+        <legend className="text-sm font-semibold text-foreground">Choose verification method</legend>
         <RadioGroup
           name="contact_method"
           value={contactMethod}
@@ -106,7 +106,7 @@ export function ResetPasswordForm({ action, initialState }: ResetPasswordFormPro
             required
             placeholder="you@example.ca"
           />
-          <p className="text-label-sm text-muted-foreground">We will email a secure link to update your password.</p>
+          <p className="text-xs text-muted-foreground">We will email a secure link to update your password.</p>
         </div>
       ) : (
         <>
@@ -126,7 +126,7 @@ export function ResetPasswordForm({ action, initialState }: ResetPasswordFormPro
               disabled={otpPending}
               required={!otpPending}
             />
-            <p className="text-label-sm text-muted-foreground">Include your country code so we can text you a verification code.</p>
+            <p className="text-xs text-muted-foreground">Include your country code so we can text you a verification code.</p>
           </div>
 
           {otpPending ? (
@@ -141,14 +141,14 @@ export function ResetPasswordForm({ action, initialState }: ResetPasswordFormPro
                 placeholder="123456"
                 required
               />
-              <p className="text-label-sm text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 We texted a 6-digit code to {maskedPhone ?? 'your phone number'}. Codes expire after 5 minutes.
               </p>
             </div>
           ) : null}
 
           {otpPending && state.message ? (
-            <p className="text-label-sm font-medium text-primary">{state.message}</p>
+            <p className="text-xs font-medium text-primary">{state.message}</p>
           ) : null}
 
           {otpPending ? (
@@ -188,7 +188,7 @@ export function ResetPasswordForm({ action, initialState }: ResetPasswordFormPro
       ) : null}
 
       {state.status === 'success' && state.message ? (
-        <Alert className="border-secondary bg-secondary-container text-on-secondary-container">
+        <Alert className="border-secondary bg-secondary/15 text-secondary-foreground">
           <AlertDescription>{state.message}</AlertDescription>
         </Alert>
       ) : null}
@@ -216,12 +216,12 @@ function ContactOption({ id, value, title, description }: ContactOptionProps) {
   return (
     <label
       htmlFor={id}
-      className="flex cursor-pointer items-start gap-3 rounded-xl border border-outline/40 bg-surface-container p-3 text-body-md font-medium text-on-surface shadow-subtle transition state-layer-color-primary hover:border-primary hover:state-layer-hover focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:state-layer-focus"
+      className="flex cursor-pointer items-start gap-3 rounded-xl border border-border/40 bg-card p-3 text-sm font-medium text-foreground shadow-sm transition hover:border-primary/60 hover:bg-muted focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2 focus-within:ring-offset-background"
     >
       <RadioGroupItem id={id} value={value} className="mt-1" />
       <span>
         {title}
-        <span className="mt-1 block text-label-sm font-normal text-muted-foreground">{description}</span>
+        <span className="mt-1 block text-xs font-normal text-muted-foreground">{description}</span>
       </span>
     </label>
   );

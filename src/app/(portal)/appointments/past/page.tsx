@@ -19,14 +19,14 @@ export default async function PastAppointmentsPage() {
   await ensurePortalProfile(supabase, user.id);
 
   return (
-    <div className="page-shell page-stack">
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
       <PageHeader
         eyebrow="Appointments"
         title="Past appointments"
         description="Review completed and cancelled appointments. Filtering and exports will be added when data is connected."
       />
       <Card>
-        <CardContent className="space-y-space-2xs py-space-md text-body-md text-muted-foreground">
+        <CardContent className="space-y-1 py-4 text-sm text-muted-foreground">
           <p>This view will list historical appointments with outcomes and follow-ups once wired to Supabase.</p>
           <p>Use the main appointments page to manage upcoming visits in the meantime.</p>
         </CardContent>

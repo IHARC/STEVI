@@ -71,17 +71,17 @@ export function ClientIntakeForm({
   return (
     <form
       action={formAction}
-      className="space-y-space-xl rounded-2xl border border-outline/40 bg-surface p-space-lg shadow-subtle sm:p-space-xl"
+      className="space-y-8 rounded-2xl border border-border/40 bg-background p-6 shadow-sm sm:p-8"
       noValidate
     >
       <input type="hidden" name="next" value={nextPath} />
       <input type="hidden" name="contact_choice" value={contactChoice} />
 
-      <section className="space-y-space-md">
+      <section className="space-y-4">
         <header>
-          <p className="text-label-sm uppercase text-outline">New client intake</p>
-          <h1 className="text-headline-sm font-semibold text-on-surface">Tell us how to keep you safe</h1>
-          <p className="mt-space-xs text-body-md text-muted-foreground">
+          <p className="text-xs uppercase text-muted-foreground">New client intake</p>
+          <h1 className="text-2xl font-semibold text-foreground">Tell us how to keep you safe</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
             Every field is optional unless labelled required. Share only what feels right today — you can update details
             with your outreach team later.
           </p>
@@ -95,12 +95,12 @@ export function ClientIntakeForm({
         ) : null}
 
         {isSuccess ? (
-          <Alert className="border-primary bg-primary-container text-on-primary-container">
+          <Alert className="border-primary bg-primary/10 text-primary">
             <AlertTitle>Intake received</AlertTitle>
-            <AlertDescription className="space-y-space-sm">
+            <AlertDescription className="space-y-3">
               <p>{state.message ?? 'Thanks for sharing your details. An outreach worker will follow up shortly.'}</p>
               {state.portalCode ? (
-                <p className="font-mono text-body-md">
+                <p className="font-mono text-sm">
                   Your IHARC code: <strong>{state.portalCode}</strong>. Keep this somewhere safe — you can use it later
                   to claim your online account.
                 </p>
@@ -110,15 +110,15 @@ export function ClientIntakeForm({
         ) : null}
       </section>
 
-      <section className="space-y-[calc(var(--md-sys-spacing-xl)-var(--md-sys-spacing-sm))]">
-        <fieldset className="space-y-space-sm rounded-xl border border-outline/30 p-space-md">
-          <legend className="text-title-sm font-semibold text-on-surface">
+      <section className="space-y-[calc(2rem-0.75rem)]">
+        <fieldset className="space-y-3 rounded-xl border border-border/30 p-4">
+          <legend className="text-base font-semibold text-foreground">
             How should we stay in touch about your services?
           </legend>
           <RadioGroup
             value={contactChoice}
             onValueChange={(value) => setContactChoice(value as ContactChoice)}
-            className="grid gap-space-sm md:grid-cols-2"
+            className="grid gap-3 md:grid-cols-2"
           >
             <ContactOption
               value="email"
@@ -144,7 +144,7 @@ export function ClientIntakeForm({
         </fieldset>
 
         {(contactChoice === 'email' || contactChoice === 'both') && (
-          <div className="grid gap-space-xs">
+          <div className="grid gap-2">
             <Label htmlFor="contact_email">Email address</Label>
             <Input
               id="contact_email"
@@ -158,7 +158,7 @@ export function ClientIntakeForm({
         )}
 
         {(contactChoice === 'phone' || contactChoice === 'both') && (
-          <div className="grid gap-space-xs">
+          <div className="grid gap-2">
             <Label htmlFor="contact_phone">Mobile phone</Label>
             <Input
               id="contact_phone"
@@ -169,13 +169,13 @@ export function ClientIntakeForm({
               required={contactChoice === 'phone' || contactChoice === 'both'}
               placeholder="+16475551234"
             />
-            <p className="text-label-sm text-muted-foreground">Include your country code so we can text verification codes if needed.</p>
+            <p className="text-xs text-muted-foreground">Include your country code so we can text verification codes if needed.</p>
           </div>
         )}
 
         {!shouldHideCredentials ? (
           <>
-            <div className="grid gap-space-xs">
+            <div className="grid gap-2">
               <Label htmlFor="password">Create a password</Label>
               <Input
                 id="password"
@@ -187,7 +187,7 @@ export function ClientIntakeForm({
                 placeholder="At least 12 characters"
               />
             </div>
-            <div className="grid gap-space-xs">
+            <div className="grid gap-2">
               <Label htmlFor="password_confirm">Confirm password</Label>
               <Input
                 id="password_confirm"
@@ -202,7 +202,7 @@ export function ClientIntakeForm({
           </>
         ) : null}
 
-        <div className="grid gap-space-xs">
+        <div className="grid gap-2">
           <Label htmlFor="chosen_name">What name should we use with you? *</Label>
           <Input
             id="chosen_name"
@@ -213,23 +213,23 @@ export function ClientIntakeForm({
           />
         </div>
 
-        <div className="grid gap-space-xs">
+        <div className="grid gap-2">
           <Label htmlFor="legal_name">Legal or government name (optional)</Label>
           <Input id="legal_name" name="legal_name" maxLength={160} placeholder="Only if it helps with benefits or ID" />
         </div>
 
-        <div className="grid gap-space-xs">
+        <div className="grid gap-2">
           <Label htmlFor="pronouns">Pronouns (optional)</Label>
           <Input id="pronouns" name="pronouns" maxLength={80} placeholder="She/her, they/them, he/him, etc." />
         </div>
 
-        <fieldset className="space-y-space-sm rounded-xl border border-outline/30 p-space-md">
-          <legend className="text-title-sm font-semibold text-on-surface">Is it safe for us to…</legend>
+        <fieldset className="space-y-3 rounded-xl border border-border/30 p-4">
+          <legend className="text-base font-semibold text-foreground">Is it safe for us to…</legend>
           <SafetyCheckbox name="safe_call" label="Call this phone number" />
           <SafetyCheckbox name="safe_text" label="Send text messages" />
           <SafetyCheckbox name="safe_voicemail" label="Leave a voicemail if you miss our call" />
 
-          <div className="grid gap-space-xs">
+          <div className="grid gap-2">
             <Label htmlFor="contact_window">Preferred contact window (optional)</Label>
             <Select name="contact_window" defaultValue="anytime">
               <SelectTrigger id="contact_window">
@@ -246,14 +246,14 @@ export function ClientIntakeForm({
           </div>
         </fieldset>
 
-        <fieldset className="space-y-space-sm rounded-xl border border-outline/30 p-space-md">
-          <legend className="text-title-sm font-semibold text-on-surface">Optional demographic details</legend>
-          <p className="text-body-sm text-muted-foreground">
+        <fieldset className="space-y-3 rounded-xl border border-border/30 p-4">
+          <legend className="text-base font-semibold text-foreground">Optional demographic details</legend>
+          <p className="text-sm text-muted-foreground">
             These questions help IHARC report on equity outcomes. Share only what feels right — skipping them never
             impacts services.
           </p>
-          <div className="grid gap-space-xs md:grid-cols-2">
-            <div className="grid gap-[calc(var(--md-sys-spacing-xs)-(var(--md-sys-spacing-2xs)/2))]">
+          <div className="grid gap-2 md:grid-cols-2">
+            <div className="grid gap-[calc(0.5rem-(0.25rem/2))]">
               <Label htmlFor="dob_month">Birth month</Label>
               <Select name="dob_month" defaultValue="">
                 <SelectTrigger id="dob_month">
@@ -269,7 +269,7 @@ export function ClientIntakeForm({
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid gap-[calc(var(--md-sys-spacing-xs)-(var(--md-sys-spacing-2xs)/2))]">
+            <div className="grid gap-[calc(0.5rem-(0.25rem/2))]">
               <Label htmlFor="dob_year">Birth year</Label>
               <Select name="dob_year" defaultValue="">
                 <SelectTrigger id="dob_year">
@@ -287,7 +287,7 @@ export function ClientIntakeForm({
             </div>
           </div>
 
-          <div className="grid gap-space-xs">
+          <div className="grid gap-2">
             <Label htmlFor="postal_code">Postal code (if any)</Label>
             <Input
               id="postal_code"
@@ -298,7 +298,7 @@ export function ClientIntakeForm({
             />
           </div>
 
-          <div className="grid gap-space-xs">
+          <div className="grid gap-2">
             <Label htmlFor="indigenous_identity">Indigenous identity (optional)</Label>
             <Input
               id="indigenous_identity"
@@ -308,7 +308,7 @@ export function ClientIntakeForm({
             />
           </div>
 
-          <div className="grid gap-space-xs">
+          <div className="grid gap-2">
             <Label htmlFor="disability">Disability or accessibility notes (optional)</Label>
             <Textarea
               id="disability"
@@ -318,14 +318,14 @@ export function ClientIntakeForm({
             />
           </div>
 
-          <div className="grid gap-space-xs">
+          <div className="grid gap-2">
             <Label htmlFor="gender_identity">Gender identity (optional)</Label>
             <Input id="gender_identity" name="gender_identity" maxLength={120} placeholder="Self-described identity" />
           </div>
         </fieldset>
 
-        <fieldset className="space-y-space-sm rounded-xl border border-outline/30 p-space-md">
-          <legend className="text-title-sm font-semibold text-on-surface">Consent</legend>
+        <fieldset className="space-y-3 rounded-xl border border-border/30 p-4">
+          <legend className="text-base font-semibold text-foreground">Consent</legend>
           <ConsentCheckbox
             id="consent_privacy"
             name="consent_privacy"
@@ -344,7 +344,7 @@ export function ClientIntakeForm({
             label="I agree to the portal Terms and Privacy Policy."
             required
           />
-          <div className="grid gap-space-xs">
+          <div className="grid gap-2">
             <Label htmlFor="additional_context">Anything else we should know?</Label>
             <Textarea
               id="additional_context"
@@ -356,13 +356,13 @@ export function ClientIntakeForm({
         </fieldset>
       </section>
 
-      <div className="flex items-center justify-between gap-space-md">
+      <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-body-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             We’ll email or text a confirmation as soon as possible. Staff can also look you up with your name and code.
           </p>
           {state.warnings?.length ? (
-            <ul className="mt-space-xs space-y-space-2xs text-body-sm text-outline">
+            <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
               {state.warnings.map((warning) => (
                 <li key={warning}>• {warning}</li>
               ))}
@@ -379,12 +379,12 @@ function ContactOption({ value, title, description }: { value: ContactChoice; ti
   return (
     <label
       htmlFor={`contact_choice_${value}`}
-      className="flex cursor-pointer items-start gap-space-sm rounded-xl border border-outline/40 bg-surface-container p-space-sm text-left text-title-sm font-medium text-on-surface shadow-subtle transition state-layer-color-primary hover:border-primary hover:state-layer-hover focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:state-layer-focus"
+      className="flex cursor-pointer items-start gap-3 rounded-xl border border-border/40 bg-card p-3 text-left text-base font-medium text-foreground shadow-sm transition hover:border-primary/60 hover:bg-muted focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2 focus-within:ring-offset-background"
     >
-      <RadioGroupItem id={`contact_choice_${value}`} value={value} className="mt-space-2xs" />
-      <span className="text-title-sm font-medium">
+      <RadioGroupItem id={`contact_choice_${value}`} value={value} className="mt-1" />
+      <span className="text-base font-medium">
         {title}
-        <span className="mt-space-2xs block text-body-sm font-normal text-muted-foreground">{description}</span>
+        <span className="mt-1 block text-sm font-normal text-muted-foreground">{description}</span>
       </span>
     </label>
   );
@@ -392,8 +392,8 @@ function ContactOption({ value, title, description }: { value: ContactChoice; ti
 
 function SafetyCheckbox({ name, label }: { name: string; label: string }) {
   return (
-    <label className="flex items-start gap-space-sm text-body-md text-on-surface">
-      <Checkbox id={name} name={name} className="mt-space-2xs" />
+    <label className="flex items-start gap-3 text-sm text-foreground">
+      <Checkbox id={name} name={name} className="mt-1" />
       <span>{label}</span>
     </label>
   );
@@ -411,8 +411,8 @@ function ConsentCheckbox({
   required?: boolean;
 }) {
   return (
-    <label htmlFor={id} className="flex items-start gap-space-sm text-body-md text-on-surface">
-      <Checkbox id={id} name={name} required={required} className="mt-space-2xs" />
+    <label htmlFor={id} className="flex items-start gap-3 text-sm text-foreground">
+      <Checkbox id={id} name={name} required={required} className="mt-1" />
       <span>
         {label} {required ? <span className="text-error">*</span> : null}
       </span>

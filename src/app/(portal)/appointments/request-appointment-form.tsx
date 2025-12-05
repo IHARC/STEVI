@@ -30,7 +30,7 @@ export function RequestAppointmentForm({ action, profileDisplayName }: RequestAp
   return (
     <form action={formAction} className="space-y-4" aria-describedby="request-form-feedback">
       <div className="space-y-1.5">
-        <label htmlFor="reason" className="text-body-md font-semibold text-on-surface">
+        <label htmlFor="reason" className="text-sm font-semibold text-foreground">
           What do you want to discuss?
         </label>
         <Textarea
@@ -43,9 +43,9 @@ export function RequestAppointmentForm({ action, profileDisplayName }: RequestAp
         />
       </div>
       <div className="space-y-1.5">
-        <label htmlFor="preferred-date" className="text-body-md font-semibold text-on-surface">
+        <label htmlFor="preferred-date" className="text-sm font-semibold text-foreground">
           Preferred date or time window{' '}
-          <span className="text-on-surface/60">(optional)</span>
+          <span className="text-foreground/60">(optional)</span>
         </label>
         <Input
           id="preferred-date"
@@ -54,8 +54,8 @@ export function RequestAppointmentForm({ action, profileDisplayName }: RequestAp
         />
       </div>
       <div className="space-y-1.5">
-        <label htmlFor="staff-preference" className="text-body-md font-semibold text-on-surface">
-          Preferred staff member <span className="text-on-surface/60">(optional)</span>
+        <label htmlFor="staff-preference" className="text-sm font-semibold text-foreground">
+          Preferred staff member <span className="text-foreground/60">(optional)</span>
         </label>
         <Input
           id="staff-preference"
@@ -63,9 +63,9 @@ export function RequestAppointmentForm({ action, profileDisplayName }: RequestAp
           placeholder="Example: Jordan, Morgan, peer navigator, or whoever is available"
         />
       </div>
-      <div className="grid gap-space-sm sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-2">
         <div className="space-y-1.5">
-          <label className="text-body-md font-semibold text-on-surface" htmlFor="location-type">
+          <label className="text-sm font-semibold text-foreground" htmlFor="location-type">
             Meeting type
           </label>
           <Select name="location_type" defaultValue="in_person">
@@ -82,13 +82,13 @@ export function RequestAppointmentForm({ action, profileDisplayName }: RequestAp
           </Select>
         </div>
         <div className="space-y-1.5">
-          <label className="text-body-md font-semibold text-on-surface" htmlFor="meeting-url">
+          <label className="text-sm font-semibold text-foreground" htmlFor="meeting-url">
             Meeting link or phone (optional)
           </label>
           <Input id="meeting-url" name="meeting_url" placeholder="Zoom/Teams link or call-back number" />
         </div>
       </div>
-      <p className="text-body-md text-muted-foreground">
+      <p className="text-sm text-muted-foreground">
         Submitting will notify the outreach coordination queue linked with STEVI Ops for {profileLabel}.
       </p>
       <Button type="submit" className="w-full sm:w-auto">
@@ -97,10 +97,10 @@ export function RequestAppointmentForm({ action, profileDisplayName }: RequestAp
       <div
         id="request-form-feedback"
         aria-live="polite"
-        className="text-body-md"
+        className="text-sm"
       >
         {state.status === 'success' ? (
-          <p className="text-tertiary">{state.message}</p>
+          <p className="text-accent">{state.message}</p>
         ) : null}
         {state.status === 'error' ? (
           <p className="text-destructive">{state.message}</p>

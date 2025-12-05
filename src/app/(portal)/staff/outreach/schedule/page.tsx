@@ -17,8 +17,8 @@ export default async function OutreachSchedulePage() {
   }
 
   return (
-    <div className="page-shell page-stack">
-      <div className="flex flex-col gap-space-sm">
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
+      <div className="flex flex-col gap-3">
         <PageHeader
           eyebrow="Staff tools"
           title="Outreach schedule"
@@ -27,7 +27,7 @@ export default async function OutreachSchedulePage() {
         <OutreachTabs />
       </div>
       <Card>
-        <CardContent className="space-y-space-2xs py-space-md text-body-md text-muted-foreground">
+        <CardContent className="space-y-1 py-4 text-sm text-muted-foreground">
           <p>Stub view for scheduling outreach routes. Integrate with shifts, appointments, and geospatial data when available.</p>
           <p>Ensure any future updates respect RLS and log to the audit trail.</p>
         </CardContent>

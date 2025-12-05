@@ -26,11 +26,11 @@ export default async function ClientCasesPage() {
   const cases = await fetchClientCases(supabase, access.userId);
 
   return (
-    <div className="page-shell page-stack">
-      <header className="space-y-space-2xs">
-        <p className="text-label-sm font-semibold uppercase text-muted-foreground">My support</p>
-        <h1 className="text-headline-lg text-on-surface sm:text-display-sm">My cases</h1>
-        <p className="max-w-3xl text-body-md text-muted-foreground sm:text-body-lg">
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
+      <header className="space-y-1">
+        <p className="text-xs font-semibold uppercase text-muted-foreground">My support</p>
+        <h1 className="text-3xl text-foreground sm:text-4xl">My cases</h1>
+        <p className="max-w-3xl text-sm text-muted-foreground sm:text-base">
           View your active cases and share updates with your IHARC team. Staff will reach out using your consent
           preferences.
         </p>
@@ -41,7 +41,7 @@ export default async function ClientCasesPage() {
           title="No cases yet"
           description="Your intake may be awaiting staff onboarding. You can submit a request in Support or check your consents."
           action={(
-            <div className="flex flex-wrap justify-center gap-space-sm">
+            <div className="flex flex-wrap justify-center gap-3">
               <Button asChild variant="default">
                 <Link href="/support">Get help</Link>
               </Button>
@@ -52,23 +52,23 @@ export default async function ClientCasesPage() {
           )}
         />
       ) : (
-        <div className="grid gap-space-md md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2">
           {cases.map((item) => (
             <Card key={item.id} className="h-full">
-              <CardHeader className="flex flex-row items-start justify-between gap-space-sm">
-                <div className="space-y-space-3xs">
-                  <CardTitle className="text-title-md">{item.caseType ?? 'Support case'}</CardTitle>
+              <CardHeader className="flex flex-row items-start justify-between gap-3">
+                <div className="space-y-0.5">
+                  <CardTitle className="text-lg">{item.caseType ?? 'Support case'}</CardTitle>
                   <CardDescription>Case #{item.caseNumber ?? item.id}</CardDescription>
-                  <p className="text-body-sm text-muted-foreground">Case manager: {item.caseManagerName}</p>
+                  <p className="text-sm text-muted-foreground">Case manager: {item.caseManagerName}</p>
                 </div>
                 <Badge variant={item.status === 'active' ? 'default' : 'secondary'} className="capitalize">
                   {item.status ?? 'active'}
                 </Badge>
               </CardHeader>
-              <CardContent className="space-y-space-sm text-body-sm text-on-surface/80">
+              <CardContent className="space-y-3 text-sm text-foreground/80">
                 <p>Priority: {item.priority ?? 'standard'}</p>
                 <p>Started: {item.startDate ? new Date(item.startDate).toLocaleDateString() : 'Pending'}</p>
-                <Button asChild variant="outline" className="mt-space-sm w-full">
+                <Button asChild variant="outline" className="mt-3 w-full">
                   <Link href={`/cases/${item.id}`}>Open case</Link>
                 </Button>
               </CardContent>

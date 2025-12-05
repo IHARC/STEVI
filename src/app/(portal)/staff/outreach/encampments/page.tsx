@@ -17,8 +17,8 @@ export default async function EncampmentsPage() {
   }
 
   return (
-    <div className="page-shell page-stack">
-      <div className="flex flex-col gap-space-sm">
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
+      <div className="flex flex-col gap-3">
         <PageHeader
           eyebrow="Staff tools"
           title="Encampment list"
@@ -27,7 +27,7 @@ export default async function EncampmentsPage() {
         <OutreachTabs />
       </div>
       <Card>
-        <CardContent className="space-y-space-2xs py-space-md text-body-md text-muted-foreground">
+        <CardContent className="space-y-1 py-4 text-sm text-muted-foreground">
           <p>Stub for encampment tracking. Add map pins, contact details, and visit history once data is available.</p>
           <p>Remember to respect consent flags and capture audit events for updates.</p>
         </CardContent>

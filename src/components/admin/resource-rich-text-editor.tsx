@@ -33,7 +33,6 @@ import {
   Underline as UnderlineIcon,
   Undo,
 } from 'lucide-react';
-import { Icon } from '@/components/ui/icon';
 
 type ResourceRichTextEditorProps = {
   name: string;
@@ -80,9 +79,9 @@ export function ResourceRichTextEditor({ name, label, description, defaultValue,
       attributes: {
         class: cn(
           'prose prose-sm max-w-none focus:outline-none',
-          'text-on-surface',
-          'prose-headings:mb-3 prose-headings:mt-6 prose-headings:text-on-surface',
-          'prose-strong:text-on-surface prose-em:text-on-surface/90 prose-code:text-primary',
+          'text-foreground',
+          'prose-headings:mb-3 prose-headings:mt-6 prose-headings:text-foreground',
+          'prose-strong:text-foreground prose-em:text-foreground/90 prose-code:text-primary',
           'prose-a:text-primary prose-a:no-underline hover:prose-a:underline',
           'prose-ul:my-4 prose-ol:my-4',
         ),
@@ -136,10 +135,10 @@ export function ResourceRichTextEditor({ name, label, description, defaultValue,
 
   return (
     <div className="space-y-2">
-      {label ? <label className="text-body-md font-medium text-on-surface">{label}</label> : null}
-      {description ? <p className="text-label-sm text-on-surface/70">{description}</p> : null}
-      <div className="rounded-3xl border border-outline/20 bg-surface-container-low">
-        <div className="flex flex-wrap items-center gap-2 border-b border-outline/15 px-3 py-2">
+      {label ? <label className="text-sm font-medium text-foreground">{label}</label> : null}
+      {description ? <p className="text-xs text-foreground/70">{description}</p> : null}
+      <div className="rounded-3xl border border-border/40 bg-muted">
+        <div className="flex flex-wrap items-center gap-2 border-b border-border/15 px-3 py-2">
           <Toggle
             type="button"
             size="sm"
@@ -151,7 +150,7 @@ export function ResourceRichTextEditor({ name, label, description, defaultValue,
               })
             }
           >
-            <Icon icon={Bold} size="sm" aria-hidden />
+            <Bold className="h-4 w-4" aria-hidden />
           </Toggle>
           <Toggle
             type="button"
@@ -164,7 +163,7 @@ export function ResourceRichTextEditor({ name, label, description, defaultValue,
               })
             }
           >
-            <Icon icon={Italic} size="sm" aria-hidden />
+            <Italic className="h-4 w-4" aria-hidden />
           </Toggle>
           <Toggle
             type="button"
@@ -177,7 +176,7 @@ export function ResourceRichTextEditor({ name, label, description, defaultValue,
               })
             }
           >
-            <Icon icon={UnderlineIcon} size="sm" aria-hidden />
+            <UnderlineIcon className="h-4 w-4" aria-hidden />
           </Toggle>
           <Button
             type="button"
@@ -187,7 +186,7 @@ export function ResourceRichTextEditor({ name, label, description, defaultValue,
             onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
             className={cn(
               'font-semibold',
-              editor?.isActive('heading', { level: 2 }) ? 'text-primary' : 'text-on-surface/80',
+              editor?.isActive('heading', { level: 2 }) ? 'text-primary' : 'text-foreground/80',
             )}
           >
             H2
@@ -200,7 +199,7 @@ export function ResourceRichTextEditor({ name, label, description, defaultValue,
             onClick={() => editor?.chain().focus().toggleHeading({ level: 3 }).run()}
             className={cn(
               'font-semibold',
-              editor?.isActive('heading', { level: 3 }) ? 'text-primary' : 'text-on-surface/80',
+              editor?.isActive('heading', { level: 3 }) ? 'text-primary' : 'text-foreground/80',
             )}
           >
             H3
@@ -216,7 +215,7 @@ export function ResourceRichTextEditor({ name, label, description, defaultValue,
               })
             }
           >
-            <Icon icon={List} size="sm" aria-hidden />
+            <List className="h-4 w-4" aria-hidden />
           </Toggle>
           <Toggle
             type="button"
@@ -229,7 +228,7 @@ export function ResourceRichTextEditor({ name, label, description, defaultValue,
               })
             }
           >
-            <Icon icon={ListOrdered} size="sm" aria-hidden />
+            <ListOrdered className="h-4 w-4" aria-hidden />
           </Toggle>
           <Toggle
             type="button"
@@ -242,14 +241,14 @@ export function ResourceRichTextEditor({ name, label, description, defaultValue,
               })
             }
           >
-            <Icon icon={Quote} size="sm" aria-hidden />
+            <Quote className="h-4 w-4" aria-hidden />
           </Toggle>
 
           <div className="ml-auto flex items-center gap-2">
             <Dialog open={linkDialogOpen} onOpenChange={setLinkDialogOpen}>
               <DialogTrigger asChild>
                 <Button type="button" size="sm" variant="ghost" aria-label="Insert link">
-                  <Icon icon={LinkIcon} size="sm" aria-hidden />
+                  <LinkIcon className="h-4 w-4" aria-hidden />
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-md">
@@ -285,7 +284,7 @@ export function ResourceRichTextEditor({ name, label, description, defaultValue,
             <Dialog open={htmlDialogOpen} onOpenChange={setHtmlDialogOpen}>
               <DialogTrigger asChild>
                 <Button type="button" size="sm" variant="ghost" aria-label="Insert HTML">
-                  <Icon icon={FileCode} size="sm" aria-hidden />
+                  <FileCode className="h-4 w-4" aria-hidden />
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-lg">
@@ -300,7 +299,7 @@ export function ResourceRichTextEditor({ name, label, description, defaultValue,
                   onChange={(event) => setHtmlSnippet(event.target.value)}
                   rows={6}
                   placeholder="<iframe …></iframe>"
-                  className="text-body-md"
+                  className="text-sm"
                 />
                 <DialogFooter className="gap-2 sm:space-x-0">
                   <Button type="button" variant="ghost" onClick={() => setHtmlDialogOpen(false)}>
@@ -321,7 +320,7 @@ export function ResourceRichTextEditor({ name, label, description, defaultValue,
               onClick={() => editor?.chain().focus().undo().run()}
               disabled={!editor?.can().undo()}
             >
-              <Icon icon={Undo} size="sm" aria-hidden />
+              <Undo className="h-4 w-4" aria-hidden />
             </Button>
             <Button
               type="button"
@@ -331,7 +330,7 @@ export function ResourceRichTextEditor({ name, label, description, defaultValue,
               onClick={() => editor?.chain().focus().redo().run()}
               disabled={!editor?.can().redo()}
             >
-              <Icon icon={Redo} size="sm" aria-hidden />
+              <Redo className="h-4 w-4" aria-hidden />
             </Button>
           </div>
         </div>
@@ -339,7 +338,7 @@ export function ResourceRichTextEditor({ name, label, description, defaultValue,
           {editor ? (
             <EditorContent editor={editor} />
           ) : (
-            <div className="min-h-[220px] rounded-2xl border border-outline/20 bg-surface p-4 text-body-md text-on-surface/70">
+            <div className="min-h-[220px] rounded-2xl border border-border/40 bg-background p-4 text-sm text-foreground/70">
               Loading editor…
             </div>
           )}
@@ -347,9 +346,9 @@ export function ResourceRichTextEditor({ name, label, description, defaultValue,
       </div>
       <input type="hidden" name={name} value={serialized} />
       {showPreview ? (
-        <div className="rounded-2xl border border-outline/15 bg-surface-container-low px-space-md py-space-sm">
-          <p className="text-label-sm font-semibold uppercase text-muted-foreground">Preview</p>
-          <div className="prose prose-sm max-w-none text-on-surface" dangerouslySetInnerHTML={{ __html: serialized }} />
+        <div className="rounded-2xl border border-border/15 bg-muted px-4 py-3">
+          <p className="text-xs font-semibold uppercase text-muted-foreground">Preview</p>
+          <div className="prose prose-sm max-w-none text-foreground" dangerouslySetInnerHTML={{ __html: serialized }} />
         </div>
       ) : null}
     </div>

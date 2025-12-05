@@ -17,12 +17,12 @@ export function ClientPreviewBanner() {
   return (
     <Alert
       role="status"
-      className="rounded-none border-0 border-b border-outline/20 bg-surface-container-low text-on-surface"
+      className="rounded-none border-0 border-b border-border/40 bg-muted text-foreground"
     >
-      <div className="mx-auto flex w-full max-w-page flex-wrap items-center justify-between gap-space-sm px-space-md">
-        <div className="space-y-space-2xs">
-          <AlertTitle className="text-label-sm font-semibold uppercase text-primary">Client preview</AlertTitle>
-          <AlertDescription className="text-body-sm text-on-surface/80">
+      <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 px-4">
+        <div className="space-y-1">
+          <AlertTitle className="text-xs font-semibold uppercase text-primary">Client preview</AlertTitle>
+          <AlertDescription className="text-sm text-foreground/80">
             You’re viewing the client portal as a {workspaceLabel.toLowerCase()}. Some actions are limited to prevent
             accidental changes. Switch back when you’re ready to keep working.
           </AlertDescription>

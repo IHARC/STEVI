@@ -48,24 +48,24 @@ export function HomeForm({ hero, contextCards }: Props) {
   };
 
   return (
-    <form action={saveHomeSettings} className="space-y-space-lg">
+    <form action={saveHomeSettings} className="space-y-6">
       <input type="hidden" name="hero_image_url" value={heroImageUrl} />
       <input type="hidden" name="context_cards_json" value={serializeContext(cards)} />
-      <div className="grid gap-space-md md:grid-cols-2">
-        <div className="space-y-space-sm">
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="space-y-3">
           <Label htmlFor="hero_pill">Pill label</Label>
           <Input id="hero_pill" name="hero_pill" defaultValue={hero.pill} required maxLength={120} />
         </div>
-        <div className="space-y-space-sm">
+        <div className="space-y-3">
           <Label htmlFor="hero_headline">Headline</Label>
           <Input id="hero_headline" name="hero_headline" defaultValue={hero.headline} required maxLength={200} />
         </div>
       </div>
-      <div className="space-y-space-sm">
+      <div className="space-y-3">
         <Label htmlFor="hero_body">Body</Label>
         <Textarea id="hero_body" name="hero_body" defaultValue={hero.body} required rows={3} />
       </div>
-      <div className="space-y-space-sm">
+      <div className="space-y-3">
         <Label htmlFor="hero_supporting">Supporting line</Label>
         <Textarea
           id="hero_supporting"
@@ -75,8 +75,8 @@ export function HomeForm({ hero, contextCards }: Props) {
           rows={2}
         />
       </div>
-      <div className="grid gap-space-md md:grid-cols-[2fr,1fr]">
-        <div className="space-y-space-sm">
+      <div className="grid gap-4 md:grid-cols-[2fr,1fr]">
+        <div className="space-y-3">
           <Label htmlFor="hero_image_alt">Hero image alt text</Label>
           <Input
             id="hero_image_alt"
@@ -85,17 +85,17 @@ export function HomeForm({ hero, contextCards }: Props) {
             placeholder="Describe the photo for people using screen readers"
             maxLength={200}
           />
-          <p className="text-body-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Required if an image is present. Keep it concise and specific.
           </p>
         </div>
-        <div className="space-y-space-xs rounded-lg border border-border bg-surface p-space-sm">
-          <div className="flex items-center justify-between gap-space-xs">
-            <div className="space-y-space-2xs">
-              <p className="text-title-sm">Hero image</p>
-              <p className="text-body-sm text-muted-foreground">JPEG/PNG, up to 5 MB. Stored in app-branding bucket.</p>
+        <div className="space-y-2 rounded-lg border border-border bg-background p-3">
+          <div className="flex items-center justify-between gap-2">
+            <div className="space-y-1">
+              <p className="text-base">Hero image</p>
+              <p className="text-sm text-muted-foreground">JPEG/PNG, up to 5 MB. Stored in app-branding bucket.</p>
             </div>
-            <label className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-body-sm font-medium text-on-surface shadow-sm transition hover:bg-surface cursor-pointer">
+            <label className="inline-flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2 text-sm font-medium text-foreground shadow-sm transition hover:bg-background cursor-pointer">
               <ImageIcon className="h-4 w-4" aria-hidden />
               {isUploading ? 'Uploading…' : 'Upload'}
               <input
@@ -117,16 +117,16 @@ export function HomeForm({ hero, contextCards }: Props) {
               // eslint-disable-next-line @next/next/no-img-element
               <img src={heroImageUrl} alt={hero.imageAlt ?? ''} className="h-full w-full object-cover" />
             ) : (
-              <div className="flex h-full items-center justify-center text-body-sm text-muted-foreground">No image selected</div>
+              <div className="flex h-full items-center justify-center text-sm text-muted-foreground">No image selected</div>
             )}
           </div>
           {heroImageUrl ? (
-            <p className="text-body-xs text-muted-foreground break-all">{heroImageUrl}</p>
+            <p className="text-xs text-muted-foreground break-all">{heroImageUrl}</p>
           ) : null}
         </div>
       </div>
-      <div className="grid gap-space-md md:grid-cols-2">
-        <div className="space-y-space-sm">
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="space-y-3">
           <Label htmlFor="hero_primary_label">Primary CTA label</Label>
           <Input
             id="hero_primary_label"
@@ -135,7 +135,7 @@ export function HomeForm({ hero, contextCards }: Props) {
             required
           />
         </div>
-        <div className="space-y-space-sm">
+        <div className="space-y-3">
           <Label htmlFor="hero_primary_href">Primary CTA href</Label>
           <Input
             id="hero_primary_href"
@@ -146,22 +146,22 @@ export function HomeForm({ hero, contextCards }: Props) {
           />
         </div>
       </div>
-      <div className="grid gap-space-md md:grid-cols-2">
-        <div className="space-y-space-sm">
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="space-y-3">
           <Label htmlFor="hero_secondary_label">Secondary link label</Label>
           <Input id="hero_secondary_label" name="hero_secondary_label" defaultValue={hero.secondaryLink?.label ?? ''} />
         </div>
-        <div className="space-y-space-sm">
+        <div className="space-y-3">
           <Label htmlFor="hero_secondary_href">Secondary link href</Label>
           <Input id="hero_secondary_href" name="hero_secondary_href" defaultValue={hero.secondaryLink?.href ?? ''} />
         </div>
       </div>
 
-      <div className="space-y-space-sm">
+      <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-title-md">Context cards</p>
-            <p className="text-body-sm text-muted-foreground">Shown under “How we got here”.</p>
+            <p className="text-lg">Context cards</p>
+            <p className="text-sm text-muted-foreground">Shown under “How we got here”.</p>
           </div>
           <Button type="button" variant="outline" onClick={addCard} className="gap-2">
             <Plus className="h-4 w-4" aria-hidden />
@@ -169,13 +169,13 @@ export function HomeForm({ hero, contextCards }: Props) {
           </Button>
         </div>
 
-        <div className="space-y-space-sm">
+        <div className="space-y-3">
           {cards.map((card, index) => (
             <div
               key={`${card.id || 'card'}-${index}`}
-              className="grid gap-space-xs rounded-lg border border-border bg-card/40 p-space-sm md:grid-cols-[1fr,1fr]"
+              className="grid gap-2 rounded-lg border border-border bg-card/40 p-3 md:grid-cols-[1fr,1fr]"
             >
-              <div className="space-y-space-2xs">
+              <div className="space-y-1">
                 <Label htmlFor={`card-id-${index}`}>ID / anchor</Label>
                 <Input
                   id={`card-id-${index}`}
@@ -185,7 +185,7 @@ export function HomeForm({ hero, contextCards }: Props) {
                   placeholder="housing"
                 />
               </div>
-              <div className="space-y-space-2xs">
+              <div className="space-y-1">
                 <Label htmlFor={`card-title-${index}`}>Title</Label>
                 <Input
                   id={`card-title-${index}`}
@@ -194,7 +194,7 @@ export function HomeForm({ hero, contextCards }: Props) {
                   required
                 />
               </div>
-              <div className="space-y-space-2xs md:col-span-2">
+              <div className="space-y-1 md:col-span-2">
                 <Label htmlFor={`card-description-${index}`}>Description</Label>
                 <Textarea
                   id={`card-description-${index}`}
@@ -203,7 +203,7 @@ export function HomeForm({ hero, contextCards }: Props) {
                   required
                 />
               </div>
-              <div className="space-y-space-2xs">
+              <div className="space-y-1">
                 <Label htmlFor={`card-href-${index}`}>Href</Label>
                 <Input
                   id={`card-href-${index}`}
@@ -230,9 +230,9 @@ export function HomeForm({ hero, contextCards }: Props) {
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-space-sm">
+      <div className="flex flex-wrap items-center gap-3">
         <Button type="submit">Save home & context</Button>
-        <p className="text-body-sm text-muted-foreground">Saves publish to the public site immediately.</p>
+        <p className="text-sm text-muted-foreground">Saves publish to the public site immediately.</p>
       </div>
     </form>
   );

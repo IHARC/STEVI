@@ -61,20 +61,20 @@ export function UserSavedSearches({ segment, currentParams }: Props) {
   };
 
   return (
-    <div className="flex flex-col gap-space-2xs rounded-2xl border border-outline/15 bg-surface-container-low px-space-sm py-space-sm">
-      <div className="flex flex-wrap items-center gap-space-sm">
+    <div className="flex flex-col gap-1 rounded-2xl border border-border/15 bg-muted px-3 py-3">
+      <div className="flex flex-wrap items-center gap-3">
         <Badge variant="secondary">Saved searches</Badge>
         <Button type="button" size="sm" variant="outline" onClick={handleSaveCurrent}>
           Save current filters
         </Button>
       </div>
-      <div className="flex flex-wrap gap-space-xs">
+      <div className="flex flex-wrap gap-2">
         {presets.map((preset) => (
           <Button
             key={preset.id}
             size="sm"
             variant="ghost"
-            className="border border-outline/20"
+            className="border border-border/40"
             onClick={() => navigateWithParams(preset.params)}
           >
             {preset.label}
@@ -85,7 +85,7 @@ export function UserSavedSearches({ segment, currentParams }: Props) {
             key={entry.id}
             size="sm"
             variant="outline"
-            className="flex items-center gap-space-2xs"
+            className="flex items-center gap-1"
             onClick={() => navigateWithParams(entry.params)}
           >
             <span>{entry.label}</span>
@@ -102,7 +102,7 @@ export function UserSavedSearches({ segment, currentParams }: Props) {
           </Button>
         ))}
       </div>
-      <p className="text-label-sm text-muted-foreground">Applies filters client-side; data still constrained by RLS.</p>
+      <p className="text-xs text-muted-foreground">Applies filters client-side; data still constrained by RLS.</p>
     </div>
   );
 }

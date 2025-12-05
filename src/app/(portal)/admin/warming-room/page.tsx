@@ -24,14 +24,14 @@ export default async function AdminWarmingRoomPage() {
   }
 
   return (
-    <div className="page-shell page-stack">
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
       <PageHeader
         eyebrow="Admin"
         title="Warming room operations"
         description="Plan capacity, staffing, and safety checks for IHARC warming rooms. Integrate with inventory and scheduling when data is ready."
       />
       <Card>
-        <CardContent className="space-y-space-2xs py-space-md text-body-md text-muted-foreground">
+        <CardContent className="space-y-1 py-4 text-sm text-muted-foreground">
           <p>Stub view for warming room coordination. Add capacity tracking, incident logging, and shift coverage here.</p>
           <p>Ensure all mutations log to the audit trail and respect consent flags once hooked to Supabase data.</p>
         </CardContent>

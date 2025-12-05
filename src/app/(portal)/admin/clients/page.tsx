@@ -75,19 +75,19 @@ export default async function AdminClientsPage({ searchParams }: PageProps) {
   });
 
   return (
-    <div className="page-shell page-stack">
-      <header className="space-y-space-2xs">
-        <p className="text-label-sm font-semibold uppercase text-muted-foreground">Clients</p>
-        <h1 className="text-title-lg text-on-surface sm:text-headline-sm">Client directory</h1>
-        <p className="max-w-3xl text-body-md text-muted-foreground sm:text-body-lg">
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
+      <header className="space-y-1">
+        <p className="text-xs font-semibold uppercase text-muted-foreground">Clients</p>
+        <h1 className="text-xl text-foreground sm:text-2xl">Client directory</h1>
+        <p className="max-w-3xl text-sm text-muted-foreground sm:text-base">
           RLS-limited view of people records. Use consent overrides to align sharing with client wishes.
         </p>
-        <div className="flex flex-wrap gap-space-sm text-body-sm text-muted-foreground">
+        <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
           <Badge variant="outline">Onboarded: {statusCounts.COMPLETED}</Badge>
           <Badge variant="secondary">Needs consents: {statusCounts.NEEDS_CONSENTS}</Badge>
           <Badge variant="outline">Not started: {statusCounts.NOT_STARTED}</Badge>
         </div>
-        <div className="flex flex-wrap gap-space-sm">
+        <div className="flex flex-wrap gap-3">
           <Button asChild variant={statusFilter === 'all' ? 'default' : 'outline'} size="sm">
             <Link href="/admin/clients">All</Link>
           </Button>
@@ -103,16 +103,16 @@ export default async function AdminClientsPage({ searchParams }: PageProps) {
         </div>
       </header>
 
-      <div className="grid gap-space-md md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {filteredPeople.map((person) => (
           <Card key={person.id} className="h-full">
-            <CardHeader className="flex flex-row items-start justify-between gap-space-sm">
-              <div className="space-y-space-2xs">
-                <CardTitle className="text-title-md">{person.first_name ?? 'Person'} {person.last_name ?? ''}</CardTitle>
+            <CardHeader className="flex flex-row items-start justify-between gap-3">
+              <div className="space-y-1">
+                <CardTitle className="text-lg">{person.first_name ?? 'Person'} {person.last_name ?? ''}</CardTitle>
                 <CardDescription>Person ID: {person.id}</CardDescription>
-                <p className="text-body-sm text-muted-foreground">Type: {person.person_type ?? 'unspecified'}</p>
+                <p className="text-sm text-muted-foreground">Type: {person.person_type ?? 'unspecified'}</p>
               </div>
-              <div className="flex flex-col items-end gap-space-2xs">
+              <div className="flex flex-col items-end gap-1">
                 <Badge variant={person.status === 'active' ? 'default' : 'secondary'} className="capitalize">
                   {person.status ?? 'active'}
                 </Badge>
@@ -121,21 +121,21 @@ export default async function AdminClientsPage({ searchParams }: PageProps) {
                 </Badge>
               </div>
             </CardHeader>
-            <CardContent className="space-y-space-2xs text-body-sm text-on-surface/80">
+            <CardContent className="space-y-1 text-sm text-foreground/80">
               <p>Email: {person.email ?? '—'}</p>
               <p>Phone: {person.phone ?? '—'}</p>
               <p>Data sharing: {person.data_sharing_consent ? 'Yes' : 'No'}</p>
               <p className="text-muted-foreground">{describeOnboarding(person.onboarding)}</p>
-              <Button asChild variant="outline" className="mt-space-sm w-full">
+              <Button asChild variant="outline" className="mt-3 w-full">
                 <Link href={`/admin/clients/${person.id}`}>Open details</Link>
               </Button>
             </CardContent>
           </Card>
         ))}
         {filteredPeople.length === 0 ? (
-          <Card className="border-dashed border-outline/60">
+          <Card className="border-dashed border-border/60">
             <CardHeader>
-              <CardTitle className="text-title-md">No clients visible</CardTitle>
+              <CardTitle className="text-lg">No clients visible</CardTitle>
               <CardDescription>Adjust RLS or try a different onboarding filter if you expect results.</CardDescription>
             </CardHeader>
           </Card>

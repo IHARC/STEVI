@@ -112,14 +112,14 @@ export default async function HomePage() {
   const preferredContact = person?.preferred_contact_method ?? 'Not provided';
 
   return (
-    <div className="page-shell page-stack">
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
       <PageHeader
         eyebrow="Client portal"
         title={`Hi ${preferredName}, you’re connected to STEVI`}
         description="Track appointments, review documents, and stay in touch with outreach staff. Updates here sync with the STEVI Ops tools the field team uses."
         actions={
           <ClientPreviewGuard message="You’re previewing the client portal. Requests are read-only until you exit preview.">
-            <div className="flex flex-wrap gap-space-sm">
+            <div className="flex flex-wrap gap-3">
               <Button asChild>
                 <Link href="/appointments">Request a new appointment</Link>
               </Button>
@@ -131,36 +131,36 @@ export default async function HomePage() {
         }
       />
 
-      <div className="grid gap-space-lg lg:grid-cols-[1.15fr_0.85fr]">
-        <Card className="relative overflow-hidden border-outline-variant/60 bg-surface-container-high shadow-level-2 lg:col-span-1">
+      <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+        <Card className="relative overflow-hidden border-border/60 bg-card shadow-md lg:col-span-1">
           <div className="h-1 w-full bg-primary" aria-hidden />
-          <CardHeader className="flex flex-col gap-space-sm sm:flex-row sm:items-center sm:justify-between">
+          <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <CardTitle id="appointments-heading" className="text-title-lg">
+              <CardTitle id="appointments-heading" className="text-xl">
                 Your timeline
               </CardTitle>
-              <p className="text-body-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 Upcoming and recent appointments in one view. We respond within one business day.
               </p>
             </div>
-            <Button variant="ghost" asChild size="sm" className="text-label-md font-medium">
+            <Button variant="ghost" asChild size="sm" className="text-xs font-medium">
               <Link href="/appointments">Manage appointments</Link>
             </Button>
           </CardHeader>
-          <CardContent className="flex flex-col gap-space-md">
+          <CardContent className="flex flex-col gap-4">
             {appointments.length === 0 ? (
-              <p className="text-body-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 No appointments yet. Request one to get started.
               </p>
             ) : (
               appointments.map((appointment) => (
                 <article
                   key={appointment.id}
-                  className="rounded-2xl border border-outline-variant/60 bg-surface-container p-space-md shadow-level-1 transition motion-duration-short motion-ease-standard state-layer-color-primary hover:-translate-y-[1px] hover:border-primary hover:shadow-level-2 hover:state-layer-hover"
+                  className="rounded-2xl border border-border/60 bg-card p-4 shadow-sm transition duration-150 ease-out hover:-translate-y-[1px] hover:border-primary hover:bg-muted hover:shadow-md"
                   aria-labelledby={`appointment-${appointment.id}`}
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <h3 id={`appointment-${appointment.id}`} className="text-title-md font-semibold text-on-surface">
+                    <h3 id={`appointment-${appointment.id}`} className="text-lg font-semibold text-foreground">
                       {appointment.title}
                     </h3>
                     <Badge
@@ -170,25 +170,25 @@ export default async function HomePage() {
                       {appointment.status}
                     </Badge>
                   </div>
-                  <dl className="mt-space-xs space-y-[0.35rem] text-body-sm text-on-surface/80">
+                  <dl className="mt-2 space-y-[0.35rem] text-sm text-foreground/80">
                     <div className="flex flex-wrap gap-1">
-                      <dt className="font-medium text-on-surface/70">When:</dt>
+                      <dt className="font-medium text-foreground/70">When:</dt>
                       <dd>{formatAppointmentDate(appointment.occursAt)}</dd>
                     </div>
                     <div className="flex flex-wrap gap-1">
-                      <dt className="font-medium text-on-surface/70">Where:</dt>
+                      <dt className="font-medium text-foreground/70">Where:</dt>
                       <dd>{appointment.location}</dd>
                       {appointment.locationType ? (
-                        <dd className="text-on-surface/60">({appointment.locationType.replaceAll('_', ' ')})</dd>
+                        <dd className="text-foreground/60">({appointment.locationType.replaceAll('_', ' ')})</dd>
                       ) : null}
                     </div>
                     <div className="flex flex-wrap gap-1">
-                      <dt className="font-medium text-on-surface/70">With:</dt>
+                      <dt className="font-medium text-foreground/70">With:</dt>
                       <dd>{appointment.staffContact}</dd>
                     </div>
                     {appointment.meetingUrl ? (
                       <div className="flex flex-wrap gap-1">
-                        <dt className="font-medium text-on-surface/70">Join:</dt>
+                        <dt className="font-medium text-foreground/70">Join:</dt>
                         <dd>
                           <a
                             className="text-primary underline-offset-4 hover:underline"
@@ -204,7 +204,7 @@ export default async function HomePage() {
                   </dl>
                   {isActionable(appointment.status) ? (
                     <ClientPreviewGuard message="Requests are disabled while you preview the client portal. Exit preview to submit.">
-                      <div className="mt-space-sm space-y-space-2xs">
+                      <div className="mt-3 space-y-1">
                         <RequestRescheduleForm action={requestRescheduleAsClient} appointmentId={appointment.id} />
                         <CancelAppointmentForm
                           action={cancelAppointmentAsClient}
@@ -217,7 +217,7 @@ export default async function HomePage() {
                 </article>
               ))
             )}
-            <p className="text-body-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Need to change something?{' '}
               <Link href="/support" className="text-primary underline-offset-4 hover:underline">
                 Message the outreach team
@@ -227,24 +227,24 @@ export default async function HomePage() {
           </CardContent>
         </Card>
 
-        <div className="space-y-space-lg">
-          <Card className="relative overflow-hidden border-outline-variant/60 bg-surface-container-high shadow-level-2">
+        <div className="space-y-6">
+          <Card className="relative overflow-hidden border-border/60 bg-card shadow-md">
             <div className="h-1 w-full bg-primary" aria-hidden />
-            <CardHeader className="pb-space-xs">
-              <CardTitle className="text-title-md">My details</CardTitle>
-              <p className="text-body-sm text-muted-foreground">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">My details</CardTitle>
+              <p className="text-sm text-muted-foreground">
                 Key preferences IHARC uses to contact you.
               </p>
             </CardHeader>
-            <CardContent className="space-y-space-sm">
-              <dl className="grid gap-space-sm sm:grid-cols-2 text-body-sm">
-                <div className="rounded-xl bg-surface-container px-space-sm py-space-sm state-layer-color-primary hover:state-layer-hover transition motion-duration-short motion-ease-standard">
-                  <dt className="text-label-sm uppercase tracking-label-uppercase text-muted-foreground">Pronouns</dt>
-                  <dd className="text-title-sm text-on-surface">{preferredPronouns}</dd>
+            <CardContent className="space-y-3">
+              <dl className="grid gap-3 sm:grid-cols-2 text-sm">
+                <div className="rounded-xl bg-card px-3 py-3 hover:bg-muted transition duration-150 ease-out">
+                  <dt className="text-xs uppercase tracking-label-uppercase text-muted-foreground">Pronouns</dt>
+                  <dd className="text-base text-foreground">{preferredPronouns}</dd>
                 </div>
-                <div className="rounded-xl bg-surface-container px-space-sm py-space-sm state-layer-color-primary hover:state-layer-hover transition motion-duration-short motion-ease-standard">
-                  <dt className="text-label-sm uppercase tracking-label-uppercase text-muted-foreground">Preferred contact</dt>
-                  <dd className="text-title-sm text-on-surface">{preferredContact}</dd>
+                <div className="rounded-xl bg-card px-3 py-3 hover:bg-muted transition duration-150 ease-out">
+                  <dt className="text-xs uppercase tracking-label-uppercase text-muted-foreground">Preferred contact</dt>
+                  <dd className="text-base text-foreground">{preferredContact}</dd>
                 </div>
               </dl>
               <Button variant="outline" size="sm" asChild className="w-fit">
@@ -253,31 +253,31 @@ export default async function HomePage() {
             </CardContent>
           </Card>
 
-          <Card className="border-outline-variant/60 bg-surface-container shadow-level-2">
+          <Card className="border-border/60 bg-card shadow-md">
             <CardHeader>
-              <CardTitle className="text-title-md">Support contacts</CardTitle>
-              <p className="text-body-sm text-muted-foreground">
+              <CardTitle className="text-lg">Support contacts</CardTitle>
+              <p className="text-sm text-muted-foreground">
                 Reach out when you need to reschedule, request supplies, or connect with services.
               </p>
             </CardHeader>
-            <CardContent className="space-y-space-md">
+            <CardContent className="space-y-4">
               {supportTeam.map((contact) => (
                 <article
                   key={contact.id}
-                  className="rounded-2xl border border-outline-variant/60 bg-surface-container p-space-md shadow-level-1 state-layer-color-primary hover:state-layer-hover transition motion-duration-short motion-ease-standard"
+                  className="rounded-2xl border border-border/60 bg-card p-4 shadow-sm hover:bg-muted transition duration-150 ease-out"
                 >
-                  <header className="flex flex-wrap items-center justify-between gap-space-2xs">
+                  <header className="flex flex-wrap items-center justify-between gap-1">
                     <div>
-                      <p className="text-title-sm font-semibold text-on-surface">{contact.name}</p>
-                      <p className="text-body-sm text-muted-foreground">{contact.role}</p>
+                      <p className="text-base font-semibold text-foreground">{contact.name}</p>
+                      <p className="text-sm text-muted-foreground">{contact.role}</p>
                     </div>
-                    <Badge variant="secondary" className="bg-surface-container-high text-on-surface">
+                    <Badge variant="secondary" className="bg-card text-foreground">
                       {contact.available}
                     </Badge>
                   </header>
-                  <dl className="mt-space-sm space-y-[0.35rem] text-body-sm">
+                  <dl className="mt-3 space-y-[0.35rem] text-sm">
                     <div className="flex flex-wrap gap-1">
-                      <dt className="font-medium text-on-surface/70">Phone:</dt>
+                      <dt className="font-medium text-foreground/70">Phone:</dt>
                       <dd>
                         <a href={`tel:${contact.phone}`} className="text-primary underline-offset-4 hover:underline">
                           {contact.phone}
@@ -285,7 +285,7 @@ export default async function HomePage() {
                       </dd>
                     </div>
                     <div className="flex flex-wrap gap-1">
-                      <dt className="font-medium text-on-surface/70">Email:</dt>
+                      <dt className="font-medium text-foreground/70">Email:</dt>
                       <dd>
                         <a href={`mailto:${contact.email}`} className="text-primary underline-offset-4 hover:underline">
                           {contact.email}
@@ -298,38 +298,38 @@ export default async function HomePage() {
             </CardContent>
           </Card>
 
-          <Card className="border-outline-variant/60 bg-surface-container shadow-level-2">
+          <Card className="border-border/60 bg-card shadow-md">
             <CardHeader>
-              <CardTitle className="text-title-md">Focus areas</CardTitle>
-              <p className="text-body-sm text-muted-foreground">
+              <CardTitle className="text-lg">Focus areas</CardTitle>
+              <p className="text-sm text-muted-foreground">
                 Snapshot of your current goals. Staff update these as part of outreach notes.
               </p>
             </CardHeader>
-            <CardContent className="space-y-space-md">
-              <article className="rounded-2xl border border-outline-variant/60 bg-surface-container p-space-md shadow-level-1 state-layer-color-primary hover:state-layer-hover transition motion-duration-short motion-ease-standard">
+            <CardContent className="space-y-4">
+              <article className="rounded-2xl border border-border/60 bg-card p-4 shadow-sm hover:bg-muted transition duration-150 ease-out">
                 <div className="flex items-center justify-between">
-                  <p className="text-title-sm font-medium text-on-surface">Housing application</p>
+                  <p className="text-base font-medium text-foreground">Housing application</p>
                   <Badge variant="secondary">In review</Badge>
                 </div>
-                <p className="mt-space-xs text-body-sm text-muted-foreground">
+                <p className="mt-2 text-sm text-muted-foreground">
                   Ontario Works packet submitted last week. Awaiting confirmation from housing help centre.
                 </p>
               </article>
-              <article className="rounded-2xl border border-outline-variant/60 bg-surface-container p-space-md shadow-level-1 state-layer-color-primary hover:state-layer-hover transition motion-duration-short motion-ease-standard">
+              <article className="rounded-2xl border border-border/60 bg-card p-4 shadow-sm hover:bg-muted transition duration-150 ease-out">
                 <div className="flex items-center justify-between">
-                  <p className="text-title-sm font-medium text-on-surface">Health supports</p>
+                  <p className="text-base font-medium text-foreground">Health supports</p>
                   <Badge variant="outline">Active</Badge>
                 </div>
-                <p className="mt-space-xs text-body-sm text-muted-foreground">
+                <p className="mt-2 text-sm text-muted-foreground">
                   Harm reduction supplies packaged for pickup at the outreach hub. Check in with Morgan if plans change.
                 </p>
               </article>
-              <article className="rounded-2xl border border-outline-variant/60 bg-surface-container p-space-md shadow-level-1 state-layer-color-primary hover:state-layer-hover transition motion-duration-short motion-ease-standard">
+              <article className="rounded-2xl border border-border/60 bg-card p-4 shadow-sm hover:bg-muted transition duration-150 ease-out">
                 <div className="flex items-center justify-between">
-                  <p className="text-title-sm font-medium text-on-surface">Income stabilization</p>
+                  <p className="text-base font-medium text-foreground">Income stabilization</p>
                   <Badge>New</Badge>
                 </div>
-                <p className="mt-space-xs text-body-sm text-muted-foreground">
+                <p className="mt-2 text-sm text-muted-foreground">
                   Let the team know if you want help with part-time gig matching or training stipends.
                 </p>
               </article>

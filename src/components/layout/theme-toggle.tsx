@@ -11,7 +11,6 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Icon } from '@/components/ui/icon';
 
 const THEME_OPTIONS = [
   { key: 'light', label: 'Light', glyph: Sun },
@@ -51,14 +50,14 @@ export function ThemeToggle() {
         <Button
           variant="ghost"
           size="icon"
-          className="h-10 w-10 rounded-[var(--md-sys-shape-corner-extra-small)] bg-transparent text-on-surface transition-colors motion-duration-short motion-ease-standard hover:bg-surface-container focus-visible:ring-primary"
+          className="h-10 w-10 rounded-md bg-transparent text-foreground transition-colors duration-150 ease-out hover:bg-muted"
           aria-label="Toggle color theme"
         >
-          <Icon icon={ActiveIcon} size="md" aria-hidden />
+          <ActiveIcon className="h-5 w-5" aria-hidden />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-44 rounded-lg">
-        <DropdownMenuLabel className="text-label-sm uppercase text-on-surface-variant">
+        <DropdownMenuLabel className="text-xs uppercase text-muted-foreground">
           Appearance
         </DropdownMenuLabel>
         {THEME_OPTIONS.map(({ key, label, glyph: Glyph }) => (
@@ -68,12 +67,12 @@ export function ThemeToggle() {
               event.preventDefault();
               setTheme(key);
             }}
-            className="flex items-center gap-2 text-body-md"
+            className="flex items-center gap-2 text-sm"
           >
-            <Icon icon={Glyph} size="sm" aria-hidden />
-            <span className="flex-1 text-on-surface">{label}</span>
+            <Glyph className="h-4 w-4" aria-hidden />
+            <span className="flex-1 text-foreground">{label}</span>
             {selectedTheme === key ? (
-              <span className="text-label-sm font-semibold uppercase text-primary">On</span>
+              <span className="text-xs font-semibold uppercase text-primary">On</span>
             ) : null}
           </DropdownMenuItem>
         ))}

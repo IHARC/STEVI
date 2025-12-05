@@ -31,42 +31,42 @@ export default async function StaffCaseDetailPage({ params }: CaseProps) {
   const activities = await fetchStaffCaseActivities(supabase, detail.personId, 80);
 
   return (
-    <div className="space-y-space-lg">
-      <header className="flex flex-col gap-space-2xs sm:flex-row sm:items-center sm:justify-between">
-        <div className="space-y-space-2xs">
-          <p className="text-label-sm font-semibold uppercase text-muted-foreground">Case #{detail.caseNumber ?? detail.id}</p>
-          <h1 className="text-headline-lg text-on-surface sm:text-display-sm">{detail.caseType ?? 'Support case'}</h1>
-          <p className="text-body-md text-muted-foreground">Person ID: {detail.personId}</p>
+    <div className="space-y-6">
+      <header className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase text-muted-foreground">Case #{detail.caseNumber ?? detail.id}</p>
+          <h1 className="text-3xl text-foreground sm:text-4xl">{detail.caseType ?? 'Support case'}</h1>
+          <p className="text-sm text-muted-foreground">Person ID: {detail.personId}</p>
         </div>
         <Badge variant={detail.status === 'active' ? 'default' : 'secondary'} className="capitalize">
           {detail.status ?? 'active'}
         </Badge>
       </header>
 
-      <div className="grid gap-space-lg lg:grid-cols-[2fr,1fr]">
+      <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
         <Card>
-          <CardHeader className="space-y-space-2xs">
-            <CardTitle className="text-title-md">Full timeline</CardTitle>
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-lg">Full timeline</CardTitle>
             <CardDescription>Activity is limited by RLS to what you are permitted to view.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-space-sm">
+          <CardContent className="space-y-3">
             {activities.length === 0 ? (
-              <p className="text-body-sm text-muted-foreground">No activity logged yet.</p>
+              <p className="text-sm text-muted-foreground">No activity logged yet.</p>
             ) : (
-              <ul className="space-y-space-sm">
+              <ul className="space-y-3">
                 {activities.map((item) => (
-                  <li key={item.id} className="rounded-xl border border-outline/30 bg-surface-container p-space-md">
-                    <div className="flex items-center justify-between gap-space-sm">
+                  <li key={item.id} className="rounded-xl border border-border/30 bg-card p-4">
+                    <div className="flex items-center justify-between gap-3">
                       <div>
-                        <p className="text-title-sm text-on-surface">{item.title}</p>
-                        <p className="text-body-sm text-muted-foreground">{item.activityType}</p>
+                        <p className="text-base text-foreground">{item.title}</p>
+                        <p className="text-sm text-muted-foreground">{item.activityType}</p>
                       </div>
-                      <p className="text-label-sm text-muted-foreground">
+                      <p className="text-xs text-muted-foreground">
                         {new Date(item.activityDate).toLocaleDateString()}
                       </p>
                     </div>
                     {item.description ? (
-                      <p className="mt-space-2xs text-body-sm text-on-surface/80">{item.description}</p>
+                      <p className="mt-1 text-sm text-foreground/80">{item.description}</p>
                     ) : null}
                   </li>
                 ))}
@@ -76,8 +76,8 @@ export default async function StaffCaseDetailPage({ params }: CaseProps) {
         </Card>
 
         <Card className="h-full">
-          <CardHeader className="space-y-space-2xs">
-            <CardTitle className="text-title-md">Add note</CardTitle>
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-lg">Add note</CardTitle>
             <CardDescription>Notes are internal to staff unless explicitly shared with the client elsewhere.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -95,13 +95,13 @@ function StaffNoteForm({ caseId }: { caseId: number }) {
   const action = staffAddCaseNoteAction;
 
   return (
-    <form action={action} className="space-y-space-sm">
+    <form action={action} className="space-y-3">
       <input type="hidden" name="case_id" value={caseId} />
-      <div className="space-y-space-2xs">
+      <div className="space-y-1">
         <Label htmlFor="title">Title</Label>
         <Input id="title" name="title" required maxLength={160} placeholder="Brief note title" />
       </div>
-      <div className="space-y-space-2xs">
+      <div className="space-y-1">
         <Label htmlFor="description">Details</Label>
         <Textarea id="description" name="description" rows={4} placeholder="Add context, steps, or outcomes." />
       </div>

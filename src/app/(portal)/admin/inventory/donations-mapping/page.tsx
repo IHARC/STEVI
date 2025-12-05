@@ -16,14 +16,14 @@ export default async function DonationsMappingPage() {
   }
 
   return (
-    <div className="page-shell page-stack">
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
       <PageHeader
         eyebrow="Inventory"
         title="Donations mapping"
         description="Link incoming donations to inventory items and locations. Align this with the donations catalogue and RLS."
       />
       <Card>
-        <CardContent className="space-y-space-2xs py-space-md text-body-md text-muted-foreground">
+        <CardContent className="space-y-1 py-4 text-sm text-muted-foreground">
           <p>Stub for mapping donation records to inventory items. Surface unmatched donations, proposed mappings, and audit notes.</p>
           <p>Ensure updates respect consent flags and log actions via the existing audit function when implemented.</p>
         </CardContent>

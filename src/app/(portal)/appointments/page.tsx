@@ -94,15 +94,15 @@ export default async function AppointmentsPage() {
   const hasAppointments = timeline.length > 0;
 
   return (
-    <div className="page-shell page-stack">
-      <header className="flex flex-col gap-space-xs">
-        <p className="text-label-sm font-medium uppercase text-muted-foreground">
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
+      <header className="flex flex-col gap-2">
+        <p className="text-xs font-medium uppercase text-muted-foreground">
           Appointment support
         </p>
-        <h1 className="text-headline-lg text-on-surface sm:text-display-sm">
+        <h1 className="text-3xl text-foreground sm:text-4xl">
           Manage your outreach appointments
         </h1>
-        <p className="max-w-2xl text-body-md text-muted-foreground sm:text-body-lg">
+        <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">
           Request meetings, see upcoming visits, and review past appointments linked with your STEVI
           plan.
         </p>
@@ -110,28 +110,28 @@ export default async function AppointmentsPage() {
 
       <section aria-labelledby="appointments-timeline">
         <Card>
-          <CardHeader className="flex flex-col gap-space-sm sm:flex-row sm:items-center sm:justify-between">
+          <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <CardTitle id="appointments-timeline" className="text-title-lg">
+              <CardTitle id="appointments-timeline" className="text-xl">
                 Appointments timeline
               </CardTitle>
-              <p className="text-body-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 All upcoming and past appointments in one place. We respond to new requests within one business day.
               </p>
             </div>
-            <Button variant="outline" asChild className="text-label-md font-medium">
+            <Button variant="outline" asChild className="text-xs font-medium">
               <a href="#request-form">Request change</a>
             </Button>
           </CardHeader>
-          <CardContent className="space-y-space-md">
+          <CardContent className="space-y-4">
             {!hasAppointments ? (
-              <div className="rounded-xl border border-dashed border-outline/30 bg-surface-container-low p-space-md text-body-sm text-muted-foreground">
-                <p className="font-medium text-on-surface">No appointments yet</p>
-                <p className="mt-space-2xs">
+              <div className="rounded-xl border border-dashed border-border/30 bg-muted p-4 text-sm text-muted-foreground">
+                <p className="font-medium text-foreground">No appointments yet</p>
+                <p className="mt-1">
                   Send us your availability and preferred contact method. The outreach coordinator will confirm and add the visit here.
                 </p>
-                <p className="mt-space-2xs text-label-sm">We aim to respond within one business day and log updates for your record.</p>
-                <div className="mt-space-sm flex flex-wrap gap-space-sm">
+                <p className="mt-1 text-xs">We aim to respond within one business day and log updates for your record.</p>
+                <div className="mt-3 flex flex-wrap gap-3">
                   <Button asChild size="sm">
                     <a href="#request-form">Request an appointment</a>
                   </Button>
@@ -141,7 +141,7 @@ export default async function AppointmentsPage() {
                 </div>
               </div>
             ) : (
-              <ol className="space-y-space-sm">
+              <ol className="space-y-3">
                 {timeline.map((appointment) => {
                   const formattedWhen = formatOccursAt(appointment.occurs_at);
                   const status = formatStatusLabel(appointment.status);
@@ -154,23 +154,23 @@ export default async function AppointmentsPage() {
                   return (
                     <li
                       key={appointment.id}
-                      className="rounded-xl border border-outline/20 bg-surface-container-low p-space-md shadow-level-1"
+                      className="rounded-xl border border-border/40 bg-muted p-4 shadow-sm"
                       aria-labelledby={`appt-${appointment.id}`}
                     >
-                      <div className="flex flex-wrap items-start justify-between gap-space-sm">
-                        <div className="space-y-space-2xs">
-                          <p className="text-label-sm text-muted-foreground">{formattedWhen}</p>
-                          <h2 id={`appt-${appointment.id}`} className="text-title-md font-medium text-on-surface">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <div className="space-y-1">
+                          <p className="text-xs text-muted-foreground">{formattedWhen}</p>
+                          <h2 id={`appt-${appointment.id}`} className="text-lg font-medium text-foreground">
                             {appointment.title}
                           </h2>
-                          <p className="text-body-sm text-on-surface/80">
+                          <p className="text-sm text-foreground/80">
                             With {appointment.staff?.display_name ?? 'outreach team'}
                           </p>
-                          <p className="text-body-sm text-muted-foreground">
+                          <p className="text-sm text-muted-foreground">
                             {appointment.location ?? 'To be confirmed'} · {formatLocationType(appointment.location_type)}
                           </p>
                           {appointment.meeting_url ? (
-                            <p className="text-body-sm">
+                            <p className="text-sm">
                               <a
                                 className="text-primary underline-offset-4 hover:underline"
                                 href={appointment.meeting_url}
@@ -182,10 +182,10 @@ export default async function AppointmentsPage() {
                             </p>
                           ) : null}
                           {appointment.requested_window ? (
-                            <p className="text-label-sm text-muted-foreground">Requested window: {appointment.requested_window}</p>
+                            <p className="text-xs text-muted-foreground">Requested window: {appointment.requested_window}</p>
                           ) : null}
                           {appointment.outcome_notes ? (
-                            <p className="text-body-sm text-on-surface/80">Outcome: {appointment.outcome_notes}</p>
+                            <p className="text-sm text-foreground/80">Outcome: {appointment.outcome_notes}</p>
                           ) : null}
                         </div>
                         <Badge variant={badgeVariant} className="capitalize">
@@ -195,7 +195,7 @@ export default async function AppointmentsPage() {
 
                       {isActionable ? (
                         <ClientPreviewGuard message="Requests are disabled while in preview mode.">
-                          <div className="mt-space-sm flex flex-wrap gap-space-sm">
+                          <div className="mt-3 flex flex-wrap gap-3">
                             <RequestRescheduleForm
                               action={requestRescheduleAsClient}
                               appointmentId={appointment.id}
@@ -214,7 +214,7 @@ export default async function AppointmentsPage() {
               </ol>
             )}
 
-            <p className="text-body-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               If plans change on the day-of, call the coordination desk at <a href="tel:289-555-0100" className="text-primary underline-offset-4 hover:underline">289-555-0100</a>. We keep this log synced with STEVI Ops so staff stay aligned.
             </p>
           </CardContent>
@@ -225,10 +225,10 @@ export default async function AppointmentsPage() {
         <ClientPreviewGuard message="Requests are disabled while you preview the client portal. Exit preview to submit.">
           <Card>
             <CardHeader>
-              <CardTitle id="request-heading" className="text-title-lg">
+              <CardTitle id="request-heading" className="text-xl">
                 Request a new appointment
               </CardTitle>
-              <p className="text-body-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 Tell us what you need. The outreach coordinator will respond using your preferred
                 contact method.
               </p>

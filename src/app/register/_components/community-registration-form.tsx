@@ -35,37 +35,37 @@ export function CommunityRegistrationForm({
   return (
     <form
       action={formAction}
-      className="space-y-space-lg rounded-3xl border border-outline/40 bg-surface p-space-lg shadow-level-1 sm:p-space-xl"
+      className="space-y-6 rounded-3xl border border-border/40 bg-background p-6 shadow-sm sm:p-8"
       noValidate
     >
       <input type="hidden" name="next" value={nextPath} />
 
-      <section className="space-y-space-sm">
+      <section className="space-y-3">
         <header>
-          <p className="text-label-sm uppercase text-outline">Neighbour updates</p>
-          <h1 className="text-title-lg font-medium text-on-surface">Join as a community member</h1>
-          <p className="mt-space-xs text-body-sm text-muted-foreground">
+          <p className="text-xs uppercase text-muted-foreground">Neighbour updates</p>
+          <h1 className="text-xl font-medium text-foreground">Join as a community member</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
             Get email updates about IHARC programs, submit feedback, and follow progress on local initiatives.
           </p>
         </header>
 
         {state.error ? (
-          <Alert variant="destructive" className="text-body-sm">
+          <Alert variant="destructive" className="text-sm">
             <AlertTitle>We couldn’t create your account</AlertTitle>
             <AlertDescription>{state.error}</AlertDescription>
           </Alert>
         ) : null}
 
         {isSuccess && state.message ? (
-          <Alert className="border-primary bg-primary-container text-body-sm text-on-primary-container">
+          <Alert className="border-primary bg-primary/10 text-sm text-primary">
             <AlertTitle>Welcome to the IHARC community</AlertTitle>
             <AlertDescription>{state.message}</AlertDescription>
           </Alert>
         ) : null}
       </section>
 
-      <section className="space-y-space-md">
-        <div className="grid gap-space-xs">
+      <section className="space-y-4">
+        <div className="grid gap-2">
           <Label htmlFor="display_name">Display name *</Label>
           <Input
             id="display_name"
@@ -77,7 +77,7 @@ export function CommunityRegistrationForm({
           />
         </div>
 
-        <div className="grid gap-space-xs">
+        <div className="grid gap-2">
           <Label htmlFor="email">Email address *</Label>
           <Input
             id="email"
@@ -87,12 +87,12 @@ export function CommunityRegistrationForm({
             required
             placeholder="you@example.ca"
           />
-          <p className="text-label-sm text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             We’ll send a confirmation email. You can manage notification preferences after signing in.
           </p>
         </div>
 
-        <div className="grid gap-space-xs">
+        <div className="grid gap-2">
           <Label htmlFor="password">Create a password *</Label>
           <Input
             id="password"
@@ -105,7 +105,7 @@ export function CommunityRegistrationForm({
           />
         </div>
 
-        <div className="grid gap-space-xs">
+        <div className="grid gap-2">
           <Label htmlFor="password_confirm">Confirm password *</Label>
           <Input
             id="password_confirm"
@@ -118,7 +118,7 @@ export function CommunityRegistrationForm({
           />
         </div>
 
-        <div className="space-y-space-sm rounded-xl border border-outline/30 p-space-md">
+        <div className="space-y-3 rounded-xl border border-border/30 p-4">
           <ConsentCheckbox
             id="consent_privacy_community"
             name="consent_privacy"
@@ -139,8 +139,8 @@ export function CommunityRegistrationForm({
         </div>
       </section>
 
-      <div className="flex items-center justify-between gap-space-md">
-        <p className="text-label-sm text-muted-foreground">You can unsubscribe from emails or delete your profile at any time.</p>
+      <div className="flex items-center justify-between gap-4">
+        <p className="text-xs text-muted-foreground">You can unsubscribe from emails or delete your profile at any time.</p>
         <SubmitButton isSuccess={isSuccess} />
       </div>
     </form>
@@ -159,7 +159,7 @@ function ConsentCheckbox({
   required?: boolean;
 }) {
   return (
-    <label htmlFor={id} className="flex items-start gap-space-sm text-body-sm text-on-surface">
+    <label htmlFor={id} className="flex items-start gap-3 text-sm text-foreground">
       <Checkbox id={id} name={name} required={required} className="mt-1" />
       <span>
         {label} {required ? <span className="text-error">*</span> : null}

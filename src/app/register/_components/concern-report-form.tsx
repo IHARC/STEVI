@@ -42,14 +42,14 @@ export function ConcernReportForm({
   return (
     <form
       action={formAction}
-      className="space-y-space-lg rounded-3xl border border-outline/40 bg-surface p-space-lg shadow-level-1 sm:p-space-xl"
+      className="space-y-6 rounded-3xl border border-border/40 bg-background p-6 shadow-sm sm:p-8"
       noValidate
     >
-      <section className="space-y-space-sm">
+      <section className="space-y-3">
         <header>
-          <p className="text-label-sm uppercase text-outline">Community concern</p>
-          <h1 className="text-title-lg font-medium text-on-surface">Report a concern or share feedback</h1>
-          <p className="mt-space-xs text-body-sm text-muted-foreground">
+          <p className="text-xs uppercase text-muted-foreground">Community concern</p>
+          <h1 className="text-xl font-medium text-foreground">Report a concern or share feedback</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
             We review every submission within two business days. If someone is in immediate danger, call 911. For
             non-emergency social and health navigation, contact{' '}
             <a
@@ -65,19 +65,19 @@ export function ConcernReportForm({
         </header>
 
         {state.error ? (
-          <Alert variant="destructive" className="text-body-sm">
+          <Alert variant="destructive" className="text-sm">
             <AlertTitle>We couldn’t submit your concern</AlertTitle>
             <AlertDescription>{state.error}</AlertDescription>
           </Alert>
         ) : null}
 
         {isSuccess && state.message ? (
-          <Alert className="border-primary bg-primary-container text-body-sm text-on-primary-container">
+          <Alert className="border-primary bg-primary/10 text-sm text-primary">
             <AlertTitle>Thanks for reaching out</AlertTitle>
             <AlertDescription className="space-y-2">
               <p>{state.message}</p>
               {state.trackingCode ? (
-                <p className="font-mono text-label-md">
+                <p className="font-mono text-xs">
                   Tracking code: <strong>{state.trackingCode}</strong>. Share this code if you contact us for an update.
                 </p>
               ) : null}
@@ -86,8 +86,8 @@ export function ConcernReportForm({
         ) : null}
       </section>
 
-      <section className="space-y-space-md">
-        <div className="grid gap-space-xs">
+      <section className="space-y-4">
+        <div className="grid gap-2">
           <Label htmlFor="category">What type of concern is this? *</Label>
           <Select name="category" defaultValue="community_impact" required>
             <SelectTrigger id="category">
@@ -104,7 +104,7 @@ export function ConcernReportForm({
           </Select>
         </div>
 
-        <div className="grid gap-space-xs">
+        <div className="grid gap-2">
           <Label htmlFor="description">What happened? *</Label>
           <Textarea
             id="description"
@@ -115,7 +115,7 @@ export function ConcernReportForm({
           />
         </div>
 
-        <div className="grid gap-space-xs">
+        <div className="grid gap-2">
           <Label htmlFor="location">Where did this happen? *</Label>
           <Input
             id="location"
@@ -126,12 +126,12 @@ export function ConcernReportForm({
           />
         </div>
 
-        <fieldset className="space-y-space-sm rounded-xl border border-outline/30 p-space-md">
-          <legend className="text-body-sm font-medium text-on-surface">How should we follow up?</legend>
+        <fieldset className="space-y-3 rounded-xl border border-border/30 p-4">
+          <legend className="text-sm font-medium text-foreground">How should we follow up?</legend>
           <RadioGroup
             value={contactPreference}
             onValueChange={(value) => setContactPreference(value as ContactPreference)}
-            className="grid gap-space-sm md:grid-cols-3"
+            className="grid gap-3 md:grid-cols-3"
           >
             <ContactOption
               value="anonymous"
@@ -151,14 +151,14 @@ export function ConcernReportForm({
           </RadioGroup>
 
           {contactPreference === 'email' ? (
-            <div className="grid gap-space-xs">
+            <div className="grid gap-2">
               <Label htmlFor="contact_email">Email address *</Label>
               <Input id="contact_email" name="contact_email" type="email" autoComplete="email" required />
             </div>
           ) : null}
 
           {contactPreference === 'phone' ? (
-            <div className="grid gap-space-xs">
+            <div className="grid gap-2">
               <Label htmlFor="contact_phone">Phone number *</Label>
               <Input
                 id="contact_phone"
@@ -173,7 +173,7 @@ export function ConcernReportForm({
           ) : null}
         </fieldset>
 
-        <div className="grid gap-space-xs">
+        <div className="grid gap-2">
           <Label htmlFor="additional_details">Anything else we should know?</Label>
           <Textarea
             id="additional_details"
@@ -186,8 +186,8 @@ export function ConcernReportForm({
         <input type="hidden" name="contact_preference" value={contactPreference} />
       </section>
 
-      <div className="flex items-center justify-between gap-space-md">
-        <p className="text-label-sm text-muted-foreground">We log every submission and keep sensitive details private.</p>
+      <div className="flex items-center justify-between gap-4">
+        <p className="text-xs text-muted-foreground">We log every submission and keep sensitive details private.</p>
         <SubmitButton isSuccess={isSuccess} />
       </div>
     </form>
@@ -206,12 +206,12 @@ function ContactOption({
   return (
     <label
       htmlFor={`contact_preference_${value}`}
-      className="flex cursor-pointer items-start gap-space-sm rounded-xl border border-outline/40 bg-surface-container p-space-md text-left text-body-sm font-medium text-on-surface shadow-level-1 transition state-layer-color-primary hover:border-primary hover:state-layer-hover focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:state-layer-focus"
+      className="flex cursor-pointer items-start gap-3 rounded-xl border border-border/40 bg-card p-4 text-left text-sm font-medium text-foreground shadow-sm transition hover:border-primary/60 hover:bg-muted focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2 focus-within:ring-offset-background"
     >
       <RadioGroupItem id={`contact_preference_${value}`} value={value} className="mt-1" />
       <span>
         {title}
-        <span className="mt-space-2xs block text-label-sm font-normal text-muted-foreground">{description}</span>
+        <span className="mt-1 block text-xs font-normal text-muted-foreground">{description}</span>
       </span>
     </label>
   );

@@ -4,7 +4,6 @@ import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { Icon } from '@/components/ui/icon';
 import { usePortalAccess } from '@/components/providers/portal-access-provider';
 import { useOptionalPortalLayout } from '@/components/providers/portal-layout-provider';
 import { resolveQuickActions, type QuickAction } from '@/lib/portal-navigation';
@@ -53,11 +52,11 @@ export function QuickCreateButton() {
         <Button
           type="button"
           size="sm"
-          className="gap-space-2xs"
+          className="gap-2"
           disabled={availableActions.length === 0}
         >
-          <Icon icon={Plus} size="sm" />
-          <span className="text-label-md font-semibold">New</span>
+          <Plus className="h-4 w-4" aria-hidden />
+          <span className="text-sm font-semibold">New</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-[280px]">
@@ -69,18 +68,18 @@ export function QuickCreateButton() {
               handleSelect(action);
             }}
             disabled={action.disabled}
-            className="flex items-start gap-space-sm px-space-sm py-space-sm"
+            className="flex items-start gap-3 px-3 py-3"
           >
             <span className={cn('mt-[2px] text-muted-foreground', action.disabled && 'opacity-60')}>
               {actionIcon(action)}
             </span>
-            <span className="space-y-space-3xs">
-              <span className="block text-body-md font-medium text-on-surface">{action.label}</span>
+            <span className="space-y-0.5">
+              <span className="block text-sm font-medium text-foreground">{action.label}</span>
               {action.description ? (
-                <span className="block text-body-sm text-muted-foreground">{action.description}</span>
+                <span className="block text-sm text-muted-foreground">{action.description}</span>
               ) : null}
               {action.disabled ? (
-                <span className="text-label-sm text-primary">Exit preview to use this action</span>
+                <span className="text-xs text-primary">Exit preview to use this action</span>
               ) : null}
             </span>
           </DropdownMenuItem>

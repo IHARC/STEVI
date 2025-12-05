@@ -66,7 +66,7 @@ export function ClientClaimForm({
   return (
     <form
       action={formAction}
-      className="space-y-8 rounded-2xl border border-outline/40 bg-surface p-6 shadow-subtle sm:p-8"
+      className="space-y-8 rounded-2xl border border-border/40 bg-background p-6 shadow-sm sm:p-8"
       noValidate
     >
       <input type="hidden" name="next" value={nextPath} />
@@ -74,9 +74,9 @@ export function ClientClaimForm({
 
       <section className="space-y-4">
         <header>
-          <p className="text-label-sm uppercase text-outline">Link existing services</p>
-          <h1 className="text-headline-sm font-semibold text-on-surface">Claim your IHARC record</h1>
-          <p className="mt-2 text-body-md text-muted-foreground">
+          <p className="text-xs uppercase text-muted-foreground">Link existing services</p>
+          <h1 className="text-2xl font-semibold text-foreground">Claim your IHARC record</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
             Share at least two pieces of information. We cross-check them securely so your record never gets duplicated.
           </p>
         </header>
@@ -89,7 +89,7 @@ export function ClientClaimForm({
         ) : null}
 
         {isSuccess && state.message ? (
-          <Alert className="border-primary bg-primary-container text-on-primary-container">
+          <Alert className="border-primary bg-primary/10 text-primary">
             <AlertTitle>Record linked</AlertTitle>
             <AlertDescription>{state.message}</AlertDescription>
           </Alert>
@@ -106,13 +106,13 @@ export function ClientClaimForm({
             placeholder="1234-5678"
             autoComplete="one-time-code"
           />
-          <p className="text-label-sm text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             This 8-digit code appears on your intake paperwork. If you do not have it, share two other details below.
           </p>
         </div>
 
-        <fieldset className="grid gap-3 rounded-xl border border-outline/30 p-4">
-          <legend className="text-body-md font-semibold text-on-surface">Who are we linking?</legend>
+        <fieldset className="grid gap-3 rounded-xl border border-border/30 p-4">
+          <legend className="text-sm font-semibold text-foreground">Who are we linking?</legend>
           <div className="grid gap-2">
             <Label htmlFor="chosen_name">Chosen or preferred name *</Label>
             <Input
@@ -159,8 +159,8 @@ export function ClientClaimForm({
           </div>
         </fieldset>
 
-        <fieldset className="space-y-3 rounded-xl border border-outline/30 p-4">
-          <legend className="text-body-md font-semibold text-on-surface">
+        <fieldset className="space-y-3 rounded-xl border border-border/30 p-4">
+          <legend className="text-sm font-semibold text-foreground">
             Where should we send login confirmations?
           </legend>
           <RadioGroup
@@ -204,7 +204,7 @@ export function ClientClaimForm({
                 required
                 placeholder="+16475551234"
               />
-              <p className="text-label-sm text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 Include the country code. We will text a verification link and never leave voicemail without consent.
               </p>
             </div>
@@ -213,13 +213,13 @@ export function ClientClaimForm({
 
         <div className="grid gap-2 md:grid-cols-2">
           <div className="grid gap-2">
-            <Label htmlFor="safe_call_claim" className="text-body-md font-medium text-on-surface">
+            <Label htmlFor="safe_call_claim" className="text-sm font-medium text-foreground">
               Is it safe to call this number?
             </Label>
             <Checkbox id="safe_call_claim" name="safe_call" className="mt-1" />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="safe_text_claim" className="text-body-md font-medium text-on-surface">
+            <Label htmlFor="safe_text_claim" className="text-sm font-medium text-foreground">
               Is it safe to send text messages?
             </Label>
             <Checkbox id="safe_text_claim" name="safe_text" className="mt-1" />
@@ -252,8 +252,8 @@ export function ClientClaimForm({
           />
         </div>
 
-        <fieldset className="space-y-3 rounded-xl border border-outline/30 p-4">
-          <legend className="text-body-md font-semibold text-on-surface">Consent</legend>
+        <fieldset className="space-y-3 rounded-xl border border-border/30 p-4">
+          <legend className="text-sm font-semibold text-foreground">Consent</legend>
           <ConsentCheckbox
             id="consent_privacy_claim"
             name="consent_privacy"
@@ -276,7 +276,7 @@ export function ClientClaimForm({
       </section>
 
       <div className="flex items-center justify-between gap-4">
-        <p className="text-label-sm text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           Staff will review matches before sensitive records unlock. You’ll see confirmation on screen and by email/text.
         </p>
         <SubmitButton isSuccess={isSuccess} />
@@ -297,12 +297,12 @@ function ContactMethodOption({
   return (
     <label
       htmlFor={`contact_method_${value}`}
-      className="flex cursor-pointer items-start gap-3 rounded-xl border border-outline/40 bg-surface-container p-3 text-left text-body-md font-medium text-on-surface shadow-subtle transition state-layer-color-primary hover:border-primary hover:state-layer-hover focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:state-layer-focus"
+      className="flex cursor-pointer items-start gap-3 rounded-xl border border-border/40 bg-card p-3 text-left text-sm font-medium text-foreground shadow-sm transition hover:border-primary/60 hover:bg-muted focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2 focus-within:ring-offset-background"
     >
       <RadioGroupItem id={`contact_method_${value}`} value={value} className="mt-1" />
       <span>
         {title}
-        <span className="mt-1 block text-label-sm font-normal text-muted-foreground">{description}</span>
+        <span className="mt-1 block text-xs font-normal text-muted-foreground">{description}</span>
       </span>
     </label>
   );
@@ -320,10 +320,10 @@ function ConsentCheckbox({
   required?: boolean;
 }) {
   return (
-    <label htmlFor={id} className="flex items-start gap-3 text-body-md text-on-surface">
+    <label htmlFor={id} className="flex items-start gap-3 text-sm text-foreground">
       <Checkbox id={id} name={name} required={required} className="mt-1" />
       <span>
-        {label} {required ? <span className="text-error">*</span> : null}
+        {label} {required ? <span className="text-destructive">*</span> : null}
       </span>
     </label>
   );

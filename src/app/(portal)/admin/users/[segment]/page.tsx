@@ -80,9 +80,9 @@ function PaginationControls({
   if (nextPage) nextParams.set('page', String(nextPage));
 
   return (
-    <div className="flex items-center justify-between gap-space-sm rounded-2xl border border-outline/20 bg-surface-container p-space-sm text-body-sm">
+    <div className="flex items-center justify-between gap-3 rounded-2xl border border-border/40 bg-card p-3 text-sm">
       <span className="text-muted-foreground">Page {page}{hasMore ? ' • more available' : ''}</span>
-      <div className="flex items-center gap-space-xs">
+      <div className="flex items-center gap-2">
         <Button asChild variant="outline" size="sm" disabled={!prevPage}>
           <Link href={prevPage ? buildHref(segment, prevParams) : '#'}>← Prev</Link>
         </Button>
@@ -178,13 +178,13 @@ export default async function AdminUsersSegmentPage({
   const paramsString = paramsForLinks.toString();
 
   return (
-    <div className="page-shell page-stack">
-      <header className="flex flex-col gap-space-xs">
-        <p className="text-label-sm font-medium uppercase text-muted-foreground">Admin · Access</p>
-        <div className="flex flex-col gap-space-sm sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-space-2xs">
-            <h1 className="text-title-lg text-on-surface sm:text-headline-sm">User management</h1>
-            <p className="max-w-3xl text-body-md text-muted-foreground sm:text-body-lg">
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
+      <header className="flex flex-col gap-2">
+        <p className="text-xs font-medium uppercase text-muted-foreground">Admin · Access</p>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-1">
+            <h1 className="text-xl text-foreground sm:text-2xl">User management</h1>
+            <p className="max-w-3xl text-sm text-muted-foreground sm:text-base">
               Review clients, partners, and IHARC staff at scale. Filter, paginate, and jump into detail pages for profile updates, roles, and history.
             </p>
           </div>
@@ -194,7 +194,7 @@ export default async function AdminUsersSegmentPage({
         </div>
       </header>
 
-      <section className="grid gap-space-sm md:grid-cols-4">
+      <section className="grid gap-3 md:grid-cols-4">
         <SummaryCard label="Total users" value={summary.total} />
         <SummaryCard label="Clients" value={summary.clients} />
         <SummaryCard label="Partners" value={summary.partners} />
@@ -215,13 +215,13 @@ export default async function AdminUsersSegmentPage({
         roleOptions={roleOptions}
       />
 
-      <Card className="border-outline/20 bg-surface-container">
-        <CardHeader className="flex flex-col gap-space-2xs sm:flex-row sm:items-center sm:justify-between">
+      <Card className="border-border/40 bg-card">
+        <CardHeader className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <CardTitle className="text-title-md">Users</CardTitle>
+            <CardTitle className="text-lg">Users</CardTitle>
             <CardDescription>Compact list with pagination and role context.</CardDescription>
           </div>
-          <Badge variant="outline" className="text-label-sm">
+          <Badge variant="outline" className="text-xs">
             {listResult.total} total
           </Badge>
         </CardHeader>
@@ -250,7 +250,7 @@ export default async function AdminUsersSegmentPage({
                   <TableRow key={user.profileId}>
                     <TableCell>
                       <div className="flex flex-col">
-                        <span className="font-medium text-on-surface">{user.displayName}</span>
+                        <span className="font-medium text-foreground">{user.displayName}</span>
                         {user.positionTitle ? (
                           <span className="text-xs text-muted-foreground">{user.positionTitle}</span>
                         ) : null}
@@ -262,13 +262,13 @@ export default async function AdminUsersSegmentPage({
                     </TableCell>
                     <TableCell>
                       {user.organizationName ? (
-                        <span className="text-on-surface">{user.organizationName}</span>
+                        <span className="text-foreground">{user.organizationName}</span>
                       ) : (
                         <span className="text-muted-foreground text-sm">None</span>
                       )}
                     </TableCell>
                     <TableCell>
-                      <div className="flex flex-wrap gap-space-2xs">
+                      <div className="flex flex-wrap gap-1">
                         {user.roles.portal.map((role: string) => (
                           <Badge key={role} variant="outline" className="capitalize">
                             {role.replace('portal_', '')}
@@ -289,7 +289,7 @@ export default async function AdminUsersSegmentPage({
                     <TableCell className="text-sm text-muted-foreground">
                       {user.lastSeenAt ? new Date(user.lastSeenAt).toLocaleString('en-CA', { dateStyle: 'medium', timeStyle: 'short' }) : '—'}
                     </TableCell>
-                    <TableCell className="flex justify-end gap-space-xs">
+                    <TableCell className="flex justify-end gap-2">
                       <UserPeekSheet user={user} roleOptions={roleOptions} />
                       <Button asChild size="sm" variant="outline">
                         <Link href={`/admin/users/profile/${user.profileId}`}>View</Link>
@@ -315,9 +315,9 @@ export default async function AdminUsersSegmentPage({
 
 function SummaryCard({ label, value, tone = 'default' }: { label: string; value: number; tone?: 'default' | 'outline' | 'secondary' }) {
   return (
-    <Card className="border-outline/20">
-      <CardHeader className="flex flex-row items-center justify-between gap-space-xs">
-        <CardTitle className="text-title-sm text-muted-foreground">{label}</CardTitle>
+    <Card className="border-border/40">
+      <CardHeader className="flex flex-row items-center justify-between gap-2">
+        <CardTitle className="text-base text-muted-foreground">{label}</CardTitle>
         <Badge variant={tone}>{value}</Badge>
       </CardHeader>
     </Card>
@@ -327,7 +327,7 @@ function SummaryCard({ label, value, tone = 'default' }: { label: string; value:
 function SegmentTabs({ active, params }: { active: AdminUserSegment; params: URLSearchParams }) {
   const entries: AdminUserSegment[] = ['all', 'clients', 'partners', 'staff'];
   return (
-    <div className="flex flex-wrap gap-space-xs">
+    <div className="flex flex-wrap gap-2">
       {entries.map((segment) => {
         const href = buildHref(segment, params);
         const isActive = segment === active;
@@ -367,18 +367,18 @@ function FilterBar({
   const currentSort = params.get('sort') ?? 'recent';
 
   return (
-    <form className="grid gap-space-sm rounded-2xl border border-outline/20 bg-surface-container p-space-sm md:grid-cols-5" action={`/admin/users/${segment}`}>
-      <div className="md:col-span-2 space-y-space-2xs">
+    <form className="grid gap-3 rounded-2xl border border-border/40 bg-card p-3 md:grid-cols-5" action={`/admin/users/${segment}`}>
+      <div className="md:col-span-2 space-y-1">
         <Label htmlFor="q">Search</Label>
         <Input id="q" name="q" placeholder="Name or email" defaultValue={currentSearch} />
       </div>
-      <div className="space-y-space-2xs">
+      <div className="space-y-1">
         <Label htmlFor="status">Status</Label>
         <select
           id="status"
           name="status"
           defaultValue={currentStatus}
-          className="w-full rounded-lg border border-outline/30 bg-surface px-space-sm py-space-2xs text-body-sm"
+          className="w-full rounded-lg border border-border/30 bg-background px-3 py-1 text-sm"
         >
           {statusOptions.map((option) => (
             <option key={option.value || 'any'} value={option.value}>
@@ -387,13 +387,13 @@ function FilterBar({
           ))}
         </select>
       </div>
-      <div className="space-y-space-2xs">
+      <div className="space-y-1">
         <Label htmlFor="role">Role</Label>
         <select
           id="role"
           name="role"
           defaultValue={currentRole}
-          className="w-full rounded-lg border border-outline/30 bg-surface px-space-sm py-space-2xs text-body-sm capitalize"
+          className="w-full rounded-lg border border-border/30 bg-background px-3 py-1 text-sm capitalize"
         >
           <option value="">Any role</option>
           {roleOptions.map((role) => (
@@ -403,13 +403,13 @@ function FilterBar({
           ))}
         </select>
       </div>
-      <div className="space-y-space-2xs">
+      <div className="space-y-1">
         <Label htmlFor="org">Organization</Label>
         <select
           id="org"
           name="org"
           defaultValue={currentOrg}
-          className="w-full rounded-lg border border-outline/30 bg-surface px-space-sm py-space-2xs text-body-sm"
+          className="w-full rounded-lg border border-border/30 bg-background px-3 py-1 text-sm"
         >
           <option value="">Any org</option>
           {organizations.map((org) => (
@@ -419,19 +419,19 @@ function FilterBar({
           ))}
         </select>
       </div>
-      <div className="space-y-space-2xs">
+      <div className="space-y-1">
         <Label htmlFor="sort">Sort</Label>
         <select
           id="sort"
           name="sort"
           defaultValue={currentSort}
-          className="w-full rounded-lg border border-outline/30 bg-surface px-space-sm py-space-2xs text-body-sm"
+          className="w-full rounded-lg border border-border/30 bg-background px-3 py-1 text-sm"
         >
           <option value="recent">Recent activity</option>
           <option value="name">Name A–Z</option>
         </select>
       </div>
-      <div className="md:col-span-5 flex flex-wrap justify-end gap-space-xs">
+      <div className="md:col-span-5 flex flex-wrap justify-end gap-2">
         <Button type="submit" variant="default">
           Apply
         </Button>

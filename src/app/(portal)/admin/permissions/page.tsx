@@ -95,53 +95,53 @@ export default async function PermissionsPage() {
   };
 
   return (
-    <div className="page-shell page-stack">
-      <header className="flex flex-col gap-space-xs">
-        <p className="text-label-sm font-medium uppercase text-muted-foreground">Admin · Permissions</p>
-        <h1 className="text-title-lg text-on-surface sm:text-headline-sm">Permissions control</h1>
-        <p className="max-w-3xl text-body-md text-muted-foreground sm:text-body-lg">
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
+      <header className="flex flex-col gap-2">
+        <p className="text-xs font-medium uppercase text-muted-foreground">Admin · Permissions</p>
+        <h1 className="text-xl text-foreground sm:text-2xl">Permissions control</h1>
+        <p className="max-w-3xl text-sm text-muted-foreground sm:text-base">
           Manage granular permissions for roles. Changes take effect immediately and refresh user claims on next refresh.
         </p>
       </header>
 
-      <div className="grid gap-space-lg lg:grid-cols-3">
-        <Card className="lg:col-span-2 border-outline/20 bg-surface-container">
+      <div className="grid gap-6 lg:grid-cols-3">
+        <Card className="lg:col-span-2 border-border/40 bg-card">
           <CardHeader>
             <CardTitle>Roles & permissions</CardTitle>
             <CardDescription>Toggle which permissions are granted to each role.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-space-md">
+          <CardContent className="space-y-4">
             {roles.map((role) => (
-              <div key={role.id} className="rounded-2xl border border-outline/12 p-space-md space-y-space-sm">
-                <div className="flex items-start justify-between gap-space-sm">
+              <div key={role.id} className="rounded-2xl border border-border/30 p-4 space-y-3">
+                <div className="flex items-start justify-between gap-3">
                   <div>
-                    <div className="flex items-center gap-space-xs">
-                      <h2 className="text-title-md text-on-surface">{role.display_name || role.name}</h2>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-lg text-foreground">{role.display_name || role.name}</h2>
                       {role.is_system_role ? <Badge variant="outline">System</Badge> : null}
                     </div>
                     {role.description ? (
-                      <p className="text-body-sm text-muted-foreground">{role.description}</p>
+                      <p className="text-sm text-muted-foreground">{role.description}</p>
                     ) : null}
                   </div>
                 </div>
                 <Separator />
-                <div className="space-y-space-sm">
+                <div className="space-y-3">
                   {Object.entries(groupedPerms).map(([domain, perms]) => (
-                    <div key={domain} className="space-y-space-2xs">
-                      <p className="text-label-sm font-medium uppercase text-muted-foreground">{domain}</p>
-                      <div className="grid gap-space-xs md:grid-cols-2">
+                    <div key={domain} className="space-y-1">
+                      <p className="text-xs font-medium uppercase text-muted-foreground">{domain}</p>
+                      <div className="grid gap-2 md:grid-cols-2">
                         {perms.map((perm) => {
                           const assigned = rolePermissions.has(`${role.id}:${perm.id}`);
                           return (
                             <form
                               key={perm.id}
                               action={handleToggle}
-                              className="flex items-start justify-between gap-space-sm rounded-xl border border-outline/10 px-space-sm py-space-2xs"
+                              className="flex items-start justify-between gap-3 rounded-xl border border-border/20 px-3 py-1"
                             >
                               <div className="space-y-[2px]">
-                                <p className="text-body-sm font-medium text-on-surface">{perm.name}</p>
+                                <p className="text-sm font-medium text-foreground">{perm.name}</p>
                                 {perm.description ? (
-                                  <p className="text-label-sm text-muted-foreground">{perm.description}</p>
+                                  <p className="text-xs text-muted-foreground">{perm.description}</p>
                                 ) : null}
                               </div>
                               <input type="hidden" name="role_id" value={role.id} />
@@ -162,26 +162,26 @@ export default async function PermissionsPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-outline/20">
+        <Card className="border-border/40">
           <CardHeader>
             <CardTitle>Create permission</CardTitle>
             <CardDescription>Add a new granular permission for assignment to roles.</CardDescription>
           </CardHeader>
           <CardContent>
-            <form action={handleCreate} className="space-y-space-sm">
-              <div className="space-y-space-2xs">
+            <form action={handleCreate} className="space-y-3">
+              <div className="space-y-1">
                 <Label htmlFor="name">Name</Label>
                 <Input id="name" name="name" required placeholder="e.g., portal.documents.read" />
               </div>
-              <div className="space-y-space-2xs">
+              <div className="space-y-1">
                 <Label htmlFor="description">Description</Label>
                 <Textarea id="description" name="description" placeholder="What does this permission allow?" />
               </div>
-              <div className="space-y-space-2xs">
+              <div className="space-y-1">
                 <Label htmlFor="domain">Domain</Label>
                 <Input id="domain" name="domain" placeholder="e.g., portal, marketing, inventory" />
               </div>
-              <div className="space-y-space-2xs">
+              <div className="space-y-1">
                 <Label htmlFor="category">Category</Label>
                 <Input id="category" name="category" placeholder="e.g., documents" />
               </div>

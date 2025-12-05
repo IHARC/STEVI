@@ -31,17 +31,17 @@ function CatalogItemForm({
   return (
     <form
       action={saveCatalogItem}
-      className="space-y-4 rounded-2xl border border-outline/15 bg-surface p-4 shadow-level-1"
+      className="space-y-4 rounded-2xl border border-border/15 bg-background p-4 shadow-sm"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="space-y-1">
           <p className="text-xs font-semibold uppercase tracking-wide text-primary">
             {variant === 'create' ? 'New catalogue item' : item?.category ?? 'Catalogue item'}
           </p>
-          <h3 className="text-lg font-semibold text-on-surface">
+          <h3 className="text-lg font-semibold text-foreground">
             {item?.title ?? 'Add a new donation option'}
           </h3>
-          <p className="text-sm text-on-surface/70">
+          <p className="text-sm text-foreground/70">
             Map this item to inventory so live stock and distribution metrics can flow to the marketing site.
           </p>
         </div>
@@ -206,7 +206,7 @@ function CatalogItemForm({
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <label className="inline-flex items-center gap-2 text-sm font-medium text-on-surface">
+        <label className="inline-flex items-center gap-2 text-sm font-medium text-foreground">
           <Input
             type="checkbox"
             name="is_active"
@@ -219,7 +219,7 @@ function CatalogItemForm({
       </div>
 
       {item ? (
-        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-outline/10 pt-3 text-xs text-on-surface/70">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/20 pt-3 text-xs text-foreground/70">
           <div className="flex flex-wrap gap-2">
             <Badge variant="outline">Slug: {item.slug}</Badge>
             {metrics?.inventoryItemName ? (
@@ -259,26 +259,26 @@ export function DonationCatalogAdmin({ catalog, inventoryItems }: Props) {
     <div className="space-y-6">
       <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
         <CatalogItemForm inventoryItems={inventoryItems} variant="create" />
-        <div className="rounded-2xl border border-outline/15 bg-surface px-4 py-3 shadow-level-1">
-          <h4 className="text-sm font-semibold text-on-surface">Live stats</h4>
-          <p className="mt-1 text-sm text-on-surface/70">
+        <div className="rounded-2xl border border-border/15 bg-background px-4 py-3 shadow-sm">
+          <h4 className="text-sm font-semibold text-foreground">Live stats</h4>
+          <p className="mt-1 text-sm text-foreground/70">
             The marketing page reads from <code>portal.donation_catalog_public</code>. Data updates after each save and
             cache revalidation.
           </p>
           <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
-            <div className="rounded-xl bg-surface-container-low p-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-on-surface/60">Active items</p>
-              <p className="text-xl font-semibold text-on-surface">{activeItems.length}</p>
+            <div className="rounded-xl bg-muted p-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-foreground/60">Active items</p>
+              <p className="text-xl font-semibold text-foreground">{activeItems.length}</p>
             </div>
-            <div className="rounded-xl bg-surface-container-low p-3">
-              <p className="text-xs font-semibold uppercase tracking-wide text-on-surface/60">Hidden items</p>
-              <p className="text-xl font-semibold text-on-surface">{inactiveItems.length}</p>
+            <div className="rounded-xl bg-muted p-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-foreground/60">Hidden items</p>
+              <p className="text-xl font-semibold text-foreground">{inactiveItems.length}</p>
             </div>
           </div>
-          <div className="mt-4 rounded-xl bg-surface-container-low p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-on-surface/60">Import from inventory</p>
+          <div className="mt-4 rounded-xl bg-muted p-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-foreground/60">Import from inventory</p>
             {importableInventory.length === 0 ? (
-              <p className="mt-2 text-xs text-on-surface/70">All active inventory items are already mapped.</p>
+              <p className="mt-2 text-xs text-foreground/70">All active inventory items are already mapped.</p>
             ) : (
               <form action={importInventoryItem} className="mt-2 space-y-2">
                 <Select name="inventory_item_id" required>
@@ -293,7 +293,7 @@ export function DonationCatalogAdmin({ catalog, inventoryItems }: Props) {
                     ))}
                   </SelectContent>
                 </Select>
-                <p className="text-xs text-on-surface/60">
+                <p className="text-xs text-foreground/60">
                   Imports name, category, target buffer, and unit cost. You can edit details after import.
                 </p>
                 <Button type="submit" size="sm" className="w-full">
@@ -307,7 +307,7 @@ export function DonationCatalogAdmin({ catalog, inventoryItems }: Props) {
 
       <div className="grid gap-5 md:grid-cols-2">
         {catalog.length === 0 ? (
-          <div className="rounded-2xl border border-outline/15 bg-surface p-4 text-sm text-on-surface/70 shadow-level-1">
+          <div className="rounded-2xl border border-border/15 bg-background p-4 text-sm text-foreground/70 shadow-sm">
             No catalogue items yet. Add one above to get started.
           </div>
         ) : (

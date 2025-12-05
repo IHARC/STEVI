@@ -74,13 +74,13 @@ export default async function AdminPersonDetailPage({ params }: PageProps) {
   const onboardingHistory = await loadOnboardingHistory(supabase, person, onboardingStatus.profileId);
 
   return (
-    <div className="page-shell page-stack">
-      <header className="space-y-space-2xs">
-        <p className="text-label-sm font-semibold uppercase text-muted-foreground">Client access</p>
-        <h1 className="text-title-lg text-on-surface sm:text-headline-sm">
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
+      <header className="space-y-1">
+        <p className="text-xs font-semibold uppercase text-muted-foreground">Client access</p>
+        <h1 className="text-xl text-foreground sm:text-2xl">
           {person.first_name ?? 'Person'} {person.last_name ?? ''}
         </h1>
-        <p className="max-w-3xl text-body-md text-muted-foreground sm:text-body-lg">
+        <p className="max-w-3xl text-sm text-muted-foreground sm:text-base">
           Manage consents and granular access grants. All actions are audited.
         </p>
       </header>
@@ -88,10 +88,10 @@ export default async function AdminPersonDetailPage({ params }: PageProps) {
       <OnboardingStatusCard personId={person.id} onboardingStatus={onboardingStatus} />
       <OnboardingHistoryCard events={onboardingHistory} />
 
-      <div className="grid gap-space-lg lg:grid-cols-[2fr,1fr]">
+      <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
         <Card>
-          <CardHeader className="space-y-space-2xs">
-            <CardTitle className="text-title-md">Consent overrides</CardTitle>
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-lg">Consent overrides</CardTitle>
             <CardDescription>Adjust sharing and contact preferences with client approval.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -100,11 +100,11 @@ export default async function AdminPersonDetailPage({ params }: PageProps) {
         </Card>
 
         <Card>
-          <CardHeader className="space-y-space-2xs">
-            <CardTitle className="text-title-md">Access grants</CardTitle>
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-lg">Access grants</CardTitle>
             <CardDescription>Grant orgs or users scoped access; revoke when no longer needed.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-space-md">
+          <CardContent className="space-y-4">
             <GrantForm personId={person.id} organizations={organizations} scopes={grantScopes} />
             <GrantList grants={grants} />
           </CardContent>
@@ -241,24 +241,24 @@ async function loadOnboardingHistory(
 
 function ConsentForm({ person }: { person: PersonRow }) {
   return (
-    <form action={adminOverrideConsentAction} className="space-y-space-sm">
+    <form action={adminOverrideConsentAction} className="space-y-3">
       <input type="hidden" name="person_id" value={person.id} />
-      <label className="flex items-center gap-space-sm text-body-sm text-on-surface">
+      <label className="flex items-center gap-3 text-sm text-foreground">
         <input
           type="checkbox"
           name="data_sharing"
           defaultChecked={Boolean(person.data_sharing_consent ?? false)}
-          className="h-4 w-4 rounded border-outline/60"
+          className="h-4 w-4 rounded border-border/60"
         />
         <span>Allow data sharing</span>
       </label>
 
-      <div className="space-y-space-2xs">
-        <Label className="text-label-sm">Preferred contact</Label>
+      <div className="space-y-1">
+        <Label className="text-xs">Preferred contact</Label>
         <select
           name="preferred_contact"
           defaultValue={person.preferred_contact_method ?? 'email'}
-          className="w-full rounded-md border border-outline/40 bg-surface px-space-sm py-space-2xs text-body-sm"
+          className="w-full rounded-md border border-border/40 bg-background px-3 py-1 text-sm"
         >
           <option value="email">Email</option>
           <option value="phone">Phone</option>
@@ -267,8 +267,8 @@ function ConsentForm({ person }: { person: PersonRow }) {
         </select>
       </div>
 
-      <div className="space-y-space-2xs">
-        <Label htmlFor="privacy_notes" className="text-label-sm">Privacy notes</Label>
+      <div className="space-y-1">
+        <Label htmlFor="privacy_notes" className="text-xs">Privacy notes</Label>
         <Textarea
           id="privacy_notes"
           name="privacy_restrictions"
@@ -285,14 +285,14 @@ function ConsentForm({ person }: { person: PersonRow }) {
 
 function GrantForm({ personId, organizations, scopes }: { personId: number; organizations: OrganizationOption[]; scopes: string[] }) {
   return (
-    <form action={adminCreateGrantAction} className="space-y-space-sm">
+    <form action={adminCreateGrantAction} className="space-y-3">
       <input type="hidden" name="person_id" value={personId} />
-      <div className="space-y-space-2xs">
-        <Label className="text-label-sm" htmlFor="scope">Scope</Label>
+      <div className="space-y-1">
+        <Label className="text-xs" htmlFor="scope">Scope</Label>
         <select
           id="scope"
           name="scope"
-          className="w-full rounded-md border border-outline/40 bg-surface px-space-sm py-space-2xs text-body-sm"
+          className="w-full rounded-md border border-border/40 bg-background px-3 py-1 text-sm"
           defaultValue="view"
         >
           {scopes.length === 0 ? (
@@ -304,19 +304,19 @@ function GrantForm({ personId, organizations, scopes }: { personId: number; orga
           )}
         </select>
       </div>
-      <div className="space-y-space-2xs">
-        <Label className="text-label-sm">User ID (optional)</Label>
+      <div className="space-y-1">
+        <Label className="text-xs">User ID (optional)</Label>
         <input
           name="grantee_user_id"
-          className="w-full rounded-md border border-outline/40 bg-surface px-space-sm py-space-2xs text-body-sm"
+          className="w-full rounded-md border border-border/40 bg-background px-3 py-1 text-sm"
           placeholder="UUID of user"
         />
       </div>
-      <div className="space-y-space-2xs">
-        <Label className="text-label-sm">Organization (optional)</Label>
+      <div className="space-y-1">
+        <Label className="text-xs">Organization (optional)</Label>
         <select
           name="grantee_org_id"
-          className="w-full rounded-md border border-outline/40 bg-surface px-space-sm py-space-2xs text-body-sm"
+          className="w-full rounded-md border border-border/40 bg-background px-3 py-1 text-sm"
           defaultValue=""
         >
           <option value="">—</option>
@@ -332,17 +332,17 @@ function GrantForm({ personId, organizations, scopes }: { personId: number; orga
 
 function GrantList({ grants }: { grants: PersonGrant[] }) {
   if (grants.length === 0) {
-    return <p className="text-body-sm text-muted-foreground">No active grants.</p>;
+    return <p className="text-sm text-muted-foreground">No active grants.</p>;
   }
 
   return (
-    <div className="space-y-space-xs">
-      <p className="text-label-sm text-muted-foreground">Active grants</p>
-      <ul className="space-y-space-2xs">
+    <div className="space-y-2">
+      <p className="text-xs text-muted-foreground">Active grants</p>
+      <ul className="space-y-1">
         {grants.map((grant) => (
-          <li key={grant.id} className="flex flex-wrap items-center justify-between gap-space-xs rounded-md border border-outline/30 bg-surface-container p-space-sm text-body-sm">
-            <div className="space-y-space-3xs">
-              <p className="font-medium text-on-surface">{grant.scope}</p>
+          <li key={grant.id} className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border/30 bg-card p-3 text-sm">
+            <div className="space-y-0.5">
+              <p className="font-medium text-foreground">{grant.scope}</p>
               <p className="text-muted-foreground">
                 {grant.granteeUserId ? `User ${grant.granteeUserId}` : grant.orgName ? grant.orgName : `Org ${grant.granteeOrgId}`}
               </p>
@@ -371,18 +371,18 @@ function OnboardingStatusCard({
 
   return (
     <Card>
-      <CardHeader className="space-y-space-2xs">
-        <CardTitle className="text-title-md">Onboarding status</CardTitle>
+      <CardHeader className="space-y-1">
+        <CardTitle className="text-lg">Onboarding status</CardTitle>
         <CardDescription>Audit the consent checklist and trigger resets or reminders.</CardDescription>
-        <div className="flex flex-wrap items-center gap-space-sm">
+        <div className="flex flex-wrap items-center gap-3">
           <Badge variant={onboardingStatus.status === 'COMPLETED' ? 'default' : 'secondary'}>
             {onboardingStatus.status.toLowerCase()}
           </Badge>
-          <p className="text-body-xs text-muted-foreground">Last touch: {lastUpdated}</p>
+          <p className="text-xs text-muted-foreground">Last touch: {lastUpdated}</p>
         </div>
       </CardHeader>
-      <CardContent className="space-y-space-sm">
-        <ul className="space-y-space-2xs text-body-sm text-on-surface/80">
+      <CardContent className="space-y-3">
+        <ul className="space-y-1 text-sm text-foreground/80">
           <StatusItem done={onboardingStatus.hasPerson}>Active person record</StatusItem>
           <StatusItem done={onboardingStatus.hasServiceAgreementConsent}>Service agreement captured</StatusItem>
           <StatusItem done={onboardingStatus.hasPrivacyAcknowledgement}>Privacy acknowledgement captured</StatusItem>
@@ -391,7 +391,7 @@ function OnboardingStatusCard({
           </StatusItem>
         </ul>
 
-        <div className="flex flex-wrap gap-space-sm">
+        <div className="flex flex-wrap gap-3">
           <form action={resetOnboardingFormAction}>
             <input type="hidden" name="person_id" value={personId} />
             <Button type="submit" variant="secondary">Reset onboarding</Button>
@@ -408,14 +408,14 @@ function OnboardingStatusCard({
 
 function StatusItem({ done, children }: { done: boolean; children: React.ReactNode }) {
   return (
-    <li className="flex items-center gap-space-2xs">
+    <li className="flex items-center gap-1">
       <span
-        className={`inline-flex h-4 w-4 items-center justify-center rounded-full ${done ? 'bg-primary text-on-primary' : 'bg-outline/30 text-on-surface'}`}
+        className={`inline-flex h-4 w-4 items-center justify-center rounded-full ${done ? 'bg-primary text-primary-foreground' : 'bg-border/30 text-foreground'}`}
         aria-hidden
       >
         {done ? '✓' : ''}
       </span>
-      <span className={done ? 'text-on-surface' : 'text-muted-foreground'}>{children}</span>
+      <span className={done ? 'text-foreground' : 'text-muted-foreground'}>{children}</span>
     </li>
   );
 }
@@ -423,26 +423,26 @@ function StatusItem({ done, children }: { done: boolean; children: React.ReactNo
 function OnboardingHistoryCard({ events }: { events: OnboardingEvent[] }) {
   return (
     <Card>
-      <CardHeader className="space-y-space-2xs">
-        <CardTitle className="text-title-md">Onboarding history</CardTitle>
+      <CardHeader className="space-y-1">
+        <CardTitle className="text-lg">Onboarding history</CardTitle>
         <CardDescription>Recent consent, sharing, and account-link events for this client.</CardDescription>
       </CardHeader>
       <CardContent>
         {events.length === 0 ? (
-          <p className="text-body-sm text-muted-foreground">No onboarding activity recorded yet.</p>
+          <p className="text-sm text-muted-foreground">No onboarding activity recorded yet.</p>
         ) : (
-          <ul className="space-y-space-sm">
+          <ul className="space-y-3">
             {events.map((event, index) => (
               <li
                 key={`${event.source}-${event.at}-${index}`}
-                className="flex flex-wrap items-start justify-between gap-space-sm rounded-lg border border-outline/20 bg-surface-container-low p-space-sm"
+                className="flex flex-wrap items-start justify-between gap-3 rounded-lg border border-border/40 bg-muted p-3"
               >
-                <div className="space-y-space-3xs">
-                  <p className="text-body-md font-medium text-on-surface">{event.label}</p>
-                  {event.detail ? <p className="text-body-sm text-muted-foreground">{event.detail}</p> : null}
-                  <p className="text-body-xs uppercase tracking-wide text-muted-foreground">{event.source}</p>
+                <div className="space-y-0.5">
+                  <p className="text-sm font-medium text-foreground">{event.label}</p>
+                  {event.detail ? <p className="text-sm text-muted-foreground">{event.detail}</p> : null}
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">{event.source}</p>
                 </div>
-                <p className="text-body-sm text-muted-foreground">{new Date(event.at).toLocaleString()}</p>
+                <p className="text-sm text-muted-foreground">{new Date(event.at).toLocaleString()}</p>
               </li>
             ))}
           </ul>

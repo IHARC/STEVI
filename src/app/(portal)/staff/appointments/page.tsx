@@ -50,11 +50,11 @@ function StaffScheduleForm({
   const quickSlots = generateAvailabilitySlots();
 
   return (
-    <form action={onConfirm} className="space-y-space-xs rounded-lg border border-outline/30 p-space-sm">
+    <form action={onConfirm} className="space-y-2 rounded-lg border border-border/30 p-3">
       <input type="hidden" name="appointment_id" value={appointment.id} />
-      <div className="grid gap-space-xs sm:grid-cols-2">
-        <div className="space-y-space-2xs">
-          <label className="text-label-sm text-on-surface/80" htmlFor={`occurs-${appointment.id}`}>
+      <div className="grid gap-2 sm:grid-cols-2">
+        <div className="space-y-1">
+          <label className="text-xs text-foreground/80" htmlFor={`occurs-${appointment.id}`}>
             Date & time
           </label>
           <Input
@@ -65,8 +65,8 @@ function StaffScheduleForm({
             defaultValue={appointment.occurs_at?.slice(0, 16)}
           />
         </div>
-        <div className="space-y-space-2xs">
-          <label className="text-label-sm text-on-surface/80" htmlFor={`location-${appointment.id}`}>
+        <div className="space-y-1">
+          <label className="text-xs text-foreground/80" htmlFor={`location-${appointment.id}`}>
             Location / meeting link
           </label>
           <Input
@@ -77,9 +77,9 @@ function StaffScheduleForm({
           />
         </div>
       </div>
-      <div className="grid gap-space-xs sm:grid-cols-2">
-        <div className="space-y-space-2xs">
-          <label className="text-label-sm text-on-surface/80" htmlFor={`duration-${appointment.id}`}>
+      <div className="grid gap-2 sm:grid-cols-2">
+        <div className="space-y-1">
+          <label className="text-xs text-foreground/80" htmlFor={`duration-${appointment.id}`}>
             Duration (minutes)
           </label>
           <Input
@@ -91,8 +91,8 @@ function StaffScheduleForm({
             defaultValue={appointment.duration_minutes ?? 60}
           />
         </div>
-        <div className="space-y-space-2xs">
-          <label className="text-label-sm text-on-surface/80" htmlFor={`location-type-${appointment.id}`}>
+        <div className="space-y-1">
+          <label className="text-xs text-foreground/80" htmlFor={`location-type-${appointment.id}`}>
             Meeting type
           </label>
           <Select name="location_type" defaultValue={appointment.location_type ?? 'in_person'}>
@@ -109,9 +109,9 @@ function StaffScheduleForm({
           </Select>
         </div>
       </div>
-      <div className="grid gap-space-xs sm:grid-cols-2">
-        <div className="space-y-space-2xs">
-          <label className="text-label-sm text-on-surface/80" htmlFor={`meeting-url-${appointment.id}`}>
+      <div className="grid gap-2 sm:grid-cols-2">
+        <div className="space-y-1">
+          <label className="text-xs text-foreground/80" htmlFor={`meeting-url-${appointment.id}`}>
             Meeting link / call-back (optional)
           </label>
           <Input
@@ -121,8 +121,8 @@ function StaffScheduleForm({
             defaultValue={appointment.meeting_url ?? ''}
           />
         </div>
-        <div className="space-y-space-2xs">
-          <label className="text-label-sm text-on-surface/80" htmlFor={`notes-${appointment.id}`}>
+        <div className="space-y-1">
+          <label className="text-xs text-foreground/80" htmlFor={`notes-${appointment.id}`}>
             Notes to client (optional)
           </label>
           <Textarea
@@ -143,7 +143,7 @@ function StaffScheduleForm({
         placeholder="Search staff"
         helperText="Leave blank to stay assigned to you."
       />
-      <div className="flex flex-wrap gap-space-sm">
+      <div className="flex flex-wrap gap-3">
         <Button type="submit" size="sm">
           Confirm & schedule
         </Button>
@@ -165,7 +165,7 @@ function CompleteForm({
   onComplete: (formData: FormData) => Promise<void>;
 }) {
   return (
-    <form action={onComplete} className="flex flex-col gap-space-xs sm:flex-row sm:items-center">
+    <form action={onComplete} className="flex flex-col gap-2 sm:flex-row sm:items-center">
       <input type="hidden" name="appointment_id" value={appointment.id} />
       <Textarea
         name="outcome_notes"
@@ -215,26 +215,26 @@ export default async function StaffAppointmentsPage() {
   const scheduled = upcoming.filter((appt) => appt.status === 'scheduled');
 
   return (
-    <div className="space-y-space-lg">
-      <header className="space-y-space-2xs">
-        <p className="text-label-sm font-semibold uppercase text-muted-foreground">Appointments</p>
-        <h1 className="text-headline-lg text-on-surface">Review and schedule requests</h1>
-        <p className="max-w-3xl text-body-md text-muted-foreground">
+    <div className="space-y-6">
+      <header className="space-y-1">
+        <p className="text-xs font-semibold uppercase text-muted-foreground">Appointments</p>
+        <h1 className="text-3xl text-foreground">Review and schedule requests</h1>
+        <p className="max-w-3xl text-sm text-muted-foreground">
           Confirm client requests, book offline appointments, and keep outcomes up to date. This list is scoped to your assignments and organization.
         </p>
       </header>
 
-      <div className="grid gap-space-lg lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle className="text-title-lg">Quick offline booking</CardTitle>
+            <CardTitle className="text-xl">Quick offline booking</CardTitle>
           </CardHeader>
           <CardContent>
             <form
               action={handleCreateOffline}
-              className="grid gap-space-sm"
+              className="grid gap-3"
             >
-              <div className="grid gap-space-sm sm:grid-cols-2">
+              <div className="grid gap-3 sm:grid-cols-2">
                 <ProfileSearch
                   name="client_profile_id"
                   label="Client"
@@ -242,19 +242,19 @@ export default async function StaffAppointmentsPage() {
                   placeholder="Search clients by name"
                   required
                 />
-                <div className="space-y-space-2xs">
-                  <label className="text-label-sm text-on-surface/80" htmlFor="offline-occurs">
+                <div className="space-y-1">
+                  <label className="text-xs text-foreground/80" htmlFor="offline-occurs">
                     Date & time (optional)
                   </label>
                   <Input id="offline-occurs" name="occurs_at" type="datetime-local" />
                 </div>
               </div>
               <Input name="title" placeholder="Appointment title" required />
-              <div className="grid gap-space-sm sm:grid-cols-2">
+              <div className="grid gap-3 sm:grid-cols-2">
                 <Input name="location" placeholder="Location or meeting link" />
                 <Input name="duration_minutes" type="number" min={15} step={15} defaultValue={60} />
               </div>
-              <div className="grid gap-space-sm sm:grid-cols-2">
+              <div className="grid gap-3 sm:grid-cols-2">
                 <Select name="location_type" defaultValue="in_person">
                   <SelectTrigger>
                     <SelectValue placeholder="Meeting type" />
@@ -280,7 +280,7 @@ export default async function StaffAppointmentsPage() {
               <Button type="submit" className="w-fit" size="sm">
                 Create appointment
               </Button>
-              <p className="text-body-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 Use profile IDs from the client directory. Booking without a time will keep the request in pending status.
               </p>
             </form>
@@ -289,24 +289,24 @@ export default async function StaffAppointmentsPage() {
 
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle className="text-title-lg">Needs attention</CardTitle>
+            <CardTitle className="text-xl">Needs attention</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-space-md">
+          <CardContent className="space-y-4">
             {needsAction.length === 0 ? (
-              <p className="text-body-sm text-muted-foreground">No pending requests right now.</p>
+              <p className="text-sm text-muted-foreground">No pending requests right now.</p>
             ) : (
               needsAction.map((appointment) => (
                 <article
                   key={appointment.id}
-                  className="rounded-xl border border-outline/20 bg-surface-container-low p-space-md shadow-level-1"
+                  className="rounded-xl border border-border/40 bg-muted p-4 shadow-sm"
                   aria-labelledby={`needs-${appointment.id}`}
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
-                      <h2 id={`needs-${appointment.id}`} className="text-title-md font-medium text-on-surface">
+                      <h2 id={`needs-${appointment.id}`} className="text-lg font-medium text-foreground">
                         {appointment.title}
                       </h2>
-                      <p className="text-body-sm text-muted-foreground">
+                      <p className="text-sm text-muted-foreground">
                         {appointment.client?.display_name ?? 'Client'} · {appointment.organization?.name ?? 'IHARC'}
                       </p>
                   </div>
@@ -314,26 +314,26 @@ export default async function StaffAppointmentsPage() {
                     {appointment.status.replaceAll('_', ' ')}
                   </Badge>
                 </div>
-                <dl className="mt-space-xs space-y-[0.3rem] text-body-sm text-on-surface/80">
+                <dl className="mt-2 space-y-[0.3rem] text-sm text-foreground/80">
                     {appointment.requested_window ? (
                       <div className="flex flex-wrap gap-1">
-                        <dt className="font-medium text-on-surface/70">Requested window:</dt>
+                        <dt className="font-medium text-foreground/70">Requested window:</dt>
                         <dd>{appointment.requested_window}</dd>
                       </div>
                     ) : null}
                     {appointment.description ? (
                       <div className="flex flex-wrap gap-1">
-                        <dt className="font-medium text-on-surface/70">Description:</dt>
+                        <dt className="font-medium text-foreground/70">Description:</dt>
                         <dd>{appointment.description}</dd>
                       </div>
                     ) : null}
                     <div className="flex flex-wrap gap-1">
-                      <dt className="font-medium text-on-surface/70">Preferred type:</dt>
+                      <dt className="font-medium text-foreground/70">Preferred type:</dt>
                       <dd>{appointment.location_type.replaceAll('_', ' ')}</dd>
                     </div>
                   </dl>
 
-                  <div className="mt-space-md space-y-space-sm">
+                  <div className="mt-4 space-y-3">
                     <StaffScheduleForm
                       appointment={appointment}
                       onConfirm={handleConfirm}
@@ -348,33 +348,33 @@ export default async function StaffAppointmentsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-title-lg">Scheduled</CardTitle>
+            <CardTitle className="text-xl">Scheduled</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-space-md">
+          <CardContent className="space-y-4">
             {scheduled.length === 0 ? (
-              <p className="text-body-sm text-muted-foreground">No scheduled appointments.</p>
+              <p className="text-sm text-muted-foreground">No scheduled appointments.</p>
             ) : (
               scheduled.map((appointment) => (
-                <article key={appointment.id} className="rounded-lg border border-outline/20 p-space-md shadow-level-1">
+                <article key={appointment.id} className="rounded-lg border border-border/40 p-4 shadow-sm">
                 <div className="flex items-center justify-between gap-2">
                   <div>
-                    <p className="text-title-sm font-semibold text-on-surface">{appointment.title}</p>
-                    <p className="text-body-sm text-muted-foreground">{appointment.client?.display_name ?? 'Client'}</p>
+                    <p className="text-base font-semibold text-foreground">{appointment.title}</p>
+                    <p className="text-sm text-muted-foreground">{appointment.client?.display_name ?? 'Client'}</p>
                   </div>
                   <Badge className="capitalize">{appointment.status}</Badge>
                 </div>
-                <p className="mt-space-2xs text-body-sm text-on-surface/80">{formatDate(appointment.occurs_at)}</p>
-                <p className="text-body-sm text-muted-foreground">
+                <p className="mt-1 text-sm text-foreground/80">{formatDate(appointment.occurs_at)}</p>
+                <p className="text-sm text-muted-foreground">
                   {appointment.location ?? 'Location TBD'} · {appointment.location_type.replaceAll('_', ' ')}
                 </p>
                 {appointment.meeting_url ? (
-                  <p className="text-body-sm text-primary">
+                  <p className="text-sm text-primary">
                     <a className="underline-offset-4 hover:underline" href={appointment.meeting_url} target="_blank" rel="noreferrer">
                       Open meeting link
                     </a>
                   </p>
                 ) : null}
-                  <div className="mt-space-sm flex flex-wrap gap-space-sm">
+                  <div className="mt-3 flex flex-wrap gap-3">
                     <CompleteForm appointment={appointment} onComplete={handleComplete} />
                     <CancelAppointmentForm action={handleCancel} appointmentId={appointment.id} variant="secondary" />
                   </div>
@@ -386,23 +386,23 @@ export default async function StaffAppointmentsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-title-lg">Completed & cancelled</CardTitle>
+            <CardTitle className="text-xl">Completed & cancelled</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-space-sm">
+          <CardContent className="space-y-3">
             {past.length === 0 ? (
-              <p className="text-body-sm text-muted-foreground">No history yet.</p>
+              <p className="text-sm text-muted-foreground">No history yet.</p>
             ) : (
               past.map((appointment) => (
-                <article key={appointment.id} className="rounded-md border border-outline/15 bg-surface p-space-sm">
+                <article key={appointment.id} className="rounded-md border border-border/15 bg-background p-3">
                   <div className="flex items-center justify-between gap-2">
-                    <p className="text-body-md font-medium text-on-surface">{appointment.title}</p>
+                    <p className="text-sm font-medium text-foreground">{appointment.title}</p>
                     <Badge variant="outline" className="capitalize">
                       {appointment.status.replaceAll('_', ' ')}
                     </Badge>
                   </div>
-                  <p className="text-body-sm text-muted-foreground">{formatDate(appointment.occurs_at)}</p>
+                  <p className="text-sm text-muted-foreground">{formatDate(appointment.occurs_at)}</p>
                   {appointment.outcome_notes ? (
-                    <p className="text-body-sm text-on-surface/80">{appointment.outcome_notes}</p>
+                    <p className="text-sm text-foreground/80">{appointment.outcome_notes}</p>
                   ) : null}
                 </article>
               ))

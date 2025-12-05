@@ -113,7 +113,7 @@ export default async function AdminOperationsPage() {
   }));
 
   return (
-    <div className="page-shell page-stack">
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
       <PageHeader
         breadcrumbs={[
           { label: 'Admin', href: '/admin/operations' },
@@ -128,23 +128,23 @@ export default async function AdminOperationsPage() {
         useSplitActions={false}
       />
 
-      <section className="space-y-space-sm">
-        <div className="flex items-center justify-between gap-space-sm">
-          <h2 className="text-title-md font-semibold text-on-surface">Operational KPIs</h2>
+      <section className="space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-lg font-semibold text-foreground">Operational KPIs</h2>
           <Badge variant="outline" className="hidden sm:inline-flex">Live</Badge>
         </div>
-        <div className="grid gap-space-md md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {coreMetrics.map((card) => (
             <StatTile key={card.id} label={card.label} value={card.value} tone={card.tone} />
           ))}
         </div>
       </section>
 
-      <section className="grid gap-space-md lg:grid-cols-[1.8fr,1.2fr]">
+      <section className="grid gap-4 lg:grid-cols-[1.8fr,1.2fr]">
         <Card className="h-full">
-          <CardHeader className="flex items-start justify-between gap-space-sm">
+          <CardHeader className="flex items-start justify-between gap-3">
             <div>
-              <CardTitle className="text-title-lg">Notifications (7 days)</CardTitle>
+              <CardTitle className="text-xl">Notifications (7 days)</CardTitle>
               <CardDescription>Sent and queued notifications grouped by day.</CardDescription>
             </div>
             <Badge variant="outline">{formatCount(snapshot.notifications7d)} total</Badge>
@@ -152,7 +152,7 @@ export default async function AdminOperationsPage() {
           <CardContent>
             <Suspense fallback={<Skeleton className="h-64 w-full" />}>
               {trendSeries.length === 0 ? (
-                <div className="space-y-space-xs text-body-sm text-muted-foreground">
+                <div className="space-y-2 text-sm text-muted-foreground">
                   <p>No notifications sent in the last week.</p>
                   <Button asChild variant="secondary" size="sm">
                     <Link href="/admin/notifications">Send a notification</Link>
@@ -167,10 +167,10 @@ export default async function AdminOperationsPage() {
 
         <Card className="h-full">
           <CardHeader>
-            <CardTitle className="text-title-lg">Queues</CardTitle>
+            <CardTitle className="text-xl">Queues</CardTitle>
             <CardDescription>Work the highest-risk items first.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-space-xs">
+          <CardContent className="space-y-2">
             <AttentionQueue
               items={[
                 {
@@ -208,9 +208,9 @@ export default async function AdminOperationsPage() {
         </Card>
       </section>
 
-      <section className="space-y-space-sm">
-        <h2 className="text-title-md font-semibold text-on-surface">Content</h2>
-        <div className="grid gap-space-md sm:grid-cols-2 lg:max-w-3xl">
+      <section className="space-y-3">
+        <h2 className="text-lg font-semibold text-foreground">Content</h2>
+        <div className="grid gap-4 sm:grid-cols-2 lg:max-w-3xl">
           {contentMetrics.map((card) => (
             <StatTile key={card.id} label={card.label} value={card.value} tone="info" />
           ))}

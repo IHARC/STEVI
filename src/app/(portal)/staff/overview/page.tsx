@@ -27,7 +27,7 @@ export default async function StaffOverviewPage() {
   const roleLabel = access.iharcRoles.includes('iharc_supervisor') ? 'Supervisor' : 'Staff & volunteers';
 
   return (
-    <div className="page-shell page-stack">
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
       <PageHeader
         eyebrow={roleLabel}
         title="Staff overview"
@@ -36,21 +36,21 @@ export default async function StaffOverviewPage() {
         secondaryAction={{ label: 'Log outreach', href: '/staff/outreach' }}
       />
 
-      <section className="grid gap-space-md md:grid-cols-3">
+      <section className="grid gap-4 md:grid-cols-3">
         <Card className="h-full">
-          <CardHeader className="space-y-space-2xs">
-            <div className="flex items-center justify-between gap-space-xs">
-              <CardTitle className="text-title-md">Active caseload</CardTitle>
+          <CardHeader className="space-y-1">
+            <div className="flex items-center justify-between gap-2">
+              <CardTitle className="text-lg">Active caseload</CardTitle>
               <Badge variant="secondary">{caseload.length} open</Badge>
             </div>
             <CardDescription>Review clients assigned to you. RLS limits what you can see.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-space-sm">
-            <ul className="space-y-space-2xs text-body-sm text-on-surface/80">
+          <CardContent className="space-y-3">
+            <ul className="space-y-1 text-sm text-foreground/80">
               {caseload.slice(0, 4).map((item) => (
-                <li key={item.id} className="flex items-start justify-between gap-space-xs">
+                <li key={item.id} className="flex items-start justify-between gap-2">
                   <div>
-                    <p className="font-medium text-on-surface">{item.clientName}</p>
+                    <p className="font-medium text-foreground">{item.clientName}</p>
                     <p className="text-muted-foreground">{item.nextStep ?? 'Next step pending'}</p>
                   </div>
                   <Badge variant={item.status === 'active' ? 'default' : 'secondary'} className="capitalize">
@@ -67,19 +67,19 @@ export default async function StaffOverviewPage() {
         </Card>
 
         <Card className="h-full">
-          <CardHeader className="space-y-space-2xs">
-            <div className="flex items-center justify-between gap-space-xs">
-              <CardTitle className="text-title-md">Today’s schedule</CardTitle>
+          <CardHeader className="space-y-1">
+            <div className="flex items-center justify-between gap-2">
+              <CardTitle className="text-lg">Today’s schedule</CardTitle>
               <Badge variant="secondary">{shifts.length} blocks</Badge>
             </div>
             <CardDescription>Shift and route assignments synced from IHARC Ops.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-space-2xs text-body-sm text-on-surface/80">
+          <CardContent className="space-y-1 text-sm text-foreground/80">
             {shifts.slice(0, 4).map((shift) => (
-              <div key={shift.id} className="rounded-lg border border-outline/20 p-space-sm">
-                <p className="font-medium text-on-surface">{shift.title}</p>
+              <div key={shift.id} className="rounded-lg border border-border/40 p-3">
+                <p className="font-medium text-foreground">{shift.title}</p>
                 <p className="text-muted-foreground">{shift.location}</p>
-                <p className="text-label-sm text-muted-foreground">
+                <p className="text-xs text-muted-foreground">
                   {shift.startsAt}–{shift.endsAt}
                 </p>
               </div>
@@ -92,12 +92,12 @@ export default async function StaffOverviewPage() {
         </Card>
 
         <Card className="h-full">
-          <CardHeader className="space-y-space-2xs">
-            <CardTitle className="text-title-md">Outreach</CardTitle>
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-lg">Outreach</CardTitle>
             <CardDescription>Jump into the outreach log for field notes.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-space-sm">
-            <p className="text-body-sm text-muted-foreground">
+          <CardContent className="space-y-3">
+            <p className="text-sm text-muted-foreground">
               Capture interactions, locations, and follow-ups. Logs stay scoped to your assignments by RLS.
             </p>
             <Button asChild variant="outline" className="w-full">

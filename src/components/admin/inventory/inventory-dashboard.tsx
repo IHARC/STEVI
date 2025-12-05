@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { EmptyState } from '@/components/ui/empty-state';
+import { cn } from '@/lib/utils';
 import type { InventoryDashboard } from '@/lib/inventory/types';
 
 type InventoryDashboardProps = {
@@ -22,7 +23,7 @@ export function InventoryDashboardSection({ dashboard }: InventoryDashboardProps
       <div className="grid gap-6 lg:grid-cols-2">
         <Card className="h-full">
           <CardHeader>
-            <CardTitle className="text-body-lg font-semibold">Low stock items</CardTitle>
+            <CardTitle className="text-base font-semibold">Low stock items</CardTitle>
           </CardHeader>
           <CardContent className="px-0">
             {dashboard.lowStockItems.length === 0 ? (
@@ -60,7 +61,7 @@ export function InventoryDashboardSection({ dashboard }: InventoryDashboardProps
 
         <Card className="h-full">
           <CardHeader>
-            <CardTitle className="text-body-lg font-semibold">Expiring soon</CardTitle>
+            <CardTitle className="text-base font-semibold">Expiring soon</CardTitle>
           </CardHeader>
           <CardContent className="px-0">
             {dashboard.expiringItems.length === 0 ? (
@@ -99,7 +100,7 @@ export function InventoryDashboardSection({ dashboard }: InventoryDashboardProps
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-body-lg font-semibold">Recent receipts</CardTitle>
+          <CardTitle className="text-base font-semibold">Recent receipts</CardTitle>
         </CardHeader>
         <CardContent className="px-0">
           {dashboard.recentReceipts.length === 0 ? (
@@ -147,15 +148,25 @@ export function InventoryDashboardSection({ dashboard }: InventoryDashboardProps
 function SummaryCard({ label, value, accent = false }: { label: string; value: string; accent?: boolean }) {
   return (
     <Card
-      className={
-        accent ? 'border-destructive text-destructive-foreground state-layer-color-error state-layer-hover' : ''
-      }
+      className={cn(
+        'border-border/60',
+        accent && 'border-destructive/60 bg-destructive/5 text-destructive',
+      )}
     >
       <CardHeader>
-        <CardTitle className="text-label-sm font-medium uppercase text-muted-foreground">{label}</CardTitle>
+        <CardTitle
+          className={cn(
+            'text-xs font-medium uppercase text-muted-foreground',
+            accent && 'text-destructive',
+          )}
+        >
+          {label}
+        </CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-headline-sm font-semibold text-on-surface">{value}</p>
+        <p className={cn('text-2xl font-semibold text-foreground', accent && 'text-destructive')}>
+          {value}
+        </p>
       </CardContent>
     </Card>
   );

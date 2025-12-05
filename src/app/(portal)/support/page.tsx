@@ -65,25 +65,25 @@ export default async function SupportPage() {
   await ensurePortalProfile(supabase, user.id);
 
   return (
-    <div className="page-shell page-stack">
-      <header className="flex flex-col gap-space-xs">
-        <p className="text-label-sm font-medium uppercase text-muted-foreground">
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
+      <header className="flex flex-col gap-2">
+        <p className="text-xs font-medium uppercase text-muted-foreground">
           Connect with IHARC
         </p>
-        <h1 className="text-headline-lg text-on-surface sm:text-display-sm">Support and contact</h1>
-        <p className="max-w-2xl text-body-md text-muted-foreground sm:text-body-lg">
+        <h1 className="text-3xl text-foreground sm:text-4xl">Support and contact</h1>
+        <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">
           These channels connect directly with the outreach, housing, and health teams collaborating
           through STEVI.
         </p>
       </header>
 
-      <section aria-label="Support channels" className="grid gap-space-md md:grid-cols-2">
+      <section aria-label="Support channels" className="grid gap-4 md:grid-cols-2">
         {supportChannels.map((channel) => (
           <Card key={channel.id} className="flex flex-col justify-between">
             <CardHeader>
-              <CardTitle className="text-title-md">{channel.label}</CardTitle>
+              <CardTitle className="text-lg">{channel.label}</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-space-sm text-body-sm text-muted-foreground">
+            <CardContent className="space-y-3 text-sm text-muted-foreground">
               <p>{channel.description}</p>
               {channel.email ? (
                 <p>
@@ -111,18 +111,18 @@ export default async function SupportPage() {
         ))}
       </section>
 
-      <section aria-labelledby="faq-heading" className="grid gap-space-md md:grid-cols-2">
+      <section aria-labelledby="faq-heading" className="grid gap-4 md:grid-cols-2">
         <Card className="md:col-span-2">
           <CardHeader>
-            <CardTitle id="faq-heading" className="text-title-lg">
+            <CardTitle id="faq-heading" className="text-xl">
               Frequently asked questions
             </CardTitle>
           </CardHeader>
-          <CardContent className="grid gap-space-md md:grid-cols-3">
+          <CardContent className="grid gap-4 md:grid-cols-3">
             {faqs.map((faq) => (
-              <article key={faq.question} className="rounded-xl border border-outline/20 p-space-md">
-                <h2 className="text-title-sm font-medium text-on-surface">{faq.question}</h2>
-                <p className="mt-space-xs text-body-sm text-muted-foreground">{faq.answer}</p>
+              <article key={faq.question} className="rounded-xl border border-border/40 p-4">
+                <h2 className="text-base font-medium text-foreground">{faq.question}</h2>
+                <p className="mt-2 text-sm text-muted-foreground">{faq.answer}</p>
               </article>
             ))}
           </CardContent>
@@ -132,11 +132,11 @@ export default async function SupportPage() {
       <section aria-labelledby="feedback-heading">
         <Card>
           <CardHeader>
-            <CardTitle id="feedback-heading" className="text-title-lg">
+            <CardTitle id="feedback-heading" className="text-xl">
               Something not working?
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-space-sm text-body-sm text-muted-foreground">
+          <CardContent className="space-y-3 text-sm text-muted-foreground">
             <p>
               Share a quick note with the STEVI team and we’ll follow up. This creates a ticket in
               the operations system so nothing gets lost.

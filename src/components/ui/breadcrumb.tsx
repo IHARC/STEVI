@@ -1,9 +1,7 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
-import { ChevronRight, MoreHorizontal } from "lucide-react"
-
 import { cn } from "@/lib/utils"
-import { Icon } from "@/components/ui/icon"
+import { ChevronRightIcon, DotsHorizontalIcon } from "@radix-ui/react-icons"
 
 const Breadcrumb = React.forwardRef<
   HTMLElement,
@@ -20,7 +18,7 @@ const BreadcrumbList = React.forwardRef<
   <ol
     ref={ref}
     className={cn(
-      "flex flex-wrap items-center gap-1.5 break-words text-body-md text-muted-foreground sm:gap-2.5",
+      "flex flex-wrap items-center gap-1.5 break-words text-sm text-muted-foreground sm:gap-2.5",
       className
     )}
     {...props}
@@ -51,7 +49,7 @@ const BreadcrumbLink = React.forwardRef<
   return (
     <Comp
       ref={ref}
-      className={cn("transition-colors motion-duration-short motion-ease-standard hover:text-foreground", className)}
+      className={cn("transition-colors hover:text-foreground", className)}
       {...props}
     />
   )
@@ -78,8 +76,13 @@ const BreadcrumbSeparator = ({
   className,
   ...props
 }: React.ComponentProps<"li">) => (
-  <li role="presentation" aria-hidden="true" className={cn("flex items-center justify-center", className)} {...props}>
-    {children ?? <Icon icon={ChevronRight} size="xs" />}
+  <li
+    role="presentation"
+    aria-hidden="true"
+    className={cn("[&>svg]:w-3.5 [&>svg]:h-3.5", className)}
+    {...props}
+  >
+    {children ?? <ChevronRightIcon />}
   </li>
 )
 BreadcrumbSeparator.displayName = "BreadcrumbSeparator"
@@ -94,7 +97,7 @@ const BreadcrumbEllipsis = ({
     className={cn("flex h-9 w-9 items-center justify-center", className)}
     {...props}
   >
-    <Icon icon={MoreHorizontal} size="sm" aria-hidden />
+    <DotsHorizontalIcon className="h-4 w-4" />
     <span className="sr-only">More</span>
   </span>
 )

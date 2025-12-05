@@ -149,21 +149,21 @@ function PendingAffiliationsContent({
 
   return (
     <Card className="border-border/60">
-      <CardHeader className="flex flex-col gap-space-sm sm:flex-row sm:items-start sm:justify-between">
+      <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <CardTitle className="text-title-lg">Pending verification queue</CardTitle>
+          <CardTitle className="text-xl">Pending verification queue</CardTitle>
           <CardDescription>
             Approve agency and government representatives so they can collaborate on STEVI right
             away.
           </CardDescription>
         </div>
-        <Badge variant="outline" className="self-start text-label-sm uppercase">
+        <Badge variant="outline" className="self-start text-xs uppercase">
           {pendingCountLabel}
         </Badge>
       </CardHeader>
-      <CardContent className="space-y-space-md">
+      <CardContent className="space-y-4">
         {pending.length === 0 ? (
-          <p className="text-body-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             No pending requests. New partner applications will surface here automatically.
           </p>
         ) : (
@@ -179,23 +179,23 @@ function PendingAffiliationsContent({
             return (
               <article
                 key={entry.id}
-                className="rounded-xl border border-outline/30 bg-surface-container-low p-space-md shadow-level-1"
+                className="rounded-xl border border-border/30 bg-muted p-4 shadow-sm"
               >
                 <header className="flex flex-col gap-space-2">
-                  <div className="flex flex-wrap items-center gap-space-xs">
-                    <h3 className="text-title-md font-semibold text-on-surface">{entry.displayName}</h3>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="text-lg font-semibold text-foreground">{entry.displayName}</h3>
                     <Badge variant="secondary">{AFFILIATION_LABELS[entry.affiliationType]}</Badge>
                   </div>
                   {entry.positionTitle ? (
-                    <p className="text-body-sm text-muted-foreground">{entry.positionTitle}</p>
+                    <p className="text-sm text-muted-foreground">{entry.positionTitle}</p>
                   ) : null}
                   {entry.organizationName ? (
-                    <p className="text-label-sm text-muted-foreground">
+                    <p className="text-xs text-muted-foreground">
                       Linked to {entry.organizationName}
                     </p>
                   ) : null}
                   {requestedDate ? (
-                    <p className="text-label-sm text-muted-foreground">
+                    <p className="text-xs text-muted-foreground">
                       Requested {requestedDate}{' '}
                       {entry.requestedOrganizationName
                         ? `• ${entry.requestedOrganizationName}`
@@ -207,14 +207,14 @@ function PendingAffiliationsContent({
                     </p>
                   ) : null}
                 </header>
-                <div className="mt-space-md flex flex-col gap-space-sm border-t border-outline/20 pt-space-sm lg:flex-row lg:items-end lg:justify-between">
-                  <div className="grid gap-space-sm lg:grid-cols-[minmax(0,320px)_auto] lg:items-end lg:gap-space-md">
-                    <label className="grid gap-1 text-body-sm text-on-surface">
-                      <span className="text-label-sm uppercase text-muted-foreground">
+                <div className="mt-4 flex flex-col gap-3 border-t border-border/40 pt-3 lg:flex-row lg:items-end lg:justify-between">
+                  <div className="grid gap-3 lg:grid-cols-[minmax(0,320px)_auto] lg:items-end lg:gap-4">
+                    <label className="grid gap-1 text-sm text-foreground">
+                      <span className="text-xs uppercase text-muted-foreground">
                         Approved organization
                       </span>
                       <select
-                        className="rounded-lg border border-outline/40 bg-surface px-3 py-2 text-body-sm text-on-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                        className="rounded-lg border border-border/40 bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                         value={orgValue}
                         onChange={(event) =>
                           setOrgSelections((prev) => ({ ...prev, [entry.id]: event.target.value }))
@@ -230,12 +230,12 @@ function PendingAffiliationsContent({
                       </select>
                     </label>
                     {entry.affiliationType === 'government_partner' ? (
-                      <label className="grid gap-1 text-body-sm text-on-surface">
-                        <span className="text-label-sm uppercase text-muted-foreground">
+                      <label className="grid gap-1 text-sm text-foreground">
+                        <span className="text-xs uppercase text-muted-foreground">
                           Role type
                         </span>
                         <select
-                          className="rounded-lg border border-outline/40 bg-surface px-3 py-2 text-body-sm text-on-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                          className="rounded-lg border border-border/40 bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                           value={govRoleValue}
                           onChange={(event) =>
                             setGovRoleSelections((prev) => ({ ...prev, [entry.id]: event.target.value }))
@@ -248,7 +248,7 @@ function PendingAffiliationsContent({
                       </label>
                     ) : null}
                   </div>
-                  <div className="flex flex-wrap gap-space-sm">
+                  <div className="flex flex-wrap gap-3">
                     <Button
                       onClick={() => handleApprove(entry.id)}
                       disabled={isPending}

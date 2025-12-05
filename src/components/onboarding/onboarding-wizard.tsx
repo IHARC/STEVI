@@ -141,37 +141,37 @@ export function OnboardingWizard({
   ];
 
   return (
-    <div className="space-y-space-lg">
-      <header className="rounded-3xl border border-outline/12 bg-surface p-space-lg shadow-level-2">
-        <div className="flex flex-wrap items-center justify-between gap-space-sm">
+    <div className="space-y-6">
+      <header className="rounded-3xl border border-border/30 bg-background p-6 shadow-md">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <span className="inline-flex items-center gap-space-2xs rounded-full border border-primary/25 bg-primary/10 px-space-sm py-space-3xs text-label-sm font-semibold uppercase tracking-label-uppercase text-primary">
+            <span className="inline-flex items-center gap-1 rounded-full border border-primary/25 bg-primary/10 px-3 py-0.5 text-xs font-semibold uppercase tracking-label-uppercase text-primary">
               Onboarding
             </span>
-            <h1 className="mt-space-xs text-headline-lg font-semibold text-on-surface sm:text-display-sm">Finish onboarding to use STEVI</h1>
-            <p className="max-w-3xl text-body-md text-muted-foreground">
+            <h1 className="mt-2 text-3xl font-semibold text-foreground sm:text-4xl">Finish onboarding to use STEVI</h1>
+            <p className="max-w-3xl text-sm text-muted-foreground">
               We need consent and a sharing choice before unlocking appointments, documents, and cases. You can pause and resume at any time.
             </p>
           </div>
-          <div className="flex items-center gap-space-sm">
+          <div className="flex items-center gap-3">
             <Badge variant={status.status === 'COMPLETED' ? 'default' : 'secondary'}>
               {status.status === 'COMPLETED' ? 'Completed' : 'In progress'}
             </Badge>
           </div>
         </div>
-        <div className="mt-space-md space-y-space-2xs">
-          <div className="flex items-center justify-between text-label-sm text-muted-foreground">
+        <div className="mt-4 space-y-1">
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>{completionCount}/3 required steps</span>
             <span>{progressValue}%</span>
           </div>
           <Progress value={progressValue} />
         </div>
-        <div className="mt-space-md flex flex-wrap gap-space-sm">
+        <div className="mt-4 flex flex-wrap gap-3">
           {steps.map((step) => (
             <Badge
               key={step.id}
               variant={step.state === 'done' ? 'default' : step.state === 'ready' ? 'outline' : 'secondary'}
-              className="flex items-center gap-space-2xs"
+              className="flex items-center gap-1"
             >
               {step.label}
               <span className="text-muted-foreground">· {step.state === 'done' ? 'Done' : step.state === 'ready' ? 'Ready' : 'Pending'}</span>
@@ -179,12 +179,12 @@ export function OnboardingWizard({
           ))}
         </div>
         {actor === 'client' && !personId ? (
-          <p className="mt-space-sm rounded-lg border border-outline/40 bg-surface-container-low px-space-sm py-space-2xs text-body-sm text-on-surface">
+          <p className="mt-3 rounded-lg border border-border/40 bg-muted px-3 py-1 text-sm text-foreground">
             We need to connect your login to an IHARC record before continuing. Please contact support if you were invited but do not see your record.
           </p>
         ) : null}
         {blocked ? (
-          <p className="mt-space-sm rounded-lg border border-destructive/30 bg-destructive/10 px-space-sm py-space-2xs text-body-sm text-destructive">
+          <p className="mt-3 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-1 text-sm text-destructive">
             {partnerBlockedReason}
           </p>
         ) : null}
@@ -193,12 +193,12 @@ export function OnboardingWizard({
       {status.status === 'COMPLETED' ? (
         <Card className="border-primary/40 bg-primary/5">
           <CardHeader>
-            <CardTitle className="text-title-lg">Onboarding complete</CardTitle>
+            <CardTitle className="text-xl">Onboarding complete</CardTitle>
             <CardDescription>
               Thanks for confirming. You can continue to the portal — your preferences are saved.
             </CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-wrap gap-space-sm">
+          <CardContent className="flex flex-wrap gap-3">
             <Button onClick={() => router.replace(nextPath && nextPath.startsWith('/') ? nextPath : '/home')}>
               Go to portal
             </Button>
@@ -211,8 +211,8 @@ export function OnboardingWizard({
         </Card>
       ) : null}
 
-      <div className="grid gap-space-lg lg:grid-cols-[2fr,1fr]">
-        <div className="space-y-space-lg">
+      <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
+        <div className="space-y-6">
           <BasicInfoCard
             onSubmit={basicAction}
             state={basicState}
@@ -245,11 +245,11 @@ export function OnboardingWizard({
           />
         </div>
 
-        <aside className="space-y-space-md rounded-3xl border border-outline/12 bg-surface-container-high p-space-lg shadow-level-1">
+        <aside className="space-y-4 rounded-3xl border border-border/30 bg-card p-6 shadow-sm">
           <div>
-            <p className="text-label-sm font-semibold uppercase text-muted-foreground">Status</p>
-            <h2 className="text-title-lg text-on-surface">What’s left</h2>
-            <ul className="mt-space-sm space-y-space-2xs text-body-sm text-on-surface/80">
+            <p className="text-xs font-semibold uppercase text-muted-foreground">Status</p>
+            <h2 className="text-xl text-foreground">What’s left</h2>
+            <ul className="mt-3 space-y-1 text-sm text-foreground/80">
               <ChecklistItem done={status.hasPerson}>Basic info saved</ChecklistItem>
               <ChecklistItem done={status.hasServiceAgreementConsent}>Service agreement accepted</ChecklistItem>
               <ChecklistItem done={status.hasPrivacyAcknowledgement}>Privacy notice acknowledged</ChecklistItem>
@@ -258,12 +258,12 @@ export function OnboardingWizard({
             </ul>
           </div>
           <Separator />
-          <div className="space-y-space-2xs text-body-sm text-muted-foreground">
-            <p><span className="font-semibold text-on-surface">Actor:</span> {actor === 'client' ? 'Client (self)' : actor === 'staff' ? 'IHARC staff/admin' : 'Partner organization'}</p>
+          <div className="space-y-1 text-sm text-muted-foreground">
+            <p><span className="font-semibold text-foreground">Actor:</span> {actor === 'client' ? 'Client (self)' : actor === 'staff' ? 'IHARC staff/admin' : 'Partner organization'}</p>
             {status.lastUpdatedAt ? (
-              <p><span className="font-semibold text-on-surface">Last updated:</span> {new Date(status.lastUpdatedAt).toLocaleString()}</p>
+              <p><span className="font-semibold text-foreground">Last updated:</span> {new Date(status.lastUpdatedAt).toLocaleString()}</p>
             ) : null}
-            {nextPath ? <p><span className="font-semibold text-on-surface">Next stop:</span> {nextPath}</p> : null}
+            {nextPath ? <p><span className="font-semibold text-foreground">Next stop:</span> {nextPath}</p> : null}
           </div>
         </aside>
       </div>
@@ -285,34 +285,34 @@ function BasicInfoCard({
   disabled?: boolean;
 }) {
   return (
-    <Card className="border-outline/16 bg-surface">
+    <Card className="border-border/40 bg-background">
       <CardHeader>
-        <CardTitle className="text-title-lg">1. Basic info</CardTitle>
+        <CardTitle className="text-xl">1. Basic info</CardTitle>
         <CardDescription>Choose the name we should use and how to reach you safely.</CardDescription>
       </CardHeader>
       <CardContent>
-        <form action={onSubmit} className="space-y-space-md">
+        <form action={onSubmit} className="space-y-4">
           <input type="hidden" name="person_id" value={personId ?? ''} />
-          <fieldset disabled={disabled} className="space-y-space-md">
-            <div className="grid gap-space-sm md:grid-cols-2">
+          <fieldset disabled={disabled} className="space-y-4">
+            <div className="grid gap-3 md:grid-cols-2">
               <Field label="Name to use" name="chosen_name" defaultValue={prefill.chosenName} required />
               <Field label="Legal name (optional)" name="legal_name" defaultValue={prefill.legalName ?? ''} />
               <Field label="Pronouns" name="pronouns" defaultValue={prefill.pronouns ?? ''} />
               <Field label="Postal code (optional)" name="postal_code" defaultValue={prefill.postalCode ?? ''} />
             </div>
 
-            <div className="grid gap-space-sm md:grid-cols-2">
+            <div className="grid gap-3 md:grid-cols-2">
               <Field label="Email" name="contact_email" type="email" defaultValue={prefill.email ?? ''} />
               <Field label="Phone" name="contact_phone" defaultValue={prefill.phone ?? ''} />
             </div>
 
-            <div className="grid gap-space-sm md:grid-cols-2">
-              <div className="space-y-space-2xs">
-                <Label className="text-label-sm text-on-surface">Preferred contact</Label>
+            <div className="grid gap-3 md:grid-cols-2">
+              <div className="space-y-1">
+                <Label className="text-xs text-foreground">Preferred contact</Label>
                 <select
                   name="preferred_contact_method"
                   defaultValue={prefill.preferredContactMethod ?? 'email'}
-                  className="w-full rounded-md border border-outline/40 bg-surface px-space-sm py-space-2xs text-body-sm"
+                  className="w-full rounded-md border border-border/40 bg-background px-3 py-1 text-sm"
                 >
                   <option value="email">Email</option>
                   <option value="phone">Phone</option>
@@ -323,20 +323,20 @@ function BasicInfoCard({
               <Field label="Safe contact window (optional)" name="contact_window" defaultValue={prefill.contactWindow ?? ''} />
             </div>
 
-            <div className="grid gap-space-sm md:grid-cols-2">
-              <div className="space-y-space-2xs">
-                <Label className="text-label-sm text-on-surface">Birth month</Label>
+            <div className="grid gap-3 md:grid-cols-2">
+              <div className="space-y-1">
+                <Label className="text-xs text-foreground">Birth month</Label>
                 <Input name="dob_month" type="number" min={1} max={12} defaultValue={prefill.dobMonth ?? ''} />
               </div>
-              <div className="space-y-space-2xs">
-                <Label className="text-label-sm text-on-surface">Birth year</Label>
+              <div className="space-y-1">
+                <Label className="text-xs text-foreground">Birth year</Label>
                 <Input name="dob_year" type="number" min={1900} max={new Date().getFullYear()} defaultValue={prefill.dobYear ?? ''} />
               </div>
             </div>
 
-            <div className="space-y-space-2xs">
-              <Label className="text-label-sm text-on-surface">Safe contact channels</Label>
-              <div className="flex flex-wrap gap-space-md">
+            <div className="space-y-1">
+              <Label className="text-xs text-foreground">Safe contact channels</Label>
+              <div className="flex flex-wrap gap-4">
                 <CheckboxField id="safe_call" label="Voice calls are okay" defaultChecked={prefill.safeCall} />
                 <CheckboxField id="safe_text" label="Text messages are okay" defaultChecked={prefill.safeText} />
                 <CheckboxField id="safe_voicemail" label="Voicemail is okay" defaultChecked={prefill.safeVoicemail} />
@@ -347,7 +347,7 @@ function BasicInfoCard({
           {state.status === 'error' ? <ErrorMessage message={state.message ?? 'Unable to save right now.'} /> : null}
           {state.status === 'success' ? <SuccessMessage message="Saved. Continue with consents next." /> : null}
 
-          <div className="flex flex-wrap gap-space-sm">
+          <div className="flex flex-wrap gap-3">
             <FormSubmit pendingLabel="Saving…" disabled={disabled}>
               {personId ? 'Save changes' : 'Save and create record'}
             </FormSubmit>
@@ -374,17 +374,17 @@ function ConsentCard({
   const policyMissing = !policies.service || !policies.privacy;
 
   return (
-    <Card className="border-outline/16 bg-surface">
+    <Card className="border-border/40 bg-background">
       <CardHeader>
-        <CardTitle className="text-title-lg">2. Service agreement & privacy</CardTitle>
+        <CardTitle className="text-xl">2. Service agreement & privacy</CardTitle>
         <CardDescription>Review the current IHARC policies and confirm you agree.</CardDescription>
       </CardHeader>
       <CardContent>
-        <form action={onSubmit} className="space-y-space-md">
+        <form action={onSubmit} className="space-y-4">
           <input type="hidden" name="person_id" value={personId ?? ''} />
-          <fieldset disabled={disabled} className="space-y-space-md">
+          <fieldset disabled={disabled} className="space-y-4">
             {policyMissing ? (
-              <p className="text-body-sm text-destructive">
+              <p className="text-sm text-destructive">
                 Policy copy is missing — ask an admin to publish the service agreement and privacy notice.
               </p>
             ) : (
@@ -394,7 +394,7 @@ function ConsentCard({
               </>
             )}
 
-            <div className="space-y-space-sm">
+            <div className="space-y-3">
               <CheckboxField id="consent_service_agreement" label="I agree to the Client Service Agreement." required />
               <CheckboxField id="consent_privacy" label="I acknowledge the Privacy & Data Protection Notice." required />
             </div>
@@ -430,16 +430,16 @@ function SharingCard({
   const partnerBlocked = actor === 'partner';
 
   return (
-    <Card className="border-outline/16 bg-surface">
+    <Card className="border-border/40 bg-background">
       <CardHeader>
-        <CardTitle className="text-title-lg">3. Data sharing</CardTitle>
+        <CardTitle className="text-xl">3. Data sharing</CardTitle>
         <CardDescription>Choose whether IHARC can share with partner organizations.</CardDescription>
       </CardHeader>
       <CardContent>
-        <form action={onSubmit} className="space-y-space-md">
+        <form action={onSubmit} className="space-y-4">
           <input type="hidden" name="person_id" value={personId ?? ''} />
-          <fieldset disabled={disabled || partnerBlocked} className="space-y-space-sm">
-            <label className="flex items-start gap-space-sm rounded-lg border border-outline/40 p-space-sm">
+          <fieldset disabled={disabled || partnerBlocked} className="space-y-3">
+            <label className="flex items-start gap-3 rounded-lg border border-border/40 p-3">
               <input
                 type="radio"
                 name="data_sharing"
@@ -448,13 +448,13 @@ function SharingCard({
                 className="mt-[4px] h-4 w-4 accent-primary"
               />
               <div>
-                <p className="text-body-md font-medium text-on-surface">IHARC only</p>
-                <p className="text-body-sm text-muted-foreground">
+                <p className="text-sm font-medium text-foreground">IHARC only</p>
+                <p className="text-sm text-muted-foreground">
                   Only IHARC staff can view and update this record. Recommended if you are unsure.
                 </p>
               </div>
             </label>
-            <label className="flex items-start gap-space-sm rounded-lg border border-outline/40 p-space-sm">
+            <label className="flex items-start gap-3 rounded-lg border border-border/40 p-3">
               <input
                 type="radio"
                 name="data_sharing"
@@ -463,8 +463,8 @@ function SharingCard({
                 className="mt-[4px] h-4 w-4 accent-primary"
               />
               <div>
-                <p className="text-body-md font-medium text-on-surface">IHARC + partner organizations</p>
-                <p className="text-body-sm text-muted-foreground">
+                <p className="text-sm font-medium text-foreground">IHARC + partner organizations</p>
+                <p className="text-sm text-muted-foreground">
                   Trusted partner organizations can view contact info and updates to coordinate services. You can change this later with IHARC.
                 </p>
               </div>
@@ -472,7 +472,7 @@ function SharingCard({
           </fieldset>
 
           {partnerBlocked ? (
-            <p className="text-body-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Partners can review onboarding but cannot change sharing preferences. Ask IHARC staff or the client to choose.
             </p>
           ) : null}
@@ -507,15 +507,15 @@ function LinkCard({
   const clientMode = actor === 'client';
 
   return (
-    <Card className="border-outline/16 bg-surface">
+    <Card className="border-border/40 bg-background">
       <CardHeader>
-        <CardTitle className="text-title-lg">4. Account link</CardTitle>
+        <CardTitle className="text-xl">4. Account link</CardTitle>
         <CardDescription>
           Link this onboarding record to the signed-in account for future visits. Staff can skip when assisting clients.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-space-md">
-        <div className="rounded-lg border border-outline/30 bg-surface-container-low p-space-md text-body-sm text-muted-foreground">
+      <CardContent className="space-y-4">
+        <div className="rounded-lg border border-border/30 bg-muted p-4 text-sm text-muted-foreground">
           {clientMode ? (
             <p>
               Linking keeps your portal access connected to this client record. If you change emails or phone numbers later, contact IHARC to update the link.
@@ -527,7 +527,7 @@ function LinkCard({
           )}
         </div>
 
-        <form action={onSubmit} className="space-y-space-sm">
+        <form action={onSubmit} className="space-y-3">
           <input type="hidden" name="person_id" value={personId ?? ''} />
           {state.status === 'error' ? <ErrorMessage message={state.message ?? 'Unable to link right now.'} /> : null}
           {state.status === 'success' ? <SuccessMessage message="Account linked." /> : null}
@@ -571,8 +571,8 @@ function Field({
   required?: boolean;
 }) {
   return (
-    <div className="space-y-space-2xs">
-      <Label htmlFor={name} className="text-label-sm text-on-surface">
+    <div className="space-y-1">
+      <Label htmlFor={name} className="text-xs text-foreground">
         {label} {required ? <span className="text-destructive">*</span> : null}
       </Label>
       <Input id={name} name={name} type={type} defaultValue={defaultValue} required={required} />
@@ -592,7 +592,7 @@ function CheckboxField({
   required?: boolean;
 }) {
   return (
-    <label className="flex items-start gap-space-sm text-body-sm text-on-surface">
+    <label className="flex items-start gap-3 text-sm text-foreground">
       <Checkbox id={id} name={id} defaultChecked={defaultChecked} required={required} className="mt-0.5" />
       <span>{label}</span>
     </label>
@@ -601,13 +601,13 @@ function CheckboxField({
 
 function PolicyBlock({ title, summary, bodyHtml }: { title: string; summary: string; bodyHtml: string }) {
   return (
-    <div className="space-y-space-2xs rounded-2xl border border-outline/16 bg-surface-container-high p-space-md">
-      <p className="text-label-sm font-semibold uppercase text-muted-foreground">{title}</p>
-      <p className="text-body-sm text-on-surface/80">{summary}</p>
+    <div className="space-y-1 rounded-2xl border border-border/40 bg-card p-4">
+      <p className="text-xs font-semibold uppercase text-muted-foreground">{title}</p>
+      <p className="text-sm text-foreground/80">{summary}</p>
       <details className="group">
-        <summary className="cursor-pointer text-body-sm font-medium text-primary">Read full text</summary>
+        <summary className="cursor-pointer text-sm font-medium text-primary">Read full text</summary>
         <div
-          className="prose prose-sm mt-space-2xs text-on-surface"
+          className="prose prose-sm mt-1 text-foreground"
           dangerouslySetInnerHTML={{ __html: bodyHtml }}
         />
       </details>
@@ -616,23 +616,23 @@ function PolicyBlock({ title, summary, bodyHtml }: { title: string; summary: str
 }
 
 function ErrorMessage({ message }: { message: string }) {
-  return <p className="rounded-xl border border-destructive/30 bg-destructive/10 px-space-sm py-space-2xs text-body-sm text-destructive">{message}</p>;
+  return <p className="rounded-xl border border-destructive/30 bg-destructive/10 px-3 py-1 text-sm text-destructive">{message}</p>;
 }
 
 function SuccessMessage({ message }: { message: string }) {
-  return <p className="rounded-xl border border-primary/25 bg-primary/10 px-space-sm py-space-2xs text-body-sm text-primary">{message}</p>;
+  return <p className="rounded-xl border border-primary/25 bg-primary/10 px-3 py-1 text-sm text-primary">{message}</p>;
 }
 
 function ChecklistItem({ done, children }: { done: boolean; children: ReactNode }) {
   return (
-    <li className="flex items-center gap-space-2xs">
+    <li className="flex items-center gap-1">
       <span
-        className={`inline-flex h-5 w-5 items-center justify-center rounded-full border ${done ? 'border-primary bg-primary text-on-primary' : 'border-outline/50 text-muted-foreground'}`}
+        className={`inline-flex h-5 w-5 items-center justify-center rounded-full border ${done ? 'border-primary bg-primary text-primary-foreground' : 'border-border/50 text-muted-foreground'}`}
         aria-hidden
       >
         {done ? '✓' : '•'}
       </span>
-      <span className={done ? 'text-on-surface' : 'text-muted-foreground'}>{children}</span>
+      <span className={done ? 'text-foreground' : 'text-muted-foreground'}>{children}</span>
     </li>
   );
 }

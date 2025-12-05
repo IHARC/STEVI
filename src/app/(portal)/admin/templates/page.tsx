@@ -24,14 +24,14 @@ export default async function AdminTemplatesPage() {
   }
 
   return (
-    <div className="page-shell page-stack">
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
       <PageHeader
         eyebrow="Admin"
         title="Templates & tests"
         description="Prepare notification templates and operational test cases before releasing new workflows."
       />
       <Card>
-        <CardContent className="space-y-space-2xs py-space-md text-body-md text-muted-foreground">
+        <CardContent className="space-y-1 py-4 text-sm text-muted-foreground">
           <p>Connect this view to notification templates, QA checklists, and regression tests that mirror STEVI flows.</p>
           <p>All future mutations should log to the audit trail and respect rate limits when triggering downstream actions.</p>
         </CardContent>

@@ -32,9 +32,9 @@ export function AvailabilityPicker({ slots, targetInputId, label }: Availability
   if (!slots.length) return null;
 
   return (
-    <div className="space-y-space-2xs">
-      <p className="text-label-sm font-semibold text-on-surface">{label ?? 'Quick pick slots'}</p>
-      <div className="grid grid-cols-2 gap-space-xs sm:grid-cols-3 lg:grid-cols-4">
+    <div className="space-y-1">
+      <p className="text-xs font-semibold text-foreground">{label ?? 'Quick pick slots'}</p>
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
         {slots.map((slot) => (
           <Button
             key={slot}

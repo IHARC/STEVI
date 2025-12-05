@@ -186,17 +186,17 @@ export default async function AdminOrganizationDetailPage({
   const statusLabel = organization.status ?? (organization.is_active === false ? 'inactive' : 'active');
 
   return (
-    <div className="space-y-space-lg">
-      <div className="flex flex-col gap-space-sm sm:flex-row sm:items-center sm:justify-between">
-        <div className="space-y-space-2xs">
-          <p className="text-label-sm font-medium uppercase text-muted-foreground">Admin · Organizations</p>
-          <div className="flex items-center gap-space-sm">
-            <h1 className="text-headline-lg text-on-surface">{organization.name}</h1>
+    <div className="space-y-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1">
+          <p className="text-xs font-medium uppercase text-muted-foreground">Admin · Organizations</p>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl text-foreground">{organization.name}</h1>
             <Badge variant={statusBadgeVariant(organization.status, organization.is_active)}>
               {statusLabel?.replace(/_/g, ' ')}
             </Badge>
           </div>
-          <p className="text-body-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Manage organization metadata, feature availability, and member/admin roles. All writes are audited and enforced by Supabase RLS.
           </p>
         </div>
@@ -211,13 +211,13 @@ export default async function AdminOrganizationDetailPage({
           <CardDescription>Update core details, contact info, and feature availability.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form action={handleUpdate} className="grid gap-space-md lg:grid-cols-2">
+          <form action={handleUpdate} className="grid gap-4 lg:grid-cols-2">
             <input type="hidden" name="organization_id" value={organization.id} />
-            <div className="space-y-space-xs">
+            <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
               <Input id="name" name="name" required defaultValue={organization.name} />
             </div>
-            <div className="space-y-space-xs">
+            <div className="space-y-2">
               <Label htmlFor="status">Status</Label>
               <Select name="status" defaultValue={organization.status ?? 'active'}>
                 <SelectTrigger id="status">
@@ -232,7 +232,7 @@ export default async function AdminOrganizationDetailPage({
               </Select>
             </div>
 
-            <div className="space-y-space-xs">
+            <div className="space-y-2">
               <Label htmlFor="organization_type">Organization type</Label>
               <Select name="organization_type" defaultValue={organization.organization_type ?? undefined}>
                 <SelectTrigger id="organization_type">
@@ -262,7 +262,7 @@ export default async function AdminOrganizationDetailPage({
               </Select>
             </div>
 
-            <div className="space-y-space-xs">
+            <div className="space-y-2">
               <Label htmlFor="partnership_type">Partnership type</Label>
               <Select name="partnership_type" defaultValue={organization.partnership_type ?? undefined}>
                 <SelectTrigger id="partnership_type">
@@ -280,20 +280,20 @@ export default async function AdminOrganizationDetailPage({
               </Select>
             </div>
 
-            <div className="space-y-space-xs">
+            <div className="space-y-2">
               <Label htmlFor="website">Website</Label>
               <Input id="website" name="website" type="url" defaultValue={organization.website ?? ''} placeholder="https://example.org" />
             </div>
-            <div className="space-y-space-xs">
+            <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input id="email" name="email" type="email" defaultValue={organization.email ?? ''} placeholder="team@example.org" />
             </div>
-            <div className="space-y-space-xs">
+            <div className="space-y-2">
               <Label htmlFor="phone">Phone</Label>
               <Input id="phone" name="phone" defaultValue={organization.phone ?? ''} placeholder="+1 (905) 555-1234" />
             </div>
-            <div className="space-y-space-xs">
-              <Label className="flex items-center gap-space-xs text-body-sm">
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2 text-sm">
                 <input
                   type="checkbox"
                   name="is_active"
@@ -304,11 +304,11 @@ export default async function AdminOrganizationDetailPage({
               </Label>
             </div>
 
-            <div className="space-y-space-xs">
+            <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
               <Textarea id="description" name="description" defaultValue={organization.description ?? ''} />
             </div>
-            <div className="space-y-space-xs">
+            <div className="space-y-2">
               <Label htmlFor="services_provided">Services provided</Label>
               <Textarea
                 id="services_provided"
@@ -318,68 +318,68 @@ export default async function AdminOrganizationDetailPage({
               />
             </div>
 
-            <div className="space-y-space-xs">
+            <div className="space-y-2">
               <Label htmlFor="address">Address</Label>
               <Input id="address" name="address" defaultValue={organization.address ?? ''} />
             </div>
-            <div className="space-y-space-xs">
+            <div className="space-y-2">
               <Label htmlFor="city">City</Label>
               <Input id="city" name="city" defaultValue={organization.city ?? ''} />
             </div>
-            <div className="space-y-space-xs">
+            <div className="space-y-2">
               <Label htmlFor="province">Province</Label>
               <Input id="province" name="province" defaultValue={organization.province ?? ''} />
             </div>
-            <div className="space-y-space-xs">
+            <div className="space-y-2">
               <Label htmlFor="postal_code">Postal code</Label>
               <Input id="postal_code" name="postal_code" defaultValue={organization.postal_code ?? ''} />
             </div>
 
-            <div className="space-y-space-xs">
+            <div className="space-y-2">
               <Label htmlFor="contact_person">Primary contact</Label>
               <Input id="contact_person" name="contact_person" defaultValue={organization.contact_person ?? ''} />
             </div>
-            <div className="space-y-space-xs">
+            <div className="space-y-2">
               <Label htmlFor="contact_title">Contact title</Label>
               <Input id="contact_title" name="contact_title" defaultValue={organization.contact_title ?? ''} />
             </div>
-            <div className="space-y-space-xs">
+            <div className="space-y-2">
               <Label htmlFor="contact_phone">Contact phone</Label>
               <Input id="contact_phone" name="contact_phone" defaultValue={organization.contact_phone ?? ''} />
             </div>
-            <div className="space-y-space-xs">
+            <div className="space-y-2">
               <Label htmlFor="contact_email">Contact email</Label>
               <Input id="contact_email" name="contact_email" type="email" defaultValue={organization.contact_email ?? ''} />
             </div>
 
-            <div className="space-y-space-xs">
+            <div className="space-y-2">
               <Label htmlFor="operating_hours">Operating hours</Label>
               <Textarea id="operating_hours" name="operating_hours" defaultValue={organization.operating_hours ?? ''} />
             </div>
-            <div className="space-y-space-xs">
+            <div className="space-y-2">
               <Label htmlFor="availability_notes">Availability notes</Label>
               <Textarea id="availability_notes" name="availability_notes" defaultValue={organization.availability_notes ?? ''} />
             </div>
-            <div className="space-y-space-xs">
+            <div className="space-y-2">
               <Label htmlFor="referral_process">Referral process</Label>
               <Textarea id="referral_process" name="referral_process" defaultValue={organization.referral_process ?? ''} />
             </div>
-            <div className="space-y-space-xs">
+            <div className="space-y-2">
               <Label htmlFor="special_requirements">Special requirements</Label>
               <Textarea id="special_requirements" name="special_requirements" defaultValue={organization.special_requirements ?? ''} />
             </div>
-            <div className="space-y-space-xs lg:col-span-2">
+            <div className="space-y-2 lg:col-span-2">
               <Label htmlFor="notes">Notes</Label>
               <Textarea id="notes" name="notes" defaultValue={organization.notes ?? ''} />
             </div>
 
-            <div className="lg:col-span-2 space-y-space-xs">
-              <Label className="text-body-sm">Feature availability</Label>
-              <div className="mt-space-sm grid gap-space-xs md:grid-cols-3">
+            <div className="lg:col-span-2 space-y-2">
+              <Label className="text-sm">Feature availability</Label>
+              <div className="mt-3 grid gap-2 md:grid-cols-3">
                 {ORG_FEATURE_OPTIONS.map((option) => (
                   <label
                     key={option.value}
-                    className="flex items-center gap-space-xs rounded-md border border-outline/20 px-space-sm py-space-xs text-body-sm"
+                    className="flex items-center gap-2 rounded-md border border-border/40 px-3 py-2 text-sm"
                   >
                     <input
                       type="checkbox"
@@ -406,22 +406,22 @@ export default async function AdminOrganizationDetailPage({
           <CardTitle>Members & admins</CardTitle>
           <CardDescription>Link profiles to this organization and control portal roles.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-space-lg">
-          <form action={handleAttachMember} className="grid gap-space-md md:grid-cols-4">
+        <CardContent className="space-y-6">
+          <form action={handleAttachMember} className="grid gap-4 md:grid-cols-4">
             <input type="hidden" name="organization_id" value={organization.id} />
-            <div className="space-y-space-xs md:col-span-2">
+            <div className="space-y-2 md:col-span-2">
               <Label htmlFor="profile_id">Profile ID</Label>
               <Input id="profile_id" name="profile_id" required placeholder="Profile UUID" />
-              <p className="text-label-sm text-muted-foreground">Find the profile in verification or profiles list first.</p>
+              <p className="text-xs text-muted-foreground">Find the profile in verification or profiles list first.</p>
             </div>
-            <div className="space-y-space-xs">
-              <Label className="flex items-center gap-space-xs text-body-sm">
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2 text-sm">
                 <input type="checkbox" name="make_admin" className="h-4 w-4 rounded border border-input" />
                 <span>Make org admin</span>
               </Label>
             </div>
-            <div className="space-y-space-xs">
-              <Label className="flex items-center gap-space-xs text-body-sm">
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2 text-sm">
                 <input type="checkbox" name="make_rep" defaultChecked className="h-4 w-4 rounded border border-input" />
                 <span>Give org rep access</span>
               </Label>
@@ -462,14 +462,14 @@ export default async function AdminOrganizationDetailPage({
                       <TableRow key={member.id}>
                         <TableCell>
                           <div className="flex flex-col">
-                            <span className="font-medium text-on-surface">{member.display_name}</span>
+                            <span className="font-medium text-foreground">{member.display_name}</span>
                             {member.position_title ? (
                               <span className="text-xs text-muted-foreground">{member.position_title}</span>
                             ) : null}
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex flex-wrap items-center gap-space-2xs">
+                          <div className="flex flex-wrap items-center gap-1">
                             {isOrgAdmin ? <Badge>Org admin</Badge> : null}
                             {isOrgRep ? (
                               <Badge variant={isOrgAdmin ? 'outline' : 'secondary'}>Org rep</Badge>
@@ -483,7 +483,7 @@ export default async function AdminOrganizationDetailPage({
                           </Badge>
                         </TableCell>
                         <TableCell>{formatDate(member.last_seen_at)}</TableCell>
-                        <TableCell className="flex justify-end gap-space-xs">
+                        <TableCell className="flex justify-end gap-2">
                           <form action={handleToggleRole}>
                             <input type="hidden" name="organization_id" value={organization.id} />
                             <input type="hidden" name="profile_id" value={member.id} />
@@ -526,9 +526,9 @@ export default async function AdminOrganizationDetailPage({
           <CardDescription>Delete the organization after detaching all linked members and invites.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form action={handleDelete} className="grid gap-space-md md:grid-cols-3 md:items-end">
+          <form action={handleDelete} className="grid gap-4 md:grid-cols-3 md:items-end">
             <input type="hidden" name="organization_id" value={organization.id} />
-            <div className="space-y-space-xs md:col-span-2">
+            <div className="space-y-2 md:col-span-2">
               <Label htmlFor="confirm_name">Type the organization name to confirm</Label>
               <Input id="confirm_name" name="confirm_name" placeholder={organization.name} />
             </div>

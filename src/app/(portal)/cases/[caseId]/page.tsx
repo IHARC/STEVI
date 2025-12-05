@@ -36,42 +36,42 @@ export default async function CaseDetailPage({ params }: CasePageProps) {
   const activities = await fetchClientCaseActivities(supabase, detail.personId, 25);
 
   return (
-    <div className="page-shell page-stack">
-      <header className="flex flex-col gap-space-2xs sm:flex-row sm:items-center sm:justify-between">
-        <div className="space-y-space-2xs">
-          <p className="text-label-sm font-semibold uppercase text-muted-foreground">Case #{detail.caseNumber ?? detail.id}</p>
-          <h1 className="text-headline-lg text-on-surface sm:text-display-sm">{detail.caseType ?? 'Support case'}</h1>
-          <p className="text-body-md text-muted-foreground">Managed by {detail.caseManagerName}</p>
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
+      <header className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase text-muted-foreground">Case #{detail.caseNumber ?? detail.id}</p>
+          <h1 className="text-3xl text-foreground sm:text-4xl">{detail.caseType ?? 'Support case'}</h1>
+          <p className="text-sm text-muted-foreground">Managed by {detail.caseManagerName}</p>
         </div>
         <Badge variant={detail.status === 'active' ? 'default' : 'secondary'} className="capitalize">
           {detail.status ?? 'active'}
         </Badge>
       </header>
 
-      <div className="grid gap-space-lg lg:grid-cols-[2fr,1fr]">
+      <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
         <Card>
-          <CardHeader className="space-y-space-2xs">
-            <CardTitle className="text-title-md">Timeline</CardTitle>
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-lg">Timeline</CardTitle>
             <CardDescription>Updates that your case manager marked as shareable with you.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-space-md">
+          <CardContent className="space-y-4">
             {activities.length === 0 ? (
-              <p className="text-body-sm text-muted-foreground">No client-visible updates yet.</p>
+              <p className="text-sm text-muted-foreground">No client-visible updates yet.</p>
             ) : (
-              <ul className="space-y-space-sm">
+              <ul className="space-y-3">
                 {activities.map((item) => (
-                  <li key={item.id} className="rounded-xl border border-outline/30 bg-surface-container p-space-md">
-                    <div className="flex items-center justify-between gap-space-sm">
+                  <li key={item.id} className="rounded-xl border border-border/30 bg-card p-4">
+                    <div className="flex items-center justify-between gap-3">
                       <div>
-                        <p className="text-title-sm text-on-surface">{item.title}</p>
-                        <p className="text-body-sm text-muted-foreground">{item.activityType}</p>
+                        <p className="text-base text-foreground">{item.title}</p>
+                        <p className="text-sm text-muted-foreground">{item.activityType}</p>
                       </div>
-                      <p className="text-label-sm text-muted-foreground">
+                      <p className="text-xs text-muted-foreground">
                         {new Date(item.activityDate).toLocaleDateString()}
                       </p>
                     </div>
                     {item.description ? (
-                      <p className="mt-space-2xs text-body-sm text-on-surface/80">{item.description}</p>
+                      <p className="mt-1 text-sm text-foreground/80">{item.description}</p>
                     ) : null}
                   </li>
                 ))}
@@ -81,8 +81,8 @@ export default async function CaseDetailPage({ params }: CasePageProps) {
         </Card>
 
         <Card className="h-full">
-          <CardHeader className="space-y-space-2xs">
-            <CardTitle className="text-title-md">Send an update</CardTitle>
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-lg">Send an update</CardTitle>
             <CardDescription>Share new info or changes. Your case manager will follow up using your consent settings.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -100,9 +100,9 @@ function ClientUpdateForm({ caseId }: { caseId: number }) {
   const action = submitClientCaseUpdateAction;
 
   return (
-    <form action={action} className="space-y-space-sm">
+    <form action={action} className="space-y-3">
       <input type="hidden" name="case_id" value={caseId} />
-      <div className="grid gap-space-2xs">
+      <div className="grid gap-1">
         <Label htmlFor="message">Message</Label>
         <Textarea id="message" name="message" rows={4} placeholder="Share an update for your worker" required minLength={8} />
       </div>

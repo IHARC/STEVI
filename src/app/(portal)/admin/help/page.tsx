@@ -56,7 +56,7 @@ export default async function AdminHelpPage() {
   await ensurePortalProfile(supabase, access.userId);
 
   return (
-    <div className="page-shell page-stack">
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
       <PageHeader
         eyebrow="Admin"
         title="Admin help"
@@ -64,14 +64,14 @@ export default async function AdminHelpPage() {
         meta={[{ label: 'RLS enforced', tone: 'info' }]}
       />
 
-      <div className="grid gap-space-md lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-3">
         {SECTIONS.map((section) => (
           <Card key={section.id} id={section.id} className="h-full">
             <CardHeader>
-              <CardTitle className="text-title-lg">{section.title}</CardTitle>
+              <CardTitle className="text-xl">{section.title}</CardTitle>
             </CardHeader>
             <CardContent>
-              <ul className="space-y-space-2xs text-body-sm text-on-surface-variant" aria-label={`${section.title} guidance`}>
+              <ul className="space-y-1 text-sm text-muted-foreground" aria-label={`${section.title} guidance`}>
                 {section.items.map((item) => (
                   <li key={item} className="leading-relaxed">
                     {item}

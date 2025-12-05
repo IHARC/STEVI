@@ -57,11 +57,11 @@ export function UserPeekSheet({ user, roleOptions }: UserPeekSheetProps) {
       </SheetTrigger>
       <SheetContent side="right" className="w-full max-w-[520px] overflow-y-auto">
         <SheetHeader className="text-left">
-          <SheetTitle className="text-title-lg">{user.displayName}</SheetTitle>
-          <p className="text-label-sm text-muted-foreground">{user.email ?? 'No email on file'}</p>
+          <SheetTitle className="text-xl">{user.displayName}</SheetTitle>
+          <p className="text-xs text-muted-foreground">{user.email ?? 'No email on file'}</p>
         </SheetHeader>
-        <div className="mt-space-md space-y-space-md text-body-sm">
-          <div className="flex flex-wrap gap-space-2xs">
+        <div className="mt-4 space-y-4 text-sm">
+          <div className="flex flex-wrap gap-1">
             <Badge variant="secondary" className="capitalize">{user.affiliationType.replace('_', ' ')}</Badge>
             <Badge variant={user.affiliationStatus === 'approved' ? 'default' : user.affiliationStatus === 'pending' ? 'outline' : 'secondary'}>
               {user.affiliationStatus}
@@ -73,9 +73,9 @@ export function UserPeekSheet({ user, roleOptions }: UserPeekSheetProps) {
             )}
           </div>
 
-          <div className="space-y-space-2xs">
-            <p className="text-label-sm text-muted-foreground">Roles</p>
-            <div className="flex flex-wrap gap-space-2xs">
+          <div className="space-y-1">
+            <p className="text-xs text-muted-foreground">Roles</p>
+            <div className="flex flex-wrap gap-1">
               {Array.from(roles).map((role) => (
                 <Badge key={role} variant={role.startsWith('portal_') ? 'outline' : 'secondary'} className="capitalize">
                   {role.replace('portal_', '').replace('iharc_', '')}
@@ -84,18 +84,18 @@ export function UserPeekSheet({ user, roleOptions }: UserPeekSheetProps) {
             </div>
           </div>
 
-          <div className="space-y-space-xs rounded-2xl border border-outline/15 bg-surface-container-low p-space-sm">
-            <div className="flex items-center justify-between gap-space-sm">
+          <div className="space-y-2 rounded-2xl border border-border/15 bg-muted p-3">
+            <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-body-sm font-medium text-on-surface">Approve profile</p>
-                <p className="text-label-sm text-muted-foreground">Sets status to approved and refreshes permissions.</p>
+                <p className="text-sm font-medium text-foreground">Approve profile</p>
+                <p className="text-xs text-muted-foreground">Sets status to approved and refreshes permissions.</p>
               </div>
               <Button size="sm" onClick={handleApprove} disabled={isPending || user.affiliationStatus === 'approved'}>
                 Approve
               </Button>
             </div>
             <Separator />
-            <div className="flex flex-col gap-space-xs">
+            <div className="flex flex-col gap-2">
               {roleOptions.map((role) => (
                 <RoleToggle
                   key={role.value}
@@ -108,7 +108,7 @@ export function UserPeekSheet({ user, roleOptions }: UserPeekSheetProps) {
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-space-sm">
+          <div className="flex flex-wrap gap-3">
             <Button asChild variant="outline" size="sm">
               <Link href={`/admin/users/profile/${user.profileId}`}>Open full profile</Link>
             </Button>
@@ -128,11 +128,11 @@ type RoleToggleProps = {
 
 function RoleToggle({ label, checked, onChange, disabled }: RoleToggleProps) {
   return (
-    <label className="flex items-center justify-between gap-space-sm rounded-xl border border-outline/15 bg-surface px-space-sm py-space-2xs text-body-sm text-on-surface">
+    <label className="flex items-center justify-between gap-3 rounded-xl border border-border/15 bg-background px-3 py-1 text-sm text-foreground">
       <span>{label}</span>
       <input
         type="checkbox"
-        className="h-4 w-4 rounded border border-outline"
+        className="h-4 w-4 rounded border border-border"
         checked={checked}
         onChange={(event) => onChange(event.target.checked)}
         disabled={disabled}

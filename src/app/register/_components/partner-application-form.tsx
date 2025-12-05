@@ -36,42 +36,42 @@ export function PartnerApplicationForm({
   return (
     <form
       action={formAction}
-      className="space-y-space-lg rounded-3xl border border-outline/40 bg-surface p-space-lg shadow-level-1 sm:p-space-xl"
+      className="space-y-6 rounded-3xl border border-border/40 bg-background p-6 shadow-sm sm:p-8"
       noValidate
     >
       <input type="hidden" name="next" value={nextPath} />
 
-      <section className="space-y-space-sm">
+      <section className="space-y-3">
         <header>
-          <p className="text-label-sm uppercase text-outline">Partner access</p>
-          <h1 className="text-title-lg font-medium text-on-surface">Request partner verification</h1>
-          <p className="mt-space-xs text-body-sm text-muted-foreground">
+          <p className="text-xs uppercase text-muted-foreground">Partner access</p>
+          <h1 className="text-xl font-medium text-foreground">Request partner verification</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
             Share your agency details so we can confirm the data-sharing agreement and scope your access appropriately.
           </p>
         </header>
 
         {state.error ? (
-          <Alert variant="destructive" className="text-body-sm">
+          <Alert variant="destructive" className="text-sm">
             <AlertTitle>We couldn’t submit your application</AlertTitle>
             <AlertDescription>{state.error}</AlertDescription>
           </Alert>
         ) : null}
 
         {isSuccess && state.message ? (
-          <Alert className="border-primary bg-primary-container text-body-sm text-on-primary-container">
+          <Alert className="border-primary bg-primary/10 text-sm text-primary">
             <AlertTitle>Application submitted</AlertTitle>
             <AlertDescription>{state.message}</AlertDescription>
           </Alert>
         ) : null}
       </section>
 
-      <section className="space-y-space-md">
-        <div className="grid gap-space-sm md:grid-cols-2">
-          <div className="grid gap-space-xs">
+      <section className="space-y-4">
+        <div className="grid gap-3 md:grid-cols-2">
+          <div className="grid gap-2">
             <Label htmlFor="full_name">Your name *</Label>
             <Input id="full_name" name="full_name" required maxLength={120} autoComplete="name" />
           </div>
-          <div className="grid gap-space-xs">
+          <div className="grid gap-2">
             <Label htmlFor="role_title">Role or title *</Label>
             <Input
               id="role_title"
@@ -83,7 +83,7 @@ export function PartnerApplicationForm({
           </div>
         </div>
 
-        <div className="grid gap-space-xs">
+        <div className="grid gap-2">
           <Label htmlFor="organization_name">Organization *</Label>
           <Input
             id="organization_name"
@@ -95,7 +95,7 @@ export function PartnerApplicationForm({
           />
         </div>
 
-        <div className="grid gap-space-xs">
+        <div className="grid gap-2">
           <Label htmlFor="work_email">Work email *</Label>
           <Input
             id="work_email"
@@ -105,13 +105,13 @@ export function PartnerApplicationForm({
             required
             placeholder="you@agency.ca"
           />
-          <p className="text-label-sm text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             Use a work email so our team can confirm your domain and agreement status quickly.
           </p>
         </div>
 
-        <div className="grid gap-space-sm md:grid-cols-2">
-          <div className="grid gap-space-xs">
+        <div className="grid gap-3 md:grid-cols-2">
+          <div className="grid gap-2">
             <Label htmlFor="password">Create a password *</Label>
             <Input
               id="password"
@@ -123,7 +123,7 @@ export function PartnerApplicationForm({
               placeholder="At least 12 characters"
             />
           </div>
-          <div className="grid gap-space-xs">
+          <div className="grid gap-2">
             <Label htmlFor="password_confirm">Confirm password *</Label>
             <Input
               id="password_confirm"
@@ -137,7 +137,7 @@ export function PartnerApplicationForm({
           </div>
         </div>
 
-        <div className="grid gap-space-xs">
+        <div className="grid gap-2">
           <Label htmlFor="work_phone">Phone number (optional)</Label>
           <Input
             id="work_phone"
@@ -149,7 +149,7 @@ export function PartnerApplicationForm({
           />
         </div>
 
-        <div className="grid gap-space-xs">
+        <div className="grid gap-2">
           <Label htmlFor="programs_supported">Which IHARC programs or teams will you support?</Label>
           <Textarea
             id="programs_supported"
@@ -159,7 +159,7 @@ export function PartnerApplicationForm({
           />
         </div>
 
-        <div className="grid gap-space-xs">
+        <div className="grid gap-2">
           <Label htmlFor="data_requirements">What data do you need access to?</Label>
           <Textarea
             id="data_requirements"
@@ -169,7 +169,7 @@ export function PartnerApplicationForm({
           />
         </div>
 
-        <div className="space-y-space-sm rounded-xl border border-outline/30 p-space-md">
+        <div className="space-y-3 rounded-xl border border-border/30 p-4">
           <ConsentCheckbox
             id="consent_privacy_partner"
             name="consent_privacy"
@@ -190,8 +190,8 @@ export function PartnerApplicationForm({
         </div>
       </section>
 
-      <div className="flex items-center justify-between gap-space-md">
-        <p className="text-label-sm text-muted-foreground">
+      <div className="flex items-center justify-between gap-4">
+        <p className="text-xs text-muted-foreground">
           Partner access stays pending until IHARC staff review your application and confirm least-privilege scopes.
         </p>
         <SubmitButton isSuccess={isSuccess} />
@@ -212,7 +212,7 @@ function ConsentCheckbox({
   required?: boolean;
 }) {
   return (
-    <label htmlFor={id} className="flex items-start gap-space-sm text-body-sm text-on-surface">
+    <label htmlFor={id} className="flex items-start gap-3 text-sm text-foreground">
       <Checkbox id={id} name={name} required={required} className="mt-1" />
       <span>
         {label} {required ? <span className="text-error">*</span> : null}

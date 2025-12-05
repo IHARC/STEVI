@@ -146,7 +146,7 @@ export function InventoryItemsSection({ items, locations, organizations, categor
   return (
     <Card className="border-border/60">
       <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <CardTitle className="text-title-sm font-semibold">Inventory items</CardTitle>
+        <CardTitle className="text-base font-semibold">Inventory items</CardTitle>
         <div className="flex items-center gap-2">
           <Dialog open={isBulkOpen} onOpenChange={setIsBulkOpen}>
             <DialogTrigger asChild>
@@ -246,7 +246,7 @@ export function InventoryItemsSection({ items, locations, organizations, categor
           </TableBody>
         </Table>
       </CardContent>
-      <CardFooter className="text-label-sm text-muted-foreground">
+      <CardFooter className="text-xs text-muted-foreground">
         Manage stock levels using receive, transfer, or adjust actions. Deactivating an item hides it from operational workflows without
         deleting historic transactions.
       </CardFooter>
@@ -336,7 +336,7 @@ function ItemDialog({
             <Field label="Name" name="name" defaultValue={defaultValues?.name} required />
             <div className="grid gap-2">
               <Label htmlFor="item_category">Category</Label>
-              <input list="inventory-categories" name="category" id="item_category" defaultValue={defaultValues?.category ?? ''} required className="rounded-md border border-input bg-background px-3 py-2 text-body-md shadow-sm focus:outline-none" />
+              <input list="inventory-categories" name="category" id="item_category" defaultValue={defaultValues?.category ?? ''} required className="rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none" />
               <datalist id="inventory-categories">
                 {categories.map((category) => (
                   <option key={category} value={category} />
@@ -402,7 +402,7 @@ function ItemDialog({
                     ))}
                   </SelectContent>
                 </Select>
-                <p className="text-label-sm text-muted-foreground">Required if you record initial stock above zero.</p>
+                <p className="text-xs text-muted-foreground">Required if you record initial stock above zero.</p>
               </div>
             </div>
           ) : null}
@@ -413,7 +413,7 @@ function ItemDialog({
               name="active"
               defaultChecked={defaultValues?.active ?? true}
             />
-            <Label htmlFor="item_active" className="text-body-md text-muted-foreground">
+            <Label htmlFor="item_active" className="text-sm text-muted-foreground">
               Item is active in operations
             </Label>
           </div>
@@ -484,7 +484,7 @@ function ReceiveStockDialog({ item, locations, organizations, onSubmit, onClose,
             <input type="hidden" name="item_id" value={item.id} />
             <div className="space-y-1">
               <Label>Item</Label>
-              <p className="text-body-md font-medium text-on-surface">{item.name}</p>
+              <p className="text-sm font-medium text-foreground">{item.name}</p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Quantity" name="quantity" type="number" min={0} required placeholder="0" />
@@ -579,7 +579,7 @@ function TransferStockDialog({ item, locations, onSubmit, onClose, actorProfileI
             <input type="hidden" name="item_id" value={item.id} />
             <div className="space-y-1">
               <Label>Item</Label>
-              <p className="text-body-md font-medium text-on-surface">{item.name}</p>
+              <p className="text-sm font-medium text-foreground">{item.name}</p>
             </div>
             <Field label="Quantity" name="quantity" type="number" min={0} required placeholder="0" />
             <div className="grid gap-4 sm:grid-cols-2">
@@ -622,7 +622,7 @@ function AdjustStockDialog({ item, locations, onSubmit, onClose, actorProfileId,
             <input type="hidden" name="item_id" value={item.id} />
             <div className="space-y-1">
               <Label>Item</Label>
-              <p className="text-body-md font-medium text-on-surface">{item.name}</p>
+              <p className="text-sm font-medium text-foreground">{item.name}</p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <SelectField label="Location" name="location_id" locations={locations} required />
@@ -704,11 +704,11 @@ function BulkReceiveDialog({ isPending, onSubmit, actorProfileId, items, locatio
             id="bulk_items_json"
             name="items_json"
             rows={8}
-            className="font-mono text-label-sm"
+            className="font-mono text-xs"
             placeholder='{"items":[{"itemId":"...","quantity":10,"locationId":"..."}]}'
             required
           />
-          <p className="text-label-sm text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             Include <code>itemId</code>, <code>quantity</code>, optional <code>locationId</code>, <code>unitCost</code>, and <code>notes</code> for each entry.
           </p>
         </div>
@@ -753,9 +753,9 @@ function TemplatePreview({ items, locations, organizations }: TemplatePreviewPro
   }, [items, locations, organizations]);
 
   return (
-    <div className="rounded-lg border border-dashed border-muted-foreground/40 bg-muted/20 p-4 text-label-sm text-muted-foreground">
-      <p className="mb-2 font-medium text-on-surface">Template example</p>
-      <pre className="whitespace-pre-wrap break-words font-mono text-label-sm leading-relaxed">{sample}</pre>
+    <div className="rounded-lg border border-dashed border-muted-foreground/40 bg-muted/20 p-4 text-xs text-muted-foreground">
+      <p className="mb-2 font-medium text-foreground">Template example</p>
+      <pre className="whitespace-pre-wrap break-words font-mono text-xs leading-relaxed">{sample}</pre>
     </div>
   );
 }

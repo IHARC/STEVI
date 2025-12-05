@@ -36,7 +36,7 @@ export default async function AdminWebsitePage({ searchParams }: AdminWebsitePag
   const TabComponent = activeTab.component;
 
   return (
-    <div className="page-shell page-stack">
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
       <PageHeader
         eyebrow="Admin"
         title="Website settings"
@@ -56,11 +56,11 @@ export default async function AdminWebsitePage({ searchParams }: AdminWebsitePag
         activeHref={`/admin/website?tab=${activeTab.id}`}
       />
 
-      <div className="text-body-sm text-muted-foreground">
-        <span className="font-medium text-on-surface">What’s inside:</span>
-        <ul className="mt-space-2xs flex flex-wrap gap-space-xs" role="list">
+      <div className="text-sm text-muted-foreground">
+        <span className="font-medium text-foreground">What’s inside:</span>
+        <ul className="mt-1 flex flex-wrap gap-2" role="list">
           {TABS.map((tab) => (
-            <li key={tab.id} className="rounded-[var(--md-sys-shape-corner-small)] bg-surface-container-low px-space-sm py-space-3xs text-label-sm text-on-surface-variant">
+            <li key={tab.id} className="rounded-lg bg-muted px-3 py-0.5 text-xs text-muted-foreground">
               {tab.label}
             </li>
           ))}
@@ -68,7 +68,7 @@ export default async function AdminWebsitePage({ searchParams }: AdminWebsitePag
       </div>
 
       {/* Render only the active tab to avoid duplicate fetches */}
-      <div className="space-y-space-lg">
+      <div className="space-y-6">
         <Suspense fallback={<WebsitePanelSkeleton />}>
           <TabComponent supabase={supabase} access={access} />
         </Suspense>
@@ -79,10 +79,10 @@ export default async function AdminWebsitePage({ searchParams }: AdminWebsitePag
 
 function WebsitePanelSkeleton() {
   return (
-    <div className="space-y-space-sm">
+    <div className="space-y-3">
       <Skeleton className="h-6 w-40" />
       <Skeleton className="h-10 w-full max-w-2xl" />
-      <Skeleton className="h-64 w-full rounded-[var(--md-sys-shape-corner-large)]" />
+      <Skeleton className="h-64 w-full rounded-2xl" />
     </div>
   );
 }

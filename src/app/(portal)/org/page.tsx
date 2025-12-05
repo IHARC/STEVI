@@ -123,7 +123,7 @@ export default async function OrgHomePage() {
   }
 
   return (
-    <div className="page-shell page-stack">
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
       <PageHeader
         eyebrow="Organization"
         title={`Manage ${orgName}`}
@@ -131,7 +131,7 @@ export default async function OrgHomePage() {
         primaryAction={{ label: 'Invite members', href: '/org/invites' }}
         secondaryAction={{ label: 'Manage members', href: '/org/members' }}
       >
-        <div className="flex flex-wrap gap-space-xs">
+        <div className="flex flex-wrap gap-2">
           {organization?.status ? (
             <Badge variant={STATUS_VARIANT[organization.status] ?? 'outline'} className="capitalize">
               {organization.status.replaceAll('_', ' ')}
@@ -145,34 +145,34 @@ export default async function OrgHomePage() {
 
       <OrgTabs />
 
-      <section className="grid gap-space-sm sm:grid-cols-2 lg:grid-cols-4">
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {summaryCards.map((card) => (
           <StatTile key={card.id} label={card.label} value={card.value} tone={card.tone} />
         ))}
       </section>
 
-      <section className="grid gap-space-md lg:grid-cols-[2fr,1fr]">
+      <section className="grid gap-4 lg:grid-cols-[2fr,1fr]">
         <Card className="h-full">
-          <CardHeader className="flex items-start justify-between gap-space-sm">
+          <CardHeader className="flex items-start justify-between gap-3">
             <div>
-              <CardTitle className="text-title-lg">Recent member activity</CardTitle>
+              <CardTitle className="text-xl">Recent member activity</CardTitle>
               <CardDescription>Most recent sign-ins from approved members.</CardDescription>
             </div>
             <Badge variant="secondary">Last seen {lastSeenLabel}</Badge>
           </CardHeader>
-          <CardContent className="space-y-space-sm">
+          <CardContent className="space-y-3">
             {recentActivity.length === 0 ? (
-              <p className="text-body-sm text-muted-foreground">No member activity yet.</p>
+              <p className="text-sm text-muted-foreground">No member activity yet.</p>
             ) : (
               <ul className="divide-y divide-outline/15">
                 {recentActivity.map((member) => (
-                  <li key={member.id} className="flex items-center justify-between gap-space-sm py-space-sm">
-                    <div className="space-y-space-2xs">
-                      <p className="text-body-md font-medium text-on-surface">{member.display_name}</p>
-                      <p className="text-label-sm text-muted-foreground">
+                  <li key={member.id} className="flex items-center justify-between gap-3 py-3">
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-foreground">{member.display_name}</p>
+                      <p className="text-xs text-muted-foreground">
                         {member.position_title ?? 'Team member'}
                       </p>
-                      <div className="flex flex-wrap gap-space-2xs text-label-sm text-muted-foreground">
+                      <div className="flex flex-wrap gap-1 text-xs text-muted-foreground">
                         {member.portal_roles.map((role) => (
                           <Badge key={role} variant="outline" className="capitalize">
                             {role.replaceAll('_', ' ')}
@@ -180,8 +180,8 @@ export default async function OrgHomePage() {
                         ))}
                       </div>
                     </div>
-                    <div className="text-right text-label-sm text-muted-foreground">
-                      <p className="font-medium text-on-surface">{formatDate(member.last_seen_at)}</p>
+                    <div className="text-right text-xs text-muted-foreground">
+                      <p className="font-medium text-foreground">{formatDate(member.last_seen_at)}</p>
                       <p>Last seen</p>
                     </div>
                   </li>
@@ -193,26 +193,26 @@ export default async function OrgHomePage() {
 
         <Card className="h-full">
           <CardHeader>
-            <CardTitle className="text-title-lg">Access health</CardTitle>
+            <CardTitle className="text-xl">Access health</CardTitle>
             <CardDescription>Keep at least one admin and a clear contact on file.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-space-sm">
+          <CardContent className="space-y-3">
             {accessHealth.length === 0 ? (
-              <div className="rounded-2xl border border-outline/12 bg-surface-container-high px-space-md py-space-sm text-body-sm text-on-surface">
+              <div className="rounded-2xl border border-border/30 bg-card px-4 py-3 text-sm text-foreground">
                 <p className="font-medium">All set</p>
                 <p className="text-muted-foreground">You have admins, reps, and contact details in place.</p>
               </div>
             ) : (
-              <ul className="space-y-space-xs">
+              <ul className="space-y-2">
                 {accessHealth.map((item) => (
                   <li
                     key={item.id}
-                    className="flex items-start gap-space-sm rounded-2xl border border-outline/12 bg-surface-container-high px-space-md py-space-sm"
+                    className="flex items-start gap-3 rounded-2xl border border-border/30 bg-card px-4 py-3"
                   >
                     <Badge variant={item.tone === 'warning' ? 'destructive' : 'secondary'} className="mt-0.5">
                       {item.tone === 'warning' ? 'Action' : 'Info'}
                     </Badge>
-                    <p className="text-body-sm text-on-surface">{item.message}</p>
+                    <p className="text-sm text-foreground">{item.message}</p>
                   </li>
                 ))}
               </ul>
@@ -221,20 +221,20 @@ export default async function OrgHomePage() {
         </Card>
       </section>
 
-      <section className="grid gap-space-md lg:grid-cols-[1.2fr,1fr]">
+      <section className="grid gap-4 lg:grid-cols-[1.2fr,1fr]">
         <Card className="h-full">
-          <CardHeader className="flex items-center justify-between gap-space-sm">
+          <CardHeader className="flex items-center justify-between gap-3">
             <div>
-              <CardTitle className="text-title-lg">Invite pipeline</CardTitle>
+              <CardTitle className="text-xl">Invite pipeline</CardTitle>
               <CardDescription>Recent invitations scoped to your organization.</CardDescription>
             </div>
             <Button asChild variant="outline" size="sm">
               <Link href="/org/invites">Open invitations</Link>
             </Button>
           </CardHeader>
-          <CardContent className="space-y-space-sm">
+          <CardContent className="space-y-3">
             {invites.length === 0 ? (
-              <p className="text-body-sm text-muted-foreground">No invites sent yet.</p>
+              <p className="text-sm text-muted-foreground">No invites sent yet.</p>
             ) : (
               <ul className="divide-y divide-outline/15">
                 {invites.slice(0, 6).map((invite) => (
@@ -247,13 +247,13 @@ export default async function OrgHomePage() {
 
         <Card className="h-full">
           <CardHeader>
-            <CardTitle className="text-title-lg">Organization snapshot</CardTitle>
+            <CardTitle className="text-xl">Organization snapshot</CardTitle>
             <CardDescription>Contact and status details staff can reference.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-space-sm text-body-sm text-on-surface">
-            <div className="grid gap-space-xs">
+          <CardContent className="space-y-3 text-sm text-foreground">
+            <div className="grid gap-2">
               <p className="font-medium">Status</p>
-              <div className="flex flex-wrap gap-space-2xs text-label-sm text-muted-foreground">
+              <div className="flex flex-wrap gap-1 text-xs text-muted-foreground">
                 {organization?.status ? (
                   <Badge variant={STATUS_VARIANT[organization.status] ?? 'outline'} className="capitalize">
                     {organization.status.replaceAll('_', ' ')}
@@ -267,7 +267,7 @@ export default async function OrgHomePage() {
               </div>
             </div>
 
-            <div className="grid gap-space-2xs">
+            <div className="grid gap-1">
               <p className="font-medium">Contact</p>
               <p className="text-muted-foreground">
                 {organization?.contact_person ?? 'Not provided'}
@@ -277,21 +277,21 @@ export default async function OrgHomePage() {
               <p className="text-muted-foreground">{organization?.contact_phone ?? 'Add contact phone'}</p>
             </div>
 
-            <div className="grid gap-space-2xs">
+            <div className="grid gap-1">
               <p className="font-medium">Org type</p>
               <p className="text-muted-foreground capitalize">
                 {organization?.organization_type?.replaceAll('_', ' ') ?? 'Not set'}
               </p>
             </div>
 
-            <div className="grid gap-space-2xs">
+            <div className="grid gap-1">
               <p className="font-medium">Partnership</p>
               <p className="text-muted-foreground capitalize">
                 {organization?.partnership_type?.replaceAll('_', ' ') ?? 'Not set'}
               </p>
             </div>
 
-            <div className="grid gap-space-2xs">
+            <div className="grid gap-1">
               <p className="font-medium">Website</p>
               {organization?.website ? (
                 <a
@@ -317,19 +317,19 @@ function InviteListItem({ invite }: { invite: OrgInviteRecord }) {
   const statusVariant = invite.status === 'pending' ? 'secondary' : invite.status === 'accepted' ? 'default' : 'outline';
 
   return (
-    <li className="flex items-start justify-between gap-space-sm py-space-sm">
-      <div className="space-y-space-2xs">
-        <p className="text-body-md font-medium text-on-surface">{invite.display_name ?? invite.email}</p>
-        <p className="text-label-sm text-muted-foreground">{invite.email}</p>
+    <li className="flex items-start justify-between gap-3 py-3">
+      <div className="space-y-1">
+        <p className="text-sm font-medium text-foreground">{invite.display_name ?? invite.email}</p>
+        <p className="text-xs text-muted-foreground">{invite.email}</p>
         {invite.position_title ? (
-          <p className="text-label-sm text-muted-foreground">{invite.position_title}</p>
+          <p className="text-xs text-muted-foreground">{invite.position_title}</p>
         ) : null}
       </div>
-      <div className="text-right text-label-sm text-muted-foreground">
+      <div className="text-right text-xs text-muted-foreground">
         <Badge variant={statusVariant as 'default' | 'secondary' | 'outline'} className="capitalize">
           {invite.status}
         </Badge>
-        <p className="mt-space-2xs">Sent {formatDate(invite.created_at)}</p>
+        <p className="mt-1">Sent {formatDate(invite.created_at)}</p>
       </div>
     </li>
   );

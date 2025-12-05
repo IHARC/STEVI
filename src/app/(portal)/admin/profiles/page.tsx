@@ -155,19 +155,19 @@ export default async function AdminProfilesPage() {
   const pendingInviteCount = recentInvites.filter((invite) => invite.status === 'pending').length;
 
   return (
-    <div className="page-shell page-stack">
-      <header className="flex flex-col gap-space-xs">
-        <p className="text-label-sm font-medium uppercase text-muted-foreground">
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
+      <header className="flex flex-col gap-2">
+        <p className="text-xs font-medium uppercase text-muted-foreground">
           Access &amp; verification
         </p>
-        <h1 className="text-title-lg text-on-surface sm:text-headline-sm">Profile verification &amp; invitations</h1>
-        <p className="max-w-3xl text-body-md text-muted-foreground sm:text-body-lg">
+        <h1 className="text-xl text-foreground sm:text-2xl">Profile verification &amp; invitations</h1>
+        <p className="max-w-3xl text-sm text-muted-foreground sm:text-base">
           Approve partner affiliations, refresh organization links, and send invitations so trusted collaborators can
           reach STEVI in seconds.
         </p>
       </header>
 
-      <section className="grid gap-space-md md:grid-cols-3">
+      <section className="grid gap-4 md:grid-cols-3">
         <SummaryCard
           title="Pending verifications"
           value={pendingAffiliations.length.toString()}
@@ -205,14 +205,14 @@ type SummaryCardProps = {
 function SummaryCard({ title, value, description }: SummaryCardProps) {
   return (
     <Card className="border-border/60">
-      <CardHeader className="flex flex-row items-center justify-between gap-space-sm">
-        <CardTitle className="text-title-sm">{title}</CardTitle>
-        <Badge variant="outline" className="text-label-sm">
+      <CardHeader className="flex flex-row items-center justify-between gap-3">
+        <CardTitle className="text-base">{title}</CardTitle>
+        <Badge variant="outline" className="text-xs">
           {value}
         </Badge>
       </CardHeader>
       <CardContent>
-        <CardDescription className="text-body-sm text-muted-foreground">{description}</CardDescription>
+        <CardDescription className="text-sm text-muted-foreground">{description}</CardDescription>
       </CardContent>
     </Card>
   );

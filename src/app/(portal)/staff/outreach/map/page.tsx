@@ -17,8 +17,8 @@ export default async function OutreachMapPage() {
   }
 
   return (
-    <div className="page-shell page-stack">
-      <div className="flex flex-col gap-space-sm">
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
+      <div className="flex flex-col gap-3">
         <PageHeader
           eyebrow="Staff tools"
           title="Outreach map"
@@ -27,7 +27,7 @@ export default async function OutreachMapPage() {
         <OutreachTabs />
       </div>
       <Card>
-        <CardContent className="space-y-space-2xs py-space-md text-body-md text-muted-foreground">
+        <CardContent className="space-y-1 py-4 text-sm text-muted-foreground">
           <p>Hook this map into geospatial data and schedule layers. Include offline-friendly notes for field teams.</p>
           <p>Future interactions (pin updates, notes) should be audited and RLS-aware.</p>
         </CardContent>

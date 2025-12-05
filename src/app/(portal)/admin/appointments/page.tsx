@@ -44,7 +44,7 @@ function AdminConfirmForm({
   const quickSlots = generateAvailabilitySlots();
 
   return (
-    <form action={onConfirm} className="grid gap-space-xs md:grid-cols-3">
+    <form action={onConfirm} className="grid gap-2 md:grid-cols-3">
       <input type="hidden" name="appointment_id" value={appointment.id} />
       <Input
         type="datetime-local"
@@ -90,7 +90,7 @@ function AdminCompleteForm({
   onComplete: (formData: FormData) => Promise<void>;
 }) {
   return (
-    <form action={onComplete} className="grid gap-space-xs md:grid-cols-[1fr_auto]">
+    <form action={onComplete} className="grid gap-2 md:grid-cols-[1fr_auto]">
       <input type="hidden" name="appointment_id" value={appointment.id} />
       <Textarea
         name="outcome_notes"
@@ -130,45 +130,45 @@ export default async function AdminAppointmentsPage() {
   const { upcoming, past } = await fetchScopedAppointments(supabase, access, { includeCompleted: true });
 
   return (
-    <div className="space-y-space-lg">
-      <header className="space-y-space-2xs">
-        <p className="text-label-sm font-semibold uppercase text-muted-foreground">Operations</p>
-        <h1 className="text-headline-lg text-on-surface">Appointments overview</h1>
-        <p className="max-w-3xl text-body-md text-muted-foreground">
+    <div className="space-y-6">
+      <header className="space-y-1">
+        <p className="text-xs font-semibold uppercase text-muted-foreground">Operations</p>
+        <h1 className="text-3xl text-foreground">Appointments overview</h1>
+        <p className="max-w-3xl text-sm text-muted-foreground">
           Monitor all appointment activity across organizations. Confirm, reassign, or complete bookings when additional support is needed.
         </p>
       </header>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-title-lg">Upcoming & pending</CardTitle>
+          <CardTitle className="text-xl">Upcoming & pending</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-space-md">
+        <CardContent className="space-y-4">
           {upcoming.length === 0 ? (
-            <p className="text-body-sm text-muted-foreground">No upcoming appointments.</p>
+            <p className="text-sm text-muted-foreground">No upcoming appointments.</p>
           ) : (
             upcoming.map((appointment) => (
-              <article key={appointment.id} className="rounded-xl border border-outline/20 bg-surface-container-low p-space-md shadow-level-1">
+              <article key={appointment.id} className="rounded-xl border border-border/40 bg-muted p-4 shadow-sm">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
-                    <p className="text-title-md font-semibold text-on-surface">{appointment.title}</p>
-                    <p className="text-body-sm text-muted-foreground">
+                    <p className="text-lg font-semibold text-foreground">{appointment.title}</p>
+                    <p className="text-sm text-muted-foreground">
                       {appointment.client?.display_name ?? 'Client'} · {appointment.organization?.name ?? 'IHARC'}
                     </p>
                   </div>
                   <Badge className="capitalize">{appointment.status.replaceAll('_', ' ')}</Badge>
                 </div>
-                <p className="text-body-sm text-on-surface/80">{formatDate(appointment.occurs_at)}</p>
+                <p className="text-sm text-foreground/80">{formatDate(appointment.occurs_at)}</p>
                 {appointment.meeting_url ? (
-                  <p className="text-body-sm text-primary">
+                  <p className="text-sm text-primary">
                     <a className="underline-offset-4 hover:underline" href={appointment.meeting_url} target="_blank" rel="noreferrer">
                       Open meeting link
                     </a>
                   </p>
                 ) : null}
-                <div className="mt-space-sm grid gap-space-sm md:grid-cols-2">
+                <div className="mt-3 grid gap-3 md:grid-cols-2">
                   <AdminConfirmForm appointment={appointment} onConfirm={handleConfirm} />
-                  <div className="flex flex-wrap gap-space-sm">
+                  <div className="flex flex-wrap gap-3">
                     <CancelAppointmentForm action={handleCancel} appointmentId={appointment.id} />
                   </div>
                 </div>
@@ -180,28 +180,28 @@ export default async function AdminAppointmentsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-title-lg">Completed & cancelled</CardTitle>
+          <CardTitle className="text-xl">Completed & cancelled</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-space-sm">
+        <CardContent className="space-y-3">
           {past.length === 0 ? (
-            <p className="text-body-sm text-muted-foreground">No history recorded.</p>
+            <p className="text-sm text-muted-foreground">No history recorded.</p>
           ) : (
             past.map((appointment) => (
-              <article key={appointment.id} className="rounded-md border border-outline/15 bg-surface p-space-sm">
+              <article key={appointment.id} className="rounded-md border border-border/15 bg-background p-3">
                 <div className="flex items-center justify-between gap-2">
                   <div>
-                    <p className="text-body-md font-medium text-on-surface">{appointment.title}</p>
-                    <p className="text-body-sm text-muted-foreground">
+                    <p className="text-sm font-medium text-foreground">{appointment.title}</p>
+                    <p className="text-sm text-muted-foreground">
                       {appointment.client?.display_name ?? 'Client'} · {appointment.organization?.name ?? 'IHARC'}
                     </p>
                   </div>
                   <Badge variant="outline" className="capitalize">{appointment.status.replaceAll('_', ' ')}</Badge>
                 </div>
-                <p className="text-body-sm text-muted-foreground">{formatDate(appointment.occurs_at)}</p>
+                <p className="text-sm text-muted-foreground">{formatDate(appointment.occurs_at)}</p>
                 {appointment.outcome_notes ? (
-                  <p className="text-body-sm text-on-surface/80">{appointment.outcome_notes}</p>
+                  <p className="text-sm text-foreground/80">{appointment.outcome_notes}</p>
                 ) : null}
-                <div className="mt-space-2xs">
+                <div className="mt-1">
                   <AdminCompleteForm appointment={appointment} onComplete={handleComplete} />
                 </div>
               </article>

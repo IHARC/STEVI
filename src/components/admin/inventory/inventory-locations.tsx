@@ -84,10 +84,10 @@ export function InventoryLocationsSection({ locations, actorProfileId, canManage
     <Card className="border-border/60">
       <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <CardTitle className="text-title-sm font-semibold">Locations</CardTitle>
-          <p className="text-body-md text-muted-foreground">Warehouses, outreach lockers, and mobile units that hold inventory.</p>
+          <CardTitle className="text-base font-semibold">Locations</CardTitle>
+          <p className="text-sm text-muted-foreground">Warehouses, outreach lockers, and mobile units that hold inventory.</p>
           {!canManageLocations ? (
-            <p className="text-label-sm text-warning-foreground">
+            <p className="text-xs text-warning-foreground">
               Viewing only: only IHARC admins can add or edit locations.
             </p>
           ) : null}
@@ -155,7 +155,7 @@ export function InventoryLocationsSection({ locations, actorProfileId, canManage
           </TableBody>
         </Table>
       </CardContent>
-      <CardFooter className="text-label-sm text-muted-foreground">
+      <CardFooter className="text-xs text-muted-foreground">
         Deleting a location is only allowed when no stock remains and no transactions reference it. Otherwise deactivate to hide it from workflows.
       </CardFooter>
 
@@ -223,7 +223,7 @@ function LocationDialog({
               defaultChecked={defaultValues?.active ?? true}
               disabled={!canManageLocations}
             />
-            <Label htmlFor="location_active" className="text-body-md text-muted-foreground">
+            <Label htmlFor="location_active" className="text-sm text-muted-foreground">
               Location is active
             </Label>
           </div>

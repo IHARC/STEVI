@@ -24,14 +24,14 @@ export default async function AdminApprovalsPage() {
   }
 
   return (
-    <div className="page-shell page-stack">
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
       <PageHeader
         eyebrow="Admin"
         title="Approvals queue"
         description="Centralise pending profile and organization approvals before granting access. Wire this view to profile approvals and audit logging."
       />
       <Card>
-        <CardContent className="space-y-space-2xs py-space-md text-body-md text-muted-foreground">
+        <CardContent className="space-y-1 py-4 text-sm text-muted-foreground">
           <p>Connect this queue to profile approvals and organization reviews. Ensure actions log to the audit trail and respect RLS.</p>
           <p>Suggested next steps: fetch pending profiles, add bulk approve/deny actions, and surface status filters.</p>
         </CardContent>

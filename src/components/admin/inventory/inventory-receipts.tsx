@@ -58,7 +58,7 @@ export function InventoryReceiptsSection({ receipts, organizations, actorProfile
   return (
     <Card className="border-border/60">
       <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <CardTitle className="text-title-sm font-semibold">Receipts</CardTitle>
+        <CardTitle className="text-base font-semibold">Receipts</CardTitle>
         <Input
           className="w-full sm:w-64"
           placeholder="Search receipts"
@@ -138,7 +138,7 @@ function UpdateSourceDialog({ receipt, organizations, actorProfileId, isPending,
             <input type="hidden" name="transaction_id" value={receipt.id} />
             <div className="grid gap-1">
               <Label>Item</Label>
-              <p className="text-body-md font-medium text-on-surface">{receipt.itemName}</p>
+              <p className="text-sm font-medium text-foreground">{receipt.itemName}</p>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="receipt_source_type">Source type</Label>
@@ -146,7 +146,7 @@ function UpdateSourceDialog({ receipt, organizations, actorProfileId, isPending,
                 id="receipt_source_type"
                 name="source_type"
                 defaultValue={receipt.refType ?? ''}
-                className="rounded-md border border-input bg-background px-3 py-2 text-body-md shadow-sm focus:outline-none"
+                className="rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none"
               >
                 <option value="">Unset</option>
                 <option value="donation">Donation</option>
@@ -161,7 +161,7 @@ function UpdateSourceDialog({ receipt, organizations, actorProfileId, isPending,
                 id="receipt_provider"
                 name="provider_org_id"
                 defaultValue={receipt.providerOrgId?.toString() ?? ''}
-                className="rounded-md border border-input bg-background px-3 py-2 text-body-md shadow-sm focus:outline-none"
+                className="rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none"
               >
                 <option value="">None</option>
                 {organizations.map((org) => (

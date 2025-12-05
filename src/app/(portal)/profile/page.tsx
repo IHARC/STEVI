@@ -412,23 +412,23 @@ export default async function PortalProfilePage() {
   const hasPhone = Boolean(initialPhone);
 
   return (
-    <div className="page-shell page-stack">
-      <header className="flex flex-col gap-space-xs">
-        <h1 className="text-headline-lg text-on-surface">Account settings</h1>
-        <p className="max-w-3xl text-body-sm text-on-surface/70">
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
+      <header className="flex flex-col gap-2">
+        <h1 className="text-3xl text-foreground">Account settings</h1>
+        <p className="max-w-3xl text-sm text-foreground/70">
           Keep your profile details and contact information up to date so neighbours know how you collaborate.
         </p>
       </header>
 
       {awaitingVerification ? (
-        <div className="rounded-2xl border border-primary bg-primary-container p-space-md text-body-sm text-on-primary-container">
+        <div className="rounded-2xl border border-primary bg-primary/10 p-4 text-sm text-primary">
           We are confirming your IHARC team role. You can keep contributing as a community member while we
           verify.
         </div>
       ) : null}
 
       {affiliationRevoked ? (
-        <div className="rounded-2xl border border-error bg-error-container p-space-md text-body-sm text-on-error-container">
+        <div className="rounded-2xl border border-error bg-destructive/10 p-4 text-sm text-destructive-foreground">
           Your verified affiliation was revoked. Reach out to IHARC administrators if circumstances have changed.
         </div>
       ) : null}

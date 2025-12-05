@@ -16,14 +16,14 @@ export default async function StaffTeamTasksPage() {
   }
 
   return (
-    <div className="page-shell page-stack">
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
       <PageHeader
         eyebrow="Staff tools"
         title="Team tasks"
         description="Coordinate tasks across the outreach team with ownership and status."
       />
       <Card>
-        <CardContent className="space-y-space-2xs py-space-md text-body-md text-muted-foreground">
+        <CardContent className="space-y-1 py-4 text-sm text-muted-foreground">
           <p>Stub for a team-wide task board. Integrate with caseload assignments and outreach scheduling when available.</p>
           <p>Include filters by location, shift, and priority, and ensure changes are audited.</p>
         </CardContent>

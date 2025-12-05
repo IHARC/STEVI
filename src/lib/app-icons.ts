@@ -32,7 +32,7 @@ import {
   Workflow,
 } from 'lucide-react';
 
-const APP_ICON_MAP = {
+export const APP_ICON_MAP = {
   home: Home,
   dashboard: LayoutDashboard,
   shield: ShieldCheck,

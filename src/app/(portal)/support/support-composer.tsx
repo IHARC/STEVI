@@ -11,7 +11,6 @@ import { ClientPreviewGuard } from '@/components/layout/client-preview-guard';
 import { submitSupportMessage } from './actions';
 import { useToast } from '@/components/ui/use-toast';
 import { usePortalLayout } from '@/components/providers/portal-layout-provider';
-import { Icon } from '@/components/ui/icon';
 import { MessageCircle } from 'lucide-react';
 
 const initialState = { success: false } as const;
@@ -51,25 +50,25 @@ export function SupportComposer() {
         <Button
           type="button"
           size="sm"
-          className="fixed bottom-4 right-4 z-30 rounded-full shadow-level-3"
+          className="fixed bottom-4 right-4 z-30 rounded-full shadow-lg"
           variant="secondary"
           disabled={isClientPreview}
         >
-          <Icon icon={MessageCircle} size="sm" />
-          <span className="ml-space-2xs">{triggerLabel}</span>
+          <MessageCircle className="h-4 w-4" aria-hidden />
+          <span className="ml-1">{triggerLabel}</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="bottom" className="max-h-[70vh] overflow-y-auto rounded-t-3xl border-t border-outline/30 bg-surface">
+      <SheetContent side="bottom" className="max-h-[70vh] overflow-y-auto rounded-t-3xl border-t border-border/30 bg-background">
         <SheetHeader>
           <SheetTitle className="text-left">Message the team</SheetTitle>
-          <p className="text-body-sm text-muted-foreground text-left">
+          <p className="text-sm text-muted-foreground text-left">
             Share what you need. We respond within one business day using your preferred contact method.
           </p>
         </SheetHeader>
 
         <ClientPreviewGuard message="Exit preview to send messages as the client.">
-          <form action={formAction} className="mt-space-md space-y-space-md">
-            <div className="space-y-space-2xs">
+          <form action={formAction} className="mt-4 space-y-4">
+            <div className="space-y-1">
               <Label htmlFor="support-message">What do you need help with?</Label>
               <Textarea
                 id="support-message"
@@ -80,10 +79,10 @@ export function SupportComposer() {
                 placeholder="Share context, dates, or what you’d like us to do."
                 className="min-h-[160px]"
               />
-              <p className="text-label-sm text-muted-foreground">Avoid sharing sensitive health details. We’ll keep this secure.</p>
+              <p className="text-xs text-muted-foreground">Avoid sharing sensitive health details. We’ll keep this secure.</p>
             </div>
 
-            <div className="space-y-space-2xs">
+            <div className="space-y-1">
               <Label htmlFor="preferred-contact">Preferred contact</Label>
               <Select name="preferredContact" defaultValue="phone">
                 <SelectTrigger id="preferred-contact" aria-label="Preferred contact method">
@@ -98,7 +97,7 @@ export function SupportComposer() {
               </Select>
             </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-space-sm text-label-sm text-muted-foreground">
+            <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
               <span>We’ll respond within one business day. For urgent changes, call 289-555-0100.</span>
               <Button type="submit" className="ml-auto">Send message</Button>
             </div>

@@ -74,12 +74,12 @@ function PaginationControls({ page, totalPages, hasMore }: { page: number; total
   return (
     <nav
       aria-label="Resource pagination"
-      className="flex flex-wrap items-center justify-between gap-space-sm rounded-2xl border border-outline/20 bg-surface-container p-space-sm text-body-sm text-on-surface"
+      className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border/40 bg-card p-3 text-sm text-foreground"
     >
-      <span className="text-label-sm text-muted-foreground">
+      <span className="text-xs text-muted-foreground">
         Page {page} of {totalPages} {hasMore ? '+' : ''}
       </span>
-      <div className="flex items-center gap-space-xs">
+      <div className="flex items-center gap-2">
         <Button
           asChild
           variant="outline"
@@ -135,14 +135,14 @@ export default async function AdminResourcesPage({ searchParams }: { searchParam
   const totalPages = Math.max(1, Math.ceil(resourceResult.total / resourceResult.pageSize));
 
   return (
-    <div className="page-shell page-stack">
-      <header className="flex flex-col gap-space-sm sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-space-xs">
-          <p className="text-label-sm font-medium uppercase text-muted-foreground">Resource library</p>
-          <h1 className="text-title-lg text-on-surface sm:text-headline-sm">
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-2">
+          <p className="text-xs font-medium uppercase text-muted-foreground">Resource library</p>
+          <h1 className="text-xl text-foreground sm:text-2xl">
             Manage public resources and reports
           </h1>
-          <p className="max-w-3xl text-body-md text-muted-foreground sm:text-body-lg">
+          <p className="max-w-3xl text-sm text-muted-foreground sm:text-base">
             Publish outreach reports, policy updates, and community resources. Published items power the marketing
             website and client resource hub, while drafts stay internal until you are ready to share them.
           </p>
@@ -152,34 +152,34 @@ export default async function AdminResourcesPage({ searchParams }: { searchParam
         </Button>
       </header>
 
-      <section className="grid gap-space-md sm:grid-cols-2">
-        <Card className="border-outline/20 bg-surface-container">
+      <section className="grid gap-4 sm:grid-cols-2">
+        <Card className="border-border/40 bg-card">
           <CardHeader>
-            <CardTitle className="text-body-lg text-muted-foreground">Published resources</CardTitle>
+            <CardTitle className="text-base text-muted-foreground">Published resources</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-headline-md font-semibold text-on-surface">{publishedCount}</p>
-            <p className="text-label-sm text-muted-foreground">
-              Visible on <span className="font-medium text-on-surface">iharc.ca</span> and the STEVI client portal.
+            <p className="text-3xl font-semibold text-foreground">{publishedCount}</p>
+            <p className="text-xs text-muted-foreground">
+              Visible on <span className="font-medium text-foreground">iharc.ca</span> and the STEVI client portal.
             </p>
           </CardContent>
         </Card>
-        <Card className="border-outline/20 bg-surface-container">
+        <Card className="border-border/40 bg-card">
           <CardHeader>
-            <CardTitle className="text-body-lg text-muted-foreground">Draft resources</CardTitle>
+            <CardTitle className="text-base text-muted-foreground">Draft resources</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-headline-md font-semibold text-on-surface">{draftCount}</p>
-            <p className="text-label-sm text-muted-foreground">
+            <p className="text-3xl font-semibold text-foreground">{draftCount}</p>
+            <p className="text-xs text-muted-foreground">
               Only visible to STEVI admins until you publish them.
             </p>
           </CardContent>
         </Card>
       </section>
 
-      <section className="space-y-space-md">
+      <section className="space-y-4">
         {resourceResult.hasMore ? (
-          <p className="text-body-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Showing {resources.length} of {resourceResult.total} resources. Use pagination to browse the full library.
           </p>
         ) : null}
@@ -187,11 +187,11 @@ export default async function AdminResourcesPage({ searchParams }: { searchParam
         <PaginationControls page={page} totalPages={totalPages} hasMore={resourceResult.hasMore} />
 
         {resources.length === 0 ? (
-          <Card className="border-outline/20 bg-surface-container">
+          <Card className="border-border/40 bg-card">
             <CardHeader>
-              <CardTitle className="text-title-sm text-on-surface">No resources yet</CardTitle>
+              <CardTitle className="text-base text-foreground">No resources yet</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4 text-body-md text-muted-foreground">
+            <CardContent className="space-y-4 text-sm text-muted-foreground">
               <p>
                 Start by publishing a delegation summary, policy brief, or outreach update. Resources you publish here
                 are shared with neighbours and partner agencies through both STEVI and the public site.
@@ -202,7 +202,7 @@ export default async function AdminResourcesPage({ searchParams }: { searchParam
             </CardContent>
           </Card>
         ) : (
-          <div className="rounded-3xl border border-outline/20 bg-surface-container">
+          <div className="rounded-3xl border border-border/40 bg-card">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -218,9 +218,9 @@ export default async function AdminResourcesPage({ searchParams }: { searchParam
                 {resources.map((resource) => (
                   <TableRow key={resource.id} className="bg-transparent">
                     <TableCell>
-                      <div className="flex flex-col gap-space-2xs">
-                        <span className="font-medium text-on-surface">{resource.title}</span>
-                        <span className="text-label-sm text-muted-foreground">/{resource.slug}</span>
+                      <div className="flex flex-col gap-1">
+                        <span className="font-medium text-foreground">{resource.title}</span>
+                        <span className="text-xs text-muted-foreground">/{resource.slug}</span>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -232,7 +232,7 @@ export default async function AdminResourcesPage({ searchParams }: { searchParam
                     <TableCell>{formatPublishedDate(resource.datePublished)}</TableCell>
                     <TableCell>{formatUpdatedDate(resource.updatedAt)}</TableCell>
                     <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-space-xs">
+                      <div className="flex items-center justify-end gap-2">
                         <Button asChild variant="outline" size="sm">
                           <Link href={`/admin/resources/${resource.slug}`}>Edit</Link>
                         </Button>
@@ -241,7 +241,7 @@ export default async function AdminResourcesPage({ searchParams }: { searchParam
                             asChild
                             variant="ghost"
                             size="sm"
-                            className="text-muted-foreground hover:text-on-surface"
+                            className="text-muted-foreground hover:text-foreground"
                           >
                             <Link
                               href={`https://iharc.ca/resources/${resource.slug}`}

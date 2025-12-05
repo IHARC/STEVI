@@ -23,22 +23,22 @@ export default async function DocumentsPage() {
   const documents = await listClientDocuments(profile.id);
 
   return (
-    <div className="page-shell page-stack">
-      <header className="flex flex-col gap-space-xs">
-        <p className="text-label-sm font-medium uppercase text-muted-foreground">
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
+      <header className="flex flex-col gap-2">
+        <p className="text-xs font-medium uppercase text-muted-foreground">
           Secure locker
         </p>
-        <h1 className="text-headline-lg text-on-surface sm:text-display-sm">Your shared documents</h1>
-        <p className="max-w-2xl text-body-md text-muted-foreground sm:text-body-lg">
+        <h1 className="text-3xl text-foreground sm:text-4xl">Your shared documents</h1>
+        <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">
           Files added here expire automatically and align with the outreach team’s attachment
           policies.
         </p>
       </header>
 
-      <section aria-labelledby="documents-heading" className="grid gap-space-md lg:grid-cols-[2fr,1fr]">
+      <section aria-labelledby="documents-heading" className="grid gap-4 lg:grid-cols-[2fr,1fr]">
         <Card>
           <CardHeader>
-            <CardTitle id="documents-heading" className="text-title-lg">
+            <CardTitle id="documents-heading" className="text-xl">
               Available documents
             </CardTitle>
             <CardDescription>
@@ -58,12 +58,12 @@ export default async function DocumentsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-title-md">Need a new document?</CardTitle>
+            <CardTitle className="text-lg">Need a new document?</CardTitle>
             <CardDescription>
               Reach out if you need identification support, appeal letters, or assessment notes.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-space-sm text-body-sm text-muted-foreground">
+          <CardContent className="space-y-3 text-sm text-muted-foreground">
             <p>
               Message the outreach coordination inbox at{' '}
               <a

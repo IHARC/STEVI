@@ -1,6 +1,6 @@
 import type { LucideIcon } from 'lucide-react';
-import { Icon } from '@/components/ui/icon';
 import { cn } from '@/lib/utils';
+import { Card, CardContent } from './card';
 
 type StatTileProps = {
   label: string;
@@ -11,25 +11,24 @@ type StatTileProps = {
 };
 
 const toneClassMap: Record<NonNullable<StatTileProps['tone']>, string> = {
-  default: 'border-outline/10 bg-surface-container text-on-surface',
-  warning: 'border-primary/24 bg-primary-container text-on-primary-container',
-  info: 'border-secondary-container/40 bg-secondary-container text-on-secondary-container',
+  default: 'border-border/70 bg-card text-foreground',
+  warning:
+    'border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-50',
+  info:
+    'border-primary/30 bg-primary/10 text-primary dark:border-primary/40 dark:bg-primary/15 dark:text-primary-foreground',
 };
 
-export function StatTile({ label, value, tone = 'default', icon, footnote }: StatTileProps) {
+export function StatTile({ label, value, tone = 'default', icon: Icon, footnote }: StatTileProps) {
   return (
-    <div
-      className={cn(
-        'flex flex-col gap-space-xs rounded-[var(--md-sys-shape-corner-small)] border px-space-md py-space-md shadow-level-1',
-        toneClassMap[tone],
-      )}
-    >
-      <div className="flex items-center gap-space-2xs text-label-md text-on-surface-variant">
-        {icon ? <Icon icon={icon} size="sm" className="text-inherit" /> : null}
-        <span>{label}</span>
-      </div>
-      <p className="text-4xl font-semibold leading-tight sm:text-5xl">{value}</p>
-      {footnote ? <p className="text-label-sm text-on-surface-variant">{footnote}</p> : null}
-    </div>
+    <Card className={cn('border', toneClassMap[tone])}>
+      <CardContent className="space-y-2 p-4">
+        <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+          {Icon ? <Icon className="h-4 w-4" aria-hidden /> : null}
+          <span>{label}</span>
+        </div>
+        <p className="text-3xl font-semibold leading-tight tracking-tight">{value}</p>
+        {footnote ? <p className="text-xs text-muted-foreground">{footnote}</p> : null}
+      </CardContent>
+    </Card>
   );
 }

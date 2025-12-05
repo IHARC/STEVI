@@ -82,8 +82,8 @@ export function InventoryOrganizationsSection({ organizations, actorProfileId }:
     <Card className="border-border/60">
       <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <CardTitle className="text-title-sm font-semibold">Partner organisations</CardTitle>
-          <p className="text-body-md text-muted-foreground">
+          <CardTitle className="text-base font-semibold">Partner organisations</CardTitle>
+          <p className="text-sm text-muted-foreground">
             Track donors, suppliers, and partners for accurate receipt attribution and reporting.
           </p>
         </div>
@@ -138,7 +138,7 @@ export function InventoryOrganizationsSection({ organizations, actorProfileId }:
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="text-tertiary hover:text-tertiary"
+                      className="text-accent hover:text-accent"
                       onClick={() => submitReactivate(org)}
                       disabled={isPending}
                     >
@@ -151,7 +151,7 @@ export function InventoryOrganizationsSection({ organizations, actorProfileId }:
           </TableBody>
         </Table>
       </CardContent>
-      <CardFooter className="text-label-sm text-muted-foreground">
+      <CardFooter className="text-xs text-muted-foreground">
         Deactivate partners to pause new activity. Reactivate them when donations resume so historic receipts stay intact.
       </CardFooter>
 

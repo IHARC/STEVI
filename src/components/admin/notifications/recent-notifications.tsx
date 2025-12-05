@@ -40,12 +40,12 @@ export function RecentNotifications({ notifications }: RecentNotificationsProps)
   return (
     <Card className="border-border/60">
       <CardHeader>
-        <CardTitle className="text-title-lg">Delivery history</CardTitle>
+        <CardTitle className="text-xl">Delivery history</CardTitle>
         <CardDescription>Last 20 notifications queued through STEVI.</CardDescription>
       </CardHeader>
       <CardContent className="overflow-x-auto">
         {rows.length === 0 ? (
-          <p className="text-body-sm text-muted-foreground">No notifications yet.</p>
+          <p className="text-sm text-muted-foreground">No notifications yet.</p>
         ) : (
           <Table>
             <TableHeader>
@@ -62,24 +62,24 @@ export function RecentNotifications({ notifications }: RecentNotificationsProps)
               {rows.map((notification) => (
                 <TableRow key={notification.id}>
                   <TableCell className="max-w-xs">
-                    <p className="font-medium text-on-surface">{notification.subject}</p>
-                    <p className="text-label-sm text-muted-foreground line-clamp-2">{notification.bodyText}</p>
+                    <p className="font-medium text-foreground">{notification.subject}</p>
+                    <p className="text-xs text-muted-foreground line-clamp-2">{notification.bodyText}</p>
                   </TableCell>
-                  <TableCell className="text-body-sm">
+                  <TableCell className="text-sm">
                     <div className="flex flex-col">
                       {notification.profileId ? (
-                        <span className="font-medium text-on-surface">
+                        <span className="font-medium text-foreground">
                           {notification.profileName ?? notification.profileId}
                         </span>
                       ) : (
                         <span className="text-muted-foreground">External</span>
                       )}
-                      <span className="text-label-sm text-muted-foreground">
+                      <span className="text-xs text-muted-foreground">
                         {notification.recipientEmail}
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-label-sm uppercase text-muted-foreground">
+                  <TableCell className="text-xs uppercase text-muted-foreground">
                     {notification.notificationType}
                   </TableCell>
                   <TableCell>
@@ -87,10 +87,10 @@ export function RecentNotifications({ notifications }: RecentNotificationsProps)
                       {notification.statusLabel}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-label-sm text-muted-foreground">
+                  <TableCell className="text-xs text-muted-foreground">
                     {formatTimestamp(notification.createdAt)}
                   </TableCell>
-                  <TableCell className="text-label-sm text-muted-foreground">{notification.sentLabel}</TableCell>
+                  <TableCell className="text-xs text-muted-foreground">{notification.sentLabel}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

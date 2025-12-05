@@ -63,25 +63,25 @@ export function QuickOutreachForm({
     <form
       ref={formRef}
       action={formAction}
-      className={cn('rounded-2xl border border-outline/20 bg-surface-container p-space-md shadow-sm', dense && 'p-space-sm')}
+      className={cn('rounded-2xl border border-border/40 bg-card p-4 shadow-sm', dense && 'p-3')}
     >
-      <div className="space-y-space-sm">
-        <div className="flex items-center justify-between gap-space-sm">
-          <div className="space-y-space-3xs">
-            <p className="text-title-sm text-on-surface">Log outreach</p>
-            <p className="text-label-sm text-muted-foreground">
+      <div className="space-y-3">
+        <div className="flex items-center justify-between gap-3">
+          <div className="space-y-0.5">
+            <p className="text-base text-foreground">Log outreach</p>
+            <p className="text-xs text-muted-foreground">
               Quick entry writes to the audit trail and stays staff-only.
             </p>
           </div>
-          <span className="rounded-full bg-outline/10 px-space-xs py-px text-label-sm text-muted-foreground">N</span>
+          <span className="rounded-full bg-border/10 px-2 py-px text-xs text-muted-foreground">N</span>
         </div>
 
         <input type="hidden" name="person_id" value={personId ?? ''} readOnly />
         {caseId ? <input type="hidden" name="case_id" value={caseId} readOnly /> : null}
 
-        <div className="grid gap-space-sm sm:grid-cols-2">
-          <div className="space-y-space-2xs">
-            <Label htmlFor="outreach-title" className="text-label-sm">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="space-y-1">
+            <Label htmlFor="outreach-title" className="text-xs">
               Title
             </Label>
             <Input
@@ -96,8 +96,8 @@ export function QuickOutreachForm({
               disabled={disabled}
             />
           </div>
-          <div className="space-y-space-2xs">
-            <Label htmlFor="outreach-occurred-at" className="text-label-sm">
+          <div className="space-y-1">
+            <Label htmlFor="outreach-occurred-at" className="text-xs">
               Occurred at
             </Label>
             <Input
@@ -111,8 +111,8 @@ export function QuickOutreachForm({
           </div>
         </div>
 
-        <div className="space-y-space-2xs">
-          <Label htmlFor="outreach-summary" className="text-label-sm">
+        <div className="space-y-1">
+          <Label htmlFor="outreach-summary" className="text-xs">
             Summary <span className="text-muted-foreground">(optional)</span>
           </Label>
           <Textarea
@@ -126,8 +126,8 @@ export function QuickOutreachForm({
           />
         </div>
 
-        <div className="space-y-space-2xs">
-          <Label htmlFor="outreach-location" className="text-label-sm">
+        <div className="space-y-1">
+          <Label htmlFor="outreach-location" className="text-xs">
             Location <span className="text-muted-foreground">(optional)</span>
           </Label>
           <Input
@@ -139,12 +139,12 @@ export function QuickOutreachForm({
           />
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-space-sm">
-          <div className="space-y-space-3xs">
-            <p className="text-label-sm text-muted-foreground">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="space-y-0.5">
+            <p className="text-xs text-muted-foreground">
               Select a case to enable logging. Entries respect Supabase RLS.
             </p>
-            <p className="text-label-sm text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               Audit trail captures actor, time, and linked person.
             </p>
           </div>
@@ -153,7 +153,7 @@ export function QuickOutreachForm({
           </Button>
         </div>
 
-        <p aria-live="polite" className={cn('text-label-sm', state.status === 'error' ? 'text-destructive' : 'text-primary')}>
+        <p aria-live="polite" className={cn('text-xs', state.status === 'error' ? 'text-destructive' : 'text-primary')}>
           {state.status === 'success' ? state.message : null}
           {state.status === 'error' ? state.message : null}
         </p>

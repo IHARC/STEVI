@@ -25,13 +25,13 @@ export function ProgramsForm({ programs }: Props) {
   const removeItem = (index: number) => setItems((prev) => prev.filter((_, i) => i !== index));
 
   return (
-    <form action={savePrograms} className="space-y-space-md">
+    <form action={savePrograms} className="space-y-4">
       <input type="hidden" name="programs_json" value={serialize()} />
-      <div className="space-y-space-sm">
+      <div className="space-y-3">
         {items.map((program, index) => (
-          <div key={`${program.title}-${index}`} className="space-y-space-xs rounded-lg border border-border bg-card/40 p-space-sm">
-            <div className="flex items-start justify-between gap-space-sm">
-              <div className="space-y-space-2xs flex-1">
+          <div key={`${program.title}-${index}`} className="space-y-2 rounded-lg border border-border bg-card/40 p-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-1 flex-1">
                 <Label htmlFor={`program-title-${index}`}>Title</Label>
                 <Input
                   id={`program-title-${index}`}
@@ -52,7 +52,7 @@ export function ProgramsForm({ programs }: Props) {
                 <Trash2 className="h-4 w-4" aria-hidden />
               </Button>
             </div>
-            <div className="space-y-space-2xs">
+            <div className="space-y-1">
               <Label htmlFor={`program-description-${index}`}>Description</Label>
               <Textarea
                 id={`program-description-${index}`}
@@ -70,9 +70,9 @@ export function ProgramsForm({ programs }: Props) {
         </Button>
       </div>
 
-      <div className="flex flex-wrap items-center gap-space-sm">
+      <div className="flex flex-wrap items-center gap-3">
         <Button type="submit">Save programs</Button>
-        <p className="text-body-sm text-muted-foreground">Changes publish to the marketing Programs page.</p>
+        <p className="text-sm text-muted-foreground">Changes publish to the marketing Programs page.</p>
       </div>
     </form>
   );

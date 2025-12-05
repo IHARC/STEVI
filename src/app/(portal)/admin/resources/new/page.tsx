@@ -28,25 +28,25 @@ export default async function AdminResourceNewPage() {
   const enumOptions = await fetchResourceEnumOptions();
 
   return (
-    <div className="page-shell page-stack text-on-surface">
-      <div className="mx-auto w-full max-w-[min(100%,52rem)] space-y-space-sm">
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6 text-foreground">
+      <div className="mx-auto w-full max-w-[min(100%,52rem)] space-y-3">
         <Button asChild variant="ghost" className="w-fit">
           <Link href="/admin/resources">← Back to admin resources</Link>
         </Button>
-        <h1 className="text-headline-lg">Create resource</h1>
-        <p className="text-body-sm text-on-surface/70">
+        <h1 className="text-3xl">Create resource</h1>
+        <p className="text-sm text-foreground/70">
           Publish delegations, data briefings, or policy notes so neighbours can co-design solutions with real-time context.
         </p>
       </div>
 
       <Card className="mx-auto w-full max-w-[min(100%,52rem)]">
         <CardHeader>
-          <CardTitle className="text-title-lg">Compose new report or delegation</CardTitle>
+          <CardTitle className="text-xl">Compose new report or delegation</CardTitle>
           <CardDescription>
             Keep the tone compassionate and community-first. Verify all numbers and remind neighbours to call 911 during emergencies.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-space-lg">
+        <CardContent className="space-y-6">
           <ResourceForm mode="create" action={createResourcePage} kindOptions={enumOptions.kinds} />
         </CardContent>
       </Card>

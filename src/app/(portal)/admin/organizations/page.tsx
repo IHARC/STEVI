@@ -76,27 +76,27 @@ export default async function AdminOrganizationsPage() {
   const organizations = (orgs ?? []) as OrganizationRow[];
 
   return (
-    <div className="space-y-space-lg">
-      <header className="space-y-space-xs">
-        <p className="text-label-sm font-medium uppercase text-muted-foreground">Admin</p>
-        <h1 className="text-headline-lg">Organizations</h1>
-        <p className="max-w-3xl text-body-md text-muted-foreground">
+    <div className="space-y-6">
+      <header className="space-y-2">
+        <p className="text-xs font-medium uppercase text-muted-foreground">Admin</p>
+        <h1 className="text-3xl">Organizations</h1>
+        <p className="max-w-3xl text-sm text-muted-foreground">
           Create, edit, and review partner organizations. Admins can seed initial org admins so teams can self-manage members under RLS.
         </p>
       </header>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-title-lg">Create organization</CardTitle>
+          <CardTitle className="text-xl">Create organization</CardTitle>
           <CardDescription>Set the basics now, refine details and feature access in the manage view.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form className="grid gap-space-md md:grid-cols-3" action={handleCreate}>
-            <div className="space-y-space-xs md:col-span-2">
+          <form className="grid gap-4 md:grid-cols-3" action={handleCreate}>
+            <div className="space-y-2 md:col-span-2">
               <Label htmlFor="name">Name</Label>
               <Input id="name" name="name" required placeholder="Community Food Bank" />
             </div>
-            <div className="space-y-space-xs">
+            <div className="space-y-2">
               <Label htmlFor="status">Status</Label>
               <Select name="status" defaultValue="active">
                 <SelectTrigger id="status">
@@ -110,7 +110,7 @@ export default async function AdminOrganizationsPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-space-xs">
+            <div className="space-y-2">
               <Label htmlFor="organization_type">Organization type</Label>
               <Select name="organization_type">
                 <SelectTrigger id="organization_type">
@@ -125,7 +125,7 @@ export default async function AdminOrganizationsPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-space-xs">
+            <div className="space-y-2">
               <Label htmlFor="partnership_type">Partnership type</Label>
               <Select name="partnership_type">
                 <SelectTrigger id="partnership_type">
@@ -140,22 +140,22 @@ export default async function AdminOrganizationsPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-space-xs">
+            <div className="space-y-2">
               <Label htmlFor="website">Website</Label>
               <Input id="website" name="website" type="url" placeholder="https://example.org" />
             </div>
-            <div className="space-y-space-xs">
-              <Label className="flex items-center gap-space-xs text-body-sm">
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2 text-sm">
                 <input type="checkbox" name="is_active" defaultChecked className="h-4 w-4 rounded border border-input" />
                 <span>Mark as active</span>
               </Label>
-              <p className="text-label-sm text-muted-foreground">Unchecked organizations remain in draft.</p>
+              <p className="text-xs text-muted-foreground">Unchecked organizations remain in draft.</p>
             </div>
             <div className="md:col-span-3">
-              <Label className="text-body-sm">Feature availability</Label>
-              <div className="mt-space-sm grid gap-space-xs sm:grid-cols-3">
+              <Label className="text-sm">Feature availability</Label>
+              <div className="mt-3 grid gap-2 sm:grid-cols-3">
                 {ORG_FEATURE_OPTIONS.map((option) => (
-                  <label key={option.value} className="flex items-center gap-space-xs rounded-md border border-outline/20 px-space-sm py-space-xs text-body-sm">
+                  <label key={option.value} className="flex items-center gap-2 rounded-md border border-border/40 px-3 py-2 text-sm">
                     <input type="checkbox" name="features" value={option.value} className="h-4 w-4 rounded border border-input" />
                     <span>{option.label}</span>
                   </label>
@@ -171,7 +171,7 @@ export default async function AdminOrganizationsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-title-lg">Organizations</CardTitle>
+          <CardTitle className="text-xl">Organizations</CardTitle>
           <CardDescription>Manage details, features, and membership for each organization.</CardDescription>
         </CardHeader>
         <CardContent className="overflow-x-auto">
@@ -201,10 +201,10 @@ export default async function AdminOrganizationsPage() {
                   return (
                     <TableRow key={org.id}>
                       <TableCell className="font-medium">
-                        <div className="flex flex-col gap-space-2xs">
-                          <span className="text-on-surface">{org.name}</span>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-foreground">{org.name}</span>
                           {org.website ? (
-                            <span className="text-label-sm text-muted-foreground">{org.website}</span>
+                            <span className="text-xs text-muted-foreground">{org.website}</span>
                           ) : null}
                         </div>
                       </TableCell>
@@ -221,7 +221,7 @@ export default async function AdminOrganizationsPage() {
                       </TableCell>
                       <TableCell className="max-w-xs">
                         {features.length ? (
-                          <div className="flex flex-wrap gap-space-2xs">
+                          <div className="flex flex-wrap gap-1">
                             {features.map((feature) => (
                               <Badge key={feature} variant="outline" className="capitalize">
                                 {feature.replace(/_/g, ' ')}

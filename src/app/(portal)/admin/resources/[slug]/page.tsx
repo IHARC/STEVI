@@ -41,23 +41,23 @@ export default async function AdminResourceEditPage({ params }: { params: RouteP
   const enumOptions = await fetchResourceEnumOptions();
 
   return (
-    <div className="page-shell page-stack text-on-surface">
-      <div className="mx-auto w-full max-w-[min(100%,52rem)] space-y-space-sm">
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6 text-foreground">
+      <div className="mx-auto w-full max-w-[min(100%,52rem)] space-y-3">
         <Button asChild variant="ghost" className="w-fit">
           <Link href="/admin/resources">← Back to admin resources</Link>
         </Button>
         <div>
-          <h1 className="text-headline-lg">Edit resource</h1>
-          <p className="text-body-sm text-on-surface/70">
+          <h1 className="text-3xl">Edit resource</h1>
+          <p className="text-sm text-foreground/70">
             Update the public summary, embed new files, or adjust publishing status. Changes apply as soon as you save.
           </p>
         </div>
       </div>
 
       <Card className="mx-auto w-full max-w-[min(100%,52rem)]">
-        <CardHeader className="flex flex-col gap-space-sm sm:flex-row sm:items-start sm:justify-between">
+        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <CardTitle className="text-title-lg">{resource.title}</CardTitle>
+            <CardTitle className="text-xl">{resource.title}</CardTitle>
             <CardDescription>
               {resource.isPublished ? 'Currently visible on the marketing site.' : 'Draft — not yet visible publicly.'}
             </CardDescription>
@@ -68,7 +68,7 @@ export default async function AdminResourceEditPage({ params }: { params: RouteP
             </Link>
           </Button>
         </CardHeader>
-        <CardContent className="space-y-space-lg">
+        <CardContent className="space-y-6">
           <ResourceForm
             mode="edit"
             action={updateResourcePage}

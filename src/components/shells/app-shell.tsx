@@ -38,7 +38,7 @@ export function AppShell({
   const showClientPreviewBanner = isClientPreview;
 
   return (
-    <div className="flex min-h-screen bg-surface-container-lowest text-on-background">
+    <div className="flex min-h-screen bg-background text-foreground">
       {showNavigation ? (
         <AppNavigationDesktop navSections={navSections} globalNavItems={globalNavItems} />
       ) : null}
@@ -51,15 +51,15 @@ export function AppShell({
         />
         {showClientPreviewBanner ? <ClientPreviewBanner /> : null}
         <main id="main-content" className="flex-1">
-          <div className="mx-auto w-full max-w-page px-space-lg py-space-md">
+          <div className="mx-auto w-full max-w-6xl px-4 py-4 md:px-6">
             <div
               className={cn(
-                'grid gap-space-lg',
+                'grid gap-6',
                 showInbox ? 'xl:grid-cols-[minmax(0,1fr)_22rem]' : 'grid-cols-1',
               )}
             >
               <section className="min-w-0">
-                <div className="space-y-space-lg [&_.page-shell]:!w-full [&_.page-shell]:!max-w-none [&_.page-shell]:!p-0 [&_.page-stack]:!gap-space-lg">
+                <div className="space-y-6">
                   {children}
                 </div>
               </section>

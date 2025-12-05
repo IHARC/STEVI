@@ -21,7 +21,6 @@ process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 process.env.NEXT_FORCE_WEBPACK = '1';
 
 const steps = [
-  { cmd: 'npm run sync:tokens', label: 'Syncing design tokens' },
   { cmd: 'npx eslint .', label: 'Linting' },
   // Force webpack so we emit .next/standalone for Azure App Service
   { cmd: 'npx next build --webpack', label: 'Building application' },

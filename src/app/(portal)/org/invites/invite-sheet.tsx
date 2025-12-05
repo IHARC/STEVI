@@ -52,22 +52,22 @@ export function InviteSheet({ rateLimit }: InviteSheetProps) {
       </SheetTrigger>
       <SheetContent side="right" className="w-full max-w-[480px] overflow-y-auto sm:w-[420px]">
         <SheetHeader className="text-left">
-          <SheetTitle className="text-title-lg">Send an invitation</SheetTitle>
+          <SheetTitle className="text-xl">Send an invitation</SheetTitle>
           <SheetDescription>
             Invitations are scoped to your organization by RLS. We include your name and optional message.
           </SheetDescription>
         </SheetHeader>
 
-        <div className="mt-space-md space-y-space-md">
-          <div className="flex items-start justify-between gap-space-sm rounded-lg border border-outline/20 bg-surface-container-low p-space-sm">
+        <div className="mt-4 space-y-4">
+          <div className="flex items-start justify-between gap-3 rounded-lg border border-border/40 bg-muted p-3">
             <Badge variant={rateLimit.allowed ? 'secondary' : 'destructive'} className="capitalize">
               {rateLimit.allowed ? 'Limit clear' : 'Rate limited'}
             </Badge>
-            <p className="text-label-sm text-right text-muted-foreground">{limitMessage}</p>
+            <p className="text-xs text-right text-muted-foreground">{limitMessage}</p>
           </div>
 
-          <form ref={formRef} action={formAction} className="grid gap-space-md">
-            <div className="space-y-space-2xs">
+          <form ref={formRef} action={formAction} className="grid gap-4">
+            <div className="space-y-1">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
@@ -79,18 +79,18 @@ export function InviteSheet({ rateLimit }: InviteSheetProps) {
               />
             </div>
 
-            <div className="grid gap-space-sm sm:grid-cols-2">
-              <div className="space-y-space-2xs">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-1">
                 <Label htmlFor="display_name">Display name (optional)</Label>
                 <Input id="display_name" name="display_name" placeholder="Jordan Smith" />
               </div>
-              <div className="space-y-space-2xs">
+              <div className="space-y-1">
                 <Label htmlFor="position_title">Role or title (optional)</Label>
                 <Input id="position_title" name="position_title" placeholder="Coordinator" />
               </div>
             </div>
 
-            <div className="space-y-space-2xs">
+            <div className="space-y-1">
               <Label htmlFor="message">Message (optional)</Label>
               <Textarea
                 id="message"

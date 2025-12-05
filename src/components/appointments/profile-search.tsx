@@ -72,11 +72,11 @@ export function ProfileSearch({
   }, [items, selectedId]);
 
   return (
-    <div className={cn('space-y-space-2xs', className)}>
-      <label className="text-label-sm font-semibold text-on-surface" htmlFor={`${name}-search`}>
+    <div className={cn('space-y-1', className)}>
+      <label className="text-xs font-semibold text-foreground" htmlFor={`${name}-search`}>
         {label}
       </label>
-      <div className="flex gap-space-xs">
+      <div className="flex gap-2">
         <Input
           id={`${name}-search`}
           placeholder={placeholder ?? 'Search by name'}
@@ -96,28 +96,28 @@ export function ProfileSearch({
           Clear
         </Button>
       </div>
-      {helperText ? <p className="text-body-xs text-muted-foreground">{helperText}</p> : null}
+      {helperText ? <p className="text-xs text-muted-foreground">{helperText}</p> : null}
       <input type="hidden" name={name} value={selectedId} required={required} />
 
-      <Card className="border-outline/30">
-        <CardContent className="space-y-space-2xs py-space-sm">
-          {loading ? <p className="text-body-sm text-muted-foreground">Searching…</p> : null}
+      <Card className="border-border/30">
+        <CardContent className="space-y-1 py-3">
+          {loading ? <p className="text-sm text-muted-foreground">Searching…</p> : null}
           {!loading && items.length === 0 ? (
-            <p className="text-body-sm text-muted-foreground">No matches.</p>
+            <p className="text-sm text-muted-foreground">No matches.</p>
           ) : (
             items.map((item) => (
               <button
                 type="button"
                 key={item.id}
-                className="flex w-full items-center justify-between rounded-md px-space-sm py-space-2xs text-left text-body-sm transition state-layer-color-primary hover:bg-surface-container-low"
+                className="flex w-full items-center justify-between rounded-md px-3 py-1 text-left text-sm transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 onClick={() => setSelectedId(item.id)}
               >
-                <span className="text-on-surface">{item.label}</span>
-                <span className="text-label-sm text-on-surface/60">{item.id.slice(0, 8)}</span>
+                <span className="text-foreground">{item.label}</span>
+                <span className="text-xs text-foreground/60">{item.id.slice(0, 8)}</span>
               </button>
             ))
           )}
-          <p className="text-body-xs text-muted-foreground">Selected: {summary}</p>
+          <p className="text-xs text-muted-foreground">Selected: {summary}</p>
         </CardContent>
       </Card>
     </div>

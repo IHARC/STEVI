@@ -41,50 +41,50 @@ export function AttentionQueue({ items }: AttentionQueueProps) {
       : "No items need attention."
 
   return (
-    <div className="space-y-space-sm">
-      <div className="flex flex-wrap items-center gap-space-2xs">
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center gap-1">
         {FILTERS.map((filter) => (
           <Button
             key={filter.id}
             size="sm"
             variant={activeFilter === filter.id ? "secondary" : "outline"}
             onClick={() => setActiveFilter(filter.id)}
-            className="rounded-full px-space-md"
+            className="rounded-full px-4"
           >
             {filter.label}
           </Button>
         ))}
       </div>
 
-      <div className="space-y-space-xs">
+      <div className="space-y-2">
         {filtered.length === 0 ? (
-          <div className="rounded-[var(--md-sys-shape-corner-small)] border border-outline/12 bg-surface-container px-space-md py-space-md text-body-sm text-muted-foreground">
+          <div className="rounded-lg border border-border/30 bg-card px-4 py-4 text-sm text-muted-foreground">
             {emptyMessage}
           </div>
         ) : (
           filtered.map((item) => (
             <div
               key={item.id}
-              className="flex items-center justify-between gap-space-sm rounded-[var(--md-sys-shape-corner-small)] border border-outline/10 bg-surface-container-low px-space-md py-space-sm shadow-level-1 transition-colors hover:bg-surface-container"
+              className="flex items-center justify-between gap-3 rounded-lg border border-border/20 bg-muted px-4 py-3 shadow-sm transition-colors hover:bg-card"
             >
-              <div className="space-y-space-3xs">
-                <p className="text-body-md font-medium text-on-surface">{item.label}</p>
+              <div className="space-y-0.5">
+                <p className="text-sm font-medium text-foreground">{item.label}</p>
                 {item.description ? (
-                  <p className="text-label-sm text-on-surface-variant">{item.description}</p>
+                  <p className="text-xs text-muted-foreground">{item.description}</p>
                 ) : null}
               </div>
-              <div className="flex items-center gap-space-sm">
+              <div className="flex items-center gap-3">
                 <Badge
                   variant={item.tone === "warning" ? "secondary" : "outline"}
                   className={cn(
                     item.tone === "warning"
-                      ? "border-primary/20 bg-primary-container text-on-primary-container"
-                      : "border-outline/30 text-on-surface-variant",
+                      ? "border-primary/20 bg-primary/10 text-primary"
+                      : "border-border/30 text-muted-foreground",
                   )}
                 >
                   {item.count.toLocaleString("en-CA")}
                 </Badge>
-                <Button asChild variant="ghost" size="sm" className="text-label-sm">
+                <Button asChild variant="ghost" size="sm" className="text-xs">
                   <Link href={item.href}>Review all</Link>
                 </Button>
               </div>
