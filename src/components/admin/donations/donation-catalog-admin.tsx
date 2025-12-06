@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from 'react';
 import { saveCatalogItem, toggleCatalogItem, importInventoryItem } from '@/app/(portal)/admin/donations/actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -5,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import type { DonationCatalogItem } from '@/lib/donations/types';
 import type { InventoryItem } from '@/lib/inventory/types';
 import { cn } from '@/lib/utils';
@@ -27,6 +31,7 @@ function CatalogItemForm({
 }) {
   const inventoryId = item?.inventoryItemId ?? '';
   const metrics = item?.metrics;
+  const [isActive, setIsActive] = useState<boolean>(item?.isActive ?? true);
 
   return (
     <form
@@ -206,12 +211,12 @@ function CatalogItemForm({
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3">
+        <input type="hidden" name="is_active" value={isActive ? 'on' : 'off'} />
         <label className="inline-flex items-center gap-2 text-sm font-medium text-foreground">
-          <Input
-            type="checkbox"
-            name="is_active"
-            className="h-4 w-4"
-            defaultChecked={item?.isActive ?? true}
+          <Checkbox
+            checked={isActive}
+            onCheckedChange={(value) => setIsActive(Boolean(value))}
+            aria-label="Toggle marketing visibility"
           />
           Visible on marketing site
         </label>

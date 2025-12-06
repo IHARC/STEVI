@@ -8,11 +8,9 @@ import { resolveLandingPath } from '@/lib/portal-navigation';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { updateProfileAction, toggleRoleAction, archiveUserAction, sendInviteAction } from '../../actions';
 import { getPortalRoles, formatEnumLabel } from '@/lib/enum-values';
+import { ProfileUpdateForm, InviteUserForm } from '@/components/admin/users/profile/profile-forms';
 
 export const dynamic = 'force-dynamic';
 
@@ -125,87 +123,22 @@ export default async function AdminUserDetailPage({
             <CardDescription>Update visible details and organizational context.</CardDescription>
           </CardHeader>
           <CardContent>
-            <form action={updateProfile} className="grid gap-4 md:grid-cols-2">
-              <input type="hidden" name="profile_id" value={detail.profile.id} />
-              <div className="space-y-1 md:col-span-2">
-                <Label htmlFor="display_name">Display name</Label>
-                <Input id="display_name" name="display_name" defaultValue={detail.profile.display_name} required />
-              </div>
-              <div className="space-y-1 md:col-span-2">
-                <Label htmlFor="position_title">Title / role</Label>
-                <Input
-                  id="position_title"
-                  name="position_title"
-                  defaultValue={detail.profile.position_title ?? ''}
-                  placeholder="Case worker, partner lead, etc."
-                />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="affiliation_type">Affiliation type</Label>
-                <select
-                  id="affiliation_type"
-                  name="affiliation_type"
-                  defaultValue={detail.profile.affiliation_type}
-                  className="w-full rounded-lg border border-border/30 bg-background px-3 py-1 text-sm"
-                >
-                  {profileEnums.affiliationTypes.map((value) => (
-                    <option key={value} value={value}>
-                      {formatEnumLabel(value.replace('_', ' '))}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="affiliation_status">Status</Label>
-                <select
-                  id="affiliation_status"
-                  name="affiliation_status"
-                  defaultValue={detail.profile.affiliation_status}
-                  className="w-full rounded-lg border border-border/30 bg-background px-3 py-1 text-sm"
-                >
-                  {profileEnums.affiliationStatuses.map((value) => (
-                    <option key={value} value={value}>
-                      {formatEnumLabel(value)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="organization_id">Organization</Label>
-                <select
-                  id="organization_id"
-                  name="organization_id"
-                  defaultValue={detail.organization?.id ?? ''}
-                  className="w-full rounded-lg border border-border/30 bg-background px-3 py-1 text-sm"
-                >
-                  <option value="">No organization</option>
-                  {organizations.map((org: { id: number; name: string }) => (
-                    <option key={org.id} value={org.id}>
-                      {org.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="government_role_type">Government role</Label>
-                <select
-                  id="government_role_type"
-                  name="government_role_type"
-                  defaultValue={detail.profile.government_role_type ?? ''}
-                  className="w-full rounded-lg border border-border/30 bg-background px-3 py-1 text-sm"
-                >
-                  <option value="">Not applicable</option>
-                  {profileEnums.governmentRoleTypes.map((value) => (
-                    <option key={value} value={value}>
-                      {formatEnumLabel(value)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="md:col-span-2 flex justify-end gap-2">
-                <Button type="submit">Save changes</Button>
-              </div>
-            </form>
+            <ProfileUpdateForm
+              profile={{
+                id: detail.profile.id,
+                display_name: detail.profile.display_name,
+                position_title: detail.profile.position_title,
+                affiliation_type: detail.profile.affiliation_type,
+                affiliation_status: detail.profile.affiliation_status,
+                organization_id: detail.organization?.id ?? null,
+                government_role_type: detail.profile.government_role_type,
+              }}
+              affiliationTypes={profileEnums.affiliationTypes}
+              affiliationStatuses={profileEnums.affiliationStatuses}
+              governmentRoleTypes={profileEnums.governmentRoleTypes}
+              organizations={organizations}
+              action={updateProfile}
+            />
           </CardContent>
         </Card>
 
@@ -301,52 +234,15 @@ export default async function AdminUserDetailPage({
                 <CardDescription>Invite this contact to complete their account.</CardDescription>
               </CardHeader>
               <CardContent>
-                <form action={sendInvite} className="space-y-3">
-                  <input type="hidden" name="invite_display_name" value={detail.profile.display_name} />
-                  <input type="hidden" name="invite_position_title" value={detail.profile.position_title ?? ''} />
-                  <div className="space-y-1">
-                    <Label htmlFor="invite_email">Email</Label>
-                    <Input id="invite_email" name="invite_email" type="email" required defaultValue={detail.email ?? ''} />
-                  </div>
-                  <div className="space-y-1">
-                    <Label htmlFor="invite_affiliation_type">Affiliation</Label>
-                  <select
-                    id="invite_affiliation_type"
-                    name="invite_affiliation_type"
-                    defaultValue={detail.profile.affiliation_type}
-                    className="w-full rounded-lg border border-border/30 bg-background px-3 py-1 text-sm"
-                  >
-                    {profileEnums.affiliationTypes.map((value) => (
-                      <option key={value} value={value}>
-                        {formatEnumLabel(value.replace('_', ' '))}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                  <div className="space-y-1">
-                    <Label htmlFor="invite_organization_id">Organization</Label>
-                    <select
-                      id="invite_organization_id"
-                      name="invite_organization_id"
-                      defaultValue={detail.organization?.id ?? ''}
-                      className="w-full rounded-lg border border-border/30 bg-background px-3 py-1 text-sm"
-                    >
-                      <option value="">No organization</option>
-                      {organizations.map((org: { id: number; name: string }) => (
-                        <option key={org.id} value={org.id}>
-                          {org.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="space-y-1">
-                    <Label htmlFor="invite_message">Message (optional)</Label>
-                    <Textarea id="invite_message" name="invite_message" placeholder="Add context or instructions." />
-                  </div>
-                  <div className="flex justify-end">
-                    <Button type="submit">Send invite</Button>
-                  </div>
-                </form>
+                <InviteUserForm
+                  profileId={detail.profile.id}
+                  displayName={detail.profile.display_name}
+                  positionTitle={detail.profile.position_title}
+                  email={detail.email}
+                  affiliationTypes={profileEnums.affiliationTypes}
+                  organizations={organizations}
+                  action={sendInvite}
+                />
               </CardContent>
             </Card>
           ) : null}

@@ -19,8 +19,6 @@ import { UserPeekSheet } from '../user-peek-sheet';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   Table,
   TableBody,
@@ -29,6 +27,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { UserFilterBar } from '@/components/admin/users/user-filter-bar';
 
 export const dynamic = 'force-dynamic';
 
@@ -132,6 +131,13 @@ export default async function AdminUsersSegmentPage({
   const q = toStringParam(resolvedSearch.q);
   const sort = toStringParam(resolvedSearch.sort) === 'name' ? 'name' : 'recent';
   const statusFilter = parseAffiliationStatus(status, profileEnums);
+  const paramsObject = {
+    q: q ?? '',
+    status: status ?? '',
+    role: role ?? '',
+    org: organizationId ? String(organizationId) : '',
+    sort,
+  };
   const [summary, listResult, orgOptions, portalRoleOptions, iharcRoleOptions] = await Promise.all([
     fetchAdminUserSummary(supabase),
     fetchAdminUsers(supabase, segment, {
@@ -207,12 +213,18 @@ export default async function AdminUsersSegmentPage({
 
       <UserSavedSearches segment={segment} currentParams={paramsString} />
 
-      <FilterBar
+      <UserFilterBar
         segment={segment}
         organizations={organizations}
-        params={paramsForLinks}
         statusOptions={statusOptions}
         roleOptions={roleOptions}
+        initial={{
+          q: paramsObject.q ?? '',
+          status: paramsObject.status ?? '',
+          role: paramsObject.role ?? '',
+          org: paramsObject.org ?? '',
+          sort: paramsObject.sort ?? 'recent',
+        }}
       />
 
       <Card className="border-border/40 bg-card">
@@ -344,101 +356,5 @@ function SegmentTabs({ active, params }: { active: AdminUserSegment; params: URL
         );
       })}
     </div>
-  );
-}
-
-function FilterBar({
-  segment,
-  organizations,
-  params,
-  statusOptions,
-  roleOptions,
-}: {
-  segment: AdminUserSegment;
-  organizations: { id: number; name: string }[];
-  params: URLSearchParams;
-  statusOptions: { value: string; label: string }[];
-  roleOptions: { value: string; label: string }[];
-}) {
-  const currentStatus = params.get('status') ?? '';
-  const currentRole = params.get('role') ?? '';
-  const currentOrg = params.get('org') ?? '';
-  const currentSearch = params.get('q') ?? '';
-  const currentSort = params.get('sort') ?? 'recent';
-
-  return (
-    <form className="grid gap-3 rounded-2xl border border-border/40 bg-card p-3 md:grid-cols-5" action={`/admin/users/${segment}`}>
-      <div className="md:col-span-2 space-y-1">
-        <Label htmlFor="q">Search</Label>
-        <Input id="q" name="q" placeholder="Name or email" defaultValue={currentSearch} />
-      </div>
-      <div className="space-y-1">
-        <Label htmlFor="status">Status</Label>
-        <select
-          id="status"
-          name="status"
-          defaultValue={currentStatus}
-          className="w-full rounded-lg border border-border/30 bg-background px-3 py-1 text-sm"
-        >
-          {statusOptions.map((option) => (
-            <option key={option.value || 'any'} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="space-y-1">
-        <Label htmlFor="role">Role</Label>
-        <select
-          id="role"
-          name="role"
-          defaultValue={currentRole}
-          className="w-full rounded-lg border border-border/30 bg-background px-3 py-1 text-sm capitalize"
-        >
-          <option value="">Any role</option>
-          {roleOptions.map((role) => (
-            <option key={role.value} value={role.value}>
-              {role.label}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="space-y-1">
-        <Label htmlFor="org">Organization</Label>
-        <select
-          id="org"
-          name="org"
-          defaultValue={currentOrg}
-          className="w-full rounded-lg border border-border/30 bg-background px-3 py-1 text-sm"
-        >
-          <option value="">Any org</option>
-          {organizations.map((org) => (
-            <option key={org.id} value={org.id}>
-              {org.name}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="space-y-1">
-        <Label htmlFor="sort">Sort</Label>
-        <select
-          id="sort"
-          name="sort"
-          defaultValue={currentSort}
-          className="w-full rounded-lg border border-border/30 bg-background px-3 py-1 text-sm"
-        >
-          <option value="recent">Recent activity</option>
-          <option value="name">Name A–Z</option>
-        </select>
-      </div>
-      <div className="md:col-span-5 flex flex-wrap justify-end gap-2">
-        <Button type="submit" variant="default">
-          Apply
-        </Button>
-        <Button type="reset" variant="ghost">
-          Reset
-        </Button>
-      </div>
-    </form>
   );
 }

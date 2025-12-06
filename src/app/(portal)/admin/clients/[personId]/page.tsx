@@ -9,14 +9,14 @@ import {
 import { fetchPersonGrants, type PersonGrant } from '@/lib/cases/grants';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { resolveLandingPath } from '@/lib/portal-navigation';
 import type { Database } from '@/types/supabase';
 import { getOnboardingStatus, type OnboardingStatus } from '@/lib/onboarding/status';
 import { resetOnboardingAction, resendOnboardingLinkAction } from '../onboarding-actions';
 import { Badge } from '@/components/ui/badge';
 import { getGrantScopes } from '@/lib/enum-values';
+import { ConsentOverrideForm } from '@/components/admin/consents/consent-override-form';
+import { PersonGrantForm } from '@/components/admin/clients/person-grant-form';
 
 async function resetOnboardingFormAction(formData: FormData) {
   'use server';
@@ -95,7 +95,13 @@ export default async function AdminPersonDetailPage({ params }: PageProps) {
             <CardDescription>Adjust sharing and contact preferences with client approval.</CardDescription>
           </CardHeader>
           <CardContent>
-            <ConsentForm person={person} />
+            <ConsentOverrideForm
+              personId={person.id}
+              dataSharingConsent={Boolean(person.data_sharing_consent ?? false)}
+              preferredContactMethod={person.preferred_contact_method}
+              privacyRestrictions={person.privacy_restrictions}
+              action={adminOverrideConsentAction}
+            />
           </CardContent>
         </Card>
 
@@ -105,7 +111,7 @@ export default async function AdminPersonDetailPage({ params }: PageProps) {
             <CardDescription>Grant orgs or users scoped access; revoke when no longer needed.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <GrantForm personId={person.id} organizations={organizations} scopes={grantScopes} />
+            <PersonGrantForm personId={person.id} organizations={organizations} scopes={grantScopes} action={adminCreateGrantAction} />
             <GrantList grants={grants} />
           </CardContent>
         </Card>
@@ -237,97 +243,6 @@ async function loadOnboardingHistory(
   }
 
   return events.sort((a, b) => Date.parse(b.at) - Date.parse(a.at));
-}
-
-function ConsentForm({ person }: { person: PersonRow }) {
-  return (
-    <form action={adminOverrideConsentAction} className="space-y-3">
-      <input type="hidden" name="person_id" value={person.id} />
-      <label className="flex items-center gap-3 text-sm text-foreground">
-        <input
-          type="checkbox"
-          name="data_sharing"
-          defaultChecked={Boolean(person.data_sharing_consent ?? false)}
-          className="h-4 w-4 rounded border-border/60"
-        />
-        <span>Allow data sharing</span>
-      </label>
-
-      <div className="space-y-1">
-        <Label className="text-xs">Preferred contact</Label>
-        <select
-          name="preferred_contact"
-          defaultValue={person.preferred_contact_method ?? 'email'}
-          className="w-full rounded-md border border-border/40 bg-background px-3 py-1 text-sm"
-        >
-          <option value="email">Email</option>
-          <option value="phone">Phone</option>
-          <option value="both">Both</option>
-          <option value="none">None</option>
-        </select>
-      </div>
-
-      <div className="space-y-1">
-        <Label htmlFor="privacy_notes" className="text-xs">Privacy notes</Label>
-        <Textarea
-          id="privacy_notes"
-          name="privacy_restrictions"
-          defaultValue={person.privacy_restrictions ?? ''}
-          rows={3}
-          placeholder="Document verbal consent changes or safety constraints."
-        />
-      </div>
-
-      <Button type="submit" className="w-full">Save override</Button>
-    </form>
-  );
-}
-
-function GrantForm({ personId, organizations, scopes }: { personId: number; organizations: OrganizationOption[]; scopes: string[] }) {
-  return (
-    <form action={adminCreateGrantAction} className="space-y-3">
-      <input type="hidden" name="person_id" value={personId} />
-      <div className="space-y-1">
-        <Label className="text-xs" htmlFor="scope">Scope</Label>
-        <select
-          id="scope"
-          name="scope"
-          className="w-full rounded-md border border-border/40 bg-background px-3 py-1 text-sm"
-          defaultValue="view"
-        >
-          {scopes.length === 0 ? (
-            <option value="">No scopes configured</option>
-          ) : (
-            scopes.map((scope) => (
-              <option key={scope} value={scope}>{scope}</option>
-            ))
-          )}
-        </select>
-      </div>
-      <div className="space-y-1">
-        <Label className="text-xs">User ID (optional)</Label>
-        <input
-          name="grantee_user_id"
-          className="w-full rounded-md border border-border/40 bg-background px-3 py-1 text-sm"
-          placeholder="UUID of user"
-        />
-      </div>
-      <div className="space-y-1">
-        <Label className="text-xs">Organization (optional)</Label>
-        <select
-          name="grantee_org_id"
-          className="w-full rounded-md border border-border/40 bg-background px-3 py-1 text-sm"
-          defaultValue=""
-        >
-          <option value="">—</option>
-          {organizations.map((org) => (
-            <option key={org.id} value={org.id}>{org.name}</option>
-          ))}
-        </select>
-      </div>
-      <Button type="submit" className="w-full">Grant access</Button>
-    </form>
-  );
 }
 
 function GrantList({ grants }: { grants: PersonGrant[] }) {

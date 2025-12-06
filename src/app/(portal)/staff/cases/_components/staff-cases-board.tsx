@@ -161,19 +161,19 @@ export function StaffCasesBoard({ cases, caseload, shifts }: StaffCasesBoardProp
 
           <div className="flex flex-wrap items-center gap-3">
             {savedViews.map((option) => (
-              <button
+              <Button
                 key={option.id}
                 type="button"
-                onClick={() => setViewId(option.id)}
+                size="sm"
+                variant={option.id === activeView.id ? 'secondary' : 'outline'}
                 className={cn(
-                  'rounded-full border px-3 py-1 text-xs font-medium transition hover:bg-muted',
-                  option.id === activeView.id
-                    ? 'border-primary bg-primary/10 text-primary'
-                    : 'border-border/40 text-foreground/80 hover:border-border',
+                  'rounded-full px-3 py-1 text-xs font-medium',
+                  option.id === activeView.id && 'border-primary/60 bg-primary/10 text-primary'
                 )}
+                onClick={() => setViewId(option.id)}
               >
                 {option.label}
-              </button>
+              </Button>
             ))}
           </div>
 

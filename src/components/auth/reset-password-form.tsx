@@ -1,5 +1,7 @@
 'use client';
 
+/* eslint-disable react-hooks/incompatible-library */
+
 import { startTransition, useActionState, useEffect, useMemo } from 'react';
 import { useFormStatus } from 'react-dom';
 import { useForm } from 'react-hook-form';

@@ -113,14 +113,16 @@ function InboxList({ items, onDismiss }: { items: InboxItem[]; onDismiss: (id: s
             </div>
             <div className="flex flex-col items-end gap-1">
               {item.badge ? <Badge variant="outline">{item.badge}</Badge> : null}
-              <button
+              <Button
                 type="button"
-                className="text-muted-foreground transition hover:text-foreground"
+                variant="ghost"
+                size="icon"
+                className="text-muted-foreground hover:text-foreground"
                 onClick={() => onDismiss(item.id)}
                 aria-label="Dismiss item"
               >
                 <X className="h-4 w-4" aria-hidden />
-              </button>
+              </Button>
             </div>
           </div>
           <TonePill tone={item.tone} />

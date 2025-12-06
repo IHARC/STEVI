@@ -3,10 +3,8 @@ import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { adminOverrideConsentAction } from '@/lib/cases/actions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { resolveLandingPath } from '@/lib/portal-navigation';
+import { ConsentOverrideForm } from '@/components/admin/consents/consent-override-form';
 
 type ConsentRow = {
   id: number;
@@ -56,45 +54,13 @@ export default async function AdminConsentsPage() {
               <CardDescription>Person ID: {person.id}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              <form action={adminOverrideConsentAction} className="space-y-3">
-                <input type="hidden" name="person_id" value={person.id} />
-                <label className="flex items-center gap-3 text-sm text-foreground">
-                  <input
-                    type="checkbox"
-                    name="data_sharing"
-                    defaultChecked={person.data_sharing_consent}
-                    className="h-4 w-4 rounded border-border/60"
-                  />
-                  <span>Allow data sharing</span>
-                </label>
-
-                <div className="space-y-1">
-                  <Label className="text-xs">Preferred contact</Label>
-                  <select
-                    name="preferred_contact"
-                    defaultValue={person.preferred_contact_method ?? 'email'}
-                    className="w-full rounded-md border border-border/40 bg-background px-3 py-1 text-sm"
-                  >
-                    <option value="email">Email</option>
-                    <option value="phone">Phone</option>
-                    <option value="both">Both</option>
-                    <option value="none">None</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1">
-                  <Label htmlFor={`privacy_${person.id}`} className="text-xs">Privacy notes</Label>
-                  <Textarea
-                    id={`privacy_${person.id}`}
-                    name="privacy_restrictions"
-                    defaultValue={person.privacy_restrictions ?? ''}
-                    rows={3}
-                    placeholder="Document verbal consent changes or safety constraints."
-                  />
-                </div>
-
-                <Button type="submit" className="w-full">Save override</Button>
-              </form>
+              <ConsentOverrideForm
+                personId={person.id}
+                dataSharingConsent={person.data_sharing_consent}
+                preferredContactMethod={person.preferred_contact_method}
+                privacyRestrictions={person.privacy_restrictions}
+                action={adminOverrideConsentAction}
+              />
             </CardContent>
           </Card>
         ))}

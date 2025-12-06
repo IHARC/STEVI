@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { approveAffiliationAction, declineAffiliationAction } from '@/app/(portal)/admin/profiles/actions';
 import type { OrganizationOption, PendingAffiliation } from './types';
 
@@ -213,38 +214,46 @@ function PendingAffiliationsContent({
                       <span className="text-xs uppercase text-muted-foreground">
                         Approved organization
                       </span>
-                      <select
-                        className="rounded-lg border border-border/40 bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                      <Select
                         value={orgValue}
-                        onChange={(event) =>
-                          setOrgSelections((prev) => ({ ...prev, [entry.id]: event.target.value }))
+                        onValueChange={(value) =>
+                          setOrgSelections((prev) => ({ ...prev, [entry.id]: value }))
                         }
                         disabled={isPending}
                       >
-                        <option value="">Select organization</option>
-                        {currentOrg.map((option) => (
-                          <option key={option.id} value={option.id}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
+                        <SelectTrigger className="rounded-lg border border-border/40 bg-background px-3 py-2 text-sm text-foreground">
+                          <SelectValue placeholder="Select organization" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">Select organization</SelectItem>
+                          {currentOrg.map((option) => (
+                            <SelectItem key={option.id} value={option.id}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </label>
                     {entry.affiliationType === 'government_partner' ? (
                       <label className="grid gap-1 text-sm text-foreground">
                         <span className="text-xs uppercase text-muted-foreground">
                           Role type
                         </span>
-                        <select
-                          className="rounded-lg border border-border/40 bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                        <Select
                           value={govRoleValue}
-                          onChange={(event) =>
-                            setGovRoleSelections((prev) => ({ ...prev, [entry.id]: event.target.value }))
+                          onValueChange={(value) =>
+                            setGovRoleSelections((prev) => ({ ...prev, [entry.id]: value }))
                           }
                           disabled={isPending}
                         >
-                          <option value="staff">Public servant / staff</option>
-                          <option value="politician">Elected leadership</option>
-                        </select>
+                          <SelectTrigger className="rounded-lg border border-border/40 bg-background px-3 py-2 text-sm text-foreground">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="staff">Public servant / staff</SelectItem>
+                            <SelectItem value="politician">Elected leadership</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </label>
                     ) : null}
                   </div>

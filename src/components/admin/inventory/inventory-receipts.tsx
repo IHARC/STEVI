@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/components/ui/use-toast';
 import { updateInventoryTransactionSourceAction } from '@/app/(portal)/admin/inventory/actions';
@@ -175,17 +176,18 @@ function UpdateSourceDialog({ receipt, organizations, actorProfileId, isPending,
                   <FormItem className="grid gap-2">
                     <FormLabel htmlFor="receipt_source_type">Source type</FormLabel>
                     <FormControl>
-                      <select
-                        id="receipt_source_type"
-                        className="rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none"
-                        {...field}
-                      >
-                        <option value="">Unset</option>
-                        <option value="donation">Donation</option>
-                        <option value="purchase">Purchase</option>
-                        <option value="transfer_in">Transfer in</option>
-                        <option value="adjustment">Adjustment</option>
-                      </select>
+                      <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                        <SelectTrigger id="receipt_source_type">
+                          <SelectValue placeholder="Select source" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">Unset</SelectItem>
+                          <SelectItem value="donation">Donation</SelectItem>
+                          <SelectItem value="purchase">Purchase</SelectItem>
+                          <SelectItem value="transfer_in">Transfer in</SelectItem>
+                          <SelectItem value="adjustment">Adjustment</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -198,18 +200,19 @@ function UpdateSourceDialog({ receipt, organizations, actorProfileId, isPending,
                   <FormItem className="grid gap-2">
                     <FormLabel htmlFor="receipt_provider">Provider organisation</FormLabel>
                     <FormControl>
-                      <select
-                        id="receipt_provider"
-                        className="rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none"
-                        {...field}
-                      >
-                        <option value="">None</option>
-                        {organizations.map((org) => (
-                          <option key={org.id} value={org.id}>
-                            {org.name}
-                          </option>
-                        ))}
-                      </select>
+                      <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+                        <SelectTrigger id="receipt_provider">
+                          <SelectValue placeholder="Select provider" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">None</SelectItem>
+                          {organizations.map((org) => (
+                            <SelectItem key={org.id} value={String(org.id)}>
+                              {org.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

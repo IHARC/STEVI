@@ -46,6 +46,8 @@ export function ClientClaimForm({
 }: ClientClaimFormProps) {
   const [state, formAction] = useActionState(action, initialState);
   const [contactMethod, setContactMethod] = useState<ContactMethod>('email');
+  const [dobMonth, setDobMonth] = useState('');
+  const [dobYear, setDobYear] = useState('');
   const form = useForm({
     defaultValues: {
       next: nextPath,
@@ -166,8 +168,11 @@ export function ClientClaimForm({
             <div className="grid gap-1.5">
               <FormLabel htmlFor="dob_month">Birth month *</FormLabel>
               <Select
-                value={form.watch('dob_month')}
-                onValueChange={(value) => form.setValue('dob_month', value)}
+                value={dobMonth}
+                onValueChange={(value) => {
+                  setDobMonth(value);
+                  form.setValue('dob_month', value);
+                }}
               >
                 <SelectTrigger id="dob_month">
                   <SelectValue placeholder="Month" />
@@ -184,7 +189,13 @@ export function ClientClaimForm({
             </div>
             <div className="grid gap-1.5">
               <FormLabel htmlFor="dob_year">Birth year *</FormLabel>
-              <Select value={form.watch('dob_year')} onValueChange={(value) => form.setValue('dob_year', value)}>
+              <Select
+                value={dobYear}
+                onValueChange={(value) => {
+                  setDobYear(value);
+                  form.setValue('dob_year', value);
+                }}
+              >
                 <SelectTrigger id="dob_year">
                   <SelectValue placeholder="Year" />
                 </SelectTrigger>
@@ -224,8 +235,8 @@ export function ClientClaimForm({
               description="We’ll text a verification link. Only use this on a phone you control."
             />
           </RadioGroup>
-          <input type="hidden" {...form.register('dob_month')} value={form.watch('dob_month')} />
-          <input type="hidden" {...form.register('dob_year')} value={form.watch('dob_year')} />
+          <input type="hidden" {...form.register('dob_month')} value={dobMonth} />
+          <input type="hidden" {...form.register('dob_year')} value={dobYear} />
 
           {contactMethod === 'email' ? (
             <FormField

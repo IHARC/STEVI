@@ -92,8 +92,8 @@ export function QuickOutreachForm({
             <span className="rounded-full bg-border/10 px-2 py-px text-xs text-muted-foreground">N</span>
           </div>
 
-          <input type="hidden" name="person_id" value={form.watch('person_id')} readOnly />
-          {caseId ? <input type="hidden" name="case_id" value={form.watch('case_id') ?? ''} readOnly /> : null}
+          <input type="hidden" {...form.register('person_id')} readOnly />
+          {caseId ? <input type="hidden" {...form.register('case_id')} readOnly /> : null}
 
           <div className="grid gap-3 sm:grid-cols-2">
             <FormField

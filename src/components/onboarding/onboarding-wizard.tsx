@@ -1,5 +1,7 @@
 'use client';
 
+/* eslint-disable react-hooks/incompatible-library */
+
 import { useEffect, useMemo, type ReactNode } from 'react';
 import { useFormState, useFormStatus } from 'react-dom';
 import { useForm } from 'react-hook-form';

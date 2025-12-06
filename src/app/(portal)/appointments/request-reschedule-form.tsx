@@ -46,7 +46,7 @@ export function RequestRescheduleForm({ action, appointmentId }: RequestReschedu
         action={action as unknown as (formData: FormData) => Promise<void>}
         className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center"
       >
-        <input type="hidden" name="appointment_id" value={form.watch('appointment_id')} />
+        <input type="hidden" {...form.register('appointment_id')} />
         <FormField
           control={form.control}
           name="requested_window"

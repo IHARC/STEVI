@@ -106,15 +106,16 @@ export function ProfileSearch({
             <p className="text-sm text-muted-foreground">No matches.</p>
           ) : (
             items.map((item) => (
-              <button
+              <Button
                 type="button"
                 key={item.id}
-                className="flex w-full items-center justify-between rounded-md px-3 py-1 text-left text-sm transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                variant="ghost"
+                className="flex w-full items-center justify-between px-3 py-1 text-left text-sm"
                 onClick={() => setSelectedId(item.id)}
               >
                 <span className="text-foreground">{item.label}</span>
                 <span className="text-xs text-foreground/60">{item.id.slice(0, 8)}</span>
-              </button>
+              </Button>
             ))
           )}
           <p className="text-xs text-muted-foreground">Selected: {summary}</p>

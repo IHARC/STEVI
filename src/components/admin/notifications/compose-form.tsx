@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/components/ui/use-toast';
 import { sendNotificationAction } from '@/app/(portal)/admin/notifications/actions';
 import type { NotificationRecipient } from './types';
@@ -268,13 +269,12 @@ export function ComposeNotificationForm({ recipients, hasAlertsSecret }: Compose
           </Label>
 
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <label className="flex items-center gap-1 text-xs text-muted-foreground">
-              <input
-                type="checkbox"
+            <label className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Checkbox
                 checked={isTestSend}
-                onChange={(event) => setIsTestSend(event.target.checked)}
-                className="h-4 w-4 rounded border border-border"
+                onCheckedChange={(value) => setIsTestSend(Boolean(value))}
                 disabled={isPending}
+                aria-label="Toggle test send"
               />
               <span>Test send (uses templates; requires secret)</span>
             </label>

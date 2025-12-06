@@ -6,6 +6,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/components/ui/use-toast';
 import { toggleRoleAction, updateProfileAction } from './actions';
 import type { AdminUserListItem } from '@/lib/admin-users';
@@ -130,12 +131,11 @@ function RoleToggle({ label, checked, onChange, disabled }: RoleToggleProps) {
   return (
     <label className="flex items-center justify-between gap-3 rounded-xl border border-border/15 bg-background px-3 py-1 text-sm text-foreground">
       <span>{label}</span>
-      <input
-        type="checkbox"
-        className="h-4 w-4 rounded border border-border"
+      <Checkbox
         checked={checked}
-        onChange={(event) => onChange(event.target.checked)}
+        onCheckedChange={(value) => onChange(Boolean(value))}
         disabled={disabled}
+        aria-label={label}
       />
     </label>
   );
