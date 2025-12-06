@@ -1,7 +1,8 @@
 'use client';
 
-import { useMemo, useState, useTransition } from 'react';
+import { useEffect, useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -13,8 +14,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
@@ -320,6 +321,53 @@ function ItemDialog({
   open,
   onOpenChange,
 }: ItemDialogProps) {
+  const form = useForm<{
+    actor_profile_id: string;
+    item_id?: string;
+    name: string;
+    category: string;
+    unit_type: string;
+    supplier: string;
+    minimum_threshold: string;
+    cost_per_unit: string;
+    description: string;
+    initial_stock: string;
+    initial_location_id: string;
+    active: boolean;
+  }>({
+    defaultValues: {
+      actor_profile_id: actorProfileId,
+      item_id: defaultValues?.id,
+      name: defaultValues?.name ?? '',
+      category: defaultValues?.category ?? '',
+      unit_type: defaultValues?.unitType ?? '',
+      supplier: defaultValues?.supplier ?? '',
+      minimum_threshold: defaultValues?.minimumThreshold?.toString() ?? '',
+      cost_per_unit: defaultValues?.costPerUnit?.toString() ?? '',
+      description: defaultValues?.description ?? '',
+      initial_stock: '',
+      initial_location_id: '',
+      active: defaultValues?.active ?? true,
+    },
+  });
+
+  useEffect(() => {
+    form.reset({
+      actor_profile_id: actorProfileId,
+      item_id: defaultValues?.id,
+      name: defaultValues?.name ?? '',
+      category: defaultValues?.category ?? '',
+      unit_type: defaultValues?.unitType ?? '',
+      supplier: defaultValues?.supplier ?? '',
+      minimum_threshold: defaultValues?.minimumThreshold?.toString() ?? '',
+      cost_per_unit: defaultValues?.costPerUnit?.toString() ?? '',
+      description: defaultValues?.description ?? '',
+      initial_stock: '',
+      initial_location_id: '',
+      active: defaultValues?.active ?? true,
+    });
+  }, [actorProfileId, defaultValues, form]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-xl">
@@ -329,132 +377,198 @@ function ItemDialog({
             Provide descriptive names and categories so outreach staff can find items quickly across locations.
           </DialogDescription>
         </DialogHeader>
-        <form action={onSubmit} className="space-y-4">
-          <input type="hidden" name="actor_profile_id" value={actorProfileId} />
-          {defaultValues ? <input type="hidden" name="item_id" value={defaultValues.id} /> : null}
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Name" name="name" defaultValue={defaultValues?.name} required />
-            <div className="grid gap-2">
-              <Label htmlFor="item_category">Category</Label>
-              <input list="inventory-categories" name="category" id="item_category" defaultValue={defaultValues?.category ?? ''} required className="rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none" />
-              <datalist id="inventory-categories">
-                {categories.map((category) => (
-                  <option key={category} value={category} />
-                ))}
-              </datalist>
-            </div>
-            <Field label="Unit type" name="unit_type" defaultValue={defaultValues?.unitType} required />
-            <Field label="Supplier" name="supplier" defaultValue={defaultValues?.supplier ?? ''} />
-          </div>
+        <Form {...form}>
+          <form action={onSubmit} className="space-y-4">
+            <input type="hidden" {...form.register('actor_profile_id')} />
+            {defaultValues ? <input type="hidden" {...form.register('item_id')} /> : null}
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field
-              label="Minimum threshold"
-              name="minimum_threshold"
-              type="number"
-              min={0}
-              defaultValue={defaultValues?.minimumThreshold ?? ''}
-              placeholder="Optional"
-            />
-            <Field
-              label="Unit cost"
-              name="cost_per_unit"
-              type="number"
-              min={0}
-              step="0.01"
-              defaultValue={defaultValues?.costPerUnit ?? ''}
-              placeholder="Optional"
-            />
-          </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="item_description">Description</Label>
-            <Textarea
-              id="item_description"
-              name="description"
-              rows={3}
-              defaultValue={defaultValues?.description ?? ''}
-              placeholder="Optional context for outreach staff"
-            />
-          </div>
-
-          {!defaultValues ? (
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field
-                label="Initial stock"
-                name="initial_stock"
-                type="number"
-                min={0}
-                placeholder="0"
+              <FormField
+                control={form.control}
+                name="name"
+                rules={{ required: 'Name is required' }}
+                render={({ field }) => (
+                  <FormItem className="grid gap-2">
+                    <FormLabel htmlFor="name">Name</FormLabel>
+                    <FormControl>
+                      <Input id="name" required {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              <div className="grid gap-2">
-                <Label htmlFor="initial_location_id">Initial location</Label>
-                <Select name="initial_location_id">
-                  <SelectTrigger id="initial_location_id">
-                    <SelectValue placeholder="Select location" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">None</SelectItem>
-                    {locations.map((location) => (
-                      <SelectItem key={location.id} value={location.id}>
-                        {location.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground">Required if you record initial stock above zero.</p>
-              </div>
+              <FormField
+                control={form.control}
+                name="category"
+                rules={{ required: 'Category is required' }}
+                render={({ field }) => (
+                  <FormItem className="grid gap-2">
+                    <FormLabel htmlFor="item_category">Category</FormLabel>
+                    <FormControl>
+                      <input
+                        list="inventory-categories"
+                        id="item_category"
+                        className="rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none"
+                        required
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                    <datalist id="inventory-categories">
+                      {categories.map((category) => (
+                        <option key={category} value={category} />
+                      ))}
+                    </datalist>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="unit_type"
+                rules={{ required: 'Unit type is required' }}
+                render={({ field }) => (
+                  <FormItem className="grid gap-2">
+                    <FormLabel htmlFor="unit_type">Unit type</FormLabel>
+                    <FormControl>
+                      <Input id="unit_type" required {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="supplier"
+                render={({ field }) => (
+                  <FormItem className="grid gap-2">
+                    <FormLabel htmlFor="supplier">Supplier</FormLabel>
+                    <FormControl>
+                      <Input id="supplier" {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
             </div>
-          ) : null}
 
-          <div className="flex items-center gap-2">
-            <Checkbox
-              id="item_active"
-              name="active"
-              defaultChecked={defaultValues?.active ?? true}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="minimum_threshold"
+                render={({ field }) => (
+                  <FormItem className="grid gap-2">
+                    <FormLabel htmlFor="minimum_threshold">Minimum threshold</FormLabel>
+                    <FormControl>
+                      <Input id="minimum_threshold" type="number" min={0} placeholder="Optional" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="cost_per_unit"
+                render={({ field }) => (
+                  <FormItem className="grid gap-2">
+                    <FormLabel htmlFor="cost_per_unit">Unit cost</FormLabel>
+                    <FormControl>
+                      <Input id="cost_per_unit" type="number" min={0} step="0.01" placeholder="Optional" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem className="grid gap-2">
+                  <FormLabel htmlFor="item_description">Description</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      id="item_description"
+                      rows={3}
+                      placeholder="Optional context for outreach staff"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            <Label htmlFor="item_active" className="text-sm text-muted-foreground">
-              Item is active in operations
-            </Label>
-          </div>
 
-          <DialogFooter className="pt-4">
-            <Button type="submit" disabled={isPending}>
-              {actionLabel}
-            </Button>
-          </DialogFooter>
-        </form>
+            {!defaultValues ? (
+              <div className="grid gap-4 sm:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="initial_stock"
+                  render={({ field }) => (
+                    <FormItem className="grid gap-2">
+                      <FormLabel htmlFor="initial_stock">Initial stock</FormLabel>
+                      <FormControl>
+                        <Input id="initial_stock" type="number" min={0} placeholder="0" {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="initial_location_id"
+                  render={({ field }) => (
+                    <FormItem className="grid gap-2">
+                      <FormLabel htmlFor="initial_location_id">Initial location</FormLabel>
+                      <FormControl>
+                        <Select value={field.value} onValueChange={field.onChange} name="initial_location_id">
+                          <SelectTrigger id="initial_location_id">
+                            <SelectValue placeholder="Select location" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">None</SelectItem>
+                            {locations.map((location) => (
+                              <SelectItem key={location.id} value={location.id}>
+                                {location.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <p className="text-xs text-muted-foreground">Required if you record initial stock above zero.</p>
+                    </FormItem>
+                  )}
+                />
+              </div>
+            ) : null}
+
+            <FormField
+              control={form.control}
+              name="active"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center gap-2">
+                  <input type="hidden" name="active" value={field.value ? 'on' : ''} />
+                  <FormControl>
+                    <Checkbox
+                      id="item_active"
+                      checked={field.value}
+                      onCheckedChange={(checked) => field.onChange(Boolean(checked))}
+                    />
+                  </FormControl>
+                  <FormLabel htmlFor="item_active" className="text-sm font-normal text-muted-foreground">
+                    Item is active in operations
+                  </FormLabel>
+                </FormItem>
+              )}
+            />
+
+            <DialogFooter className="pt-4">
+              <Button type="submit" disabled={isPending}>
+                {actionLabel}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
-  );
-}
-
-type FieldProps = {
-  label: string;
-  name: string;
-  defaultValue?: string | number | null;
-  placeholder?: string;
-  type?: string;
-  required?: boolean;
-  min?: number;
-  step?: string;
-};
-
-function Field({ label, name, defaultValue, placeholder, type = 'text', required, min, step }: FieldProps) {
-  return (
-    <div className="grid gap-2">
-      <Label htmlFor={name}>{label}</Label>
-      <Input
-        id={name}
-        name={name}
-        type={type}
-        defaultValue={defaultValue ?? ''}
-        placeholder={placeholder}
-        required={required}
-        min={min}
-        step={step}
-      />
-    </div>
   );
 }
 
@@ -469,6 +583,47 @@ type ReceiveStockDialogProps = {
 };
 
 function ReceiveStockDialog({ item, locations, organizations, onSubmit, onClose, actorProfileId, isPending }: ReceiveStockDialogProps) {
+  const form = useForm<{
+    actor_profile_id: string;
+    item_id: string;
+    quantity: string;
+    unit_cost: string;
+    location_id: string;
+    source_type: string;
+    provider_org_id: string;
+    lot_number: string;
+    expiry_date: string;
+    notes: string;
+  }>({
+    defaultValues: {
+      actor_profile_id: actorProfileId,
+      item_id: item?.id ?? '',
+      quantity: '',
+      unit_cost: '',
+      location_id: '',
+      source_type: '',
+      provider_org_id: '',
+      lot_number: '',
+      expiry_date: DATE_PLACEHOLDER,
+      notes: '',
+    },
+  });
+
+  useEffect(() => {
+    form.reset({
+      actor_profile_id: actorProfileId,
+      item_id: item?.id ?? '',
+      quantity: '',
+      unit_cost: '',
+      location_id: '',
+      source_type: '',
+      provider_org_id: '',
+      lot_number: '',
+      expiry_date: DATE_PLACEHOLDER,
+      notes: '',
+    });
+  }, [actorProfileId, form, item]);
+
   return (
     <Dialog open={Boolean(item)} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-lg">
@@ -479,77 +634,168 @@ function ReceiveStockDialog({ item, locations, organizations, onSubmit, onClose,
           </DialogDescription>
         </DialogHeader>
         {item ? (
-          <form action={onSubmit} className="space-y-4">
-            <input type="hidden" name="actor_profile_id" value={actorProfileId} />
-            <input type="hidden" name="item_id" value={item.id} />
-            <div className="space-y-1">
-              <Label>Item</Label>
-              <p className="text-sm font-medium text-foreground">{item.name}</p>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Quantity" name="quantity" type="number" min={0} required placeholder="0" />
-              <Field label="Unit cost" name="unit_cost" type="number" min={0} step="0.01" placeholder="0.00" />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="receive_location">Location</Label>
-              <Select name="location_id" required>
-                <SelectTrigger id="receive_location">
-                  <SelectValue placeholder="Select location" />
-                </SelectTrigger>
-                <SelectContent>
-                  {locations.map((location) => (
-                    <SelectItem key={location.id} value={location.id}>
-                      {location.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="receive_source">Source type</Label>
-              <Select name="source_type">
-                <SelectTrigger id="receive_source">
-                  <SelectValue placeholder="Select source" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">None</SelectItem>
-                  <SelectItem value="donation">Donation</SelectItem>
-                  <SelectItem value="purchase">Purchase</SelectItem>
-                  <SelectItem value="transfer_in">Transfer in</SelectItem>
-                  <SelectItem value="adjustment">Adjustment</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="provider_org">Provider organisation</Label>
-              <Select name="provider_org_id">
-                <SelectTrigger id="provider_org">
-                  <SelectValue placeholder="None" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">None</SelectItem>
-                  {organizations.map((org) => (
-                    <SelectItem key={org.id} value={String(org.id)}>
-                      {org.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Lot number" name="lot_number" placeholder="Optional" />
-              <Field label="Expiry date" name="expiry_date" type="date" defaultValue={DATE_PLACEHOLDER} />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="receive_notes">Notes</Label>
-              <Textarea id="receive_notes" name="notes" rows={3} placeholder="Optional context" />
-            </div>
-            <DialogFooter className="pt-4">
-              <Button type="submit" disabled={isPending}>
-                Record receipt
-              </Button>
-            </DialogFooter>
-          </form>
+          <Form {...form}>
+            <form action={onSubmit} className="space-y-4">
+              <input type="hidden" {...form.register('actor_profile_id')} />
+              <input type="hidden" {...form.register('item_id')} />
+
+              <div className="space-y-1">
+                <FormLabel>Item</FormLabel>
+                <p className="text-sm font-medium text-foreground">{item.name}</p>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="quantity"
+                  rules={{ required: 'Quantity is required' }}
+                  render={({ field }) => (
+                    <FormItem className="grid gap-2">
+                      <FormLabel htmlFor="quantity">Quantity</FormLabel>
+                      <FormControl>
+                        <Input id="quantity" type="number" min={0} required placeholder="0" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="unit_cost"
+                  render={({ field }) => (
+                    <FormItem className="grid gap-2">
+                      <FormLabel htmlFor="unit_cost">Unit cost</FormLabel>
+                      <FormControl>
+                        <Input id="unit_cost" type="number" min={0} step="0.01" placeholder="0.00" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="location_id"
+                rules={{ required: 'Choose a location' }}
+                render={({ field }) => (
+                  <FormItem className="grid gap-2">
+                    <FormLabel htmlFor="receive_location">Location</FormLabel>
+                    <FormControl>
+                      <Select value={field.value} onValueChange={field.onChange} name="location_id" required>
+                        <SelectTrigger id="receive_location">
+                          <SelectValue placeholder="Select location" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {locations.map((location) => (
+                            <SelectItem key={location.id} value={location.id}>
+                              {location.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="source_type"
+                render={({ field }) => (
+                  <FormItem className="grid gap-2">
+                    <FormLabel htmlFor="receive_source">Source type</FormLabel>
+                    <FormControl>
+                      <Select value={field.value} onValueChange={field.onChange} name="source_type">
+                        <SelectTrigger id="receive_source">
+                          <SelectValue placeholder="Select source" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">None</SelectItem>
+                          <SelectItem value="donation">Donation</SelectItem>
+                          <SelectItem value="purchase">Purchase</SelectItem>
+                          <SelectItem value="transfer_in">Transfer in</SelectItem>
+                          <SelectItem value="adjustment">Adjustment</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="provider_org_id"
+                render={({ field }) => (
+                  <FormItem className="grid gap-2">
+                    <FormLabel htmlFor="provider_org">Provider organization</FormLabel>
+                    <FormControl>
+                      <Select value={field.value} onValueChange={field.onChange} name="provider_org_id">
+                        <SelectTrigger id="provider_org">
+                          <SelectValue placeholder="None" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">None</SelectItem>
+                          {organizations.map((org) => (
+                            <SelectItem key={org.id} value={String(org.id)}>
+                              {org.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="lot_number"
+                  render={({ field }) => (
+                    <FormItem className="grid gap-2">
+                      <FormLabel htmlFor="lot_number">Lot number</FormLabel>
+                      <FormControl>
+                        <Input id="lot_number" placeholder="Optional" {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="expiry_date"
+                  render={({ field }) => (
+                    <FormItem className="grid gap-2">
+                      <FormLabel htmlFor="expiry_date">Expiry date</FormLabel>
+                      <FormControl>
+                        <Input id="expiry_date" type="date" {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem className="grid gap-2">
+                    <FormLabel htmlFor="receive_notes">Notes</FormLabel>
+                    <FormControl>
+                      <Textarea id="receive_notes" rows={3} placeholder="Optional context" {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <DialogFooter className="pt-4">
+                <Button type="submit" disabled={isPending}>
+                  Record receipt
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
         ) : null}
       </DialogContent>
     </Dialog>
@@ -566,6 +812,35 @@ type TransferStockDialogProps = {
 };
 
 function TransferStockDialog({ item, locations, onSubmit, onClose, actorProfileId, isPending }: TransferStockDialogProps) {
+  const form = useForm<{
+    actor_profile_id: string;
+    item_id: string;
+    quantity: string;
+    from_location_id: string;
+    to_location_id: string;
+    notes: string;
+  }>({
+    defaultValues: {
+      actor_profile_id: actorProfileId,
+      item_id: item?.id ?? '',
+      quantity: '',
+      from_location_id: '',
+      to_location_id: '',
+      notes: '',
+    },
+  });
+
+  useEffect(() => {
+    form.reset({
+      actor_profile_id: actorProfileId,
+      item_id: item?.id ?? '',
+      quantity: '',
+      from_location_id: '',
+      to_location_id: '',
+      notes: '',
+    });
+  }, [actorProfileId, form, item]);
+
   return (
     <Dialog open={Boolean(item)} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-lg">
@@ -574,25 +849,99 @@ function TransferStockDialog({ item, locations, onSubmit, onClose, actorProfileI
           <DialogDescription>Move stock from one location to another.</DialogDescription>
         </DialogHeader>
         {item ? (
-          <form action={onSubmit} className="space-y-4">
-            <input type="hidden" name="actor_profile_id" value={actorProfileId} />
-            <input type="hidden" name="item_id" value={item.id} />
-            <div className="space-y-1">
-              <Label>Item</Label>
-              <p className="text-sm font-medium text-foreground">{item.name}</p>
-            </div>
-            <Field label="Quantity" name="quantity" type="number" min={0} required placeholder="0" />
-            <div className="grid gap-4 sm:grid-cols-2">
-              <SelectField label="From" name="from_location_id" locations={locations} required />
-              <SelectField label="To" name="to_location_id" locations={locations} required />
-            </div>
-            <Field label="Notes" name="notes" placeholder="Optional" />
-            <DialogFooter className="pt-4">
-              <Button type="submit" disabled={isPending}>
-                Transfer
-              </Button>
-            </DialogFooter>
-          </form>
+          <Form {...form}>
+            <form action={onSubmit} className="space-y-4">
+              <input type="hidden" {...form.register('actor_profile_id')} />
+              <input type="hidden" {...form.register('item_id')} />
+              <div className="space-y-1">
+                <FormLabel>Item</FormLabel>
+                <p className="text-sm font-medium text-foreground">{item.name}</p>
+              </div>
+              <FormField
+                control={form.control}
+                name="quantity"
+                rules={{ required: 'Quantity is required' }}
+                render={({ field }) => (
+                  <FormItem className="grid gap-2">
+                    <FormLabel htmlFor="quantity_transfer">Quantity</FormLabel>
+                    <FormControl>
+                      <Input id="quantity_transfer" type="number" min={0} required placeholder="0" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="from_location_id"
+                  rules={{ required: 'Select a source location' }}
+                  render={({ field }) => (
+                    <FormItem className="grid gap-2">
+                      <FormLabel htmlFor="from_location_id">From</FormLabel>
+                      <FormControl>
+                        <Select value={field.value} onValueChange={field.onChange} name="from_location_id" required>
+                          <SelectTrigger id="from_location_id">
+                            <SelectValue placeholder="Select location" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {locations.map((location) => (
+                              <SelectItem key={location.id} value={location.id}>
+                                {location.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="to_location_id"
+                  rules={{ required: 'Select a destination' }}
+                  render={({ field }) => (
+                    <FormItem className="grid gap-2">
+                      <FormLabel htmlFor="to_location_id">To</FormLabel>
+                      <FormControl>
+                        <Select value={field.value} onValueChange={field.onChange} name="to_location_id" required>
+                          <SelectTrigger id="to_location_id">
+                            <SelectValue placeholder="Select location" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {locations.map((location) => (
+                              <SelectItem key={location.id} value={location.id}>
+                                {location.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem className="grid gap-2">
+                    <FormLabel htmlFor="transfer_notes">Notes</FormLabel>
+                    <FormControl>
+                      <Input id="transfer_notes" placeholder="Optional" {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <DialogFooter className="pt-4">
+                <Button type="submit" disabled={isPending}>
+                  Transfer
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
         ) : null}
       </DialogContent>
     </Dialog>
@@ -609,6 +958,35 @@ type AdjustStockDialogProps = {
 };
 
 function AdjustStockDialog({ item, locations, onSubmit, onClose, actorProfileId, isPending }: AdjustStockDialogProps) {
+  const form = useForm<{
+    actor_profile_id: string;
+    item_id: string;
+    location_id: string;
+    quantity_delta: string;
+    reason: string;
+    notes: string;
+  }>({
+    defaultValues: {
+      actor_profile_id: actorProfileId,
+      item_id: item?.id ?? '',
+      location_id: '',
+      quantity_delta: '',
+      reason: '',
+      notes: '',
+    },
+  });
+
+  useEffect(() => {
+    form.reset({
+      actor_profile_id: actorProfileId,
+      item_id: item?.id ?? '',
+      location_id: '',
+      quantity_delta: '',
+      reason: '',
+      notes: '',
+    });
+  }, [actorProfileId, form, item]);
+
   return (
     <Dialog open={Boolean(item)} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-lg">
@@ -617,61 +995,96 @@ function AdjustStockDialog({ item, locations, onSubmit, onClose, actorProfileId,
           <DialogDescription>Apply corrections for damaged or counted stock.</DialogDescription>
         </DialogHeader>
         {item ? (
-          <form action={onSubmit} className="space-y-4">
-            <input type="hidden" name="actor_profile_id" value={actorProfileId} />
-            <input type="hidden" name="item_id" value={item.id} />
-            <div className="space-y-1">
-              <Label>Item</Label>
-              <p className="text-sm font-medium text-foreground">{item.name}</p>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <SelectField label="Location" name="location_id" locations={locations} required />
-              <Field
-                label="Quantity adjustment"
-                name="quantity_delta"
-                type="number"
-                placeholder="Use negative numbers for reductions"
-                required
+          <Form {...form}>
+            <form action={onSubmit} className="space-y-4">
+              <input type="hidden" {...form.register('actor_profile_id')} />
+              <input type="hidden" {...form.register('item_id')} />
+              <div className="space-y-1">
+                <FormLabel>Item</FormLabel>
+                <p className="text-sm font-medium text-foreground">{item.name}</p>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="location_id"
+                  rules={{ required: 'Select a location' }}
+                  render={({ field }) => (
+                    <FormItem className="grid gap-2">
+                      <FormLabel htmlFor="adjust_location">Location</FormLabel>
+                      <FormControl>
+                        <Select value={field.value} onValueChange={field.onChange} name="location_id" required>
+                          <SelectTrigger id="adjust_location">
+                            <SelectValue placeholder="Select location" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {locations.map((location) => (
+                              <SelectItem key={location.id} value={location.id}>
+                                {location.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="quantity_delta"
+                  rules={{ required: 'Enter an adjustment amount' }}
+                  render={({ field }) => (
+                    <FormItem className="grid gap-2">
+                      <FormLabel htmlFor="quantity_delta">Quantity adjustment</FormLabel>
+                      <FormControl>
+                        <Input
+                          id="quantity_delta"
+                          type="number"
+                          placeholder="Use negative numbers for reductions"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <FormField
+                control={form.control}
+                name="reason"
+                rules={{ required: 'Add a reason' }}
+                render={({ field }) => (
+                  <FormItem className="grid gap-2">
+                    <FormLabel htmlFor="reason">Reason</FormLabel>
+                    <FormControl>
+                      <Input id="reason" placeholder="e.g., Damaged during transit" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <Field label="Reason" name="reason" placeholder="e.g., Damaged during transit" required />
-            <Field label="Notes" name="notes" placeholder="Optional" />
-            <DialogFooter className="pt-4">
-              <Button type="submit" disabled={isPending}>
-                Apply adjustment
-              </Button>
-            </DialogFooter>
-          </form>
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem className="grid gap-2">
+                    <FormLabel htmlFor="adjust_notes">Notes</FormLabel>
+                    <FormControl>
+                      <Input id="adjust_notes" placeholder="Optional" {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <DialogFooter className="pt-4">
+                <Button type="submit" disabled={isPending}>
+                  Apply adjustment
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
         ) : null}
       </DialogContent>
     </Dialog>
-  );
-}
-
-type SelectFieldProps = {
-  label: string;
-  name: string;
-  locations: InventoryLocation[];
-  required?: boolean;
-};
-
-function SelectField({ label, name, locations, required }: SelectFieldProps) {
-  return (
-    <div className="grid gap-2">
-      <Label htmlFor={name}>{label}</Label>
-      <Select name={name} required={required}>
-        <SelectTrigger id={name}>
-          <SelectValue placeholder="Select location" />
-        </SelectTrigger>
-        <SelectContent>
-          {locations.map((location) => (
-            <SelectItem key={location.id} value={location.id}>
-              {location.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
   );
 }
 
@@ -699,7 +1112,7 @@ function BulkReceiveDialog({ isPending, onSubmit, actorProfileId, items, locatio
       >
         <input type="hidden" name="actor_profile_id" value={actorProfileId} />
         <div className="grid gap-2">
-          <Label htmlFor="bulk_items_json">Receipts JSON</Label>
+          <FormLabel htmlFor="bulk_items_json">Receipts JSON</FormLabel>
           <Textarea
             id="bulk_items_json"
             name="items_json"

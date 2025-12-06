@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -13,8 +14,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/components/ui/use-toast';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -87,7 +88,7 @@ export function InventoryLocationsSection({ locations, actorProfileId, canManage
           <CardTitle className="text-base font-semibold">Locations</CardTitle>
           <p className="text-sm text-muted-foreground">Warehouses, outreach lockers, and mobile units that hold inventory.</p>
           {!canManageLocations ? (
-            <p className="text-xs text-warning-foreground">
+            <p className="text-xs text-amber-600">
               Viewing only: only IHARC admins can add or edit locations.
             </p>
           ) : null}
@@ -197,6 +198,38 @@ function LocationDialog({
   onOpenChange,
   canManageLocations,
 }: LocationDialogProps) {
+  const form = useForm<{
+    actor_profile_id: string;
+    location_id?: string;
+    name: string;
+    code: string;
+    type: string;
+    address: string;
+    active: boolean;
+  }>({
+    defaultValues: {
+      actor_profile_id: actorProfileId,
+      location_id: defaultValues?.id,
+      name: defaultValues?.name ?? '',
+      code: defaultValues?.code ?? '',
+      type: defaultValues?.type ?? '',
+      address: defaultValues?.address ?? '',
+      active: defaultValues?.active ?? true,
+    },
+  });
+
+  useEffect(() => {
+    form.reset({
+      actor_profile_id: actorProfileId,
+      location_id: defaultValues?.id,
+      name: defaultValues?.name ?? '',
+      code: defaultValues?.code ?? '',
+      type: defaultValues?.type ?? '',
+      address: defaultValues?.address ?? '',
+      active: defaultValues?.active ?? true,
+    });
+  }, [actorProfileId, defaultValues, form]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
@@ -204,61 +237,100 @@ function LocationDialog({
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>Track detailed addresses so deliveries and outreach staff know where supplies live.</DialogDescription>
         </DialogHeader>
-        <form action={onSubmit} className="space-y-4">
-          <input type="hidden" name="actor_profile_id" value={actorProfileId} />
-          {defaultValues ? <input type="hidden" name="location_id" value={defaultValues.id} /> : null}
-          <div className="grid gap-2">
-            <Label htmlFor="location_name">Name</Label>
-            <Input id="location_name" name="name" defaultValue={defaultValues?.name ?? ''} required disabled={!canManageLocations} />
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Code" name="code" defaultValue={defaultValues?.code ?? ''} placeholder="Short code" required disabled={!canManageLocations} />
-            <Field label="Type" name="type" defaultValue={defaultValues?.type ?? ''} placeholder="e.g., Warehouse" required disabled={!canManageLocations} />
-          </div>
-          <Field label="Address" name="address" defaultValue={defaultValues?.address ?? ''} placeholder="Street, city" disabled={!canManageLocations} />
-          <div className="flex items-center gap-2">
-            <Checkbox
-              id="location_active"
-              name="active"
-              defaultChecked={defaultValues?.active ?? true}
-              disabled={!canManageLocations}
+        <Form {...form}>
+          <form action={onSubmit} className="space-y-4">
+            <input type="hidden" {...form.register('actor_profile_id')} />
+            {defaultValues ? <input type="hidden" {...form.register('location_id')} /> : null}
+
+            <FormField
+              control={form.control}
+              name="name"
+              rules={{ required: 'Location name is required' }}
+              render={({ field }) => (
+                <FormItem className="grid gap-2">
+                  <FormLabel htmlFor="location_name">Name</FormLabel>
+                  <FormControl>
+                    <Input id="location_name" required disabled={!canManageLocations} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            <Label htmlFor="location_active" className="text-sm text-muted-foreground">
-              Location is active
-            </Label>
-          </div>
-          <DialogFooter>
-            <Button type="submit" disabled={isPending || !canManageLocations}>
-              {actionLabel}
-            </Button>
-          </DialogFooter>
-        </form>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="code"
+                rules={{ required: 'Code is required' }}
+                render={({ field }) => (
+                  <FormItem className="grid gap-2">
+                    <FormLabel htmlFor="code">Code</FormLabel>
+                    <FormControl>
+                      <Input id="code" placeholder="Short code" required disabled={!canManageLocations} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="type"
+                rules={{ required: 'Type is required' }}
+                render={({ field }) => (
+                  <FormItem className="grid gap-2">
+                    <FormLabel htmlFor="type">Type</FormLabel>
+                    <FormControl>
+                      <Input id="type" placeholder="e.g., Warehouse" required disabled={!canManageLocations} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="address"
+              render={({ field }) => (
+                <FormItem className="grid gap-2">
+                  <FormLabel htmlFor="address">Address</FormLabel>
+                  <FormControl>
+                    <Input id="address" placeholder="Street, city" disabled={!canManageLocations} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="active"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center gap-2">
+                  <input type="hidden" name="active" value={field.value ? 'on' : ''} />
+                  <FormControl>
+                    <Checkbox
+                      id="location_active"
+                      checked={field.value}
+                      onCheckedChange={(checked) => field.onChange(Boolean(checked))}
+                      disabled={!canManageLocations}
+                    />
+                  </FormControl>
+                  <FormLabel htmlFor="location_active" className="text-sm font-normal text-muted-foreground">
+                    Location is active
+                  </FormLabel>
+                </FormItem>
+              )}
+            />
+
+            <DialogFooter>
+              <Button type="submit" disabled={isPending || !canManageLocations}>
+                {actionLabel}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
-  );
-}
-
-type FieldProps = {
-  label: string;
-  name: string;
-  defaultValue?: string | null;
-  placeholder?: string;
-  required?: boolean;
-  disabled?: boolean;
-};
-
-function Field({ label, name, defaultValue, placeholder, required, disabled }: FieldProps) {
-  return (
-    <div className="grid gap-2">
-      <Label htmlFor={name}>{label}</Label>
-      <Input
-        id={name}
-        name={name}
-        defaultValue={defaultValue ?? ''}
-        placeholder={placeholder}
-        required={required}
-        disabled={disabled}
-      />
-    </div>
   );
 }

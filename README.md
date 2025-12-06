@@ -23,14 +23,14 @@ Environment variables (full notes in `docs/backend.md`):
 ## Tech Stack
 
 - Next.js 16 App Router with React Server Components (React 19)
-- TypeScript + Tailwind CSS with Material 3 tokens (`docs/design-tokens.md`), Radix primitives, shadcn-inspired wrappers, TipTap for rich text
+- TypeScript + Tailwind CSS with shadcn/ui tokens sourced from `src/styles/theme.css`, Radix primitives, and TipTap for rich text
 - Supabase Auth/Database/Edge Functions shared with the marketing portal (schemas: `portal`, `core`, `case_mgmt`, `inventory`, `donations`)
 - Vitest + Testing Library for unit coverage; Playwright for end-to-end flows
 - Azure App Service (Linux, Node 24) deployed via GitHub Actions (`.github/workflows/main_stevi.yml`); build entry `node build.js` runs lint + default Next build (Turbopack). Runtime uses the Next standalone output (`node .next/standalone/server.js`).
 
 ## Migration Status
 
-- ✅ Next.js scaffold, shared layout/providers, Material 3 tokens
+- ✅ Next.js scaffold, shared layout/providers, shadcn/ui tokens
 - ✅ Supabase clients (server + RSC), auth middleware, unified navigation config
 - ✅ Client portal shells: home, appointments, documents, cases, support, profile, consents (appointments/documents currently read from placeholders)
 - ✅ Admin tools: profiles/invites, resources, policies, notifications, marketing content, inventory, donations

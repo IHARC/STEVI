@@ -21,7 +21,7 @@
 
 ## Snapshot — 2025-12-03
 - Product: STEVI (Supportive Technology to Enable Vulnerable Individuals) operated by IHARC (Northumberland County, ON, Canada).
-- Stack: Next.js 16 (App Router + server actions, React 19), TypeScript, Tailwind with Material 3 tokens (`docs/design-tokens.md`), Radix primitives + shadcn-inspired wrappers, TipTap for rich text.
+- Stack: Next.js 16 (App Router + server actions, React 19), TypeScript, Tailwind with shadcn/ui tokens from `src/styles/theme.css`, Radix primitives, and TipTap for rich text.
 - Hosting/build: Azure App Service (Linux, Node 24). `npm run build` → `node build.js` (runs `eslint .`, forces webpack via `NEXT_FORCE_WEBPACK=1`, copies static into `.next/standalone/.next/static`). GitHub Actions `.github/workflows/main_stevi.yml` deploys via publish profiles; runtime start is `node .next/standalone/server.js`. Marketing app deploys separately but shares the Supabase project/env vars.
 - Auth/session: Supabase Auth via `@supabase/ssr` cookies. Use `createSupabaseServerClient` inside actions/route handlers to set cookies; `createSupabaseRSCClient` is read-only and warns if it would set cookies. Middleware `updateSession` keeps Supabase sessions fresh and applies security headers (CSP, HSTS, etc.). Most portal routes export `dynamic = 'force-dynamic'` to respect session + RLS.
 - Data & storage: Supabase schemas in active use: `portal`, `core`, `case_mgmt`, `inventory`, `donations`. Key portal tables: `profiles`, `profile_invites`, `profile_contacts`, `registration_flows`, `public_settings`, `resource_pages`, `policies`, `notifications`, `appointments`, `audit_log`. Storage bucket `portal-attachments` powers the document locker. Edge Functions: `portal-alerts` (optional via `PORTAL_ALERTS_SECRET`) and `portal-admin-invite` (used for invites).
@@ -50,7 +50,7 @@
   2. Add the link under the correct section/group in `portal-navigation.ts` with `requires` guards.
   3. Guard the page/server action with the same capability check and ensure Supabase RLS enforces it.
   4. Add cache invalidation/tagging as needed and update tests.
-  5. Keep UI consistent with Material 3 tokens and shared components.
+ 5. Keep UI consistent with the shared shadcn token theme and shared components.
 
 ## Current surface status
 - **Client portal**: Home/support/profile/consents/cases are live and wired to Supabase (`core.people`, `case_mgmt.case_management`, grants, activities). Appointments are backed by `portal.appointments` (request/reschedule/cancel flows audit + revalidate). Documents read from the `portal-attachments` bucket with 30‑minute signed URLs. Support composer queues notifications via `portal_queue_notification` + audit. Messages page is a placeholder; Home “focus areas” are static copy only.
@@ -71,7 +71,7 @@
 - Use `createSupabaseServerClient` inside actions/route handlers to set auth cookies; the RSC client is read-only and should not set cookies.
 - Keep routes dynamic unless truly static. Do not fetch roles client-side—pass `PortalAccess` down.
 - Respect RLS and consent: verify policies with Supabase MCP before shipping; UI hiding is not security.
-- Design system: stick to Material 3 tokens and shared components; avoid ad-hoc colors/spacing. Regenerate tokens with `npm run sync:tokens` after updating `tokens/material3.json`.
+- Design system: stick to the shadcn token set in `src/styles/theme.css` and shared components; avoid ad-hoc colors/spacing.
 - Notifications/alerts: send via `queuePortalNotification`; include `PORTAL_ALERTS_SECRET` locally only if you need to exercise the Edge Function.
 - Testing: `npm run lint`, `npm run typecheck`, `npm run test` (Vitest), `npm run e2e` (Playwright). Few tests exist—add coverage when touching flows.
 - Build/deploy: run `node build.js` (lints then builds with webpack + standalone output). Azure App Service consumes the generated `.next/standalone` output.

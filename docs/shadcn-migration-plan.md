@@ -1,81 +1,79 @@
-# shadcn/ui Cutover Plan (Single Pass, No Fallbacks)
+# shadcn/ui Migration + Remediation Plan (No Fallbacks)
 
-Purpose: enable a fresh Codex instance to migrate this codebase to shadcn/ui in one execution, removing all legacy UI and tokens. No dual systems, no back-compat.
+Purpose: Equip a fresh Codex run to finish the shadcn/ui cutover, fix the audit gaps, and leave zero legacy styling or components. No dual systems, no backward compatibility.
 
-## Repo context
-- Current global CSS: `src/styles/main.css` (Material 3 tokens + utilities).
-- Global layout: `src/app/layout.tsx` imports `@/styles/main.css` and uses `ThemeProvider` + `Toaster`.
-- Key shells: `src/components/layout/top-nav.tsx`, `src/components/shells/app-shell.tsx`, `src/components/layout/page-header.tsx`, sidebar in `src/components/layout/app-navigation.tsx`.
-- Legacy UI primitives live in `src/components/ui/*.tsx` (Button, Card, Badge, StatTile, etc.).
-- Tokens file: `tokens/material3.json`.
+## Progress snapshot (Dec 6, 2025)
+- ✅ Tailwind/theme: custom shadows removed; tokens consolidated in `src/styles/theme.css`.
+- ✅ Auth + profile security forms on shadcn `Form`: login, reset/update password, profile contact/password.
+- ✅ Admin/org/support forms on shadcn `Form`: inventory items/locations/organizations/receipts dialogs, org settings (contact/notes), support composer sheet, website footer form.
+- ✅ Sidebar navigation rebuilt on shadcn `navigation-menu` primitives.
+- ✅ Token/docs cleanup: README/agents updated; `docs/design-tokens.md` rewritten for shadcn; Material references removed.
+- ✅ Playwright baseline added (`playwright.config.ts`, `playwright/tests/baseline.spec.ts`).
+- ✅ Legacy utility cleanup: `tracking-label-uppercase`, `text-error`, `border-error`, `text-warning-foreground` removed where found.
+- ⬜ Forms still to migrate to shadcn `Form`: onboarding wizard; all registration flows (client intake/claim, partner, volunteer, community, concern report); appointments request/cancel/reschedule; marketing forms; quick outreach; org invites; documents list; any remaining raw forms in `rg "<form" src` not yet converted.
+- ⬜ Top navigation (TopNav) needs `navigation-menu` treatment and removal of bespoke styling.
+- ⬜ Final sweep for legacy utility classes and any bespoke modals/tables/breadcrumbs outside `@/components/ui`.
+- ⬜ Testing: run `npm run lint`, `npm run typecheck`, `npm run test`, `npm run e2e` (Playwright snapshots) and fix issues.
 
-## 0) Preconditions
-- `npm install` succeeds.
-- You can run `npm run lint` and tests locally.
+## Repo snapshot
+- Global tokens/styles: `src/styles/theme.css` only. No `main.css`, no Material token files.
+- Tailwind: `tailwind.config.ts` already points to `src/app`, `src/components`, `src/hooks`, `src/lib`, `src/content` globs.
+- UI primitives: generated under `src/components/ui/` with barrel `index.ts`; `Toaster` mounted in `src/app/layout.tsx`.
+- ESLint blocks legacy imports (`@/components/ui-legacy/*`, `@/styles/main.css`).
 
-## 1) Initialize shadcn/ui
-```bash
-npx shadcn@latest init
-# Choices: TypeScript, Tailwind, RSC support = yes, alias = @/
-```
-- Update `tailwind.config.ts` content globs to include: `./src/app/**/*.{ts,tsx}`, `./src/components/**/*.{ts,tsx}`, `./src/lib/**/*.{ts,tsx}`, and any `./src/content/**/*.{md,mdx}`.
-- Add/keep `@/lib/utils` `cn` from shadcn template; remove other `cn` helpers.
+## Pre-flight
+1) `npm install`
+2) `npm run lint` and `npm run typecheck` (must pass before code changes ship).
 
-## 2) Generate primitives (one command)
-```bash
-npx shadcn@latest add \
-  button input label textarea select checkbox radio-group switch badge avatar skeleton tooltip popover dialog drawer \
-  tabs card separator scroll-area sheet dropdown-menu menubar accordion breadcrumb alert toast sonner table \
-  navigation-menu command form
-```
-- Output: `src/components/ui/*`. Create `src/components/ui/index.ts` that re-exports all generated components.
+## 1) Theme + Tailwind alignment
+- Keep tokens in `src/styles/theme.css`; do **not** reintroduce Material token files.
+- Normalize Tailwind extensions to shadcn defaults: remove custom `boxShadow` overrides unless matching the shadcn template; keep radius + color variables from `theme.css`.
+- Fonts: continue `next/font` in `src/app/layout.tsx` mapping to `--font-sans`/`--font-mono` (and optional heading/body vars).
 
-## 3) Theme setup
-- Add `src/styles/theme.css` from shadcn template.
-- In `src/app/layout.tsx`, replace `import '@/styles/main.css'` with `import '@/styles/theme.css'` (and any minimal global resets you keep).
-- In `tailwind.config.ts`, switch to shadcn token usage (`--background`, `--primary`, radius, shadow defaults). Delete custom color/shadow maps copied from Material 3.
-- Set fonts via `next/font` and map to CSS vars in `theme.css`.
-- Keep existing `ThemeProvider` if desired; otherwise swap to the shadcn `ThemeProvider` pattern (next-themes) for dark/light based on tokens.
+## 2) Purge legacy utility classes
+- Search/replace any Material-era classes with shadcn tokens/utilities:
+  - `tracking-label-uppercase` → `tracking-wide uppercase text-xs font-semibold` (or equivalent semantic utility).
+  - `text-error`, `border-error`, `text-warning-foreground`, `bg-error*`, etc. → use shadcn semantic colors (`text-destructive`, `text-amber-600`, `border-destructive`, `bg-destructive/10`, etc.) defined in `theme.css`.
+- Verify replacements in: `src/components/auth/login-form.tsx`, `src/app/(portal)/profile/page.tsx`, `src/components/admin/inventory/inventory-locations.tsx`, `src/app/(portal)/home/page.tsx`, and any other matches from `rg`.
+- After replacements, ensure no custom color names remain; only shadcn token-driven utilities should be used.
 
-## 4) Remove legacy tokens/CSS
-- Delete `tokens/material3.json`.
-- Strip Material token blocks and unused utilities from `src/styles/main.css`. If no resets are needed, delete the file entirely; otherwise keep only the resets and ensure it is **not** imported.
+## 3) Forms: adopt shadcn `Form`
+- Standardize on `@/components/ui/form` + `react-hook-form` for all interactive forms that render client-side UI feedback. Replace raw `<form>`/manual field markup with `Form`, `FormField`, `FormItem`, `FormLabel`, `FormControl`, `FormMessage`.
+- Prioritize: auth forms (`src/components/auth/login-form.tsx`, reset/update password), onboarding forms, inventory CRUD dialogs, admin/org settings, registration flows.
+- Remove dead code if any custom form helpers become unused.
 
-## 5) Primitive swap (mechanical)
-- Replace all imports of legacy primitives (`Button`, `Card`, `Badge`, `Skeleton`, inputs, switches, etc.) with shadcn equivalents across `src`.
-- Delete old primitive files after replacement: `src/components/ui/button.tsx`, `card.tsx`, `badge.tsx`, `stat-tile.tsx`, etc.
+## 4) Navigation shell rebuild
+- Rebuild sidebar and top navigation using shadcn primitives:
+  - Use `@/components/ui/navigation-menu` for desktop navigation; ensure focus styles match tokens.
+  - Mobile nav stays sheet-based but keep Sheet content built from the same navigation-menu data.
+- Apply to `src/components/layout/app-navigation.tsx` and `src/components/layout/top-nav.tsx`; remove bespoke `Link` list styling and any legacy scrollbar CSS.
 
-## 6) Shell rebuild (specific files)
-- `src/components/layout/top-nav.tsx`: refactor using shadcn `navigation-menu`, `dropdown-menu`, `sheet`, `button`, `avatar`, `command`.
-- `src/components/layout/app-navigation.tsx`: rebuild sidebar with shadcn `navigation-menu` + `scroll-area`; remove custom scrollbar CSS.
-- `src/components/shells/app-shell.tsx`: ensure containers use shadcn cards/buttons where applicable.
-- `src/components/layout/page-header.tsx`: rebuild with shadcn `breadcrumb`, `button`, `badge`.
+## 5) Overlays & feedback
+- Ensure all modals/drawers use shadcn `Dialog`/`Drawer`/`Sheet` components (already present in many files). Confirm no third-party or legacy modal code remains.
+- Toasts: keep Sonner Toaster in `src/app/layout.tsx`; all toast calls should come from `@/components/ui/use-toast`.
+- Alerts: use `@/components/ui/alert` for inline statuses and empty states.
 
-## 7) Overlays & feedback
-- Replace all modals/drawers with shadcn `Dialog`/`Drawer`.
-- Replace toast usage with shadcn `toast` and `Sonner` provider from `ui/sonner` mounted in `src/app/layout.tsx` (remove old `Toaster` import/usage).
-- Use shadcn `Alert` for inline status/empty states.
+## 6) Data display widgets
+- Tables: all tables should use `@/components/ui/table`. Replace any raw `<table>` markup if found.
+- Tabs/Accordion: use shadcn `Tabs`/`Accordion` components only.
+- Breadcrumbs: keep `@/components/ui/breadcrumb` in page headers; remove any custom breadcrumb logic elsewhere.
+- Charts: keep `ui/chart` composition but ensure it reads colors from CSS vars (already does).
 
-## 8) Data display & navigation widgets
-- Replace simple tables with shadcn `Table`; wrap complex grids with shadcn tokens for row/header styling.
-- Swap Tabs/Accordion to shadcn versions.
-- Add shadcn `Breadcrumb` in page headers; remove custom breadcrumb logic.
-- Use shadcn `Form` (react-hook-form adapter) for all forms.
+## 7) Tokens & documentation cleanup
+- Update `README.md`, `agents.md`, and `docs/design-tokens.md` to remove Material 3 references and clearly state shadcn token usage via `theme.css`.
+- Delete any instructions referencing `tokens/material3.json` or `src/styles/main.css`.
+- Document the new color/spacing guidance based on the current `theme.css` variables.
 
-## 9) Purge legacy assets and lock imports
-- Remove leftover CSS utilities in `src/styles/main.css`; ensure file is unused or deleted.
-- Add ESLint rule to forbid imports from removed legacy UI paths (e.g., specific deleted files).
+## 8) ESLint & guardrails
+- Keep the existing `no-restricted-imports` block; extend if new legacy paths surface during cleanup.
+- Run `npm run lint` after every migration step; fix violations immediately.
 
-## 10) Quality gates
-```bash
-npm run lint
-npm run test   # or vitest
-```
-- Add Playwright visual snapshots for `/`, `/admin/operations`, `/login` to detect layout regressions.
-- Verify dark/light themes via shadcn tokens.
+## 9) Testing & visual baselines
+- Add Playwright config plus visual snapshot coverage for `/`, `/admin/operations`, and `/login` using shadcn-styled UI. Place tests under `playwright/` with `playwright.config.ts`.
+- Ensure Vitest unit tests still pass (`npm run test`).
 
-## Acceptance Criteria
-- All UI imports come from `@/components/ui` or compositions built on them.
-- Only `theme.css` supplies design tokens; no Material token files remain.
-- All shells, forms, overlays, tables, nav, and headers use shadcn primitives; no legacy components or CSS are imported.
-- Lint/tests and visual checks pass; focus states and spacing are consistent.
+## 10) Acceptance criteria
+- Only `src/styles/theme.css` supplies design tokens. No Material assets or classes remain.
+- All UI imports come from `@/components/ui` (or compositions built on them) with navigation rebuilt on `navigation-menu`.
+- Forms use shadcn `Form` components; overlays use shadcn `Dialog`/`Drawer`; tables/tabs/accordions/breadcrumbs use shadcn counterparts.
+- Lint, typecheck, vitest, and Playwright tests pass without warnings. No backward compatibility shims or legacy CSS.

@@ -414,7 +414,7 @@ function ConsentCheckbox({
     <label htmlFor={id} className="flex items-start gap-3 text-sm text-foreground">
       <Checkbox id={id} name={name} required={required} className="mt-1" />
       <span>
-        {label} {required ? <span className="text-error">*</span> : null}
+        {label} {required ? <span className="text-destructive">*</span> : null}
       </span>
     </label>
   );

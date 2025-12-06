@@ -1,12 +1,13 @@
 'use client';
 
-import { startTransition, useActionState, useEffect, useMemo, useState } from 'react';
+import { startTransition, useActionState, useEffect, useMemo } from 'react';
 import { useFormStatus } from 'react-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { useForm } from 'react-hook-form';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { maskPhoneNumber } from '@/lib/phone';
 
 export type ResetPasswordState = {
@@ -23,185 +24,262 @@ type ResetPasswordFormProps = {
   initialState: ResetPasswordState;
 };
 
+type ResetPasswordValues = {
+  contact_method: 'email' | 'phone';
+  email: string;
+  phone: string;
+  otp_code: string;
+  stage: 'request' | 'verify';
+  otp_phone: string;
+  new_password: string;
+  confirm_password: string;
+};
+
 export function ResetPasswordForm({ action, initialState }: ResetPasswordFormProps) {
   const [state, formAction] = useActionState(action, initialState);
-  const [contactMethod, setContactMethod] = useState<'email' | 'phone'>(initialState.contactMethod ?? 'email');
-  const [phoneInput, setPhoneInput] = useState(state.phone ?? '');
+  const form = useForm<ResetPasswordValues>({
+    defaultValues: {
+      contact_method: initialState.contactMethod ?? 'email',
+      email: '',
+      phone: initialState.phone ?? '',
+      otp_code: '',
+      stage: initialState.status === 'otp_sent' ? 'verify' : 'request',
+      otp_phone: initialState.phone ?? '',
+      new_password: '',
+      confirm_password: '',
+    },
+  });
+
+  const contactMethod = form.watch('contact_method');
+  const phoneInput = form.watch('phone');
+  const otpPending = state.status === 'otp_sent' && contactMethod === 'phone';
 
   useEffect(() => {
     const nextMethod = state.contactMethod;
     if (nextMethod && nextMethod !== contactMethod) {
       startTransition(() => {
-        setContactMethod(nextMethod);
+        form.setValue('contact_method', nextMethod);
       });
     }
-  }, [state.contactMethod, contactMethod]);
+  }, [contactMethod, form, state.contactMethod]);
 
   useEffect(() => {
-    if (state.status === 'success') {
-      startTransition(() => {
-        setPhoneInput('');
-      });
-    }
-    if (state.phone) {
-      startTransition(() => {
-        setPhoneInput(state.phone ?? '');
-      });
-    }
-  }, [state.status, state.phone]);
-
-  const otpPending = state.status === 'otp_sent' && contactMethod === 'phone';
+    startTransition(() => {
+      form.setValue('stage', otpPending ? 'verify' : 'request');
+      form.setValue('otp_phone', state.phone ?? phoneInput ?? '');
+      if (state.status === 'success') {
+        form.reset({
+          ...form.getValues(),
+          phone: '',
+          otp_code: '',
+          new_password: '',
+          confirm_password: '',
+        });
+      }
+      if (state.phone) {
+        form.setValue('phone', state.phone);
+      }
+    });
+  }, [form, otpPending, phoneInput, state.phone, state.status]);
 
   const maskedPhone = useMemo(() => {
     if (otpPending) {
-      return state.maskedPhone ?? (state.phone ? maskPhoneNumber(state.phone) : null);
+      const source = state.phone ?? phoneInput;
+      if (!source) return null;
+      return state.maskedPhone ?? maskPhoneNumber(source) ?? source;
     }
-    if (!phoneInput) {
-      return null;
-    }
-    return maskPhoneNumber(phoneInput) || phoneInput;
-  }, [otpPending, state.maskedPhone, state.phone, phoneInput]);
+
+    if (!phoneInput) return null;
+    return maskPhoneNumber(phoneInput) ?? phoneInput;
+  }, [otpPending, phoneInput, state.maskedPhone, state.phone]);
 
   return (
-    <form action={formAction} className="grid gap-6 rounded-2xl border border-border/40 bg-background p-6 shadow-sm">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-semibold text-foreground">Reset your password</h1>
-        <p className="text-sm text-foreground/70">
-          Choose how you would like to verify your identity. We will send a secure link or code before you set a new
-          password.
-        </p>
-      </div>
+    <Form {...form}>
+      <form action={formAction} className="grid gap-6 rounded-2xl border border-border/40 bg-background p-6 shadow-sm">
+        <input type="hidden" {...form.register('stage')} />
+        <input type="hidden" {...form.register('otp_phone')} />
 
-      <fieldset className="space-y-3 rounded-xl border border-border/25 p-4">
-        <legend className="text-sm font-semibold text-foreground">Choose verification method</legend>
-        <RadioGroup
-          name="contact_method"
-          value={contactMethod}
-          onValueChange={(value) => setContactMethod(value as 'email' | 'phone')}
-          className="grid gap-3 md:grid-cols-2"
-        >
-          <ContactOption
-            id="reset-contact-email"
-            value="email"
-            title="Email"
-            description="Send me a password reset link"
-          />
-          <ContactOption
-            id="reset-contact-phone"
-            value="phone"
-            title="Phone"
-            description="Send me a verification code by text"
-          />
-        </RadioGroup>
-      </fieldset>
-
-      {contactMethod === 'email' ? (
-        <div className="grid gap-2">
-          <Label htmlFor="reset-email">Email</Label>
-          <Input
-            id="reset-email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            required
-            placeholder="you@example.ca"
-          />
-          <p className="text-xs text-muted-foreground">We will email a secure link to update your password.</p>
+        <div className="space-y-2">
+          <h1 className="text-3xl font-semibold text-foreground">Reset your password</h1>
+          <p className="text-sm text-foreground/70">
+            Choose how you would like to verify your identity. We will send a secure link or code before you set a new
+            password.
+          </p>
         </div>
-      ) : (
-        <>
-          <input type="hidden" name="stage" value={otpPending ? 'verify' : 'request'} />
-          {otpPending ? <input type="hidden" name="otp_phone" value={state.phone ?? phoneInput} /> : null}
-          <div className="grid gap-2">
-            <Label htmlFor="reset-phone">Phone number</Label>
-            <Input
-              id="reset-phone"
+
+        <FormField
+          control={form.control}
+          name="contact_method"
+          render={({ field }) => (
+            <FormItem className="space-y-3 rounded-xl border border-border/25 p-4">
+              <legend className="text-sm font-semibold text-foreground">Choose verification method</legend>
+              <FormControl>
+                <div className="space-y-3">
+                  <input type="hidden" name="contact_method" value={field.value} />
+                  <RadioGroup
+                    value={field.value}
+                    onValueChange={(value) => field.onChange(value as 'email' | 'phone')}
+                    className="grid gap-3 md:grid-cols-2"
+                  >
+                    <ContactOption
+                      id="reset-contact-email"
+                      value="email"
+                      title="Email"
+                      description="Send me a password reset link"
+                    />
+                    <ContactOption
+                      id="reset-contact-phone"
+                      value="phone"
+                      title="Phone"
+                      description="Send me a verification code by text"
+                    />
+                  </RadioGroup>
+                </div>
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        {contactMethod === 'email' ? (
+          <FormField
+            control={form.control}
+            name="email"
+            rules={{ required: 'Email is required' }}
+            render={({ field }) => (
+              <FormItem className="grid gap-2">
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input id="reset-email" type="email" autoComplete="email" required placeholder="you@example.ca" {...field} />
+                </FormControl>
+                <FormDescription>We will email a secure link to update your password.</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        ) : (
+          <>
+            <FormField
+              control={form.control}
               name="phone"
-              type="tel"
-              inputMode="tel"
-              autoComplete="tel"
-              placeholder="+16475551234"
-              value={phoneInput}
-              onChange={(event) => setPhoneInput(event.target.value)}
-              disabled={otpPending}
-              required={!otpPending}
+              rules={{ required: !otpPending ? 'Phone number is required' : false }}
+              render={({ field }) => (
+                <FormItem className="grid gap-2">
+                  <FormLabel htmlFor="reset-phone">Phone number</FormLabel>
+                  <FormControl>
+                    <Input
+                      id="reset-phone"
+                      type="tel"
+                      inputMode="tel"
+                      autoComplete="tel"
+                      placeholder="+16475551234"
+                      disabled={otpPending}
+                      required={!otpPending}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Include your country code so we can text you a verification code.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            <p className="text-xs text-muted-foreground">Include your country code so we can text you a verification code.</p>
-          </div>
 
-          {otpPending ? (
-            <div className="grid gap-2">
-              <Label htmlFor="reset-otp">Verification code</Label>
-              <Input
-                id="reset-otp"
+            {otpPending ? (
+              <FormField
+                control={form.control}
                 name="otp_code"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                maxLength={6}
-                placeholder="123456"
-                required
+                rules={{ required: 'Enter the 6-digit code we sent' }}
+                render={({ field }) => (
+                  <FormItem className="grid gap-2">
+                    <FormLabel htmlFor="reset-otp">Verification code</FormLabel>
+                    <FormControl>
+                      <Input
+                        id="reset-otp"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={6}
+                        placeholder="123456"
+                        required
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      We texted a 6-digit code to {maskedPhone ?? 'your phone number'}. Codes expire after 5 minutes.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              <p className="text-xs text-muted-foreground">
-                We texted a 6-digit code to {maskedPhone ?? 'your phone number'}. Codes expire after 5 minutes.
-              </p>
-            </div>
-          ) : null}
+            ) : null}
 
-          {otpPending && state.message ? (
-            <p className="text-xs font-medium text-primary">{state.message}</p>
-          ) : null}
+            {otpPending && state.message ? <p className="text-xs font-medium text-primary">{state.message}</p> : null}
 
-          {otpPending ? (
-            <div className="grid gap-2 md:grid-cols-2">
-              <div className="grid gap-2">
-                <Label htmlFor="reset-new-password">New password</Label>
-                <Input
-                  id="reset-new-password"
+            {otpPending ? (
+              <div className="grid gap-2 md:grid-cols-2">
+                <FormField
+                  control={form.control}
                   name="new_password"
-                  type="password"
-                  autoComplete="new-password"
-                  minLength={8}
-                  required
+                  rules={{ required: 'Create a new password' }}
+                  render={({ field }) => (
+                    <FormItem className="grid gap-2">
+                      <FormLabel htmlFor="reset-new-password">New password</FormLabel>
+                      <FormControl>
+                        <Input id="reset-new-password" type="password" autoComplete="new-password" minLength={8} required {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="reset-confirm-password">Confirm new password</Label>
-                <Input
-                  id="reset-confirm-password"
+                <FormField
+                  control={form.control}
                   name="confirm_password"
-                  type="password"
-                  autoComplete="new-password"
-                  minLength={8}
-                  required
+                  rules={{ required: 'Confirm your new password' }}
+                  render={({ field }) => (
+                    <FormItem className="grid gap-2">
+                      <FormLabel htmlFor="reset-confirm-password">Confirm new password</FormLabel>
+                      <FormControl>
+                        <Input
+                          id="reset-confirm-password"
+                          type="password"
+                          autoComplete="new-password"
+                          minLength={8}
+                          required
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
-            </div>
-          ) : null}
-        </>
-      )}
+            ) : null}
+          </>
+        )}
 
-      {state.error ? (
-        <Alert variant="destructive">
-          <AlertTitle>We could not reset your password</AlertTitle>
-          <AlertDescription>{state.error}</AlertDescription>
-        </Alert>
-      ) : null}
-
-      {state.status === 'success' && state.message ? (
-        <Alert className="border-secondary bg-secondary/15 text-secondary-foreground">
-          <AlertDescription>{state.message}</AlertDescription>
-        </Alert>
-      ) : null}
-
-      <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
-        <ResetSubmitButton otpPending={otpPending} contactMethod={contactMethod} />
-        {otpPending ? (
-          <Button type="submit" name="intent" value="cancel" variant="outline" formNoValidate>
-            Use a different number
-          </Button>
+        {state.error ? (
+          <Alert variant="destructive">
+            <AlertTitle>We could not reset your password</AlertTitle>
+            <AlertDescription>{state.error}</AlertDescription>
+          </Alert>
         ) : null}
-      </div>
-    </form>
+
+        {state.status === 'success' && state.message ? (
+          <Alert className="border-secondary bg-secondary/15 text-secondary-foreground">
+            <AlertDescription>{state.message}</AlertDescription>
+          </Alert>
+        ) : null}
+
+        <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
+          <ResetSubmitButton otpPending={otpPending} contactMethod={contactMethod} />
+          {otpPending ? (
+            <Button type="submit" name="intent" value="cancel" variant="outline" formNoValidate>
+              Use a different number
+            </Button>
+          ) : null}
+        </div>
+      </form>
+    </Form>
   );
 }
 

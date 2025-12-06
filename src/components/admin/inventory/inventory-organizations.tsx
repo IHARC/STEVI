@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -13,8 +14,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
@@ -181,6 +182,32 @@ type OrganizationDialogProps = {
 };
 
 function OrganizationDialog({ title, actionLabel, actorProfileId, onSubmit, isPending, defaultValues, open, onOpenChange }: OrganizationDialogProps) {
+  const form = useForm<{
+    actor_profile_id: string;
+    organization_id?: string;
+    name: string;
+    website: string;
+    description: string;
+  }>({
+    defaultValues: {
+      actor_profile_id: actorProfileId,
+      organization_id: defaultValues?.id ? String(defaultValues.id) : undefined,
+      name: defaultValues?.name ?? '',
+      website: defaultValues?.website ?? '',
+      description: defaultValues?.description ?? '',
+    },
+  });
+
+  useEffect(() => {
+    form.reset({
+      actor_profile_id: actorProfileId,
+      organization_id: defaultValues?.id ? String(defaultValues.id) : undefined,
+      name: defaultValues?.name ?? '',
+      website: defaultValues?.website ?? '',
+      description: defaultValues?.description ?? '',
+    });
+  }, [actorProfileId, defaultValues, form]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
@@ -188,27 +215,61 @@ function OrganizationDialog({ title, actionLabel, actorProfileId, onSubmit, isPe
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>Capture supplier details and websites to simplify follow-up for receipts.</DialogDescription>
         </DialogHeader>
-        <form action={onSubmit} className="space-y-4">
-          <input type="hidden" name="actor_profile_id" value={actorProfileId} />
-          {defaultValues ? <input type="hidden" name="organization_id" value={String(defaultValues.id)} /> : null}
-          <div className="grid gap-2">
-            <Label htmlFor="org_name">Name</Label>
-            <Input id="org_name" name="name" defaultValue={defaultValues?.name ?? ''} required />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="org_website">Website</Label>
-            <Input id="org_website" name="website" type="url" defaultValue={defaultValues?.website ?? ''} placeholder="https://example.ca" />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="org_description">Description</Label>
-            <Textarea id="org_description" name="description" rows={3} defaultValue={defaultValues?.description ?? ''} />
-          </div>
-          <DialogFooter>
-            <Button type="submit" disabled={isPending}>
-              {actionLabel}
-            </Button>
-          </DialogFooter>
-        </form>
+        <Form {...form}>
+          <form action={onSubmit} className="space-y-4">
+            <input type="hidden" {...form.register('actor_profile_id')} />
+            {defaultValues ? <input type="hidden" {...form.register('organization_id')} /> : null}
+
+            <FormField
+              control={form.control}
+              name="name"
+              rules={{ required: 'Organization name is required' }}
+              render={({ field }) => (
+                <FormItem className="grid gap-2">
+                  <FormLabel htmlFor="org_name">Name</FormLabel>
+                  <FormControl>
+                    <Input id="org_name" required {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="website"
+              render={({ field }) => (
+                <FormItem className="grid gap-2">
+                  <FormLabel htmlFor="org_website">Website</FormLabel>
+                  <FormControl>
+                    <Input id="org_website" type="url" placeholder="https://example.ca" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem className="grid gap-2">
+                  <FormLabel htmlFor="org_description">Description</FormLabel>
+                  <FormControl>
+                    <Textarea id="org_description" rows={3} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <DialogFooter>
+              <Button type="submit" disabled={isPending}>
+                {actionLabel}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

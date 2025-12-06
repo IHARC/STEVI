@@ -2,11 +2,12 @@
 
 import { useActionState, useEffect, useMemo, useState } from 'react';
 import { useFormStatus } from 'react-dom';
+import { useForm } from 'react-hook-form';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   RadioGroup,
   RadioGroupItem,
@@ -45,6 +46,25 @@ export function ClientClaimForm({
 }: ClientClaimFormProps) {
   const [state, formAction] = useActionState(action, initialState);
   const [contactMethod, setContactMethod] = useState<ContactMethod>('email');
+  const form = useForm({
+    defaultValues: {
+      next: nextPath,
+      contact_method: contactMethod,
+      portal_code: '',
+      chosen_name: '',
+      dob_month: '',
+      dob_year: '',
+      contact_email: '',
+      contact_phone: '',
+      safe_call: false,
+      safe_text: false,
+      password: '',
+      password_confirm: '',
+      consent_privacy: false,
+      consent_contact: false,
+      consent_terms: false,
+    },
+  });
 
   const isSuccess = state.status === 'success';
 
@@ -64,13 +84,14 @@ export function ClientClaimForm({
   }, []);
 
   return (
-    <form
-      action={formAction}
-      className="space-y-8 rounded-2xl border border-border/40 bg-background p-6 shadow-sm sm:p-8"
-      noValidate
-    >
-      <input type="hidden" name="next" value={nextPath} />
-      <input type="hidden" name="contact_method" value={contactMethod} />
+    <Form {...form}>
+      <form
+        action={formAction}
+        className="space-y-8 rounded-2xl border border-border/40 bg-background p-6 shadow-sm sm:p-8"
+        noValidate
+      >
+        <input type="hidden" {...form.register('next')} />
+        <input type="hidden" {...form.register('contact_method')} value={contactMethod} />
 
       <section className="space-y-4">
         <header>
@@ -96,37 +117,58 @@ export function ClientClaimForm({
         ) : null}
       </section>
 
-      <section className="space-y-5">
-        <div className="grid gap-2">
-          <Label htmlFor="portal_code">IHARC ID or intake code (optional)</Label>
-          <Input
-            id="portal_code"
+        <section className="space-y-5">
+          <FormField
+            control={form.control}
             name="portal_code"
-            maxLength={12}
-            placeholder="1234-5678"
-            autoComplete="one-time-code"
+            render={({ field }) => (
+              <FormItem className="grid gap-2">
+                <FormLabel htmlFor="portal_code">IHARC ID or intake code (optional)</FormLabel>
+                <FormControl>
+                  <Input
+                    id="portal_code"
+                    maxLength={12}
+                    placeholder="1234-5678"
+                    autoComplete="one-time-code"
+                    {...field}
+                  />
+                </FormControl>
+                <p className="text-xs text-muted-foreground">
+                  This 8-digit code appears on your intake paperwork. If you do not have it, share two other details below.
+                </p>
+              </FormItem>
+            )}
           />
-          <p className="text-xs text-muted-foreground">
-            This 8-digit code appears on your intake paperwork. If you do not have it, share two other details below.
-          </p>
-        </div>
 
-        <fieldset className="grid gap-3 rounded-xl border border-border/30 p-4">
-          <legend className="text-sm font-semibold text-foreground">Who are we linking?</legend>
-          <div className="grid gap-2">
-            <Label htmlFor="chosen_name">Chosen or preferred name *</Label>
-            <Input
-              id="chosen_name"
+          <fieldset className="grid gap-3 rounded-xl border border-border/30 p-4">
+            <legend className="text-sm font-semibold text-foreground">Who are we linking?</legend>
+            <FormField
+              control={form.control}
               name="chosen_name"
-              required
-              maxLength={120}
-              placeholder="Name your outreach worker knows you by"
+              rules={{ required: 'Provide your preferred name' }}
+              render={({ field }) => (
+                <FormItem className="grid gap-2">
+                  <FormLabel htmlFor="chosen_name">Chosen or preferred name *</FormLabel>
+                  <FormControl>
+                    <Input
+                      id="chosen_name"
+                      required
+                      maxLength={120}
+                      placeholder="Name your outreach worker knows you by"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
           <div className="grid gap-2 md:grid-cols-2">
             <div className="grid gap-1.5">
-              <Label htmlFor="dob_month">Birth month *</Label>
-              <Select name="dob_month" defaultValue="">
+              <FormLabel htmlFor="dob_month">Birth month *</FormLabel>
+              <Select
+                value={form.watch('dob_month')}
+                onValueChange={(value) => form.setValue('dob_month', value)}
+              >
                 <SelectTrigger id="dob_month">
                   <SelectValue placeholder="Month" />
                 </SelectTrigger>
@@ -141,8 +183,8 @@ export function ClientClaimForm({
               </Select>
             </div>
             <div className="grid gap-1.5">
-              <Label htmlFor="dob_year">Birth year *</Label>
-              <Select name="dob_year" defaultValue="">
+              <FormLabel htmlFor="dob_year">Birth year *</FormLabel>
+              <Select value={form.watch('dob_year')} onValueChange={(value) => form.setValue('dob_year', value)}>
                 <SelectTrigger id="dob_year">
                   <SelectValue placeholder="Year" />
                 </SelectTrigger>
@@ -165,7 +207,10 @@ export function ClientClaimForm({
           </legend>
           <RadioGroup
             value={contactMethod}
-            onValueChange={(value) => setContactMethod(value as ContactMethod)}
+            onValueChange={(value) => {
+              setContactMethod(value as ContactMethod);
+              form.setValue('contact_method', value);
+            }}
             className="grid gap-3 md:grid-cols-2"
           >
             <ContactMethodOption
@@ -179,98 +224,213 @@ export function ClientClaimForm({
               description="We’ll text a verification link. Only use this on a phone you control."
             />
           </RadioGroup>
+          <input type="hidden" {...form.register('dob_month')} value={form.watch('dob_month')} />
+          <input type="hidden" {...form.register('dob_year')} value={form.watch('dob_year')} />
 
           {contactMethod === 'email' ? (
-            <div className="grid gap-2">
-              <Label htmlFor="contact_email">Email address *</Label>
-              <Input
-                id="contact_email"
-                name="contact_email"
-                type="email"
-                autoComplete="email"
-                required
-                placeholder="you@example.ca"
-              />
-            </div>
+            <FormField
+              control={form.control}
+              name="contact_email"
+              rules={{ required: 'Email is required' }}
+              render={({ field }) => (
+                <FormItem className="grid gap-2">
+                  <FormLabel htmlFor="contact_email">Email address *</FormLabel>
+                  <FormControl>
+                    <Input
+                      id="contact_email"
+                      type="email"
+                      autoComplete="email"
+                      required
+                      placeholder="you@example.ca"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           ) : (
-            <div className="grid gap-2">
-              <Label htmlFor="contact_phone">Mobile phone *</Label>
-              <Input
-                id="contact_phone"
-                name="contact_phone"
-                type="tel"
-                autoComplete="tel"
-                inputMode="tel"
-                required
-                placeholder="+16475551234"
-              />
-              <p className="text-xs text-muted-foreground">
-                Include the country code. We will text a verification link and never leave voicemail without consent.
-              </p>
-            </div>
+            <FormField
+              control={form.control}
+              name="contact_phone"
+              rules={{ required: 'Phone is required' }}
+              render={({ field }) => (
+                <FormItem className="grid gap-2">
+                  <FormLabel htmlFor="contact_phone">Mobile phone *</FormLabel>
+                  <FormControl>
+                    <Input
+                      id="contact_phone"
+                      type="tel"
+                      autoComplete="tel"
+                      inputMode="tel"
+                      required
+                      placeholder="+16475551234"
+                      {...field}
+                    />
+                  </FormControl>
+                  <p className="text-xs text-muted-foreground">
+                    Include the country code. We will text a verification link and never leave voicemail without consent.
+                  </p>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           )}
         </fieldset>
 
         <div className="grid gap-2 md:grid-cols-2">
-          <div className="grid gap-2">
-            <Label htmlFor="safe_call_claim" className="text-sm font-medium text-foreground">
-              Is it safe to call this number?
-            </Label>
-            <Checkbox id="safe_call_claim" name="safe_call" className="mt-1" />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="safe_text_claim" className="text-sm font-medium text-foreground">
-              Is it safe to send text messages?
-            </Label>
-            <Checkbox id="safe_text_claim" name="safe_text" className="mt-1" />
-          </div>
-        </div>
-
-        <div className="grid gap-2">
-          <Label htmlFor="password">Create a password *</Label>
-          <Input
-            id="password"
-            name="password"
-            type="password"
-            autoComplete="new-password"
-            required
-            minLength={12}
-            placeholder="At least 12 characters"
+          <FormField
+            control={form.control}
+            name="safe_call"
+            render={({ field }) => (
+              <FormItem className="grid gap-2">
+                <FormLabel htmlFor="safe_call_claim" className="text-sm font-medium text-foreground">
+                  Is it safe to call this number?
+                </FormLabel>
+                <input type="hidden" name="safe_call" value={field.value ? 'on' : ''} />
+                <FormControl>
+                  <Checkbox
+                    id="safe_call_claim"
+                    checked={field.value}
+                    onCheckedChange={(checked) => field.onChange(Boolean(checked))}
+                    className="mt-1"
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="safe_text"
+            render={({ field }) => (
+              <FormItem className="grid gap-2">
+                <FormLabel htmlFor="safe_text_claim" className="text-sm font-medium text-foreground">
+                  Is it safe to send text messages?
+                </FormLabel>
+                <input type="hidden" name="safe_text" value={field.value ? 'on' : ''} />
+                <FormControl>
+                  <Checkbox
+                    id="safe_text_claim"
+                    checked={field.value}
+                    onCheckedChange={(checked) => field.onChange(Boolean(checked))}
+                    className="mt-1"
+                  />
+                </FormControl>
+              </FormItem>
+            )}
           />
         </div>
 
-        <div className="grid gap-2">
-          <Label htmlFor="password_confirm">Confirm password *</Label>
-          <Input
-            id="password_confirm"
-            name="password_confirm"
-            type="password"
-            autoComplete="new-password"
-            required
-            minLength={12}
-            placeholder="Re-enter your password"
-          />
-        </div>
+        <FormField
+          control={form.control}
+          name="password"
+          rules={{ required: 'Create a password' }}
+          render={({ field }) => (
+            <FormItem className="grid gap-2">
+              <FormLabel htmlFor="password">Create a password *</FormLabel>
+              <FormControl>
+                <Input
+                  id="password"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  minLength={12}
+                  placeholder="At least 12 characters"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="password_confirm"
+          rules={{ required: 'Confirm password' }}
+          render={({ field }) => (
+            <FormItem className="grid gap-2">
+              <FormLabel htmlFor="password_confirm">Confirm password *</FormLabel>
+              <FormControl>
+                <Input
+                  id="password_confirm"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  minLength={12}
+                  placeholder="Re-enter your password"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <fieldset className="space-y-3 rounded-xl border border-border/30 p-4">
           <legend className="text-sm font-semibold text-foreground">Consent</legend>
-          <ConsentCheckbox
-            id="consent_privacy_claim"
+          <FormField
+            control={form.control}
             name="consent_privacy"
-            label="I understand why IHARC collects my information and how it’s used."
-            required
+            rules={{ required: true }}
+            render={({ field }) => (
+              <FormItem className="flex items-start gap-3 text-sm text-foreground">
+                <input type="hidden" name="consent_privacy" value={field.value ? 'on' : ''} />
+                <FormControl>
+                  <Checkbox
+                    id="consent_privacy_claim"
+                    checked={field.value}
+                    onCheckedChange={(checked) => field.onChange(Boolean(checked))}
+                    className="mt-1"
+                  />
+                </FormControl>
+                <FormLabel htmlFor="consent_privacy_claim" className="font-normal">
+                  I understand why IHARC collects my information and how it’s used. <span className="text-destructive">*</span>
+                </FormLabel>
+              </FormItem>
+            )}
           />
-          <ConsentCheckbox
-            id="consent_contact_claim"
+          <FormField
+            control={form.control}
             name="consent_contact"
-            label="It is safe for IHARC to contact me about my case."
-            required
+            rules={{ required: true }}
+            render={({ field }) => (
+              <FormItem className="flex items-start gap-3 text-sm text-foreground">
+                <input type="hidden" name="consent_contact" value={field.value ? 'on' : ''} />
+                <FormControl>
+                  <Checkbox
+                    id="consent_contact_claim"
+                    checked={field.value}
+                    onCheckedChange={(checked) => field.onChange(Boolean(checked))}
+                    className="mt-1"
+                  />
+                </FormControl>
+                <FormLabel htmlFor="consent_contact_claim" className="font-normal">
+                  It is safe for IHARC to contact me about my case. <span className="text-destructive">*</span>
+                </FormLabel>
+              </FormItem>
+            )}
           />
-          <ConsentCheckbox
-            id="consent_terms_claim"
+          <FormField
+            control={form.control}
             name="consent_terms"
-            label="I agree to the portal Terms and Privacy Policy."
-            required
+            rules={{ required: true }}
+            render={({ field }) => (
+              <FormItem className="flex items-start gap-3 text-sm text-foreground">
+                <input type="hidden" name="consent_terms" value={field.value ? 'on' : ''} />
+                <FormControl>
+                  <Checkbox
+                    id="consent_terms_claim"
+                    checked={field.value}
+                    onCheckedChange={(checked) => field.onChange(Boolean(checked))}
+                    className="mt-1"
+                  />
+                </FormControl>
+                <FormLabel htmlFor="consent_terms_claim" className="font-normal">
+                  I agree to the portal Terms and Privacy Policy. <span className="text-destructive">*</span>
+                </FormLabel>
+              </FormItem>
+            )}
           />
         </fieldset>
       </section>
@@ -303,27 +463,6 @@ function ContactMethodOption({
       <span>
         {title}
         <span className="mt-1 block text-xs font-normal text-muted-foreground">{description}</span>
-      </span>
-    </label>
-  );
-}
-
-function ConsentCheckbox({
-  id,
-  name,
-  label,
-  required = false,
-}: {
-  id: string;
-  name: string;
-  label: string;
-  required?: boolean;
-}) {
-  return (
-    <label htmlFor={id} className="flex items-start gap-3 text-sm text-foreground">
-      <Checkbox id={id} name={name} required={required} className="mt-1" />
-      <span>
-        {label} {required ? <span className="text-destructive">*</span> : null}
       </span>
     </label>
   );

@@ -2,10 +2,11 @@
 
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useForm } from 'react-hook-form';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 
 export type PasswordFormState = {
   status: 'idle' | 'success';
@@ -22,6 +23,13 @@ type ProfilePasswordFormProps = {
 
 export function ProfilePasswordForm({ action, initialState, hasEmail, hasPhone }: ProfilePasswordFormProps) {
   const [state, formAction] = useActionState(action, initialState);
+  const form = useForm<{ current_password: string; new_password: string; confirm_password: string }>({
+    defaultValues: {
+      current_password: '',
+      new_password: '',
+      confirm_password: '',
+    },
+  });
 
   return (
     <section className="grid gap-6 rounded-3xl border border-border/40 bg-background p-6 shadow-sm">
@@ -36,35 +44,67 @@ export function ProfilePasswordForm({ action, initialState, hasEmail, hasPhone }
         </p>
       </div>
 
-      <form action={formAction} className="grid gap-3">
-        <div className="grid gap-2">
-          <Label htmlFor="current_password">Current password</Label>
-          <Input id="current_password" name="current_password" type="password" autoComplete="current-password" required />
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="new_password">New password</Label>
-          <Input id="new_password" name="new_password" type="password" autoComplete="new-password" required minLength={8} />
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="confirm_password">Confirm new password</Label>
-          <Input id="confirm_password" name="confirm_password" type="password" autoComplete="new-password" required minLength={8} />
-        </div>
+      <Form {...form}>
+        <form action={formAction} className="grid gap-3">
+          <FormField
+            control={form.control}
+            name="current_password"
+            rules={{ required: 'Enter your current password' }}
+            render={({ field }) => (
+              <FormItem className="grid gap-2">
+                <FormLabel htmlFor="current_password">Current password</FormLabel>
+                <FormControl>
+                  <Input id="current_password" type="password" autoComplete="current-password" required {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="new_password"
+            rules={{ required: 'Create a new password' }}
+            render={({ field }) => (
+              <FormItem className="grid gap-2">
+                <FormLabel htmlFor="new_password">New password</FormLabel>
+                <FormControl>
+                  <Input id="new_password" type="password" autoComplete="new-password" minLength={8} required {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="confirm_password"
+            rules={{ required: 'Confirm your new password' }}
+            render={({ field }) => (
+              <FormItem className="grid gap-2">
+                <FormLabel htmlFor="confirm_password">Confirm new password</FormLabel>
+                <FormControl>
+                  <Input id="confirm_password" type="password" autoComplete="new-password" minLength={8} required {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        {state.error ? (
-          <Alert variant="destructive" className="text-sm">
-            <AlertTitle>We could not update your password</AlertTitle>
-            <AlertDescription>{state.error}</AlertDescription>
-          </Alert>
-        ) : null}
+          {state.error ? (
+            <Alert variant="destructive" className="text-sm">
+              <AlertTitle>We could not update your password</AlertTitle>
+              <AlertDescription>{state.error}</AlertDescription>
+            </Alert>
+          ) : null}
 
-        {state.status === 'success' && state.message ? (
-          <Alert className="border-secondary bg-secondary/15 text-secondary-foreground">
-            <AlertDescription>{state.message}</AlertDescription>
-          </Alert>
-        ) : null}
+          {state.status === 'success' && state.message ? (
+            <Alert className="border-secondary bg-secondary/15 text-secondary-foreground">
+              <AlertDescription>{state.message}</AlertDescription>
+            </Alert>
+          ) : null}
 
-        <PasswordSubmitButton />
-      </form>
+          <PasswordSubmitButton />
+        </form>
+      </Form>
     </section>
   );
 }

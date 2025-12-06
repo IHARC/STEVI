@@ -2,12 +2,13 @@
 
 import { useEffect } from 'react';
 import { useFormState, useFormStatus } from 'react-dom';
+import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/components/ui/use-toast';
 import { updateOrgSettingsAction, type OrgSettingsFormState } from './actions';
 
@@ -31,6 +32,15 @@ export function OrgContactSettingsForm({ initialValues }: { initialValues: Conta
   const { toast } = useToast();
   const router = useRouter();
   const [state, formAction] = useFormState(updateOrgSettingsAction, initialState);
+  const form = useForm<ContactValues>({
+    defaultValues: {
+      contact_person: initialValues.contact_person ?? '',
+      contact_title: initialValues.contact_title ?? '',
+      contact_email: initialValues.contact_email ?? '',
+      contact_phone: initialValues.contact_phone ?? '',
+      website: initialValues.website ?? '',
+    },
+  });
 
   useEffect(() => {
     if (state.status === 'success') {
@@ -50,70 +60,90 @@ export function OrgContactSettingsForm({ initialValues }: { initialValues: Conta
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form action={formAction} className="grid gap-4">
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="space-y-1">
-              <Label htmlFor="contact_person">Primary contact</Label>
-              <Input
-                id="contact_person"
+        <Form {...form}>
+          <form action={formAction} className="grid gap-4">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <FormField
+                control={form.control}
                 name="contact_person"
-                defaultValue={initialValues.contact_person ?? ''}
-                placeholder="Jordan Smith"
+                render={({ field }) => (
+                  <FormItem className="space-y-1">
+                    <FormLabel htmlFor="contact_person">Primary contact</FormLabel>
+                    <FormControl>
+                      <Input id="contact_person" placeholder="Jordan Smith" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="contact_title">Title / role</Label>
-              <Input
-                id="contact_title"
+              <FormField
+                control={form.control}
                 name="contact_title"
-                defaultValue={initialValues.contact_title ?? ''}
-                placeholder="Coordinator"
+                render={({ field }) => (
+                  <FormItem className="space-y-1">
+                    <FormLabel htmlFor="contact_title">Title / role</FormLabel>
+                    <FormControl>
+                      <Input id="contact_title" placeholder="Coordinator" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
-          </div>
 
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="space-y-1">
-              <Label htmlFor="contact_email">Contact email</Label>
-              <Input
-                id="contact_email"
+            <div className="grid gap-3 sm:grid-cols-2">
+              <FormField
+                control={form.control}
                 name="contact_email"
-                type="email"
-                defaultValue={initialValues.contact_email ?? ''}
-                placeholder="team@example.org"
+                render={({ field }) => (
+                  <FormItem className="space-y-1">
+                    <FormLabel htmlFor="contact_email">Contact email</FormLabel>
+                    <FormControl>
+                      <Input id="contact_email" type="email" placeholder="team@example.org" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="contact_phone">Contact phone</Label>
-              <Input
-                id="contact_phone"
+              <FormField
+                control={form.control}
                 name="contact_phone"
-                defaultValue={initialValues.contact_phone ?? ''}
-                placeholder="+1 (555) 123-4567"
+                render={({ field }) => (
+                  <FormItem className="space-y-1">
+                    <FormLabel htmlFor="contact_phone">Contact phone</FormLabel>
+                    <FormControl>
+                      <Input id="contact_phone" placeholder="+1 (555) 123-4567" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
-          </div>
 
-          <div className="space-y-1">
-            <Label htmlFor="website">Website</Label>
-            <Input
-              id="website"
+            <FormField
+              control={form.control}
               name="website"
-              type="url"
-              defaultValue={initialValues.website ?? ''}
-              placeholder="https://example.org"
+              render={({ field }) => (
+                <FormItem className="space-y-1">
+                  <FormLabel htmlFor="website">Website</FormLabel>
+                  <FormControl>
+                    <Input id="website" type="url" placeholder="https://example.org" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="flex items-center justify-end gap-3">
-            {state.status === 'error' && state.message ? (
-              <p className="text-xs text-destructive" role="status">
-                {state.message}
-              </p>
-            ) : null}
-            <SubmitButton label="Save contact" />
-          </div>
-        </form>
+            <div className="flex items-center justify-end gap-3">
+              {state.status === 'error' && state.message ? (
+                <p className="text-xs text-destructive" role="status">
+                  {state.message}
+                </p>
+              ) : null}
+              <SubmitButton label="Save contact" />
+            </div>
+          </form>
+        </Form>
       </CardContent>
     </Card>
   );
@@ -123,6 +153,13 @@ export function OrgNotesSettingsForm({ initialValues }: { initialValues: NotesVa
   const { toast } = useToast();
   const router = useRouter();
   const [state, formAction] = useFormState(updateOrgSettingsAction, initialState);
+  const form = useForm<NotesValues>({
+    defaultValues: {
+      referral_process: initialValues.referral_process ?? '',
+      special_requirements: initialValues.special_requirements ?? '',
+      availability_notes: initialValues.availability_notes ?? '',
+    },
+  });
 
   useEffect(() => {
     if (state.status === 'success') {
@@ -140,49 +177,75 @@ export function OrgNotesSettingsForm({ initialValues }: { initialValues: NotesVa
         <CardDescription>Share referral steps or access needs with IHARC staff.</CardDescription>
       </CardHeader>
       <CardContent>
-        <form action={formAction} className="space-y-4">
-          <div className="space-y-1">
-            <Label htmlFor="referral_process">Referral process</Label>
-            <Textarea
-              id="referral_process"
+        <Form {...form}>
+          <form action={formAction} className="space-y-4">
+            <FormField
+              control={form.control}
               name="referral_process"
-              rows={3}
-              defaultValue={initialValues.referral_process ?? ''}
-              placeholder="How IHARC should refer clients or book with your team."
+              render={({ field }) => (
+                <FormItem className="space-y-1">
+                  <FormLabel htmlFor="referral_process">Referral process</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      id="referral_process"
+                      rows={3}
+                      placeholder="How IHARC should refer clients or book with your team."
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="space-y-1">
-            <Label htmlFor="availability_notes">Availability notes</Label>
-            <Textarea
-              id="availability_notes"
+            <FormField
+              control={form.control}
               name="availability_notes"
-              rows={3}
-              defaultValue={initialValues.availability_notes ?? ''}
-              placeholder="Office hours, blackout dates, or holiday closures."
+              render={({ field }) => (
+                <FormItem className="space-y-1">
+                  <FormLabel htmlFor="availability_notes">Availability notes</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      id="availability_notes"
+                      rows={3}
+                      placeholder="Office hours, blackout dates, or holiday closures."
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="space-y-1">
-            <Label htmlFor="special_requirements">Special requirements</Label>
-            <Textarea
-              id="special_requirements"
+            <FormField
+              control={form.control}
               name="special_requirements"
-              rows={3}
-              defaultValue={initialValues.special_requirements ?? ''}
-              placeholder="Accessibility, trauma-informed needs, or safety considerations."
+              render={({ field }) => (
+                <FormItem className="space-y-1">
+                  <FormLabel htmlFor="special_requirements">Special requirements</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      id="special_requirements"
+                      rows={3}
+                      placeholder="Accessibility, trauma-informed needs, or safety considerations."
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="flex items-center justify-end gap-3">
-            {state.status === 'error' && state.message ? (
-              <p className="text-xs text-destructive" role="status">
-                {state.message}
-              </p>
-            ) : null}
-            <SubmitButton label="Save notes" />
-          </div>
-        </form>
+            <div className="flex items-center justify-end gap-3">
+              {state.status === 'error' && state.message ? (
+                <p className="text-xs text-destructive" role="status">
+                  {state.message}
+                </p>
+              ) : null}
+              <SubmitButton label="Save notes" />
+            </div>
+          </form>
+        </Form>
       </CardContent>
     </Card>
   );

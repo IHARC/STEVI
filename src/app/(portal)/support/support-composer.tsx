@@ -2,9 +2,10 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useFormState } from 'react-dom';
+import { useForm } from 'react-hook-form';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ClientPreviewGuard } from '@/components/layout/client-preview-guard';
@@ -18,6 +19,12 @@ const initialState = { success: false } as const;
 export function SupportComposer() {
   const [open, setOpen] = useState(false);
   const [state, formAction] = useFormState(submitSupportMessage, initialState);
+  const form = useForm<{ message: string; preferredContact: string }>({
+    defaultValues: {
+      message: '',
+      preferredContact: 'phone',
+    },
+  });
   const { toast } = useToast();
   const { isClientPreview } = usePortalLayout();
 
@@ -67,41 +74,64 @@ export function SupportComposer() {
         </SheetHeader>
 
         <ClientPreviewGuard message="Exit preview to send messages as the client.">
-          <form action={formAction} className="mt-4 space-y-4">
-            <div className="space-y-1">
-              <Label htmlFor="support-message">What do you need help with?</Label>
-              <Textarea
-                id="support-message"
+          <Form {...form}>
+            <form action={formAction} className="mt-4 space-y-4">
+              <FormField
+                control={form.control}
                 name="message"
-                minLength={10}
-                maxLength={2000}
-                required
-                placeholder="Share context, dates, or what you’d like us to do."
-                className="min-h-[160px]"
+                rules={{ required: 'Describe what you need help with', minLength: { value: 10, message: 'Add a few more details.' } }}
+                render={({ field }) => (
+                  <FormItem className="space-y-1">
+                    <FormLabel htmlFor="support-message">What do you need help with?</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        id="support-message"
+                        minLength={10}
+                        maxLength={2000}
+                        required
+                        placeholder="Share context, dates, or what you’d like us to do."
+                        className="min-h-[160px]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <p className="text-xs text-muted-foreground">Avoid sharing sensitive health details. We’ll keep this secure.</p>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              <p className="text-xs text-muted-foreground">Avoid sharing sensitive health details. We’ll keep this secure.</p>
-            </div>
 
-            <div className="space-y-1">
-              <Label htmlFor="preferred-contact">Preferred contact</Label>
-              <Select name="preferredContact" defaultValue="phone">
-                <SelectTrigger id="preferred-contact" aria-label="Preferred contact method">
-                  <SelectValue placeholder="Select contact method" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="phone">Phone call</SelectItem>
-                  <SelectItem value="sms">Text message</SelectItem>
-                  <SelectItem value="email">Email</SelectItem>
-                  <SelectItem value="in_person">In person</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+              <FormField
+                control={form.control}
+                name="preferredContact"
+                render={({ field }) => (
+                  <FormItem className="space-y-1">
+                    <FormLabel htmlFor="preferred-contact">Preferred contact</FormLabel>
+                    <FormControl>
+                      <div>
+                        <input type="hidden" name="preferredContact" value={field.value} />
+                        <Select value={field.value} onValueChange={field.onChange}>
+                          <SelectTrigger id="preferred-contact" aria-label="Preferred contact method">
+                            <SelectValue placeholder="Select contact method" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="phone">Phone call</SelectItem>
+                            <SelectItem value="sms">Text message</SelectItem>
+                            <SelectItem value="email">Email</SelectItem>
+                            <SelectItem value="in_person">In person</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
 
-            <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
-              <span>We’ll respond within one business day. For urgent changes, call 289-555-0100.</span>
-              <Button type="submit" className="ml-auto">Send message</Button>
-            </div>
-          </form>
+              <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
+                <span>We’ll respond within one business day. For urgent changes, call 289-555-0100.</span>
+                <Button type="submit" className="ml-auto">Send message</Button>
+              </div>
+            </form>
+          </Form>
         </ClientPreviewGuard>
       </SheetContent>
     </Sheet>

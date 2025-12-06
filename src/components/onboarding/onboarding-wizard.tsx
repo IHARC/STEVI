@@ -145,7 +145,7 @@ export function OnboardingWizard({
       <header className="rounded-3xl border border-border/30 bg-background p-6 shadow-md">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <span className="inline-flex items-center gap-1 rounded-full border border-primary/25 bg-primary/10 px-3 py-0.5 text-xs font-semibold uppercase tracking-label-uppercase text-primary">
+            <span className="inline-flex items-center gap-1 rounded-full border border-primary/25 bg-primary/10 px-3 py-0.5 text-xs font-semibold uppercase tracking-wide text-primary">
               Onboarding
             </span>
             <h1 className="mt-2 text-3xl font-semibold text-foreground sm:text-4xl">Finish onboarding to use STEVI</h1>

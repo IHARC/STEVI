@@ -246,7 +246,7 @@ export function ResourceForm({ mode, action, onDeleteAction, resource, kindOptio
       {isEdit && resource && onDeleteAction ? (
         <form
           action={onDeleteAction}
-          className="rounded-3xl border border-error/20 bg-destructive/10 p-4 text-destructive-foreground"
+          className="rounded-3xl border border-destructive/20 bg-destructive/10 p-4 text-destructive-foreground"
         >
           <input type="hidden" name="resource_id" value={resource.id} />
           <input type="hidden" name="resource_slug" value={resource.slug} />

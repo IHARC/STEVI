@@ -239,11 +239,11 @@ export default async function HomePage() {
             <CardContent className="space-y-3">
               <dl className="grid gap-3 sm:grid-cols-2 text-sm">
                 <div className="rounded-xl bg-card px-3 py-3 hover:bg-muted transition duration-150 ease-out">
-                  <dt className="text-xs uppercase tracking-label-uppercase text-muted-foreground">Pronouns</dt>
+                  <dt className="text-xs uppercase tracking-wide text-muted-foreground">Pronouns</dt>
                   <dd className="text-base text-foreground">{preferredPronouns}</dd>
                 </div>
                 <div className="rounded-xl bg-card px-3 py-3 hover:bg-muted transition duration-150 ease-out">
-                  <dt className="text-xs uppercase tracking-label-uppercase text-muted-foreground">Preferred contact</dt>
+                  <dt className="text-xs uppercase tracking-wide text-muted-foreground">Preferred contact</dt>
                   <dd className="text-base text-foreground">{preferredContact}</dd>
                 </div>
               </dl>

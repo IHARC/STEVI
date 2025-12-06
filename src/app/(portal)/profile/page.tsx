@@ -428,7 +428,7 @@ export default async function PortalProfilePage() {
       ) : null}
 
       {affiliationRevoked ? (
-        <div className="rounded-2xl border border-error bg-destructive/10 p-4 text-sm text-destructive-foreground">
+        <div className="rounded-2xl border border-destructive bg-destructive/10 p-4 text-sm text-destructive-foreground">
           Your verified affiliation was revoked. Reach out to IHARC administrators if circumstances have changed.
         </div>
       ) : null}

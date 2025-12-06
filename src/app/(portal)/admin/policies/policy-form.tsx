@@ -188,7 +188,7 @@ export function PolicyForm({ mode, action, onDeleteAction, policy, statusOptions
       {isEdit && policy && onDeleteAction ? (
         <form
           action={onDeleteAction}
-          className="rounded-3xl border border-error/20 bg-destructive/10 p-4 text-destructive-foreground"
+          className="rounded-3xl border border-destructive/20 bg-destructive/10 p-4 text-destructive-foreground"
         >
           <input type="hidden" name="policy_id" value={policy.id} />
           <input type="hidden" name="policy_slug" value={policy.slug} />

@@ -1,6 +1,7 @@
 'use client';
 
-import { useMemo, useState, useTransition } from 'react';
+import { useEffect, useMemo, useState, useTransition } from 'react';
+import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,8 +13,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/components/ui/use-toast';
 import { updateInventoryTransactionSourceAction } from '@/app/(portal)/admin/inventory/actions';
@@ -125,6 +126,32 @@ type UpdateSourceDialogProps = {
 };
 
 function UpdateSourceDialog({ receipt, organizations, actorProfileId, isPending, onSubmit, onClose }: UpdateSourceDialogProps) {
+  const form = useForm<{
+    actor_profile_id: string;
+    transaction_id: string;
+    source_type: string;
+    provider_org_id: string;
+    notes: string;
+  }>({
+    defaultValues: {
+      actor_profile_id: actorProfileId,
+      transaction_id: receipt?.id ?? '',
+      source_type: receipt?.refType ?? '',
+      provider_org_id: receipt?.providerOrgId ? receipt.providerOrgId.toString() : '',
+      notes: receipt?.notes ?? '',
+    },
+  });
+
+  useEffect(() => {
+    form.reset({
+      actor_profile_id: actorProfileId,
+      transaction_id: receipt?.id ?? '',
+      source_type: receipt?.refType ?? '',
+      provider_org_id: receipt?.providerOrgId ? receipt.providerOrgId.toString() : '',
+      notes: receipt?.notes ?? '',
+    });
+  }, [actorProfileId, form, receipt]);
+
   return (
     <Dialog open={Boolean(receipt)} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-lg">
@@ -133,59 +160,80 @@ function UpdateSourceDialog({ receipt, organizations, actorProfileId, isPending,
           <DialogDescription>Attach or correct the provider for this receipt. This keeps reporting accurate across teams.</DialogDescription>
         </DialogHeader>
         {receipt ? (
-          <form action={onSubmit} className="space-y-4">
-            <input type="hidden" name="actor_profile_id" value={actorProfileId} />
-            <input type="hidden" name="transaction_id" value={receipt.id} />
-            <div className="grid gap-1">
-              <Label>Item</Label>
-              <p className="text-sm font-medium text-foreground">{receipt.itemName}</p>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="receipt_source_type">Source type</Label>
-              <select
-                id="receipt_source_type"
+          <Form {...form}>
+            <form action={onSubmit} className="space-y-4">
+              <input type="hidden" {...form.register('actor_profile_id')} />
+              <input type="hidden" {...form.register('transaction_id')} />
+              <div className="grid gap-1">
+                <FormLabel>Item</FormLabel>
+                <p className="text-sm font-medium text-foreground">{receipt.itemName}</p>
+              </div>
+              <FormField
+                control={form.control}
                 name="source_type"
-                defaultValue={receipt.refType ?? ''}
-                className="rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none"
-              >
-                <option value="">Unset</option>
-                <option value="donation">Donation</option>
-                <option value="purchase">Purchase</option>
-                <option value="transfer_in">Transfer in</option>
-                <option value="adjustment">Adjustment</option>
-              </select>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="receipt_provider">Provider organisation</Label>
-              <select
-                id="receipt_provider"
-                name="provider_org_id"
-                defaultValue={receipt.providerOrgId?.toString() ?? ''}
-                className="rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none"
-              >
-                <option value="">None</option>
-                {organizations.map((org) => (
-                  <option key={org.id} value={org.id}>
-                    {org.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="receipt_notes">Notes</Label>
-              <Input
-                id="receipt_notes"
-                name="notes"
-                defaultValue={receipt.notes ?? ''}
-                placeholder="Optional comments"
+                render={({ field }) => (
+                  <FormItem className="grid gap-2">
+                    <FormLabel htmlFor="receipt_source_type">Source type</FormLabel>
+                    <FormControl>
+                      <select
+                        id="receipt_source_type"
+                        className="rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none"
+                        {...field}
+                      >
+                        <option value="">Unset</option>
+                        <option value="donation">Donation</option>
+                        <option value="purchase">Purchase</option>
+                        <option value="transfer_in">Transfer in</option>
+                        <option value="adjustment">Adjustment</option>
+                      </select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <DialogFooter>
-              <Button type="submit" disabled={isPending}>
-                Save changes
-              </Button>
-            </DialogFooter>
-          </form>
+              <FormField
+                control={form.control}
+                name="provider_org_id"
+                render={({ field }) => (
+                  <FormItem className="grid gap-2">
+                    <FormLabel htmlFor="receipt_provider">Provider organisation</FormLabel>
+                    <FormControl>
+                      <select
+                        id="receipt_provider"
+                        className="rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none"
+                        {...field}
+                      >
+                        <option value="">None</option>
+                        {organizations.map((org) => (
+                          <option key={org.id} value={org.id}>
+                            {org.name}
+                          </option>
+                        ))}
+                      </select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem className="grid gap-2">
+                    <FormLabel htmlFor="receipt_notes">Notes</FormLabel>
+                    <FormControl>
+                      <Input id="receipt_notes" placeholder="Optional comments" {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <DialogFooter>
+                <Button type="submit" disabled={isPending}>
+                  Save changes
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
         ) : null}
       </DialogContent>
     </Dialog>
