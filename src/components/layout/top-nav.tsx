@@ -1,9 +1,13 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from '@/components/ui/navigation-menu';
 import { CommandPalette } from '@/components/layout/command-palette';
 import { QuickCreateButton } from '@/components/layout/quick-create-button';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
 import { AppNavigationMobile } from '@/components/layout/app-navigation';
+import { APP_ICON_MAP, type AppIconName } from '@/lib/app-icons';
+import { cn } from '@/lib/utils';
 import type { CommandPaletteItem } from '@/lib/portal-access';
 import type { ResolvedBrandingAssets } from '@/lib/marketing/branding';
 import type { UserNavigation } from '@/components/layout/user-nav';
@@ -22,6 +26,7 @@ export function TopNav({
   navigation,
   branding,
 }: TopNavProps) {
+  const pathname = usePathname() ?? '/';
   const { desktop, mobile } = navigation;
   const hasNav = navSections.length > 0;
 
@@ -66,6 +71,12 @@ export function TopNav({
               <span className="block text-xs text-muted-foreground">Client Support Portal</span>
             </span>
           </Link>
+
+          {hasNav ? (
+            <div className="hidden lg:flex">
+              <TopNavMenu navSections={navSections} pathname={pathname} />
+            </div>
+          ) : null}
         </div>
 
         <div className="flex flex-1 items-center justify-end gap-2">
@@ -78,4 +89,74 @@ export function TopNav({
       </div>
     </header>
   );
+}
+
+type NavMenuProps = {
+  navSections: NavSection[];
+  pathname: string;
+};
+
+function TopNavMenu({ navSections, pathname }: NavMenuProps) {
+  return (
+    <NavigationMenu className="w-full">
+      <NavigationMenuList>
+        {navSections.map((section) => (
+          <NavigationMenuItem key={section.id}>
+            <NavigationMenuTrigger className="text-sm font-semibold capitalize">{section.label}</NavigationMenuTrigger>
+            <NavigationMenuContent className="p-4">
+              <div className="grid gap-4 md:w-[520px] md:grid-cols-2">
+                {section.groups.map((group) => {
+                  const GroupIcon = group.icon ? APP_ICON_MAP[group.icon] : null;
+                  return (
+                    <div key={group.id} className="space-y-2">
+                      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        {GroupIcon ? <GroupIcon className="h-4 w-4" aria-hidden /> : null}
+                        <span>{group.label}</span>
+                      </div>
+                      <div className="space-y-1">
+                        {group.items.map((item) => (
+                          <NavigationMenuLink asChild key={item.href} className="focus-visible:outline-none">
+                            <Link
+                              href={item.href}
+                              className={cn(
+                                'flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-muted',
+                                isLinkActive(item, pathname) ? 'bg-primary/10 text-primary' : 'text-muted-foreground',
+                              )}
+                            >
+                              {item.icon ? <NavIcon name={item.icon} /> : null}
+                              <span className="truncate">{item.label}</span>
+                            </Link>
+                          </NavigationMenuLink>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </NavigationMenuContent>
+          </NavigationMenuItem>
+        ))}
+      </NavigationMenuList>
+    </NavigationMenu>
+  );
+}
+
+function NavIcon({ name }: { name: AppIconName }) {
+  const Icon = APP_ICON_MAP[name];
+  if (!Icon) return null;
+  return <Icon className="h-4 w-4" aria-hidden />;
+}
+
+function isLinkActive(link: Pick<NavSection['groups'][number]['items'][number], 'href' | 'match' | 'exact'>, pathname: string) {
+  const matchPrefixes = link.match ?? [];
+  if (matchPrefixes.length > 0) {
+    return matchPrefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+  }
+
+  if ('exact' in link && link.exact) {
+    return pathname === link.href;
+  }
+
+  if (pathname === link.href) return true;
+  return pathname.startsWith(`${link.href}/`);
 }

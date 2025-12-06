@@ -10,10 +10,10 @@ Purpose: Equip a fresh Codex run to finish the shadcn/ui cutover, fix the audit 
 - ✅ Token/docs cleanup: README/agents updated; `docs/design-tokens.md` rewritten for shadcn; Material references removed.
 - ✅ Playwright baseline added (`playwright.config.ts`, `playwright/tests/baseline.spec.ts`).
 - ✅ Legacy utility cleanup: `tracking-label-uppercase`, `text-error`, `border-error`, `text-warning-foreground` removed where found.
-- ⬜ Forms still to migrate to shadcn `Form`: onboarding wizard; all registration flows (client intake/claim, partner, volunteer, community, concern report); appointments request/cancel/reschedule; marketing forms; quick outreach; org invites; documents list; any remaining raw forms in `rg "<form" src` not yet converted.
-- ⬜ Top navigation (TopNav) needs `navigation-menu` treatment and removal of bespoke styling.
+- ✅ Forms migrated to shadcn `Form`: onboarding wizard; all registration flows (client intake/claim, partner, volunteer, community, concern report); appointments request/cancel/reschedule; marketing forms; quick outreach; org invites; documents list; remaining raw forms cleaned.
+- ✅ Top navigation (TopNav) rebuilt on `navigation-menu` primitives; bespoke styling removed.
 - ⬜ Final sweep for legacy utility classes and any bespoke modals/tables/breadcrumbs outside `@/components/ui`.
-- ⬜ Testing: run `npm run lint`, `npm run typecheck`, `npm run test`, `npm run e2e` (Playwright snapshots) and fix issues.
+- ⬜ Testing: `npm run lint`, `npm run typecheck`, and `npm run test` pass; `npm run e2e` still failing (Playwright worker exits unexpectedly) — needs investigation.
 
 ## Repo snapshot
 - Global tokens/styles: `src/styles/theme.css` only. No `main.css`, no Material token files.

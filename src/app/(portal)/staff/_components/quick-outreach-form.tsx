@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useFormState } from 'react-dom';
+import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { staffLogOutreachAction, type OutreachFormState } from '@/lib/staff/actions';
 import { cn } from '@/lib/utils';
@@ -15,6 +16,15 @@ type QuickOutreachFormProps = {
   focusSignal?: number;
   defaultTitle?: string;
   dense?: boolean;
+};
+
+type OutreachFormValues = {
+  person_id: string;
+  case_id?: string;
+  title: string;
+  occurred_at: string;
+  summary: string;
+  location: string;
 };
 
 const initialState: OutreachFormState = { status: 'idle' };
@@ -34,130 +44,167 @@ export function QuickOutreachForm({
   dense = false,
 }: QuickOutreachFormProps) {
   const [state, formAction] = useFormState(staffLogOutreachAction, initialState);
-  const formRef = useRef<HTMLFormElement | null>(null);
-  const titleRef = useRef<HTMLInputElement | null>(null);
-  const occurredAtRef = useRef<HTMLInputElement | null>(null);
-
   const initialDateTime = useMemo(() => toLocalDateTimeValue(new Date()), []);
+  const form = useForm<OutreachFormValues>({
+    defaultValues: {
+      person_id: personId ? String(personId) : '',
+      case_id: caseId ? String(caseId) : undefined,
+      title: defaultTitle ?? '',
+      occurred_at: initialDateTime,
+      summary: '',
+      location: '',
+    },
+  });
 
   useEffect(() => {
     if (focusSignal) {
-      titleRef.current?.focus();
+      form.setFocus('title');
     }
-  }, [focusSignal]);
+  }, [focusSignal, form]);
 
   useEffect(() => {
-    if (state.status === 'success') {
-      formRef.current?.reset();
-      const nextDefault = toLocalDateTimeValue(new Date());
-      if (occurredAtRef.current) {
-        occurredAtRef.current.value = nextDefault;
-      }
-      titleRef.current?.focus();
-    }
-  }, [state.status]);
+    form.reset({
+      person_id: personId ? String(personId) : '',
+      case_id: caseId ? String(caseId) : undefined,
+      title: defaultTitle ?? '',
+      occurred_at: toLocalDateTimeValue(new Date()),
+      summary: '',
+      location: '',
+    });
+  }, [caseId, defaultTitle, form, personId, state.status]);
 
   const disabled = !personId;
 
   return (
-    <form
-      ref={formRef}
-      action={formAction}
-      className={cn('rounded-2xl border border-border/40 bg-card p-4 shadow-sm', dense && 'p-3')}
-    >
-      <div className="space-y-3">
-        <div className="flex items-center justify-between gap-3">
-          <div className="space-y-0.5">
-            <p className="text-base text-foreground">Log outreach</p>
-            <p className="text-xs text-muted-foreground">
-              Quick entry writes to the audit trail and stays staff-only.
-            </p>
+    <Form {...form}>
+      <form
+        action={formAction}
+        className={cn('rounded-2xl border border-border/40 bg-card p-4 shadow-sm', dense && 'p-3')}
+      >
+        <div className="space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <div className="space-y-0.5">
+              <p className="text-base text-foreground">Log outreach</p>
+              <p className="text-xs text-muted-foreground">
+                Quick entry writes to the audit trail and stays staff-only.
+              </p>
+            </div>
+            <span className="rounded-full bg-border/10 px-2 py-px text-xs text-muted-foreground">N</span>
           </div>
-          <span className="rounded-full bg-border/10 px-2 py-px text-xs text-muted-foreground">N</span>
-        </div>
 
-        <input type="hidden" name="person_id" value={personId ?? ''} readOnly />
-        {caseId ? <input type="hidden" name="case_id" value={caseId} readOnly /> : null}
+          <input type="hidden" name="person_id" value={form.watch('person_id')} readOnly />
+          {caseId ? <input type="hidden" name="case_id" value={form.watch('case_id') ?? ''} readOnly /> : null}
 
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="space-y-1">
-            <Label htmlFor="outreach-title" className="text-xs">
-              Title
-            </Label>
-            <Input
-              id="outreach-title"
+          <div className="grid gap-3 sm:grid-cols-2">
+            <FormField
+              control={form.control}
               name="title"
-              ref={titleRef}
-              required
-              minLength={3}
-              maxLength={160}
-              placeholder="Phone check-in, wellness visit, supply drop…"
-              defaultValue={defaultTitle ?? ''}
-              disabled={disabled}
+              rules={{ required: 'Add a title' }}
+              render={({ field }) => (
+                <FormItem className="space-y-1">
+                  <FormLabel htmlFor="outreach-title" className="text-xs">
+                    Title
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      id="outreach-title"
+                      required
+                      minLength={3}
+                      maxLength={160}
+                      placeholder="Phone check-in, wellness visit, supply drop…"
+                      disabled={disabled}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          <div className="space-y-1">
-            <Label htmlFor="outreach-occurred-at" className="text-xs">
-              Occurred at
-            </Label>
-            <Input
-              id="outreach-occurred-at"
+            <FormField
+              control={form.control}
               name="occurred_at"
-              type="datetime-local"
-              ref={occurredAtRef}
-              defaultValue={initialDateTime}
-              disabled={disabled}
+              render={({ field }) => (
+                <FormItem className="space-y-1">
+                  <FormLabel htmlFor="outreach-occurred-at" className="text-xs">
+                    Occurred at
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      id="outreach-occurred-at"
+                      type="datetime-local"
+                      disabled={disabled}
+                      {...field}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
             />
           </div>
-        </div>
 
-        <div className="space-y-1">
-          <Label htmlFor="outreach-summary" className="text-xs">
-            Summary <span className="text-muted-foreground">(optional)</span>
-          </Label>
-          <Textarea
-            id="outreach-summary"
+          <FormField
+            control={form.control}
             name="summary"
-            minLength={0}
-            maxLength={1200}
-            rows={4}
-            placeholder="What happened, supports provided, any follow-ups needed."
-            disabled={disabled}
+            render={({ field }) => (
+              <FormItem className="space-y-1">
+                <FormLabel htmlFor="outreach-summary" className="text-xs">
+                  Summary <span className="text-muted-foreground">(optional)</span>
+                </FormLabel>
+                <FormControl>
+                  <Textarea
+                    id="outreach-summary"
+                    minLength={0}
+                    maxLength={1200}
+                    rows={4}
+                    placeholder="What happened, supports provided, any follow-ups needed."
+                    disabled={disabled}
+                    {...field}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
           />
-        </div>
 
-        <div className="space-y-1">
-          <Label htmlFor="outreach-location" className="text-xs">
-            Location <span className="text-muted-foreground">(optional)</span>
-          </Label>
-          <Input
-            id="outreach-location"
+          <FormField
+            control={form.control}
             name="location"
-            maxLength={240}
-            placeholder="Example: Brookside shelter, phone, outreach van"
-            disabled={disabled}
+            render={({ field }) => (
+              <FormItem className="space-y-1">
+                <FormLabel htmlFor="outreach-location" className="text-xs">
+                  Location <span className="text-muted-foreground">(optional)</span>
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    id="outreach-location"
+                    maxLength={240}
+                    placeholder="Example: Brookside shelter, phone, outreach van"
+                    disabled={disabled}
+                    {...field}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
           />
-        </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="space-y-0.5">
-            <p className="text-xs text-muted-foreground">
-              Select a case to enable logging. Entries respect Supabase RLS.
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Audit trail captures actor, time, and linked person.
-            </p>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="space-y-0.5">
+              <p className="text-xs text-muted-foreground">
+                Select a case to enable logging. Entries respect Supabase RLS.
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Audit trail captures actor, time, and linked person.
+              </p>
+            </div>
+            <Button type="submit" disabled={disabled}>
+              Save outreach
+            </Button>
           </div>
-          <Button type="submit" disabled={disabled}>
-            Save outreach
-          </Button>
-        </div>
 
-        <p aria-live="polite" className={cn('text-xs', state.status === 'error' ? 'text-destructive' : 'text-primary')}>
-          {state.status === 'success' ? state.message : null}
-          {state.status === 'error' ? state.message : null}
-        </p>
-      </div>
-    </form>
+          <p aria-live="polite" className={cn('text-xs', state.status === 'error' ? 'text-destructive' : 'text-primary')}>
+            {state.status === 'success' ? state.message : null}
+            {state.status === 'error' ? state.message : null}
+          </p>
+        </div>
+      </form>
+    </Form>
   );
 }

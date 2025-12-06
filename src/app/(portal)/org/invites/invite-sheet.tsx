@@ -1,13 +1,14 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useFormState, useFormStatus } from 'react-dom';
+import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useToast } from '@/components/ui/use-toast';
 import type { RateLimitResult } from '@/lib/rate-limit';
@@ -20,22 +21,36 @@ type InviteSheetProps = {
 
 const initialState: OrgInviteFormState = { status: 'idle' };
 
+type InviteFormValues = {
+  email: string;
+  display_name: string;
+  position_title: string;
+  message: string;
+};
+
 export function InviteSheet({ rateLimit }: InviteSheetProps) {
   const router = useRouter();
   const { toast } = useToast();
-  const formRef = useRef<HTMLFormElement>(null);
   const [open, setOpen] = useState(false);
   const [state, formAction] = useFormState(createOrgInviteAction, initialState);
+  const form = useForm<InviteFormValues>({
+    defaultValues: {
+      email: '',
+      display_name: '',
+      position_title: '',
+      message: '',
+    },
+  });
 
   useEffect(() => {
     if (state.status === 'success') {
       toast({ title: 'Invitation sent', description: 'Recipients receive a secure link tied to your organization.' });
-      formRef.current?.reset();
+      form.reset();
       router.refresh();
     } else if (state.status === 'error' && state.message) {
       toast({ title: 'Invite not sent', description: state.message, variant: 'destructive' });
     }
-  }, [state, toast, router]);
+  }, [state, toast, router, form]);
 
   const limitMessage = useMemo(() => {
     if (rateLimit.allowed) {
@@ -66,45 +81,81 @@ export function InviteSheet({ rateLimit }: InviteSheetProps) {
             <p className="text-xs text-right text-muted-foreground">{limitMessage}</p>
           </div>
 
-          <form ref={formRef} action={formAction} className="grid gap-4">
-            <div className="space-y-1">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
+          <Form {...form}>
+            <form action={formAction} className="grid gap-4">
+              <FormField
+                control={form.control}
                 name="email"
-                type="email"
-                required
-                placeholder="person@example.org"
-                aria-required
+                rules={{ required: 'Email is required' }}
+                render={({ field }) => (
+                  <FormItem className="space-y-1">
+                    <FormLabel htmlFor="email">Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="person@example.org"
+                        aria-required
+                        required
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="space-y-1">
-                <Label htmlFor="display_name">Display name (optional)</Label>
-                <Input id="display_name" name="display_name" placeholder="Jordan Smith" />
+              <div className="grid gap-3 sm:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="display_name"
+                  render={({ field }) => (
+                    <FormItem className="space-y-1">
+                      <FormLabel htmlFor="display_name">Display name (optional)</FormLabel>
+                      <FormControl>
+                        <Input id="display_name" placeholder="Jordan Smith" {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="position_title"
+                  render={({ field }) => (
+                    <FormItem className="space-y-1">
+                      <FormLabel htmlFor="position_title">Role or title (optional)</FormLabel>
+                      <FormControl>
+                        <Input id="position_title" placeholder="Coordinator" {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
               </div>
-              <div className="space-y-1">
-                <Label htmlFor="position_title">Role or title (optional)</Label>
-                <Input id="position_title" name="position_title" placeholder="Coordinator" />
-              </div>
-            </div>
 
-            <div className="space-y-1">
-              <Label htmlFor="message">Message (optional)</Label>
-              <Textarea
-                id="message"
+              <FormField
+                control={form.control}
                 name="message"
-                rows={3}
-                className="min-h-[120px]"
-                placeholder="Add supportive context or onboarding steps. Avoid sensitive details."
+                render={({ field }) => (
+                  <FormItem className="space-y-1">
+                    <FormLabel htmlFor="message">Message (optional)</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        id="message"
+                        rows={3}
+                        className="min-h-[120px]"
+                        placeholder="Add supportive context or onboarding steps. Avoid sensitive details."
+                        {...field}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
               />
-            </div>
 
-            <div className="flex justify-end">
-              <SubmitButton disabled={!rateLimit.allowed} />
-            </div>
-          </form>
+              <div className="flex justify-end">
+                <SubmitButton disabled={!rateLimit.allowed} />
+              </div>
+            </form>
+          </Form>
         </div>
       </SheetContent>
     </Sheet>

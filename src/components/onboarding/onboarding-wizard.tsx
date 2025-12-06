@@ -2,15 +2,19 @@
 
 import { useEffect, useMemo, type ReactNode } from 'react';
 import { useFormState, useFormStatus } from 'react-dom';
+import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import {
   INITIAL_ONBOARDING_ACTION_STATE,
   linkAccountToPersonAction,
@@ -44,6 +48,38 @@ export type OnboardingPrefill = {
   safeText: boolean;
   safeVoicemail: boolean;
   dataSharingConsent: boolean | null;
+};
+
+type BasicInfoFormValues = {
+  person_id: string;
+  chosen_name: string;
+  legal_name: string;
+  pronouns: string;
+  postal_code: string;
+  contact_email: string;
+  contact_phone: string;
+  preferred_contact_method: string;
+  contact_window: string;
+  dob_month: string;
+  dob_year: string;
+  safe_call: boolean;
+  safe_text: boolean;
+  safe_voicemail: boolean;
+};
+
+type ConsentFormValues = {
+  person_id: string;
+  consent_service_agreement: boolean;
+  consent_privacy: boolean;
+};
+
+type SharingFormValues = {
+  person_id: string;
+  data_sharing: 'iharc_only' | 'partners';
+};
+
+type LinkFormValues = {
+  person_id: string;
 };
 
 type OnboardingWizardProps = {
@@ -284,6 +320,44 @@ function BasicInfoCard({
   prefill: OnboardingPrefill;
   disabled?: boolean;
 }) {
+  const form = useForm<BasicInfoFormValues>({
+    defaultValues: {
+      person_id: personId ? String(personId) : '',
+      chosen_name: prefill.chosenName ?? '',
+      legal_name: prefill.legalName ?? '',
+      pronouns: prefill.pronouns ?? '',
+      postal_code: prefill.postalCode ?? '',
+      contact_email: prefill.email ?? '',
+      contact_phone: prefill.phone ?? '',
+      preferred_contact_method: prefill.preferredContactMethod ?? 'email',
+      contact_window: prefill.contactWindow ?? '',
+      dob_month: prefill.dobMonth ? String(prefill.dobMonth) : '',
+      dob_year: prefill.dobYear ? String(prefill.dobYear) : '',
+      safe_call: prefill.safeCall,
+      safe_text: prefill.safeText,
+      safe_voicemail: prefill.safeVoicemail,
+    },
+  });
+
+  useEffect(() => {
+    form.reset({
+      person_id: personId ? String(personId) : '',
+      chosen_name: prefill.chosenName ?? '',
+      legal_name: prefill.legalName ?? '',
+      pronouns: prefill.pronouns ?? '',
+      postal_code: prefill.postalCode ?? '',
+      contact_email: prefill.email ?? '',
+      contact_phone: prefill.phone ?? '',
+      preferred_contact_method: prefill.preferredContactMethod ?? 'email',
+      contact_window: prefill.contactWindow ?? '',
+      dob_month: prefill.dobMonth ? String(prefill.dobMonth) : '',
+      dob_year: prefill.dobYear ? String(prefill.dobYear) : '',
+      safe_call: prefill.safeCall,
+      safe_text: prefill.safeText,
+      safe_voicemail: prefill.safeVoicemail,
+    });
+  }, [form, personId, prefill]);
+
   return (
     <Card className="border-border/40 bg-background">
       <CardHeader>
@@ -291,68 +365,242 @@ function BasicInfoCard({
         <CardDescription>Choose the name we should use and how to reach you safely.</CardDescription>
       </CardHeader>
       <CardContent>
-        <form action={onSubmit} className="space-y-4">
-          <input type="hidden" name="person_id" value={personId ?? ''} />
-          <fieldset disabled={disabled} className="space-y-4">
-            <div className="grid gap-3 md:grid-cols-2">
-              <Field label="Name to use" name="chosen_name" defaultValue={prefill.chosenName} required />
-              <Field label="Legal name (optional)" name="legal_name" defaultValue={prefill.legalName ?? ''} />
-              <Field label="Pronouns" name="pronouns" defaultValue={prefill.pronouns ?? ''} />
-              <Field label="Postal code (optional)" name="postal_code" defaultValue={prefill.postalCode ?? ''} />
-            </div>
+        <Form {...form}>
+          <form action={onSubmit} className="space-y-4">
+            <input type="hidden" name="person_id" value={form.watch('person_id')} />
+            <fieldset disabled={disabled} className="space-y-4">
+              <div className="grid gap-3 md:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="chosen_name"
+                  rules={{ required: 'Name is required' }}
+                  render={({ field }) => (
+                    <FormItem className="grid gap-2">
+                      <FormLabel htmlFor="chosen_name">Name to use *</FormLabel>
+                      <FormControl>
+                        <Input id="chosen_name" required {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="legal_name"
+                  render={({ field }) => (
+                    <FormItem className="grid gap-2">
+                      <FormLabel htmlFor="legal_name">Legal name (optional)</FormLabel>
+                      <FormControl>
+                        <Input id="legal_name" {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="pronouns"
+                  render={({ field }) => (
+                    <FormItem className="grid gap-2">
+                      <FormLabel htmlFor="pronouns">Pronouns</FormLabel>
+                      <FormControl>
+                        <Input id="pronouns" {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="postal_code"
+                  render={({ field }) => (
+                    <FormItem className="grid gap-2">
+                      <FormLabel htmlFor="postal_code">Postal code (optional)</FormLabel>
+                      <FormControl>
+                        <Input id="postal_code" autoComplete="postal-code" {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-            <div className="grid gap-3 md:grid-cols-2">
-              <Field label="Email" name="contact_email" type="email" defaultValue={prefill.email ?? ''} />
-              <Field label="Phone" name="contact_phone" defaultValue={prefill.phone ?? ''} />
-            </div>
+              <div className="grid gap-3 md:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="contact_email"
+                  render={({ field }) => (
+                    <FormItem className="grid gap-2">
+                      <FormLabel htmlFor="contact_email">Email</FormLabel>
+                      <FormControl>
+                        <Input id="contact_email" type="email" autoComplete="email" {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="contact_phone"
+                  render={({ field }) => (
+                    <FormItem className="grid gap-2">
+                      <FormLabel htmlFor="contact_phone">Phone</FormLabel>
+                      <FormControl>
+                        <Input id="contact_phone" type="tel" inputMode="tel" autoComplete="tel" {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="space-y-1">
-                <Label className="text-xs text-foreground">Preferred contact</Label>
-                <select
+              <div className="grid gap-3 md:grid-cols-2">
+                <FormField
+                  control={form.control}
                   name="preferred_contact_method"
-                  defaultValue={prefill.preferredContactMethod ?? 'email'}
-                  className="w-full rounded-md border border-border/40 bg-background px-3 py-1 text-sm"
-                >
-                  <option value="email">Email</option>
-                  <option value="phone">Phone</option>
-                  <option value="both">Email or phone</option>
-                  <option value="none">Do not contact</option>
-                </select>
+                  rules={{ required: 'Choose a contact preference' }}
+                  render={({ field }) => (
+                    <FormItem className="grid gap-2">
+                      <FormLabel htmlFor="preferred_contact_method">Preferred contact</FormLabel>
+                      <input type="hidden" name="preferred_contact_method" value={field.value} />
+                      <FormControl>
+                        <Select value={field.value} onValueChange={field.onChange}>
+                          <SelectTrigger id="preferred_contact_method">
+                            <SelectValue placeholder="Select method" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="email">Email</SelectItem>
+                            <SelectItem value="phone">Phone</SelectItem>
+                            <SelectItem value="both">Email or phone</SelectItem>
+                            <SelectItem value="none">Do not contact</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="contact_window"
+                  render={({ field }) => (
+                    <FormItem className="grid gap-2">
+                      <FormLabel htmlFor="contact_window">Safe contact window (optional)</FormLabel>
+                      <FormControl>
+                        <Input id="contact_window" placeholder="Evenings, weekdays, etc." {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
               </div>
-              <Field label="Safe contact window (optional)" name="contact_window" defaultValue={prefill.contactWindow ?? ''} />
+
+              <div className="grid gap-3 md:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="dob_month"
+                  render={({ field }) => (
+                    <FormItem className="grid gap-2">
+                      <FormLabel htmlFor="dob_month">Birth month</FormLabel>
+                      <FormControl>
+                        <Input id="dob_month" type="number" min={1} max={12} {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="dob_year"
+                  render={({ field }) => (
+                    <FormItem className="grid gap-2">
+                      <FormLabel htmlFor="dob_year">Birth year</FormLabel>
+                      <FormControl>
+                        <Input id="dob_year" type="number" min={1900} max={new Date().getFullYear()} {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <FormLabel className="text-xs text-foreground">Safe contact channels</FormLabel>
+                <div className="flex flex-wrap gap-4">
+                  <FormField
+                    control={form.control}
+                    name="safe_call"
+                    render={({ field }) => (
+                      <FormItem className="flex items-start gap-2">
+                        <input type="hidden" name="safe_call" value={field.value ? 'on' : ''} />
+                        <FormControl>
+                          <Checkbox
+                            id="safe_call"
+                            checked={field.value}
+                            onCheckedChange={(checked) => field.onChange(Boolean(checked))}
+                          />
+                        </FormControl>
+                        <FormLabel htmlFor="safe_call" className="text-sm font-normal">
+                          Voice calls are okay
+                        </FormLabel>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="safe_text"
+                    render={({ field }) => (
+                      <FormItem className="flex items-start gap-2">
+                        <input type="hidden" name="safe_text" value={field.value ? 'on' : ''} />
+                        <FormControl>
+                          <Checkbox
+                            id="safe_text"
+                            checked={field.value}
+                            onCheckedChange={(checked) => field.onChange(Boolean(checked))}
+                          />
+                        </FormControl>
+                        <FormLabel htmlFor="safe_text" className="text-sm font-normal">
+                          Text messages are okay
+                        </FormLabel>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="safe_voicemail"
+                    render={({ field }) => (
+                      <FormItem className="flex items-start gap-2">
+                        <input type="hidden" name="safe_voicemail" value={field.value ? 'on' : ''} />
+                        <FormControl>
+                          <Checkbox
+                            id="safe_voicemail"
+                            checked={field.value}
+                            onCheckedChange={(checked) => field.onChange(Boolean(checked))}
+                          />
+                        </FormControl>
+                        <FormLabel htmlFor="safe_voicemail" className="text-sm font-normal">
+                          Voicemail is okay
+                        </FormLabel>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+            </fieldset>
+
+            {state.status === 'error' ? (
+              <Alert variant="destructive">
+                <AlertTitle>We couldn’t save your details</AlertTitle>
+                <AlertDescription>{state.message ?? 'Unable to save right now.'}</AlertDescription>
+              </Alert>
+            ) : null}
+            {state.status === 'success' ? (
+              <Alert variant="default" className="border-primary/30 bg-primary/10 text-primary">
+                <AlertTitle>Saved</AlertTitle>
+                <AlertDescription>Continue with consents next.</AlertDescription>
+              </Alert>
+            ) : null}
+
+            <div className="flex flex-wrap gap-3">
+              <FormSubmit pendingLabel="Saving…" disabled={disabled}>
+                {personId ? 'Save changes' : 'Save and create record'}
+              </FormSubmit>
             </div>
-
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="space-y-1">
-                <Label className="text-xs text-foreground">Birth month</Label>
-                <Input name="dob_month" type="number" min={1} max={12} defaultValue={prefill.dobMonth ?? ''} />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs text-foreground">Birth year</Label>
-                <Input name="dob_year" type="number" min={1900} max={new Date().getFullYear()} defaultValue={prefill.dobYear ?? ''} />
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <Label className="text-xs text-foreground">Safe contact channels</Label>
-              <div className="flex flex-wrap gap-4">
-                <CheckboxField id="safe_call" label="Voice calls are okay" defaultChecked={prefill.safeCall} />
-                <CheckboxField id="safe_text" label="Text messages are okay" defaultChecked={prefill.safeText} />
-                <CheckboxField id="safe_voicemail" label="Voicemail is okay" defaultChecked={prefill.safeVoicemail} />
-              </div>
-            </div>
-          </fieldset>
-
-          {state.status === 'error' ? <ErrorMessage message={state.message ?? 'Unable to save right now.'} /> : null}
-          {state.status === 'success' ? <SuccessMessage message="Saved. Continue with consents next." /> : null}
-
-          <div className="flex flex-wrap gap-3">
-            <FormSubmit pendingLabel="Saving…" disabled={disabled}>
-              {personId ? 'Save changes' : 'Save and create record'}
-            </FormSubmit>
-          </div>
-        </form>
+          </form>
+        </Form>
       </CardContent>
     </Card>
   );
@@ -372,6 +620,21 @@ function ConsentCard({
   disabled?: boolean;
 }) {
   const policyMissing = !policies.service || !policies.privacy;
+  const form = useForm<ConsentFormValues>({
+    defaultValues: {
+      person_id: personId ? String(personId) : '',
+      consent_service_agreement: false,
+      consent_privacy: false,
+    },
+  });
+
+  useEffect(() => {
+    form.reset({
+      person_id: personId ? String(personId) : '',
+      consent_service_agreement: false,
+      consent_privacy: false,
+    });
+  }, [form, personId]);
 
   return (
     <Card className="border-border/40 bg-background">
@@ -380,33 +643,90 @@ function ConsentCard({
         <CardDescription>Review the current IHARC policies and confirm you agree.</CardDescription>
       </CardHeader>
       <CardContent>
-        <form action={onSubmit} className="space-y-4">
-          <input type="hidden" name="person_id" value={personId ?? ''} />
-          <fieldset disabled={disabled} className="space-y-4">
-            {policyMissing ? (
-              <p className="text-sm text-destructive">
-                Policy copy is missing — ask an admin to publish the service agreement and privacy notice.
-              </p>
-            ) : (
-              <>
-                <PolicyBlock title={policies.service!.title} summary={policies.service!.shortSummary} bodyHtml={policies.service!.bodyHtml} />
-                <PolicyBlock title={policies.privacy!.title} summary={policies.privacy!.shortSummary} bodyHtml={policies.privacy!.bodyHtml} />
-              </>
-            )}
+        <Form {...form}>
+          <form action={onSubmit} className="space-y-4">
+            <input type="hidden" name="person_id" value={form.watch('person_id')} />
+            <fieldset disabled={disabled} className="space-y-4">
+              {policyMissing ? (
+                <Alert variant="destructive">
+                  <AlertTitle>Policy copy missing</AlertTitle>
+                  <AlertDescription>
+                    Ask an admin to publish the service agreement and privacy notice before continuing.
+                  </AlertDescription>
+                </Alert>
+              ) : (
+                <>
+                  <PolicyBlock title={policies.service!.title} summary={policies.service!.shortSummary} bodyHtml={policies.service!.bodyHtml} />
+                  <PolicyBlock title={policies.privacy!.title} summary={policies.privacy!.shortSummary} bodyHtml={policies.privacy!.bodyHtml} />
+                </>
+              )}
 
-            <div className="space-y-3">
-              <CheckboxField id="consent_service_agreement" label="I agree to the Client Service Agreement." required />
-              <CheckboxField id="consent_privacy" label="I acknowledge the Privacy & Data Protection Notice." required />
-            </div>
-          </fieldset>
+              <div className="space-y-3">
+                <FormField
+                  control={form.control}
+                  name="consent_service_agreement"
+                  rules={{ required: true }}
+                  render={({ field }) => (
+                    <FormItem className="flex items-start gap-3 text-sm text-foreground">
+                      <input type="hidden" name="consent_service_agreement" value={field.value ? 'on' : ''} />
+                      <FormControl>
+                        <Checkbox
+                          id="consent_service_agreement"
+                          checked={field.value}
+                          onCheckedChange={(checked) => field.onChange(Boolean(checked))}
+                          className="mt-1"
+                        />
+                      </FormControl>
+                      <FormLabel htmlFor="consent_service_agreement" className="font-normal">
+                        I agree to the Client Service Agreement. <span className="text-destructive">*</span>
+                      </FormLabel>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="consent_privacy"
+                  rules={{ required: true }}
+                  render={({ field }) => (
+                    <FormItem className="flex items-start gap-3 text-sm text-foreground">
+                      <input type="hidden" name="consent_privacy" value={field.value ? 'on' : ''} />
+                      <FormControl>
+                        <Checkbox
+                          id="consent_privacy"
+                          checked={field.value}
+                          onCheckedChange={(checked) => field.onChange(Boolean(checked))}
+                          className="mt-1"
+                        />
+                      </FormControl>
+                      <FormLabel htmlFor="consent_privacy" className="font-normal">
+                        I acknowledge the Privacy & Data Protection Notice. <span className="text-destructive">*</span>
+                      </FormLabel>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </fieldset>
 
-          {state.status === 'error' ? <ErrorMessage message={state.message ?? 'Unable to save consent.'} /> : null}
-          {state.status === 'success' ? <SuccessMessage message="Consent recorded." /> : null}
+            {state.status === 'error' ? (
+              <Alert variant="destructive">
+                <AlertTitle>Unable to save consent</AlertTitle>
+                <AlertDescription>{state.message ?? 'Try again in a moment.'}</AlertDescription>
+              </Alert>
+            ) : null}
+            {state.status === 'success' ? (
+              <Alert variant="default" className="border-primary/30 bg-primary/10 text-primary">
+                <AlertTitle>Consent recorded</AlertTitle>
+                <AlertDescription>Your confirmation is saved.</AlertDescription>
+              </Alert>
+            ) : null}
 
-          <FormSubmit disabled={disabled || policyMissing} pendingLabel="Recording…">
-            Record consent
-          </FormSubmit>
-        </form>
+            <FormSubmit disabled={disabled || policyMissing} pendingLabel="Recording…">
+              Record consent
+            </FormSubmit>
+          </form>
+        </Form>
       </CardContent>
     </Card>
   );
@@ -428,6 +748,19 @@ function SharingCard({
   disabled?: boolean;
 }) {
   const partnerBlocked = actor === 'partner';
+  const form = useForm<SharingFormValues>({
+    defaultValues: {
+      person_id: personId ? String(personId) : '',
+      data_sharing: dataSharingConsent === true ? 'partners' : 'iharc_only',
+    },
+  });
+
+  useEffect(() => {
+    form.reset({
+      person_id: personId ? String(personId) : '',
+      data_sharing: dataSharingConsent === true ? 'partners' : 'iharc_only',
+    });
+  }, [dataSharingConsent, form, personId]);
 
   return (
     <Card className="border-border/40 bg-background">
@@ -436,54 +769,69 @@ function SharingCard({
         <CardDescription>Choose whether IHARC can share with partner organizations.</CardDescription>
       </CardHeader>
       <CardContent>
-        <form action={onSubmit} className="space-y-4">
-          <input type="hidden" name="person_id" value={personId ?? ''} />
-          <fieldset disabled={disabled || partnerBlocked} className="space-y-3">
-            <label className="flex items-start gap-3 rounded-lg border border-border/40 p-3">
-              <input
-                type="radio"
+        <Form {...form}>
+          <form action={onSubmit} className="space-y-4">
+            <input type="hidden" name="person_id" value={form.watch('person_id')} />
+            <fieldset disabled={disabled || partnerBlocked} className="space-y-3">
+              <FormField
+                control={form.control}
                 name="data_sharing"
-                value="iharc_only"
-                defaultChecked={dataSharingConsent !== true}
-                className="mt-[4px] h-4 w-4 accent-primary"
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <FormItem className="space-y-3">
+                    <input type="hidden" name="data_sharing" value={field.value} />
+                    <FormControl>
+                      <RadioGroup value={field.value} onValueChange={field.onChange} className="space-y-3">
+                        <label className="flex items-start gap-3 rounded-lg border border-border/40 p-3">
+                          <RadioGroupItem value="iharc_only" id="data_sharing_iharc" className="mt-[4px]" />
+                          <div>
+                            <p className="text-sm font-medium text-foreground">IHARC only</p>
+                            <p className="text-sm text-muted-foreground">
+                              Only IHARC staff can view and update this record. Recommended if you are unsure.
+                            </p>
+                          </div>
+                        </label>
+                        <label className="flex items-start gap-3 rounded-lg border border-border/40 p-3">
+                          <RadioGroupItem value="partners" id="data_sharing_partners" className="mt-[4px]" />
+                          <div>
+                            <p className="text-sm font-medium text-foreground">IHARC + partner organizations</p>
+                            <p className="text-sm text-muted-foreground">
+                              Trusted partner organizations can view contact info and updates to coordinate services. You can change this later.
+                            </p>
+                          </div>
+                        </label>
+                      </RadioGroup>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              <div>
-                <p className="text-sm font-medium text-foreground">IHARC only</p>
-                <p className="text-sm text-muted-foreground">
-                  Only IHARC staff can view and update this record. Recommended if you are unsure.
-                </p>
-              </div>
-            </label>
-            <label className="flex items-start gap-3 rounded-lg border border-border/40 p-3">
-              <input
-                type="radio"
-                name="data_sharing"
-                value="partners"
-                defaultChecked={dataSharingConsent === true}
-                className="mt-[4px] h-4 w-4 accent-primary"
-              />
-              <div>
-                <p className="text-sm font-medium text-foreground">IHARC + partner organizations</p>
-                <p className="text-sm text-muted-foreground">
-                  Trusted partner organizations can view contact info and updates to coordinate services. You can change this later with IHARC.
-                </p>
-              </div>
-            </label>
-          </fieldset>
+            </fieldset>
 
-          {partnerBlocked ? (
-            <p className="text-sm text-muted-foreground">
-              Partners can review onboarding but cannot change sharing preferences. Ask IHARC staff or the client to choose.
-            </p>
-          ) : null}
+            {partnerBlocked ? (
+              <p className="text-sm text-muted-foreground">
+                Partners can review onboarding but cannot change sharing preferences. Ask IHARC staff or the client to choose.
+              </p>
+            ) : null}
 
-          {state.status === 'error' ? <ErrorMessage message={state.message ?? 'Unable to save sharing preference.'} /> : null}
-          {state.status === 'success' ? <SuccessMessage message="Sharing preference saved." /> : null}
+            {state.status === 'error' ? (
+              <Alert variant="destructive">
+                <AlertTitle>Unable to save sharing choice</AlertTitle>
+                <AlertDescription>{state.message ?? 'Please try again.'}</AlertDescription>
+              </Alert>
+            ) : null}
+            {state.status === 'success' ? (
+              <Alert variant="default" className="border-primary/30 bg-primary/10 text-primary">
+                <AlertTitle>Sharing preference saved</AlertTitle>
+                <AlertDescription>Your preference is recorded.</AlertDescription>
+              </Alert>
+            ) : null}
 
-          <FormSubmit disabled={disabled || partnerBlocked} pendingLabel="Saving…">
-            Save choice
-          </FormSubmit>
-        </form>
+            <FormSubmit disabled={disabled || partnerBlocked} pendingLabel="Saving…">
+              Save choice
+            </FormSubmit>
+          </form>
+        </Form>
       </CardContent>
     </Card>
   );
@@ -505,6 +853,15 @@ function LinkCard({
   disabled?: boolean;
 }) {
   const clientMode = actor === 'client';
+  const form = useForm<LinkFormValues>({
+    defaultValues: {
+      person_id: personId ? String(personId) : '',
+    },
+  });
+
+  useEffect(() => {
+    form.setValue('person_id', personId ? String(personId) : '');
+  }, [form, personId]);
 
   return (
     <Card className="border-border/40 bg-background">
@@ -527,14 +884,26 @@ function LinkCard({
           )}
         </div>
 
-        <form action={onSubmit} className="space-y-3">
-          <input type="hidden" name="person_id" value={personId ?? ''} />
-          {state.status === 'error' ? <ErrorMessage message={state.message ?? 'Unable to link right now.'} /> : null}
-          {state.status === 'success' ? <SuccessMessage message="Account linked." /> : null}
-          <FormSubmit disabled={disabled || !clientMode || hasAccountLink} pendingLabel="Linking…">
-            {hasAccountLink ? 'Account linked' : 'Link my account'}
-          </FormSubmit>
-        </form>
+        <Form {...form}>
+          <form action={onSubmit} className="space-y-3">
+            <input type="hidden" name="person_id" value={form.watch('person_id')} />
+            {state.status === 'error' ? (
+              <Alert variant="destructive">
+                <AlertTitle>Unable to link right now</AlertTitle>
+                <AlertDescription>{state.message ?? 'Try again in a moment.'}</AlertDescription>
+              </Alert>
+            ) : null}
+            {state.status === 'success' ? (
+              <Alert variant="default" className="border-primary/30 bg-primary/10 text-primary">
+                <AlertTitle>Account linked</AlertTitle>
+                <AlertDescription>Your account is connected to this record.</AlertDescription>
+              </Alert>
+            ) : null}
+            <FormSubmit disabled={disabled || !clientMode || hasAccountLink} pendingLabel="Linking…">
+              {hasAccountLink ? 'Account linked' : 'Link my account'}
+            </FormSubmit>
+          </form>
+        </Form>
       </CardContent>
     </Card>
   );
@@ -557,48 +926,6 @@ function FormSubmit({
   );
 }
 
-function Field({
-  label,
-  name,
-  type = 'text',
-  defaultValue,
-  required,
-}: {
-  label: string;
-  name: string;
-  type?: string;
-  defaultValue?: string | number;
-  required?: boolean;
-}) {
-  return (
-    <div className="space-y-1">
-      <Label htmlFor={name} className="text-xs text-foreground">
-        {label} {required ? <span className="text-destructive">*</span> : null}
-      </Label>
-      <Input id={name} name={name} type={type} defaultValue={defaultValue} required={required} />
-    </div>
-  );
-}
-
-function CheckboxField({
-  id,
-  label,
-  defaultChecked,
-  required,
-}: {
-  id: string;
-  label: string;
-  defaultChecked?: boolean;
-  required?: boolean;
-}) {
-  return (
-    <label className="flex items-start gap-3 text-sm text-foreground">
-      <Checkbox id={id} name={id} defaultChecked={defaultChecked} required={required} className="mt-0.5" />
-      <span>{label}</span>
-    </label>
-  );
-}
-
 function PolicyBlock({ title, summary, bodyHtml }: { title: string; summary: string; bodyHtml: string }) {
   return (
     <div className="space-y-1 rounded-2xl border border-border/40 bg-card p-4">
@@ -613,14 +940,6 @@ function PolicyBlock({ title, summary, bodyHtml }: { title: string; summary: str
       </details>
     </div>
   );
-}
-
-function ErrorMessage({ message }: { message: string }) {
-  return <p className="rounded-xl border border-destructive/30 bg-destructive/10 px-3 py-1 text-sm text-destructive">{message}</p>;
-}
-
-function SuccessMessage({ message }: { message: string }) {
-  return <p className="rounded-xl border border-primary/25 bg-primary/10 px-3 py-1 text-sm text-primary">{message}</p>;
 }
 
 function ChecklistItem({ done, children }: { done: boolean; children: ReactNode }) {

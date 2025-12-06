@@ -1,13 +1,15 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { useFormState } from 'react-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Form } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useFormState } from 'react-dom';
 import type { ClientDocument } from '@/lib/documents';
 
 type DocumentsListProps = {
@@ -112,21 +114,21 @@ export function DocumentsList({ documents, onRequestLink, onExtendAccess }: Docu
                   </Button>
                 )}
 
-                <form action={requestAction} className="flex-1 min-w-[140px]">
-                  <input type="hidden" name="path" value={doc.path} />
-                  <input type="hidden" name="reason" value="Client requested new link" />
-                  <Button type="submit" variant="outline" size="sm" className="w-full">
-                    Request new link
-                  </Button>
-                </form>
+                <DocumentActionForm
+                  action={requestAction}
+                  path={doc.path}
+                  reason="Client requested new link"
+                  label="Request new link"
+                  variant="outline"
+                />
 
-                <form action={extendAction} className="flex min-w-[140px] flex-1">
-                  <input type="hidden" name="path" value={doc.path} />
-                  <input type="hidden" name="reason" value="Client requested longer access" />
-                  <Button type="submit" variant="ghost" size="sm" className="w-full">
-                    Extend access
-                  </Button>
-                </form>
+                <DocumentActionForm
+                  action={extendAction}
+                  path={doc.path}
+                  reason="Client requested longer access"
+                  label="Extend access"
+                  variant="ghost"
+                />
               </div>
 
               {requestState?.error ? (
@@ -140,5 +142,34 @@ export function DocumentsList({ documents, onRequestLink, onExtendAccess }: Docu
         </div>
       )}
     </div>
+  );
+}
+
+type DocumentActionFormProps = {
+  action: (formData: FormData) => void | Promise<void>;
+  path: string;
+  reason: string;
+  label: string;
+  variant?: 'default' | 'outline' | 'ghost' | 'secondary' | 'destructive' | 'link' | null;
+};
+
+function DocumentActionForm({ action, path, reason, label, variant = 'outline' }: DocumentActionFormProps) {
+  const form = useForm<{ path: string; reason: string }>({
+    defaultValues: {
+      path,
+      reason,
+    },
+  });
+
+  return (
+    <Form {...form}>
+      <form action={action} className="flex-1 min-w-[140px]">
+        <input type="hidden" {...form.register('path')} value={path} />
+        <input type="hidden" {...form.register('reason')} value={reason} />
+        <Button type="submit" variant={variant ?? 'outline'} size="sm" className="w-full">
+          {label}
+        </Button>
+      </form>
+    </Form>
   );
 }

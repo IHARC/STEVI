@@ -8,7 +8,7 @@ import { ensurePortalProfile } from '@/lib/profile';
 import { maskPhoneNumber, normalizePhoneNumber } from '@/lib/phone';
 import { checkRateLimit } from '@/lib/rate-limit';
 import type { Json } from '@/types/supabase';
-import { FormPageShell } from '@/components/layout/form-mx-auto w-full max-w-6xl px-4 py-8 md:px-6';
+import { FormPageShell } from '@/components/layout/form-page-shell';
 
 export const dynamic = 'force-dynamic';
 

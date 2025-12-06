@@ -1,10 +1,11 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
+import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
+import { Form, FormLabel } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import type { SupportContact, SupportEntry } from '@/lib/marketing/settings';
 import { saveSupports } from './actions';
@@ -12,6 +13,11 @@ import { saveSupports } from './actions';
 type Props = {
   urgent: SupportEntry[];
   mutualAid: string[];
+};
+
+type SupportsFormValues = {
+  urgent_supports_json: string;
+  mutual_aid_json: string;
 };
 
 function serialize(urgent: SupportEntry[], mutualAid: string[]) {
@@ -26,6 +32,12 @@ export function SupportsForm({ urgent, mutualAid }: Props) {
   const [mutualAidItems, setMutualAidItems] = useState<string[]>(mutualAid);
 
   const serialized = useMemo(() => serialize(urgentSupports, mutualAidItems), [urgentSupports, mutualAidItems]);
+  const form = useForm<SupportsFormValues>({
+    defaultValues: {
+      urgent_supports_json: serialized.urgent,
+      mutual_aid_json: serialized.mutualAid,
+    },
+  });
 
   const updateSupport = (index: number, field: keyof SupportEntry, value: string) => {
     setUrgentSupports((prev) => prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)));
@@ -69,139 +81,147 @@ export function SupportsForm({ urgent, mutualAid }: Props) {
     setMutualAidItems((prev) => prev.map((item, i) => (i === index ? value : item)));
   const removeMutualAid = (index: number) => setMutualAidItems((prev) => prev.filter((_, i) => i !== index));
 
-  return (
-    <form action={saveSupports} className="space-y-6">
-      <input type="hidden" name="urgent_supports_json" value={serialized.urgent} />
-      <input type="hidden" name="mutual_aid_json" value={serialized.mutualAid} />
+  useEffect(() => {
+    const next = serialize(urgentSupports, mutualAidItems);
+    form.setValue('urgent_supports_json', next.urgent);
+    form.setValue('mutual_aid_json', next.mutualAid);
+  }, [form, mutualAidItems, urgentSupports]);
 
-      <div className="space-y-3">
-        {urgentSupports.map((support, index) => (
-          <div key={`${support.title}-${index}`} className="space-y-3 rounded-xl border border-border bg-card/40 p-4">
-            <div className="flex items-start justify-between gap-3">
-              <div className="space-y-1 flex-1">
-                <Label htmlFor={`title-${index}`}>Title</Label>
-                <Input
-                  id={`title-${index}`}
-                  value={support.title}
-                  onChange={(e) => updateSupport(index, 'title', e.target.value)}
-                  required
-                  maxLength={120}
-                />
-              </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="text-destructive"
-                onClick={() => removeSupport(index)}
-                aria-label={`Remove support ${support.title || index + 1}`}
-              >
-                <Trash2 className="h-4 w-4" aria-hidden />
-              </Button>
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor={`summary-${index}`}>Summary</Label>
-              <Textarea
-                id={`summary-${index}`}
-                value={support.summary}
-                onChange={(e) => updateSupport(index, 'summary', e.target.value)}
-                required
-                rows={2}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor={`body-${index}`}>Body</Label>
-              <Textarea
-                id={`body-${index}`}
-                value={support.body}
-                onChange={(e) => updateSupport(index, 'body', e.target.value)}
-                required
-                rows={3}
-              />
-            </div>
-            <div className="space-y-1">
-              <div className="flex items-center justify-between">
-                <Label>Contacts</Label>
-                <Button type="button" variant="ghost" onClick={() => addContact(index)} className="gap-2">
-                  <Plus className="h-4 w-4" aria-hidden />
-                  Add contact
+  return (
+    <Form {...form}>
+      <form action={saveSupports} className="space-y-6">
+        <input type="hidden" {...form.register('urgent_supports_json')} value={serialized.urgent} />
+        <input type="hidden" {...form.register('mutual_aid_json')} value={serialized.mutualAid} />
+
+        <div className="space-y-3">
+          {urgentSupports.map((support, index) => (
+            <div key={`${support.title}-${index}`} className="space-y-3 rounded-xl border border-border bg-card/40 p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 space-y-1">
+                  <FormLabel htmlFor={`title-${index}`}>Title</FormLabel>
+                  <Input
+                    id={`title-${index}`}
+                    value={support.title}
+                    onChange={(e) => updateSupport(index, 'title', e.target.value)}
+                    required
+                    maxLength={120}
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="text-destructive"
+                  onClick={() => removeSupport(index)}
+                  aria-label={`Remove support ${support.title || index + 1}`}
+                >
+                  <Trash2 className="h-4 w-4" aria-hidden />
                 </Button>
               </div>
-              <div className="space-y-2">
-                {(support.contacts ?? []).map((contact, contactIndex) => (
-                  <div key={`${contact.label}-${contactIndex}`} className="grid gap-2 md:grid-cols-[1fr,1fr,auto]">
-                    <Input
-                      placeholder="Label (e.g., Dial 2-1-1)"
-                      value={contact.label}
-                      onChange={(e) => updateContact(index, contactIndex, 'label', e.target.value)}
-                      required
-                    />
-                    <Input
-                      placeholder="Href (e.g., tel:211 or https://...)"
-                      value={contact.href ?? ''}
-                      onChange={(e) => updateContact(index, contactIndex, 'href', e.target.value)}
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="text-destructive"
-                      onClick={() => removeContact(index, contactIndex)}
-                      aria-label="Remove contact"
-                    >
-                      <Trash2 className="h-4 w-4" aria-hidden />
-                    </Button>
-                  </div>
-                ))}
+              <div className="space-y-1">
+                <FormLabel htmlFor={`summary-${index}`}>Summary</FormLabel>
+                <Textarea
+                  id={`summary-${index}`}
+                  value={support.summary}
+                  onChange={(e) => updateSupport(index, 'summary', e.target.value)}
+                  required
+                  rows={2}
+                />
+              </div>
+              <div className="space-y-1">
+                <FormLabel htmlFor={`body-${index}`}>Body</FormLabel>
+                <Textarea
+                  id={`body-${index}`}
+                  value={support.body}
+                  onChange={(e) => updateSupport(index, 'body', e.target.value)}
+                  required
+                  rows={3}
+                />
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <FormLabel>Contacts</FormLabel>
+                  <Button type="button" variant="ghost" onClick={() => addContact(index)} className="gap-2">
+                    <Plus className="h-4 w-4" aria-hidden />
+                    Add contact
+                  </Button>
+                </div>
+                <div className="space-y-2">
+                  {(support.contacts ?? []).map((contact, contactIndex) => (
+                    <div key={`${contact.label}-${contactIndex}`} className="grid gap-2 md:grid-cols-[1fr,1fr,auto]">
+                      <Input
+                        placeholder="Label (e.g., Dial 2-1-1)"
+                        value={contact.label}
+                        onChange={(e) => updateContact(index, contactIndex, 'label', e.target.value)}
+                        required
+                      />
+                      <Input
+                        placeholder="Href (e.g., tel:211 or https://...)"
+                        value={contact.href ?? ''}
+                        onChange={(e) => updateContact(index, contactIndex, 'href', e.target.value)}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="text-destructive"
+                        onClick={() => removeContact(index, contactIndex)}
+                        aria-label="Remove contact"
+                      >
+                        <Trash2 className="h-4 w-4" aria-hidden />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-        <Button type="button" variant="outline" onClick={addSupport} className="gap-2">
-          <Plus className="h-4 w-4" aria-hidden />
-          Add support entry
-        </Button>
-      </div>
-
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-lg">Mutual aid notes</p>
-            <p className="text-sm text-muted-foreground">Shown as a list beneath urgent supports.</p>
-          </div>
-          <Button type="button" variant="outline" onClick={addMutualAid} className="gap-2">
+          ))}
+          <Button type="button" variant="outline" onClick={addSupport} className="gap-2">
             <Plus className="h-4 w-4" aria-hidden />
-            Add item
+            Add support entry
           </Button>
         </div>
-        <div className="space-y-2">
-          {mutualAidItems.map((item, index) => (
-            <div key={`${item}-${index}`} className="flex items-center gap-2">
-              <Input
-                value={item}
-                onChange={(e) => updateMutualAid(index, e.target.value)}
-                required
-                className="flex-1"
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="text-destructive"
-                onClick={() => removeMutualAid(index)}
-                aria-label="Remove mutual aid item"
-              >
-                <Trash2 className="h-4 w-4" aria-hidden />
-              </Button>
-            </div>
-          ))}
-        </div>
-      </div>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <Button type="submit">Save supports</Button>
-        <p className="text-sm text-muted-foreground">Changes appear on the public site immediately.</p>
-      </div>
-    </form>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-lg">Mutual aid notes</p>
+              <p className="text-sm text-muted-foreground">Shown as a list beneath urgent supports.</p>
+            </div>
+            <Button type="button" variant="outline" onClick={addMutualAid} className="gap-2">
+              <Plus className="h-4 w-4" aria-hidden />
+              Add item
+            </Button>
+          </div>
+          <div className="space-y-2">
+            {mutualAidItems.map((item, index) => (
+              <div key={`${item}-${index}`} className="flex items-center gap-2">
+                <Input
+                  value={item}
+                  onChange={(e) => updateMutualAid(index, e.target.value)}
+                  required
+                  className="flex-1"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="text-destructive"
+                  onClick={() => removeMutualAid(index)}
+                  aria-label="Remove mutual aid item"
+                >
+                  <Trash2 className="h-4 w-4" aria-hidden />
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <Button type="submit">Save supports</Button>
+          <p className="text-sm text-muted-foreground">Changes appear on the public site immediately.</p>
+        </div>
+      </form>
+    </Form>
   );
 }

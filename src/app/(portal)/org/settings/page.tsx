@@ -110,19 +110,19 @@ export default async function OrgSettingsPage() {
       <div className="grid gap-4 lg:grid-cols-2">
         <OrgContactSettingsForm
           initialValues={{
-            contact_person: organization.contact_person,
-            contact_title: organization.contact_title,
-            contact_email: organization.contact_email,
-            contact_phone: organization.contact_phone,
-            website: organization.website,
+            contact_person: organization.contact_person ?? '',
+            contact_title: organization.contact_title ?? '',
+            contact_email: organization.contact_email ?? '',
+            contact_phone: organization.contact_phone ?? '',
+            website: organization.website ?? '',
           }}
         />
 
         <OrgNotesSettingsForm
           initialValues={{
-            referral_process: organization.referral_process,
-            special_requirements: organization.special_requirements,
-            availability_notes: organization.availability_notes,
+            referral_process: organization.referral_process ?? '',
+            special_requirements: organization.special_requirements ?? '',
+            availability_notes: organization.availability_notes ?? '',
           }}
         />
       </div>

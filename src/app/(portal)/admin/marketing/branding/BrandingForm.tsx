@@ -1,14 +1,21 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
+import { useForm } from 'react-hook-form';
 import { Image as ImageIcon, Loader2, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import { Form, FormField, FormLabel } from '@/components/ui/form';
 import type { BrandingAssets } from '@/lib/marketing/settings';
 import { saveBrandingSettings, uploadBrandingAsset } from './actions';
 
 type Props = {
   branding?: BrandingAssets;
+};
+
+type BrandingFormValues = {
+  branding_logo_light_url: string;
+  branding_logo_dark_url: string;
+  branding_favicon_url: string;
 };
 
 type BrandUploadProps = {
@@ -25,6 +32,14 @@ export function BrandingForm({ branding }: Props) {
   const [logoDarkUrl, setLogoDarkUrl] = useState(branding?.logoDarkUrl ?? '');
   const [faviconUrl, setFaviconUrl] = useState(branding?.faviconUrl ?? '');
   const [isUploading, startUpload] = useTransition();
+
+  const form = useForm<BrandingFormValues>({
+    defaultValues: {
+      branding_logo_light_url: branding?.logoLightUrl ?? '',
+      branding_logo_dark_url: branding?.logoDarkUrl ?? '',
+      branding_favicon_url: branding?.faviconUrl ?? '',
+    },
+  });
 
   const handleBrandUpload = (kind: 'logo_light' | 'logo_dark' | 'favicon', file?: File | null) => {
     if (!file) return;
@@ -44,57 +59,77 @@ export function BrandingForm({ branding }: Props) {
     });
   };
 
+  useEffect(() => {
+    form.setValue('branding_logo_light_url', logoLightUrl);
+    form.setValue('branding_logo_dark_url', logoDarkUrl);
+    form.setValue('branding_favicon_url', faviconUrl);
+  }, [faviconUrl, form, logoDarkUrl, logoLightUrl]);
+
   return (
-    <form action={saveBrandingSettings} className="space-y-6">
-      <input type="hidden" name="branding_logo_light_url" value={logoLightUrl} />
-      <input type="hidden" name="branding_logo_dark_url" value={logoDarkUrl} />
-      <input type="hidden" name="branding_favicon_url" value={faviconUrl} />
-
-      <div className="grid gap-4 md:grid-cols-3">
-        <BrandUpload
-          label="Logo (light mode)"
-          description="Used on light surfaces; transparent PNG/SVG recommended."
-          value={logoLightUrl}
-          onClear={() => setLogoLightUrl('')}
-          onUpload={(file) => handleBrandUpload('logo_light', file)}
-          disabled={isUploading}
+    <Form {...form}>
+      <form action={saveBrandingSettings} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="branding_logo_light_url"
+          render={() => <input type="hidden" name="branding_logo_light_url" value={logoLightUrl} />}
         />
-        <BrandUpload
-          label="Logo (dark mode)"
-          description="Used on dark surfaces; transparent PNG/SVG recommended."
-          value={logoDarkUrl}
-          onClear={() => setLogoDarkUrl('')}
-          onUpload={(file) => handleBrandUpload('logo_dark', file)}
-          disabled={isUploading}
+        <FormField
+          control={form.control}
+          name="branding_logo_dark_url"
+          render={() => <input type="hidden" name="branding_logo_dark_url" value={logoDarkUrl} />}
         />
-        <BrandUpload
-          label="Favicon"
-          description="Square PNG/ICO/SVG, at least 64×64."
-          value={faviconUrl}
-          onClear={() => setFaviconUrl('')}
-          onUpload={(file) => handleBrandUpload('favicon', file)}
-          disabled={isUploading}
+        <FormField
+          control={form.control}
+          name="branding_favicon_url"
+          render={() => <input type="hidden" name="branding_favicon_url" value={faviconUrl} />}
         />
-      </div>
 
-      <div className="space-y-3 rounded-lg border border-border bg-background p-3">
-        <Label className="text-base">Publishing notes</Label>
-        <ul className="list-disc space-y-0.5 pl-5 text-sm text-muted-foreground">
-          <li>All assets publish immediately to the marketing site and STEVI metadata.</li>
-          <li>Use final production files to avoid broken icons for visitors and outreach staff.</li>
-          <li>Uploads replace the existing files; clear a slot if you need to remove an asset.</li>
-        </ul>
-      </div>
+        <div className="grid gap-4 md:grid-cols-3">
+          <BrandUpload
+            label="Logo (light mode)"
+            description="Used on light surfaces; transparent PNG/SVG recommended."
+            value={logoLightUrl}
+            onClear={() => setLogoLightUrl('')}
+            onUpload={(file) => handleBrandUpload('logo_light', file)}
+            disabled={isUploading}
+          />
+          <BrandUpload
+            label="Logo (dark mode)"
+            description="Used on dark surfaces; transparent PNG/SVG recommended."
+            value={logoDarkUrl}
+            onClear={() => setLogoDarkUrl('')}
+            onUpload={(file) => handleBrandUpload('logo_dark', file)}
+            disabled={isUploading}
+          />
+          <BrandUpload
+            label="Favicon"
+            description="Square PNG/ICO/SVG, at least 64×64."
+            value={faviconUrl}
+            onClear={() => setFaviconUrl('')}
+            onUpload={(file) => handleBrandUpload('favicon', file)}
+            disabled={isUploading}
+          />
+        </div>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <Button type="submit" disabled={!logoLightUrl || !logoDarkUrl || !faviconUrl || isUploading}>
-          Save branding
-        </Button>
-        <p className="text-sm text-muted-foreground">
-          Logos and favicon drive navigation, app icon, and shared link previews.
-        </p>
-      </div>
-    </form>
+        <div className="space-y-3 rounded-lg border border-border bg-background p-3">
+          <FormLabel className="text-base">Publishing notes</FormLabel>
+          <ul className="list-disc space-y-0.5 pl-5 text-sm text-muted-foreground">
+            <li>All assets publish immediately to the marketing site and STEVI metadata.</li>
+            <li>Use final production files to avoid broken icons for visitors and outreach staff.</li>
+            <li>Uploads replace the existing files; clear a slot if you need to remove an asset.</li>
+          </ul>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <Button type="submit" disabled={!logoLightUrl || !logoDarkUrl || !faviconUrl || isUploading}>
+            Save branding
+          </Button>
+          <p className="text-sm text-muted-foreground">
+            Logos and favicon drive navigation, app icon, and shared link previews.
+          </p>
+        </div>
+      </form>
+    </Form>
   );
 }
 
@@ -135,7 +170,7 @@ function BrandUpload({ label, description, value, onUpload, onClear, disabled }:
           <div className="flex h-full items-center justify-center text-sm text-muted-foreground">No file selected</div>
         )}
       </div>
-      {value ? <p className="text-xs text-muted-foreground break-all">{value}</p> : null}
+      {value ? <p className="break-all text-xs text-muted-foreground">{value}</p> : null}
     </div>
   );
 }

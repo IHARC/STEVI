@@ -12,7 +12,7 @@ export type ChartConfig = Record<
 
 type ChartContainerProps = React.ComponentProps<'div'> & {
   config?: ChartConfig;
-  children: React.ReactNode;
+  children: React.ReactElement;
 };
 
 const baseStyles: React.CSSProperties = {

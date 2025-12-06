@@ -125,7 +125,6 @@ export default async function AdminOperationsPage() {
         meta={[{ label: 'RLS enforced', tone: 'info' }, { label: 'Live metrics', tone: 'success' }]}
         helperLink={{ href: '/admin/help', label: 'View admin help' }}
         primaryAction={{ label: 'Send notification', href: '/admin/notifications' }}
-        useSplitActions={false}
       />
 
       <section className="space-y-3">

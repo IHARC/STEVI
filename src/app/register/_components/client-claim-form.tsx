@@ -209,7 +209,7 @@ export function ClientClaimForm({
             value={contactMethod}
             onValueChange={(value) => {
               setContactMethod(value as ContactMethod);
-              form.setValue('contact_method', value);
+              form.setValue('contact_method', value as ContactMethod);
             }}
             className="grid gap-3 md:grid-cols-2"
           >
@@ -442,6 +442,7 @@ export function ClientClaimForm({
         <SubmitButton isSuccess={isSuccess} />
       </div>
     </form>
+    </Form>
   );
 }
 

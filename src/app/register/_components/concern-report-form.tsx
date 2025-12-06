@@ -1,15 +1,13 @@
 'use client';
 
-import { useActionState, useState } from 'react';
+import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
+import { useForm } from 'react-hook-form';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  RadioGroup,
-  RadioGroupItem,
-} from '@/components/ui/radio-group';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 
@@ -26,6 +24,16 @@ export const CONCERN_REPORT_INITIAL_STATE: ConcernReportState = {
 
 type ContactPreference = 'anonymous' | 'email' | 'phone';
 
+type ConcernReportValues = {
+  category: string;
+  description: string;
+  location: string;
+  contact_preference: ContactPreference;
+  contact_email: string;
+  contact_phone: string;
+  additional_details: string;
+};
+
 type ConcernReportFormProps = {
   action: (state: ConcernReportState, formData: FormData) => Promise<ConcernReportState>;
   initialState?: ConcernReportState;
@@ -36,161 +44,241 @@ export function ConcernReportForm({
   initialState = CONCERN_REPORT_INITIAL_STATE,
 }: ConcernReportFormProps) {
   const [state, formAction] = useActionState(action, initialState);
-  const [contactPreference, setContactPreference] = useState<ContactPreference>('anonymous');
+  const form = useForm<ConcernReportValues>({
+    defaultValues: {
+      category: 'community_impact',
+      description: '',
+      location: '',
+      contact_preference: 'anonymous',
+      contact_email: '',
+      contact_phone: '',
+      additional_details: '',
+    },
+  });
+
+  const contactPreference = form.watch('contact_preference');
   const isSuccess = state.status === 'success';
 
   return (
-    <form
-      action={formAction}
-      className="space-y-6 rounded-3xl border border-border/40 bg-background p-6 shadow-sm sm:p-8"
-      noValidate
-    >
-      <section className="space-y-3">
-        <header>
-          <p className="text-xs uppercase text-muted-foreground">Community concern</p>
-          <h1 className="text-xl font-medium text-foreground">Report a concern or share feedback</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            We review every submission within two business days. If someone is in immediate danger, call 911. For
-            non-emergency social and health navigation, contact{' '}
-            <a
-              className="underline hover:text-primary"
-              href="https://211ontario.ca"
-              target="_blank"
-              rel="noreferrer"
-            >
-              211 Ontario
-            </a>{' '}
-            by phone, text, or chat — they offer support 24/7 in 150+ languages.
-          </p>
-        </header>
+    <Form {...form}>
+      <form
+        action={formAction}
+        className="space-y-6 rounded-3xl border border-border/40 bg-background p-6 shadow-sm sm:p-8"
+        noValidate
+      >
+        <section className="space-y-3">
+          <header>
+            <p className="text-xs uppercase text-muted-foreground">Community concern</p>
+            <h1 className="text-xl font-medium text-foreground">Report a concern or share feedback</h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              We review every submission within two business days. If someone is in immediate danger, call 911. For
+              non-emergency social and health navigation, contact{' '}
+              <a
+                className="underline hover:text-primary"
+                href="https://211ontario.ca"
+                target="_blank"
+                rel="noreferrer"
+              >
+                211 Ontario
+              </a>{' '}
+              by phone, text, or chat — they offer support 24/7 in 150+ languages.
+            </p>
+          </header>
 
-        {state.error ? (
-          <Alert variant="destructive" className="text-sm">
-            <AlertTitle>We couldn’t submit your concern</AlertTitle>
-            <AlertDescription>{state.error}</AlertDescription>
-          </Alert>
-        ) : null}
+          {state.error ? (
+            <Alert variant="destructive" className="text-sm">
+              <AlertTitle>We couldn’t submit your concern</AlertTitle>
+              <AlertDescription>{state.error}</AlertDescription>
+            </Alert>
+          ) : null}
 
-        {isSuccess && state.message ? (
-          <Alert className="border-primary bg-primary/10 text-sm text-primary">
-            <AlertTitle>Thanks for reaching out</AlertTitle>
-            <AlertDescription className="space-y-2">
-              <p>{state.message}</p>
-              {state.trackingCode ? (
-                <p className="font-mono text-xs">
-                  Tracking code: <strong>{state.trackingCode}</strong>. Share this code if you contact us for an update.
-                </p>
-              ) : null}
-            </AlertDescription>
-          </Alert>
-        ) : null}
-      </section>
+          {isSuccess && state.message ? (
+            <Alert className="border-primary bg-primary/10 text-sm text-primary">
+              <AlertTitle>Thanks for reaching out</AlertTitle>
+              <AlertDescription className="space-y-2">
+                <p>{state.message}</p>
+                {state.trackingCode ? (
+                  <p className="font-mono text-xs">
+                    Tracking code: <strong>{state.trackingCode}</strong>. Share this code if you contact us for an update.
+                  </p>
+                ) : null}
+              </AlertDescription>
+            </Alert>
+          ) : null}
+        </section>
 
-      <section className="space-y-4">
-        <div className="grid gap-2">
-          <Label htmlFor="category">What type of concern is this? *</Label>
-          <Select name="category" defaultValue="community_impact" required>
-            <SelectTrigger id="category">
-              <SelectValue placeholder="Select a category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="community_impact">Community impact near IHARC sites</SelectItem>
-              <SelectItem value="service_feedback">Service feedback or kudos</SelectItem>
-              <SelectItem value="safety_hazard">Safety hazard or needle clean-up</SelectItem>
-              <SelectItem value="discrimination">Discrimination or harassment</SelectItem>
-              <SelectItem value="encampment_support">Encampment or welfare check request</SelectItem>
-              <SelectItem value="other">Other</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <section className="space-y-4">
+          <FormField
+            control={form.control}
+            name="category"
+            rules={{ required: 'Choose a category' }}
+            render={({ field }) => (
+              <FormItem className="grid gap-2">
+                <FormLabel htmlFor="category">What type of concern is this? *</FormLabel>
+                <input type="hidden" name="category" value={field.value} />
+                <FormControl>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger id="category">
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="community_impact">Community impact near IHARC sites</SelectItem>
+                      <SelectItem value="service_feedback">Service feedback or kudos</SelectItem>
+                      <SelectItem value="safety_hazard">Safety hazard or needle clean-up</SelectItem>
+                      <SelectItem value="discrimination">Discrimination or harassment</SelectItem>
+                      <SelectItem value="encampment_support">Encampment or welfare check request</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <div className="grid gap-2">
-          <Label htmlFor="description">What happened? *</Label>
-          <Textarea
-            id="description"
+          <FormField
+            control={form.control}
             name="description"
-            rows={5}
-            required
-            placeholder="Share what you witnessed, when it happened, and who was involved (if known)."
+            rules={{ required: 'Tell us what happened' }}
+            render={({ field }) => (
+              <FormItem className="grid gap-2">
+                <FormLabel htmlFor="description">What happened? *</FormLabel>
+                <FormControl>
+                  <Textarea
+                    id="description"
+                    rows={5}
+                    required
+                    placeholder="Share what you witnessed, when it happened, and who was involved (if known)."
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
 
-        <div className="grid gap-2">
-          <Label htmlFor="location">Where did this happen? *</Label>
-          <Input
-            id="location"
+          <FormField
+            control={form.control}
             name="location"
-            required
-            maxLength={200}
-            placeholder="Cross-streets, landmarks, shelter/hotel name, etc."
+            rules={{ required: 'Location is required' }}
+            render={({ field }) => (
+              <FormItem className="grid gap-2">
+                <FormLabel htmlFor="location">Where did this happen? *</FormLabel>
+                <FormControl>
+                  <Input
+                    id="location"
+                    required
+                    maxLength={200}
+                    placeholder="Cross-streets, landmarks, shelter/hotel name, etc."
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
 
-        <fieldset className="space-y-3 rounded-xl border border-border/30 p-4">
-          <legend className="text-sm font-medium text-foreground">How should we follow up?</legend>
-          <RadioGroup
-            value={contactPreference}
-            onValueChange={(value) => setContactPreference(value as ContactPreference)}
-            className="grid gap-3 md:grid-cols-3"
-          >
-            <ContactOption
-              value="anonymous"
-              title="Anonymous"
-              description="Get a tracking code only. Provide this if you contact us later."
-            />
-            <ContactOption
-              value="email"
-              title="Email"
-              description="Receive updates and clarification questions by email."
-            />
-            <ContactOption
-              value="phone"
-              title="Phone"
-              description="We’ll text or call if it’s safe. Leave details below."
-            />
-          </RadioGroup>
+          <FormField
+            control={form.control}
+            name="contact_preference"
+            render={({ field }) => (
+              <FormItem className="space-y-3 rounded-xl border border-border/30 p-4">
+                <FormLabel className="text-sm font-medium text-foreground">How should we follow up?</FormLabel>
+                <input type="hidden" name="contact_preference" value={field.value} />
+                <FormControl>
+                  <RadioGroup
+                    value={field.value}
+                    onValueChange={(value) => field.onChange(value as ContactPreference)}
+                    className="grid gap-3 md:grid-cols-3"
+                  >
+                    <ContactOption
+                      value="anonymous"
+                      title="Anonymous"
+                      description="Get a tracking code only. Provide this if you contact us later."
+                    />
+                    <ContactOption
+                      value="email"
+                      title="Email"
+                      description="Receive updates and clarification questions by email."
+                    />
+                    <ContactOption
+                      value="phone"
+                      title="Phone"
+                      description="We’ll text or call if it’s safe. Leave details below."
+                    />
+                  </RadioGroup>
+                </FormControl>
 
-          {contactPreference === 'email' ? (
-            <div className="grid gap-2">
-              <Label htmlFor="contact_email">Email address *</Label>
-              <Input id="contact_email" name="contact_email" type="email" autoComplete="email" required />
-            </div>
-          ) : null}
+                {contactPreference === 'email' ? (
+                  <FormField
+                    control={form.control}
+                    name="contact_email"
+                    rules={{ required: 'Email is required for follow up' }}
+                    render={({ field }) => (
+                      <FormItem className="grid gap-2">
+                        <FormLabel htmlFor="contact_email">Email address *</FormLabel>
+                        <FormControl>
+                          <Input id="contact_email" type="email" autoComplete="email" required {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ) : null}
 
-          {contactPreference === 'phone' ? (
-            <div className="grid gap-2">
-              <Label htmlFor="contact_phone">Phone number *</Label>
-              <Input
-                id="contact_phone"
-                name="contact_phone"
-                type="tel"
-                autoComplete="tel"
-                inputMode="tel"
-                required
-                placeholder="+16475551234"
-              />
-            </div>
-          ) : null}
-        </fieldset>
+                {contactPreference === 'phone' ? (
+                  <FormField
+                    control={form.control}
+                    name="contact_phone"
+                    rules={{ required: 'Phone number is required for follow up' }}
+                    render={({ field }) => (
+                      <FormItem className="grid gap-2">
+                        <FormLabel htmlFor="contact_phone">Phone number *</FormLabel>
+                        <FormControl>
+                          <Input
+                            id="contact_phone"
+                            type="tel"
+                            autoComplete="tel"
+                            inputMode="tel"
+                            required
+                            placeholder="+16475551234"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ) : null}
+              </FormItem>
+            )}
+          />
 
-        <div className="grid gap-2">
-          <Label htmlFor="additional_details">Anything else we should know?</Label>
-          <Textarea
-            id="additional_details"
+          <FormField
+            control={form.control}
             name="additional_details"
-            rows={3}
-            placeholder="Safety notes, people involved, or supports already in place."
+            render={({ field }) => (
+              <FormItem className="grid gap-2">
+                <FormLabel htmlFor="additional_details">Anything else we should know?</FormLabel>
+                <FormControl>
+                  <Textarea
+                    id="additional_details"
+                    rows={3}
+                    placeholder="Safety notes, people involved, or supports already in place."
+                    {...field}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
           />
+        </section>
+
+        <div className="flex items-center justify-between gap-4">
+          <p className="text-xs text-muted-foreground">We log every submission and keep sensitive details private.</p>
+          <SubmitButton isSuccess={isSuccess} />
         </div>
-
-        <input type="hidden" name="contact_preference" value={contactPreference} />
-      </section>
-
-      <div className="flex items-center justify-between gap-4">
-        <p className="text-xs text-muted-foreground">We log every submission and keep sensitive details private.</p>
-        <SubmitButton isSuccess={isSuccess} />
-      </div>
-    </form>
+      </form>
+    </Form>
   );
 }
 

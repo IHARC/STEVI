@@ -1,13 +1,20 @@
 'use client';
 
+import { useForm } from 'react-hook-form';
 import { useFormStatus } from 'react-dom';
 import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 
 type CancelAppointmentFormProps = {
   action: (formData: FormData) => Promise<{ success: boolean; error?: string } | void>;
   appointmentId: string;
   variant?: 'outline' | 'secondary' | 'destructive';
+};
+
+type CancelAppointmentValues = {
+  appointment_id: string;
+  cancellation_reason: string;
 };
 
 function SubmitButton({ variant }: { variant: CancelAppointmentFormProps['variant'] }) {
@@ -18,7 +25,6 @@ function SubmitButton({ variant }: { variant: CancelAppointmentFormProps['varian
       variant={variant ?? 'destructive'}
       size="sm"
       disabled={pending}
-      stateLayerTone={variant === 'destructive' ? 'destructive' : undefined}
     >
       {pending ? 'Cancelling…' : 'Cancel appointment'}
     </Button>
@@ -26,18 +32,38 @@ function SubmitButton({ variant }: { variant: CancelAppointmentFormProps['varian
 }
 
 export function CancelAppointmentForm({ action, appointmentId, variant }: CancelAppointmentFormProps) {
+  const form = useForm<CancelAppointmentValues>({
+    defaultValues: {
+      appointment_id: appointmentId,
+      cancellation_reason: '',
+    },
+  });
+
   return (
-    <form
-      action={action as unknown as (formData: FormData) => Promise<void>}
-      className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center"
-    >
-      <input type="hidden" name="appointment_id" value={appointmentId} />
-      <Input
-        name="cancellation_reason"
-        placeholder="Optional reason"
-        className="sm:min-w-[200px]"
-      />
-      <SubmitButton variant={variant} />
-    </form>
+    <Form {...form}>
+      <form
+        action={action as unknown as (formData: FormData) => Promise<void>}
+        className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center"
+      >
+        <input type="hidden" name="appointment_id" value={form.watch('appointment_id')} />
+        <FormField
+          control={form.control}
+          name="cancellation_reason"
+          render={({ field }) => (
+            <FormItem className="flex-1">
+              <FormLabel className="sr-only">Cancellation reason</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  placeholder="Optional reason"
+                  className="sm:min-w-[200px]"
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        <SubmitButton variant={variant} />
+      </form>
+    </Form>
   );
 }

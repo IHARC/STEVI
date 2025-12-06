@@ -7,7 +7,7 @@ import { resolveNextPath } from '@/lib/auth';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { resolveLandingPath } from '@/lib/portal-navigation';
-import { FormPageShell } from '@/components/layout/form-mx-auto w-full max-w-6xl px-4 py-8 md:px-6';
+import { FormPageShell } from '@/components/layout/form-page-shell';
 
 export const dynamic = 'force-dynamic';
 

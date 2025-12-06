@@ -13,6 +13,7 @@ export default defineConfig({
     // tests inside worker processes. Using the legacy threads pool restores
     // prior behavior and keeps the suite stable.
     pool: 'threads',
+    exclude: ['playwright/**/*', 'node_modules/**'],
   },
   resolve: {
     alias: {

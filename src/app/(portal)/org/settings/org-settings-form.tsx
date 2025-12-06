@@ -15,17 +15,17 @@ import { updateOrgSettingsAction, type OrgSettingsFormState } from './actions';
 const initialState: OrgSettingsFormState = { status: 'idle' };
 
 type ContactValues = {
-  contact_person: string | null;
-  contact_title: string | null;
-  contact_email: string | null;
-  contact_phone: string | null;
-  website: string | null;
+  contact_person: string;
+  contact_title: string;
+  contact_email: string;
+  contact_phone: string;
+  website: string;
 };
 
 type NotesValues = {
-  referral_process: string | null;
-  special_requirements: string | null;
-  availability_notes: string | null;
+  referral_process: string;
+  special_requirements: string;
+  availability_notes: string;
 };
 
 export function OrgContactSettingsForm({ initialValues }: { initialValues: ContactValues }) {

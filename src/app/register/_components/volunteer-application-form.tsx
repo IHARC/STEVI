@@ -2,11 +2,12 @@
 
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
+import { useForm } from 'react-hook-form';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 
 export type VolunteerApplicationState = {
@@ -17,6 +18,21 @@ export type VolunteerApplicationState = {
 
 export const VOLUNTEER_APPLICATION_INITIAL_STATE: VolunteerApplicationState = {
   status: 'idle',
+};
+
+type VolunteerApplicationValues = {
+  next: string;
+  full_name: string;
+  pronouns: string;
+  email: string;
+  phone: string;
+  interests: string;
+  availability: string;
+  password: string;
+  password_confirm: string;
+  consent_privacy: boolean;
+  consent_terms: boolean;
+  consent_screening: boolean;
 };
 
 type VolunteerApplicationFormProps = {
@@ -31,160 +47,279 @@ export function VolunteerApplicationForm({
   nextPath,
 }: VolunteerApplicationFormProps) {
   const [state, formAction] = useActionState(action, initialState);
+  const form = useForm<VolunteerApplicationValues>({
+    defaultValues: {
+      next: nextPath,
+      full_name: '',
+      pronouns: '',
+      email: '',
+      phone: '',
+      interests: '',
+      availability: '',
+      password: '',
+      password_confirm: '',
+      consent_privacy: false,
+      consent_terms: false,
+      consent_screening: false,
+    },
+  });
   const isSuccess = state.status === 'success';
 
   return (
-    <form
-      action={formAction}
-      className="space-y-6 rounded-3xl border border-border/40 bg-background p-6 shadow-sm sm:p-8"
-      noValidate
-    >
-      <input type="hidden" name="next" value={nextPath} />
+    <Form {...form}>
+      <form
+        action={formAction}
+        className="space-y-6 rounded-3xl border border-border/40 bg-background p-6 shadow-sm sm:p-8"
+        noValidate
+      >
+        <input type="hidden" {...form.register('next')} />
 
-      <section className="space-y-3">
-        <header>
-          <p className="text-xs uppercase text-muted-foreground">Volunteer onboarding</p>
-          <h1 className="text-xl font-medium text-foreground">Apply as a volunteer</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Tell us how you’d like to help neighbours. We’ll reach out about orientation, background checks, and shifts.
-          </p>
-        </header>
+        <section className="space-y-3">
+          <header>
+            <p className="text-xs uppercase text-muted-foreground">Volunteer onboarding</p>
+            <h1 className="text-xl font-medium text-foreground">Apply as a volunteer</h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Tell us how you’d like to help neighbours. We’ll reach out about orientation, background checks, and shifts.
+            </p>
+          </header>
 
-        {state.error ? (
-          <Alert variant="destructive" className="text-sm">
-            <AlertTitle>We couldn’t submit your application</AlertTitle>
-            <AlertDescription>{state.error}</AlertDescription>
-          </Alert>
-        ) : null}
+          {state.error ? (
+            <Alert variant="destructive" className="text-sm">
+              <AlertTitle>We couldn’t submit your application</AlertTitle>
+              <AlertDescription>{state.error}</AlertDescription>
+            </Alert>
+          ) : null}
 
-        {isSuccess && state.message ? (
-          <Alert className="border-primary bg-primary/10 text-sm text-primary">
-            <AlertTitle>Volunteer application received</AlertTitle>
-            <AlertDescription>{state.message}</AlertDescription>
-          </Alert>
-        ) : null}
-      </section>
+          {isSuccess && state.message ? (
+            <Alert className="border-primary bg-primary/10 text-sm text-primary">
+              <AlertTitle>Volunteer application received</AlertTitle>
+              <AlertDescription>{state.message}</AlertDescription>
+            </Alert>
+          ) : null}
+        </section>
 
-      <section className="space-y-4">
-        <div className="grid gap-3 md:grid-cols-2">
-          <div className="grid gap-2">
-            <Label htmlFor="full_name">Your name *</Label>
-            <Input id="full_name" name="full_name" required maxLength={120} autoComplete="name" />
+        <section className="space-y-4">
+          <div className="grid gap-3 md:grid-cols-2">
+            <FormField
+              control={form.control}
+              name="full_name"
+              rules={{ required: 'Name is required' }}
+              render={({ field }) => (
+                <FormItem className="grid gap-2">
+                  <FormLabel htmlFor="full_name">Your name *</FormLabel>
+                  <FormControl>
+                    <Input id="full_name" autoComplete="name" required maxLength={120} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="pronouns"
+              render={({ field }) => (
+                <FormItem className="grid gap-2">
+                  <FormLabel htmlFor="pronouns">Pronouns (optional)</FormLabel>
+                  <FormControl>
+                    <Input id="pronouns" maxLength={80} placeholder="She/her, they/them…" {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="pronouns">Pronouns (optional)</Label>
-            <Input id="pronouns" name="pronouns" maxLength={80} placeholder="She/her, they/them…" />
-          </div>
-        </div>
 
-        <div className="grid gap-2">
-          <Label htmlFor="email">Email *</Label>
-          <Input id="email" name="email" type="email" autoComplete="email" required placeholder="you@example.ca" />
-        </div>
+          <FormField
+            control={form.control}
+            name="email"
+            rules={{ required: 'Email is required' }}
+            render={({ field }) => (
+              <FormItem className="grid gap-2">
+                <FormLabel htmlFor="email">Email *</FormLabel>
+                <FormControl>
+                  <Input id="email" type="email" autoComplete="email" required placeholder="you@example.ca" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <div className="grid gap-2">
-          <Label htmlFor="phone">Phone (optional)</Label>
-          <Input id="phone" name="phone" type="tel" autoComplete="tel" inputMode="tel" placeholder="+16475551234" />
-        </div>
+          <FormField
+            control={form.control}
+            name="phone"
+            render={({ field }) => (
+              <FormItem className="grid gap-2">
+                <FormLabel htmlFor="phone">Phone (optional)</FormLabel>
+                <FormControl>
+                  <Input id="phone" type="tel" autoComplete="tel" inputMode="tel" placeholder="+16475551234" {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
 
-        <div className="grid gap-2">
-          <Label htmlFor="interests">How would you like to help? *</Label>
-          <Textarea
-            id="interests"
+          <FormField
+            control={form.control}
             name="interests"
-            rows={3}
-            required
-            placeholder="Example: outreach meal prep, winter clothing drives, art drop-ins, transportation."
+            rules={{ required: 'Describe how you would like to help' }}
+            render={({ field }) => (
+              <FormItem className="grid gap-2">
+                <FormLabel htmlFor="interests">How would you like to help? *</FormLabel>
+                <FormControl>
+                  <Textarea
+                    id="interests"
+                    rows={3}
+                    required
+                    placeholder="Example: outreach meal prep, winter clothing drives, art drop-ins, transportation."
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </div>
 
-        <div className="grid gap-2">
-          <Label htmlFor="availability">Availability (optional)</Label>
-          <Textarea
-            id="availability"
+          <FormField
+            control={form.control}
             name="availability"
-            rows={2}
-            placeholder="Weekday evenings, weekends, once a month, etc."
+            render={({ field }) => (
+              <FormItem className="grid gap-2">
+                <FormLabel htmlFor="availability">Availability (optional)</FormLabel>
+                <FormControl>
+                  <Textarea
+                    id="availability"
+                    rows={2}
+                    placeholder="Weekday evenings, weekends, once a month, etc."
+                    {...field}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
           />
-        </div>
 
-        <div className="grid gap-3 md:grid-cols-2">
-          <div className="grid gap-2">
-            <Label htmlFor="password">Create a password *</Label>
-            <Input
-              id="password"
+          <div className="grid gap-3 md:grid-cols-2">
+            <FormField
+              control={form.control}
               name="password"
-              type="password"
-              autoComplete="new-password"
-              required
-              minLength={12}
-              placeholder="At least 12 characters"
+              rules={{ required: 'Create a password' }}
+              render={({ field }) => (
+                <FormItem className="grid gap-2">
+                  <FormLabel htmlFor="password">Create a password *</FormLabel>
+                  <FormControl>
+                    <Input
+                      id="password"
+                      type="password"
+                      autoComplete="new-password"
+                      required
+                      minLength={12}
+                      placeholder="At least 12 characters"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="password_confirm">Confirm password *</Label>
-            <Input
-              id="password_confirm"
+            <FormField
+              control={form.control}
               name="password_confirm"
-              type="password"
-              autoComplete="new-password"
-              required
-              minLength={12}
-              placeholder="Re-enter your password"
+              rules={{ required: 'Confirm password' }}
+              render={({ field }) => (
+                <FormItem className="grid gap-2">
+                  <FormLabel htmlFor="password_confirm">Confirm password *</FormLabel>
+                  <FormControl>
+                    <Input
+                      id="password_confirm"
+                      type="password"
+                      autoComplete="new-password"
+                      required
+                      minLength={12}
+                      placeholder="Re-enter your password"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
           </div>
+
+          <div className="space-y-3 rounded-xl border border-border/30 p-4">
+            <FormField
+              control={form.control}
+              name="consent_privacy"
+              rules={{ required: true }}
+              render={({ field }) => (
+                <FormItem className="flex items-start gap-3 text-sm text-foreground">
+                  <input type="hidden" name="consent_privacy" value={field.value ? 'on' : ''} />
+                  <FormControl>
+                    <Checkbox
+                      id="consent_privacy_volunteer"
+                      checked={field.value}
+                      onCheckedChange={(checked) => field.onChange(Boolean(checked))}
+                      className="mt-1"
+                    />
+                  </FormControl>
+                  <FormLabel htmlFor="consent_privacy_volunteer" className="font-normal">
+                    I understand IHARC will store my application and contact me about volunteer onboarding. <span className="text-destructive">*</span>
+                  </FormLabel>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="consent_terms"
+              rules={{ required: true }}
+              render={({ field }) => (
+                <FormItem className="flex items-start gap-3 text-sm text-foreground">
+                  <input type="hidden" name="consent_terms" value={field.value ? 'on' : ''} />
+                  <FormControl>
+                    <Checkbox
+                      id="consent_terms_volunteer"
+                      checked={field.value}
+                      onCheckedChange={(checked) => field.onChange(Boolean(checked))}
+                      className="mt-1"
+                    />
+                  </FormControl>
+                  <FormLabel htmlFor="consent_terms_volunteer" className="font-normal">
+                    I agree to follow IHARC’s volunteer code of conduct and privacy practices. <span className="text-destructive">*</span>
+                  </FormLabel>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="consent_screening"
+              rules={{ required: true }}
+              render={({ field }) => (
+                <FormItem className="flex items-start gap-3 text-sm text-foreground">
+                  <input type="hidden" name="consent_screening" value={field.value ? 'on' : ''} />
+                  <FormControl>
+                    <Checkbox
+                      id="consent_screening"
+                      checked={field.value}
+                      onCheckedChange={(checked) => field.onChange(Boolean(checked))}
+                      className="mt-1"
+                    />
+                  </FormControl>
+                  <FormLabel htmlFor="consent_screening" className="font-normal">
+                    I consent to required screenings (background checks, references) before volunteering. <span className="text-destructive">*</span>
+                  </FormLabel>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </section>
+
+        <div className="flex items-center justify-between gap-4">
+          <p className="text-xs text-muted-foreground">
+            Volunteers receive limited access until screening and training are complete. You can withdraw at any time.
+          </p>
+          <SubmitButton isSuccess={isSuccess} />
         </div>
-
-        <div className="space-y-3 rounded-xl border border-border/30 p-4">
-          <ConsentCheckbox
-            id="consent_privacy_volunteer"
-            name="consent_privacy"
-            label="I understand IHARC will store my application and contact me about volunteer onboarding."
-            required
-          />
-          <ConsentCheckbox
-            id="consent_terms_volunteer"
-            name="consent_terms"
-            label="I agree to follow IHARC’s volunteer code of conduct and privacy practices."
-            required
-          />
-          <ConsentCheckbox
-            id="consent_screening"
-            name="consent_screening"
-            label="I consent to required screenings (background checks, references) before volunteering."
-            required
-          />
-        </div>
-      </section>
-
-      <div className="flex items-center justify-between gap-4">
-        <p className="text-xs text-muted-foreground">
-          Volunteers receive limited access until screening and training are complete. You can withdraw at any time.
-        </p>
-        <SubmitButton isSuccess={isSuccess} />
-      </div>
-    </form>
-  );
-}
-
-function ConsentCheckbox({
-  id,
-  name,
-  label,
-  required = false,
-}: {
-  id: string;
-  name: string;
-  label: string;
-  required?: boolean;
-}) {
-  return (
-    <label htmlFor={id} className="flex items-start gap-3 text-sm text-foreground">
-      <Checkbox id={id} name={name} required={required} className="mt-1" />
-      <span>
-        {label} {required ? <span className="text-destructive">*</span> : null}
-      </span>
-    </label>
+      </form>
+    </Form>
   );
 }
 
