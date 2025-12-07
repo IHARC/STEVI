@@ -5,11 +5,13 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from '@/components/ui/navigation-menu';
 import { CommandPalette } from '@/components/layout/command-palette';
-import { QuickCreateButton } from '@/components/layout/quick-create-button';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
 import { AppNavigationMobile } from '@/components/layout/app-navigation';
 import { APP_ICON_MAP, type AppIconName } from '@/lib/app-icons';
 import { cn } from '@/lib/utils';
+import { Eye } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useOptionalPortalLayout } from '@/components/providers/portal-layout-provider';
 import type { CommandPaletteItem } from '@/lib/portal-access';
 import type { ResolvedBrandingAssets } from '@/lib/marketing/branding';
 import type { UserNavigation } from '@/components/layout/user-nav';
@@ -31,6 +33,8 @@ export function TopNav({
   const pathname = usePathname() ?? '/';
   const { desktop, mobile } = navigation;
   const hasNav = navSections.length > 0;
+  const layout = useOptionalPortalLayout();
+  const showClientPreviewCta = layout?.activeArea !== 'client';
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background/85 text-foreground shadow-sm backdrop-blur">
@@ -40,53 +44,80 @@ export function TopNav({
       >
         Skip to content
       </a>
-      <div className="mx-auto flex w-full max-w-6xl items-center gap-3 px-4 py-3 md:px-6">
-        <div className="flex min-w-0 flex-1 items-center gap-3">
-          {hasNav ? (
-            <div className="lg:hidden">
-              <AppNavigationMobile navSections={navSections} />
-            </div>
-          ) : null}
-          <Link
-            href="/"
-            className="inline-flex items-center gap-3 rounded-lg border border-transparent px-3 py-1.5 transition-colors hover:border-border/50 hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-            aria-label="STEVI home"
-          >
-            <Image
-              src={branding.logoLightUrl}
-              alt="IHARC"
-              width={56}
-              height={56}
-              priority
-              className="h-9 w-auto dark:hidden"
-            />
-            <Image
-              src={branding.logoDarkUrl}
-              alt="IHARC"
-              width={56}
-              height={56}
-              priority
-              className="hidden h-8 w-auto dark:block"
-            />
-            <span className="text-left leading-tight">
-              <span className="block text-base font-semibold text-foreground">STEVI</span>
-              <span className="block text-xs text-muted-foreground">Client Support Portal</span>
-            </span>
-          </Link>
+      <div className="mx-auto w-full max-w-6xl px-4 py-3 md:px-6">
+        <div className="grid w-full grid-cols-[auto_1fr] items-center gap-3 md:gap-4 lg:grid-cols-[auto_1fr_auto]">
+          <div className="flex min-w-0 items-center gap-3">
+            {hasNav ? (
+              <div className="lg:hidden">
+                <AppNavigationMobile navSections={navSections} />
+              </div>
+            ) : null}
+            <Link
+              href="/"
+              className="inline-flex items-center gap-3 rounded-lg border border-transparent px-3 py-1.5 transition-colors hover:border-border/50 hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              aria-label="STEVI home"
+            >
+              <Image
+                src={branding.logoLightUrl}
+                alt="IHARC"
+                width={56}
+                height={56}
+                priority
+                className="h-9 w-auto dark:hidden"
+              />
+              <Image
+                src={branding.logoDarkUrl}
+                alt="IHARC"
+                width={56}
+                height={56}
+                priority
+                className="hidden h-8 w-auto dark:block"
+              />
+              <span className="text-left leading-tight">
+                <span className="block text-base font-semibold text-foreground">STEVI</span>
+                <span className="block text-xs text-muted-foreground">Client Support Portal</span>
+              </span>
+            </Link>
+          </div>
 
           {hasNav ? (
-            <div className="hidden lg:flex">
+            <nav aria-label="Primary navigation" className="hidden min-w-0 lg:flex">
               <TopNavMenu navSections={navSections} pathname={pathname} />
-            </div>
+            </nav>
           ) : null}
-        </div>
 
-        <div className="flex flex-1 items-center justify-end gap-2">
-          <CommandPalette items={commands} compactTrigger className="hidden sm:flex" />
-          <QuickCreateButton />
-          <ThemeToggle />
-          <div className="hidden md:flex items-center gap-2">{desktop}</div>
-          <div className="flex items-center gap-2 md:hidden">{mobile}</div>
+          <div className="flex items-center justify-end gap-2">
+            {showClientPreviewCta ? (
+              <Button
+                asChild
+                size="sm"
+                variant="secondary"
+                className="hidden sm:inline-flex"
+              >
+                <Link href="/home" aria-label="Preview client portal">
+                  <Eye className="h-4 w-4" aria-hidden />
+                  <span className="text-sm font-semibold">Preview client portal</span>
+                </Link>
+              </Button>
+            ) : null}
+            <CommandPalette items={commands} compactTrigger className="hidden sm:flex" />
+            <ThemeToggle />
+            <div className="hidden md:flex items-center gap-2">{desktop}</div>
+            <div className="flex items-center gap-2 md:hidden">{mobile}</div>
+            {showClientPreviewCta ? (
+              <Button
+                asChild
+                size="sm"
+                variant="secondary"
+                className="sm:hidden"
+              >
+                <Link href="/home" aria-label="Preview client portal">
+                  <Eye className="h-4 w-4" aria-hidden />
+                  <span className="text-sm font-semibold">Preview portal</span>
+                </Link>
+              </Button>
+            ) : null}
+          </div>
         </div>
       </div>
     </header>
@@ -100,8 +131,8 @@ type NavMenuProps = {
 
 function TopNavMenu({ navSections, pathname }: NavMenuProps) {
   return (
-    <NavigationMenu className="w-full">
-      <NavigationMenuList>
+    <NavigationMenu className="w-full max-w-full justify-start">
+      <NavigationMenuList className="justify-start">
         {navSections.map((section) => (
           <NavigationMenuItem key={section.id}>
             <NavigationMenuTrigger className="text-sm font-semibold capitalize">{section.label}</NavigationMenuTrigger>

@@ -24,7 +24,7 @@ export default async function PortalLayout({ children }: { children: ReactNode }
     currentPathname,
     supabase,
   } = await getPortalRequestContext();
-  const navSections = buildPortalNav(portalAccess);
+  const navSections = buildPortalNav(portalAccess, { activeArea });
 
   if (navSections.length === 0) {
     redirect(landingPath);

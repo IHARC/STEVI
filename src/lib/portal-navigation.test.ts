@@ -84,7 +84,7 @@ describe('buildPortalNav', () => {
       organizationId: 12,
     };
 
-    const sectionIds = buildPortalNav(access).map((section) => section.id);
+    const sectionIds = buildPortalNav(access, { activeArea: 'client' }).map((section) => section.id);
     expect(sectionIds).toEqual(expect.arrayContaining(['client-portal', 'staff-tools', 'admin', 'organization']));
   });
 
@@ -94,6 +94,29 @@ describe('buildPortalNav', () => {
     expect(sections).toContain('staff-tools');
     expect(sections).not.toContain('admin');
     expect(sections).not.toContain('organization');
+  });
+
+  it('hides client portal section for non-client area when user has higher access', () => {
+    const access = {
+      ...baseAccess,
+      canAccessAdminWorkspace: true,
+      canAccessStaffWorkspace: true,
+    };
+
+    const sections = buildPortalNav(access, { activeArea: 'admin' }).map((section) => section.id);
+    expect(sections).toContain('admin');
+    expect(sections).toContain('staff-tools');
+    expect(sections).not.toContain('client-portal');
+  });
+
+  it('keeps client portal when explicitly in client area (preview)', () => {
+    const access = {
+      ...baseAccess,
+      canAccessAdminWorkspace: true,
+    };
+
+    const sections = buildPortalNav(access, { activeArea: 'client' }).map((section) => section.id);
+    expect(sections).toContain('client-portal');
   });
 });
 

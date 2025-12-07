@@ -265,11 +265,20 @@ function filterGroups(groups: NavGroupDefinition[], access: PortalAccess): NavGr
     .filter((group) => group.items.length > 0);
 }
 
-export function buildPortalNav(access: PortalAccess | null): NavSection[] {
+export function buildPortalNav(
+  access: PortalAccess | null,
+  options: { activeArea?: PortalArea } = {},
+): NavSection[] {
   if (!access) return [];
+
+  const { activeArea } = options;
+  const hasNonClientAccess =
+    access.canAccessAdminWorkspace || access.canAccessOrgWorkspace || access.canAccessStaffWorkspace;
+  const shouldHideClientNav = hasNonClientAccess && activeArea && activeArea !== 'client';
 
   return NAV_SECTIONS
     .filter((section) => !section.requires || section.requires(access))
+    .filter((section) => (shouldHideClientNav ? section.area !== 'client' : true))
     .map((section) => ({
       id: section.id,
       label: section.label,

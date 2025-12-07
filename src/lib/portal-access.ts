@@ -159,7 +159,7 @@ const USER_MENU_BLUEPRINT: MenuLinkBlueprint[] = [
   },
   {
     href: '/home',
-    label: 'View client portal',
+    label: 'Preview client portal',
     requires: (access) =>
       access.canAccessStaffWorkspace || access.canAccessAdminWorkspace || access.canAccessOrgWorkspace,
   },
