@@ -87,4 +87,5 @@
 
 ## Tooling notes
 - Default to MCP. Use Context7 for any library/API documentation or codegen steps; use Supabase MCP to inspect live schema/RLS instead of guessing from migrations.
-- MCP resources/templates are not configured—do not rely on them. 
+- Azure MCP suite is available for ops/infra (AppLens diagnostics, Resource Health/Monitor, App Service, AKS, Storage, Key Vault, SQL, Redis, Service Bus, Event Grid/Hubs, SignalR/Communication, Grafana, Marketplace/quota, deploy planner/architecture, CLI generator, best-practices/doc lookup). Scope every Azure action to the single allowed subscription `IHARC-main-sub` (`cc2de7f0-1207-4c5a-ab0e-df2cd0a57ab7`); ignore all others.
+- MCP resources/templates beyond Azure/Supabase are not configured—do not rely on them. 
