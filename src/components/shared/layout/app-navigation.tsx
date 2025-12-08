@@ -201,7 +201,7 @@ function useAugmentedSections(navSections: NavSection[]) {
   }, [access, layout]);
 
   return useMemo<NavSection[]>(() => {
-    const baseSections = quickActions.length
+    const baseSections: NavSection[] = quickActions.length
       ? [
           {
             id: 'quick-access',
@@ -211,7 +211,7 @@ function useAugmentedSections(navSections: NavSection[]) {
               {
                 id: 'quick-access-group',
                 label: 'Shortcuts',
-                icon: 'dashboard',
+                icon: 'dashboard' as AppIconName,
                 items: quickActions.map((action) => ({
                   id: action.id,
                   href: action.href,
@@ -220,7 +220,7 @@ function useAugmentedSections(navSections: NavSection[]) {
                 })),
               },
             ],
-          },
+          } satisfies NavSection,
           ...navSections,
         ]
       : navSections;
@@ -252,7 +252,7 @@ function addPreviewQueryToNavSections(navSections: NavSection[]): NavSection[] {
           href: appendPreviewParam(item.href),
         })),
       })),
-    };
+    } satisfies NavSection;
   });
 }
 

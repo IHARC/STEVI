@@ -62,4 +62,4 @@ This document codifies the client/workspace shell split for STEVI. It complement
 ## References
 - `plan.md` (execution tasks)
 - `docs/client-workspace-shell-separation-plan.md`
-- `docs/unified-navigation.md` (historic context; superseded for navigation ownership)
+- `docs/navigation-ownership.md` (navigation ownership note; supersedes the legacy unified shell doc)

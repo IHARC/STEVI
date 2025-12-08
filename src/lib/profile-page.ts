@@ -28,7 +28,7 @@ export async function loadProfilePageData(
     .eq('is_active', true)
     .order('name', { ascending: true });
 
-  const organizations: OrganizationOption[] = (organizationRowsRaw ?? []).map((org) => ({
+  const organizations: OrganizationOption[] = (organizationRowsRaw ?? []).map((org: { id: number; name: string | null }) => ({
     id: String(org.id),
     name: org.name ?? 'Organization',
   }));
