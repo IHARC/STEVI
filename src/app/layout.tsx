@@ -1,6 +1,5 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
-import { Inter, JetBrains_Mono } from 'next/font/google';
 import { cn } from '@/lib/utils';
 import '@/styles/theme.css';
 import { ThemeProvider } from '@shared/providers/theme-provider';
@@ -27,18 +26,6 @@ const ANALYTICS_DISABLED =
 const ANALYTICS_ENABLED = Boolean(GA_MEASUREMENT_ID) && !ANALYTICS_DISABLED;
 const OG_IMAGE_PATH = '/logo.png';
 const OG_IMAGE_ALT = 'STEVI — IHARC Client Portal';
-
-const fontSans = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-sans',
-});
-
-const fontMono = JetBrains_Mono({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-mono',
-});
 
 export async function generateMetadata(): Promise<Metadata> {
   const branding = await getBrandingAssets();
@@ -80,8 +67,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body
         className={cn(
           'min-h-screen bg-background font-sans text-foreground antialiased',
-          fontSans.variable,
-          fontMono.variable,
         )}
       >
         <ThemeProvider>

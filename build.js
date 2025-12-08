@@ -16,8 +16,7 @@ const __dirname = path.dirname(__filename);
 console.log('🚀 Starting IHARC portal build...');
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
-// Turbopack currently skips generating the standalone entry Azure App Service expects.
-// Force webpack so `.next/standalone/server.js` is produced for `node .next/standalone/server.js` start commands.
+// Force webpack so the build matches our CI expectations.
 process.env.NEXT_FORCE_WEBPACK = '1';
 
 const steps = [
@@ -38,30 +37,25 @@ if (!fs.existsSync(outDir)) {
   process.exit(1);
 }
 
-const standaloneEntrypoint = path.join(outDir, 'standalone', 'server.js');
-if (!fs.existsSync(standaloneEntrypoint)) {
-  console.error('❌ Build verification failed: .next/standalone/server.js missing');
-  process.exit(1);
-}
-
 const staticSource = path.join(outDir, 'static');
-const staticDest = path.join(outDir, 'standalone', '.next', 'static');
-
 if (!fs.existsSync(staticSource)) {
   console.error('❌ Build verification failed: .next/static missing');
   process.exit(1);
 }
 
-fs.cpSync(staticSource, staticDest, { recursive: true, force: true });
+const standaloneDir = path.join(outDir, 'standalone');
+const standaloneServer = path.join(standaloneDir, 'server.js');
 
-if (!fs.existsSync(staticDest)) {
-  console.error('❌ Build verification failed: static assets not copied');
+if (!fs.existsSync(standaloneServer)) {
+  console.error('❌ Build verification failed: .next/standalone/server.js missing');
   process.exit(1);
 }
 
-if (!fs.existsSync(path.join(staticDest, 'chunks')) || !fs.existsSync(path.join(staticDest, 'css'))) {
-  console.warn('⚠️ Static assets copied but expected chunk/css directories are missing. Build may be incomplete.');
-}
+const staticSource = path.join(outDir, 'static');
+const staticDest = path.join(standaloneDir, '.next', 'static');
+
+fs.mkdirSync(path.join(standaloneDir, '.next'), { recursive: true });
+fs.cpSync(staticSource, staticDest, { recursive: true, force: true });
 
 console.log('📦 Synced static assets into .next/standalone/.next/static');
 

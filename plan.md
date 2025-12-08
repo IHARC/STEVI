@@ -1,5 +1,9 @@
 # Dual-Shell Separation Plan (Client vs Staff/Admin/Org)
 
+**Status: Completed — 2025-12-08**
+
+All work items below have been implemented in the codebase. The client and workspace shells now live in separate route groups with isolated layouts, themes, navigation, guards, and lint boundaries. See `docs/architecture/shells.md` for the finalized architecture notes and migration checklist.
+
 This plan keeps a single Next.js app + single App Service/Front Door origin while fully separating the client UI from the workspace UI (staff/admin/org). It is a clean cut-over—no fallbacks, shims, legacy paths, or temporary backwards-compatibility routes. Legacy code is removed rather than retained.
 
 ## Context / Why

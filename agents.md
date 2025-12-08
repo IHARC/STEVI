@@ -19,7 +19,7 @@
 - Supabase schema is shared across STEVI, STEVI OPS, and the marketing app—do not alter it without coordination. Verify policies via Supabase MCP, not migrations alone.
 - Keep audit, privacy, and rate limits intact; every mutation should log to the audit trail and respect RLS/consent flags.
 
-## Snapshot — 2025-12-03
+## Snapshot — 2025-12-08
 - Product: STEVI (Supportive Technology to Enable Vulnerable Individuals) operated by IHARC (Northumberland County, ON, Canada).
 - Stack: Next.js 16 (App Router + server actions, React 19), TypeScript, Tailwind with shadcn/ui tokens from `src/styles/theme.css`, Radix primitives, and TipTap for rich text.
 - Hosting/build: Azure App Service (Linux, Node 24). `npm run build` → `node build.js` (runs `eslint .`, forces webpack via `NEXT_FORCE_WEBPACK=1`, copies static into `.next/standalone/.next/static`). GitHub Actions `.github/workflows/main_stevi.yml` deploys via publish profiles; runtime start is `node .next/standalone/server.js`. Marketing app deploys separately but shares the Supabase project/env vars.
@@ -43,14 +43,14 @@
 - Content safety: sanitize TipTap/HTML using `sanitize-resource-html` and `sanitize-embed` before persisting.
 
 ## Navigation
-- Unified navigation lives in `src/lib/portal-navigation.ts` with sections for client, staff, admin, and organization. It is role/approval-gated via existing `PortalAccess` flags—no mode switching.
-- Admin access automatically sees staff tools; staff/admin can also see client links for preview.
+- Split shells: client navigation is defined in `src/lib/client-navigation.ts` and rendered only in `src/app/(client)`. Workspace navigation (staff/admin/org) lives in `src/lib/portal-navigation.ts` and is rendered only in `src/app/(workspace)`.
+- Client preview is opt-in via `?preview=1` and only for users with workspace access; workspace shell does not render preview mode.
 - Best practice for new surfaces:
-  1. Add/adjust a capability flag in `PortalAccess` if required (reusing existing roles/RLS; do not invent new workspace concepts).
-  2. Add the link under the correct section/group in `portal-navigation.ts` with `requires` guards.
-  3. Guard the page/server action with the same capability check and ensure Supabase RLS enforces it.
+  1. Add/adjust capability flags in `PortalAccess` as needed (reuse existing roles/RLS).
+  2. Add links to the correct shell nav file; never cross-import shell components. Shared pieces belong in `components/shared` or `lib`.
+  3. Guard pages/actions with `requireArea` from `src/lib/portal-areas.ts` and ensure Supabase RLS matches.
   4. Add cache invalidation/tagging as needed and update tests.
- 5. Keep UI consistent with the shared shadcn token theme and shared components.
+  5. Keep UI consistent with shared shadcn tokens/components in `components/shared/ui`.
 
 ## Current surface status
 - **Client portal**: Home/support/profile/consents/cases are live and wired to Supabase (`core.people`, `case_mgmt.case_management`, grants, activities). Appointments are backed by `portal.appointments` (request/reschedule/cancel flows audit + revalidate). Documents read from the `portal-attachments` bucket with 30‑minute signed URLs. Support composer queues notifications via `portal_queue_notification` + audit. Messages page is a placeholder; Home “focus areas” are static copy only.
@@ -77,6 +77,14 @@
 - Build/deploy: run `node build.js` (lints then builds with webpack + standalone output). Azure App Service consumes the generated `.next/standalone` output.
 - Environment: `.env.example` exists; keep it aligned with `docs/backend.md`. Never commit secrets or the service-role key. Set `NEXT_PUBLIC_MARKETING_URL` when telemetry must accept a marketing host.
 
+## Updates — 2025-12-08
+- Dual-shell split delivered: client routes live in `src/app/(client)` with `@client/client-shell` layout + `theme.client.css`; workspace (staff/admin/org) routes live in `src/app/(workspace)` with `@workspace/shells/app-shell` + `theme.workspace.css`.
+- Guards centralized in `src/lib/portal-areas.ts` (`requireArea`, preview query parsing, landing resolution). Client preview requires `?preview=1`; workspace shell rejects preview mode. Onboarding gating now only in the client layout.
+- Navigation split: client nav in `src/lib/client-navigation.ts`; workspace nav (no client links) in `src/lib/portal-navigation.ts`. Preview links now point to `/home?preview=1`.
+- Components reorganized: `components/client`, `components/workspace`, `components/shared` (UI primitives now at `@shared/ui`). Shared providers/layout under `@shared/providers` / `@shared/layout`. Cancel appointment form at `@shared/appointments/cancel-appointment-form`.
+- Path aliases added: `@client/*`, `@workspace/*`, `@shared/*`; ESLint `no-restricted-imports` enforces cross-shell boundaries. CODEOWNERS covers both shells.
+- Docs: `docs/architecture/shells.md` documents the split and checklist; README updated accordingly; `plan.md` marked completed.
+- Tests: Vitest suite updated for new guards; Playwright smoke updated to assert login redirects for client preview and workspace routes.
 ## Outstanding work (prioritised)
 1. Wire the Messages page and staff Tasks view to real data (respect consent/RLS) and add audit trails.
 2. Add cache revalidation/webhook strategy so marketing and STEVI stay in sync after admin content updates.
