@@ -1,5 +1,3 @@
-'use server';
-
 import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { normalizeEmail } from '@/lib/email';
@@ -34,6 +32,7 @@ export function makeProfileActions({
   revalidateTarget,
 }: ProfileActionParams) {
   async function updateProfileDetails(_prevState: ProfileDetailsFormState, formData: FormData): Promise<ProfileDetailsFormState> {
+    'use server';
     'use server';
 
     const supabase = await createSupabaseServerClient();
@@ -143,6 +142,7 @@ export function makeProfileActions({
 
   async function updateEmail(_prevState: EmailFormState, formData: FormData): Promise<EmailFormState> {
     'use server';
+    'use server';
 
     const supa = await createSupabaseServerClient();
     const {
@@ -185,6 +185,7 @@ export function makeProfileActions({
   }
 
   async function updatePhone(_prevState: PhoneFormState, formData: FormData): Promise<PhoneFormState> {
+    'use server';
     'use server';
 
     const supa = await createSupabaseServerClient();
@@ -284,6 +285,7 @@ export function makeProfileActions({
   }
 
   async function updatePassword(_prevState: PasswordFormState, formData: FormData): Promise<PasswordFormState> {
+    'use server';
     'use server';
 
     const supa = await createSupabaseServerClient();
