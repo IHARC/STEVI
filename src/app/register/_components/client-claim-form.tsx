@@ -3,22 +3,22 @@
 import { useActionState, useEffect, useMemo, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { useForm } from 'react-hook-form';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+import { Alert, AlertDescription, AlertTitle } from '@shared/ui/alert';
+import { Button } from '@shared/ui/button';
+import { Checkbox } from '@shared/ui/checkbox';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@shared/ui/form';
+import { Input } from '@shared/ui/input';
 import {
   RadioGroup,
   RadioGroupItem,
-} from '@/components/ui/radio-group';
+} from '@shared/ui/radio-group';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from '@shared/ui/select';
 
 export type ClientClaimFormState = {
   status: 'idle' | 'success';

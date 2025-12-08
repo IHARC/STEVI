@@ -4,19 +4,19 @@ import { normalizePathFromHeader, stripRouteGroups } from './paths';
 describe('paths helpers', () => {
   describe('stripRouteGroups', () => {
     it('removes route group segments while keeping leading slash', () => {
-      expect(stripRouteGroups('/(portal)/staff/overview')).toBe('/staff/overview');
-      expect(stripRouteGroups('/(portal)/(foo)/admin/operations')).toBe('/admin/operations');
+      expect(stripRouteGroups('/(workspace)/staff/overview')).toBe('/staff/overview');
+      expect(stripRouteGroups('/(client)/(foo)/admin/operations')).toBe('/admin/operations');
     });
   });
 
   describe('normalizePathFromHeader', () => {
     it('parses absolute URLs and strips route groups', () => {
-      const result = normalizePathFromHeader('https://example.com/(portal)/staff/overview?foo=1', '/');
+      const result = normalizePathFromHeader('https://example.com/(workspace)/staff/overview?foo=1', '/');
       expect(result).toEqual({ pathname: '/staff/overview', path: '/staff/overview?foo=1' });
     });
 
     it('parses proxy style original urls', () => {
-      const result = normalizePathFromHeader('/(portal)/staff/caseload?bar=baz', '/');
+      const result = normalizePathFromHeader('/(workspace)/staff/caseload?bar=baz', '/');
       expect(result).toEqual({ pathname: '/staff/caseload', path: '/staff/caseload?bar=baz' });
     });
 

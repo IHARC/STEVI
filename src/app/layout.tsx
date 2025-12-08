@@ -3,9 +3,9 @@ import type { Metadata } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
 import { cn } from '@/lib/utils';
 import '@/styles/theme.css';
-import { ThemeProvider } from '@/components/providers/theme-provider';
-import { AnalyticsProvider } from '@/components/providers/analytics-provider';
-import { Toaster } from '@/components/ui/sonner';
+import { ThemeProvider } from '@shared/providers/theme-provider';
+import { AnalyticsProvider } from '@shared/providers/analytics-provider';
+import { Toaster } from '@shared/ui/sonner';
 import { getBrandingAssets } from '@/lib/marketing/branding';
 
 export const dynamic = 'force-dynamic';

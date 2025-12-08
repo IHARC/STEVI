@@ -4,7 +4,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { normalizePhoneNumber } from '@/lib/phone';
 import { checkRateLimit } from '@/lib/rate-limit';
 import type { Json } from '@/types/supabase';
-import { FormPageShell } from '@/components/layout/form-page-shell';
+import { FormPageShell } from '@shared/layout/form-page-shell';
 
 export const dynamic = 'force-dynamic';
 

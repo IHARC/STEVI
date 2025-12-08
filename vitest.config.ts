@@ -19,6 +19,9 @@ export default defineConfig({
     alias: {
       '@': resolveFromRoot('src'),
       '~': resolveFromRoot('src'),
+      '@client': resolveFromRoot('src/components/client'),
+      '@workspace': resolveFromRoot('src/components/workspace'),
+      '@shared': resolveFromRoot('src/components/shared'),
     },
   },
 });

@@ -5,7 +5,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { logAuditEvent, buildEntityRef } from '@/lib/audit';
-import type { AppointmentRequestState } from '@/app/(portal)/appointments/types';
+import type { AppointmentRequestState } from '@/app/(client)/appointments/types';
 import type { AppointmentChannel, AppointmentStatus } from './types';
 import { assertOnboardingComplete } from '@/lib/onboarding/guard';
 

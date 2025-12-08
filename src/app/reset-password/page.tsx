@@ -1,4 +1,4 @@
-import { ResetPasswordForm, type ResetPasswordState } from '@/components/auth/reset-password-form';
+import { ResetPasswordForm, type ResetPasswordState } from '@shared/auth/reset-password-form';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { normalizeEmail } from '@/lib/email';
 import { normalizePhoneNumber, maskPhoneNumber } from '@/lib/phone';

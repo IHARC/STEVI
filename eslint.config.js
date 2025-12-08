@@ -36,6 +36,29 @@ const headingNeedsTextClass = {
   },
 };
 
+const legacyRestrictedImports = [
+  {
+    group: ['@/components/ui-legacy/*', '@/styles/main.css', '@/lib/state-layer'],
+    message: 'Legacy UI has been removed. Use shadcn/ui primitives from "@/components/ui".',
+  },
+];
+
+const clientImportBoundaries = [
+  ...legacyRestrictedImports,
+  {
+    group: ['@workspace/*', '@/components/workspace/*', '**/components/workspace/**'],
+    message: 'Client shell cannot import workspace components. Move shared pieces to components/shared.',
+  },
+];
+
+const workspaceImportBoundaries = [
+  ...legacyRestrictedImports,
+  {
+    group: ['@client/*', '@/components/client/*', '**/components/client/**'],
+    message: 'Workspace shell cannot import client components. Move shared pieces to components/shared.',
+  },
+];
+
 const steviConfig = [
   {
     ignores: [
@@ -66,12 +89,29 @@ const steviConfig = [
       'no-restricted-imports': [
         'error',
         {
-          patterns: [
-            {
-              group: ['@/components/ui-legacy/*', '@/styles/main.css', '@/lib/state-layer'],
-              message: 'Legacy UI has been removed. Use shadcn/ui primitives from "@/components/ui".',
-            },
-          ],
+          patterns: legacyRestrictedImports,
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/app/(client)/**/*.{ts,tsx}', 'src/components/client/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: clientImportBoundaries,
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/app/(workspace)/**/*.{ts,tsx}', 'src/components/workspace/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: workspaceImportBoundaries,
         },
       ],
     },

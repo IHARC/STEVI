@@ -11,7 +11,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
 import { normalizePhoneNumber } from '@/lib/phone';
 import type { Json } from '@/types/supabase';
-import { FormPageShell } from '@/components/layout/form-page-shell';
+import { FormPageShell } from '@shared/layout/form-page-shell';
 
 export const dynamic = 'force-dynamic';
 

@@ -20,6 +20,15 @@
     "incremental": true,
     "baseUrl": ".",
     "paths": {
+      "@client/*": [
+        "./src/components/client/*"
+      ],
+      "@workspace/*": [
+        "./src/components/workspace/*"
+      ],
+      "@shared/*": [
+        "./src/components/shared/*"
+      ],
       "@/*": [
         "./src/*"
       ],

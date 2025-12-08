@@ -112,7 +112,7 @@ describe('buildUserMenuLinks', () => {
 
     const access = await loadPortalAccess(supabase);
     const links = buildUserMenuLinks(access!);
-    expect(links.some((link) => link.href === '/home')).toBe(true);
+    expect(links.some((link) => link.href === '/home?preview=1')).toBe(true);
   });
 
   it('omits client preview for client-only users', async () => {
@@ -126,6 +126,6 @@ describe('buildUserMenuLinks', () => {
 
     const access = await loadPortalAccess(supabase);
     const links = buildUserMenuLinks(access!);
-    expect(links.some((link) => link.href === '/home')).toBe(false);
+    expect(links.some((link) => link.href === '/home?preview=1')).toBe(false);
   });
 });

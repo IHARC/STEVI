@@ -10,7 +10,7 @@ import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
 import type { Json } from '@/types/supabase';
-import { FormPageShell } from '@/components/layout/form-page-shell';
+import { FormPageShell } from '@shared/layout/form-page-shell';
 
 export const dynamic = 'force-dynamic';
 

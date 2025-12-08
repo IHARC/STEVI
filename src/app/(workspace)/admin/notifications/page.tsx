@@ -1,0 +1,153 @@
+import { redirect } from 'next/navigation';
+import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
+import { ensurePortalProfile } from '@/lib/profile';
+import { loadPortalAccess } from '@/lib/portal-access';
+import { ComposeNotificationForm } from '@workspace/admin/notifications/compose-form';
+import { RecentNotifications } from '@workspace/admin/notifications/recent-notifications';
+import { RelaySettingsCard } from '@workspace/admin/notifications/relay-settings-card';
+import type {
+  NotificationRecipient,
+  NotificationRecord,
+} from '@workspace/admin/notifications/types';
+import type { Database } from '@/types/supabase';
+import { resolveLandingPath } from '@/lib/portal-navigation';
+
+type MaybeArray<T> = T | T[] | null;
+
+type OrganizationRelation = { name: string | null };
+type ContactRelation = Pick<
+  Database['portal']['Tables']['profile_contacts']['Row'],
+  'contact_type' | 'contact_value'
+>;
+
+type RecipientRow = Pick<
+  Database['portal']['Tables']['profiles']['Row'],
+  'id' | 'display_name' | 'affiliation_type'
+> & {
+  organization: MaybeArray<OrganizationRelation>;
+  contacts: MaybeArray<ContactRelation>;
+};
+
+type NotificationRow = Database['portal']['Tables']['notifications']['Row'] & {
+  profile: MaybeArray<Pick<Database['portal']['Tables']['profiles']['Row'], 'display_name'>>;
+};
+
+export const dynamic = 'force-dynamic';
+
+export default async function NotificationsAdminPage() {
+  const supabase = await createSupabaseRSCClient();
+  const access = await loadPortalAccess(supabase);
+
+  if (!access) {
+    redirect('/login?next=/admin/notifications');
+  }
+
+  if (!access.canManageNotifications) {
+    redirect(resolveLandingPath(access));
+  }
+
+  await ensurePortalProfile(supabase, access.userId);
+  const portal = supabase.schema('portal');
+
+  const [profilesResponse, notificationsResponse] = await Promise.all([
+    portal
+      .from('profiles')
+      .select(
+        `
+          id,
+          display_name,
+          affiliation_type,
+          organization:core.organizations(name),
+          contacts:profile_contacts(contact_type, contact_value)
+        `,
+      )
+      .order('display_name'),
+    portal
+      .from('notifications')
+      .select(
+        `
+          id,
+          profile_id,
+          recipient_email,
+          subject,
+          body_text,
+          body_html,
+          notification_type,
+          status,
+          created_at,
+          sent_at,
+          profile:profiles(display_name)
+        `,
+      )
+      .order('created_at', { ascending: false })
+      .limit(20),
+  ]);
+
+  if (profilesResponse.error) {
+    throw profilesResponse.error;
+  }
+  if (notificationsResponse.error) {
+    throw notificationsResponse.error;
+  }
+
+  const recipientRows = (profilesResponse.data ?? []) as RecipientRow[];
+  const recipients: NotificationRecipient[] = recipientRows.map((row) => {
+    const contacts = Array.isArray(row.contacts)
+      ? row.contacts
+      : row.contacts
+        ? [row.contacts]
+        : [];
+    const emailContact = contacts.find((contact) => contact.contact_type === 'email');
+    const organizationRelation = Array.isArray(row.organization)
+      ? row.organization[0]
+      : row.organization ?? null;
+    return {
+      id: row.id,
+      displayName: row.display_name,
+      email: emailContact?.contact_value ?? null,
+      affiliation: row.affiliation_type,
+      organizationName: organizationRelation?.name ?? null,
+    };
+  });
+
+  const notificationRows = (notificationsResponse.data ?? []) as NotificationRow[];
+  const notifications: NotificationRecord[] = notificationRows.map((row) => {
+    const profileRelation = Array.isArray(row.profile) ? row.profile[0] : row.profile ?? null;
+    return {
+      id: row.id,
+      profileId: row.profile_id,
+      profileName: profileRelation?.display_name ?? null,
+      recipientEmail: row.recipient_email,
+      subject: row.subject,
+      bodyText: row.body_text,
+      bodyHtml: row.body_html,
+      notificationType: row.notification_type,
+      status: row.status,
+      createdAt: row.created_at,
+      sentAt: row.sent_at,
+    };
+  });
+
+  const hasAlertsSecret = Boolean(process.env.PORTAL_ALERTS_SECRET);
+
+  return (
+    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
+      <header className="flex flex-col gap-2">
+        <p className="text-xs font-medium uppercase text-muted-foreground">
+          Outreach messaging
+        </p>
+        <h1 className="text-xl text-foreground sm:text-2xl">Notifications</h1>
+        <p className="max-w-3xl text-sm text-muted-foreground sm:text-base">
+          Send reminders and alerts that respect each neighbour’s consent preferences. Delivery runs
+          through Supabase notifications and the existing portal-alerts Edge Function.
+        </p>
+      </header>
+
+      <ComposeNotificationForm recipients={recipients} hasAlertsSecret={hasAlertsSecret} />
+
+      <RelaySettingsCard />
+
+      <RecentNotifications notifications={notifications} />
+    </div>
+  );
+}

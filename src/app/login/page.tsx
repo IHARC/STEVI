@@ -1,12 +1,12 @@
 import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { LoginForm } from '@/components/auth/login-form';
+import { LoginForm } from '@shared/auth/login-form';
 import { resolveNextPath, parseAuthErrorCode, type AuthErrorCode } from '@/lib/auth';
 import { normalizePhoneNumber } from '@/lib/phone';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { resolveLandingPath } from '@/lib/portal-navigation';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 
 export const dynamic = 'force-dynamic';
 

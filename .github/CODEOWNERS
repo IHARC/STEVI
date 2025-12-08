@@ -1,0 +1,6 @@
+# Shell boundaries
+/src/components/client/** @iharc-jordan
+/src/app/(client)/** @iharc-jordan
+
+/src/components/workspace/** @iharc-jordan
+/src/app/(workspace)/** @iharc-jordan

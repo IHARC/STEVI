@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { buildPortalNav, inferPortalAreaFromPath, isClientPreview, resolveLandingPath } from './portal-navigation';
+import { buildPortalNav } from './portal-navigation';
+import { inferPortalAreaFromPath, requireArea, resolveLandingPath } from './portal-areas';
 import type { PortalAccess } from './portal-access';
 import type { PortalProfile } from './profile';
 
@@ -84,8 +85,8 @@ describe('buildPortalNav', () => {
       organizationId: 12,
     };
 
-    const sectionIds = buildPortalNav(access, { activeArea: 'client' }).map((section) => section.id);
-    expect(sectionIds).toEqual(expect.arrayContaining(['client-portal', 'staff-tools', 'admin', 'organization']));
+    const sectionIds = buildPortalNav(access).map((section) => section.id);
+    expect(sectionIds).toEqual(expect.arrayContaining(['staff-tools', 'admin', 'organization']));
   });
 
   it('hides sections the user cannot access', () => {
@@ -96,43 +97,37 @@ describe('buildPortalNav', () => {
     expect(sections).not.toContain('organization');
   });
 
-  it('hides client portal section for non-client area when user has higher access', () => {
-    const access = {
-      ...baseAccess,
-      canAccessAdminWorkspace: true,
-      canAccessStaffWorkspace: true,
-    };
-
-    const sections = buildPortalNav(access, { activeArea: 'admin' }).map((section) => section.id);
-    expect(sections).toContain('admin');
-    expect(sections).toContain('staff-tools');
-    expect(sections).not.toContain('client-portal');
-  });
-
-  it('keeps client portal when explicitly in client area (preview)', () => {
-    const access = {
-      ...baseAccess,
-      canAccessAdminWorkspace: true,
-    };
-
-    const sections = buildPortalNav(access, { activeArea: 'client' }).map((section) => section.id);
-    expect(sections).toContain('client-portal');
+  it('never includes client portal section (split shell)', () => {
+    const access = { ...baseAccess, canAccessAdminWorkspace: true, canAccessStaffWorkspace: true };
+    const sectionIds = buildPortalNav(access).map((section) => section.id);
+    expect(sectionIds).not.toContain('client-portal');
   });
 });
 
-describe('isClientPreview', () => {
-  const adminAndStaff = { ...baseAccess, canAccessAdminWorkspace: true, canAccessStaffWorkspace: true };
+describe('requireArea guards', () => {
+  it('forces preview flag for workspace users visiting client shell', () => {
+    const admin = { ...baseAccess, canAccessAdminWorkspace: true };
+    const landingPath = resolveLandingPath(admin);
 
-  it('treats client paths as preview when user has elevated access', () => {
-    expect(isClientPreview(adminAndStaff, '/home')).toBe(true);
+    const noPreview = requireArea(admin, 'client', { preview: false, landingPath });
+    expect(noPreview.allowed).toBe(false);
+    if (!noPreview.allowed) {
+      expect(noPreview.redirectPath).toBe('/admin/operations');
+    }
+
+    const withPreview = requireArea(admin, 'client', { preview: true, landingPath });
+    expect(withPreview.allowed).toBe(true);
+    if (withPreview.allowed) {
+      expect(withPreview.isPreview).toBe(true);
+    }
   });
 
-  it('returns false for client-only users', () => {
-    expect(isClientPreview(baseAccess, '/home')).toBe(false);
-  });
-
-  it('returns false for non-client paths', () => {
-    expect(isClientPreview(adminAndStaff, '/staff/overview')).toBe(false);
+  it('redirects non-staff users away from staff shell', () => {
+    const result = requireArea(baseAccess, 'staff');
+    expect(result.allowed).toBe(false);
+    if (!result.allowed) {
+      expect(result.redirectPath).toBe('/home');
+    }
   });
 });
 

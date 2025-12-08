@@ -4,7 +4,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import {
   UpdateRecoveredPasswordForm,
   type UpdateRecoveredPasswordState,
-} from '@/components/auth/update-password-form';
+} from '@shared/auth/update-password-form';
 
 export const dynamic = 'force-dynamic';
 

@@ -1,41 +1,17 @@
 import type { AppIconName } from '@/lib/app-icons';
 import type { PortalAccess } from '@/lib/portal-access';
-
-export type PortalArea = 'client' | 'staff' | 'admin' | 'org';
+import type { NavGroup, NavItem, NavSection } from '@/lib/nav-types';
+import type { PortalArea } from '@/lib/portal-areas';
+export type { PortalArea } from '@/lib/portal-areas';
+export { resolveLandingPath, inferPortalAreaFromPath } from '@/lib/portal-areas';
 
 type NavRule = (access: PortalAccess) => boolean;
 
-type NavItemDefinition = {
-  id: string;
-  href: string;
-  label: string;
-  icon?: AppIconName;
-  match?: string[];
-  exact?: boolean;
-  requires?: NavRule;
-};
+type NavItemDefinition = NavItem & { requires?: NavRule };
+type NavGroupDefinition = Omit<NavGroup, 'items'> & { items: NavItemDefinition[]; requires?: NavRule };
+type NavSectionDefinition = Omit<NavSection, 'groups'> & { groups: NavGroupDefinition[]; requires?: NavRule };
 
-type NavGroupDefinition = {
-  id: string;
-  label: string;
-  description?: string;
-  icon?: AppIconName;
-  items: NavItemDefinition[];
-  requires?: NavRule;
-};
-
-type NavSectionDefinition = {
-  id: string;
-  label: string;
-  description?: string;
-  area: PortalArea;
-  groups: NavGroupDefinition[];
-  requires?: NavRule;
-};
-
-export type NavItem = Omit<NavItemDefinition, 'requires'>;
-export type NavGroup = Omit<NavGroupDefinition, 'requires' | 'items'> & { items: NavItem[] };
-export type NavSection = Omit<NavSectionDefinition, 'requires' | 'groups'> & { groups: NavGroup[] };
+export type { NavItem, NavGroup, NavSection } from '@/lib/nav-types';
 
 export type QuickAction = {
   id: string;
@@ -66,47 +42,6 @@ const canAccessInventoryHub = (access: PortalAccess) =>
   access.canAccessInventoryWorkspace || access.iharcRoles.includes('iharc_admin');
 
 const NAV_SECTIONS: NavSectionDefinition[] = [
-  {
-    id: 'client-portal',
-    label: 'Client portal',
-    description: 'Home, support, records, and profile',
-    area: 'client',
-    groups: [
-      {
-        id: 'client-home',
-        label: 'Overview',
-        items: [
-          { id: 'client-home', href: '/home', label: 'Today', icon: 'home', match: ['/home'] },
-          { id: 'client-appointments', href: '/appointments', label: 'Appointments', icon: 'calendar', match: ['/appointments'] },
-        ],
-      },
-      {
-        id: 'client-support',
-        label: 'Care & support',
-        items: [
-          { id: 'client-cases', href: '/cases', label: 'My cases', icon: 'briefcase', match: ['/cases'] },
-          { id: 'client-support-requests', href: '/support', label: 'Support requests', icon: 'lifebuoy', match: ['/support'] },
-          { id: 'client-messages', href: '/messages', label: 'Messages', icon: 'message', match: ['/messages'] },
-        ],
-      },
-      {
-        id: 'client-records',
-        label: 'Records',
-        items: [
-          { id: 'client-documents', href: '/documents', label: 'Documents', icon: 'file', match: ['/documents'] },
-          { id: 'client-resources', href: '/resources', label: 'Resources', icon: 'book', match: ['/resources'] },
-        ],
-      },
-      {
-        id: 'client-profile',
-        label: 'Profile & consents',
-        items: [
-          { id: 'client-profile', href: '/profile', label: 'Profile', icon: 'settings', exact: true },
-          { id: 'client-consents', href: '/profile/consents', label: 'Consents', icon: 'shield', match: ['/profile/consents'] },
-        ],
-      },
-    ],
-  },
   {
     id: 'staff-tools',
     label: 'Staff tools',
@@ -265,20 +200,11 @@ function filterGroups(groups: NavGroupDefinition[], access: PortalAccess): NavGr
     .filter((group) => group.items.length > 0);
 }
 
-export function buildPortalNav(
-  access: PortalAccess | null,
-  options: { activeArea?: PortalArea } = {},
-): NavSection[] {
+export function buildPortalNav(access: PortalAccess | null): NavSection[] {
   if (!access) return [];
-
-  const { activeArea } = options;
-  const hasNonClientAccess =
-    access.canAccessAdminWorkspace || access.canAccessOrgWorkspace || access.canAccessStaffWorkspace;
-  const shouldHideClientNav = hasNonClientAccess && activeArea && activeArea !== 'client';
 
   return NAV_SECTIONS
     .filter((section) => !section.requires || section.requires(access))
-    .filter((section) => (shouldHideClientNav ? section.area !== 'client' : true))
     .map((section) => ({
       id: section.id,
       label: section.label,
@@ -287,30 +213,6 @@ export function buildPortalNav(
       groups: filterGroups(section.groups, access),
     }))
     .filter((section) => section.groups.length > 0);
-}
-
-export function inferPortalAreaFromPath(pathname: string): PortalArea {
-  if (pathname.startsWith('/admin')) return 'admin';
-  if (pathname.startsWith('/staff')) return 'staff';
-  if (pathname.startsWith('/org')) return 'org';
-  return 'client';
-}
-
-export function resolveLandingPath(access: PortalAccess | null): string {
-  if (!access) return '/home';
-  if (access.canAccessAdminWorkspace) return '/admin/operations';
-  if (access.canAccessStaffWorkspace) return '/staff/overview';
-  if (access.canAccessOrgWorkspace) return '/org';
-  return '/home';
-}
-
-export function isClientPreview(access: PortalAccess | null, pathname: string): boolean {
-  if (!access) return false;
-  const area = inferPortalAreaFromPath(pathname);
-  if (area !== 'client') return false;
-  const hasOtherAccess =
-    access.canAccessAdminWorkspace || access.canAccessOrgWorkspace || access.canAccessStaffWorkspace;
-  return hasOtherAccess;
 }
 
 export function resolveQuickActions(

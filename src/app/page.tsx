@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
-import { resolveLandingPath } from '@/lib/portal-navigation';
+import { resolveLandingPath } from '@/lib/portal-areas';
 
 export const dynamic = 'force-dynamic';
 

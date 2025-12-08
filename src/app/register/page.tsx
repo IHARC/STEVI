@@ -6,8 +6,8 @@ import type { LucideIcon } from 'lucide-react';
 import { resolveNextPath } from '@/lib/auth';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
-import { resolveLandingPath } from '@/lib/portal-navigation';
-import { FormPageShell } from '@/components/layout/form-page-shell';
+import { resolveLandingPath } from '@/lib/portal-areas';
+import { FormPageShell } from '@shared/layout/form-page-shell';
 
 export const dynamic = 'force-dynamic';
 

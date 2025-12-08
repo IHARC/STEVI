@@ -1,6 +1,6 @@
 import type { SupabaseAnyServerClient } from '@/lib/supabase/types';
 import type { PortalAccess } from '@/lib/portal-access';
-import type { PortalArea } from '@/lib/portal-navigation';
+import type { PortalArea } from '@/lib/portal-areas';
 import { fetchClientAppointments } from '@/lib/appointments/queries';
 import { listClientDocuments } from '@/lib/documents';
 import { fetchStaffCaseload, fetchStaffShifts } from '@/lib/staff/fetchers';

@@ -1,0 +1,285 @@
+'use client';
+
+import { useMemo, useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
+import { Badge } from '@shared/ui/badge';
+import { Button } from '@shared/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
+import { useToast } from '@shared/ui/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/ui/select';
+import { approveAffiliationAction, declineAffiliationAction } from '@/app/(workspace)/admin/profiles/actions';
+import type { OrganizationOption, PendingAffiliation } from './types';
+
+type PendingAffiliationsSectionProps = {
+  pending: PendingAffiliation[];
+  communityOrganizations: OrganizationOption[];
+  governmentOrganizations: OrganizationOption[];
+};
+
+const dateFormatter = new Intl.DateTimeFormat('en-CA', { dateStyle: 'medium' });
+
+const AFFILIATION_LABELS: Record<PendingAffiliation['affiliationType'], string> = {
+  community_member: 'Community member',
+  agency_partner: 'Agency partner',
+  government_partner: 'Government partner',
+};
+
+const GOV_LEVEL_LABELS: Record<string, string> = {
+  municipal: 'Municipal',
+  county: 'County / regional',
+  provincial: 'Provincial / territorial',
+  federal: 'Federal',
+  other: 'Other',
+};
+
+function formatDate(value: string | null) {
+  if (!value) {
+    return null;
+  }
+  try {
+    return dateFormatter.format(new Date(value));
+  } catch {
+    return value;
+  }
+}
+
+function formatGovernmentLevel(value: string | null) {
+  if (!value) {
+    return null;
+  }
+  return GOV_LEVEL_LABELS[value] ?? value;
+}
+
+const createOrgSelectionMap = (pending: PendingAffiliation[]) =>
+  Object.fromEntries(pending.map((entry) => [entry.id, entry.organizationId ?? '']));
+
+const createGovRoleSelectionMap = (pending: PendingAffiliation[]) =>
+  Object.fromEntries(
+    pending.map((entry) => [
+      entry.id,
+      entry.requestedGovernmentRole ?? entry.governmentRoleType ?? 'staff',
+    ]),
+  );
+
+export function PendingAffiliationsSection(props: PendingAffiliationsSectionProps) {
+  const resetKey = useMemo(
+    () =>
+      JSON.stringify(
+        props.pending.map((entry) => ({
+          id: entry.id,
+          org: entry.organizationId ?? '',
+          govRole: entry.governmentRoleType ?? '',
+          requested: entry.requestedGovernmentRole ?? '',
+        })),
+      ),
+    [props.pending],
+  );
+
+  return <PendingAffiliationsContent key={resetKey} {...props} />;
+}
+
+function PendingAffiliationsContent({
+  pending,
+  communityOrganizations,
+  governmentOrganizations,
+}: PendingAffiliationsSectionProps) {
+  const router = useRouter();
+  const { toast } = useToast();
+  const [isPending, startTransition] = useTransition();
+  const [orgSelections, setOrgSelections] = useState<Record<string, string>>(() =>
+    createOrgSelectionMap(pending),
+  );
+  const [govRoleSelections, setGovRoleSelections] = useState<Record<string, string>>(() =>
+    createGovRoleSelectionMap(pending),
+  );
+
+  const pendingCountLabel =
+    pending.length === 1 ? '1 pending request' : `${pending.length} pending requests`;
+
+  const organizationOptions = useMemo(() => {
+    const community = communityOrganizations.map((org) => ({
+      id: org.id,
+      label: org.name,
+    }));
+    const government = governmentOrganizations.map((org) => ({
+      id: org.id,
+      label: `${org.name}${
+        org.governmentLevel ? ` (${formatGovernmentLevel(org.governmentLevel)})` : ''
+      }`,
+    }));
+    return { community, government };
+  }, [communityOrganizations, governmentOrganizations]);
+
+  const handleApprove = async (profileId: string) => {
+    const formData = new FormData();
+    formData.set('profile_id', profileId);
+    if (orgSelections[profileId]) {
+      formData.set('approved_organization_id', orgSelections[profileId]);
+    }
+    if (govRoleSelections[profileId]) {
+      formData.set('approved_government_role', govRoleSelections[profileId]);
+    }
+    const result = await approveAffiliationAction(formData);
+    if (!result.success) {
+      toast({
+        title: 'Approval failed',
+        description: result.error,
+        variant: 'destructive',
+      });
+      return;
+    }
+    toast({ title: 'Affiliation approved', description: 'Permissions refresh automatically.' });
+    startTransition(() => router.refresh());
+  };
+
+  const handleDecline = async (profileId: string) => {
+    const formData = new FormData();
+    formData.set('profile_id', profileId);
+    const result = await declineAffiliationAction(formData);
+    if (!result.success) {
+      toast({
+        title: 'Decline failed',
+        description: result.error,
+        variant: 'destructive',
+      });
+      return;
+    }
+    toast({ title: 'Affiliation declined', description: 'We removed this request from the queue.' });
+    startTransition(() => router.refresh());
+  };
+
+  return (
+    <Card className="border-border/60">
+      <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <CardTitle className="text-xl">Pending verification queue</CardTitle>
+          <CardDescription>
+            Approve agency and government representatives so they can collaborate on STEVI right
+            away.
+          </CardDescription>
+        </div>
+        <Badge variant="outline" className="self-start text-xs uppercase">
+          {pendingCountLabel}
+        </Badge>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {pending.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            No pending requests. New partner applications will surface here automatically.
+          </p>
+        ) : (
+          pending.map((entry) => {
+            const requestedDate = formatDate(entry.affiliationRequestedAt);
+            const requestedLevel = formatGovernmentLevel(entry.requestedGovernmentLevel);
+            const currentOrg =
+              entry.affiliationType === 'government_partner'
+                ? organizationOptions.government
+                : organizationOptions.community;
+            const orgValue = orgSelections[entry.id] ?? '';
+            const govRoleValue = govRoleSelections[entry.id] ?? 'staff';
+            return (
+              <article
+                key={entry.id}
+                className="rounded-xl border border-border/30 bg-muted p-4 shadow-sm"
+              >
+                <header className="flex flex-col gap-space-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="text-lg font-semibold text-foreground">{entry.displayName}</h3>
+                    <Badge variant="secondary">{AFFILIATION_LABELS[entry.affiliationType]}</Badge>
+                  </div>
+                  {entry.positionTitle ? (
+                    <p className="text-sm text-muted-foreground">{entry.positionTitle}</p>
+                  ) : null}
+                  {entry.organizationName ? (
+                    <p className="text-xs text-muted-foreground">
+                      Linked to {entry.organizationName}
+                    </p>
+                  ) : null}
+                  {requestedDate ? (
+                    <p className="text-xs text-muted-foreground">
+                      Requested {requestedDate}{' '}
+                      {entry.requestedOrganizationName
+                        ? `• ${entry.requestedOrganizationName}`
+                        : entry.requestedGovernmentName
+                          ? `• ${entry.requestedGovernmentName}${
+                              requestedLevel ? ` (${requestedLevel})` : ''
+                            }`
+                          : null}
+                    </p>
+                  ) : null}
+                </header>
+                <div className="mt-4 flex flex-col gap-3 border-t border-border/40 pt-3 lg:flex-row lg:items-end lg:justify-between">
+                  <div className="grid gap-3 lg:grid-cols-[minmax(0,320px)_auto] lg:items-end lg:gap-4">
+                    <label className="grid gap-1 text-sm text-foreground">
+                      <span className="text-xs uppercase text-muted-foreground">
+                        Approved organization
+                      </span>
+                      <Select
+                        value={orgValue}
+                        onValueChange={(value) =>
+                          setOrgSelections((prev) => ({ ...prev, [entry.id]: value }))
+                        }
+                        disabled={isPending}
+                      >
+                        <SelectTrigger className="rounded-lg border border-border/40 bg-background px-3 py-2 text-sm text-foreground">
+                          <SelectValue placeholder="Select organization" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">Select organization</SelectItem>
+                          {currentOrg.map((option) => (
+                            <SelectItem key={option.id} value={option.id}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </label>
+                    {entry.affiliationType === 'government_partner' ? (
+                      <label className="grid gap-1 text-sm text-foreground">
+                        <span className="text-xs uppercase text-muted-foreground">
+                          Role type
+                        </span>
+                        <Select
+                          value={govRoleValue}
+                          onValueChange={(value) =>
+                            setGovRoleSelections((prev) => ({ ...prev, [entry.id]: value }))
+                          }
+                          disabled={isPending}
+                        >
+                          <SelectTrigger className="rounded-lg border border-border/40 bg-background px-3 py-2 text-sm text-foreground">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="staff">Public servant / staff</SelectItem>
+                            <SelectItem value="politician">Elected leadership</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </label>
+                    ) : null}
+                  </div>
+                  <div className="flex flex-wrap gap-3">
+                    <Button
+                      onClick={() => handleApprove(entry.id)}
+                      disabled={isPending}
+                      className="min-w-[120px]"
+                    >
+                      Approve
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => handleDecline(entry.id)}
+                      disabled={isPending}
+                      className="min-w-[120px]"
+                    >
+                      Decline
+                    </Button>
+                  </div>
+                </div>
+              </article>
+            );
+          })
+        )}
+      </CardContent>
+    </Card>
+  );
+}
