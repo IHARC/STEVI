@@ -13,7 +13,7 @@
 --Clients: Used to refer to anyone who utilizes the services of IHARC or any other applicable organization using the STEVI app. Information availability/sharing is entirely dictated based on client consents that they can control within their portal. Clients are users of the app and can leverage a client portal. The client portal is meant to allow a simple way to track all aspects of services provided by organizations and IHARC. It will also serve as platform to simplify clients on their journey to stability in terms of homelessness, addictions, health, etc. 
 
 ## Ground rules
-- CLI runs in workspace-write with unrestricted outbound network. Prefer MCP tools (Context7 for docs/codegen, Supabase MCP for schema/RLS) and repo sources; no need to request approval before any internet call.
+- CLI runs in workspace-write; use the Azure CLI for all infra/state checks (Front Door, App Service, DNS). Subscription is already set to **IHARC-main-sub** (`cc2de7f0-1207-4c5a-ab0e-df2cd0a57ab7`); keep it scoped there.
 - Treat this repo + Supabase types as the source of truth. If any older docs (marketing repo, Notion, etc.) conflict with the code/schema, defer to the code and call out the discrepancy.
 - Never add backward-compatibility shims, hidden fallbacks, or keep dead/legacy code. Ship clean, explicit fixes that honour IHARC’s and WCAG commitments (see marketing architecture doc referenced in the marketing repo).
 - Supabase schema is shared across STEVI, STEVI OPS, and the marketing app—do not alter it without coordination. Verify policies via Supabase MCP, not migrations alone.
@@ -86,6 +86,9 @@
 6. Mirror or pipeline Supabase Edge Functions (`portal-alerts`, `portal-admin-invite`, etc.) into this repo or clearly document their external home.
 
 ## Tooling notes
-- Default to MCP. Use Context7 for any library/API documentation or codegen steps; use Supabase MCP to inspect live schema/RLS instead of guessing from migrations.
-- Azure MCP suite is available for ops/infra (AppLens diagnostics, Resource Health/Monitor, App Service, AKS, Storage, Key Vault, SQL, Redis, Service Bus, Event Grid/Hubs, SignalR/Communication, Grafana, Marketplace/quota, deploy planner/architecture, CLI generator, best-practices/doc lookup). Scope every Azure action to the single allowed subscription `IHARC-main-sub` (`cc2de7f0-1207-4c5a-ab0e-df2cd0a57ab7`); ignore all others.
-- MCP resources/templates beyond Azure/Supabase are not configured—do not rely on them. 
+- Default to Azure CLI for infra. Helpful context:
+  - Subscription: **IHARC-main-sub** (`cc2de7f0-1207-4c5a-ab0e-df2cd0a57ab7`) is the only scope to touch. `az account show` should already reflect this.
+  - Resource groups of interest: `IHARC_public_apps` (Front Door, App Service, DNS zone `iharc.ca`), `IHARC` (core data), `contact_centre` (separate). Front Door profile `IHARC-FD`, endpoint `iharc` (`iharc-hngcbedraxgtfggz.z03.azurefd.net`). App Service plan `IHARC-Linux` (Basic B1; scale to B2 if needed). Apps: `STEVI` (workspace shell, host `stevi.iharc.ca`), `IHARC-Login` (login shell). DNS zone `iharc.ca` lives in `IHARC_public_apps`.
+  - Common commands: `az afd profile/list/route/origin/custom-domain`, `az webapp list/show/config access-restriction`, `az appservice plan show/update`, `az network dns zone/record-set cname`, `az account set --subscription IHARC-main-sub`.
+- Use Context7 for library/API docs/codegen; use Supabase MCP for live schema/RLS inspection instead of guessing from migrations.
+- No Azure MCP usage—run Azure operations directly via the CLI. 
