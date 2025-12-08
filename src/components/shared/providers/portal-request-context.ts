@@ -7,6 +7,7 @@ import {
   inferPortalAreaFromPath,
   isPreviewQueryEnabled,
   resolveLandingPath,
+  resolveLandingArea,
   type PortalArea,
 } from '@/lib/portal-areas';
 import type { SupabaseRSCClient } from '@/lib/supabase/types';
@@ -57,7 +58,11 @@ export async function getPortalRequestContext(): Promise<PortalRequestContextVal
       ? landingPath
       : normalizedPath.path;
 
-  const activeArea = inferPortalAreaFromPath(effectivePathname);
+  let activeArea = inferPortalAreaFromPath(effectivePathname);
+
+  if (activeArea === 'client' && effectivePathname.startsWith('/workspace')) {
+    activeArea = resolveLandingArea(portalAccess);
+  }
   const isPreviewRequest = isPreviewQueryEnabled(effectivePath);
 
   return {

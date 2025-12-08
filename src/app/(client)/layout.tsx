@@ -46,7 +46,10 @@ export default async function ClientShellLayout({ children }: { children: ReactN
   const actionCommands = quickActions
     .filter((action) => !action.disabled)
     .map((action) => ({ href: action.href, label: action.label, group: 'Actions' }));
-  const commandPaletteItems = buildCommandPaletteItems(portalAccess, navSections, actionCommands);
+  const baseCommandPaletteItems = buildCommandPaletteItems(portalAccess, navSections, actionCommands);
+  const commandPaletteItems = isPreview
+    ? baseCommandPaletteItems.map((item) => ({ ...item, href: appendPreviewParam(item.href) }))
+    : baseCommandPaletteItems;
 
   const primaryArea = resolveLandingArea(portalAccess);
   const primaryAreaLabel = navAreaLabel(primaryArea);
@@ -91,4 +94,18 @@ export default async function ClientShellLayout({ children }: { children: ReactN
       </PortalLayoutProvider>
     </PortalAccessProvider>
   );
+}
+
+function appendPreviewParam(href: string): string {
+  if (!href || href.startsWith('http') || href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('#')) {
+    return href;
+  }
+
+  try {
+    const url = new URL(href, 'http://preview.local');
+    url.searchParams.set('preview', '1');
+    return `${url.pathname}${url.search}${url.hash}`;
+  } catch {
+    return href.includes('?') ? `${href}&preview=1` : `${href}?preview=1`;
+  }
 }

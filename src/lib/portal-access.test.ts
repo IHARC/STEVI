@@ -113,6 +113,7 @@ describe('buildUserMenuLinks', () => {
     const access = await loadPortalAccess(supabase);
     const links = buildUserMenuLinks(access!);
     expect(links.some((link) => link.href === '/home?preview=1')).toBe(true);
+    expect(links.find((link) => link.label === 'Profile')?.href).toBe('/workspace/profile');
   });
 
   it('omits client preview for client-only users', async () => {
@@ -127,5 +128,6 @@ describe('buildUserMenuLinks', () => {
     const access = await loadPortalAccess(supabase);
     const links = buildUserMenuLinks(access!);
     expect(links.some((link) => link.href === '/home?preview=1')).toBe(false);
+    expect(links.find((link) => link.label === 'Profile')?.href).toBe('/profile');
   });
 });

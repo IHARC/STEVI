@@ -181,15 +181,16 @@ function NavIcon({ name }: { name: AppIconName }) {
 }
 
 function isLinkActive(link: Pick<NavSection['groups'][number]['items'][number], 'href' | 'match' | 'exact'>, pathname: string) {
+  const hrefPath = link.href.split('?')[0];
   const matchPrefixes = link.match ?? [];
   if (matchPrefixes.length > 0) {
     return matchPrefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
   }
 
   if ('exact' in link && link.exact) {
-    return pathname === link.href;
+    return pathname === hrefPath;
   }
 
-  if (pathname === link.href) return true;
-  return pathname.startsWith(`${link.href}/`);
+  if (pathname === hrefPath) return true;
+  return pathname.startsWith(`${hrefPath}/`);
 }

@@ -201,29 +201,34 @@ function useAugmentedSections(navSections: NavSection[]) {
   }, [access, layout]);
 
   return useMemo<NavSection[]>(() => {
-    if (!quickActions.length) return navSections;
+    const baseSections = quickActions.length
+      ? [
+          {
+            id: 'quick-access',
+            label: 'Quick access',
+            area: navSections[0]?.area ?? 'client',
+            groups: [
+              {
+                id: 'quick-access-group',
+                label: 'Shortcuts',
+                icon: 'dashboard',
+                items: quickActions.map((action) => ({
+                  id: action.id,
+                  href: action.href,
+                  label: action.label,
+                  icon: quickActionIcon(action.icon),
+                })),
+              },
+            ],
+          },
+          ...navSections,
+        ]
+      : navSections;
 
-    const quickNavSection: NavSection = {
-      id: 'quick-access',
-      label: 'Quick access',
-      area: navSections[0]?.area ?? 'client',
-      groups: [
-        {
-          id: 'quick-access-group',
-          label: 'Shortcuts',
-          icon: 'dashboard',
-          items: quickActions.map((action) => ({
-            id: action.id,
-            href: action.href,
-            label: action.label,
-            icon: quickActionIcon(action.icon),
-          })),
-        },
-      ],
-    };
+    if (!layout?.isClientPreview) return baseSections;
 
-    return [quickNavSection, ...navSections];
-  }, [navSections, quickActions]);
+    return addPreviewQueryToNavSections(baseSections);
+  }, [navSections, quickActions, layout?.isClientPreview]);
 }
 
 function quickActionIcon(icon?: QuickAction['icon']): AppIconName | undefined {
@@ -234,18 +239,50 @@ function quickActionIcon(icon?: QuickAction['icon']): AppIconName | undefined {
   return undefined;
 }
 
+function addPreviewQueryToNavSections(navSections: NavSection[]): NavSection[] {
+  return navSections.map((section) => {
+    if (section.area !== 'client') return section;
+
+    return {
+      ...section,
+      groups: section.groups.map((group) => ({
+        ...group,
+        items: group.items.map((item) => ({
+          ...item,
+          href: appendPreviewParam(item.href),
+        })),
+      })),
+    };
+  });
+}
+
+function appendPreviewParam(href: string): string {
+  if (!href || href.startsWith('http') || href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('#')) {
+    return href;
+  }
+
+  try {
+    const url = new URL(href, 'http://preview.local');
+    url.searchParams.set('preview', '1');
+    return `${url.pathname}${url.search}${url.hash}`;
+  } catch {
+    return href.includes('?') ? `${href}&preview=1` : `${href}?preview=1`;
+  }
+}
+
 function isLinkActive(link: Pick<PortalNavItem, 'href' | 'match' | 'exact'>, pathname: string): boolean {
+  const hrefPath = link.href.split('?')[0];
   const matchPrefixes = link.match ?? [];
   if (matchPrefixes.length > 0) {
     return matchPrefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
   }
 
   if ('exact' in link && link.exact) {
-    return pathname === link.href;
+    return pathname === hrefPath;
   }
 
-  if (pathname === link.href) return true;
-  return pathname.startsWith(`${link.href}/`);
+  if (pathname === hrefPath) return true;
+  return pathname.startsWith(`${hrefPath}/`);
 }
 
 function primaryNavToNavItem(item: PrimaryNavItem): Pick<PortalNavItem, 'href' | 'icon' | 'label' | 'match'> {

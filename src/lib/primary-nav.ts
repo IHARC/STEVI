@@ -37,9 +37,15 @@ export function buildPrimaryNavItems(access: PortalAccess | null): PrimaryNavIte
     id: 'settings',
     label: 'Settings',
     description: 'Profile & preferences',
-    href: '/profile',
+    href:
+      access?.canAccessAdminWorkspace || access?.canAccessStaffWorkspace || access?.canAccessOrgWorkspace
+        ? '/workspace/profile'
+        : '/profile',
     icon: 'settings',
-    match: ['/profile'],
+    match:
+      access?.canAccessAdminWorkspace || access?.canAccessStaffWorkspace || access?.canAccessOrgWorkspace
+        ? ['/workspace/profile']
+        : ['/profile'],
   });
 
   return items;

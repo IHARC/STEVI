@@ -24,7 +24,9 @@ export function ClientPreviewGuard({ children, message }: ClientPreviewGuardProp
           {message ?? 'Actions are disabled while you are previewing the client portal. Exit preview to continue.'}
         </AlertDescription>
       </Alert>
-      {children}
+      <div className="pointer-events-none opacity-60" aria-disabled>
+        {children}
+      </div>
       <p className="text-xs text-muted-foreground">
         Use the navigation links or the banner to exit preview and re-enable actions.
       </p>

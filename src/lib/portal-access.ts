@@ -139,31 +139,38 @@ async function fetchUserRoles(
 
 type MenuLinkBlueprint = PortalLink & { requires?: (access: PortalAccess) => boolean };
 
-const USER_MENU_BLUEPRINT: MenuLinkBlueprint[] = [
-  { href: '/profile', label: 'Profile' },
-  { href: '/support', label: 'Support' },
-  {
-    href: '/admin/operations',
-    label: 'Admin & operations',
-    requires: (access) => access.canAccessAdminWorkspace,
-  },
-  {
-    href: '/staff/overview',
-    label: 'Staff tools',
-    requires: (access) => access.canAccessStaffWorkspace,
-  },
-  {
-    href: '/org',
-    label: 'Organization settings',
-    requires: (access) => access.canAccessOrgWorkspace,
-  },
-  {
-    href: '/home?preview=1',
-    label: 'Preview client portal',
-    requires: (access) =>
-      access.canAccessStaffWorkspace || access.canAccessAdminWorkspace || access.canAccessOrgWorkspace,
-  },
-];
+const WORKSPACE_PROFILE_PATH = '/workspace/profile';
+
+function userMenuBlueprint(access: PortalAccess): MenuLinkBlueprint[] {
+  const profileHref = access.canAccessAdminWorkspace || access.canAccessStaffWorkspace || access.canAccessOrgWorkspace
+    ? WORKSPACE_PROFILE_PATH
+    : '/profile';
+
+  return [
+    { href: profileHref, label: 'Profile' },
+    { href: '/support', label: 'Support' },
+    {
+      href: '/admin/operations',
+      label: 'Admin & operations',
+      requires: (a) => a.canAccessAdminWorkspace,
+    },
+    {
+      href: '/staff/overview',
+      label: 'Staff tools',
+      requires: (a) => a.canAccessStaffWorkspace,
+    },
+    {
+      href: '/org',
+      label: 'Organization settings',
+      requires: (a) => a.canAccessOrgWorkspace,
+    },
+    {
+      href: '/home?preview=1',
+      label: 'Preview client portal',
+      requires: (a) => a.canAccessStaffWorkspace || a.canAccessAdminWorkspace || a.canAccessOrgWorkspace,
+    },
+  ];
+}
 
 function dedupeLinks<T extends { href: string }>(links: T[]): T[] {
   const seen = new Set<string>();
@@ -204,7 +211,7 @@ const HUB_TAB_COMMANDS: { href: string; label: string; group: string; requires: 
 ];
 
 export function buildUserMenuLinks(access: PortalAccess): PortalLink[] {
-  const links = USER_MENU_BLUEPRINT.filter((entry) => linkIsAllowed(entry, access)).map(
+  const links = userMenuBlueprint(access).filter((entry) => linkIsAllowed(entry, access)).map(
     ({ href, label }) => ({ href, label }),
   );
 

@@ -34,6 +34,7 @@ This document codifies the client/workspace shell split for STEVI. It complement
   - Requires staff/admin/org capability; rejects to `/home` when missing.
   - Navigation contains only workspace areas; a single “Preview client portal” link points to `/home?preview=1`.
 - Preview banner lives only in the client shell with an explicit exit path back to the user’s primary workspace area.
+- Workspace users manage their own profile at `/workspace/profile`; the client shell keeps `/profile` for client users and preview-only browsing. No duplicated flows—shared form components live under `components/shared/profile`.
 
 ## Theming
 - Shell-specific token files (`src/styles/theme.client.css`, `src/styles/theme.workspace.css`) overlay the shared base tokens from `src/styles/theme.css`.
