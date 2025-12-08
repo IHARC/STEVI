@@ -51,7 +51,6 @@ if (!fs.existsSync(standaloneServer)) {
   process.exit(1);
 }
 
-const staticSource = path.join(outDir, 'static');
 const staticDest = path.join(standaloneDir, '.next', 'static');
 
 fs.mkdirSync(path.join(standaloneDir, '.next'), { recursive: true });
