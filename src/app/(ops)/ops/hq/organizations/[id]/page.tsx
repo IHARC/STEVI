@@ -58,10 +58,10 @@ const STATUS_BADGE: Record<string, 'default' | 'secondary' | 'outline'> = {
   inactive: 'secondary',
 };
 
-type PageProps = { params: { id: string } };
+type PageProps = { params: Promise<{ id: string }> };
 
 export default async function HqOrganizationDetailPage({ params }: PageProps) {
-  const { id } = params;
+  const { id } = await params;
   const organizationId = Number.parseInt(id, 10);
 
   if (!Number.isFinite(organizationId)) {
