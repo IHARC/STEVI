@@ -26,6 +26,8 @@
   --border: 230 20% 86%;
   --input: 230 20% 86%;
   --ring: 350 78% 46%;
+}
+
 .dark .ops-shell {
   --background: 223 15% 9%;
   --foreground: 220 23% 95%;

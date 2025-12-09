@@ -66,6 +66,15 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
         ],
       },
       {
+        id: 'visits',
+        label: 'Visits',
+        icon: 'workflow',
+        requires: canSeeFrontline,
+        items: [
+          { id: 'visits', href: '/ops/visits/new', label: 'Visits', icon: 'workflow', match: ['/ops/visits'] },
+        ],
+      },
+      {
         id: 'supplies',
         label: 'Supplies',
         icon: 'boxes',

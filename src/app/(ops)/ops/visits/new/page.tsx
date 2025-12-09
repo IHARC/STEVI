@@ -5,76 +5,10 @@ import type { SupabaseRSCClient } from '@/lib/supabase/types';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { PageHeader } from '@shared/layout/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { resolveLandingPath } from '@/lib/portal-navigation';
 
 export const dynamic = 'force-dynamic';
-
-type VisitPanel = {
-  id: string;
-  title: string;
-  description: string;
-  ctaLabel: string;
-  href: string;
-  badge?: string;
-  gated?: (access: Awaited<ReturnType<typeof loadPortalAccess>>) => boolean;
-};
-
-const PANELS: VisitPanel[] = [
-  {
-    id: 'notes',
-        title: 'Notes',
-        description: 'Capture Visit context, observations, and client requests. Notes will stay inside the Visit record.',
-        ctaLabel: 'Coming soon',
-        href: '#',
-      },
-  {
-    id: 'tasks',
-    title: 'Tasks',
-    description: 'Assign follow-ups to yourself or teammates. Keep them inside the Visit to avoid orphaned work.',
-        ctaLabel: 'Coming soon',
-        href: '#',
-      },
-  {
-    id: 'appointments',
-    title: 'Appointments',
-    description: 'Schedule or log appointments tied to this Visit. Maintain a single source for location and program context.',
-        ctaLabel: 'Coming soon',
-        href: '#',
-      },
-  {
-    id: 'supplies',
-    title: 'Supplies used',
-    description: 'Record any items provided during the Visit. Inventory adjustments are driven by supplies logged here.',
-        ctaLabel: 'Coming soon',
-        href: '#',
-        badge: 'Stock adjusts from Visit',
-        gated: (access) => access?.canAccessInventoryOps ?? false,
-      },
-  {
-    id: 'referrals',
-    title: 'Referrals',
-    description: 'Create referrals from the Visit so Partners can see provenance. Directory/config lives under Partners.',
-        ctaLabel: 'Coming soon',
-        href: '#',
-      },
-  {
-    id: 'attachments',
-    title: 'Attachments',
-    description: 'Upload documents or photos directly to the Visit. Keep visibility aligned with consent.',
-        ctaLabel: 'Coming soon',
-        href: '#',
-      },
-  {
-    id: 'clinical',
-    title: 'Clinical / Justice (role-gated)',
-    description: 'Add vitals, clinical notes, or justice-related flags where permitted. Hidden for roles without clearance.',
-        ctaLabel: 'Coming soon',
-        href: '#',
-        gated: (access) => access?.canAccessOpsFrontline ?? false,
-      },
-    ];
 
 export default async function NewVisitPage() {
   const supabase = await createSupabaseRSCClient();
@@ -163,25 +97,32 @@ export default async function NewVisitPage() {
         </CardContent>
       </Card>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        {PANELS.filter((panel) => !panel.gated || panel.gated(access)).map((panel) => (
-          <Card key={panel.id} className="h-full border-border/70">
-            <CardHeader className="space-y-1">
-              <div className="flex items-center justify-between gap-2">
-                <CardTitle className="text-lg">{panel.title}</CardTitle>
-                {panel.badge ? <Badge variant="secondary">{panel.badge}</Badge> : null}
-              </div>
-              <CardDescription className="text-sm text-muted-foreground">{panel.description}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm text-foreground/80">
-              <Button asChild variant="outline" className="w-full">
-                <Link href={panel.href}>{panel.ctaLabel}</Link>
-              </Button>
-              <p className="text-xs text-muted-foreground">Keep consent and sharing aligned; Visit history should show who created each action.</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <Card className="border-border/70">
+        <CardHeader>
+          <CardTitle className="text-xl">Visit actions available now</CardTitle>
+          <CardDescription>Stay on the visit-first rail using the Ops tools that are live today.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm text-foreground/80">
+          <ul className="space-y-2 text-muted-foreground">
+            <li>
+              <Link href="/ops/today" className="font-semibold text-foreground hover:underline">Open Today</Link>
+              {' '}to start or resume a Visit with your acting org applied.
+            </li>
+            <li>
+              <Link href="/ops/clients?view=directory" className="font-semibold text-foreground hover:underline">Find or create a person</Link>
+              {' '}to anchor the Visit and keep intake aligned to your org.
+            </li>
+            <li>
+              <Link href="/ops/programs" className="font-semibold text-foreground hover:underline">Check programs & shifts</Link>
+              {' '}before logging so Visits capture the right context.
+            </li>
+            <li>
+              <Link href="/ops/supplies" className="font-semibold text-foreground hover:underline">Review supplies</Link>
+              {' '}to prep stock and keep Visit adjustments in sync with inventory controls.
+            </li>
+          </ul>
+        </CardContent>
+      </Card>
     </div>
   );
 }

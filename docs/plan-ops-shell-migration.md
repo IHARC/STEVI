@@ -12,7 +12,10 @@
   - Client preview/shared chrome: `components/shared/layout/top-nav.tsx`, `components/shared/layout/client-preview-banner.tsx`, `components/shared/layout/app-navigation.tsx`, `components/shared/providers/*`
   - Tests/docs: `src/lib/portal-navigation.test.ts`, `src/lib/paths.test.ts`, `src/lib/portal-access.test.ts`, `docs/architecture/shells.md`, `docs/navigation-ownership.md`, `README.md`
 
-## Goals
+## Status
+- COMPLETE as of 2025-12-09. Lint/typecheck/test all pass (`npm run lint`, `npm run typecheck`, `npm run test`).
+
+## Goals (all delivered)
 1) Rename the workspace shell to **Operations** (short **ops** in URLs, classnames, labels).
 2) Split areas: `ops_frontline`, `ops_org`, `ops_hq`, `client`. Preserve explicit guards per area; remove the “workspace catch-all”.
 3) Add an IHARC HQ hub (global admin) with navigation surface and overview under `/ops/hq`.
@@ -34,43 +37,18 @@
 - Profile path: `/ops/profile`.
 - Preview CTA remains “Preview client portal” linking to `/home?preview=1`.
 
-## Work Plan (one shot)
-1) **Area model**
-   - Update `PortalArea` in `src/lib/portal-areas.ts` to new enums; remap `inferPortalAreaFromPath` to `/ops`, `/ops/org`, `/ops/hq`; drop workspace catch-all.
-   - Adjust `resolveLandingArea/Path`, `requireArea`, preview handling, and `getPortalRequestContext` to use new areas and paths.
-2) **Routing & paths**
-   - Route group `(ops)` with `/ops/...` paths across pages, actions (`revalidatePath`), and links.
-   - Move/alias layout to `src/app/(ops)/layout.tsx` with updated imports/guards.
-   - Update login redirects (`/login?next=/ops/...`) in pages/actions.
-3) **Shell/theme rename**
-   - Change root class to `ops-shell` in `AppShell` and `theme` file; `src/styles/theme.ops.css` provides ops tokens and imports.
-   - Update descriptive copy in PageHeaders (“Operations”) and preview banner text.
-4) **Navigation rebuild**
-   - Replace `NAV_SECTIONS` with Ops sections:
-     - `ops_frontline`: Today, Clients, Programs, Supplies, Partners (gated by existing capability flags renamed if needed).
-     - `ops_org`: Organization hub (`/ops/org`), members/invites/settings; only for org admins/IHARC admins.
-     - `ops_hq`: HQ hub (`/ops/hq`) for IHARC admins only; groups for Global Settings, Content & Notifications, Organizations (list), Inventory/Donations, Operations (users/permissions/attention queue).
-   - Update `workspace-rail` (rename component/file to `ops-rail` if desired) to pull from new nav sections.
-   - Update quick actions and command palette builders for new paths/areas.
-5) **IHARC HQ hub**
-   - Create `/ops/hq` entry page using existing admin components (policies/resources/public settings/notifications/marketing/inventory/donations/operations).
-   - No acting-org requirement; hide acting-org badge in TopNav when activeArea is `ops_hq`.
-6) **Org hub tightening**
-   - Keep `/ops/org` pages; ensure guards require acting org for org admins; allow IHARC admins to specify org via query or selector.
-   - Update `org-tabs` links to `/ops/org/*`.
-7) **Frontline rail**
-   - Update Today/Clients/Programs/Visits/Supplies pages to new paths, breadcrumbs, headers.
-   - Ensure `resolveQuickActions` and buttons use `/ops/...`.
-8) **Primary/secondary nav & user menu**
-   - Update `primary-nav`, `user menu` profile link, TopNav acting-org badge visibility, and client preview CTA to use new paths/labels.
-9) **Tests & fixtures**
-   - Update Vitest suites (`portal-navigation.test.ts`, `paths.test.ts`, `portal-access.test.ts`, `inventory/auth.test.ts`) to new paths/area labels.
-   - Adjust any path normalization expectations (`stripRouteGroups`).
-10) **Docs & README**
-    - Refresh `README.md`, `docs/architecture/shells.md`, `docs/navigation-ownership.md` with new naming/areas and the no-back-compat rule.
-    - Mention dead links acceptable during migration; remove references to “workspace”.
-11) **Quality gates**
-    - Run `npm run lint`, `npm run typecheck`, `npm run test`. Update snapshots if any. No redirects/fallbacks added.
+## Execution (one shot, all done)
+1) **Area model** – [done] `PortalArea` now `ops_frontline|ops_org|ops_hq|client`; inference/landing/guards and request context updated; preview handled; no workspace catch-all.
+2) **Routing & paths** – [done] Route group renamed to `(ops)` with `/ops/...` across pages/actions/links; layout lives at `src/app/(ops)/layout.tsx`; login redirects use `/ops/...`.
+3) **Shell/theme rename** – [done] Root class `ops-shell`; ops tokens in `src/styles/theme.ops.css`; PageHeaders/top chrome copy updated; preview banner copy refreshed.
+4) **Navigation rebuild** – [done] Ops nav sections for frontline/org/HQ; ops rail component; quick actions + command palette rebuilt to new paths/areas.
+5) **IHARC HQ hub** – [done] `/ops/hq` overview with notifications, attention queue, inventory/donations, and website panels; acting-org badge hidden on HQ.
+6) **Org hub tightening** – [done] `/ops/org` guarded by acting org; org selector allowed for IHARC admins; tabs/links updated to `/ops/org/*`.
+7) **Frontline rail** – [done] Today/Clients/Programs/Visits/Supplies/Partners/Profile moved to `/ops/*` with visit-first copy and breadcrumbs.
+8) **Primary/secondary nav & user menu** – [done] Profile link at `/ops/profile`; TopNav acting-org only on frontline/org; client preview CTA intact.
+9) **Tests & fixtures** – [done] Vitest suites updated; path stripping expectations adjusted.
+10) **Docs & README** – [done] README, architecture, navigation ownership, Front Door/App Service notes updated to ops naming; dead-link tolerance noted.
+11) **Quality gates** – [done] `npm run lint`, `npm run typecheck`, `npm run test` passing (Dec 9, 2025).
 
 ## Risks / Calls
 - Bulk path rename is pervasive; rely on `rg` + type errors to catch stragglers.
