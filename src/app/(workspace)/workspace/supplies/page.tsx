@@ -40,7 +40,6 @@ export default async function WorkspaceSuppliesPage() {
         title="Supplies"
         description="Stock summary, donations, and reconciliation. Giving items must be logged from a Visit."
         meta={[{ label: 'Inventory + donations', tone: 'info' }, { label: 'Visit-first', tone: 'neutral' }]}
-        primaryAction={{ label: 'Start Visit', href: '/workspace/visits/new' }}
       />
 
       <div className="grid gap-4 md:grid-cols-3">

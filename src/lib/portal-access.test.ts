@@ -48,10 +48,16 @@ const createSupabase = (
     user = { id: 'user-1', email: 'taylor@example.com' },
     rpcResult = { data: [], error: null },
     orgResult = { data: { name: 'Org' }, error: null },
+    accessibleOrgsResult = { data: [{ id: 10, name: 'Org', is_active: true }], error: null },
+    userPeopleResult = { data: [{ person_id: 77 }], error: null },
+    orgPeopleResult = { data: [{ organization_id: 10, end_date: null }], error: null },
   }: {
     user?: Record<string, unknown> | null;
     rpcResult?: { data: unknown; error: Error | null };
     orgResult?: { data: unknown; error: Error | null };
+    accessibleOrgsResult?: { data: unknown; error: Error | null };
+    userPeopleResult?: { data: unknown; error: Error | null };
+    orgPeopleResult?: { data: unknown; error: Error | null };
   },
 ): SupabaseAnyServerClient =>
   ({
@@ -60,10 +66,44 @@ const createSupabase = (
     },
     rpc: vi.fn().mockResolvedValue(rpcResult),
     schema: vi.fn().mockReturnValue({
-      from: vi.fn().mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({ maybeSingle: vi.fn().mockResolvedValue(orgResult) }),
-        }),
+      from: vi.fn().mockImplementation((table: string) => {
+        if (table === 'user_people') {
+          return {
+            select: vi.fn().mockReturnValue({
+              eq: vi.fn().mockResolvedValue(userPeopleResult),
+            }),
+          };
+        }
+
+        if (table === 'organization_people') {
+          return {
+            select: vi.fn().mockReturnValue({
+              in: vi.fn().mockReturnValue({
+                is: vi.fn().mockResolvedValue(orgPeopleResult),
+              }),
+            }),
+          };
+        }
+
+        if (table === 'organizations') {
+          return {
+            select: vi.fn().mockReturnValue({
+              eq: vi.fn().mockImplementation(() => ({ maybeSingle: vi.fn().mockResolvedValue(orgResult) })),
+              in: vi.fn().mockReturnValue({
+                eq: vi.fn().mockResolvedValue(accessibleOrgsResult),
+                order: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue(accessibleOrgsResult) }),
+                limit: vi.fn().mockResolvedValue(accessibleOrgsResult),
+              }),
+              order: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue(accessibleOrgsResult) }),
+            }),
+          };
+        }
+
+        return {
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({ maybeSingle: vi.fn().mockResolvedValue(orgResult) }),
+          }),
+        };
       }),
     }),
   } as unknown as SupabaseAnyServerClient);

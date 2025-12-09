@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { loadPortalAccess } from '@/lib/portal-access';
+import { assertOrganizationSelected, loadPortalAccess } from '@/lib/portal-access';
 import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 import { requirePersonForUser } from '@/lib/cases/person';
 import { fetchClientCaseDetail, fetchStaffCaseDetail } from '@/lib/cases/fetchers';
@@ -209,6 +209,8 @@ export async function staffAddCaseNoteAction(formData: FormData): Promise<void> 
     throw new Error('You do not have permission to add notes.');
   }
 
+  assertOrganizationSelected(access, 'Select an acting organization before adding a note.');
+
   const detail = await fetchStaffCaseDetail(supabase, caseId);
   if (!detail) throw new Error('Case not found.');
 
@@ -253,6 +255,8 @@ export async function processIntakeAction(formData: FormData): Promise<void> {
   if (!access || !access.canAccessStaffWorkspace) {
     throw new Error('You do not have permission to process intakes.');
   }
+
+  assertOrganizationSelected(access, 'Select an acting organization before processing an intake.');
 
   await processClientIntake(supabase, intakeId, access.userId);
 

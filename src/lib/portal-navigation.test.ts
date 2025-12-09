@@ -61,6 +61,8 @@ const baseAccess: PortalAccess = {
   canManageOrgInvites: false,
   canAccessStaffWorkspace: false,
   inventoryAllowedRoles: [],
+  actingOrgChoicesCount: null,
+  actingOrgAutoSelected: false,
 };
 
 describe('resolveLandingPath', () => {

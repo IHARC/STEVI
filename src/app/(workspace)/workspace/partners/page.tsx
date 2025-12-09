@@ -36,7 +36,6 @@ export default async function WorkspacePartnersPage() {
         eyebrow="Workspace"
         title="Partners"
         description="Directory, services catalog, and agreements. Referrals start from a Visit or client profile."
-        primaryAction={{ label: 'Start Visit', href: '/workspace/visits/new' }}
         secondaryAction={{ label: 'Manage org hub', href: '/org' }}
       />
 

@@ -32,8 +32,8 @@ export default async function ProgramDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  const newVisitHref = `/workspace/visits/new?programId=${program.id}`;
   const orgMissing = (access.canAccessStaffWorkspace || access.canAccessAdminWorkspace) && !access.organizationId;
+  const newVisitHref = orgMissing ? '/org' : `/workspace/visits/new?programId=${program.id}`;
   const visitAction = orgMissing
     ? { label: 'Select org to start Visit', href: '/org' }
     : { label: 'Start Visit in this program', href: newVisitHref };
@@ -80,7 +80,7 @@ export default async function ProgramDetailPage({ params }: PageProps) {
             <p className="font-semibold mt-2">Schedule</p>
             <p className="text-muted-foreground">{program.startsAt} – {program.endsAt}</p>
             <Button asChild variant="outline" className="w-full mt-3">
-              <Link href="/workspace/visits/new">Log shift note</Link>
+              <Link href={newVisitHref}>Log shift note</Link>
             </Button>
           </CardContent>
         </Card>

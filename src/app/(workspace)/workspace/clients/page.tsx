@@ -53,9 +53,9 @@ export default async function WorkspaceClientsPage({ searchParams }: PageProps) 
 
   const canStartVisit = access.canAccessStaffWorkspace || access.canAccessAdminWorkspace;
   const orgMissing = canStartVisit && !access.organizationId;
-  const visitAction = orgMissing
-    ? { label: 'Select org to start Visit', href: '/org' }
-    : { label: 'New Visit', href: '/workspace/visits/new' };
+  const visitAction = canStartVisit
+    ? { label: orgMissing ? 'Select org to start Visit' : 'New Visit', href: orgMissing ? '/org' : '/workspace/visits/new' }
+    : { label: 'Find or create person', href: '/workspace/clients?view=directory' };
 
   const [people, onboardingMap, caseload, cases] = await Promise.all([
     loadDirectory(supabase),

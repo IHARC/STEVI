@@ -88,6 +88,48 @@ export default async function NewVisitPage() {
     redirect(resolveLandingPath(access));
   }
 
+  const canStartVisit = access.canAccessAdminWorkspace || access.canAccessStaffWorkspace;
+  const orgMissing = canStartVisit && !access.organizationId;
+  const orgSelectionHref = (access.canAccessOrgWorkspace || access.canManageOrgUsers) ? '/org' : '/workspace/profile';
+  const orgOptionsCount = access.actingOrgChoicesCount;
+
+  if (orgMissing) {
+    return (
+      <div className="mx-auto w-full max-w-6xl space-y-8 px-4 py-8 md:px-6">
+        <PageHeader
+          eyebrow="Visit"
+          title="Select an acting organization"
+          description="Choose your organization before starting a Visit. This keeps provenance, referrals, and supplies tied to the right tenant."
+          primaryAction={{ label: 'Select organization', href: orgSelectionHref }}
+          secondaryAction={{ label: 'Back to Today', href: '/workspace/today' }}
+          meta={[
+            { label: orgOptionsCount && orgOptionsCount > 1 ? 'Multiple orgs available' : 'Org required', tone: 'warning' },
+          ]}
+          breadcrumbs={[{ label: 'Today', href: '/workspace/today' }, { label: 'New Visit' }]}
+        />
+
+        <Card className="border-dashed border-border/70">
+          <CardHeader>
+            <CardTitle className="text-xl">Set acting org to continue</CardTitle>
+            <CardDescription>Visit creation is blocked until you pick which organization you’re acting on behalf of.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm text-foreground/80">
+            <p>Choose your org from the Organization hub. This ensures every Visit, referral, and supply adjustment records provenance.</p>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Button asChild className="flex-1">
+                <Link href={orgSelectionHref}>Open organization hub</Link>
+              </Button>
+              <Button asChild variant="outline" className="flex-1">
+                <Link href="/workspace/today">Return to Today</Link>
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">If you only have one organization, we’ll auto-select it next time you sign in.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   const orgLabel = access.organizationName ?? 'Unassigned org';
   const logHref = '/workspace/today';
 

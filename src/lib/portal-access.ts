@@ -37,7 +37,15 @@ export type PortalAccess = {
   canManageOrgInvites: boolean;
   canAccessStaffWorkspace: boolean;
   inventoryAllowedRoles: IharcRole[];
+  actingOrgChoicesCount: number | null;
+  actingOrgAutoSelected: boolean;
 };
+
+export function assertOrganizationSelected(access: PortalAccess | null, message = 'Select an organization to continue.'): asserts access is PortalAccess & { organizationId: number } {
+  if (!access || !access.organizationId) {
+    throw new Error(message);
+  }
+}
 
 export async function loadPortalAccess(
   supabase: SupabaseAnyServerClient,
@@ -51,7 +59,7 @@ export async function loadPortalAccess(
     return null;
   }
 
-  const profile = await ensurePortalProfile(supabase, user.id);
+  let profile = await ensurePortalProfile(supabase, user.id);
   const roles = await fetchUserRoles(supabase, user.id);
 
   const iharcRoles = roles.filter((role): role is IharcRole => role.startsWith('iharc_'));
@@ -59,9 +67,48 @@ export async function loadPortalAccess(
   const inventoryAllowedRoles = (await getInventoryRoles(supabase)).filter((role): role is IharcRole =>
     role.startsWith('iharc_'),
   );
-  const organizationId = profile.organization_id ?? null;
-  const organizationName = organizationId ? await fetchOrganizationName(supabase, organizationId) : null;
+
+  let organizationId = profile.organization_id ?? null;
+  let organizationName = organizationId ? await fetchOrganizationName(supabase, organizationId) : null;
   const isProfileApproved = profile.affiliation_status === 'approved';
+
+  let actingOrgChoicesCount: number | null = null;
+  let actingOrgAutoSelected = false;
+
+  const hasWorkspaceRole = isProfileApproved && (portalRoles.length > 0 || iharcRoles.length > 0);
+
+  if (hasWorkspaceRole) {
+    const accessibleOrganizations = await fetchAccessibleOrganizations(supabase, user.id);
+    const accessibleOrgSet = new Map<number, string | null>();
+    accessibleOrganizations.forEach((org) => accessibleOrgSet.set(org.id, org.name ?? null));
+    if (organizationId !== null && !accessibleOrgSet.has(organizationId)) {
+      accessibleOrgSet.set(organizationId, organizationName ?? null);
+    }
+
+    actingOrgChoicesCount = accessibleOrgSet.size;
+
+    if (!organizationId && accessibleOrgSet.size === 1) {
+      const [soleOrgId, soleOrgName] = accessibleOrgSet.entries().next().value as [number, string | null];
+      const { error } = await supabase
+        .schema('portal')
+        .from('profiles')
+        .update({ organization_id: soleOrgId, requested_organization_name: null })
+        .eq('id', profile.id);
+
+      if (!error) {
+        organizationId = soleOrgId;
+        organizationName = soleOrgName ?? organizationName;
+        actingOrgAutoSelected = true;
+        profile = { ...profile, organization_id: soleOrgId };
+        await refreshUserPermissions(supabase, user.id);
+      } else if (process.env.NODE_ENV !== 'production') {
+        console.warn('Unable to auto-select acting org', error);
+      }
+    } else if (organizationId && !organizationName) {
+      organizationName = await fetchOrganizationName(supabase, organizationId);
+      profile = { ...profile, organization_id: organizationId };
+    }
+  }
 
   const isPortalAdmin = portalRoles.includes('portal_admin');
   const isIharcAdmin = iharcRoles.includes('iharc_admin');
@@ -112,6 +159,8 @@ export async function loadPortalAccess(
     canManageOrgInvites,
     canAccessStaffWorkspace,
     inventoryAllowedRoles,
+    actingOrgChoicesCount,
+    actingOrgAutoSelected,
   };
 }
 
@@ -154,6 +203,89 @@ async function fetchOrganizationName(supabase: SupabaseAnyServerClient, organiza
   }
 
   return data?.name ?? null;
+}
+
+async function fetchAccessibleOrganizations(
+  supabase: SupabaseAnyServerClient,
+  userId: string,
+  limit = 10,
+): Promise<Array<{ id: number; name: string | null }>> {
+  try {
+    const core = supabase.schema('core');
+
+    const { data: userPeopleRows, error: userPeopleError } = await core
+      .from('user_people')
+      .select('person_id')
+      .eq('user_id', userId);
+
+    if (userPeopleError || !userPeopleRows?.length) {
+      return [];
+    }
+
+    const personIds = Array.from(
+      new Set(
+        userPeopleRows
+          .map((row: { person_id: number }) => row.person_id)
+          .filter((id: number): id is number => Number.isFinite(id)),
+      ),
+    );
+    if (personIds.length === 0) return [];
+
+    const { data: orgPeopleRows, error: orgPeopleError } = await core
+      .from('organization_people')
+      .select('organization_id, end_date')
+      .in('person_id', personIds)
+      .is('end_date', null);
+
+    if (orgPeopleError) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn('Unable to load organization memberships', orgPeopleError);
+      }
+      return [];
+    }
+
+    const orgIds = Array.from(
+      new Set(
+        (orgPeopleRows ?? [])
+          .map((row: { organization_id: number | null }) => (row.organization_id ? Number(row.organization_id) : null))
+          .filter((id: number | null): id is number => typeof id === 'number' && Number.isFinite(id)),
+      ),
+    ).slice(0, limit);
+
+    if (orgIds.length === 0) return [];
+
+    const { data: organizations, error: orgError } = await core
+      .from('organizations')
+      .select('id, name, is_active')
+      .in('id', orgIds)
+      .eq('is_active', true)
+      .order('name')
+      .limit(limit);
+
+    if (orgError) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn('Unable to load accessible organizations', orgError);
+      }
+      return [];
+    }
+
+    return (organizations ?? []).map((org: { id: number; name: string | null }) => ({ id: org.id, name: org.name ?? null }));
+  } catch (error) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn('Unexpected error while loading accessible organizations', error);
+    }
+    return [];
+  }
+}
+
+async function refreshUserPermissions(supabase: SupabaseAnyServerClient, userId: string) {
+  try {
+    await supabase.rpc('refresh_user_permissions', { user_uuid: userId });
+  } catch (error) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn('Failed to refresh user permissions after org selection', error);
+    }
+  }
 }
 
 type MenuLinkBlueprint = PortalLink & { requires?: (access: PortalAccess) => boolean };

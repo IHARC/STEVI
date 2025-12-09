@@ -33,11 +33,12 @@ export default async function WorkspaceTodayPage() {
     : [[], [], []];
 
   const findPersonHref = '/workspace/clients?view=directory';
-  const newVisitHref = access.canAccessStaffWorkspace || access.canAccessAdminWorkspace ? '/workspace/visits/new' : findPersonHref;
-  const orgMissing = (access.canAccessStaffWorkspace || access.canAccessAdminWorkspace) && !access.organizationId;
-  const visitAction = orgMissing
-    ? { label: 'Select org to start Visit', href: '/org' }
-    : { label: 'New Visit', href: newVisitHref };
+  const canStartVisit = access.canAccessStaffWorkspace || access.canAccessAdminWorkspace;
+  const orgMissing = canStartVisit && !access.organizationId;
+  const newVisitHref = canStartVisit ? (orgMissing ? '/org' : '/workspace/visits/new') : findPersonHref;
+  const visitAction = canStartVisit
+    ? { label: orgMissing ? 'Select org to start Visit' : 'New Visit', href: newVisitHref }
+    : { label: 'Find or create person', href: findPersonHref };
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-8 px-4 py-8 md:px-6">

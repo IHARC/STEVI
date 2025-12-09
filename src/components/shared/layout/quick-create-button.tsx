@@ -79,7 +79,9 @@ export function QuickCreateButton() {
                 <span className="block text-sm text-muted-foreground">{action.description}</span>
               ) : null}
               {action.disabled ? (
-                <span className="text-xs text-primary">Exit preview to use this action</span>
+                <span className="text-xs text-primary">
+                  {action.disabledReason ?? 'Action unavailable in this mode'}
+                </span>
               ) : null}
             </span>
           </DropdownMenuItem>

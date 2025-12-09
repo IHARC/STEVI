@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { buildEntityRef, logAuditEvent } from '@/lib/audit';
-import { loadPortalAccess } from '@/lib/portal-access';
+import { assertOrganizationSelected, loadPortalAccess } from '@/lib/portal-access';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 
 export type OutreachFormState = {
@@ -61,6 +61,8 @@ export async function staffLogOutreachAction(
   if (!access || !access.canAccessStaffWorkspace) {
     return { status: 'error', message: 'You need staff access to log outreach.' };
   }
+
+  assertOrganizationSelected(access, 'Select an acting organization before logging outreach.');
 
   const core = supabase.schema('core');
   const { error } = await core.from('people_activities').insert({

@@ -20,6 +20,7 @@ export type QuickAction = {
   description?: string;
   icon?: 'calendar' | 'chat' | 'file';
   disabled?: boolean;
+  disabledReason?: string;
 };
 
 const hasWorkspaceAccess = (access: PortalAccess) =>
@@ -138,6 +139,8 @@ export function resolveQuickActions(
   if (!access) return [];
 
   const previewDisabled = Boolean(isPreview);
+  const orgMissing = (access.canAccessStaffWorkspace || access.canAccessAdminWorkspace) && !access.organizationId;
+  const requiresOrgSelection = orgMissing && (access.actingOrgChoicesCount ?? 0) > 1;
 
   if (area === 'client') {
     return [
@@ -175,10 +178,15 @@ export function resolveQuickActions(
       actions.push({
         id: 'workspace-new-visit',
         label: 'New Visit',
-        href: '/workspace/visits/new',
-        description: 'Start a Visit from your current context',
+        href: orgMissing ? '/org' : '/workspace/visits/new',
+        description: orgMissing ? 'Select an acting org to start a Visit' : 'Start a Visit from your current context',
         icon: 'calendar',
-        disabled: previewDisabled,
+        disabled: previewDisabled || orgMissing,
+        disabledReason: previewDisabled
+          ? 'Not available in preview'
+          : requiresOrgSelection
+            ? 'Select an acting org to start a Visit'
+            : 'Set an acting org to start a Visit',
       });
     }
 
@@ -190,6 +198,7 @@ export function resolveQuickActions(
         description: 'Search existing records or start intake',
         icon: 'file',
         disabled: previewDisabled,
+        disabledReason: previewDisabled ? 'Not available in preview' : undefined,
       });
     }
 
@@ -201,6 +210,7 @@ export function resolveQuickActions(
         description: 'Send an access invite',
         icon: 'chat',
         disabled: previewDisabled,
+        disabledReason: previewDisabled ? 'Not available in preview' : undefined,
       });
     }
 
