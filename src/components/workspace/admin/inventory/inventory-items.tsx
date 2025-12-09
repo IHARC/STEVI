@@ -405,13 +405,7 @@ function ItemDialog({
                   <FormItem className="grid gap-2">
                     <FormLabel htmlFor="item_category">Category</FormLabel>
                     <FormControl>
-                      <input
-                        list="inventory-categories"
-                        id="item_category"
-                        className="rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none"
-                        required
-                        {...field}
-                      />
+                      <Input list="inventory-categories" id="item_category" required {...field} />
                     </FormControl>
                     <FormMessage />
                     <datalist id="inventory-categories">

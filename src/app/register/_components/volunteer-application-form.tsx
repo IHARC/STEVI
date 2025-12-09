@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
+import type { FormEvent } from 'react';
 import { useFormStatus } from 'react-dom';
 import { useForm } from 'react-hook-form';
 import { Alert, AlertDescription, AlertTitle } from '@shared/ui/alert';
@@ -64,6 +65,13 @@ export function VolunteerApplicationForm({
     },
   });
   const isSuccess = state.status === 'success';
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    const isValid = await form.trigger();
+    if (!isValid) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  };
 
   return (
     <Form {...form}>
@@ -71,6 +79,7 @@ export function VolunteerApplicationForm({
         action={formAction}
         className="space-y-6 rounded-3xl border border-border/40 bg-background p-6 shadow-sm sm:p-8"
         noValidate
+        onSubmit={handleSubmit}
       >
         <input type="hidden" {...form.register('next')} />
 

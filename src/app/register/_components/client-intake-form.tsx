@@ -3,6 +3,7 @@
 /* eslint-disable react-hooks/incompatible-library */
 
 import { useActionState, useEffect, useMemo } from 'react';
+import type { FormEvent } from 'react';
 import { useFormStatus } from 'react-dom';
 import { useForm } from 'react-hook-form';
 import { Alert, AlertDescription, AlertTitle } from '@shared/ui/alert';
@@ -108,6 +109,13 @@ export function ClientIntakeForm({
   const contactChoice = form.watch('contact_choice');
   const shouldHideCredentials = contactChoice === 'none';
   const isSuccess = state.status === 'success';
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    const isValid = await form.trigger();
+    if (!isValid) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  };
 
   useEffect(() => {
     if (isSuccess) {
@@ -130,6 +138,7 @@ export function ClientIntakeForm({
         action={formAction}
         className="space-y-8 rounded-2xl border border-border/40 bg-background p-6 shadow-sm sm:p-8"
         noValidate
+        onSubmit={handleSubmit}
       >
         <input type="hidden" {...form.register('next')} />
 

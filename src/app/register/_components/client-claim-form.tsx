@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState, useEffect, useMemo, useState } from 'react';
+import type { FormEvent } from 'react';
 import { useFormStatus } from 'react-dom';
 import { useForm } from 'react-hook-form';
 import { Alert, AlertDescription, AlertTitle } from '@shared/ui/alert';
@@ -69,6 +70,13 @@ export function ClientClaimForm({
   });
 
   const isSuccess = state.status === 'success';
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    const isValid = await form.trigger();
+    if (!isValid) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  };
 
   useEffect(() => {
     if (state.error || isSuccess) {
@@ -91,6 +99,7 @@ export function ClientClaimForm({
         action={formAction}
         className="space-y-8 rounded-2xl border border-border/40 bg-background p-6 shadow-sm sm:p-8"
         noValidate
+        onSubmit={handleSubmit}
       >
         <input type="hidden" {...form.register('next')} />
         <input type="hidden" {...form.register('contact_method')} value={contactMethod} />
