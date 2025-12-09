@@ -124,7 +124,8 @@ describe('ensureInventoryActor', () => {
 
     const actor = await ensureInventoryActor(supabase);
     expect(actor.profile.id).toBe('profile-1');
-    expect(actor.roles).toEqual(['iharc_staff']);
+    expect(actor.roles).toContain('iharc_staff');
+    expect(actor.roles).toContain('iharc_admin');
   });
 
   it('redirects to login when configured to redirect on failure', async () => {
