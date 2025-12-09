@@ -54,12 +54,13 @@ async function loadAssignableRoles(supabase: SupabaseServerClient): Promise<Set<
     getPortalRoles(supabase),
     getIharcRoles(supabase),
   ]);
-  return new Set([...portalRoles, ...iharcRoles]);
+  const filteredPortalRoles = portalRoles.filter((role) => role !== 'portal_admin');
+  return new Set([...filteredPortalRoles, ...iharcRoles]);
 }
 
 function hasElevatedAdmin(access: Awaited<ReturnType<typeof loadPortalAccess>>): boolean {
   if (!access) return false;
-  return access.portalRoles.includes('portal_admin') || access.iharcRoles.includes('iharc_admin');
+  return access.iharcRoles.includes('iharc_admin');
 }
 
 function hasOrgAdmin(access: Awaited<ReturnType<typeof loadPortalAccess>>): boolean {

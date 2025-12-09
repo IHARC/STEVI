@@ -26,7 +26,7 @@ async function requireElevatedAdmin() {
     throw new Error('Profile approval required.');
   }
 
-  const isElevated = access.portalRoles.includes('portal_admin') || access.iharcRoles.includes('iharc_admin');
+  const isElevated = access.iharcRoles.includes('iharc_admin');
   if (!isElevated) {
     throw new Error('Elevated admin access is required.');
   }

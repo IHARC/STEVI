@@ -129,7 +129,7 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
         items: [
           { id: 'hq-overview', href: '/ops/hq', label: 'Overview', icon: 'dashboard', match: ['/ops/hq'], exact: true },
           { id: 'hq-content', href: '/ops/hq#content', label: 'Content & Notifications', icon: 'megaphone', match: ['/ops/hq'] },
-          { id: 'hq-organizations', href: '/ops/hq#organizations', label: 'Organizations', icon: 'globe', match: ['/ops/hq'] },
+          { id: 'hq-organizations', href: '/ops/hq/organizations', label: 'Organizations', icon: 'globe', match: ['/ops/hq/organizations'] },
           { id: 'hq-inventory', href: '/ops/hq#inventory', label: 'Inventory & Donations', icon: 'boxes', match: ['/ops/hq'] },
           { id: 'hq-operations', href: '/ops/hq#operations', label: 'Operations', icon: 'workflow', match: ['/ops/hq'] },
         ],

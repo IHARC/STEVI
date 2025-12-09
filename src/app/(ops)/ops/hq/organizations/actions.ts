@@ -97,8 +97,8 @@ async function requirePortalAdminContext() {
     throw new Error('Sign in to continue.');
   }
 
-  if (!access.portalRoles.includes('portal_admin')) {
-    throw new Error('Administrator access is required.');
+  if (!access.iharcRoles.includes('iharc_admin')) {
+    throw new Error('IHARC admin access is required.');
   }
 
   const actorProfile = await ensurePortalProfile(supabase, access.userId);

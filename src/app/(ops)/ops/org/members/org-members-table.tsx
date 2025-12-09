@@ -39,7 +39,7 @@ function formatDate(value: string | null) {
 
 function seedSingleRoleState(member?: OrgMemberRecord) {
   if (!member) return { admin: false, rep: false };
-  const isOrgAdmin = member.portal_roles.includes('portal_org_admin') || member.portal_roles.includes('portal_admin');
+  const isOrgAdmin = member.portal_roles.includes('portal_org_admin');
   const isOrgRep = member.portal_roles.includes('portal_org_rep');
   return { admin: isOrgAdmin, rep: isOrgRep };
 }
@@ -143,8 +143,7 @@ export function OrgMembersTable({ members, currentProfileId, organizationId }: O
       <TableBody>
         {members.map((member) => {
           const isSelf = member.id === currentProfileId;
-          const baseAdmin =
-            member.portal_roles.includes('portal_org_admin') || member.portal_roles.includes('portal_admin');
+          const baseAdmin = member.portal_roles.includes('portal_org_admin');
           const baseRep = member.portal_roles.includes('portal_org_rep');
 
           const state = roleState[member.id] ?? { admin: baseAdmin, rep: baseRep };

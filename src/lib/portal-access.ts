@@ -64,7 +64,9 @@ export async function loadPortalAccess(
   const roles = await fetchUserRoles(supabase, user.id);
 
   const iharcRoles = roles.filter((role): role is IharcRole => role.startsWith('iharc_'));
-  const portalRoles = roles.filter((role): role is PortalRole => role.startsWith('portal_'));
+  const portalRoles = roles
+    .filter((role): role is PortalRole => role.startsWith('portal_'))
+    .filter((role) => role !== 'portal_admin');
   const inventoryAllowedRoles = (await getInventoryRoles(supabase)).filter((role): role is IharcRole =>
     role.startsWith('iharc_'),
   );
@@ -111,35 +113,33 @@ export async function loadPortalAccess(
     }
   }
 
-  const isPortalAdmin = portalRoles.includes('portal_admin');
   const isIharcAdmin = iharcRoles.includes('iharc_admin');
   const isOrgAdmin = portalRoles.includes('portal_org_admin');
   const isOrgRep = portalRoles.includes('portal_org_rep');
 
-  const canAccessOpsHq = isProfileApproved && (isIharcAdmin || isPortalAdmin);
-  const canAccessOpsAdmin = isProfileApproved && (isPortalAdmin || isIharcAdmin || isOrgAdmin);
-  const canAccessOpsOrg = isProfileApproved && (isOrgAdmin || isOrgRep || canAccessOpsHq) && organizationId !== null;
+  const canAccessOpsHq = isProfileApproved && isIharcAdmin;
+  const canAccessOpsAdmin = isProfileApproved && (isIharcAdmin || isOrgAdmin);
+  const canAccessOpsOrg = isProfileApproved && ((isOrgAdmin || isOrgRep) && organizationId !== null || isIharcAdmin);
   const canAccessOpsFrontline = isProfileApproved && (
     iharcRoles.some((role) => ['iharc_admin', 'iharc_supervisor', 'iharc_staff', 'iharc_volunteer'].includes(role)) ||
-    isPortalAdmin ||
     isOrgAdmin ||
     isOrgRep
   );
 
-  const canManageResources = isProfileApproved && isPortalAdmin;
-  const canManagePolicies = isProfileApproved && isPortalAdmin;
+  const canManageResources = isProfileApproved && isIharcAdmin;
+  const canManagePolicies = isProfileApproved && isIharcAdmin;
   const canAccessInventoryOps = isProfileApproved && iharcRoles.some((role) =>
     inventoryAllowedRoles.includes(role),
   );
 
-  const canManageNotifications = isProfileApproved && isPortalAdmin;
-  const canManageWebsiteContent = isProfileApproved && isPortalAdmin;
-  const canManageSiteFooter = isProfileApproved && isPortalAdmin;
-  const canManageConsents = isProfileApproved && (isPortalAdmin || isIharcAdmin);
-  const canReviewProfiles = isProfileApproved && (isPortalAdmin || isIharcAdmin);
-  const canViewMetrics = isProfileApproved && isPortalAdmin;
-  const canManageOrgUsers = isProfileApproved && isOrgAdmin && organizationId !== null;
-  const canManageOrgInvites = isProfileApproved && isOrgAdmin && organizationId !== null;
+  const canManageNotifications = isProfileApproved && isIharcAdmin;
+  const canManageWebsiteContent = isProfileApproved && isIharcAdmin;
+  const canManageSiteFooter = isProfileApproved && isIharcAdmin;
+  const canManageConsents = isProfileApproved && isIharcAdmin;
+  const canReviewProfiles = isProfileApproved && isIharcAdmin;
+  const canViewMetrics = isProfileApproved && isIharcAdmin;
+  const canManageOrgUsers = isProfileApproved && (isIharcAdmin || (isOrgAdmin && organizationId !== null));
+  const canManageOrgInvites = isProfileApproved && (isIharcAdmin || (isOrgAdmin && organizationId !== null));
 
   return {
     userId: user.id,

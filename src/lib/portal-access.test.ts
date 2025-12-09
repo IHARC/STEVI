@@ -116,7 +116,7 @@ describe('loadPortalAccess', () => {
   it('derives capability flags from Supabase roles', async () => {
     const supabase = createSupabase({
       rpcResult: {
-        data: [{ role_name: 'portal_admin' }, { role_name: 'iharc_staff' }, 'portal_org_admin'],
+        data: [{ role_name: 'iharc_admin' }, { role_name: 'iharc_staff' }, 'portal_org_admin'],
         error: null,
       },
     });
@@ -124,8 +124,8 @@ describe('loadPortalAccess', () => {
 
     const access = await loadPortalAccess(supabase);
 
-    expect(access?.portalRoles).toEqual(['portal_admin', 'portal_org_admin']);
-    expect(access?.iharcRoles).toEqual(['iharc_staff']);
+    expect(access?.portalRoles).toEqual(['portal_org_admin']);
+    expect(access?.iharcRoles).toEqual(['iharc_admin', 'iharc_staff']);
     expect(access?.canAccessOpsAdmin).toBe(true);
     expect(access?.canAccessOpsHq).toBe(true);
     expect(access?.canAccessOpsOrg).toBe(true);
