@@ -32,7 +32,9 @@ export default async function OpsHqPage() {
   const [{ data: notificationRows, error: notificationsError }, pendingProfiles, pendingInvites] = await Promise.all([
     portal
       .from('notifications')
-      .select('id, subject, body_text, body_html, notification_type, status, created_at, sent_at, recipient_email, profile_id, profile_name')
+      .select(
+        'id, subject, body_text, body_html, notification_type, status, created_at, sent_at, recipient_email, profile_id, profile:profiles(display_name)',
+      )
       .order('created_at', { ascending: false })
       .limit(20),
     portal.from('profiles').select('id', { count: 'exact', head: true }).eq('affiliation_status', 'pending'),
@@ -46,7 +48,7 @@ export default async function OpsHqPage() {
   const notifications: NotificationRecord[] = (notificationRows ?? []).map((row: Record<string, unknown>) => ({
     id: String(row.id ?? ''),
     profileId: (row.profile_id as string | null) ?? null,
-    profileName: (row.profile_name as string | null) ?? null,
+    profileName: ((row.profile as { display_name?: string } | null)?.display_name as string | null) ?? null,
     recipientEmail: (row.recipient_email as string | null) ?? 'Unknown',
     subject: (row.subject as string | null) ?? 'Notification',
     bodyText: (row.body_text as string | null) ?? '',
