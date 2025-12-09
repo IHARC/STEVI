@@ -32,8 +32,12 @@ export default async function WorkspaceTodayPage() {
     ? await loadStaffWidgets(supabase, access.userId)
     : [[], [], []];
 
-  const findPersonHref = access.canManageConsents || access.canAccessAdminWorkspace ? '/admin/clients' : '/staff/intake';
+  const findPersonHref = '/workspace/clients?view=directory';
   const newVisitHref = access.canAccessStaffWorkspace || access.canAccessAdminWorkspace ? '/workspace/visits/new' : findPersonHref;
+  const orgMissing = (access.canAccessStaffWorkspace || access.canAccessAdminWorkspace) && !access.organizationId;
+  const visitAction = orgMissing
+    ? { label: 'Select org to start Visit', href: '/org' }
+    : { label: 'New Visit', href: newVisitHref };
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-8 px-4 py-8 md:px-6">
@@ -42,9 +46,9 @@ export default async function WorkspaceTodayPage() {
         title="Today"
         description="Stay visit-first: start a Visit, find or create a person, and work the queues that matter for your role."
         meta={[{ label: 'Visit-first', tone: 'info' }, { label: 'Single rail', tone: 'neutral' }]}
-        primaryAction={{ label: 'New Visit', href: newVisitHref }}
+        primaryAction={visitAction}
         secondaryAction={{ label: 'Find or create person', href: findPersonHref }}
-        helperLink={{ label: 'View help', href: '/admin/help' }}
+        helperLink={{ label: 'View help', href: '/support' }}
       />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -93,7 +97,7 @@ export default async function WorkspaceTodayPage() {
               ))}
               {caseload.length === 0 ? <p className="text-muted-foreground">No assigned people yet.</p> : null}
               <Button asChild variant="outline" className="w-full">
-                <Link href="/staff/caseload">Open caseload</Link>
+                <Link href="/workspace/clients?view=caseload">Open caseload</Link>
               </Button>
             </CardContent>
           </Card>
@@ -118,7 +122,7 @@ export default async function WorkspaceTodayPage() {
               ))}
               {shifts.length === 0 ? <p className="text-muted-foreground">No scheduled shifts today.</p> : null}
               <Button asChild variant="outline" className="w-full">
-                <Link href="/staff/schedule">Open schedule</Link>
+                <Link href="/workspace/programs">Open programs</Link>
               </Button>
             </CardContent>
           </Card>
@@ -142,7 +146,7 @@ export default async function WorkspaceTodayPage() {
               ))}
               {intakes.length === 0 ? <p className="text-muted-foreground">No pending intakes.</p> : null}
               <Button asChild variant="outline" className="w-full">
-                <Link href="/staff/intake">Process intake</Link>
+                <Link href="/workspace/clients?view=directory">Process intake</Link>
               </Button>
             </CardContent>
           </Card>

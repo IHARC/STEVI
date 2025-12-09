@@ -56,6 +56,8 @@ export default async function OrgHomePage() {
     redirect(resolveLandingPath(access));
   }
 
+  const isOrgAdmin = access.portalRoles.includes('portal_org_admin') || access.canAccessAdminWorkspace;
+
   const members: OrgMemberRecord[] = await fetchOrgMembersWithRoles(supabase, access.organizationId);
   const invites: OrgInviteRecord[] = await fetchOrgInvites(supabase, access.organizationId, 30);
   const organizationResult = await supabase
@@ -85,6 +87,15 @@ export default async function OrgHomePage() {
 
   const orgName = organization?.name ?? 'your organization';
   const lastSeenLabel = lastSeenTimestamp ? formatDate(new Date(lastSeenTimestamp).toISOString()) : 'No recent activity';
+
+  const orgActions = [
+    { id: 'users', label: 'Users', description: 'Manage members and roles.', href: '/org/members', requires: isOrgAdmin },
+    { id: 'roles', label: 'Roles & permissions', description: 'Control access and visibility.', href: '/org/members', requires: isOrgAdmin },
+    { id: 'tenant', label: 'Tenant settings', description: 'Domains, defaults, and preferences.', href: '/org/settings', requires: isOrgAdmin },
+    { id: 'brand', label: 'Brand & website', description: 'Logos, colors, and public pages.', href: '/org/settings', requires: isOrgAdmin },
+    { id: 'policies', label: 'Policies', description: 'Configure policy acknowledgements.', href: '/org/settings', requires: isOrgAdmin },
+    { id: 'integrations', label: 'Integrations', description: 'Connect tools and data flows.', href: '/org/settings', requires: isOrgAdmin },
+  ].filter((item) => item.requires);
 
   type OrgSummaryCard = { id: string; label: string; value: string; tone?: 'default' | 'warning' | 'info' };
 
@@ -142,6 +153,24 @@ export default async function OrgHomePage() {
           </Badge>
         </div>
       </PageHeader>
+
+      {orgActions.length ? (
+        <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {orgActions.map((action) => (
+            <Card key={action.id} className="border-border/60">
+              <CardHeader>
+                <CardTitle className="text-lg">{action.label}</CardTitle>
+                <CardDescription>{action.description}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button asChild variant="outline" className="w-full">
+                  <Link href={action.href}>Open</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </section>
+      ) : null}
 
       <OrgTabs />
 

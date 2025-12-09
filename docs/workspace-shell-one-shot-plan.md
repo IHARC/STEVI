@@ -119,3 +119,10 @@ Optional: Reports (must be **either** rail hub **or** palette/search-only; never
 - Node 24 env ready; no DB schema changes required.
 - Decide final hub route prefixes under `/workspace/{hub}` before refactors.
 - Plan deletions for replaced `/admin/*` `/staff/*` routes to avoid dangling imports/tests.
+
+## Implementation Status (2025-12-09)
+- ✅ Nav flattened to six hubs; workspace-only rail added (`src/components/workspace/layout/workspace-rail.tsx`) and wired into shell. Command palette cap removed.
+- ✅ Hub pages live at `/workspace/today`, `/workspace/clients`, `/workspace/clients/[id]`, `/workspace/programs`, `/workspace/programs/[id]`, `/workspace/supplies`, `/workspace/partners`; org landing refreshed. Legacy `/admin/*` and `/staff/*` pages removed.
+- ✅ Links, inbox, actions, and revalidation paths retargeted to new hub routes; Visit CTAs gated when org unset. Inventory auth/login redirects now point to `/workspace/supplies`.
+- ✅ Tests: `npm run typecheck`; `npx vitest run src/lib/portal-navigation.test.ts`.
+- Remaining follow-up: auto-select acting org when single org available; add Playwright smoke for rail ≤6 hubs and Visit entry points; ensure any stray admin resource/actions still reachable via org cards if needed.

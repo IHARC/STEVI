@@ -119,12 +119,12 @@ export default async function OnboardingPage({ searchParams }: PageProps) {
           <CardContent className="flex flex-wrap gap-3 pt-2">
             {access.canAccessAdminWorkspace ? (
               <Button asChild size="sm" variant="secondary">
-                <Link href="/admin/clients">Find existing client</Link>
+                <Link href="/workspace/clients">Find existing client</Link>
               </Button>
             ) : null}
             {access.canAccessStaffWorkspace ? (
               <Button asChild size="sm" variant="outline">
-                <Link href="/staff/intake">View intake queue</Link>
+                <Link href="/workspace/clients?view=directory">View intake queue</Link>
               </Button>
             ) : null}
             {personId ? (

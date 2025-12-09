@@ -23,28 +23,13 @@ export async function buildEntityCommandPaletteItems(
       const cases = await fetchStaffCases(supabase, 10);
       cases.forEach((item) => {
         commands.push({
-          href: `/staff/cases/${item.id}`,
+          href: `/workspace/clients/${item.personId ?? item.id}?case=${item.id}`,
           label: item.caseType ?? `Case #${item.id}`,
-          group: 'Cases',
+          group: 'Clients · Cases',
         });
       });
     } catch (error) {
       console.warn('Command palette cases unavailable', error);
-    }
-  }
-
-  if (access.canManageResources) {
-    try {
-      const resources = await listResources({}, { pageSize: 6, includeUnpublished: false });
-      resources.items.forEach((resource: Resource) => {
-        commands.push({
-          href: `/admin/resources/${resource.slug}`,
-          label: resource.title,
-          group: 'Resources',
-        });
-      });
-    } catch (error) {
-      console.warn('Command palette resources unavailable', error);
     }
   }
 
@@ -61,7 +46,7 @@ export async function buildEntityCommandPaletteItems(
       if (!error) {
         (data ?? []).forEach((person: PeopleListItem) => {
           commands.push({
-            href: `/admin/clients/${person.id}`,
+            href: `/workspace/clients/${person.id}`,
             label: `${person.first_name ?? 'Client'} ${person.last_name ?? ''}`.trim(),
             group: 'Clients',
           });

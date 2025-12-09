@@ -89,7 +89,7 @@ export default async function NewVisitPage() {
   }
 
   const orgLabel = access.organizationName ?? 'Unassigned org';
-  const logHref = access.canAccessStaffWorkspace || access.canAccessAdminWorkspace ? '/staff/outreach' : '/workspace/today';
+  const logHref = '/workspace/today';
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-8 px-4 py-8 md:px-6">
@@ -108,16 +108,15 @@ export default async function NewVisitPage() {
 
       <Card className="border-dashed border-border/70">
         <CardHeader>
-          <Badge variant="secondary" className="w-fit">Coming soon</Badge>
           <CardTitle className="text-xl">Visit creation</CardTitle>
-          <CardDescription>We’re wiring the unified Visit record here. For now, continue logging via outreach/tasks while keeping supplies and referrals inside Visit context.</CardDescription>
+          <CardDescription>Start the Visit to capture notes, supplies, referrals, and tasks together. Supplies and referrals stay inside the Visit context.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-2 text-sm text-muted-foreground">
           <Button asChild className="w-full md:w-auto">
-            <Link href={logHref}>Open outreach log</Link>
+            <Link href={logHref}>Open Today</Link>
           </Button>
           <Button asChild variant="outline" className="w-full md:w-auto">
-            <Link href="/workspace/today">Back to Today</Link>
+            <Link href="/workspace/clients">Find a client</Link>
           </Button>
         </CardContent>
       </Card>

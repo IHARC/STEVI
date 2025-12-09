@@ -31,7 +31,7 @@ export async function ensureInventoryActor(
 
   if (error || !user) {
     if (redirectOnFailure) {
-      redirect('/login?next=/admin/inventory');
+      redirect('/login?next=/workspace/supplies');
     }
     throw new InventoryAccessError('Sign in to continue.');
   }
@@ -39,14 +39,14 @@ export async function ensureInventoryActor(
   const access = await loadPortalAccess(supabase);
   if (!access) {
     if (redirectOnFailure) {
-      redirect('/login?next=/admin/inventory');
+      redirect('/login?next=/workspace/supplies');
     }
     throw new InventoryAccessError('Sign in to continue.');
   }
 
   if (!access.canAccessInventoryWorkspace) {
     if (redirectOnFailure) {
-      redirect('/admin');
+      redirect('/workspace/today');
     }
     throw new InventoryAccessError('IHARC inventory access is restricted to staff accounts.');
   }

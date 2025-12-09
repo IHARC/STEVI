@@ -7,7 +7,7 @@ const LANDING_PATH_BY_AREA: Record<PortalArea, string> = {
   client: '/home',
   workspace: '/workspace/today',
   staff: '/workspace/today',
-  admin: '/admin/operations',
+  admin: '/workspace/today',
   org: '/org',
 };
 

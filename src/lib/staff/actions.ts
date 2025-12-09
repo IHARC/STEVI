@@ -95,8 +95,8 @@ export async function staffLogOutreachAction(
     meta: { person_id: personId, case_id: caseId, via: 'staff_fast_entry' },
   });
 
-  revalidatePath('/staff/cases');
-  revalidatePath('/staff/outreach');
+  revalidatePath('/workspace/clients?view=activity');
+  revalidatePath('/workspace/programs');
 
   return { status: 'success', message: 'Outreach saved.' };
 }

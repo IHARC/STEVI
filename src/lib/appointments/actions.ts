@@ -114,9 +114,8 @@ function assertCanActOnAppointment(
 async function touchAppointmentListings() {
   revalidatePath('/appointments');
   revalidatePath('/home');
-  revalidatePath('/staff/appointments');
+  revalidatePath('/workspace/programs');
   revalidatePath('/org/appointments');
-  revalidatePath('/admin/appointments');
 }
 
 export async function requestAppointmentAction(

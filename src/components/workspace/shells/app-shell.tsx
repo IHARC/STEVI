@@ -3,19 +3,17 @@ import { TopNav } from '@shared/layout/top-nav';
 import { SiteFooter } from '@shared/SiteFooter';
 import { ClientPreviewBanner } from '@shared/layout/client-preview-banner';
 import { InboxPanel } from '@shared/layout/inbox-panel';
-import { AppNavigationDesktop } from '@shared/layout/app-navigation';
 import type { CommandPaletteItem } from '@/lib/portal-access';
 import type { InboxItem } from '@/lib/inbox';
 import { cn } from '@/lib/utils';
-import type { PrimaryNavItem } from '@/lib/primary-nav';
 import type { ResolvedBrandingAssets } from '@/lib/marketing/branding';
 import type { UserNavigation } from '@shared/layout/user-nav';
 import type { NavSection } from '@/lib/portal-navigation';
+import { WorkspaceRail } from '@workspace/layout/workspace-rail';
 
 type AppShellProps = {
   children: ReactNode;
   navSections: NavSection[];
-  globalNavItems: PrimaryNavItem[];
   inboxItems: InboxItem[];
   isClientPreview: boolean;
   navigation: UserNavigation;
@@ -26,7 +24,6 @@ type AppShellProps = {
 export function AppShell({
   children,
   navSections,
-  globalNavItems,
   inboxItems,
   isClientPreview,
   navigation,
@@ -40,7 +37,7 @@ export function AppShell({
   return (
     <div className={cn('workspace-shell flex min-h-screen bg-background text-foreground')}>
       {showNavigation ? (
-        <AppNavigationDesktop navSections={navSections} globalNavItems={globalNavItems} />
+        <WorkspaceRail navSections={navSections} />
       ) : null}
       <div className="flex min-h-screen flex-1 flex-col">
         <TopNav

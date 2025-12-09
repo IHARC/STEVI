@@ -76,7 +76,7 @@ describe('resolveLandingPath', () => {
 });
 
 describe('buildPortalNav', () => {
-  it('includes all sections when access allows', () => {
+  it('includes all hubs when access allows', () => {
     const access = {
       ...baseAccess,
       canAccessAdminWorkspace: true,
@@ -96,7 +96,7 @@ describe('buildPortalNav', () => {
     expect(sections).toHaveLength(1);
     expect(sections[0]?.id).toBe('workspace');
     const groupIds = sections[0]?.groups.map((group) => group.id);
-    expect(groupIds).toEqual(expect.arrayContaining(['today', 'clients', 'programs', 'supplies', 'partners', 'organization', 'reports']));
+    expect(groupIds).toEqual(expect.arrayContaining(['today', 'clients', 'programs', 'supplies', 'partners', 'organization']));
   });
 
   it('hides sections the user cannot access', () => {
@@ -116,6 +116,34 @@ describe('buildPortalNav', () => {
     const access = { ...baseAccess, canAccessAdminWorkspace: true, canAccessStaffWorkspace: true };
     const sectionIds = buildPortalNav(access).map((section) => section.id);
     expect(sectionIds).toEqual(['workspace']);
+  });
+
+  it('renders each hub as a single flat link', () => {
+    const access = {
+      ...baseAccess,
+      canAccessAdminWorkspace: true,
+      canAccessStaffWorkspace: true,
+      canAccessOrgWorkspace: true,
+      canAccessInventoryWorkspace: true,
+    } satisfies PortalAccess;
+
+    const nav = buildPortalNav(access);
+    const workspace = nav[0];
+    expect(workspace.groups.every((group) => group.items.length === 1)).toBe(true);
+  });
+
+  it('caps hub count at six', () => {
+    const access = {
+      ...baseAccess,
+      canAccessAdminWorkspace: true,
+      canAccessStaffWorkspace: true,
+      canAccessOrgWorkspace: true,
+      canAccessInventoryWorkspace: true,
+      canManageConsents: true,
+    } satisfies PortalAccess;
+
+    const nav = buildPortalNav(access);
+    expect(nav[0]?.groups.length).toBeLessThanOrEqual(6);
   });
 });
 

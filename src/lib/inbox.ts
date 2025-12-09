@@ -115,7 +115,7 @@ async function fetchStaffInboxItems(
           id: `case-${entry.id}`,
           title: entry.clientName ?? 'Client case',
           description: entry.nextStep ?? 'Next action pending',
-          href: '/staff/cases',
+          href: '/workspace/clients?view=activity',
           tone: entry.nextAt ? 'warning' : 'info',
           badge: entry.nextAt ? 'Due soon' : 'Follow-up',
           meta: entry.nextAt ? { due: entry.nextAt } : undefined,
@@ -133,7 +133,7 @@ async function fetchStaffInboxItems(
         id: `shift-${nextShift.id}`,
         title: nextShift.title || 'Upcoming shift',
         description: nextShift.location,
-        href: '/staff/schedule',
+        href: '/workspace/programs',
         tone: 'success',
         badge: `${nextShift.startsAt}–${nextShift.endsAt}`.trim(),
       });
@@ -149,7 +149,7 @@ async function fetchStaffInboxItems(
         id: `intake-${intake.id}`,
         title: 'New intake submission',
         description: intake.chosenName || 'New client',
-        href: '/staff/intake',
+        href: '/workspace/clients?view=directory',
         tone: 'warning',
         badge: 'Review',
       });

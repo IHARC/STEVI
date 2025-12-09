@@ -7,7 +7,6 @@ import { getPortalRequestContext } from '@shared/providers/portal-request-contex
 import { buildCommandPaletteItems } from '@/lib/portal-access';
 import { buildPortalNav, navAreaLabel, resolveQuickActions } from '@/lib/portal-navigation';
 import { fetchPortalInbox } from '@/lib/inbox';
-import { buildPrimaryNavItems } from '@/lib/primary-nav';
 import { getBrandingAssetsWithClient } from '@/lib/marketing/branding';
 import { getUserNavigation } from '@shared/layout/user-nav';
 import { buildEntityCommandPaletteItems } from '@/lib/command-palette';
@@ -43,7 +42,6 @@ export default async function WorkspaceLayout({ children }: { children: ReactNod
     redirect(landingPath);
   }
 
-  const primaryNavItems = buildPrimaryNavItems(portalAccess);
   const branding = await getBrandingAssetsWithClient(supabase);
   const navigation = await getUserNavigation(portalAccess);
 
@@ -76,7 +74,6 @@ export default async function WorkspaceLayout({ children }: { children: ReactNod
       >
         <AppShell
           navSections={navSections}
-          globalNavItems={primaryNavItems}
           inboxItems={inboxItems}
           isClientPreview={previewingClient}
           navigation={navigation}
