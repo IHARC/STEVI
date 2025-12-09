@@ -60,7 +60,7 @@ export async function getPortalRequestContext(): Promise<PortalRequestContextVal
 
   let activeArea = inferPortalAreaFromPath(effectivePathname);
 
-  if (activeArea === 'client' && effectivePathname.startsWith('/workspace')) {
+  if (activeArea === 'client' && effectivePathname.startsWith('/ops')) {
     activeArea = resolveLandingArea(portalAccess);
   }
   const isPreviewRequest = isPreviewQueryEnabled(effectivePath);

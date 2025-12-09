@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { saveCatalogItem, toggleCatalogItem, importInventoryItem } from '@/app/(workspace)/admin/donations/actions';
+import { saveCatalogItem, toggleCatalogItem, importInventoryItem } from '@/app/(ops)/ops/hq/donations/actions';
 import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Input } from '@shared/ui/input';

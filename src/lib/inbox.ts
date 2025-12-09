@@ -115,7 +115,7 @@ async function fetchStaffInboxItems(
           id: `case-${entry.id}`,
           title: entry.clientName ?? 'Client case',
           description: entry.nextStep ?? 'Next action pending',
-          href: '/workspace/clients?view=activity',
+          href: '/ops/clients?view=activity',
           tone: entry.nextAt ? 'warning' : 'info',
           badge: entry.nextAt ? 'Due soon' : 'Follow-up',
           meta: entry.nextAt ? { due: entry.nextAt } : undefined,
@@ -133,7 +133,7 @@ async function fetchStaffInboxItems(
         id: `shift-${nextShift.id}`,
         title: nextShift.title || 'Upcoming shift',
         description: nextShift.location,
-        href: '/workspace/programs',
+        href: '/ops/programs',
         tone: 'success',
         badge: `${nextShift.startsAt}–${nextShift.endsAt}`.trim(),
       });
@@ -149,7 +149,7 @@ async function fetchStaffInboxItems(
         id: `intake-${intake.id}`,
         title: 'New intake submission',
         description: intake.chosenName || 'New client',
-        href: '/workspace/clients?view=directory',
+        href: '/ops/clients?view=directory',
         tone: 'warning',
         badge: 'Review',
       });
@@ -178,7 +178,7 @@ async function fetchOrgInboxItems(
           id: `invite-${invite.id}`,
           title: invite.display_name ?? invite.email,
           description: 'Pending organization invite',
-          href: '/org/invites',
+          href: '/ops/org/invites',
           tone: 'warning',
           badge: 'Pending',
         });
@@ -195,7 +195,7 @@ async function fetchOrgInboxItems(
         id: `member-${member.id}`,
         title: member.display_name ?? 'Member approval',
         description: 'Approve or decline member access',
-        href: '/org/members',
+        href: '/ops/org/members',
         tone: 'warning',
         badge: 'Approval',
       });
@@ -227,7 +227,7 @@ async function fetchAdminInboxItems(
         id: 'admin-profiles',
         title: 'Profile approvals',
         description: `${pendingProfiles.count} pending profiles`,
-        href: '/admin/profiles',
+        href: '/ops/hq#operations',
         tone: 'warning',
         badge: 'Review',
       });
@@ -238,7 +238,7 @@ async function fetchAdminInboxItems(
         id: 'admin-invites',
         title: 'Pending invites',
         description: `${pendingInvites.count} invites awaiting action`,
-        href: '/admin/profiles',
+        href: '/ops/hq#operations',
         tone: 'info',
         badge: 'Invites',
       });
@@ -249,7 +249,7 @@ async function fetchAdminInboxItems(
         id: 'admin-notifications',
         title: 'Unacknowledged notifications',
         description: `${notifications.count} queued/sent notifications`,
-        href: '/admin/notifications',
+        href: '/ops/hq#content',
         tone: 'info',
         badge: 'Notifications',
       });
@@ -260,7 +260,7 @@ async function fetchAdminInboxItems(
         id: 'admin-cases',
         title: 'Open cases',
         description: `${openCases.count} cases open`,
-        href: '/admin/appointments',
+        href: '/ops/hq#operations',
         tone: 'info',
         badge: 'Cases',
       });
@@ -277,32 +277,26 @@ export async function fetchPortalInbox(
   access: PortalAccess,
   area: PortalArea,
 ): Promise<InboxItem[]> {
-  if (area === 'workspace') {
-    if (access.canAccessAdminWorkspace) {
+  if (area === 'ops_hq') {
+    if (access.canAccessOpsHq) {
       return fetchAdminInboxItems(supabase);
     }
+  }
 
-    if (access.canAccessStaffWorkspace) {
+  if (area === 'ops_org') {
+    return fetchOrgInboxItems(supabase, access);
+  }
+
+  if (area === 'ops_frontline') {
+    if (access.canAccessOpsFrontline || access.canAccessOpsAdmin) {
       return fetchStaffInboxItems(supabase, access);
     }
 
-    if (access.canAccessOrgWorkspace) {
+    if (access.canAccessOpsOrg) {
       return fetchOrgInboxItems(supabase, access);
     }
 
     return [];
-  }
-
-  if (area === 'staff') {
-    return fetchStaffInboxItems(supabase, access);
-  }
-
-  if (area === 'org') {
-    return fetchOrgInboxItems(supabase, access);
-  }
-
-  if (area === 'admin') {
-    return fetchAdminInboxItems(supabase);
   }
 
   return fetchClientInboxItems(supabase, access);

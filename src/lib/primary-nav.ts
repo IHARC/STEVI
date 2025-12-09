@@ -22,13 +22,13 @@ export function buildPrimaryNavItems(access: PortalAccess | null): PrimaryNavIte
     label: 'Settings',
     description: 'Profile & preferences',
     href:
-      access?.canAccessAdminWorkspace || access?.canAccessStaffWorkspace || access?.canAccessOrgWorkspace
-        ? '/workspace/profile'
+      access?.canAccessOpsAdmin || access?.canAccessOpsFrontline || access?.canAccessOpsOrg
+        ? '/ops/profile'
         : '/profile',
     icon: 'settings',
     match:
-      access?.canAccessAdminWorkspace || access?.canAccessStaffWorkspace || access?.canAccessOrgWorkspace
-        ? ['/workspace/profile']
+      access?.canAccessOpsAdmin || access?.canAccessOpsFrontline || access?.canAccessOpsOrg
+        ? ['/ops/profile']
         : ['/profile'],
   });
 

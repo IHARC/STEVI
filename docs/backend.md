@@ -57,7 +57,7 @@ Copy `.env.example` to `.env` and fill the required values. All variables prefix
 
 ## Authorization & Role Separation
 
-- `src/lib/portal-access.ts` is the single source of truth for portal authorization. It pulls roles from the Supabase RPC `get_user_roles(user_uuid)` (no JWT fallbacks) and derives capability flags (`canManageResources`, `canManagePolicies`, `canManageWebsiteContent`, `canManageNotifications`, `canManageOrgUsers/Invites`, `canAccessAdminWorkspace`, etc.).
+- `src/lib/portal-access.ts` is the single source of truth for portal authorization. It pulls roles from the Supabase RPC `get_user_roles(user_uuid)` (no JWT fallbacks) and derives capability flags (`canManageResources`, `canManagePolicies`, `canManageWebsiteContent`, `canManageNotifications`, `canManageOrgUsers/Invites`, `canAccessOpsFrontline`, `canAccessOpsOrg`, `canAccessOpsHq`, etc.).
 - Navigation, layouts, server pages, and server actions consume these capability flags—never raw role strings—to avoid drift and ensure UI/server parity.
 - Inventory tooling still uses `ensureInventoryActor` on top of `PortalAccess` for IHARC-specific roles when needed.
 - Do not add new privileged routes without updating `portal-access.ts`; keep UI links, server guards, and Supabase RLS in sync to prevent privilege escalation.

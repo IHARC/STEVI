@@ -16,7 +16,7 @@ test.describe('Workspace shell', () => {
   });
 
   test('staff routes redirect unauthenticated users', async ({ page }) => {
-    await page.goto('/workspace/today');
+    await page.goto('/ops/today');
     await expect(page).toHaveURL(/\/login\?next=%2Fworkspace%2Ftoday/);
   });
 });

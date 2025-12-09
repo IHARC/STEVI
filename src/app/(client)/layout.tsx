@@ -57,9 +57,9 @@ export default async function ClientShellLayout({ children }: { children: ReactN
 
   const shouldGateOnboarding =
     !isPreview &&
-    !portalAccess.canAccessAdminWorkspace &&
-    !portalAccess.canAccessOrgWorkspace &&
-    !portalAccess.canAccessStaffWorkspace;
+    !portalAccess.canAccessOpsAdmin &&
+    !portalAccess.canAccessOpsOrg &&
+    !portalAccess.canAccessOpsFrontline;
 
   if (shouldGateOnboarding) {
     const onboardingStatus = await getOnboardingStatusForUser(portalAccess.userId, supabase);

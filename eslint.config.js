@@ -47,7 +47,7 @@ const clientImportBoundaries = [
   ...legacyRestrictedImports,
   {
     group: ['@workspace/*', '@/components/workspace/*', '**/components/workspace/**'],
-    message: 'Client shell cannot import workspace components. Move shared pieces to components/shared.',
+    message: 'Client shell cannot import operations components. Move shared pieces to components/shared.',
   },
 ];
 
@@ -55,7 +55,7 @@ const workspaceImportBoundaries = [
   ...legacyRestrictedImports,
   {
     group: ['@client/*', '@/components/client/*', '**/components/client/**'],
-    message: 'Workspace shell cannot import client components. Move shared pieces to components/shared.',
+    message: 'Operations shell cannot import client components. Move shared pieces to components/shared.',
   },
 ];
 
@@ -106,7 +106,7 @@ const steviConfig = [
     },
   },
   {
-    files: ['src/app/(workspace)/**/*.{ts,tsx}', 'src/components/workspace/**/*.{ts,tsx}'],
+    files: ['src/app/(ops)/**/*.{ts,tsx}', 'src/components/workspace/**/*.{ts,tsx}'],
     rules: {
       'no-restricted-imports': [
         'error',

@@ -1,5 +1,5 @@
 /**
- * Remove Next.js route group segments (e.g. /(client) or /(workspace)) so matching works
+ * Remove Next.js route group segments (e.g. /(client) or /(ops)) so matching works
  * against the user-facing pathname.
  */
 export function stripRouteGroups(pathname: string): string {

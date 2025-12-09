@@ -86,16 +86,16 @@ const createSupabase = (
         }
 
         if (table === 'organizations') {
+          const orgQuery = {
+            in: vi.fn().mockReturnThis(),
+            eq: vi.fn().mockReturnThis(),
+            order: vi.fn().mockReturnThis(),
+            limit: vi.fn().mockResolvedValue(accessibleOrgsResult),
+            maybeSingle: vi.fn().mockResolvedValue(orgResult),
+          };
+
           return {
-            select: vi.fn().mockReturnValue({
-              eq: vi.fn().mockImplementation(() => ({ maybeSingle: vi.fn().mockResolvedValue(orgResult) })),
-              in: vi.fn().mockReturnValue({
-                eq: vi.fn().mockResolvedValue(accessibleOrgsResult),
-                order: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue(accessibleOrgsResult) }),
-                limit: vi.fn().mockResolvedValue(accessibleOrgsResult),
-              }),
-              order: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue(accessibleOrgsResult) }),
-            }),
+            select: vi.fn().mockReturnValue(orgQuery),
           };
         }
 
@@ -126,9 +126,11 @@ describe('loadPortalAccess', () => {
 
     expect(access?.portalRoles).toEqual(['portal_admin', 'portal_org_admin']);
     expect(access?.iharcRoles).toEqual(['iharc_staff']);
-    expect(access?.canAccessAdminWorkspace).toBe(true);
-    expect(access?.canAccessOrgWorkspace).toBe(true);
-    expect(access?.canAccessInventoryWorkspace).toBe(true);
+    expect(access?.canAccessOpsAdmin).toBe(true);
+    expect(access?.canAccessOpsHq).toBe(true);
+    expect(access?.canAccessOpsOrg).toBe(true);
+    expect(access?.canAccessOpsFrontline).toBe(true);
+    expect(access?.canAccessInventoryOps).toBe(true);
     expect(access?.profile.id).toBe('profile-42');
     expect(access?.organizationId).toBe(10);
     expect(access?.organizationName).toBe('Org');
@@ -163,7 +165,7 @@ describe('buildUserMenuLinks', () => {
     const access = await loadPortalAccess(supabase);
     const links = buildUserMenuLinks(access!);
     expect(links.some((link) => link.href === '/home?preview=1')).toBe(true);
-    expect(links.find((link) => link.label === 'Profile')?.href).toBe('/workspace/profile');
+    expect(links.find((link) => link.label === 'Profile')?.href).toBe('/ops/profile');
   });
 
   it('omits client preview for client-only users', async () => {

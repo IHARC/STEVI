@@ -58,7 +58,7 @@ export async function staffLogOutreachAction(
   const supabase = await createSupabaseServerClient();
   const access = await loadPortalAccess(supabase);
 
-  if (!access || !access.canAccessStaffWorkspace) {
+  if (!access || !access.canAccessOpsFrontline) {
     return { status: 'error', message: 'You need staff access to log outreach.' };
   }
 
@@ -97,8 +97,8 @@ export async function staffLogOutreachAction(
     meta: { person_id: personId, case_id: caseId, via: 'staff_fast_entry' },
   });
 
-  revalidatePath('/workspace/clients?view=activity');
-  revalidatePath('/workspace/programs');
+  revalidatePath('/ops/clients?view=activity');
+  revalidatePath('/ops/programs');
 
   return { status: 'success', message: 'Outreach saved.' };
 }

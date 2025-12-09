@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 import type { ResolvedBrandingAssets } from '@/lib/marketing/branding';
 import type { UserNavigation } from '@shared/layout/user-nav';
 import type { NavSection } from '@/lib/portal-navigation';
-import { WorkspaceRail } from '@workspace/layout/workspace-rail';
+import { OpsRail } from '@workspace/layout/ops-rail';
 
 type AppShellProps = {
   children: ReactNode;
@@ -35,9 +35,9 @@ export function AppShell({
   const showClientPreviewBanner = isClientPreview;
 
   return (
-    <div className={cn('workspace-shell flex min-h-screen bg-background text-foreground')}>
+    <div className={cn('ops-shell flex min-h-screen bg-background text-foreground')}>
       {showNavigation ? (
-        <WorkspaceRail navSections={navSections} />
+        <OpsRail navSections={navSections} />
       ) : null}
       <div className="flex min-h-screen flex-1 flex-col">
         <TopNav

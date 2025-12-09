@@ -102,9 +102,9 @@ function assertCanActOnAppointment(
 
   // staff/org/admin context
   const isAssignedStaff = appointment.staff_profile_id === access.profile.id;
-  const isOrgScoped = access.canAccessOrgWorkspace && sameOrg;
-  const isStaffScoped = access.canAccessStaffWorkspace && (sameOrg || isAssignedStaff);
-  const isPortalAdminScoped = access.canAccessAdminWorkspace && sameOrg;
+  const isOrgScoped = access.canAccessOpsOrg && sameOrg;
+  const isStaffScoped = access.canAccessOpsFrontline && (sameOrg || isAssignedStaff);
+  const isPortalAdminScoped = access.canAccessOpsAdmin && sameOrg;
 
   if (isStaffScoped || isOrgScoped || isPortalAdminScoped) return;
 
@@ -114,8 +114,8 @@ function assertCanActOnAppointment(
 async function touchAppointmentListings() {
   revalidatePath('/appointments');
   revalidatePath('/home');
-  revalidatePath('/workspace/programs');
-  revalidatePath('/org/appointments');
+  revalidatePath('/ops/programs');
+  revalidatePath('/ops/org/appointments');
 }
 
 export async function requestAppointmentAction(
@@ -331,7 +331,7 @@ export async function confirmAppointment(formData: FormData): Promise<ActionResu
 
     const supabase = await createSupabaseServerClient();
     const access = await loadPortalAccess(supabase);
-    if (!access || (!access.canAccessStaffWorkspace && !access.canAccessOrgWorkspace && !access.canAccessAdminWorkspace)) {
+    if (!access || (!access.canAccessOpsFrontline && !access.canAccessOpsOrg && !access.canAccessOpsAdmin)) {
       throw new Error('You do not have permission to confirm appointments.');
     }
 
@@ -396,7 +396,7 @@ export async function createOfflineAppointment(formData: FormData): Promise<Acti
     const supabase = await createSupabaseServerClient();
     const access = await loadPortalAccess(supabase);
 
-    if (!access || (!access.canAccessStaffWorkspace && !access.canAccessOrgWorkspace && !access.canAccessAdminWorkspace)) {
+    if (!access || (!access.canAccessOpsFrontline && !access.canAccessOpsOrg && !access.canAccessOpsAdmin)) {
       throw new Error('You do not have permission to create appointments.');
     }
 
@@ -453,7 +453,7 @@ export async function completeAppointment(formData: FormData): Promise<ActionRes
 
     const supabase = await createSupabaseServerClient();
     const access = await loadPortalAccess(supabase);
-    if (!access || (!access.canAccessStaffWorkspace && !access.canAccessAdminWorkspace && !access.canAccessOrgWorkspace)) {
+    if (!access || (!access.canAccessOpsFrontline && !access.canAccessOpsAdmin && !access.canAccessOpsOrg)) {
       throw new Error('You do not have permission to complete appointments.');
     }
 
@@ -498,7 +498,7 @@ export async function cancelAppointmentAsStaff(formData: FormData): Promise<Acti
 
     const supabase = await createSupabaseServerClient();
     const access = await loadPortalAccess(supabase);
-    if (!access || (!access.canAccessStaffWorkspace && !access.canAccessAdminWorkspace && !access.canAccessOrgWorkspace)) {
+    if (!access || (!access.canAccessOpsFrontline && !access.canAccessOpsAdmin && !access.canAccessOpsOrg)) {
       throw new Error('You do not have permission to cancel appointments.');
     }
 

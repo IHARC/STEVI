@@ -90,13 +90,13 @@ export async function fetchScopedAppointments(
 
   const targetOrgId = options.targetOrgId ?? null;
 
-  if (access.canAccessAdminWorkspace) {
+  if (access.canAccessOpsAdmin) {
     if (targetOrgId) {
       filterParts.push(`organization_id.eq.${targetOrgId}`);
     }
-  } else if (access.canAccessOrgWorkspace && access.organizationId) {
+  } else if (access.canAccessOpsOrg && access.organizationId) {
     filterParts.push(`organization_id.eq.${access.organizationId}`);
-  } else if (access.canAccessStaffWorkspace) {
+  } else if (access.canAccessOpsFrontline) {
     filterParts.push(`staff_profile_id.eq.${access.profile.id}`);
     if (access.organizationId) {
       filterParts.push(`organization_id.eq.${access.organizationId}`);

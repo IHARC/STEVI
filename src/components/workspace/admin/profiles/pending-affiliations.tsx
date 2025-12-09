@@ -7,7 +7,7 @@ import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { useToast } from '@shared/ui/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/ui/select';
-import { approveAffiliationAction, declineAffiliationAction } from '@/app/(workspace)/admin/profiles/actions';
+import { approveAffiliationAction, declineAffiliationAction } from '@/app/(ops)/ops/hq/profiles/actions';
 import type { OrganizationOption, PendingAffiliation } from './types';
 
 type PendingAffiliationsSectionProps = {

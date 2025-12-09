@@ -12,7 +12,7 @@ export function ClientPreviewBanner() {
     return null;
   }
 
-  const workspaceLabel = primaryAreaLabel || 'area';
+  const operationsLabel = primaryAreaLabel || 'area';
 
   return (
     <Alert
@@ -23,8 +23,8 @@ export function ClientPreviewBanner() {
         <div className="space-y-1">
           <AlertTitle className="text-xs font-semibold uppercase text-primary">Client preview</AlertTitle>
           <AlertDescription className="text-sm text-foreground/80">
-            You’re viewing the client portal as a {workspaceLabel.toLowerCase()}. Some actions are limited to prevent
-            accidental changes. Switch back when you’re ready to keep working.
+            You’re viewing the client portal as an {operationsLabel.toLowerCase()} user. Some actions are limited to
+            prevent accidental changes. Switch back when you’re ready to keep working.
           </AlertDescription>
         </div>
         <Button asChild variant="outline" size="sm">

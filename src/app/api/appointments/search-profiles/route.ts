@@ -22,9 +22,9 @@ export async function GET(request: Request) {
   }
 
   // Only allow admins, IHARC staff, or org admins to search.
-  const canAdmin = access.canAccessAdminWorkspace;
-  const canOrg = access.canAccessOrgWorkspace;
-  const canStaff = access.canAccessStaffWorkspace;
+  const canAdmin = access.canAccessOpsAdmin;
+  const canOrg = access.canAccessOpsOrg;
+  const canStaff = access.canAccessOpsFrontline;
 
   if (!canAdmin && !canOrg && !canStaff) {
     return NextResponse.json({ error: 'forbidden' }, { status: 403 });

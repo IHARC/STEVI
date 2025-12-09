@@ -1,6 +1,6 @@
 # Dual Shell Architecture
 
-This document codifies the client/workspace shell split for STEVI. It complements the detailed execution notes in `plan.md` and the background in `docs/client-workspace-shell-separation-plan.md`.
+This document codifies the client/operations shell split for STEVI. It complements the detailed execution notes in `plan.md` and the background in `docs/client-workspace-shell-separation-plan.md`.
 
 ## Intent
 - Isolate the client experience from staff/admin/org tooling while keeping a single Next.js app and host.
@@ -9,13 +9,13 @@ This document codifies the client/workspace shell split for STEVI. It complement
 
 ## Route & Layout Map
 - `(client)` route group: `/home`, `/messages`, `/appointments`, `/documents`, `/support`, `/resources`, `/cases`, `/profile`, `/onboarding` (+ supporting client-only routes).
-- `(workspace)` route group: `/staff/*`, `/admin/*`, `/org/*` and shared workspace primitives (command palette, inbox, navigation).
+- `(ops)` route group: `/ops/*` (frontline), `/ops/org/*` (tenant org hub), `/ops/hq/*` (IHARC HQ) plus shared ops primitives (command palette, inbox, navigation).
 - `/login`, `/register/*`, `/reset-password` remain outside shell groups.
 - Each group owns its layout, theme token file, and navigation surface; no shared chrome between shells.
 
 ## Component Boundaries
 - `src/components/client/**` – client shell UI and hooks.
-- `src/components/workspace/**` – staff/admin/org UI and hooks.
+- `src/components/workspace/**` – operations UI and hooks (frontline, org, HQ).
 - `src/components/shared/**` – primitives, providers, and cross-shell utilities (including shadcn/ui).
 - Lint rules block imports from the opposite shell; shared + `src/lib/**` stay allowed for both.
 - Path aliases:
@@ -27,29 +27,30 @@ This document codifies the client/workspace shell split for STEVI. It complement
 - `requireArea(access, area, options)` centralizes shell authorization and preview handling.
 - Client shell:
   - Normal access for client users.
-  - Preview allowed only with `?preview=1` when the user has staff/admin/org access.
-  - Otherwise redirect to the workspace landing path.
+  - Preview allowed only with `?preview=1` when the user has ops access.
+  - Otherwise redirect to the ops landing path.
   - Onboarding enforced in the client layout (redirect to `/onboarding?next=...` when incomplete).
-- Workspace shell:
-  - Requires staff/admin/org capability; rejects to `/home` when missing.
-  - Navigation contains only workspace areas; a single “Preview client portal” link points to `/home?preview=1`.
-- Preview banner lives only in the client shell with an explicit exit path back to the user’s primary workspace area.
-- Workspace users manage their own profile at `/workspace/profile`; the client shell keeps `/profile` for client users and preview-only browsing. No duplicated flows—shared form components live under `components/shared/profile`.
+- Operations shell:
+  - Areas: `ops_frontline`, `ops_org`, `ops_hq`.
+  - Redirects to `/home` when ops access is missing.
+  - Navigation contains only ops sections; “Preview client portal” points to `/home?preview=1`.
+- Preview banner lives only in the client shell with an explicit exit path back to the user’s primary ops area.
+- Ops users manage their profile at `/ops/profile`; the client shell keeps `/profile` for client users and preview-only browsing. Shared form components live under `components/shared/profile`.
 
 ## Theming
-- Shell-specific token files (`src/styles/theme.client.css`, `src/styles/theme.workspace.css`) overlay the shared base tokens from `src/styles/theme.css`.
-- Layout roots apply a `client-shell` or `workspace-shell` class to scope the overrides.
+- Shell-specific token files (`src/styles/theme.client.css`, `src/styles/theme.ops.css`) overlay the shared base tokens from `src/styles/theme.css`.
+- Layout roots apply a `client-shell` or `ops-shell` class to scope the overrides.
 
 ## Testing Expectations
 - Lint: `npm run lint -- --max-warnings=0` (import boundaries + heading class rule).
 - Unit: `npm run test` (Vitest) covers navigation visibility, `requireArea`, and guard redirects.
-- E2E: `npm run e2e` (Playwright) smoke per shell (client header/support button; workspace command palette + absence of client nav; preview banner flow).
+- E2E: `npm run e2e` (Playwright) smoke per shell (client header/support button; ops command palette + absence of client nav; preview banner flow).
 
 ## Migration Checklist
-1. Move client routes into `(client)` and workspace routes into `(workspace)`; delete unified `(portal)` layout.
+1. Move client routes into `(client)` and operations routes into `(ops)`; delete unified `(portal)` layout.
 2. Relocate components into `components/client`, `components/workspace`, or `components/shared`; update imports to new aliases.
 3. Apply shell themes and add layout-level guards using `requireArea`.
-4. Update navigation: client-only nav for `(client)`, workspace-only nav for `(workspace)`; preview link → `/home?preview=1`.
+4. Update navigation: client-only nav for `(client)`, ops-only nav for `(ops)`; preview link → `/home?preview=1`.
 5. Update `middleware.ts`/`resolveLandingPath` to leverage `requireArea`.
 6. Run lint, typecheck, Vitest, and Playwright smoke; fix any boundary or guard regressions.
 7. Deploy as a single app service; no legacy redirects or compatibility shims.

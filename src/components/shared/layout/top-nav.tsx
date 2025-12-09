@@ -39,7 +39,7 @@ export function TopNav({
   const portalAccess = usePortalAccess();
   const showClientPreviewCta = layout?.activeArea !== 'client';
   const showMegaMenu = hasNav && layout?.activeArea === 'client';
-  const showActingOrg = layout?.activeArea === 'workspace';
+  const showActingOrg = layout?.activeArea === 'ops_frontline' || layout?.activeArea === 'ops_org';
   const actingOrgName = portalAccess?.organizationName ?? (portalAccess?.organizationId ? 'Organization' : 'Not set');
 
   return (

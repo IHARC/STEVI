@@ -24,7 +24,7 @@ import {
   deleteInventoryLocationAction,
   toggleInventoryLocationAction,
   updateInventoryLocationAction,
-} from '@/app/(workspace)/admin/inventory/actions';
+} from '@/app/(ops)/ops/hq/inventory/actions';
 import type { InventoryLocation } from '@/lib/inventory/types';
 
 type InventoryLocationsSectionProps = {

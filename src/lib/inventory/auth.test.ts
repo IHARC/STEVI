@@ -62,11 +62,13 @@ const baseAccess: PortalAccess = {
   portalRoles: ['portal_admin'],
   organizationId: 1,
   organizationName: 'IHARC',
-  canAccessAdminWorkspace: true,
-  canAccessOrgWorkspace: false,
+  canAccessOpsAdmin: true,
+  canAccessOpsHq: true,
+  canAccessOpsOrg: false,
+  canAccessOpsFrontline: true,
   canManageResources: true,
   canManagePolicies: true,
-  canAccessInventoryWorkspace: true,
+  canAccessInventoryOps: true,
   canManageNotifications: true,
   canReviewProfiles: true,
   canViewMetrics: true,
@@ -75,7 +77,6 @@ const baseAccess: PortalAccess = {
   canManageConsents: true,
   canManageOrgUsers: false,
   canManageOrgInvites: false,
-  canAccessStaffWorkspace: true,
   inventoryAllowedRoles: ['iharc_staff'],
   actingOrgChoicesCount: null,
   actingOrgAutoSelected: false,
@@ -111,7 +112,7 @@ describe('ensureInventoryActor', () => {
     loadPortalAccess.mockResolvedValue({
       ...baseAccess,
       iharcRoles: ['iharc_volunteer'],
-      canAccessInventoryWorkspace: false,
+      canAccessInventoryOps: false,
     });
 
     await expect(ensureInventoryActor(supabase)).rejects.toBeInstanceOf(InventoryAccessError);
@@ -129,8 +130,8 @@ describe('ensureInventoryActor', () => {
   it('redirects to login when configured to redirect on failure', async () => {
     const supabase = createSupabase(null);
 
-    await expect(ensureInventoryActor(supabase, true)).rejects.toThrow('redirect:/login?next=/workspace/supplies');
-    expect(redirectMock).toHaveBeenCalledWith('/login?next=/workspace/supplies');
+    await expect(ensureInventoryActor(supabase, true)).rejects.toThrow('redirect:/login?next=/ops/supplies');
+    expect(redirectMock).toHaveBeenCalledWith('/login?next=/ops/supplies');
   });
 });
 

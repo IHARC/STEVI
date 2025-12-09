@@ -30,13 +30,13 @@ Environment variables (full notes in `docs/backend.md`):
 
 ## Architecture
 
-- Dual shells: client routes live in `src/app/(client)` with their own layout/theme/navigation; workspace (staff/admin/org) routes live in `src/app/(workspace)`.
+- Dual shells: client routes live in `src/app/(client)` with their own layout/theme/navigation; Operations routes live in `src/app/(ops)`.
 - Boundaries enforced via `requireArea`, lint rules, and path aliases (`@client/*`, `@workspace/*`, `@shared/*`). See `docs/architecture/shells.md` for the migration checklist and guard expectations.
 
 ## Migration Status
 
 - ✅ Next.js scaffold, shared layout/providers, shadcn/ui tokens
-- ✅ Supabase clients (server + RSC), auth middleware, separated client/workspace navigation
+- ✅ Supabase clients (server + RSC), auth middleware, separated client/ops navigation
 - ✅ Client portal shells: home, appointments, documents, cases, support, profile, consents (appointments/documents currently read from placeholders)
 - ✅ Admin tools: profiles/invites, resources, policies, notifications, marketing content, inventory, donations
 - ✅ Staff tools: caseload, schedule, outreach log; Organization tools: members/invites/settings

@@ -30,7 +30,7 @@ import {
   toggleInventoryItemStatusAction,
   transferInventoryStockAction,
   updateInventoryItemAction,
-} from '@/app/(workspace)/admin/inventory/actions';
+} from '@/app/(ops)/ops/hq/inventory/actions';
 import type {
   BulkReceiptInput,
   InventoryItem,

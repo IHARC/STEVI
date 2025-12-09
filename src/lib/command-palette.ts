@@ -17,12 +17,12 @@ export async function buildEntityCommandPaletteItems(
 
   const commands: CommandPaletteItem[] = [];
 
-  if (access.canAccessStaffWorkspace || access.canAccessAdminWorkspace) {
+  if (access.canAccessOpsFrontline || access.canAccessOpsAdmin) {
     try {
       const cases = await fetchStaffCases(supabase, 10);
       cases.forEach((item) => {
         commands.push({
-          href: `/workspace/clients/${item.personId ?? item.id}?case=${item.id}`,
+          href: `/ops/clients/${item.personId ?? item.id}?case=${item.id}`,
           label: item.caseType ?? `Case #${item.id}`,
           group: 'Clients · Cases',
         });
@@ -32,7 +32,7 @@ export async function buildEntityCommandPaletteItems(
     }
   }
 
-  if (access.canManageConsents || access.canManageOrgUsers || access.canAccessStaffWorkspace) {
+  if (access.canManageConsents || access.canManageOrgUsers || access.canAccessOpsFrontline || access.canAccessOpsAdmin) {
     try {
       const core = supabase.schema('core');
       const { data, error } = await core.rpc('get_people_list_with_types', {
@@ -45,7 +45,7 @@ export async function buildEntityCommandPaletteItems(
       if (!error) {
         (data ?? []).forEach((person: PeopleListItem) => {
           commands.push({
-            href: `/workspace/clients/${person.id}`,
+            href: `/ops/clients/${person.id}`,
             label: `${person.first_name ?? 'Client'} ${person.last_name ?? ''}`.trim(),
             group: 'Clients',
           });

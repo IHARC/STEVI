@@ -22,11 +22,13 @@ export type PortalAccess = {
   portalRoles: PortalRole[];
   organizationId: number | null;
   organizationName: string | null;
-  canAccessAdminWorkspace: boolean;
-  canAccessOrgWorkspace: boolean;
+  canAccessOpsAdmin: boolean;
+  canAccessOpsHq: boolean;
+  canAccessOpsOrg: boolean;
+  canAccessOpsFrontline: boolean;
   canManageResources: boolean;
   canManagePolicies: boolean;
-  canAccessInventoryWorkspace: boolean;
+  canAccessInventoryOps: boolean;
   canManageNotifications: boolean;
   canReviewProfiles: boolean;
   canViewMetrics: boolean;
@@ -35,7 +37,6 @@ export type PortalAccess = {
   canManageConsents: boolean;
   canManageOrgUsers: boolean;
   canManageOrgInvites: boolean;
-  canAccessStaffWorkspace: boolean;
   inventoryAllowedRoles: IharcRole[];
   actingOrgChoicesCount: number | null;
   actingOrgAutoSelected: boolean;
@@ -75,9 +76,9 @@ export async function loadPortalAccess(
   let actingOrgChoicesCount: number | null = null;
   let actingOrgAutoSelected = false;
 
-  const hasWorkspaceRole = isProfileApproved && (portalRoles.length > 0 || iharcRoles.length > 0);
+  const hasOpsRole = isProfileApproved && (portalRoles.length > 0 || iharcRoles.length > 0);
 
-  if (hasWorkspaceRole) {
+  if (hasOpsRole) {
     const accessibleOrganizations = await fetchAccessibleOrganizations(supabase, user.id);
     const accessibleOrgSet = new Map<number, string | null>();
     accessibleOrganizations.forEach((org) => accessibleOrgSet.set(org.id, org.name ?? null));
@@ -115,11 +116,19 @@ export async function loadPortalAccess(
   const isOrgAdmin = portalRoles.includes('portal_org_admin');
   const isOrgRep = portalRoles.includes('portal_org_rep');
 
-  const canAccessAdminWorkspace = isProfileApproved && (isPortalAdmin || isIharcAdmin || isOrgAdmin);
-  const canAccessOrgWorkspace = isProfileApproved && (isOrgAdmin || isOrgRep) && organizationId !== null;
+  const canAccessOpsHq = isProfileApproved && (isIharcAdmin || isPortalAdmin);
+  const canAccessOpsAdmin = isProfileApproved && (isPortalAdmin || isIharcAdmin || isOrgAdmin);
+  const canAccessOpsOrg = isProfileApproved && (isOrgAdmin || isOrgRep || canAccessOpsHq) && organizationId !== null;
+  const canAccessOpsFrontline = isProfileApproved && (
+    iharcRoles.some((role) => ['iharc_admin', 'iharc_supervisor', 'iharc_staff', 'iharc_volunteer'].includes(role)) ||
+    isPortalAdmin ||
+    isOrgAdmin ||
+    isOrgRep
+  );
+
   const canManageResources = isProfileApproved && isPortalAdmin;
   const canManagePolicies = isProfileApproved && isPortalAdmin;
-  const canAccessInventoryWorkspace = isProfileApproved && iharcRoles.some((role) =>
+  const canAccessInventoryOps = isProfileApproved && iharcRoles.some((role) =>
     inventoryAllowedRoles.includes(role),
   );
 
@@ -131,9 +140,6 @@ export async function loadPortalAccess(
   const canViewMetrics = isProfileApproved && isPortalAdmin;
   const canManageOrgUsers = isProfileApproved && isOrgAdmin && organizationId !== null;
   const canManageOrgInvites = isProfileApproved && isOrgAdmin && organizationId !== null;
-  const canAccessStaffWorkspace = isProfileApproved && iharcRoles.some((role) =>
-    ['iharc_admin', 'iharc_supervisor', 'iharc_staff', 'iharc_volunteer'].includes(role),
-  );
 
   return {
     userId: user.id,
@@ -144,11 +150,13 @@ export async function loadPortalAccess(
     portalRoles,
     organizationId,
     organizationName,
-    canAccessAdminWorkspace,
-    canAccessOrgWorkspace,
+    canAccessOpsAdmin,
+    canAccessOpsHq,
+    canAccessOpsOrg,
+    canAccessOpsFrontline,
     canManageResources,
     canManagePolicies,
-    canAccessInventoryWorkspace,
+    canAccessInventoryOps,
     canManageNotifications,
     canManageWebsiteContent,
     canReviewProfiles,
@@ -157,7 +165,6 @@ export async function loadPortalAccess(
     canManageConsents,
     canManageOrgUsers,
     canManageOrgInvites,
-    canAccessStaffWorkspace,
     inventoryAllowedRoles,
     actingOrgChoicesCount,
     actingOrgAutoSelected,
@@ -290,30 +297,28 @@ async function refreshUserPermissions(supabase: SupabaseAnyServerClient, userId:
 
 type MenuLinkBlueprint = PortalLink & { requires?: (access: PortalAccess) => boolean };
 
-const WORKSPACE_PROFILE_PATH = '/workspace/profile';
+const OPS_PROFILE_PATH = '/ops/profile';
 
 function userMenuBlueprint(access: PortalAccess): MenuLinkBlueprint[] {
-  const profileHref = access.canAccessAdminWorkspace || access.canAccessStaffWorkspace || access.canAccessOrgWorkspace
-    ? WORKSPACE_PROFILE_PATH
-    : '/profile';
+  const profileHref = access.canAccessOpsAdmin || access.canAccessOpsFrontline || access.canAccessOpsOrg ? OPS_PROFILE_PATH : '/profile';
 
   return [
     { href: profileHref, label: 'Profile' },
     { href: '/support', label: 'Support' },
     {
-      href: '/workspace/today',
-      label: 'Staff tools',
-      requires: (a) => a.canAccessStaffWorkspace,
+      href: '/ops/today',
+      label: 'Operations',
+      requires: (a) => a.canAccessOpsFrontline,
     },
     {
-      href: '/org',
-      label: 'Organization settings',
-      requires: (a) => a.canAccessOrgWorkspace,
+      href: '/ops/org',
+      label: 'Organization hub',
+      requires: (a) => a.canAccessOpsOrg,
     },
     {
       href: '/home?preview=1',
       label: 'Preview client portal',
-      requires: (a) => a.canAccessStaffWorkspace || a.canAccessAdminWorkspace || a.canAccessOrgWorkspace,
+      requires: (a) => a.canAccessOpsFrontline || a.canAccessOpsAdmin || a.canAccessOpsOrg,
     },
   ];
 }
@@ -337,12 +342,12 @@ function linkIsAllowed(entry: { requires?: (access: PortalAccess) => boolean }, 
 }
 
 const HUB_TAB_COMMANDS: { href: string; label: string; group: string; requires: (access: PortalAccess) => boolean }[] = [
-  { href: '/workspace/clients?view=directory', label: 'Client directory', group: 'Clients', requires: (access) => access.canAccessStaffWorkspace || access.canManageConsents },
-  { href: '/workspace/clients?view=caseload', label: 'My caseload', group: 'Clients', requires: (access) => access.canAccessStaffWorkspace },
-  { href: '/workspace/programs', label: 'Programs', group: 'Programs', requires: (access) => access.canAccessStaffWorkspace || access.canAccessAdminWorkspace },
-  { href: '/workspace/supplies', label: 'Supplies', group: 'Supplies', requires: (access) => access.canAccessInventoryWorkspace || access.canAccessAdminWorkspace },
-  { href: '/workspace/partners', label: 'Partner directory', group: 'Partners', requires: (access) => access.canAccessAdminWorkspace },
-  { href: '/org', label: 'Organization hub', group: 'Organization', requires: (access) => access.canAccessOrgWorkspace || access.canAccessAdminWorkspace },
+  { href: '/ops/clients?view=directory', label: 'Client directory', group: 'Clients', requires: (access) => access.canAccessOpsFrontline || access.canManageConsents },
+  { href: '/ops/clients?view=caseload', label: 'My caseload', group: 'Clients', requires: (access) => access.canAccessOpsFrontline },
+  { href: '/ops/programs', label: 'Programs', group: 'Programs', requires: (access) => access.canAccessOpsFrontline || access.canAccessOpsAdmin },
+  { href: '/ops/supplies', label: 'Supplies', group: 'Supplies', requires: (access) => access.canAccessInventoryOps || access.canAccessOpsAdmin },
+  { href: '/ops/partners', label: 'Partner directory', group: 'Partners', requires: (access) => access.canAccessOpsAdmin },
+  { href: '/ops/org', label: 'Organization hub', group: 'Organization', requires: (access) => access.canAccessOpsOrg || access.canAccessOpsAdmin },
 ];
 
 export function buildUserMenuLinks(access: PortalAccess): PortalLink[] {

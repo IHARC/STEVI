@@ -1,14 +1,13 @@
 import { stripRouteGroups } from '@/lib/paths';
 import type { PortalAccess } from '@/lib/portal-access';
 
-export type PortalArea = 'client' | 'workspace' | 'staff' | 'admin' | 'org';
+export type PortalArea = 'client' | 'ops_frontline' | 'ops_org' | 'ops_hq';
 
 const LANDING_PATH_BY_AREA: Record<PortalArea, string> = {
   client: '/home',
-  workspace: '/workspace/today',
-  staff: '/workspace/today',
-  admin: '/workspace/today',
-  org: '/org',
+  ops_frontline: '/ops/today',
+  ops_org: '/ops/org',
+  ops_hq: '/ops/hq',
 };
 
 type RequireAreaOptions = {
@@ -24,16 +23,17 @@ export type RequireAreaResult =
 export function inferPortalAreaFromPath(pathname: string): PortalArea {
   const cleaned = stripRouteGroups(pathname || '');
 
-  if (cleaned.startsWith('/admin')) return 'workspace';
-  if (cleaned.startsWith('/staff')) return 'workspace';
-  if (cleaned.startsWith('/org')) return 'workspace';
-  if (cleaned.startsWith('/workspace')) return 'workspace';
+  if (cleaned.startsWith('/ops/hq')) return 'ops_hq';
+  if (cleaned.startsWith('/ops/org')) return 'ops_org';
+  if (cleaned.startsWith('/ops')) return 'ops_frontline';
   return 'client';
 }
 
 export function resolveLandingArea(access: PortalAccess | null): PortalArea {
   if (!access) return 'client';
-  if (access.canAccessAdminWorkspace || access.canAccessStaffWorkspace || access.canAccessOrgWorkspace) return 'workspace';
+  if (access.canAccessOpsHq) return 'ops_hq';
+  if (access.canAccessOpsFrontline) return 'ops_frontline';
+  if (access.canAccessOpsOrg) return 'ops_org';
   return 'client';
 }
 
@@ -79,51 +79,46 @@ export function requireArea(
   }
 
   const clientHome = LANDING_PATH_BY_AREA.client;
-  const hasAdminAccess = access.canAccessAdminWorkspace;
-  const hasStaffAccess = access.canAccessStaffWorkspace || hasAdminAccess;
-  const hasOrgAccess = access.canAccessOrgWorkspace || hasAdminAccess;
-  const hasWorkspaceAccess = hasAdminAccess || hasStaffAccess || hasOrgAccess;
+  const hasHqAccess = access.canAccessOpsHq;
+  const hasFrontlineAccess = access.canAccessOpsFrontline;
+  const hasOrgAccess = access.canAccessOpsOrg;
+  const hasOpsAccess = hasHqAccess || hasFrontlineAccess || hasOrgAccess;
   const previewRequested = Boolean(options.preview);
 
-  if (area === 'workspace') {
-    if (hasWorkspaceAccess) {
-      return { allowed: true, activeArea: 'workspace', isPreview: false };
+  if (area === 'ops_frontline') {
+    if (hasFrontlineAccess) {
+      return { allowed: true, activeArea: 'ops_frontline', isPreview: false };
     }
 
-    return { allowed: false, redirectPath: clientHome };
+    const redirectPath = hasOrgAccess ? LANDING_PATH_BY_AREA.ops_org : clientHome;
+    return { allowed: false, redirectPath };
   }
 
   if (area === 'client') {
-    if (hasWorkspaceAccess && !previewRequested) {
+    if (hasOpsAccess && !previewRequested) {
       return { allowed: false, redirectPath: landingPathForArea(resolveLandingArea(access)) };
     }
 
     return {
       allowed: true,
       activeArea: 'client',
-      isPreview: hasWorkspaceAccess && previewRequested,
+      isPreview: hasOpsAccess && previewRequested,
     };
   }
 
-  if (area === 'admin') {
-    if (hasAdminAccess) {
-      return { allowed: true, activeArea: 'admin', isPreview: false };
+  if (area === 'ops_hq') {
+    if (hasHqAccess) {
+      return { allowed: true, activeArea: 'ops_hq', isPreview: false };
     }
     return { allowed: false, redirectPath: landingPath };
   }
 
-  if (area === 'staff') {
-    if (hasStaffAccess) {
-      return { allowed: true, activeArea: 'staff', isPreview: false };
-    }
-    return { allowed: false, redirectPath: landingPath };
-  }
-
-  if (area === 'org') {
+  if (area === 'ops_org') {
     if (hasOrgAccess) {
-      return { allowed: true, activeArea: 'org', isPreview: false };
+      return { allowed: true, activeArea: 'ops_org', isPreview: false };
     }
-    return { allowed: false, redirectPath: landingPath };
+    const redirectPath = hasFrontlineAccess ? LANDING_PATH_BY_AREA.ops_frontline : landingPath;
+    return { allowed: false, redirectPath };
   }
 
   return { allowed: false, redirectPath: clientHome };

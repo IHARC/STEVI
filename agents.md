@@ -42,9 +42,9 @@
 - Rate limiting: `portal_check_rate_limit` backs the public/registration flows. Keep it in the loop when adding new anonymous endpoints.
 - Content safety: sanitize TipTap/HTML using `sanitize-resource-html` and `sanitize-embed` before persisting.
 
-## Navigation
-- Split shells: client navigation is defined in `src/lib/client-navigation.ts` and rendered only in `src/app/(client)`. Workspace navigation (staff/admin/org) lives in `src/lib/portal-navigation.ts` and is rendered only in `src/app/(workspace)`.
-- Client preview is opt-in via `?preview=1` and only for users with workspace access; workspace shell does not render preview mode.
+-## Navigation
+- Split shells: client navigation is defined in `src/lib/client-navigation.ts` and rendered only in `src/app/(client)`. Ops navigation (frontline/org/HQ) lives in `src/lib/portal-navigation.ts` and is rendered only in `src/app/(ops)`.
+- Client preview is opt-in via `?preview=1` and only for users with ops access; ops shell does not render preview mode.
 - Best practice for new surfaces:
   1. Add/adjust capability flags in `PortalAccess` as needed (reuse existing roles/RLS).
   2. Add links to the correct shell nav file; never cross-import shell components. Shared pieces belong in `components/shared` or `lib`.
@@ -77,10 +77,10 @@
 - Build/deploy: run `node build.js` (lints then builds with webpack + standalone output). Azure App Service consumes the generated `.next/standalone` output.
 - Environment: `.env.example` exists; keep it aligned with `docs/backend.md`. Never commit secrets or the service-role key. Set `NEXT_PUBLIC_MARKETING_URL` when telemetry must accept a marketing host.
 
-## Updates — 2025-12-08
-- Dual-shell split delivered: client routes live in `src/app/(client)` with `@client/client-shell` layout + `theme.client.css`; workspace (staff/admin/org) routes live in `src/app/(workspace)` with `@workspace/shells/app-shell` + `theme.workspace.css`.
-- Guards centralized in `src/lib/portal-areas.ts` (`requireArea`, preview query parsing, landing resolution). Client preview requires `?preview=1`; workspace shell rejects preview mode. Onboarding gating now only in the client layout.
-- Navigation split: client nav in `src/lib/client-navigation.ts`; workspace nav (no client links) in `src/lib/portal-navigation.ts`. Preview links now point to `/home?preview=1`.
+-## Updates — 2025-12-08
+- Dual-shell split delivered: client routes live in `src/app/(client)` with `@client/client-shell` layout + `theme.client.css`; operations routes live in `src/app/(ops)` with `@workspace/shells/app-shell` + `theme.ops.css`.
+- Guards centralized in `src/lib/portal-areas.ts` (`requireArea`, preview query parsing, landing resolution). Client preview requires `?preview=1`; ops shell rejects preview mode. Onboarding gating now only in the client layout.
+- Navigation split: client nav in `src/lib/client-navigation.ts`; ops nav (no client links) in `src/lib/portal-navigation.ts`. Preview links now point to `/home?preview=1`.
 - Components reorganized: `components/client`, `components/workspace`, `components/shared` (UI primitives now at `@shared/ui`). Shared providers/layout under `@shared/providers` / `@shared/layout`. Cancel appointment form at `@shared/appointments/cancel-appointment-form`.
 - Path aliases added: `@client/*`, `@workspace/*`, `@shared/*`; ESLint `no-restricted-imports` enforces cross-shell boundaries. CODEOWNERS covers both shells.
 - Docs: `docs/architecture/shells.md` documents the split and checklist; README updated accordingly; `plan.md` marked completed.

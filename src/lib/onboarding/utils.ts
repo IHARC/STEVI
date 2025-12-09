@@ -3,11 +3,11 @@ import type { PortalAccess } from '@/lib/portal-access';
 export type OnboardingActor = 'client' | 'staff' | 'partner';
 
 export function resolveOnboardingActor(access: PortalAccess | null): OnboardingActor {
-  if (access?.canAccessStaffWorkspace || access?.canManageConsents) {
+  if (access?.canAccessOpsFrontline || access?.canManageConsents) {
     return 'staff';
   }
 
-  if (access?.canAccessOrgWorkspace) {
+  if (access?.canAccessOpsOrg) {
     return 'partner';
   }
 

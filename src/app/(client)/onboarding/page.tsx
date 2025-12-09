@@ -117,14 +117,14 @@ export default async function OnboardingPage({ searchParams }: PageProps) {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-3 pt-2">
-            {access.canAccessAdminWorkspace ? (
+            {access.canAccessOpsAdmin ? (
               <Button asChild size="sm" variant="secondary">
-                <Link href="/workspace/clients">Find existing client</Link>
+                <Link href="/ops/clients">Find existing client</Link>
               </Button>
             ) : null}
-            {access.canAccessStaffWorkspace ? (
+            {access.canAccessOpsFrontline ? (
               <Button asChild size="sm" variant="outline">
-                <Link href="/workspace/clients?view=directory">View intake queue</Link>
+                <Link href="/ops/clients?view=directory">View intake queue</Link>
               </Button>
             ) : null}
             {personId ? (
@@ -136,12 +136,12 @@ export default async function OnboardingPage({ searchParams }: PageProps) {
         </Card>
       ) : null}
 
-      {(access.canManagePolicies || access.canAccessAdminWorkspace) && (!servicePolicy || !privacyPolicy) ? (
+      {(access.canManagePolicies || access.canAccessOpsAdmin) && (!servicePolicy || !privacyPolicy) ? (
         <div className="rounded-3xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive shadow-sm">
           Policy copy missing: publish both “Client Service Agreement” and “Privacy & Data Protection Notice” in Admin → Policies to unblock onboarding.
         </div>
       ) : null}
-      {(access.canManagePolicies || access.canAccessAdminWorkspace) && !registrationDraft ? (
+      {(access.canManagePolicies || access.canAccessOpsAdmin) && !registrationDraft ? (
         <div className="rounded-3xl border border-border/40 bg-muted p-4 text-sm text-foreground/80 shadow-sm">
           No registration draft found for this account. Prefill may be empty; this is expected for staff-assisted onboarding.
         </div>

@@ -146,7 +146,7 @@ export async function adminOverrideConsentAction(formData: FormData): Promise<vo
     meta: { pk_int: personId, data_sharing_consent: dataSharing, preferred_contact_method: preferredContact },
   });
 
-  revalidatePath('/workspace/clients');
+  revalidatePath('/ops/clients');
 }
 
 export async function adminCreateGrantAction(formData: FormData): Promise<void> {
@@ -179,7 +179,7 @@ export async function adminCreateGrantAction(formData: FormData): Promise<void> 
     actorUserId: access.userId,
   });
 
-  revalidatePath('/workspace/clients');
+  revalidatePath('/ops/clients');
 }
 
 export async function adminRevokeGrantAction(formData: FormData): Promise<void> {
@@ -193,7 +193,7 @@ export async function adminRevokeGrantAction(formData: FormData): Promise<void> 
   }
 
   await revokePersonGrant(supabase, { grantId, actorProfileId: access.profile.id });
-  revalidatePath('/workspace/clients');
+  revalidatePath('/ops/clients');
 }
 
 export async function staffAddCaseNoteAction(formData: FormData): Promise<void> {
@@ -205,7 +205,7 @@ export async function staffAddCaseNoteAction(formData: FormData): Promise<void> 
 
   const supabase = await createSupabaseServerClient();
   const access = await loadPortalAccess(supabase);
-  if (!access || !access.canAccessStaffWorkspace) {
+  if (!access || !access.canAccessOpsFrontline) {
     throw new Error('You do not have permission to add notes.');
   }
 
@@ -243,7 +243,7 @@ export async function staffAddCaseNoteAction(formData: FormData): Promise<void> 
     meta: { case_id: caseId, person_id: detail.personId },
   });
 
-  revalidatePath(`/workspace/clients/${detail.personId}?case=${caseId}`);
+  revalidatePath(`/ops/clients/${detail.personId}?case=${caseId}`);
 }
 
 export async function processIntakeAction(formData: FormData): Promise<void> {
@@ -252,7 +252,7 @@ export async function processIntakeAction(formData: FormData): Promise<void> {
 
   const supabase = await createSupabaseServerClient();
   const access = await loadPortalAccess(supabase);
-  if (!access || !access.canAccessStaffWorkspace) {
+  if (!access || !access.canAccessOpsFrontline) {
     throw new Error('You do not have permission to process intakes.');
   }
 
@@ -260,6 +260,6 @@ export async function processIntakeAction(formData: FormData): Promise<void> {
 
   await processClientIntake(supabase, intakeId, access.userId);
 
-  revalidatePath('/workspace/clients?view=directory');
-  revalidatePath('/workspace/clients?view=activity');
+  revalidatePath('/ops/clients?view=directory');
+  revalidatePath('/ops/clients?view=activity');
 }
