@@ -67,7 +67,7 @@ const baseAccess: PortalAccess = {
 };
 
 describe('resolveLandingPath', () => {
-  it('sends HQ admins to the HQ hub', () => {
+  it('lands IHARC HQ admins on the operations home', () => {
     const access = {
       ...baseAccess,
       canAccessOpsHq: true,
@@ -75,7 +75,7 @@ describe('resolveLandingPath', () => {
       canAccessOpsFrontline: true,
       canAccessOpsOrg: true,
     };
-    expect(resolveLandingPath(access)).toBe('/ops/hq');
+    expect(resolveLandingPath(access)).toBe('/ops/today');
   });
 
   it('lands frontline-only users on operations today', () => {

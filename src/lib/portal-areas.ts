@@ -31,9 +31,9 @@ export function inferPortalAreaFromPath(pathname: string): PortalArea {
 
 export function resolveLandingArea(access: PortalAccess | null): PortalArea {
   if (!access) return 'client';
-  if (access.canAccessOpsHq) return 'ops_hq';
   if (access.canAccessOpsFrontline) return 'ops_frontline';
   if (access.canAccessOpsOrg) return 'ops_org';
+  if (access.canAccessOpsHq) return 'ops_hq';
   return 'client';
 }
 

@@ -4,7 +4,7 @@ import { useEffect, useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { Image as ImageIcon, Loader2, Trash2 } from 'lucide-react';
 import { Button } from '@shared/ui/button';
-import { Form, FormField, FormLabel } from '@shared/ui/form';
+import { Form, FormField } from '@shared/ui/form';
 import type { BrandingAssets } from '@/lib/marketing/settings';
 import { saveBrandingSettings, uploadBrandingAsset } from './actions';
 
@@ -112,7 +112,7 @@ export function BrandingForm({ branding }: Props) {
         </div>
 
         <div className="space-y-3 rounded-lg border border-border bg-background p-3">
-          <FormLabel className="text-base">Publishing notes</FormLabel>
+          <p className="text-base font-medium">Publishing notes</p>
           <ul className="list-disc space-y-0.5 pl-5 text-sm text-muted-foreground">
             <li>All assets publish immediately to the marketing site and STEVI metadata.</li>
             <li>Use final production files to avoid broken icons for visitors and outreach staff.</li>

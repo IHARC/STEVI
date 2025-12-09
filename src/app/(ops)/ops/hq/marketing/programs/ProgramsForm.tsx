@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { Button } from '@shared/ui/button';
-import { Form, FormLabel } from '@shared/ui/form';
+import { Form } from '@shared/ui/form';
+import { Label } from '@shared/ui/label';
 import { Input } from '@shared/ui/input';
 import { Textarea } from '@shared/ui/textarea';
 import type { ProgramEntry } from '@/lib/marketing/settings';
@@ -43,7 +44,7 @@ export function ProgramsForm({ programs }: Props) {
             <div key={`${program.title}-${index}`} className="space-y-2 rounded-lg border border-border bg-card/40 p-3">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 space-y-1">
-                  <FormLabel htmlFor={`program-title-${index}`}>Title</FormLabel>
+                  <Label htmlFor={`program-title-${index}`}>Title</Label>
                   <Input
                     id={`program-title-${index}`}
                     value={program.title}
@@ -64,7 +65,7 @@ export function ProgramsForm({ programs }: Props) {
                 </Button>
               </div>
               <div className="space-y-1">
-                <FormLabel htmlFor={`program-description-${index}`}>Description</FormLabel>
+                <Label htmlFor={`program-description-${index}`}>Description</Label>
                 <Textarea
                   id={`program-description-${index}`}
                   value={program.description}

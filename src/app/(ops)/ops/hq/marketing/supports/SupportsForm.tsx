@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { Button } from '@shared/ui/button';
-import { Form, FormLabel } from '@shared/ui/form';
+import { Form } from '@shared/ui/form';
+import { Label } from '@shared/ui/label';
 import { Input } from '@shared/ui/input';
 import { Textarea } from '@shared/ui/textarea';
 import type { SupportContact, SupportEntry } from '@/lib/marketing/settings';
@@ -98,7 +99,7 @@ export function SupportsForm({ urgent, mutualAid }: Props) {
             <div key={`${support.title}-${index}`} className="space-y-3 rounded-xl border border-border bg-card/40 p-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 space-y-1">
-                  <FormLabel htmlFor={`title-${index}`}>Title</FormLabel>
+                  <Label htmlFor={`title-${index}`}>Title</Label>
                   <Input
                     id={`title-${index}`}
                     value={support.title}
@@ -119,7 +120,7 @@ export function SupportsForm({ urgent, mutualAid }: Props) {
                 </Button>
               </div>
               <div className="space-y-1">
-                <FormLabel htmlFor={`summary-${index}`}>Summary</FormLabel>
+                <Label htmlFor={`summary-${index}`}>Summary</Label>
                 <Textarea
                   id={`summary-${index}`}
                   value={support.summary}
@@ -129,7 +130,7 @@ export function SupportsForm({ urgent, mutualAid }: Props) {
                 />
               </div>
               <div className="space-y-1">
-                <FormLabel htmlFor={`body-${index}`}>Body</FormLabel>
+                <Label htmlFor={`body-${index}`}>Body</Label>
                 <Textarea
                   id={`body-${index}`}
                   value={support.body}
@@ -140,7 +141,7 @@ export function SupportsForm({ urgent, mutualAid }: Props) {
               </div>
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
-                  <FormLabel>Contacts</FormLabel>
+                  <Label>Contacts</Label>
                   <Button type="button" variant="ghost" onClick={() => addContact(index)} className="gap-2">
                     <Plus className="h-4 w-4" aria-hidden />
                     Add contact
