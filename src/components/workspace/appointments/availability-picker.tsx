@@ -2,6 +2,7 @@
 
 import { useCallback } from 'react';
 import { Button } from '@shared/ui/button';
+import { toLocalDateTimeInput } from '@/lib/datetime';
 
 type AvailabilityPickerProps = {
   slots: string[];
@@ -22,9 +23,12 @@ export function AvailabilityPicker({ slots, targetInputId, label }: Availability
     (iso: string) => {
       const input = document.getElementById(targetInputId) as HTMLInputElement | null;
       if (!input) return;
-      const localValue = iso.slice(0, 16); // YYYY-MM-DDTHH:mm from ISO
+      const localValue = toLocalDateTimeInput(iso);
+      if (!localValue) return;
       input.value = localValue;
       input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+      input.focus();
     },
     [targetInputId],
   );

@@ -7,6 +7,7 @@ import Link from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
+import sanitizeHtml from 'sanitize-html';
 import {
   Dialog,
   DialogContent,
@@ -43,8 +44,19 @@ type ResourceRichTextEditorProps = {
   showPreview?: boolean;
 };
 
+const sanitizeOptions: sanitizeHtml.IOptions = {
+  allowedTags: [...sanitizeHtml.defaults.allowedTags, 'h2', 'h3', 'h4', 'img', 'figure', 'figcaption', 'iframe'],
+  allowedAttributes: {
+    ...sanitizeHtml.defaults.allowedAttributes,
+    a: ['href', 'name', 'target', 'rel', 'class'],
+    iframe: ['src', 'title', 'allow', 'allowfullscreen', 'frameborder'],
+  },
+  allowedSchemes: ['http', 'https', 'mailto', 'tel'],
+  allowedIframeHostnames: ['www.youtube.com', 'player.vimeo.com', 'www.google.com', 'maps.google.com'],
+};
+
 export function ResourceRichTextEditor({ name, label, description, defaultValue, onChange, showPreview }: ResourceRichTextEditorProps) {
-  const [serialized, setSerialized] = useState(defaultValue ?? '');
+  const [sanitized, setSanitized] = useState(() => sanitizeHtml(defaultValue ?? '', sanitizeOptions));
   const [linkDialogOpen, setLinkDialogOpen] = useState(false);
   const [linkUrl, setLinkUrl] = useState('');
   const [htmlDialogOpen, setHtmlDialogOpen] = useState(false);
@@ -72,8 +84,10 @@ export function ResourceRichTextEditor({ name, label, description, defaultValue,
     ],
     content: defaultValue ?? '',
     onUpdate({ editor: instance }: { editor: Editor }) {
-      setSerialized(instance.getHTML());
-      onChange?.(instance.getHTML());
+      const html = instance.getHTML();
+      const safeHtml = sanitizeHtml(html, sanitizeOptions);
+      setSanitized(safeHtml);
+      onChange?.(safeHtml);
     },
     editorProps: {
       attributes: {
@@ -91,7 +105,7 @@ export function ResourceRichTextEditor({ name, label, description, defaultValue,
 
   useEffect(() => {
     startTransition(() => {
-      setSerialized(defaultValue ?? '');
+      setSanitized(sanitizeHtml(defaultValue ?? '', sanitizeOptions));
     });
     if (editor && typeof defaultValue === 'string') {
       editor.commands.setContent(defaultValue, false);
@@ -344,11 +358,11 @@ export function ResourceRichTextEditor({ name, label, description, defaultValue,
           )}
         </div>
       </div>
-      <input type="hidden" name={name} value={serialized} />
+      <input type="hidden" name={name} value={sanitized} />
       {showPreview ? (
         <div className="rounded-2xl border border-border/15 bg-muted px-4 py-3">
           <p className="text-xs font-semibold uppercase text-muted-foreground">Preview</p>
-          <div className="prose prose-sm max-w-none text-foreground" dangerouslySetInnerHTML={{ __html: serialized }} />
+          <div className="prose prose-sm max-w-none text-foreground" dangerouslySetInnerHTML={{ __html: sanitized }} />
         </div>
       ) : null}
     </div>

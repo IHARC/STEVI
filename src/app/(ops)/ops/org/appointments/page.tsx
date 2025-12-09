@@ -16,6 +16,7 @@ import { CancelAppointmentForm } from '@shared/appointments/cancel-appointment-f
 import { fetchScopedAppointments } from '@/lib/appointments/queries';
 import { confirmAppointment, cancelAppointmentAsStaff } from '@/lib/appointments/actions';
 import type { AppointmentWithRelations } from '@/lib/appointments/types';
+import { toLocalDateTimeInput } from '@/lib/datetime';
 
 export const dynamic = 'force-dynamic';
 
@@ -46,8 +47,9 @@ function ConfirmForm({
         <Input
           type="datetime-local"
           name="occurs_at"
+          id={`occurs-${appointment.id}`}
           required
-          defaultValue={appointment.occurs_at?.slice(0, 16)}
+          defaultValue={toLocalDateTimeInput(appointment.occurs_at)}
           className="sm:w-full"
         />
         <Input
