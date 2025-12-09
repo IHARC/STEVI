@@ -117,7 +117,12 @@ export default async function HqOrganizationDetailPage({ params }: PageProps) {
             <CardDescription>Edit core attributes, services, and contact details.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <form action={updateOrganizationAction} className="space-y-4">
+            <form
+              action={async (formData) => {
+                await updateOrganizationAction(formData);
+              }}
+              className="space-y-4"
+            >
               <input type="hidden" name="organization_id" value={organizationId} />
 
               <div className="grid gap-3 md:grid-cols-2">
@@ -318,7 +323,12 @@ export default async function HqOrganizationDetailPage({ params }: PageProps) {
               <CardDescription>Permanently remove this organization after clearing all memberships and links.</CardDescription>
             </CardHeader>
             <CardContent>
-              <form action={deleteOrganizationAction} className="space-y-3">
+              <form
+                action={async (formData) => {
+                  await deleteOrganizationAction(formData);
+                }}
+                className="space-y-3"
+              >
                 <input type="hidden" name="organization_id" value={organizationId} />
                 <div className="space-y-1">
                   <Label htmlFor="confirm_name">Type the organization name to confirm</Label>
@@ -350,7 +360,12 @@ export default async function HqOrganizationDetailPage({ params }: PageProps) {
             <CardDescription>Link an existing profile and optionally grant org roles.</CardDescription>
           </CardHeader>
           <CardContent>
-            <form action={attachOrgMemberAction} className="space-y-3">
+            <form
+              action={async (formData) => {
+                await attachOrgMemberAction(formData);
+              }}
+              className="space-y-3"
+            >
               <input type="hidden" name="organization_id" value={organizationId} />
               <div className="space-y-1">
                 <Label htmlFor="profile_id">Profile ID</Label>

@@ -84,10 +84,12 @@ export default async function HqOrganizationsPage() {
     throw error;
   }
 
-  const organizations = (orgRows ?? []).map((row) => ({
-    ...row,
-    features: extractOrgFeatureFlags(row.services_tags),
-  }));
+  const organizations: Array<OrganizationRow & { features: ReturnType<typeof extractOrgFeatureFlags> }> = (orgRows ?? []).map(
+    (row: OrganizationRow) => ({
+      ...row,
+      features: extractOrgFeatureFlags(row.services_tags),
+    }),
+  );
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8 md:px-6">
@@ -106,7 +108,12 @@ export default async function HqOrganizationsPage() {
             <CardDescription>Super admins only. All changes are audit logged.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <form action={createOrganizationAction} className="space-y-4">
+            <form
+              action={async (formData) => {
+                await createOrganizationAction(formData);
+              }}
+              className="space-y-4"
+            >
               <div className="grid gap-3 md:grid-cols-2">
                 <div className="space-y-1">
                   <Label htmlFor="name">Name</Label>
@@ -207,7 +214,7 @@ export default async function HqOrganizationsPage() {
       </section>
 
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" id="list">
-        {organizations.map((org) => (
+        {organizations.map((org: OrganizationRow & { features: string[] }) => (
           <Card key={org.id} className="border-border/60">
             <CardHeader className="space-y-2">
               <div className="flex items-start justify-between gap-2">
