@@ -1,11 +1,12 @@
-# Navigation Ownership (Updated)
+# Navigation Ownership (Visit-First)
 
-The unified shell has been retired. The source of truth for the dual-shell architecture, navigation, and guards now lives in `docs/architecture/shells.md`.
+The workspace rail follows the visit-first IA defined in `docs/architecture/encounter-nav-plan.md`. This plan is the single source of truth for navigation, guards, and UX enforcement across the staff/admin/org workspace.
 
 Key references:
-- `docs/architecture/shells.md` – route groups, guard rules, preview behaviour, and testing expectations.
-- `src/lib/portal-navigation.ts` – workspace navigation sections (staff/admin/org).
-- `src/lib/client-navigation.ts` – client navigation.
-- `src/components/shared/layout/app-navigation.tsx` – shared navigation surfaces with preview handling.
+- `docs/architecture/encounter-nav-plan.md` – Visit-first rail, gating rules, and testing expectations.
+- `src/lib/portal-navigation.ts` – single workspace rail (Today, Clients, Programs, Supplies, Partners, Organization, Reports).
+- `src/components/shared/layout/app-navigation.tsx` – rail rendering (desktop/mobile) with preview handling.
+- `src/components/shared/layout/top-nav.tsx` – top chrome without workspace mega menu; acting-org indicator.
+- `src/lib/client-navigation.ts` – client portal navigation (unchanged).
 
-There are no legacy fallbacks or compatibility routes; new surfaces must align with the dual-shell patterns documented above.
+No legacy multi-rail menus remain. Additions or changes must align with the Visit-first plan; deviations require an ADR.

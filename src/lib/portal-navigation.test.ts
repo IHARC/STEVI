@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildPortalNav } from './portal-navigation';
+import { buildPortalNav, flattenNavItemsForCommands } from './portal-navigation';
 import { inferPortalAreaFromPath, requireArea, resolveLandingPath } from './portal-areas';
 import type { PortalAccess } from './portal-access';
 import type { PortalProfile } from './profile';
@@ -45,6 +45,7 @@ const baseAccess: PortalAccess = {
   iharcRoles: [],
   portalRoles: [],
   organizationId: null,
+  organizationName: null,
   canAccessAdminWorkspace: false,
   canAccessOrgWorkspace: false,
   canManageResources: false,
@@ -63,14 +64,13 @@ const baseAccess: PortalAccess = {
 };
 
 describe('resolveLandingPath', () => {
-  it('prefers admin when available', () => {
+  it('sends any workspace user to the unified today rail', () => {
     const access = { ...baseAccess, canAccessAdminWorkspace: true };
-    expect(resolveLandingPath(access)).toBe('/admin/operations');
+    expect(resolveLandingPath(access)).toBe('/workspace/today');
+    expect(resolveLandingPath({ ...baseAccess, canAccessStaffWorkspace: true })).toBe('/workspace/today');
   });
 
-  it('falls back to staff then org then client', () => {
-    expect(resolveLandingPath({ ...baseAccess, canAccessStaffWorkspace: true })).toBe('/staff/overview');
-    expect(resolveLandingPath({ ...baseAccess, canAccessOrgWorkspace: true, organizationId: 8 })).toBe('/org');
+  it('keeps client-only users on the client landing', () => {
     expect(resolveLandingPath(baseAccess)).toBe('/home');
   });
 });
@@ -83,24 +83,39 @@ describe('buildPortalNav', () => {
       canAccessStaffWorkspace: true,
       canAccessOrgWorkspace: true,
       organizationId: 12,
+      organizationName: 'IHARC',
+      canAccessInventoryWorkspace: true,
+      canManagePolicies: true,
+      canManageResources: true,
+      canManageNotifications: true,
+      canManageWebsiteContent: true,
+      canViewMetrics: true,
     };
 
-    const sectionIds = buildPortalNav(access).map((section) => section.id);
-    expect(sectionIds).toEqual(expect.arrayContaining(['staff-tools', 'admin', 'organization']));
+    const sections = buildPortalNav(access);
+    expect(sections).toHaveLength(1);
+    expect(sections[0]?.id).toBe('workspace');
+    const groupIds = sections[0]?.groups.map((group) => group.id);
+    expect(groupIds).toEqual(expect.arrayContaining(['today', 'clients', 'programs', 'supplies', 'partners', 'organization', 'reports']));
   });
 
   it('hides sections the user cannot access', () => {
     const staffOnly = { ...baseAccess, canAccessStaffWorkspace: true };
-    const sections = buildPortalNav(staffOnly).map((section) => section.id);
-    expect(sections).toContain('staff-tools');
-    expect(sections).not.toContain('admin');
-    expect(sections).not.toContain('organization');
+    const sections = buildPortalNav(staffOnly);
+    expect(sections).toHaveLength(1);
+    const groupIds = sections[0]?.groups.map((group) => group.id) ?? [];
+    expect(groupIds).toContain('today');
+    expect(groupIds).toContain('clients');
+    expect(groupIds).toContain('programs');
+    expect(groupIds).not.toContain('supplies');
+    expect(groupIds).not.toContain('partners');
+    expect(groupIds).not.toContain('organization');
   });
 
   it('never includes client portal section (split shell)', () => {
     const access = { ...baseAccess, canAccessAdminWorkspace: true, canAccessStaffWorkspace: true };
     const sectionIds = buildPortalNav(access).map((section) => section.id);
-    expect(sectionIds).not.toContain('client-portal');
+    expect(sectionIds).toEqual(['workspace']);
   });
 });
 
@@ -112,7 +127,7 @@ describe('requireArea guards', () => {
     const noPreview = requireArea(admin, 'client', { preview: false, landingPath });
     expect(noPreview.allowed).toBe(false);
     if (!noPreview.allowed) {
-      expect(noPreview.redirectPath).toBe('/admin/operations');
+      expect(noPreview.redirectPath).toBe('/workspace/today');
     }
 
     const withPreview = requireArea(admin, 'client', { preview: true, landingPath });
@@ -122,8 +137,8 @@ describe('requireArea guards', () => {
     }
   });
 
-  it('redirects non-staff users away from staff shell', () => {
-    const result = requireArea(baseAccess, 'staff');
+  it('redirects non-workspace users away from workspace shell', () => {
+    const result = requireArea(baseAccess, 'workspace');
     expect(result.allowed).toBe(false);
     if (!result.allowed) {
       expect(result.redirectPath).toBe('/home');
@@ -133,9 +148,40 @@ describe('requireArea guards', () => {
 
 describe('inferPortalAreaFromPath', () => {
   it('maps known prefixes to areas', () => {
-    expect(inferPortalAreaFromPath('/admin/operations')).toBe('admin');
-    expect(inferPortalAreaFromPath('/staff/cases')).toBe('staff');
-    expect(inferPortalAreaFromPath('/org/settings')).toBe('org');
+    expect(inferPortalAreaFromPath('/admin/operations')).toBe('workspace');
+    expect(inferPortalAreaFromPath('/staff/cases')).toBe('workspace');
+    expect(inferPortalAreaFromPath('/org/settings')).toBe('workspace');
+    expect(inferPortalAreaFromPath('/workspace/today')).toBe('workspace');
     expect(inferPortalAreaFromPath('/home')).toBe('client');
+  });
+});
+
+describe('no orphan routes', () => {
+  it('ensures every workspace hub path is represented in nav commands', () => {
+    const access = {
+      ...baseAccess,
+      canAccessAdminWorkspace: true,
+      canAccessStaffWorkspace: true,
+      canAccessOrgWorkspace: true,
+      canAccessInventoryWorkspace: true,
+      canManagePolicies: true,
+      canManageResources: true,
+      canManageNotifications: true,
+      canManageWebsiteContent: true,
+      canManageConsents: true,
+      canViewMetrics: true,
+      organizationName: 'IHARC',
+    } satisfies PortalAccess;
+
+    const navSections = buildPortalNav(access);
+    const commands = flattenNavItemsForCommands(navSections);
+    expect(commands.length).toBeGreaterThan(0);
+    commands.forEach((cmd) => {
+      expect(cmd.href).toBeTruthy();
+      expect(cmd.label).toBeTruthy();
+    });
+
+    const duplicateHrefs = commands.filter((cmd, index) => commands.findIndex((c) => c.href === cmd.href) !== index);
+    expect(duplicateHrefs.length).toBe(0);
   });
 });

@@ -45,6 +45,9 @@ export type CaseActivity = {
   activityDate: string;
   activityTime: string | null;
   activityType: string;
+  createdByOrg: string | null;
+  sharedWithClient: boolean;
+  visibility: 'client' | 'internal';
 };
 
 export type IntakeSubmission = {

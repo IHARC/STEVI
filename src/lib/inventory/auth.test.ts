@@ -61,6 +61,7 @@ const baseAccess: PortalAccess = {
   iharcRoles: ['iharc_staff'],
   portalRoles: ['portal_admin'],
   organizationId: 1,
+  organizationName: 'IHARC',
   canAccessAdminWorkspace: true,
   canAccessOrgWorkspace: false,
   canManageResources: true,

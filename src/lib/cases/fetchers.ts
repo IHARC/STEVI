@@ -76,7 +76,7 @@ export async function fetchClientCaseActivities(
   const core = supabase.schema('core');
   const { data, error } = await core
     .from(ACTIVITIES_TABLE)
-    .select('*')
+    .select('id, title, description, activity_date, activity_time, activity_type, metadata, provider_org_id, organizations(name)')
     .eq('person_id', personId)
     .contains('metadata', { client_visible: true })
     .order('activity_date', { ascending: false })
@@ -87,14 +87,7 @@ export async function fetchClientCaseActivities(
     throw new Error('Unable to load case activity right now.');
   }
 
-  return (data ?? []).map((row: ActivityRow) => ({
-    id: row.id,
-    title: row.title,
-    description: row.description,
-    activityDate: row.activity_date,
-    activityTime: row.activity_time,
-    activityType: row.activity_type,
-  }));
+  return (data ?? []).map((row: ActivityRow & { organizations?: { name?: string | null } }) => toActivity(row, true));
 }
 
 export async function fetchPersonConsents(
@@ -162,7 +155,7 @@ export async function fetchStaffCaseActivities(
   const core = supabase.schema('core');
   const { data, error } = await core
     .from(ACTIVITIES_TABLE)
-    .select('*')
+    .select('id, title, description, activity_date, activity_time, activity_type, metadata, provider_org_id, organizations(name)')
     .eq('person_id', personId)
     .order('activity_date', { ascending: false })
     .order('activity_time', { ascending: false })
@@ -173,14 +166,7 @@ export async function fetchStaffCaseActivities(
     throw new Error('Unable to load activity.');
   }
 
-  return (data ?? []).map((row: ActivityRow) => ({
-    id: row.id,
-    title: row.title,
-    description: row.description,
-    activityDate: row.activity_date,
-    activityTime: row.activity_time,
-    activityType: row.activity_type,
-  }));
+  return (data ?? []).map((row: ActivityRow & { organizations?: { name?: string | null } }) => toActivity(row));
 }
 
 export async function fetchPendingIntakes(
@@ -225,5 +211,34 @@ function toCaseSummary(row: CaseRecord): CaseSummary {
     caseManagerContact: row.case_manager_contact ?? null,
     startDate: row.start_date ?? null,
     endDate: row.end_date ?? null,
+  };
+}
+
+function toActivity(row: ActivityRow & { organizations?: { name?: string | null } }, clientVisibleFilter = false): CaseActivity {
+  const { sharedWithClient, visibility } = resolveActivityVisibility(row.metadata, clientVisibleFilter);
+
+  return {
+    id: row.id,
+    title: row.title,
+    description: row.description,
+    activityDate: row.activity_date,
+    activityTime: row.activity_time,
+    activityType: row.activity_type,
+    createdByOrg: row.organizations?.name ?? 'Not recorded',
+    sharedWithClient,
+    visibility,
+  };
+}
+
+function resolveActivityVisibility(
+  metadata: ActivityRow['metadata'],
+  forceClientVisible: boolean,
+): { sharedWithClient: boolean; visibility: 'client' | 'internal' } {
+  const meta = (metadata ?? {}) as Record<string, unknown>;
+  const sharedWithClient = forceClientVisible || Boolean(meta.client_visible);
+
+  return {
+    sharedWithClient,
+    visibility: sharedWithClient ? 'client' : 'internal',
   };
 }

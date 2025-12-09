@@ -22,159 +22,112 @@ export type QuickAction = {
   disabled?: boolean;
 };
 
-const isApproved = (access: PortalAccess) => access.isProfileApproved;
-const hasElevatedAdminAccess = (access: PortalAccess) =>
-  isApproved(access) && (access.portalRoles.includes('portal_admin') || access.iharcRoles.includes('iharc_admin'));
-const canManageUsers = (access: PortalAccess) =>
-  isApproved(access) &&
-  (access.portalRoles.includes('portal_admin') ||
-    access.iharcRoles.includes('iharc_admin') ||
-    access.portalRoles.includes('portal_org_admin'));
-const canManageOrgs = (access: PortalAccess) =>
-  isApproved(access) && (access.portalRoles.includes('portal_org_admin') || access.portalRoles.includes('portal_org_rep'));
-const canAccessContentHub = (access: PortalAccess) =>
-  isApproved(access) &&
-  (access.canManageWebsiteContent || access.canManageResources || access.canManagePolicies || access.canManageNotifications);
-const canAccessPeopleHub = (access: PortalAccess) =>
-  isApproved(access) &&
-  (access.canManageConsents || canManageUsers(access) || hasElevatedAdminAccess(access) || access.canManageOrgUsers);
-const canAccessInventoryHub = (access: PortalAccess) =>
-  access.canAccessInventoryWorkspace || access.iharcRoles.includes('iharc_admin');
+const hasWorkspaceAccess = (access: PortalAccess) =>
+  access.canAccessAdminWorkspace || access.canAccessStaffWorkspace || access.canAccessOrgWorkspace;
+
+const canSeeClients = (access: PortalAccess) => access.canAccessStaffWorkspace || access.canManageConsents;
+const canSeePrograms = (access: PortalAccess) => access.canAccessStaffWorkspace || access.canAccessAdminWorkspace;
+const canSeeSupplies = (access: PortalAccess) => access.canAccessInventoryWorkspace || access.canAccessAdminWorkspace;
+const canSeePartners = (access: PortalAccess) => access.canAccessAdminWorkspace;
+const canSeeOrganization = (access: PortalAccess) => access.canAccessOrgWorkspace || access.canAccessAdminWorkspace;
+const canSeeReports = (access: PortalAccess) => access.canViewMetrics || access.canAccessAdminWorkspace;
+const canManageOrgAccess = (access: PortalAccess) => access.canManageOrgUsers || access.canManageOrgInvites || access.canAccessAdminWorkspace;
+const canManageBrand = (access: PortalAccess) =>
+  access.canManageWebsiteContent || access.canManageSiteFooter || access.canManageResources || access.canManagePolicies || access.canManageNotifications || access.canAccessAdminWorkspace;
 
 const NAV_SECTIONS: NavSectionDefinition[] = [
   {
-    id: 'staff-tools',
-    label: 'Staff tools',
-    description: 'Caseload, tasks, outreach, and schedules',
-    area: 'staff',
-    requires: (access) => access.canAccessStaffWorkspace || access.canAccessAdminWorkspace,
+    id: 'workspace',
+    label: 'Workspace',
+    description: 'Today, clients, programs, and operations',
+    area: 'workspace',
+    requires: hasWorkspaceAccess,
     groups: [
       {
-        id: 'staff-caseload',
-        label: 'Caseload',
+        id: 'today',
+        label: 'Today',
+        icon: 'dashboard',
         items: [
-          { id: 'staff-overview', href: '/staff/overview', label: 'Overview', icon: 'dashboard', match: ['/staff/overview'] },
-          { id: 'staff-caseload-active', href: '/staff/caseload', label: 'Active caseload', icon: 'users', match: ['/staff/caseload'] },
-          { id: 'staff-cases-all', href: '/staff/cases', label: 'All cases', icon: 'briefcase', match: ['/staff/cases'] },
-          { id: 'staff-intake', href: '/staff/intake', label: 'Intake queue', icon: 'inbox', match: ['/staff/intake'] },
+          { id: 'today-home', href: '/workspace/today', label: 'Today', icon: 'dashboard', match: ['/workspace/today'], exact: true },
+          { id: 'today-new-visit', href: '/workspace/visits/new', label: 'New Visit', icon: 'file', match: ['/workspace/visits'] },
+          { id: 'today-tasks', href: '/staff/tasks', label: 'Tasks', icon: 'list', match: ['/staff/tasks'], requires: (access) => access.canAccessStaffWorkspace },
+          { id: 'today-appointments', href: '/staff/appointments', label: 'Appointments', icon: 'calendar', match: ['/staff/appointments'], requires: (access) => access.canAccessStaffWorkspace },
+          { id: 'today-intake', href: '/staff/intake', label: 'Intake queue', icon: 'inbox', match: ['/staff/intake'], requires: (access) => access.canAccessStaffWorkspace },
         ],
       },
       {
-        id: 'staff-tasks',
-        label: 'Tasks & workflows',
+        id: 'clients',
+        label: 'Clients',
+        icon: 'users',
+        requires: canSeeClients,
         items: [
-          { id: 'staff-my-tasks', href: '/staff/tasks', label: 'My tasks', icon: 'list', match: ['/staff/tasks'] },
-          { id: 'staff-team-tasks', href: '/staff/tasks/team', label: 'Team tasks', icon: 'users', match: ['/staff/tasks/team'] },
+          { id: 'clients-directory', href: '/admin/clients', label: 'Client directory', icon: 'users', match: ['/admin/clients'], requires: (access) => access.canManageConsents || access.canAccessAdminWorkspace },
+          { id: 'clients-journey', href: '/staff/cases', label: 'Client Journey', icon: 'briefcase', match: ['/staff/cases'], requires: (access) => access.canAccessStaffWorkspace },
+          { id: 'clients-caseload', href: '/staff/caseload', label: 'Caseload', icon: 'briefcase', match: ['/staff/caseload'], requires: (access) => access.canAccessStaffWorkspace },
         ],
       },
       {
-        id: 'staff-field',
-        label: 'Field operations',
+        id: 'programs',
+        label: 'Programs',
+        icon: 'calendarRange',
+        requires: canSeePrograms,
         items: [
-          { id: 'staff-outreach', href: '/staff/outreach', label: 'Outreach', icon: 'notebook', match: ['/staff/outreach'] },
-          { id: 'staff-appointments', href: '/staff/appointments', label: 'Appointments', icon: 'calendar', match: ['/staff/appointments'] },
-          { id: 'staff-schedule', href: '/staff/schedule', label: 'Schedule', icon: 'calendarRange', match: ['/staff/schedule'] },
+          { id: 'programs-rosters', href: '/staff/schedule', label: 'Schedules & rosters', icon: 'calendarRange', match: ['/staff/schedule'], requires: (access) => access.canAccessStaffWorkspace },
+          { id: 'programs-outreach', href: '/staff/outreach', label: 'Outreach', icon: 'route', match: ['/staff/outreach'], requires: (access) => access.canAccessStaffWorkspace },
+          { id: 'programs-shifts', href: '/staff/shifts/logs', label: 'Shift logs', icon: 'clock', match: ['/staff/shifts/logs'], requires: (access) => access.canAccessStaffWorkspace },
+          { id: 'programs-appointments', href: '/admin/appointments', label: 'Program appointments', icon: 'calendar', match: ['/admin/appointments'], requires: (access) => access.canAccessAdminWorkspace },
+          { id: 'programs-warming', href: '/admin/warming-room', label: 'Warming room', icon: 'flame', match: ['/admin/warming-room'], requires: (access) => access.canAccessAdminWorkspace },
+          { id: 'programs-service-rules', href: '/admin/service-rules', label: 'Service rules', icon: 'workflow', match: ['/admin/service-rules'], requires: (access) => access.canAccessAdminWorkspace },
+          { id: 'programs-templates', href: '/admin/templates', label: 'Templates', icon: 'file', match: ['/admin/templates'], requires: (access) => access.canAccessAdminWorkspace },
         ],
       },
       {
-        id: 'staff-shifts',
-        label: 'Shifts & logs',
+        id: 'supplies',
+        label: 'Supplies',
+        icon: 'boxes',
+        requires: canSeeSupplies,
         items: [
-          { id: 'staff-shift-logs', href: '/staff/shifts/logs', label: 'Shift logs', icon: 'clock', match: ['/staff/shifts/logs'] },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'admin',
-    label: 'Admin',
-    description: 'Operations, access, content, and inventory',
-    area: 'admin',
-    requires: (access) => access.canAccessAdminWorkspace,
-    groups: [
-      {
-        id: 'admin-operations',
-        label: 'Operations',
-        items: [
-          {
-            id: 'admin-operations-overview',
-            href: '/admin/operations',
-            label: 'Operations hub',
-            icon: 'dashboard',
-            match: ['/admin/operations', '/admin/approvals', '/admin/appointments', '/admin/warming-room', '/admin/service-rules', '/admin/templates'],
-          },
+          { id: 'supplies-overview', href: '/admin/inventory/overview', label: 'Stock overview', icon: 'boxes', match: ['/admin/inventory/overview', '/admin/inventory'] },
+          { id: 'supplies-items', href: '/admin/inventory/items', label: 'Items & locations', icon: 'box', match: ['/admin/inventory/items'] },
+          { id: 'supplies-donations', href: '/admin/donations', label: 'Donations', icon: 'inbox', match: ['/admin/donations'] },
+          { id: 'supplies-reconciliation', href: '/admin/inventory/donations-mapping', label: 'Reconciliation', icon: 'approval', match: ['/admin/inventory/donations-mapping'] },
         ],
       },
       {
-        id: 'admin-people',
-        label: 'People & access',
+        id: 'partners',
+        label: 'Partners',
+        icon: 'building',
+        requires: canSeePartners,
         items: [
-          {
-            id: 'admin-people-hub',
-            href: '/admin/people',
-            label: 'People & access',
-            icon: 'users',
-            match: ['/admin/people', '/admin/clients', '/admin/consents', '/admin/users', '/admin/profiles', '/admin/organizations', '/admin/permissions'],
-            requires: canAccessPeopleHub,
-          },
+          { id: 'partners-directory', href: '/admin/organizations', label: 'Directory', icon: 'building', match: ['/admin/organizations'] },
+          { id: 'partners-approvals', href: '/admin/approvals', label: 'Agreements & approvals', icon: 'approval', match: ['/admin/approvals'] },
+          { id: 'partners-help', href: '/admin/help', label: 'Help', icon: 'lifebuoy', match: ['/admin/help'] },
         ],
       },
       {
-        id: 'admin-content',
-        label: 'Content & site',
+        id: 'organization',
+        label: 'Organization',
+        icon: 'settings',
+        requires: canSeeOrganization,
         items: [
-          {
-            id: 'admin-content-hub',
-            href: '/admin/content',
-            label: 'Content & website',
-            icon: 'notebook',
-            match: ['/admin/content', '/admin/website', '/admin/resources', '/admin/policies', '/admin/notifications'],
-            requires: canAccessContentHub,
-          },
+          { id: 'org-overview', href: '/org', label: 'Overview', icon: 'dashboard', match: ['/org'], exact: true },
+          { id: 'org-access', href: '/org/members', label: 'Access & roles', icon: 'shield', match: ['/org/members'], requires: canManageOrgAccess },
+          { id: 'org-invites', href: '/org/invites', label: 'Invites', icon: 'inbox', match: ['/org/invites'], requires: canManageOrgAccess },
+          { id: 'org-settings', href: '/org/settings', label: 'Settings', icon: 'settings', match: ['/org/settings'], requires: (access) => access.canAccessOrgWorkspace || access.canAccessAdminWorkspace },
+          { id: 'org-content', href: '/admin/content', label: 'Content hub', icon: 'notebook', match: ['/admin/content'], requires: canManageBrand },
+          { id: 'org-website', href: '/admin/website', label: 'Website & Brand', icon: 'globe', match: ['/admin/website'], requires: canManageBrand },
+          { id: 'org-policies', href: '/admin/policies', label: 'Policies', icon: 'book', match: ['/admin/policies'], requires: (access) => access.canManagePolicies || access.canAccessAdminWorkspace },
+          { id: 'org-notifications', href: '/admin/notifications', label: 'Notifications', icon: 'megaphone', match: ['/admin/notifications'], requires: (access) => access.canManageNotifications || access.canAccessAdminWorkspace },
         ],
       },
       {
-        id: 'admin-inventory',
-        label: 'Inventory & donations',
+        id: 'reports',
+        label: 'Reports',
+        icon: 'chart',
+        requires: canSeeReports,
         items: [
-          {
-            id: 'admin-inventory-hub',
-            href: '/admin/inventory/overview',
-            label: 'Inventory & donations',
-            icon: 'boxes',
-            match: ['/admin/inventory/overview', '/admin/inventory/items', '/admin/inventory/donations-mapping', '/admin/donations', '/admin/inventory'],
-            requires: canAccessInventoryHub,
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'organization',
-    label: 'Organization',
-    description: 'Org overview, members, and settings',
-    area: 'org',
-    requires: (access) => access.canAccessOrgWorkspace,
-    groups: [
-      {
-        id: 'org-overview',
-        label: 'Overview',
-        items: [
-          { id: 'org-home', href: '/org', label: 'Overview', icon: 'dashboard', exact: true },
-        ],
-      },
-      {
-        id: 'org-people',
-        label: 'People',
-        items: [
-          { id: 'org-members', href: '/org/members', label: 'Members', icon: 'users', match: ['/org/members'], requires: (access) => access.canManageOrgUsers },
-        ],
-      },
-      {
-        id: 'org-settings',
-        label: 'Settings',
-        items: [
-          { id: 'org-settings-general', href: '/org/settings', label: 'Settings', icon: 'settings', match: ['/org/settings'], requires: canManageOrgs },
+          { id: 'reports-operations', href: '/admin/operations', label: 'Operations overview', icon: 'chart', match: ['/admin/operations'] },
+          { id: 'reports-content', href: '/admin/content-inventory', label: 'Content inventory', icon: 'notebook', match: ['/admin/content-inventory'] },
         ],
       },
     ],
@@ -253,67 +206,55 @@ export function resolveQuickActions(
     ];
   }
 
-  if (area === 'staff') {
-    return [
-      {
-        id: 'staff-add-outreach',
-        label: 'Log outreach note',
-        href: '/staff/outreach',
-        description: 'Capture quick outreach details',
-        icon: 'chat',
+  if (area === 'workspace' || area === 'staff' || area === 'admin' || area === 'org') {
+    const actions: QuickAction[] = [];
+
+    if (access.canAccessStaffWorkspace || access.canAccessAdminWorkspace) {
+      actions.push({
+        id: 'workspace-new-visit',
+        label: 'New Visit',
+        href: '/workspace/visits/new',
+        description: 'Start a Visit from your current context',
+        icon: 'calendar',
         disabled: previewDisabled,
-      },
-      {
-        id: 'staff-new-case-note',
-        label: 'Add case note',
-        href: '/staff/cases',
-        description: 'Open cases and add updates',
+      });
+    }
+
+    if (access.canAccessStaffWorkspace || access.canManageConsents || access.canAccessAdminWorkspace) {
+      const personHref = access.canManageConsents || access.canAccessAdminWorkspace ? '/admin/clients' : '/staff/intake';
+      actions.push({
+        id: 'workspace-find-person',
+        label: 'Find or create person',
+        href: personHref,
+        description: 'Search existing records or start intake',
         icon: 'file',
         disabled: previewDisabled,
-      },
-    ];
-  }
+      });
+    }
 
-  if (area === 'org') {
-    return [
-      {
-        id: 'org-new-invite',
+    if (access.canManageOrgInvites) {
+      actions.push({
+        id: 'workspace-invite-member',
         label: 'Invite member',
         href: '/org/invites',
-        description: 'Send an organization invite',
+        description: 'Send an access invite',
         icon: 'chat',
         disabled: previewDisabled,
-      },
-      {
-        id: 'org-add-profile',
-        label: 'Update org profile',
-        href: '/org/settings',
-        description: 'Edit details and contacts',
-        icon: 'file',
-        disabled: previewDisabled,
-      },
-    ];
-  }
+      });
+    }
 
-  if (area === 'admin') {
-    return [
-      {
-        id: 'admin-invite-user',
-        label: 'Invite user',
-        href: '/admin/profiles',
-        description: 'Send portal invite',
-        icon: 'chat',
-        disabled: previewDisabled,
-      },
-      {
-        id: 'admin-new-notification',
+    if (access.canManageNotifications || access.canAccessAdminWorkspace) {
+      actions.push({
+        id: 'workspace-notification',
         label: 'Send notification',
         href: '/admin/notifications',
         description: 'Queue SMS or email',
         icon: 'file',
         disabled: previewDisabled,
-      },
-    ];
+      });
+    }
+
+    return actions;
   }
 
   return [];
@@ -321,6 +262,8 @@ export function resolveQuickActions(
 
 export function navAreaLabel(area: PortalArea): string {
   switch (area) {
+    case 'workspace':
+      return 'Workspace';
     case 'admin':
       return 'Admin';
     case 'staff':

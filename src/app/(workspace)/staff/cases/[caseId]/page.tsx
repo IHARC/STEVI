@@ -57,19 +57,29 @@ export default async function StaffCaseDetailPage({ params }: CaseProps) {
                 {activities.map((item) => (
                   <li key={item.id} className="rounded-xl border border-border/30 bg-card p-4">
                     <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <p className="text-base text-foreground">{item.title}</p>
-                        <p className="text-sm text-muted-foreground">{item.activityType}</p>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(item.activityDate).toLocaleDateString()}
-                      </p>
+                    <div>
+                      <p className="text-base text-foreground">{item.title}</p>
+                      <p className="text-sm text-muted-foreground">{item.activityType}</p>
                     </div>
-                    {item.description ? (
-                      <p className="mt-1 text-sm text-foreground/80">{item.description}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(item.activityDate).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                    {item.createdByOrg ? (
+                      <Badge variant="outline" className="border-border/70">
+                        Created by {item.createdByOrg}
+                      </Badge>
                     ) : null}
-                  </li>
-                ))}
+                    <Badge variant={item.sharedWithClient ? 'secondary' : 'outline'} className="border-border/70">
+                      Visibility: {item.sharedWithClient ? 'Shared with client' : 'Internal'}
+                    </Badge>
+                  </div>
+                  {item.description ? (
+                    <p className="mt-1 text-sm text-foreground/80">{item.description}</p>
+                  ) : null}
+                </li>
+              ))}
               </ul>
             )}
           </CardContent>

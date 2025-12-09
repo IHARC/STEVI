@@ -277,6 +277,22 @@ export async function fetchPortalInbox(
   access: PortalAccess,
   area: PortalArea,
 ): Promise<InboxItem[]> {
+  if (area === 'workspace') {
+    if (access.canAccessAdminWorkspace) {
+      return fetchAdminInboxItems(supabase);
+    }
+
+    if (access.canAccessStaffWorkspace) {
+      return fetchStaffInboxItems(supabase, access);
+    }
+
+    if (access.canAccessOrgWorkspace) {
+      return fetchOrgInboxItems(supabase, access);
+    }
+
+    return [];
+  }
+
   if (area === 'staff') {
     return fetchStaffInboxItems(supabase, access);
   }

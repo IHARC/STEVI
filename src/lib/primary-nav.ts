@@ -17,22 +17,6 @@ export type PrimaryNavItem = {
 export function buildPrimaryNavItems(access: PortalAccess | null): PrimaryNavItem[] {
   const items: PrimaryNavItem[] = [];
 
-  if (access?.canAccessAdminWorkspace || access?.canAccessStaffWorkspace) {
-    const reportsHref = access?.canAccessAdminWorkspace ? '/admin/operations' : '/staff/overview';
-    const reportMatches = access?.canAccessAdminWorkspace
-      ? ['/admin/operations', '/admin/approvals', '/admin/appointments']
-      : ['/staff/overview', '/staff/caseload', '/staff/tasks', '/staff/schedule'];
-
-    items.push({
-      id: 'reports',
-      label: 'Reports',
-      description: 'Dashboards & exports',
-      href: reportsHref,
-      icon: 'chart',
-      match: reportMatches,
-    });
-  }
-
   items.push({
     id: 'settings',
     label: 'Settings',

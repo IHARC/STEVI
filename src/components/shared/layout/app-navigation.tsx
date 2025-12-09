@@ -8,12 +8,10 @@ import { Button } from '@shared/ui/button';
 import { ScrollArea } from '@shared/ui/scroll-area';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@shared/ui/sheet';
 import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from '@shared/ui/navigation-menu';
-import { APP_ICON_MAP, type AppIconName } from '@/lib/app-icons';
+import { APP_ICON_MAP } from '@/lib/app-icons';
 import { cn } from '@/lib/utils';
 import type { NavSection, NavItem as PortalNavItem } from '@/lib/portal-navigation';
 import type { PrimaryNavItem } from '@/lib/primary-nav';
-import { resolveQuickActions, type QuickAction } from '@/lib/portal-navigation';
-import { usePortalAccess } from '@shared/providers/portal-access-provider';
 import { useOptionalPortalLayout } from '@shared/providers/portal-layout-provider';
 
 type AppNavigationProps = {
@@ -177,7 +175,7 @@ function NavLink({ link, pathname, onNavigate }: NavLinkProps) {
       aria-current={active ? 'page' : undefined}
       onClick={onNavigate}
       className={cn(
-        'flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+        'flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background min-h-[44px]',
         active
           ? 'bg-primary/10 text-primary ring-1 ring-primary/50'
           : 'text-muted-foreground',
@@ -190,53 +188,11 @@ function NavLink({ link, pathname, onNavigate }: NavLinkProps) {
 }
 
 function useAugmentedSections(navSections: NavSection[]) {
-  const access = usePortalAccess();
   const layout = useOptionalPortalLayout();
-
-  const quickActions = useMemo(() => {
-    if (!access || !layout) return [] as QuickAction[];
-    return resolveQuickActions(access, layout.activeArea, { isPreview: layout.isClientPreview }).filter(
-      (action) => !action.disabled,
-    );
-  }, [access, layout]);
-
   return useMemo<NavSection[]>(() => {
-    const baseSections: NavSection[] = quickActions.length
-      ? [
-          {
-            id: 'quick-access',
-            label: 'Quick access',
-            area: navSections[0]?.area ?? 'client',
-            groups: [
-              {
-                id: 'quick-access-group',
-                label: 'Shortcuts',
-                icon: 'dashboard' as AppIconName,
-                items: quickActions.map((action) => ({
-                  id: action.id,
-                  href: action.href,
-                  label: action.label,
-                  icon: quickActionIcon(action.icon),
-                })),
-              },
-            ],
-          } satisfies NavSection,
-          ...navSections,
-        ]
-      : navSections;
-
-    if (!layout?.isClientPreview) return baseSections;
-
-    return addPreviewQueryToNavSections(baseSections);
-  }, [navSections, quickActions, layout?.isClientPreview]);
-}
-
-function quickActionIcon(icon?: QuickAction['icon']): AppIconName | undefined {
-  if (!icon) return undefined;
-  if (icon === 'chat') return 'message';
-  if (icon === 'calendar') return 'calendar';
-  if (icon === 'file') return 'file';
-  return undefined;
+    if (!layout?.isClientPreview) return navSections;
+    return addPreviewQueryToNavSections(navSections);
+  }, [navSections, layout?.isClientPreview]);
 }
 
 function addPreviewQueryToNavSections(navSections: NavSection[]): NavSection[] {

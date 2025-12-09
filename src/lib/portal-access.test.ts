@@ -47,9 +47,11 @@ const createSupabase = (
   {
     user = { id: 'user-1', email: 'taylor@example.com' },
     rpcResult = { data: [], error: null },
+    orgResult = { data: { name: 'Org' }, error: null },
   }: {
     user?: Record<string, unknown> | null;
     rpcResult?: { data: unknown; error: Error | null };
+    orgResult?: { data: unknown; error: Error | null };
   },
 ): SupabaseAnyServerClient =>
   ({
@@ -57,6 +59,13 @@ const createSupabase = (
       getUser: vi.fn().mockResolvedValue({ data: { user }, error: null }),
     },
     rpc: vi.fn().mockResolvedValue(rpcResult),
+    schema: vi.fn().mockReturnValue({
+      from: vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({ maybeSingle: vi.fn().mockResolvedValue(orgResult) }),
+        }),
+      }),
+    }),
   } as unknown as SupabaseAnyServerClient);
 
 afterEach(() => {
@@ -82,6 +91,7 @@ describe('loadPortalAccess', () => {
     expect(access?.canAccessInventoryWorkspace).toBe(true);
     expect(access?.profile.id).toBe('profile-42');
     expect(access?.organizationId).toBe(10);
+    expect(access?.organizationName).toBe('Org');
   });
 
   it('returns null when no authenticated user is present', async () => {

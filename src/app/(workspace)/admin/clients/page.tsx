@@ -82,6 +82,14 @@ export default async function AdminClientsPage({ searchParams }: PageProps) {
         <p className="max-w-3xl text-sm text-muted-foreground sm:text-base">
           RLS-limited view of people records. Use consent overrides to align sharing with client wishes.
         </p>
+        <div className="flex flex-wrap gap-2">
+          <Button asChild>
+            <Link href="/workspace/visits/new">New Visit</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/staff/intake">Find or create person</Link>
+          </Button>
+        </div>
         <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
           <Badge variant="outline">Onboarded: {statusCounts.COMPLETED}</Badge>
           <Badge variant="secondary">Needs consents: {statusCounts.NEEDS_CONSENTS}</Badge>
@@ -118,6 +126,9 @@ export default async function AdminClientsPage({ searchParams }: PageProps) {
                 </Badge>
                 <Badge variant={resolveOnboardingVariant(person.onboarding)} className="capitalize">
                   {person.onboarding ? person.onboarding.status.toLowerCase() : 'status n/a'}
+                </Badge>
+                <Badge variant={person.data_sharing_consent ? 'outline' : 'secondary'} className="capitalize">
+                  {person.data_sharing_consent ? 'Sharing: org/partners' : 'Sharing: restricted'}
                 </Badge>
               </div>
             </CardHeader>

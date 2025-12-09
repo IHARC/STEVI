@@ -21,6 +21,7 @@ export type PortalAccess = {
   iharcRoles: IharcRole[];
   portalRoles: PortalRole[];
   organizationId: number | null;
+  organizationName: string | null;
   canAccessAdminWorkspace: boolean;
   canAccessOrgWorkspace: boolean;
   canManageResources: boolean;
@@ -59,6 +60,7 @@ export async function loadPortalAccess(
     role.startsWith('iharc_'),
   );
   const organizationId = profile.organization_id ?? null;
+  const organizationName = organizationId ? await fetchOrganizationName(supabase, organizationId) : null;
   const isProfileApproved = profile.affiliation_status === 'approved';
 
   const isPortalAdmin = portalRoles.includes('portal_admin');
@@ -94,6 +96,7 @@ export async function loadPortalAccess(
     iharcRoles,
     portalRoles,
     organizationId,
+    organizationName,
     canAccessAdminWorkspace,
     canAccessOrgWorkspace,
     canManageResources,
@@ -137,6 +140,22 @@ async function fetchUserRoles(
     .filter((role): role is string => Boolean(role));
 }
 
+async function fetchOrganizationName(supabase: SupabaseAnyServerClient, organizationId: number): Promise<string | null> {
+  const { data, error } = await supabase
+    .schema('core')
+    .from('organizations')
+    .select('name')
+    .eq('id', organizationId)
+    .maybeSingle();
+
+  if (error) {
+    console.warn('Unable to load organization name', error);
+    return null;
+  }
+
+  return data?.name ?? null;
+}
+
 type MenuLinkBlueprint = PortalLink & { requires?: (access: PortalAccess) => boolean };
 
 const WORKSPACE_PROFILE_PATH = '/workspace/profile';
@@ -155,7 +174,7 @@ function userMenuBlueprint(access: PortalAccess): MenuLinkBlueprint[] {
       requires: (a) => a.canAccessAdminWorkspace,
     },
     {
-      href: '/staff/overview',
+      href: '/workspace/today',
       label: 'Staff tools',
       requires: (a) => a.canAccessStaffWorkspace,
     },
@@ -191,23 +210,23 @@ function linkIsAllowed(entry: { requires?: (access: PortalAccess) => boolean }, 
 }
 
 const HUB_TAB_COMMANDS: { href: string; label: string; group: string; requires: (access: PortalAccess) => boolean }[] = [
-  { href: '/admin/content?tab=website', label: 'Website settings', group: 'Content & website', requires: (access) => access.canManageWebsiteContent },
-  { href: '/admin/content?tab=resources', label: 'Resource library', group: 'Content & website', requires: (access) => access.canManageResources },
-  { href: '/admin/content?tab=policies', label: 'Policies', group: 'Content & website', requires: (access) => access.canManagePolicies },
-  { href: '/admin/content?tab=notifications', label: 'Notifications', group: 'Content & website', requires: (access) => access.canManageNotifications },
-  { href: '/admin/website?tab=branding', label: 'Website · Branding', group: 'Website settings', requires: (access) => access.canManageWebsiteContent },
-  { href: '/admin/website?tab=navigation', label: 'Website · Navigation', group: 'Website settings', requires: (access) => access.canManageWebsiteContent },
-  { href: '/admin/website?tab=home', label: 'Website · Home & context', group: 'Website settings', requires: (access) => access.canManageWebsiteContent },
-  { href: '/admin/website?tab=supports', label: 'Website · Supports', group: 'Website settings', requires: (access) => access.canManageWebsiteContent },
-  { href: '/admin/website?tab=programs', label: 'Website · Programs', group: 'Website settings', requires: (access) => access.canManageWebsiteContent },
-  { href: '/admin/website?tab=footer', label: 'Website · Footer', group: 'Website settings', requires: (access) => access.canManageWebsiteContent },
-  { href: '/admin/website?tab=inventory', label: 'Website · Content inventory', group: 'Website settings', requires: (access) => access.canManageWebsiteContent },
-  { href: '/admin/people?tab=clients', label: 'People · Client directory', group: 'People & access', requires: (access) => access.canManageConsents },
-  { href: '/admin/people?tab=consents', label: 'People · Consent overrides', group: 'People & access', requires: (access) => access.canManageConsents },
-  { href: '/admin/people?tab=users', label: 'People · Users', group: 'People & access', requires: (access) => access.isProfileApproved && (access.portalRoles.includes('portal_org_admin') || access.portalRoles.includes('portal_admin') || access.iharcRoles.includes('iharc_admin')) },
-  { href: '/admin/people?tab=profiles', label: 'People · Profiles & invites', group: 'People & access', requires: (access) => access.isProfileApproved && (access.portalRoles.includes('portal_admin') || access.iharcRoles.includes('iharc_admin')) },
-  { href: '/admin/people?tab=permissions', label: 'People · Permissions', group: 'People & access', requires: (access) => access.isProfileApproved && (access.portalRoles.includes('portal_admin') || access.iharcRoles.includes('iharc_admin')) },
-  { href: '/admin/people?tab=organizations', label: 'People · Organizations', group: 'People & access', requires: (access) => access.isProfileApproved && (access.portalRoles.includes('portal_admin') || access.iharcRoles.includes('iharc_admin')) },
+  { href: '/admin/content?tab=website', label: 'Website settings', group: 'Organization · Content & website', requires: (access) => access.canManageWebsiteContent },
+  { href: '/admin/content?tab=resources', label: 'Resource library', group: 'Organization · Content & website', requires: (access) => access.canManageResources },
+  { href: '/admin/content?tab=policies', label: 'Policies', group: 'Organization · Content & website', requires: (access) => access.canManagePolicies },
+  { href: '/admin/content?tab=notifications', label: 'Notifications', group: 'Organization · Content & website', requires: (access) => access.canManageNotifications },
+  { href: '/admin/website?tab=branding', label: 'Website · Branding', group: 'Organization · Website & Brand', requires: (access) => access.canManageWebsiteContent },
+  { href: '/admin/website?tab=navigation', label: 'Website · Navigation', group: 'Organization · Website & Brand', requires: (access) => access.canManageWebsiteContent },
+  { href: '/admin/website?tab=home', label: 'Website · Home & context', group: 'Organization · Website & Brand', requires: (access) => access.canManageWebsiteContent },
+  { href: '/admin/website?tab=supports', label: 'Website · Supports', group: 'Organization · Website & Brand', requires: (access) => access.canManageWebsiteContent },
+  { href: '/admin/website?tab=programs', label: 'Website · Programs', group: 'Organization · Website & Brand', requires: (access) => access.canManageWebsiteContent },
+  { href: '/admin/website?tab=footer', label: 'Website · Footer', group: 'Organization · Website & Brand', requires: (access) => access.canManageWebsiteContent },
+  { href: '/admin/website?tab=inventory', label: 'Website · Content inventory', group: 'Organization · Website & Brand', requires: (access) => access.canManageWebsiteContent },
+  { href: '/admin/people?tab=clients', label: 'People · Client directory', group: 'Organization · People & access', requires: (access) => access.canManageConsents },
+  { href: '/admin/people?tab=consents', label: 'People · Consent overrides', group: 'Organization · People & access', requires: (access) => access.canManageConsents },
+  { href: '/admin/people?tab=users', label: 'People · Users', group: 'Organization · People & access', requires: (access) => access.isProfileApproved && (access.portalRoles.includes('portal_org_admin') || access.portalRoles.includes('portal_admin') || access.iharcRoles.includes('iharc_admin')) },
+  { href: '/admin/people?tab=profiles', label: 'People · Profiles & invites', group: 'Organization · People & access', requires: (access) => access.isProfileApproved && (access.portalRoles.includes('portal_admin') || access.iharcRoles.includes('iharc_admin')) },
+  { href: '/admin/people?tab=permissions', label: 'People · Permissions', group: 'Organization · People & access', requires: (access) => access.isProfileApproved && (access.portalRoles.includes('portal_admin') || access.iharcRoles.includes('iharc_admin')) },
+  { href: '/admin/people?tab=organizations', label: 'People · Organizations', group: 'Organization · People & access', requires: (access) => access.isProfileApproved && (access.portalRoles.includes('portal_admin') || access.iharcRoles.includes('iharc_admin')) },
 ];
 
 export function buildUserMenuLinks(access: PortalAccess): PortalLink[] {
@@ -227,7 +246,7 @@ export function buildCommandPaletteItems(
 ): CommandPaletteItem[] {
   if (!access) return [];
 
-  const MAX_ITEMS = 20;
+  const MAX_ITEMS = 500;
   const sections = navSections ?? buildPortalNav(access);
   const navCommands = flattenNavItemsForCommands(sections).map((item) => ({ ...item }));
   const hubCommands = HUB_TAB_COMMANDS.filter((entry) => entry.requires(access)).map(({ href, label, group }) => ({

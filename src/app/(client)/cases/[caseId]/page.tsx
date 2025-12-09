@@ -70,6 +70,16 @@ export default async function CaseDetailPage({ params }: CasePageProps) {
                         {new Date(item.activityDate).toLocaleDateString()}
                       </p>
                     </div>
+                    <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                      {item.createdByOrg ? (
+                        <Badge variant="outline" className="border-border/70">
+                          Created by {item.createdByOrg}
+                        </Badge>
+                      ) : null}
+                      <Badge variant="secondary" className="border-border/70">
+                        Shared with you
+                      </Badge>
+                    </div>
                     {item.description ? (
                       <p className="mt-1 text-sm text-foreground/80">{item.description}</p>
                     ) : null}

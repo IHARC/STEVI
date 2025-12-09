@@ -11,7 +11,9 @@ import { APP_ICON_MAP, type AppIconName } from '@/lib/app-icons';
 import { cn } from '@/lib/utils';
 import { Eye } from 'lucide-react';
 import { Button } from '@shared/ui/button';
+import { Badge } from '@shared/ui/badge';
 import { useOptionalPortalLayout } from '@shared/providers/portal-layout-provider';
+import { usePortalAccess } from '@shared/providers/portal-access-provider';
 import type { CommandPaletteItem } from '@/lib/portal-access';
 import type { ResolvedBrandingAssets } from '@/lib/marketing/branding';
 import type { UserNavigation } from '@shared/layout/user-nav';
@@ -34,7 +36,11 @@ export function TopNav({
   const { desktop, mobile } = navigation;
   const hasNav = navSections.length > 0;
   const layout = useOptionalPortalLayout();
+  const portalAccess = usePortalAccess();
   const showClientPreviewCta = layout?.activeArea !== 'client';
+  const showMegaMenu = hasNav && layout?.activeArea === 'client';
+  const showActingOrg = layout?.activeArea === 'workspace';
+  const actingOrgName = portalAccess?.organizationName ?? (portalAccess?.organizationId ? 'Organization' : 'Not set');
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background/85 text-foreground shadow-sm backdrop-blur">
@@ -80,13 +86,24 @@ export function TopNav({
             </Link>
           </div>
 
-          {hasNav ? (
+          {showMegaMenu ? (
             <nav aria-label="Primary navigation" className="hidden min-w-0 lg:flex">
               <TopNavMenu navSections={navSections} pathname={pathname} />
             </nav>
           ) : null}
 
           <div className="flex items-center justify-end gap-2">
+            {showActingOrg ? (
+              <Badge variant="outline" className="hidden md:inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <span className="text-[10px] font-semibold text-muted-foreground">Acting org</span>
+                <span className="text-foreground normal-case text-xs font-semibold">{actingOrgName}</span>
+              </Badge>
+            ) : null}
+            {showActingOrg ? (
+              <Badge variant="secondary" className="md:hidden px-2 py-1 text-[11px] font-semibold uppercase tracking-wide">
+                Org: {actingOrgName}
+              </Badge>
+            ) : null}
             {showClientPreviewCta ? (
               <Button
                 asChild

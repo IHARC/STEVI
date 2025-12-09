@@ -1,11 +1,12 @@
 import { stripRouteGroups } from '@/lib/paths';
 import type { PortalAccess } from '@/lib/portal-access';
 
-export type PortalArea = 'client' | 'staff' | 'admin' | 'org';
+export type PortalArea = 'client' | 'workspace' | 'staff' | 'admin' | 'org';
 
 const LANDING_PATH_BY_AREA: Record<PortalArea, string> = {
   client: '/home',
-  staff: '/staff/overview',
+  workspace: '/workspace/today',
+  staff: '/workspace/today',
   admin: '/admin/operations',
   org: '/org',
 };
@@ -23,17 +24,16 @@ export type RequireAreaResult =
 export function inferPortalAreaFromPath(pathname: string): PortalArea {
   const cleaned = stripRouteGroups(pathname || '');
 
-  if (cleaned.startsWith('/admin')) return 'admin';
-  if (cleaned.startsWith('/staff')) return 'staff';
-  if (cleaned.startsWith('/org')) return 'org';
+  if (cleaned.startsWith('/admin')) return 'workspace';
+  if (cleaned.startsWith('/staff')) return 'workspace';
+  if (cleaned.startsWith('/org')) return 'workspace';
+  if (cleaned.startsWith('/workspace')) return 'workspace';
   return 'client';
 }
 
 export function resolveLandingArea(access: PortalAccess | null): PortalArea {
   if (!access) return 'client';
-  if (access.canAccessAdminWorkspace) return 'admin';
-  if (access.canAccessStaffWorkspace) return 'staff';
-  if (access.canAccessOrgWorkspace) return 'org';
+  if (access.canAccessAdminWorkspace || access.canAccessStaffWorkspace || access.canAccessOrgWorkspace) return 'workspace';
   return 'client';
 }
 
@@ -85,6 +85,14 @@ export function requireArea(
   const hasWorkspaceAccess = hasAdminAccess || hasStaffAccess || hasOrgAccess;
   const previewRequested = Boolean(options.preview);
 
+  if (area === 'workspace') {
+    if (hasWorkspaceAccess) {
+      return { allowed: true, activeArea: 'workspace', isPreview: false };
+    }
+
+    return { allowed: false, redirectPath: clientHome };
+  }
+
   if (area === 'client') {
     if (hasWorkspaceAccess && !previewRequested) {
       return { allowed: false, redirectPath: landingPathForArea(resolveLandingArea(access)) };
@@ -101,21 +109,21 @@ export function requireArea(
     if (hasAdminAccess) {
       return { allowed: true, activeArea: 'admin', isPreview: false };
     }
-    return { allowed: false, redirectPath: clientHome };
+    return { allowed: false, redirectPath: landingPath };
   }
 
   if (area === 'staff') {
     if (hasStaffAccess) {
       return { allowed: true, activeArea: 'staff', isPreview: false };
     }
-    return { allowed: false, redirectPath: clientHome };
+    return { allowed: false, redirectPath: landingPath };
   }
 
   if (area === 'org') {
     if (hasOrgAccess) {
       return { allowed: true, activeArea: 'org', isPreview: false };
     }
-    return { allowed: false, redirectPath: clientHome };
+    return { allowed: false, redirectPath: landingPath };
   }
 
   return { allowed: false, redirectPath: clientHome };
