@@ -17,6 +17,7 @@ import { ORG_INVITE_RATE_LIMIT, formatInviteCooldown } from './constants';
 
 type InviteSheetProps = {
   rateLimit: RateLimitResult;
+  organizationId: number;
 };
 
 const initialState: OrgInviteFormState = { status: 'idle' };
@@ -28,7 +29,7 @@ type InviteFormValues = {
   message: string;
 };
 
-export function InviteSheet({ rateLimit }: InviteSheetProps) {
+export function InviteSheet({ rateLimit, organizationId }: InviteSheetProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
@@ -83,6 +84,7 @@ export function InviteSheet({ rateLimit }: InviteSheetProps) {
 
           <Form {...form}>
             <form action={formAction} className="grid gap-4">
+              <input type="hidden" name="organization_id" value={organizationId} />
               <FormField
                 control={form.control}
                 name="email"

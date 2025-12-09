@@ -1,13 +1,18 @@
 import { PageTabNav, type PageTab } from '@shared/layout/page-tab-nav';
 
-const ORG_TABS: PageTab[] = [
-  { label: 'Overview', href: '/org', match: ['/org'] },
-  { label: 'Members', href: '/org/members' },
-  { label: 'Invites', href: '/org/invites' },
-  { label: 'Settings', href: '/org/settings' },
-];
-
-export function OrgTabs() {
-  return <PageTabNav tabs={ORG_TABS} />;
+function withOrg(href: string, orgId?: number | null) {
+  if (!orgId) return href;
+  const separator = href.includes('?') ? '&' : '?';
+  return `${href}${separator}orgId=${orgId}`;
 }
 
+export function OrgTabs({ orgId }: { orgId?: number | null }) {
+  const tabs: PageTab[] = [
+    { label: 'Overview', href: withOrg('/org', orgId), match: ['/org'] },
+    { label: 'Members', href: withOrg('/org/members', orgId) },
+    { label: 'Invites', href: withOrg('/org/invites', orgId) },
+    { label: 'Settings', href: withOrg('/org/settings', orgId) },
+  ];
+
+  return <PageTabNav tabs={tabs} />;
+}

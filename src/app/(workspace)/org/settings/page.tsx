@@ -34,11 +34,28 @@ const STATUS_VARIANT: Record<string, 'default' | 'secondary' | 'outline'> = {
   inactive: 'secondary',
 };
 
-export default async function OrgSettingsPage() {
+type PageProps = { searchParams?: Promise<Record<string, string | string[] | undefined>> };
+
+export default async function OrgSettingsPage({ searchParams }: PageProps) {
   const supabase = await createSupabaseRSCClient();
   const access = await loadPortalAccess(supabase);
 
-  if (!access || !access.canAccessOrgWorkspace || !access.organizationId) {
+  if (!access) {
+    redirect(resolveLandingPath(access));
+  }
+
+  const resolved = searchParams ? await searchParams : undefined;
+  const orgParam = resolved?.orgId ?? resolved?.org ?? resolved?.organizationId;
+  const parsedOrg = Array.isArray(orgParam) ? Number.parseInt(orgParam[0] ?? '', 10) : Number.parseInt(orgParam ?? '', 10);
+  const requestedOrgId = Number.isFinite(parsedOrg) ? parsedOrg : null;
+  const targetOrgId = access.organizationId ?? requestedOrgId ?? null;
+
+  if (!targetOrgId && access.canAccessAdminWorkspace) {
+    redirect('/org');
+  }
+
+  const allowed = (access.canAccessOrgWorkspace && access.organizationId === targetOrgId) || access.canAccessAdminWorkspace;
+  if (!allowed || !targetOrgId) {
     redirect(resolveLandingPath(access));
   }
 
@@ -48,7 +65,7 @@ export default async function OrgSettingsPage() {
     .select(
       'id, name, status, organization_type, partnership_type, contact_person, contact_title, contact_email, contact_phone, website, referral_process, special_requirements, availability_notes',
     )
-    .eq('id', access.organizationId)
+    .eq('id', targetOrgId)
     .maybeSingle();
 
   if (error) {
@@ -71,7 +88,7 @@ export default async function OrgSettingsPage() {
         </p>
       </header>
 
-      <OrgTabs />
+      <OrgTabs orgId={targetOrgId} />
 
       <Card>
         <CardHeader className="flex flex-wrap items-center justify-between gap-3">
@@ -109,6 +126,7 @@ export default async function OrgSettingsPage() {
 
       <div className="grid gap-4 lg:grid-cols-2">
         <OrgContactSettingsForm
+          organizationId={targetOrgId}
           initialValues={{
             contact_person: organization.contact_person ?? '',
             contact_title: organization.contact_title ?? '',
@@ -119,6 +137,7 @@ export default async function OrgSettingsPage() {
         />
 
         <OrgNotesSettingsForm
+          organizationId={targetOrgId}
           initialValues={{
             referral_process: organization.referral_process ?? '',
             special_requirements: organization.special_requirements ?? '',

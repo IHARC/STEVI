@@ -9,9 +9,8 @@ import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Separator } from '@shared/ui/separator';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@shared/ui/tabs';
 import type { Database } from '@/types/supabase';
-import { cn } from '@/lib/utils';
 
 type PageProps = { params: Promise<{ id: string }>; searchParams?: Promise<Record<string, string | string[] | undefined>> };
 

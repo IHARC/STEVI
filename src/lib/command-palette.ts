@@ -1,6 +1,5 @@
 import { fetchClientAppointments } from '@/lib/appointments/queries';
 import { fetchStaffCases } from '@/lib/cases/fetchers';
-import { listResources, type Resource } from '@/lib/resources';
 import type { SupabaseAnyServerClient } from '@/lib/supabase/types';
 import type { CommandPaletteItem, PortalAccess } from '@/lib/portal-access';
 import type { Database } from '@/types/supabase';

@@ -10,15 +10,32 @@ import { OrgTabs } from '../org-tabs';
 
 export const dynamic = 'force-dynamic';
 
-export default async function OrgMembersPage() {
+type PageProps = { searchParams?: Promise<Record<string, string | string[] | undefined>> };
+
+export default async function OrgMembersPage({ searchParams }: PageProps) {
   const supabase = await createSupabaseRSCClient();
   const access = await loadPortalAccess(supabase);
 
-  if (!access || !access.canManageOrgUsers || !access.organizationId) {
+  if (!access) {
     redirect(resolveLandingPath(access));
   }
 
-  const members = await fetchOrgMembersWithRoles(supabase, access.organizationId);
+  const resolved = searchParams ? await searchParams : undefined;
+  const orgParam = resolved?.orgId ?? resolved?.org ?? resolved?.organizationId;
+  const parsedOrg = Array.isArray(orgParam) ? Number.parseInt(orgParam[0] ?? '', 10) : Number.parseInt(orgParam ?? '', 10);
+  const requestedOrgId = Number.isFinite(parsedOrg) ? parsedOrg : null;
+  const targetOrgId = access.organizationId ?? requestedOrgId ?? null;
+
+  if (!targetOrgId && access.canAccessAdminWorkspace) {
+    redirect('/org');
+  }
+
+  const allowed = (access.canManageOrgUsers && targetOrgId !== null && access.organizationId === targetOrgId) || access.canAccessAdminWorkspace;
+  if (!allowed || !targetOrgId) {
+    redirect(resolveLandingPath(access));
+  }
+
+  const members = await fetchOrgMembersWithRoles(supabase, targetOrgId);
 
   return (
     <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
@@ -30,7 +47,7 @@ export default async function OrgMembersPage() {
         </p>
       </header>
 
-      <OrgTabs />
+      <OrgTabs orgId={targetOrgId} />
 
       <div className="grid gap-3 md:grid-cols-2">
         <RoleCard
@@ -51,7 +68,7 @@ export default async function OrgMembersPage() {
           <CardDescription>Promote admins, assign representatives, or remove access.</CardDescription>
         </CardHeader>
         <CardContent className="overflow-x-auto">
-          <OrgMembersTable members={members} currentProfileId={access.profile.id} />
+          <OrgMembersTable members={members} currentProfileId={access.profile.id} organizationId={targetOrgId} />
         </CardContent>
       </Card>
     </div>

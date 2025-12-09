@@ -78,6 +78,7 @@ export async function fetchClientAppointments(
 type ScopedOptions = {
   includeCompleted?: boolean;
   limit?: number;
+  targetOrgId?: number | null;
 };
 
 export async function fetchScopedAppointments(
@@ -87,8 +88,12 @@ export async function fetchScopedAppointments(
 ) {
   const filterParts: string[] = [];
 
+  const targetOrgId = options.targetOrgId ?? null;
+
   if (access.canAccessAdminWorkspace) {
-    // No additional filter; admins see everything.
+    if (targetOrgId) {
+      filterParts.push(`organization_id.eq.${targetOrgId}`);
+    }
   } else if (access.canAccessOrgWorkspace && access.organizationId) {
     filterParts.push(`organization_id.eq.${access.organizationId}`);
   } else if (access.canAccessStaffWorkspace) {

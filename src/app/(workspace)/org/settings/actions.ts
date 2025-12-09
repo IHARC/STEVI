@@ -38,7 +38,16 @@ export async function updateOrgSettingsAction(
     const supabase = await createSupabaseServerClient();
     const access = await loadPortalAccess(supabase);
 
-    if (!access || !access.canManageOrgUsers || !access.organizationId) {
+    if (!access) {
+      return { status: 'error', message: 'Sign in to continue.' };
+    }
+
+    const canAdminAnyOrg = access.canAccessAdminWorkspace;
+    const orgIdRaw = formData.get('organization_id');
+    const parsedOrgId = typeof orgIdRaw === 'string' ? Number.parseInt(orgIdRaw, 10) : null;
+    const orgId = access.organizationId ?? (Number.isFinite(parsedOrgId) ? parsedOrgId : null);
+
+    if (!orgId || (!canAdminAnyOrg && !access.canManageOrgUsers)) {
       return { status: 'error', message: 'Organization admin access is required.' };
     }
 
@@ -84,7 +93,7 @@ export async function updateOrgSettingsAction(
       .schema('core')
       .from('organizations')
       .update(updates)
-      .eq('id', access.organizationId);
+      .eq('id', orgId);
 
     if (error) {
       throw error;
@@ -94,7 +103,7 @@ export async function updateOrgSettingsAction(
       actorProfileId: actorProfile.id,
       action: 'org_settings_updated',
       entityType: 'organization',
-      entityRef: buildEntityRef({ schema: 'core', table: 'organizations', id: access.organizationId }),
+      entityRef: buildEntityRef({ schema: 'core', table: 'organizations', id: orgId }),
       meta: { updated_keys: Object.keys(updates) },
     });
 

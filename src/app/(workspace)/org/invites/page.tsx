@@ -30,16 +30,32 @@ function formatDate(value: string) {
   }
 }
 
-export default async function OrgInvitesPage() {
+type PageProps = { searchParams?: Promise<Record<string, string | string[] | undefined>> };
+
+export default async function OrgInvitesPage({ searchParams }: PageProps) {
   const supabase = await createSupabaseRSCClient();
   const access = await loadPortalAccess(supabase);
 
-  if (!access || !access.canManageOrgInvites || !access.organizationId) {
+  if (!access) {
+    redirect(resolveLandingPath(access));
+  }
+
+  const resolved = searchParams ? await searchParams : undefined;
+  const orgParam = resolved?.orgId ?? resolved?.org ?? resolved?.organizationId;
+  const parsedOrg = Array.isArray(orgParam) ? Number.parseInt(orgParam[0] ?? '', 10) : Number.parseInt(orgParam ?? '', 10);
+  const requestedOrgId = Number.isFinite(parsedOrg) ? parsedOrg : null;
+  const targetOrgId = access.organizationId ?? requestedOrgId ?? null;
+
+  if (!targetOrgId && access.canAccessAdminWorkspace) {
+    redirect('/org');
+  }
+
+  if (!targetOrgId || (!access.canManageOrgInvites && !access.canAccessAdminWorkspace)) {
     redirect(resolveLandingPath(access));
   }
 
   const [invites, rateLimit]: [OrgInviteRecord[], RateLimitResult] = await Promise.all([
-    fetchOrgInvites(supabase, access.organizationId, 50),
+    fetchOrgInvites(supabase, targetOrgId, 50),
     checkRateLimit({
       supabase,
       type: ORG_INVITE_EVENT,
@@ -58,10 +74,10 @@ export default async function OrgInvitesPage() {
             Invitations stay locked to your organization by Supabase RLS. Rate limits keep accidental resends in check.
           </p>
         </div>
-        <InviteSheet rateLimit={rateLimit} />
+        <InviteSheet rateLimit={rateLimit} organizationId={targetOrgId} />
       </header>
 
-      <OrgTabs />
+      <OrgTabs orgId={targetOrgId} />
 
       <Card>
         <CardHeader className="flex flex-wrap items-start justify-between gap-3">

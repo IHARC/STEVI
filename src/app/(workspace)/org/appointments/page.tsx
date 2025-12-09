@@ -97,17 +97,34 @@ function ConfirmForm({
   );
 }
 
-export default async function OrgAppointmentsPage() {
+type PageProps = { searchParams?: Promise<Record<string, string | string[] | undefined>> };
+
+export default async function OrgAppointmentsPage({ searchParams }: PageProps) {
   const supabase = await createSupabaseRSCClient();
   const access = await loadPortalAccess(supabase);
 
-  if (!access || !access.canAccessOrgWorkspace) {
+  if (!access) {
+    redirect(resolveLandingPath(access));
+  }
+
+  const resolved = searchParams ? await searchParams : undefined;
+  const orgParam = resolved?.orgId ?? resolved?.org ?? resolved?.organizationId;
+  const parsedOrg = Array.isArray(orgParam) ? Number.parseInt(orgParam[0] ?? '', 10) : Number.parseInt(orgParam ?? '', 10);
+  const requestedOrgId = Number.isFinite(parsedOrg) ? parsedOrg : null;
+  const targetOrgId = access.organizationId ?? requestedOrgId ?? null;
+
+  if (!targetOrgId && access.canAccessAdminWorkspace) {
+    redirect('/org');
+  }
+
+  const allowed = (access.canAccessOrgWorkspace && access.organizationId === targetOrgId) || access.canAccessAdminWorkspace;
+  if (!allowed) {
     redirect(resolveLandingPath(access));
   }
 
   await ensurePortalProfile(supabase, access.userId);
 
-  const { upcoming, past } = await fetchScopedAppointments(supabase, access, { includeCompleted: true });
+  const { upcoming, past } = await fetchScopedAppointments(supabase, access, { includeCompleted: true, targetOrgId });
 
   const handleConfirm = async (formData: FormData) => {
     await confirmAppointment(formData);

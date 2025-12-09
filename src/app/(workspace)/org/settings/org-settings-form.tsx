@@ -28,7 +28,7 @@ type NotesValues = {
   availability_notes: string;
 };
 
-export function OrgContactSettingsForm({ initialValues }: { initialValues: ContactValues }) {
+export function OrgContactSettingsForm({ initialValues, organizationId }: { initialValues: ContactValues; organizationId: number }) {
   const { toast } = useToast();
   const router = useRouter();
   const [state, formAction] = useFormState(updateOrgSettingsAction, initialState);
@@ -62,6 +62,7 @@ export function OrgContactSettingsForm({ initialValues }: { initialValues: Conta
       <CardContent>
         <Form {...form}>
           <form action={formAction} className="grid gap-4">
+            <input type="hidden" name="organization_id" value={organizationId} />
             <div className="grid gap-3 sm:grid-cols-2">
               <FormField
                 control={form.control}
@@ -149,7 +150,7 @@ export function OrgContactSettingsForm({ initialValues }: { initialValues: Conta
   );
 }
 
-export function OrgNotesSettingsForm({ initialValues }: { initialValues: NotesValues }) {
+export function OrgNotesSettingsForm({ initialValues, organizationId }: { initialValues: NotesValues; organizationId: number }) {
   const { toast } = useToast();
   const router = useRouter();
   const [state, formAction] = useFormState(updateOrgSettingsAction, initialState);
@@ -179,6 +180,7 @@ export function OrgNotesSettingsForm({ initialValues }: { initialValues: NotesVa
       <CardContent>
         <Form {...form}>
           <form action={formAction} className="space-y-4">
+            <input type="hidden" name="organization_id" value={organizationId} />
             <FormField
               control={form.control}
               name="referral_process"

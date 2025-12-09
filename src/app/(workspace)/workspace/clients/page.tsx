@@ -10,8 +10,6 @@ import { PageHeader } from '@shared/layout/page-header';
 import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
-import { Input } from '@shared/ui/input';
-import { cn } from '@/lib/utils';
 
 type PeopleListItem = {
   id: number;

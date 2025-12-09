@@ -20,6 +20,7 @@ import { removeMemberAction, toggleMemberRoleAction } from './actions';
 type OrgMembersTableProps = {
   members: OrgMemberRecord[];
   currentProfileId: string;
+  organizationId: number;
 };
 
 const dateFormatter = new Intl.DateTimeFormat('en-CA', {
@@ -50,7 +51,7 @@ function seedRoles(members: OrgMemberRecord[]) {
   }, {});
 }
 
-export function OrgMembersTable({ members, currentProfileId }: OrgMembersTableProps) {
+export function OrgMembersTable({ members, currentProfileId, organizationId }: OrgMembersTableProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [pendingKey, setPendingKey] = useState<string | null>(null);
@@ -71,6 +72,7 @@ export function OrgMembersTable({ members, currentProfileId }: OrgMembersTablePr
       formData.append('profile_id', memberId);
       formData.append('role_name', roleName);
       formData.append('enable', enable.toString());
+      formData.append('organization_id', String(organizationId));
 
       setRoleState((prev) => {
         const existing = prev[memberId] ?? seedSingleRoleState(members.find((m) => m.id === memberId));
@@ -114,6 +116,7 @@ export function OrgMembersTable({ members, currentProfileId }: OrgMembersTablePr
     startTransition(async () => {
       const formData = new FormData();
       formData.append('profile_id', memberId);
+      formData.append('organization_id', String(organizationId));
 
       const result = await removeMemberAction(formData);
       if (!result.success) {

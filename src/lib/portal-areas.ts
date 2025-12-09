@@ -81,7 +81,7 @@ export function requireArea(
   const clientHome = LANDING_PATH_BY_AREA.client;
   const hasAdminAccess = access.canAccessAdminWorkspace;
   const hasStaffAccess = access.canAccessStaffWorkspace || hasAdminAccess;
-  const hasOrgAccess = access.canAccessOrgWorkspace;
+  const hasOrgAccess = access.canAccessOrgWorkspace || hasAdminAccess;
   const hasWorkspaceAccess = hasAdminAccess || hasStaffAccess || hasOrgAccess;
   const previewRequested = Boolean(options.preview);
 

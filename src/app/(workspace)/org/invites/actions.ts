@@ -32,6 +32,8 @@ export async function createOrgInviteAction(
     const displayName = readString(formData, 'display_name');
     const positionTitle = readString(formData, 'position_title');
     const message = readString(formData, 'message');
+    const orgIdRaw = readString(formData, 'organization_id');
+    const targetOrgId = orgIdRaw ? Number.parseInt(orgIdRaw, 10) : null;
 
     if (!email || !email.includes('@')) {
       return { status: 'error', message: 'Enter a valid email address.' };
@@ -44,7 +46,10 @@ export async function createOrgInviteAction(
       return { status: 'error', message: 'Sign in to continue.' };
     }
 
-    if (!access.canManageOrgInvites || !access.organizationId) {
+    const canAdminAnyOrg = access.canAccessAdminWorkspace;
+    const orgId = access.organizationId ?? targetOrgId;
+
+    if (!orgId || (!canAdminAnyOrg && !access.canManageOrgInvites)) {
       return { status: 'error', message: 'Organization admin access is required.' };
     }
 
@@ -64,9 +69,6 @@ export async function createOrgInviteAction(
     }
 
     const actorProfile = await ensurePortalProfile(supabase, access.userId);
-    if (!actorProfile.organization_id) {
-      return { status: 'error', message: 'Organization admin access is required.' };
-    }
 
     const portal = supabase.schema('portal');
     const insert = await portal
@@ -77,7 +79,7 @@ export async function createOrgInviteAction(
         position_title: positionTitle,
         message,
         affiliation_type: 'agency_partner',
-        organization_id: actorProfile.organization_id,
+        organization_id: orgId,
         invited_by_profile_id: actorProfile.id,
         invited_by_user_id: access.userId,
       })
@@ -93,7 +95,7 @@ export async function createOrgInviteAction(
       action: 'org_invite_created',
       entityType: 'profile_invite',
       entityRef: buildEntityRef({ schema: 'portal', table: 'profile_invites', id: insert.data?.id ?? null }),
-      meta: { organization_id: actorProfile.organization_id, email },
+      meta: { organization_id: orgId, email },
     });
 
     await revalidatePath(INVITES_PATH);

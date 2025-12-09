@@ -17,7 +17,7 @@ type ToggleRolePayload = {
   enable: boolean;
 };
 
-async function requireOrgAdminContext() {
+async function requireOrgAdminContext(targetOrgId: number | null) {
   const supabase = await createSupabaseServerClient();
   const access = await loadPortalAccess(supabase);
 
@@ -25,17 +25,21 @@ async function requireOrgAdminContext() {
     throw new Error('Sign in to continue.');
   }
 
-  if (!access.canManageOrgUsers) {
+  const canAdminAnyOrg = access.canAccessAdminWorkspace;
+  const orgId = targetOrgId ?? access.organizationId ?? null;
+
+  if (!orgId) {
+    throw new Error('Select an organization to manage.');
+  }
+
+  const canAdminThisOrg = canAdminAnyOrg || (access.canManageOrgUsers && access.organizationId === orgId);
+  if (!canAdminThisOrg) {
     throw new Error('Organization admin access is required.');
   }
 
   const actorProfile = await ensurePortalProfile(supabase, access.userId);
-  if (!actorProfile.organization_id) {
-    throw new Error('Your profile is not linked to an organization.');
-  }
-
   const portal = supabase.schema('portal');
-  return { supabase, portal, actorProfile };
+  return { supabase, portal, actorProfile, orgId, canAdminAnyOrg }; 
 }
 
 async function setRole(
@@ -69,7 +73,11 @@ export async function toggleMemberRoleAction(formData: FormData): Promise<Action
       throw new Error('Unsupported role.');
     }
 
-    const { supabase, portal, actorProfile } = await requireOrgAdminContext();
+    const orgIdValue = formData.get('organization_id');
+    const parsedOrgId = typeof orgIdValue === 'string' ? Number.parseInt(orgIdValue, 10) : null;
+    const { supabase, portal, actorProfile, orgId, canAdminAnyOrg } = await requireOrgAdminContext(
+      Number.isFinite(parsedOrgId) ? parsedOrgId : null,
+    );
 
     const { data: member, error: memberError } = await portal
       .from('profiles')
@@ -81,7 +89,7 @@ export async function toggleMemberRoleAction(formData: FormData): Promise<Action
       throw memberError ?? new Error('Member not found.');
     }
 
-    if (member.organization_id !== actorProfile.organization_id) {
+    if (!canAdminAnyOrg && member.organization_id !== orgId) {
       throw new Error('You can only manage members in your organization.');
     }
 
@@ -92,7 +100,7 @@ export async function toggleMemberRoleAction(formData: FormData): Promise<Action
     action: enable ? 'org_role_granted' : 'org_role_revoked',
     entityType: 'profile',
     entityRef: buildEntityRef({ schema: 'portal', table: 'profiles', id: profileId }),
-    meta: { role: roleName, organization_id: actorProfile.organization_id },
+    meta: { role: roleName, organization_id: orgId },
   });
 
     await revalidatePath(MEMBERS_PATH);
@@ -112,7 +120,11 @@ export async function removeMemberAction(formData: FormData): Promise<ActionResu
       throw new Error('Missing member id.');
     }
 
-    const { supabase, portal, actorProfile } = await requireOrgAdminContext();
+    const orgIdValue = formData.get('organization_id');
+    const parsedOrgId = typeof orgIdValue === 'string' ? Number.parseInt(orgIdValue, 10) : null;
+    const { supabase, portal, actorProfile, orgId, canAdminAnyOrg } = await requireOrgAdminContext(
+      Number.isFinite(parsedOrgId) ? parsedOrgId : null,
+    );
 
     const { data: member, error: memberError } = await portal
       .from('profiles')
@@ -124,7 +136,7 @@ export async function removeMemberAction(formData: FormData): Promise<ActionResu
       throw memberError ?? new Error('Member not found.');
     }
 
-    if (member.organization_id !== actorProfile.organization_id) {
+    if (!canAdminAnyOrg && member.organization_id !== orgId) {
       throw new Error('You can only remove members from your organization.');
     }
 
@@ -149,7 +161,7 @@ export async function removeMemberAction(formData: FormData): Promise<ActionResu
     action: 'org_member_removed',
     entityType: 'profile',
     entityRef: buildEntityRef({ schema: 'portal', table: 'profiles', id: profileId }),
-    meta: { organization_id: actorProfile.organization_id },
+    meta: { organization_id: orgId },
   });
 
     await revalidatePath(MEMBERS_PATH);

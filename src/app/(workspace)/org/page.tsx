@@ -48,25 +48,102 @@ function formatDate(value: string | null) {
   }
 }
 
-export default async function OrgHomePage() {
+type PageProps = { searchParams?: Promise<Record<string, string | string[] | undefined>> };
+
+export default async function OrgHomePage({ searchParams }: PageProps) {
   const supabase = await createSupabaseRSCClient();
   const access = await loadPortalAccess(supabase);
 
-  if (!access || !access.canAccessOrgWorkspace || !access.organizationId) {
+  if (!access) {
+    redirect(resolveLandingPath(access));
+  }
+
+  const resolved = searchParams ? await searchParams : undefined;
+  const orgParam = resolved?.orgId ?? resolved?.org ?? resolved?.organizationId;
+  const parsedOrgId = Array.isArray(orgParam) ? Number.parseInt(orgParam[0] ?? '', 10) : Number.parseInt(orgParam ?? '', 10);
+  const requestedOrgId = Number.isFinite(parsedOrgId) ? parsedOrgId : null;
+
+  const targetOrgId = access.organizationId ?? requestedOrgId ?? null;
+
+  if (!targetOrgId && !access.canAccessAdminWorkspace) {
     redirect(resolveLandingPath(access));
   }
 
   const isOrgAdmin = access.portalRoles.includes('portal_org_admin') || access.canAccessAdminWorkspace;
 
-  const members: OrgMemberRecord[] = await fetchOrgMembersWithRoles(supabase, access.organizationId);
-  const invites: OrgInviteRecord[] = await fetchOrgInvites(supabase, access.organizationId, 30);
+  if (!targetOrgId) {
+    const { data: orgRows, error: orgListError } = await supabase
+      .schema('core')
+      .from('organizations')
+      .select('id, name, status, is_active, partnership_type, organization_type, updated_at')
+      .eq('is_active', true)
+      .order('name')
+      .limit(50);
+
+    if (orgListError) {
+      throw orgListError;
+    }
+
+    const orgs = (orgRows ?? []) as Array<Pick<OrganizationRow, 'id' | 'name' | 'status' | 'partnership_type' | 'organization_type' | 'is_active' | 'updated_at'>>;
+
+    return (
+      <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
+        <PageHeader
+          eyebrow="Organization"
+          title="Select an organization to administer"
+          description="IHARC admins can manage any active organization. Choose one to view members, invites, and settings."
+          primaryAction={orgs[0] ? { label: 'Open first org', href: `/org?orgId=${orgs[0].id}` } : undefined}
+        />
+
+        <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {orgs.map((org) => (
+            <Card key={org.id} className="border-border/60">
+              <CardHeader className="space-y-1">
+                <div className="flex items-center justify-between gap-2">
+                  <CardTitle className="text-lg">{org.name ?? 'Organization'}</CardTitle>
+                  <Badge variant={STATUS_VARIANT[org.status ?? 'active'] ?? 'outline'} className="capitalize">
+                    {org.status ?? 'active'}
+                  </Badge>
+                </div>
+                <CardDescription className="capitalize">
+                  {org.organization_type?.replaceAll('_', ' ') ?? 'Type not set'}
+                </CardDescription>
+                <div className="flex flex-wrap gap-1 text-xs text-muted-foreground">
+                  <Badge variant="outline" className="capitalize">
+                    {org.partnership_type?.replaceAll('_', ' ') ?? 'Partnership pending'}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm text-foreground/80">
+                <p className="text-xs text-muted-foreground">Updated {formatDate(org.updated_at)}</p>
+                <Button asChild className="w-full">
+                  <Link href={`/org?orgId=${org.id}`}>Open org</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+          {orgs.length === 0 ? (
+            <Card className="border-dashed border-border/60">
+              <CardHeader>
+                <CardTitle className="text-lg">No organizations found</CardTitle>
+                <CardDescription>Add an organization before managing settings.</CardDescription>
+              </CardHeader>
+            </Card>
+          ) : null}
+        </section>
+      </div>
+    );
+  }
+
+  const members: OrgMemberRecord[] = await fetchOrgMembersWithRoles(supabase, targetOrgId);
+  const invites: OrgInviteRecord[] = await fetchOrgInvites(supabase, targetOrgId, 30);
   const organizationResult = await supabase
     .schema('core')
     .from('organizations')
     .select(
       'id, name, status, partnership_type, organization_type, website, contact_email, contact_phone, contact_person, contact_title, is_active, updated_at',
     )
-    .eq('id', access.organizationId)
+    .eq('id', targetOrgId)
     .maybeSingle();
 
   if (organizationResult.error) {
@@ -87,6 +164,7 @@ export default async function OrgHomePage() {
 
   const orgName = organization?.name ?? 'your organization';
   const lastSeenLabel = lastSeenTimestamp ? formatDate(new Date(lastSeenTimestamp).toISOString()) : 'No recent activity';
+  const roleLabel = access.canAccessAdminWorkspace ? 'IHARC admin' : access.portalRoles.includes('portal_org_admin') ? 'Org admin' : 'Org representative';
 
   const orgActions = [
     { id: 'users', label: 'Users', description: 'Manage members and roles.', href: '/org/members', requires: isOrgAdmin },
@@ -139,8 +217,8 @@ export default async function OrgHomePage() {
         eyebrow="Organization"
         title={`Manage ${orgName}`}
         description="Track how your team is using STEVI, keep member access healthy, and jump into invites or settings from the same app. All data respects Supabase RLS for your organization."
-        primaryAction={{ label: 'Invite members', href: '/org/invites' }}
-        secondaryAction={{ label: 'Manage members', href: '/org/members' }}
+        primaryAction={{ label: 'Invite members', href: `/org/invites?orgId=${targetOrgId}` }}
+        secondaryAction={{ label: 'Manage members', href: `/org/members?orgId=${targetOrgId}` }}
       >
         <div className="flex flex-wrap gap-2">
           {organization?.status ? (
@@ -149,7 +227,7 @@ export default async function OrgHomePage() {
             </Badge>
           ) : null}
           <Badge variant="secondary" className="capitalize">
-            {access.portalRoles.includes('portal_org_admin') ? 'Org admin' : 'Org representative'}
+            {roleLabel}
           </Badge>
         </div>
       </PageHeader>
@@ -172,7 +250,7 @@ export default async function OrgHomePage() {
         </section>
       ) : null}
 
-      <OrgTabs />
+      <OrgTabs orgId={targetOrgId} />
 
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {summaryCards.map((card) => (
