@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
@@ -6,6 +7,7 @@ import { resolveNextPath, parseAuthErrorCode, type AuthErrorCode } from '@/lib/a
 import { normalizePhoneNumber } from '@/lib/phone';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { resolveLandingPath } from '@/lib/portal-navigation';
+import { getBrandingAssets } from '@/lib/marketing/branding';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 
 export const dynamic = 'force-dynamic';
@@ -50,6 +52,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   if (user) {
     redirect(nextPath || landingPath || '/home');
   }
+
+  const branding = await getBrandingAssets();
 
   const initialState: FormState = initialError
     ? { ...INITIAL_FORM_STATE, error: initialError }
@@ -123,6 +127,28 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         <Card className="relative overflow-hidden border-border/60 bg-card shadow-md">
           <div className="h-2 w-full bg-primary" aria-hidden />
           <CardHeader className="gap-2 pb-4 pt-4">
+            <div className="flex items-center gap-3">
+              <Image
+                src={branding.logoLightUrl}
+                alt="IHARC"
+                width={72}
+                height={72}
+                priority
+                className="h-10 w-auto dark:hidden"
+              />
+              <Image
+                src={branding.logoDarkUrl}
+                alt="IHARC"
+                width={72}
+                height={72}
+                priority
+                className="hidden h-10 w-auto dark:block"
+              />
+              <div className="leading-tight">
+                <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">STEVI</p>
+                <p className="text-base font-semibold text-foreground">Supportive Technology to Enable Vulnerable Individuals</p>
+              </div>
+            </div>
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Welcome back
             </p>
