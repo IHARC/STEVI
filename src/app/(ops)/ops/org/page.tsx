@@ -6,8 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shar
 import { Button } from '@shared/ui/button';
 import { Badge } from '@shared/ui/badge';
 import { resolveLandingPath } from '@/lib/portal-navigation';
-import { fetchOrgInvites, fetchOrgMembersWithRoles, type OrgInviteRecord, type OrgMemberRecord } from '@/lib/org/fetchers';
-import type { Database } from '@/types/supabase';
+import { loadOrgSelection, loadOrgDetail, type OrgDetailRecord } from '@/lib/org/loaders';
 import { PageHeader } from '@shared/layout/page-header';
 import { StatTile } from '@shared/ui/stat-tile';
 import { OrgTabs } from './org-tabs';
@@ -15,22 +14,6 @@ import { OrgTabs } from './org-tabs';
 export const dynamic = 'force-dynamic';
 
 const dateFormatter = new Intl.DateTimeFormat('en-CA', { dateStyle: 'medium', timeStyle: 'short' });
-
-type OrganizationRow = Pick<
-  Database['core']['Tables']['organizations']['Row'],
-  | 'id'
-  | 'name'
-  | 'status'
-  | 'partnership_type'
-  | 'organization_type'
-  | 'website'
-  | 'contact_email'
-  | 'contact_phone'
-  | 'contact_person'
-  | 'contact_title'
-  | 'is_active'
-  | 'updated_at'
->;
 
 const STATUS_VARIANT: Record<string, 'default' | 'secondary' | 'outline'> = {
   active: 'default',
@@ -72,19 +55,7 @@ export default async function OrgHomePage({ searchParams }: PageProps) {
   const isOrgAdmin = access.portalRoles.includes('portal_org_admin') || access.canAccessOpsAdmin;
 
   if (!targetOrgId) {
-    const { data: orgRows, error: orgListError } = await supabase
-      .schema('core')
-      .from('organizations')
-      .select('id, name, status, is_active, partnership_type, organization_type, updated_at')
-      .eq('is_active', true)
-      .order('name')
-      .limit(50);
-
-    if (orgListError) {
-      throw orgListError;
-    }
-
-    const orgs = (orgRows ?? []) as Array<Pick<OrganizationRow, 'id' | 'name' | 'status' | 'partnership_type' | 'organization_type' | 'is_active' | 'updated_at'>>;
+    const orgs = await loadOrgSelection(supabase);
 
     return (
       <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
@@ -135,27 +106,7 @@ export default async function OrgHomePage({ searchParams }: PageProps) {
     );
   }
 
-  const members: OrgMemberRecord[] = await fetchOrgMembersWithRoles(supabase, targetOrgId);
-  const invites: OrgInviteRecord[] = await fetchOrgInvites(supabase, targetOrgId, 30);
-  const organizationResult = await supabase
-    .schema('core')
-    .from('organizations')
-    .select(
-      'id, name, status, partnership_type, organization_type, website, contact_email, contact_phone, contact_person, contact_title, is_active, updated_at',
-    )
-    .eq('id', targetOrgId)
-    .maybeSingle();
-
-  if (organizationResult.error) {
-    throw organizationResult.error;
-  }
-
-  const organization = (organizationResult.data ?? null) as OrganizationRow | null;
-
-  const approvedMembers = members.filter((member) => member.affiliation_status === 'approved');
-  const adminCount = members.filter((member) => member.portal_roles.includes('portal_org_admin')).length;
-  const repCount = members.filter((member) => member.portal_roles.includes('portal_org_rep')).length;
-  const pendingInvites = invites.filter((invite) => invite.status === 'pending').length;
+  const { organization, members, invites, approvedMembers, adminCount, repCount, pendingInvites } = await loadOrgDetail(supabase, targetOrgId);
 
   const lastSeenTimestamp = approvedMembers.reduce((latest, member) => {
     const ts = member.last_seen_at ? Date.parse(member.last_seen_at) : 0;

@@ -9,6 +9,7 @@ import { findPersonForUser } from '@/lib/cases/person';
 import { normalizePhoneNumber } from '@/lib/phone';
 import { normalizeEmail } from '@/lib/email';
 import { normalizePostalCode } from '@/lib/registration';
+import { getBoolean, getNumber, getString } from '@/lib/server-actions/form';
 import type { Database } from '@/types/supabase';
 
 export type OnboardingActionState = {
@@ -27,19 +28,6 @@ function errorState(message: string): OnboardingActionState {
 
 function successState(partial: Partial<OnboardingActionState> = {}): OnboardingActionState {
   return { status: 'success', ...partial };
-}
-
-function parseNumber(value: FormDataEntryValue | null, min?: number, max?: number): number | null {
-  if (typeof value !== 'string') return null;
-  const parsed = Number.parseInt(value, 10);
-  if (Number.isNaN(parsed)) return null;
-  if (typeof min === 'number' && parsed < min) return null;
-  if (typeof max === 'number' && parsed > max) return null;
-  return parsed;
-}
-
-function parseBoolean(value: FormDataEntryValue | null): boolean {
-  return value === 'on' || value === 'true';
 }
 
 function sanitizeShortText(value: FormDataEntryValue | null, max = 160): string | null {
@@ -231,18 +219,18 @@ export async function saveBasicInfoAction(_prev: OnboardingActionState, formData
   }
 
   const actor = resolveOnboardingActor(access);
-  const personIdInput = parseNumber(formData.get('person_id'));
+  const personIdInput = getNumber(formData, 'person_id');
   const chosenName = sanitizeShortText(formData.get('chosen_name')) ?? '';
   const legalName = sanitizeShortText(formData.get('legal_name'));
   const pronouns = sanitizeShortText(formData.get('pronouns'));
   const preferredContactMethod = sanitizeShortText(formData.get('preferred_contact_method')) ?? 'email';
   const contactWindow = sanitizeShortText(formData.get('contact_window'), 120);
   const postalCode = normalizePostalCode(sanitizeShortText(formData.get('postal_code')));
-  const dobMonth = parseNumber(formData.get('dob_month'), 1, 12);
-  const dobYear = parseNumber(formData.get('dob_year'), 1900, new Date().getFullYear());
-  const safeCall = parseBoolean(formData.get('safe_call'));
-  const safeText = parseBoolean(formData.get('safe_text'));
-  const safeVoicemail = parseBoolean(formData.get('safe_voicemail'));
+  const dobMonth = getNumber(formData, 'dob_month', { min: 1, max: 12 });
+  const dobYear = getNumber(formData, 'dob_year', { min: 1900, max: new Date().getFullYear() });
+  const safeCall = getBoolean(formData, 'safe_call');
+  const safeText = getBoolean(formData, 'safe_text');
+  const safeVoicemail = getBoolean(formData, 'safe_voicemail');
   const email = normalizeEmail(formData.get('contact_email')) ?? null;
   const phone = normalizePhoneNumber(formData.get('contact_phone')) ?? null;
   const contactContext = composeContactContext({
@@ -390,9 +378,9 @@ export async function recordConsentsAction(
     return errorState('Partners can review onboarding but cannot capture consents. Ask the client or IHARC staff to proceed.');
   }
 
-  const personId = parseNumber(formData.get('person_id'));
-  const consentServiceAgreement = parseBoolean(formData.get('consent_service_agreement'));
-  const consentPrivacy = parseBoolean(formData.get('consent_privacy'));
+  const personId = getNumber(formData, 'person_id');
+  const consentServiceAgreement = getBoolean(formData, 'consent_service_agreement');
+  const consentPrivacy = getBoolean(formData, 'consent_privacy');
 
   if (!personId) {
     return errorState('A client record is required before capturing consent.');
@@ -468,7 +456,7 @@ export async function saveSharingPreferenceAction(
     return errorState('Only the client or IHARC staff can change data sharing preferences.');
   }
 
-  const personId = parseNumber(formData.get('person_id'));
+  const personId = getNumber(formData, 'person_id');
   const sharingChoice = sanitizeShortText(formData.get('data_sharing')) ?? 'iharc_only';
   const dataSharingConsent = sharingChoice === 'partners';
 
@@ -524,7 +512,7 @@ export async function linkAccountToPersonAction(
     return errorState('Only the client can link their portal account to this record.');
   }
 
-  const personId = parseNumber(formData.get('person_id'));
+  const personId = getNumber(formData, 'person_id');
   if (!personId) {
     return errorState('A client record is required before linking.');
   }

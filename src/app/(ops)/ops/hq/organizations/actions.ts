@@ -10,6 +10,7 @@ import {
   ORG_FEATURE_KEYS,
   type OrgFeatureKey,
 } from '@/lib/organizations';
+import { getBoolean, getString, parseEnum } from '@/lib/server-actions/form';
 import type { SupabaseServerClient } from '@/lib/supabase/types';
 import type { Database } from '@/types/supabase';
 
@@ -47,39 +48,18 @@ const PARTNERSHIP_TYPE_OPTIONS: PartnershipType[] = [
   'other',
 ];
 
-function getString(form: FormData, key: string): string | null {
-  const value = form.get(key);
-  if (typeof value !== 'string') return null;
-  const trimmed = value.trim();
-  return trimmed.length ? trimmed : null;
-}
-
-function requireString(form: FormData, key: string, message: string): string {
-  const value = getString(form, key);
-  if (!value) {
-    throw new Error(message);
-  }
-  return value;
-}
-
-function getBoolean(form: FormData, key: string, fallback = false): boolean {
-  const value = form.get(key);
-  if (typeof value === 'string') {
-    if (['true', '1', 'on', 'yes'].includes(value.toLowerCase())) return true;
-    if (['false', '0', 'off', 'no'].includes(value.toLowerCase())) return false;
-  }
-  return fallback;
-}
-
 function parseNumericId(value: FormDataEntryValue | null): number | null {
   if (typeof value !== 'string') return null;
   const parsed = Number.parseInt(value, 10);
   return Number.isNaN(parsed) ? null : parsed;
 }
 
-function parseEnum<T extends string>(value: string | null, allowed: readonly T[]): T | null {
-  if (!value) return null;
-  return allowed.includes(value as T) ? (value as T) : null;
+function requireField(form: FormData, key: string, message: string): string {
+  const value = getString(form, key, { required: true });
+  if (!value) {
+    throw new Error(message);
+  }
+  return value;
 }
 
 function readFeatureSelection(form: FormData): OrgFeatureKey[] {
@@ -145,7 +125,7 @@ function failure(error: unknown, fallback: string): ActionResult {
 
 export async function createOrganizationAction(formData: FormData): Promise<ActionResult> {
   try {
-    const name = requireString(formData, 'name', 'Organization name is required.');
+    const name = requireField(formData, 'name', 'Organization name is required.');
     const website = getString(formData, 'website');
     const status = parseEnum(getString(formData, 'status'), ORGANIZATION_STATUS_OPTIONS) ?? 'active';
     const organizationType = parseEnum(getString(formData, 'organization_type'), ORGANIZATION_TYPE_OPTIONS);
@@ -205,7 +185,7 @@ export async function updateOrganizationAction(formData: FormData): Promise<Acti
       throw new Error('Organization context is missing.');
     }
 
-    const name = requireString(formData, 'name', 'Organization name is required.');
+    const name = requireField(formData, 'name', 'Organization name is required.');
     const website = getString(formData, 'website');
     const email = getString(formData, 'email');
     const phone = getString(formData, 'phone');
