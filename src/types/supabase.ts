@@ -6562,6 +6562,7 @@ export type Database = {
           short_description: string | null
           slug: string
           stripe_price_id: string | null
+          stripe_product_id: string | null
           target_buffer: number | null
           title: string
           unit_cost_cents: number | null
@@ -6581,6 +6582,7 @@ export type Database = {
           short_description?: string | null
           slug: string
           stripe_price_id?: string | null
+          stripe_product_id?: string | null
           target_buffer?: number | null
           title: string
           unit_cost_cents?: number | null
@@ -6600,6 +6602,7 @@ export type Database = {
           short_description?: string | null
           slug?: string
           stripe_price_id?: string | null
+          stripe_product_id?: string | null
           target_buffer?: number | null
           title?: string
           unit_cost_cents?: number | null
@@ -6607,14 +6610,59 @@ export type Database = {
         }
         Relationships: []
       }
+      donation_intent_items: {
+        Row: {
+          catalog_item_id: string
+          created_at: string
+          donation_intent_id: string
+          id: string
+          line_amount_cents: number
+          quantity: number
+          unit_amount_cents: number
+        }
+        Insert: {
+          catalog_item_id: string
+          created_at?: string
+          donation_intent_id: string
+          id?: string
+          line_amount_cents: number
+          quantity: number
+          unit_amount_cents: number
+        }
+        Update: {
+          catalog_item_id?: string
+          created_at?: string
+          donation_intent_id?: string
+          id?: string
+          line_amount_cents?: number
+          quantity?: number
+          unit_amount_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "donation_intent_items_catalog_item_id_fkey"
+            columns: ["catalog_item_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "donation_intent_items_donation_intent_id_fkey"
+            columns: ["donation_intent_id"]
+            isOneToOne: false
+            referencedRelation: "donation_intents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       donation_intents: {
         Row: {
           completed_at: string | null
           created_at: string
           currency: string
-          donor_email: string | null
+          custom_amount_cents: number
+          donor_id: string | null
           id: string
-          items: Json
           metadata: Json | null
           status: Database["donations"]["Enums"]["donation_intent_status"]
           stripe_session_id: string | null
@@ -6624,9 +6672,9 @@ export type Database = {
           completed_at?: string | null
           created_at?: string
           currency?: string
-          donor_email?: string | null
+          custom_amount_cents?: number
+          donor_id?: string | null
           id?: string
-          items?: Json
           metadata?: Json | null
           status?: Database["donations"]["Enums"]["donation_intent_status"]
           stripe_session_id?: string | null
@@ -6636,25 +6684,36 @@ export type Database = {
           completed_at?: string | null
           created_at?: string
           currency?: string
-          donor_email?: string | null
+          custom_amount_cents?: number
+          donor_id?: string | null
           id?: string
-          items?: Json
           metadata?: Json | null
           status?: Database["donations"]["Enums"]["donation_intent_status"]
           stripe_session_id?: string | null
           total_amount_cents?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "donation_intents_donor_id_fkey"
+            columns: ["donor_id"]
+            isOneToOne: false
+            referencedRelation: "donors"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       donation_payments: {
         Row: {
           amount_cents: number
           created_at: string
           currency: string
-          donation_intent_id: string
+          donation_intent_id: string | null
+          donation_subscription_id: string | null
           id: string
           processed_at: string
           provider: string
+          provider_charge_id: string | null
+          provider_invoice_id: string | null
           provider_payment_id: string | null
           raw_payload: Json | null
           status: Database["donations"]["Enums"]["donation_payment_status"]
@@ -6663,10 +6722,13 @@ export type Database = {
           amount_cents: number
           created_at?: string
           currency?: string
-          donation_intent_id: string
+          donation_intent_id?: string | null
+          donation_subscription_id?: string | null
           id?: string
           processed_at?: string
           provider?: string
+          provider_charge_id?: string | null
+          provider_invoice_id?: string | null
           provider_payment_id?: string | null
           raw_payload?: Json | null
           status?: Database["donations"]["Enums"]["donation_payment_status"]
@@ -6675,10 +6737,13 @@ export type Database = {
           amount_cents?: number
           created_at?: string
           currency?: string
-          donation_intent_id?: string
+          donation_intent_id?: string | null
+          donation_subscription_id?: string | null
           id?: string
           processed_at?: string
           provider?: string
+          provider_charge_id?: string | null
+          provider_invoice_id?: string | null
           provider_payment_id?: string | null
           raw_payload?: Json | null
           status?: Database["donations"]["Enums"]["donation_payment_status"]
@@ -6691,7 +6756,231 @@ export type Database = {
             referencedRelation: "donation_intents"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "donation_payments_donation_subscription_id_fkey"
+            columns: ["donation_subscription_id"]
+            isOneToOne: false
+            referencedRelation: "donation_subscriptions"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      donation_subscriptions: {
+        Row: {
+          amount_cents: number
+          canceled_at: string | null
+          created_at: string
+          currency: string
+          donor_id: string
+          id: string
+          last_invoice_status: string | null
+          last_payment_at: string | null
+          started_at: string | null
+          status: Database["donations"]["Enums"]["donation_subscription_status"]
+          stripe_price_id: string
+          stripe_subscription_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          canceled_at?: string | null
+          created_at?: string
+          currency?: string
+          donor_id: string
+          id?: string
+          last_invoice_status?: string | null
+          last_payment_at?: string | null
+          started_at?: string | null
+          status?: Database["donations"]["Enums"]["donation_subscription_status"]
+          stripe_price_id: string
+          stripe_subscription_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          canceled_at?: string | null
+          created_at?: string
+          currency?: string
+          donor_id?: string
+          id?: string
+          last_invoice_status?: string | null
+          last_payment_at?: string | null
+          started_at?: string | null
+          status?: Database["donations"]["Enums"]["donation_subscription_status"]
+          stripe_price_id?: string
+          stripe_subscription_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "donation_subscriptions_donor_id_fkey"
+            columns: ["donor_id"]
+            isOneToOne: false
+            referencedRelation: "donors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      donor_manage_tokens: {
+        Row: {
+          consumed_at: string | null
+          created_at: string
+          donor_id: string
+          expires_at: string
+          id: string
+          token_hash: string
+        }
+        Insert: {
+          consumed_at?: string | null
+          created_at?: string
+          donor_id: string
+          expires_at: string
+          id?: string
+          token_hash: string
+        }
+        Update: {
+          consumed_at?: string | null
+          created_at?: string
+          donor_id?: string
+          expires_at?: string
+          id?: string
+          token_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "donor_manage_tokens_donor_id_fkey"
+            columns: ["donor_id"]
+            isOneToOne: false
+            referencedRelation: "donors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      donors: {
+        Row: {
+          address: Json | null
+          created_at: string
+          email: string
+          id: string
+          name: string | null
+          stripe_customer_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: Json | null
+          created_at?: string
+          email: string
+          id?: string
+          name?: string | null
+          stripe_customer_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: Json | null
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string | null
+          stripe_customer_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      rate_limit_logs: {
+        Row: {
+          created_at: string
+          event: string
+          id: string
+          identifier: string
+        }
+        Insert: {
+          created_at?: string
+          event: string
+          id?: string
+          identifier: string
+        }
+        Update: {
+          created_at?: string
+          event?: string
+          id?: string
+          identifier?: string
+        }
+        Relationships: []
+      }
+      stripe_amount_prices: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          currency: string
+          interval: string
+          stripe_price_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          currency: string
+          interval: string
+          stripe_price_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          currency?: string
+          interval?: string
+          stripe_price_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      stripe_products: {
+        Row: {
+          created_at: string
+          key: string
+          stripe_product_id: string
+        }
+        Insert: {
+          created_at?: string
+          key: string
+          stripe_product_id: string
+        }
+        Update: {
+          created_at?: string
+          key?: string
+          stripe_product_id?: string
+        }
+        Relationships: []
+      }
+      stripe_webhook_events: {
+        Row: {
+          error: string | null
+          id: string
+          processed_at: string | null
+          received_at: string
+          status: Database["donations"]["Enums"]["stripe_webhook_event_status"] | null
+          stripe_event_id: string
+          type: string
+        }
+        Insert: {
+          error?: string | null
+          id?: string
+          processed_at?: string | null
+          received_at?: string
+          status?: Database["donations"]["Enums"]["stripe_webhook_event_status"] | null
+          stripe_event_id: string
+          type: string
+        }
+        Update: {
+          error?: string | null
+          id?: string
+          processed_at?: string | null
+          received_at?: string
+          status?: Database["donations"]["Enums"]["stripe_webhook_event_status"] | null
+          stripe_event_id?: string
+          type?: string
+        }
+        Relationships: []
       }
     }
     Views: {
@@ -6725,7 +7014,19 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      donations_check_rate_limit: {
+        Args: {
+          p_cooldown_ms?: number
+          p_event: string
+          p_identifier: string
+          p_limit: number
+          p_window_ms?: number
+        }
+        Returns: {
+          allowed: boolean
+          retry_in_ms: number
+        }[]
+      }
     }
     Enums: {
       donation_intent_status:
@@ -6739,6 +7040,17 @@ export type Database = {
         | "requires_action"
         | "failed"
         | "refunded"
+      donation_subscription_status:
+        | "active"
+        | "canceled"
+        | "past_due"
+        | "unpaid"
+        | "incomplete"
+        | "incomplete_expired"
+        | "trialing"
+      stripe_webhook_event_status:
+        | "succeeded"
+        | "failed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -12614,6 +12926,19 @@ export const Constants = {
         "requires_action",
         "failed",
         "refunded",
+      ],
+      donation_subscription_status: [
+        "active",
+        "canceled",
+        "past_due",
+        "unpaid",
+        "incomplete",
+        "incomplete_expired",
+        "trialing",
+      ],
+      stripe_webhook_event_status: [
+        "succeeded",
+        "failed",
       ],
     },
   },
