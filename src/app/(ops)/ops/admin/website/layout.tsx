@@ -25,7 +25,7 @@ export default async function WebsiteAdminLayout({ children }: { children: React
   await ensurePortalProfile(supabase, access.userId);
 
   return (
-    <div className="flex flex-col gap-6 py-6">
+    <div className="flex flex-col gap-6">
       <PageHeader
         eyebrow="STEVI Admin"
         title="Website & Marketing"

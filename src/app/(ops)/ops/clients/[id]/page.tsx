@@ -60,7 +60,7 @@ export default async function OpsClientDetailPage({ params, searchParams }: Page
   const filteredActivities = activities.filter((activity) => filterActivity(activity.activityType, activeFilter));
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-8 md:px-6">
+    <div className="space-y-6">
       <PageHeader
         eyebrow="Client"
         title={`${person.first_name ?? 'Person'} ${person.last_name ?? ''}`.trim() || 'Client profile'}

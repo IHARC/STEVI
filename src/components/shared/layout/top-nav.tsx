@@ -56,15 +56,15 @@ export function TopNav({
           : 'Client portal';
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border/60 bg-background/85 text-foreground shadow-sm backdrop-blur">
+    <header className="sticky top-0 z-50 border-b border-border/60 bg-background text-foreground shadow-sm">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary/10 focus:px-3 focus:py-2 focus:text-primary-foreground"
       >
         Skip to content
       </a>
-      <div className="mx-auto w-full max-w-7xl px-4 py-3 md:px-6 lg:px-8">
-        <div className="grid w-full grid-cols-[auto_1fr] items-center gap-3 md:gap-4 lg:grid-cols-[auto_1fr_auto]">
+      <div className="w-full px-4 md:px-6 lg:px-8">
+        <div className="grid h-16 w-full grid-cols-[auto_1fr] items-center gap-3 md:gap-4 lg:grid-cols-[auto_1fr_auto]">
           <div className="flex min-w-0 items-center gap-3">
             {hasNav ? (
               <div className={hamburgerBreakpointClass}>

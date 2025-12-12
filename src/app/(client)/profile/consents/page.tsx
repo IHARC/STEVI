@@ -25,7 +25,7 @@ export default async function ConsentsPage() {
   const consentData = await fetchPersonConsents(supabase, access.userId);
 
   return (
-    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
+    <div className="flex flex-col gap-6">
       <PageHeader
         eyebrow="Privacy & contact"
         title="My consents"

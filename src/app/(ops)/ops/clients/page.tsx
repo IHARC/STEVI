@@ -81,7 +81,7 @@ export default async function OpsClientsPage({ searchParams }: PageProps) {
   const activeHref = `/ops/clients?view=${activeView}`;
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-8 md:px-6">
+    <div className="space-y-6">
       <PageHeader
         eyebrow="Operations"
         title="Clients"

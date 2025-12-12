@@ -39,7 +39,7 @@ export default async function ProgramDetailPage({ params }: PageProps) {
     : { label: 'Start Visit in this program', href: newVisitHref };
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-8 md:px-6">
+    <div className="space-y-6">
       <PageHeader
         eyebrow="Program"
         title={program.title}

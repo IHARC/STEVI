@@ -58,7 +58,7 @@ export default async function OpsProfilePage() {
   const hasPhone = Boolean(initialPhone);
 
   return (
-    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
+    <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-2">
         <h1 className="text-3xl text-foreground">Operations account settings</h1>
         <p className="max-w-3xl text-sm text-foreground/70">

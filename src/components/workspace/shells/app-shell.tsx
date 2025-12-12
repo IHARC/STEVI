@@ -53,7 +53,7 @@ export function AppShell({
         {showNavigation ? <OpsHubRail navSections={navSections} /> : null}
         <div className="flex min-h-full flex-1 flex-col">
           <main id="main-content" className="flex-1">
-            <div className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6 lg:px-8">
+            <div className="mx-auto w-full max-w-screen-2xl px-4 py-6 md:px-6 lg:px-8">
               <div
                 className={cn(
                   'grid gap-6',

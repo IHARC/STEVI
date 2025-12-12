@@ -3,7 +3,7 @@ import { Skeleton } from '@shared/ui/skeleton';
 
 export default function LoadingDocuments() {
   return (
-    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
+    <div className="flex flex-col gap-6">
       <header className="space-y-1">
         <Skeleton className="h-4 w-32" />
         <Skeleton className="h-8 w-72" />

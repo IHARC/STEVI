@@ -29,7 +29,7 @@ export default async function NewVisitPage() {
 
   if (orgMissing) {
     return (
-      <div className="mx-auto w-full max-w-6xl space-y-8 px-4 py-8 md:px-6">
+      <div className="space-y-8">
         <PageHeader
           eyebrow="Visit"
           title="Select an acting organization"
@@ -68,7 +68,7 @@ export default async function NewVisitPage() {
   const logHref = '/ops/today';
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-8 px-4 py-8 md:px-6">
+    <div className="space-y-8">
       <PageHeader
         eyebrow="Visit"
         title="New Visit"

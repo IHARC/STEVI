@@ -8,7 +8,7 @@ export function WebsiteTabs() {
     { label: 'Supports', href: '/ops/admin/website/supports' },
     { label: 'Programs', href: '/ops/admin/website/programs' },
     { label: 'Footer', href: '/ops/admin/website/footer' },
-    { label: 'Inventory', href: '/ops/admin/website/inventory' },
+    { label: 'Content inventory', href: '/ops/admin/website/inventory' },
     { label: 'Fundraising', href: '/ops/admin/website/fundraising' },
   ];
 

@@ -112,7 +112,7 @@ export default async function HomePage() {
   const preferredContact = person?.preferred_contact_method ?? 'Not provided';
 
   return (
-    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
+    <div className="flex flex-col gap-6">
       <PageHeader
         eyebrow="Client portal"
         title={`Hi ${preferredName}, you’re connected to STEVI`}

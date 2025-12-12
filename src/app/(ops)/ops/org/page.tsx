@@ -57,7 +57,7 @@ export default async function OrgHomePage({ searchParams }: PageProps) {
     const orgs = await loadOrgSelection(supabase);
 
     return (
-      <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
+      <div className="flex flex-col gap-6">
         <PageHeader
           eyebrow="Organization"
           title="Select an organization to administer"
@@ -153,7 +153,7 @@ export default async function OrgHomePage({ searchParams }: PageProps) {
   }
 
   return (
-    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
+    <div className="flex flex-col gap-6">
       <PageHeader
         eyebrow="Organization"
         title={`Manage ${orgName}`}

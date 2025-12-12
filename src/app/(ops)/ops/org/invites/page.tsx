@@ -65,7 +65,7 @@ export default async function OrgInvitesPage({ searchParams }: PageProps) {
   ]);
 
   return (
-    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
+    <div className="flex flex-col gap-6">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-1">
           <p className="text-xs font-medium uppercase text-muted-foreground">Organization</p>

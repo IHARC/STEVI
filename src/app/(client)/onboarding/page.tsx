@@ -100,7 +100,7 @@ export default async function OnboardingPage({ searchParams }: PageProps) {
           : 'This client has not opted into partner sharing. Ask IHARC staff or the client to update sharing before assisting.';
 
   return (
-    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
+    <div className="flex flex-col gap-6">
       <PageHeader
         eyebrow="Onboarding"
         title={actor === 'staff' ? 'Assist a client with onboarding' : 'Share your details to get support'}

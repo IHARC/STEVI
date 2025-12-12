@@ -41,7 +41,7 @@ export default async function OpsTodayPage() {
     : { label: 'Find or create person', href: findPersonHref };
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-8 px-4 py-8 md:px-6">
+    <div className="space-y-8">
       <PageHeader
         eyebrow="Operations"
         title="Today"

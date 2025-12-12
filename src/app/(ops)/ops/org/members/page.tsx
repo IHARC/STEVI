@@ -38,7 +38,7 @@ export default async function OrgMembersPage({ searchParams }: PageProps) {
   const members = await fetchOrgMembersWithRoles(supabase, targetOrgId);
 
   return (
-    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
+    <div className="flex flex-col gap-6">
       <header className="space-y-1">
         <p className="text-xs font-medium uppercase text-muted-foreground">Organization</p>
         <h1 className="text-3xl sm:text-4xl">Members</h1>

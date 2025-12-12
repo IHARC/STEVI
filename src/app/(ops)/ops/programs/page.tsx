@@ -46,7 +46,7 @@ export default async function OpsProgramsPage({ searchParams }: PageProps) {
   const activeHref = activeView === 'schedule' ? '/ops/programs?view=schedule' : '/ops/programs';
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-8 md:px-6">
+    <div className="space-y-6">
       <PageHeader
         eyebrow="Operations"
         title="Programs"

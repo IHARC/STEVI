@@ -36,7 +36,7 @@ export default async function CaseDetailPage({ params }: CasePageProps) {
   const activities = await fetchClientCaseActivities(supabase, detail.personId, 25);
 
   return (
-    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
+    <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
           <p className="text-xs font-semibold uppercase text-muted-foreground">Case #{detail.caseNumber ?? detail.id}</p>

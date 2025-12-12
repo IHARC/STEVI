@@ -30,28 +30,31 @@ export function ClientShell({
   const showNavigation = navSections.length > 0;
 
   return (
-    <div className="client-shell flex min-h-screen bg-background text-foreground">
-      {showNavigation ? (
-        <AppNavigationDesktop
-          navSections={navSections}
-          globalNavItems={primaryNavItems}
-          className="border-r border-border/60 bg-muted/20"
-        />
-      ) : null}
-      <div className="flex min-h-screen flex-1 flex-col">
-        <TopNav
-          navSections={navSections}
-          commands={commandPaletteItems}
-          navigation={navigation}
-          branding={branding}
-        />
-        <ClientPreviewBanner />
-        <main id="main-content" className="flex-1">
-          <div className="mx-auto w-full max-w-5xl px-4 py-6 md:px-6">
-            <div className={cn('space-y-6')}>{children}</div>
-          </div>
-        </main>
-        <SiteFooter />
+    <div className="client-shell min-h-screen bg-background text-foreground">
+      <TopNav
+        navSections={navSections}
+        commands={commandPaletteItems}
+        navigation={navigation}
+        branding={branding}
+      />
+      <ClientPreviewBanner />
+
+      <div className="flex min-h-[calc(100vh-4rem)]">
+        {showNavigation ? (
+          <AppNavigationDesktop
+            navSections={navSections}
+            globalNavItems={primaryNavItems}
+            className="border-r border-border/60 bg-muted/20"
+          />
+        ) : null}
+        <div className="flex min-h-full flex-1 flex-col">
+          <main id="main-content" className="flex-1">
+            <div className="mx-auto w-full max-w-screen-2xl px-4 py-6 md:px-6 lg:px-8">
+              <div className={cn('space-y-6')}>{children}</div>
+            </div>
+          </main>
+          <SiteFooter />
+        </div>
       </div>
     </div>
   );

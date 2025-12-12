@@ -19,7 +19,7 @@ export function ClientPreviewBanner() {
       role="status"
       className="rounded-none border-0 border-b border-border/40 bg-muted text-foreground"
     >
-      <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 px-4">
+      <div className="flex w-full flex-wrap items-center justify-between gap-3 px-4 md:px-6 lg:px-8">
         <div className="space-y-1">
           <AlertTitle className="text-xs font-semibold uppercase text-primary">Client preview</AlertTitle>
           <AlertDescription className="text-sm text-foreground/80">

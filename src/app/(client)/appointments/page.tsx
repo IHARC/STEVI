@@ -94,7 +94,7 @@ export default async function AppointmentsPage() {
   const hasAppointments = timeline.length > 0;
 
   return (
-    <div className="mx-auto w-full max-w-6xl flex flex-col gap-6 px-4 py-8 md:px-6">
+    <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-2">
         <p className="text-xs font-medium uppercase text-muted-foreground">
           Appointment support

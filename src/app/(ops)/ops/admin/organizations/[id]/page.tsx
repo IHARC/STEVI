@@ -93,7 +93,7 @@ export default async function AdminOrganizationDetailPage({ params }: PageProps)
   const selectedFeatures = extractOrgFeatureFlags(orgRow.services_tags);
 
   return (
-    <div className="flex flex-col gap-6 py-6">
+    <div className="flex flex-col gap-6">
       <PageHeader
         eyebrow="STEVI Admin"
         title={orgRow.name ?? 'Organization'}

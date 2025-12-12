@@ -33,7 +33,7 @@ export function AppNavigationDesktop({ navSections, globalNavItems = [], classNa
     <nav
       aria-label="Application navigation"
       className={cn(
-        'sticky top-0 hidden h-screen w-64 shrink-0 border-r border-border/60 bg-muted/30 px-3 py-6 xl:block',
+        'sticky top-16 hidden h-[calc(100vh-4rem)] w-64 shrink-0 border-r border-border/60 bg-muted/30 px-3 py-6 xl:block',
         className,
       )}
     >
