@@ -13,7 +13,7 @@ import {
 } from '@/lib/marketing/settings';
 import { sanitizeFileName } from '@/lib/utils';
 
-const ADMIN_PATHS = ['/ops/admin', '/ops/admin/website'] as const;
+const ADMIN_PATHS = ['/ops/admin/website/home'] as const;
 const HERO_BUCKET = 'app-branding';
 
 function parseContextCards(raw: string | null): ContextCard[] {

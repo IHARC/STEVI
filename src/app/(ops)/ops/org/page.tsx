@@ -53,8 +53,6 @@ export default async function OrgHomePage({ searchParams }: PageProps) {
     redirect(resolveLandingPath(access));
   }
 
-  const isOrgAdmin = access.portalRoles.includes('portal_org_admin') || access.canAccessOpsAdmin;
-
   if (!targetOrgId) {
     const orgs = await loadOrgSelection(supabase);
 
@@ -118,15 +116,6 @@ export default async function OrgHomePage({ searchParams }: PageProps) {
   const lastSeenLabel = lastSeenTimestamp ? formatDate(new Date(lastSeenTimestamp).toISOString()) : 'No recent activity';
   const roleLabel = access.canAccessOpsAdmin ? 'IHARC admin' : access.portalRoles.includes('portal_org_admin') ? 'Org admin' : 'Org representative';
 
-  const orgActions = [
-    { id: 'users', label: 'Users', description: 'Manage members and roles.', href: '/ops/org/members', requires: isOrgAdmin },
-    { id: 'roles', label: 'Roles & permissions', description: 'Control access and visibility.', href: '/ops/org/members', requires: isOrgAdmin },
-    { id: 'tenant', label: 'Tenant settings', description: 'Domains, defaults, and preferences.', href: '/ops/org/settings', requires: isOrgAdmin },
-    { id: 'brand', label: 'Brand & website', description: 'Logos, colors, and public pages.', href: '/ops/org/settings', requires: isOrgAdmin },
-    { id: 'policies', label: 'Policies', description: 'Configure policy acknowledgements.', href: '/ops/org/settings', requires: isOrgAdmin },
-    { id: 'integrations', label: 'Integrations', description: 'Connect tools and data flows.', href: '/ops/org/settings', requires: isOrgAdmin },
-  ].filter((item) => item.requires);
-
   type OrgSummaryCard = { id: string; label: string; value: string; tone?: 'default' | 'warning' | 'info' };
 
   const summaryCards: OrgSummaryCard[] = [
@@ -183,24 +172,6 @@ export default async function OrgHomePage({ searchParams }: PageProps) {
           </Badge>
         </div>
       </PageHeader>
-
-      {orgActions.length ? (
-        <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {orgActions.map((action) => (
-            <Card key={action.id} className="border-border/60">
-              <CardHeader>
-                <CardTitle className="text-lg">{action.label}</CardTitle>
-                <CardDescription>{action.description}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button asChild variant="outline" className="w-full">
-                  <Link href={action.href}>Open</Link>
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </section>
-      ) : null}
 
       <OrgTabs orgId={targetOrgId} />
 

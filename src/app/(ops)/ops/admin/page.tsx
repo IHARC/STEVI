@@ -5,12 +5,10 @@ import { resolveLandingPath } from '@/lib/portal-navigation';
 import { PageHeader } from '@shared/layout/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { NotificationsChart } from './notifications-chart';
-import { RecentNotifications } from '@workspace/admin/notifications/recent-notifications';
 import { AttentionQueue, type AttentionQueueItem } from './operations/attention-queue';
 import type { NotificationRecord } from '@workspace/admin/notifications/types';
 import Link from 'next/link';
 import { Button } from '@shared/ui/button';
-import { Badge } from '@shared/ui/badge';
 import { AdminTabs } from './admin-tabs';
 
 export const dynamic = 'force-dynamic';
@@ -90,17 +88,12 @@ export default async function OpsAdminPage() {
     },
   ];
 
-  const canManageWebsite = access.canManageWebsiteContent;
-  const canSeeInventory = access.canAccessInventoryOps;
-
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-8 md:px-6">
       <PageHeader
         eyebrow="STEVI Admin"
-        title="STEVI Administration"
-        description="Global controls for content, notifications, inventory, and tenant organizations."
-        primaryAction={{ label: 'Organizations', href: '/ops/admin/organizations' }}
-        secondaryAction={{ label: 'Users', href: '/ops/admin/users/all' }}
+        title="General settings"
+        description="System-wide configuration and status for STEVI."
         meta={[{ label: 'IHARC only', tone: 'warning' }, { label: 'No client data', tone: 'neutral' }]}
       />
 
@@ -133,68 +126,6 @@ export default async function OpsAdminPage() {
           </CardContent>
         </Card>
       </div>
-
-      <RecentNotifications notifications={notifications.slice(0, 12)} />
-
-      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        <Card className="border-border/60">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-lg">Organizations</CardTitle>
-            <CardDescription>Manage tenants and feature flags.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button asChild>
-              <Link href="/ops/admin/organizations">Open organizations</Link>
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card className="border-border/60">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-lg">Users</CardTitle>
-            <CardDescription>Profiles, roles, and access audits.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button asChild>
-              <Link href="/ops/admin/users/all">Open users</Link>
-            </Button>
-          </CardContent>
-        </Card>
-
-        {canSeeInventory ? (
-          <Card className="border-border/60">
-            <CardHeader className="space-y-1">
-              <CardTitle className="text-lg">Inventory</CardTitle>
-              <CardDescription>Global stock and donations.</CardDescription>
-            </CardHeader>
-            <CardContent className="flex items-center justify-between gap-2">
-              <Button asChild>
-                <Link href="/ops/admin/inventory">Open inventory</Link>
-              </Button>
-              <Badge variant="secondary" className="text-[11px] uppercase tracking-wide">
-                Enabled
-              </Badge>
-            </CardContent>
-          </Card>
-        ) : null}
-
-        {canManageWebsite ? (
-          <Card className="border-border/60">
-            <CardHeader className="space-y-1">
-              <CardTitle className="text-lg">Website</CardTitle>
-              <CardDescription>Branding and marketing content.</CardDescription>
-            </CardHeader>
-            <CardContent className="flex items-center justify-between gap-2">
-              <Button asChild>
-                <Link href="/ops/admin/website">Open website editor</Link>
-              </Button>
-              <Badge variant="secondary" className="text-[11px] uppercase tracking-wide">
-                Enabled
-              </Badge>
-            </CardContent>
-          </Card>
-        ) : null}
-      </section>
     </div>
   );
 }

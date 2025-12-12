@@ -27,7 +27,7 @@ export default async function AdminInventoryPage() {
           eyebrow="STEVI Admin"
           title="Inventory & Donations"
           description="Global inventory tools are not enabled for your role."
-          primaryAction={{ label: 'Back to overview', href: '/ops/admin' }}
+          primaryAction={{ label: 'Back to general settings', href: '/ops/admin' }}
         />
         <AdminTabs />
         <EmptyState
@@ -48,7 +48,7 @@ export default async function AdminInventoryPage() {
         eyebrow="STEVI Admin"
         title="Inventory & Donations"
         description="Global stock, receipts, and org participation."
-        primaryAction={{ label: 'Back to overview', href: '/ops/admin' }}
+        primaryAction={{ label: 'Back to general settings', href: '/ops/admin' }}
       />
 
       <AdminTabs />
@@ -65,4 +65,3 @@ export default async function AdminInventoryPage() {
     </div>
   );
 }
-

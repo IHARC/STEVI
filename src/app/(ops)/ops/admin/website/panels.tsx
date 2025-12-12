@@ -6,11 +6,6 @@ import { NavForm } from '../marketing/navigation/NavForm';
 import { HomeForm } from '../marketing/home/HomeForm';
 import { SupportsForm } from '../marketing/supports/SupportsForm';
 import { ProgramsForm } from '../marketing/programs/ProgramsForm';
-import { resolveLandingPath } from '@/lib/portal-navigation';
-import { redirect } from 'next/navigation';
-import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
-import { ensurePortalProfile } from '@/lib/profile';
-import { loadPortalAccess, type PortalAccess } from '@/lib/portal-access';
 import {
   BrandingAssets,
   ContextCard,
@@ -28,7 +23,6 @@ import { EmptyState } from '@shared/ui/empty-state';
 
 type PanelProps = {
   supabase: SupabaseClient<Database>;
-  access: PortalAccess;
 };
 
 type SettingRow = { setting_key: string; setting_value: string | null };
@@ -193,21 +187,4 @@ export async function WebsiteContentInventoryPanel(_: PanelProps) {
       </CardContent>
     </Card>
   );
-}
-
-export async function buildWebsiteContext() {
-  const supabase = await createSupabaseRSCClient();
-  const access = await loadPortalAccess(supabase);
-
-  if (!access) {
-    redirect('/login?next=/ops/admin/website');
-  }
-
-  if (!access.canManageWebsiteContent) {
-    redirect(resolveLandingPath(access));
-  }
-
-  await ensurePortalProfile(supabase, access.userId);
-
-  return { supabase, access } as const;
 }

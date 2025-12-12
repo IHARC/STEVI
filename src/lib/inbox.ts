@@ -207,81 +207,12 @@ async function fetchOrgInboxItems(
   return items.slice(0, 8);
 }
 
-async function fetchAdminInboxItems(
-  supabase: SupabaseAnyServerClient,
-): Promise<InboxItem[]> {
-  const items: InboxItem[] = [];
-
-  try {
-    const portal = supabase.schema('portal');
-    const caseMgmt = supabase.schema('case_mgmt');
-    const [pendingProfiles, pendingInvites, notifications, openCases] = await Promise.all([
-      portal.from('profiles').select('id', { count: 'exact', head: true }).eq('affiliation_status', 'pending'),
-      portal.from('profile_invites').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
-      portal.from('notifications').select('id', { count: 'exact', head: true }).is('acknowledged_at', null),
-      caseMgmt.from('case_management').select('id', { count: 'exact', head: true }).not('status', 'eq', 'closed'),
-    ]);
-
-    if ((pendingProfiles.count ?? 0) > 0) {
-      items.push({
-        id: 'admin-profiles',
-        title: 'Profile approvals',
-        description: `${pendingProfiles.count} pending profiles`,
-        href: '/ops/admin/operations',
-        tone: 'warning',
-        badge: 'Review',
-      });
-    }
-
-    if ((pendingInvites.count ?? 0) > 0) {
-      items.push({
-        id: 'admin-invites',
-        title: 'Pending invites',
-        description: `${pendingInvites.count} invites awaiting action`,
-        href: '/ops/admin/operations',
-        tone: 'info',
-        badge: 'Invites',
-      });
-    }
-
-    if ((notifications.count ?? 0) > 0) {
-      items.push({
-        id: 'admin-notifications',
-        title: 'Unacknowledged notifications',
-        description: `${notifications.count} queued/sent notifications`,
-        href: '/ops/admin/content',
-        tone: 'info',
-        badge: 'Notifications',
-      });
-    }
-
-    if ((openCases.count ?? 0) > 0) {
-      items.push({
-        id: 'admin-cases',
-        title: 'Open cases',
-        description: `${openCases.count} cases open`,
-        href: '/ops/admin/operations',
-        tone: 'info',
-        badge: 'Cases',
-      });
-    }
-  } catch (error) {
-    console.warn('Unable to load admin inbox', error);
-  }
-
-  return items.slice(0, 8);
-}
-
 export async function fetchPortalInbox(
   supabase: SupabaseAnyServerClient,
   access: PortalAccess,
   area: PortalArea,
 ): Promise<InboxItem[]> {
-  if (area === 'ops_admin') {
-    if (access.canAccessOpsSteviAdmin) {
-      return fetchAdminInboxItems(supabase);
-    }
-  }
+  if (area === 'ops_admin') return [];
 
   if (area === 'ops_org') {
     return fetchOrgInboxItems(supabase, access);

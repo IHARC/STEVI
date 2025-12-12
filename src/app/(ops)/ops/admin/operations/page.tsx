@@ -80,7 +80,7 @@ export default async function AdminOperationsPage() {
         eyebrow="STEVI Admin"
         title="Operations"
         description="Approvals, invites, and system queues that need admin attention."
-        primaryAction={{ label: 'Back to overview', href: '/ops/admin' }}
+        primaryAction={{ label: 'Back to general settings', href: '/ops/admin' }}
       />
 
       <AdminTabs />
@@ -97,4 +97,3 @@ export default async function AdminOperationsPage() {
     </div>
   );
 }
-

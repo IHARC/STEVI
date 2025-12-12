@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { ScrollArea } from '@shared/ui/scroll-area';
@@ -14,6 +15,8 @@ type InboxPanelProps = {
 };
 
 export function InboxPanel({ items }: InboxPanelProps) {
+  const pathname = usePathname() ?? '';
+  const cleanedPath = pathname.split('?')[0];
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
   const [open, setOpen] = useState(false);
 
@@ -22,6 +25,7 @@ export function InboxPanel({ items }: InboxPanelProps) {
     [items, dismissed],
   );
 
+  if (cleanedPath !== '/ops/today') return null;
   if (!items.length) return null;
 
   function handleDismiss(id: string) {

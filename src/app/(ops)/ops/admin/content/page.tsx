@@ -52,7 +52,7 @@ export default async function AdminContentPage() {
         eyebrow="STEVI Admin"
         title="Content & Notifications"
         description="Monitor outbound communications and manage public-facing content."
-        primaryAction={{ label: 'Back to overview', href: '/ops/admin' }}
+        primaryAction={{ label: 'Back to general settings', href: '/ops/admin' }}
       />
 
       <AdminTabs />

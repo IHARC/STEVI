@@ -7,7 +7,7 @@ import { loadPortalAccess } from '@/lib/portal-access';
 import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 import { MARKETING_SETTINGS_KEYS, NavItem, assertNonEmpty } from '@/lib/marketing/settings';
 
-const ADMIN_PATHS = ['/ops/admin', '/ops/admin/website'] as const;
+const ADMIN_PATHS = ['/ops/admin/website/navigation'] as const;
 
 function parseNavItems(raw: string | null): NavItem[] {
   if (!raw) {
