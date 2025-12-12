@@ -25,7 +25,7 @@ export default async function WebsiteAdminLayout({ children }: { children: React
   await ensurePortalProfile(supabase, access.userId);
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8 md:px-6">
+    <div className="flex flex-col gap-6 py-6">
       <PageHeader
         eyebrow="STEVI Admin"
         title="Website & Marketing"
@@ -34,7 +34,9 @@ export default async function WebsiteAdminLayout({ children }: { children: React
       />
 
       <AdminTabs />
-      <WebsiteTabs />
+      <div className="rounded-2xl border border-border/60 bg-muted/20 px-3 py-2">
+        <WebsiteTabs />
+      </div>
 
       <div className="space-y-6">{children}</div>
     </div>

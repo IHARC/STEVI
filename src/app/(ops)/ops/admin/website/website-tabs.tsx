@@ -12,6 +12,5 @@ export function WebsiteTabs() {
     { label: 'Fundraising', href: '/ops/admin/website/fundraising' },
   ];
 
-  return <PageTabNav tabs={tabs} />;
+  return <PageTabNav tabs={tabs} variant="secondary" />;
 }
-

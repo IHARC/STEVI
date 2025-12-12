@@ -46,7 +46,7 @@ export async function WebsiteBrandingPanel({ supabase }: PanelProps) {
     : undefined;
 
   return (
-    <Card className="max-w-5xl">
+    <Card className="border-border/60">
       <CardHeader>
         <CardTitle className="text-xl">Branding</CardTitle>
         <CardDescription>Manage logos and favicon used across the marketing site and portal metadata.</CardDescription>
@@ -64,7 +64,7 @@ export async function WebsiteNavigationPanel({ supabase }: PanelProps) {
   const portalCtaLabel = settings[MARKETING_SETTINGS_KEYS.navPortalCtaLabel] ?? '';
 
   return (
-    <Card className="max-w-5xl">
+    <Card className="border-border/60">
       <CardHeader>
         <CardTitle className="text-xl">Navigation</CardTitle>
         <CardDescription>Control top navigation links and the portal call-to-action.</CardDescription>
@@ -82,7 +82,7 @@ export async function WebsiteHomePanel({ supabase }: PanelProps) {
   const contextCards = parseJsonSetting<ContextCard[]>(settings[MARKETING_SETTINGS_KEYS.contextCards], MARKETING_SETTINGS_KEYS.contextCards);
 
   return (
-    <Card className="max-w-5xl">
+    <Card className="border-border/60">
       <CardHeader>
         <CardTitle className="text-xl">Home & context</CardTitle>
         <CardDescription>Update the hero and contextual story cards on the marketing home page.</CardDescription>
@@ -100,7 +100,7 @@ export async function WebsiteSupportsPanel({ supabase }: PanelProps) {
   const mutualAid = parseJsonSetting<string[]>(settings[MARKETING_SETTINGS_KEYS.supportsMutualAid], MARKETING_SETTINGS_KEYS.supportsMutualAid);
 
   return (
-    <Card className="max-w-5xl">
+    <Card className="border-border/60">
       <CardHeader>
         <CardTitle className="text-xl">Supports</CardTitle>
         <CardDescription>Urgent supports and mutual aid text shown on Get Help.</CardDescription>
@@ -117,7 +117,7 @@ export async function WebsiteProgramsPanel({ supabase }: PanelProps) {
   const programs = parseJsonSetting<ProgramEntry[]>(settings[MARKETING_SETTINGS_KEYS.programs], MARKETING_SETTINGS_KEYS.programs);
 
   return (
-    <Card className="max-w-5xl">
+    <Card className="border-border/60">
       <CardHeader>
         <CardTitle className="text-xl">Programs</CardTitle>
         <CardDescription>Control program cards shown on the marketing site.</CardDescription>
@@ -155,7 +155,7 @@ export async function WebsiteFooterPanel({ supabase }: PanelProps) {
     : null;
 
   return (
-    <Card className="max-w-4xl">
+    <Card className="border-border/60">
       <CardHeader className="space-y-2">
         <CardTitle className="text-xl">Footer</CardTitle>
         <CardDescription>Update the copy shown on every page of the marketing site.</CardDescription>

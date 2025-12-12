@@ -47,7 +47,7 @@ export default async function AdminContentPage() {
   const trendData = buildNotificationTrend(notifications);
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8 md:px-6">
+    <div className="flex flex-col gap-6 py-6">
       <PageHeader
         eyebrow="STEVI Admin"
         title="Content & Notifications"

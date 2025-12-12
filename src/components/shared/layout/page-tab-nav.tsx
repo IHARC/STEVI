@@ -10,6 +10,8 @@ export type PageTab = {
   match?: string[];
 };
 
+type PageTabNavVariant = 'primary' | 'secondary';
+
 function isActive(pathname: string, tab: PageTab) {
   const prefixes = tab.match ?? [];
   if (prefixes.length > 0) {
@@ -18,14 +20,33 @@ function isActive(pathname: string, tab: PageTab) {
   return pathname === tab.href || pathname.startsWith(`${tab.href}/`);
 }
 
-export function PageTabNav({ tabs, className, activeHref }: { tabs: PageTab[]; className?: string; activeHref?: string }) {
+export function PageTabNav({
+  tabs,
+  className,
+  activeHref,
+  variant = 'primary',
+}: {
+  tabs: PageTab[];
+  className?: string;
+  activeHref?: string;
+  variant?: PageTabNavVariant;
+}) {
   const pathname = usePathname() ?? '/';
 
   return (
-    <nav aria-label="Section navigation" className={cn('w-full overflow-x-auto pb-1 sm:pb-0', className)}>
+    <nav
+      aria-label="Section navigation"
+      className={cn(
+        'w-full overflow-x-auto',
+        variant === 'primary' ? 'pb-1 sm:pb-0' : 'border-b border-border/60 pb-1',
+        className,
+      )}
+    >
       <div
         className={cn(
-          'inline-flex min-w-full flex-nowrap gap-1 rounded-2xl bg-muted p-1 shadow-sm sm:min-w-0 sm:flex-wrap',
+          variant === 'primary'
+            ? 'inline-flex min-w-full flex-nowrap gap-1 rounded-2xl bg-muted p-1 shadow-sm sm:min-w-0 sm:flex-wrap'
+            : 'inline-flex min-w-full flex-nowrap gap-2 bg-transparent p-0 sm:min-w-0 sm:flex-wrap',
         )}
       >
         {tabs.map((tab) => {
@@ -36,10 +57,16 @@ export function PageTabNav({ tabs, className, activeHref }: { tabs: PageTab[]; c
               href={tab.href}
               aria-current={active ? 'page' : undefined}
               className={cn(
-                'relative inline-flex items-center gap-1 rounded-xl px-4 py-1 text-xs font-semibold transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-                active
-                  ? 'bg-secondary/15 text-secondary-foreground'
-                  : 'text-muted-foreground hover:bg-card',
+                variant === 'primary'
+                  ? 'relative inline-flex items-center gap-1 rounded-xl px-4 py-1 text-xs font-semibold transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background'
+                  : 'relative inline-flex items-center gap-1 rounded-md px-2 py-2 text-sm font-semibold text-muted-foreground transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+                variant === 'primary'
+                  ? active
+                    ? 'bg-secondary/15 text-secondary-foreground'
+                    : 'text-muted-foreground hover:bg-card'
+                  : active
+                    ? 'text-foreground after:absolute after:inset-x-2 after:-bottom-[9px] after:h-0.5 after:rounded-full after:bg-primary'
+                    : 'hover:text-foreground',
               )}
             >
               {tab.label}

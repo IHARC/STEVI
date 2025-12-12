@@ -63,7 +63,7 @@ export function TopNav({
       >
         Skip to content
       </a>
-      <div className="mx-auto w-full max-w-6xl px-4 py-3 md:px-6">
+      <div className="mx-auto w-full max-w-7xl px-4 py-3 md:px-6 lg:px-8">
         <div className="grid w-full grid-cols-[auto_1fr] items-center gap-3 md:gap-4 lg:grid-cols-[auto_1fr_auto]">
           <div className="flex min-w-0 items-center gap-3">
             {hasNav ? (
