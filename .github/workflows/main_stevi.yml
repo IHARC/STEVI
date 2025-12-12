@@ -49,6 +49,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Cache Next.js build cache
+        uses: actions/cache@v4
+        with:
+          path: .next/cache
+          key: ${{ runner.os }}-nextjs-${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ env.NODE_VERSION }}-
+
       - name: Type check
         run: npm run typecheck
 
@@ -87,21 +95,11 @@ jobs:
           mkdir -p deployment/.next deployment/public
 
           cp -r .next/standalone deployment/.next/standalone
-          cp -r .next/static deployment/.next/static
           cp -r public/. deployment/public/ || true
           cp package.json package-lock.json next.config.ts middleware.ts build.js deployment/
 
-          # Safety: ensure standalone bundle contains static assets where Next expects them
-          mkdir -p deployment/.next/standalone/.next
-          rm -rf deployment/.next/standalone/.next/static
-          cp -r .next/static deployment/.next/standalone/.next/static
-
           if [ ! -f "deployment/.next/standalone/server.js" ]; then
             echo "Deployment bundle validation failed: .next/standalone/server.js missing" >&2
-            exit 1
-          fi
-          if [ ! -d "deployment/.next/static" ]; then
-            echo "Deployment bundle validation failed: .next/static missing" >&2
             exit 1
           fi
           if [ ! -d "deployment/.next/standalone/.next/static" ]; then
@@ -119,11 +117,15 @@ jobs:
         with:
           name: node-app
           path: node-app.zip
+          retention-days: 1
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
     environment: ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.slot) || 'production' }}
+    permissions:
+      contents: read
+      actions: write
     
     steps:
       - name: Download artifact from build job
@@ -182,3 +184,27 @@ jobs:
           slot-name: ${{ steps.slot.outputs.slot }}
           package: node-app.zip
           publish-profile: ${{ steps.slot.outputs.slot == 'staging' && secrets.AZUREAPPSERVICE_PUBLISHPROFILE_STAGING || secrets.AZUREAPPSERVICE_PUBLISHPROFILE_C1805A0956574B47AE4629B59BCC2619 }}
+
+      - name: Delete deployment artifact (node-app)
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const run_id = context.runId;
+            const artifacts = await github.paginate(github.rest.actions.listWorkflowRunArtifacts, {
+              owner,
+              repo,
+              run_id,
+            });
+
+            const matches = artifacts.filter((artifact) => artifact.name === 'node-app');
+            if (matches.length === 0) {
+              core.info('No node-app artifact found for this run.');
+              return;
+            }
+
+            for (const artifact of matches) {
+              core.info(`Deleting artifact ${artifact.id} (${artifact.size_in_bytes} bytes).`);
+              await github.rest.actions.deleteArtifact({ owner, repo, artifact_id: artifact.id });
+            }
