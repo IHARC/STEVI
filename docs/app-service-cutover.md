@@ -1,13 +1,13 @@
-# STEVI → Azure App Service Cutover Plan (Node 24)
+# STEVI → Azure App Service Cutover Plan (Node 24.11.1)
 
-Audience: a fresh Codex run / new engineer completing the migration from Azure Static Web Apps (SWA) to Azure App Service (Linux) using Node 24 LTS.
+Audience: a fresh Codex run / new engineer completing the migration from Azure Static Web Apps (SWA) to Azure App Service (Linux) using Node 24.11.1+ (Node 24 LTS).
 
 ## Current repo state
-- GitHub Action `.github/workflows/main_stevi.yml` builds with Node 24.x, prunes dev deps, and deploys the build artifact via publish profile to the `STEVI` Web App (Production slot).
-- Runtime expectations: Node 24.x (`package.json` engines, `.nvmrc` 24.11.1, README prerequisite).
+- GitHub Action `.github/workflows/main_stevi.yml` builds with Node 24.11.1, prunes dev deps, and deploys the build artifact via publish profile to the `STEVI` Web App (Production slot).
+- Runtime expectations: Node 24.11.1+ (`package.json` engines, `.nvmrc` 24.11.1, README prerequisite).
 
 ## Prerequisites
-- Azure resources already created: App Service `STEVI` (Linux, Node 24 LTS). If staging slot exists, prefer using it for validation.
+- Azure resources already created: App Service `STEVI` (Linux, Node 24 LTS / 24.11.x). If staging slot exists, prefer using it for validation.
 - Secrets in GitHub: `AZUREAPPSERVICE_PUBLISHPROFILE_*` for target slot(s); Supabase and app URLs available (see below).
 - Local: `nvm use 24.11.1` and `npm ci` for parity.
 
@@ -49,7 +49,7 @@ Set in **App Settings** (and in staging slot if used):
 - If single slot: redeploy last known-good artifact from Actions history or temporarily restore the previous App Service snapshot / publish profile artifact.
 
 ## Operational differences vs SWA
-- **Platform config**: set `WEBSITE_NODE_DEFAULT_VERSION` to Node 24.x, `SCM_DO_BUILD_DURING_DEPLOYMENT=false` (we ship prebuilt artifacts), `WEBSITE_RUN_FROM_PACKAGE` not required.
+- **Platform config**: set `WEBSITE_NODE_DEFAULT_VERSION` to Node 24 (24.11.x), `SCM_DO_BUILD_DURING_DEPLOYMENT=false` (we ship prebuilt artifacts), `WEBSITE_RUN_FROM_PACKAGE` not required.
 - **Startup**: App uses Next standalone output; start command is `node .next/standalone/server.js`.
 - **Always On / warm**: enable `alwaysOn` to keep the Next.js server warm; configure `ARRAffinity` as needed for sticky sessions (Supabase auth cookies are stateless).
 - **Logging/monitoring**: enable App Insights (live metrics + traces), HTTP access logs, and set 5xx/latency alerts. SWA handled this implicitly; App Service requires explicit setup.

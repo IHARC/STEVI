@@ -7,7 +7,7 @@ read-only; both apps share the same Supabase project.
 
 ## Getting Started
 
-- **Prerequisites**: Node.js 24.x LTS (npm 10+). Run `nvm use` if you have it installed.
+- **Prerequisites**: Node.js 24.11.1+ (npm 10+). Run `nvm use` if you have it installed.
 - **Configure env**: Copy `.env.example` to `.env.local` and fill the Supabase + app URLs (see below).
 - **Install dependencies**: `npm install`
 - **Run locally**: `npm run dev` (http://localhost:3000)
@@ -26,7 +26,7 @@ Environment variables (full notes in `docs/backend.md`):
 - TypeScript + Tailwind CSS with shadcn/ui tokens sourced from `src/styles/theme.css`, Radix primitives, and TipTap for rich text
 - Supabase Auth/Database/Edge Functions shared with the marketing portal (schemas: `portal`, `core`, `case_mgmt`, `inventory`, `donations`)
 - Vitest + Testing Library for unit coverage; Playwright for end-to-end flows
-- Azure App Service (Linux, Node 24) deployed via GitHub Actions (`.github/workflows/main_stevi.yml`); build entry `node build.js` runs lint + default Next build (Turbopack). Runtime uses the Next standalone output (`node .next/standalone/server.js`).
+- Azure App Service (Linux, Node 24.11.x) deployed via GitHub Actions (`.github/workflows/main_stevi.yml`); build entry `node build.js` runs lint + default Next build (Turbopack). Runtime uses the Next standalone output (`node .next/standalone/server.js`).
 
 ## Architecture
 
