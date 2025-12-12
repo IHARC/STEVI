@@ -22,6 +22,7 @@ export type DonationCatalogItem = {
   priority: number;
   targetBuffer: number | null;
   imageUrl: string | null;
+  stripeProductId: string | null;
   stripePriceId: string | null;
   isActive: boolean;
   metrics: DonationCatalogMetrics;

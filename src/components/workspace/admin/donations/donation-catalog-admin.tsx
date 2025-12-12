@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { saveCatalogItem, toggleCatalogItem, importInventoryItem } from '@/app/(ops)/ops/admin/donations/actions';
+import { importInventoryItem, saveCatalogItem, syncCatalogItemStripeAction, toggleCatalogItem } from '@/app/(ops)/ops/admin/website/fundraising/actions';
 import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Input } from '@shared/ui/input';
@@ -178,15 +178,6 @@ function CatalogItemForm({
             placeholder="https://example.com/image.jpg"
           />
         </div>
-        <div className="space-y-2">
-          <Label htmlFor={`stripe-${item?.id ?? 'new'}`}>Stripe price ID (optional)</Label>
-          <Input
-            id={`stripe-${item?.id ?? 'new'}`}
-            name="stripe_price_id"
-            defaultValue={item?.stripePriceId ?? ''}
-            placeholder="price_123"
-          />
-        </div>
       </div>
 
       <div className="space-y-2">
@@ -227,6 +218,12 @@ function CatalogItemForm({
         <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/20 pt-3 text-xs text-foreground/70">
           <div className="flex flex-wrap gap-2">
             <Badge variant="outline">Slug: {item.slug}</Badge>
+            <Badge variant={item.stripePriceId ? 'outline' : 'secondary'}>
+              Stripe price: {item.stripePriceId ?? 'Not linked'}
+            </Badge>
+            <Badge variant={item.stripeProductId ? 'outline' : 'secondary'}>
+              Stripe product: {item.stripeProductId ?? 'Not linked'}
+            </Badge>
             {metrics?.inventoryItemName ? (
               <Badge variant="outline">
                 Inventory: {metrics.inventoryItemName}
@@ -236,18 +233,26 @@ function CatalogItemForm({
               <Badge variant="secondary">No inventory link</Badge>
             )}
           </div>
-          <form action={toggleCatalogItem}>
-            <input type="hidden" name="id" value={item.id} />
-            <input type="hidden" name="next_state" value={item.isActive ? 'deactivate' : 'activate'} />
-            <Button
-              variant="ghost"
-              size="sm"
-              type="submit"
-              className={cn('px-3', item.isActive ? 'text-destructive' : 'text-primary')}
-            >
-              {item.isActive ? 'Hide from marketing' : 'Activate item'}
-            </Button>
-          </form>
+          <div className="flex flex-wrap items-center gap-2">
+            <form action={syncCatalogItemStripeAction}>
+              <input type="hidden" name="catalog_item_id" value={item.id} />
+              <Button type="submit" variant="secondary" size="sm">
+                Sync Stripe price
+              </Button>
+            </form>
+            <form action={toggleCatalogItem}>
+              <input type="hidden" name="id" value={item.id} />
+              <input type="hidden" name="next_state" value={item.isActive ? 'deactivate' : 'activate'} />
+              <Button
+                variant="ghost"
+                size="sm"
+                type="submit"
+                className={cn('px-3', item.isActive ? 'text-destructive' : 'text-primary')}
+              >
+                {item.isActive ? 'Hide from marketing' : 'Activate item'}
+              </Button>
+            </form>
+          </div>
         </div>
       ) : null}
     </form>

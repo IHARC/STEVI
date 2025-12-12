@@ -41,21 +41,71 @@ The goal is to add **custom one-time donations**, **monthly recurring donations*
 - **STEVI types updated** to reflect the new `donations` schema:
   - `STEVI/src/types/supabase.ts` updated (manual sync to the live DB schema).
 
-### Not started yet (next implementation blocks)
+### Completed implementation blocks (delivered)
 
-- **Supabase Edge Functions** (Stripe secrets live here; invoked by iharc.ca with anon key):
-  - `donations_create_checkout_session`
-  - `donations_create_subscription_session`
-  - `donations_request_manage_link` (email-based manage flow)
-  - `donations_create_portal_session` (Stripe Customer Portal session)
-  - `donations_stripe_webhook` (signature verified + idempotent)
+- **Supabase Edge Functions deployed (Stripe configured via Vault):**
+  - Public flows:
+    - `donations_create_checkout_session` (one-time donation: catalogue items + optional custom amount)
+    - `donations_create_subscription_session` (monthly amount-only donations; whole-dollar increments)
+    - `donations_request_manage_link` (email-based manage link; rate-limited; privacy-preserving responses)
+    - `donations_create_portal_session` (token → Stripe Customer Portal session)
+    - `donations_get_checkout_status` (success-page confirmation helper)
+  - Webhooks + admin-only helpers:
+    - `donations_stripe_webhook` (signature verified + idempotent + writes donor/payment/subscription tables + sends receipt emails)
+    - `donations_admin_sync_catalog_item_stripe` (create/update Stripe Product+Price for a catalogue item; admin-gated)
+    - `donations_admin_cancel_subscription` (cancel subscription in Stripe; admin-gated)
+    - `donations_admin_resend_manage_link` (admin resend flow)
+    - `donations_admin_reprocess_webhook_event` (retry failed Stripe events by `evt_...`)
+
 - **Public website UX** (`I.H.A.R.C-Public-Website`):
-  - Replace the current mailto-only `/donate` with a cart + preset/custom one-time donation + monthly preset/custom flow.
-  - Add `/donate/success`, `/donate/cancel`, `/manage-donation`.
-- **STEVI admin UX**:
-  - Wire `/ops/admin/website/fundraising` to real fundraising tooling (and reconcile with the existing `/ops/admin/donations` surfaces).
+  - `/donate` now supports:
+    - world-vision style catalogue browsing + filtering + “most needed” sort
+    - cart drawer, quantity controls, optional custom amount, and secure Stripe Checkout redirect
+    - monthly donations (preset + custom; amount-only as locked)
+    - clear receipt note: **registered non-profit, not tax deductible**
+  - Added:
+    - `/donate/success` (server-rendered confirmation; validates via Edge Function)
+    - `/donate/cancel`
+    - `/manage-donation` (request manage link)
+    - `/manage-donation/portal` (token → redirect to Stripe Customer Portal)
+
+- **STEVI admin UX** (Website & Marketing > Fundraising):
+  - `/ops/admin/website/fundraising` is now the single fundraising admin surface:
+    - catalogue CRUD + inventory mapping (reuses existing donation catalogue admin component patterns)
+    - Stripe binding is handled by a “Sync Stripe price” action (no manual Stripe ID editing)
+    - donations inbox, monthly donors table (cancel + resend manage link), webhook health + retry
+  - Legacy `/ops/admin/donations` actions were removed; fundraising is consolidated under `/ops/admin/website/fundraising`.
 
 ---
+
+## Audit findings + fixes applied (2025-12-12)
+
+### ✅ Fixed: “Manage donation” portal flow failed from server-rendered pages
+- **Finding:** `donations_create_portal_session` relied on the `Origin` header. The marketing site portal route (`/manage-donation/portal`) invokes Edge Functions from a server component (no `Origin` header), which caused failures and silent redirects.
+- **Fix:** Donation Edge Functions now generate success/cancel/portal return URLs from `IHARC_SITE_URL` (required Edge Function env var) and do not require or trust `Origin` for URL construction.
+- **UX fix:** `/manage-donation/portal` now shows an explicit “link expired / request a new link” state instead of redirect loops.
+
+### ✅ Implemented: Admin-configurable Stripe mode + secrets (no fallbacks)
+- **Finding:** Stripe config needed to be switchable to test mode safely without redeploying or editing secrets in multiple places.
+- **Fix:** Stripe secrets are now **Supabase Vault-backed** and selected via `portal.public_settings` under a single active mode:
+  - Configure via `STEVI Admin → Website & Marketing → Fundraising → Stripe configuration`
+  - Keys:
+    - `stripe_donations_mode` (`test` | `live`)
+    - `stripe_donations_test_secret_key_id`, `stripe_donations_test_webhook_secret_id`
+    - `stripe_donations_live_secret_key_id`, `stripe_donations_live_webhook_secret_id`
+  - **No environment-variable fallbacks** are used by the donations functions.
+
+### ✅ Hardened: Webhook verification + retry correctness
+- **Finding:** Webhook signature verification must use the raw request body bytes and retries must share the same processing path.
+- **Fix:** Webhook verification uses raw body bytes and admin reprocessing uses the same shared processing code path as the webhook handler.
+
+### ✅ Hardened: Public CORS + origin handling
+- **Finding:** Trusting arbitrary `Origin` headers is not appropriate for payments flows.
+- **Fix:** Donation Edge Functions now use a strict allowlist based on `IHARC_SITE_URL` (plus local dev origins) and default to the site origin when the inbound origin is not allowed.
+
+### ✅ Aligned: Monthly donation amount rules in UI
+- **Finding:** Monthly donations are whole-dollar only by plan; client validation didn’t enforce this strictly.
+- **Fix:** The marketing donation UI now blocks non-whole-dollar monthly amounts, matching server-side validation.
 
 ## 0) Non-negotiables / Constraints
 
@@ -63,7 +113,7 @@ The goal is to add **custom one-time donations**, **monthly recurring donations*
    - Marketing site reads public-safe views (anon key only).
    - STEVI admin writes configuration and sees private donor/payment data under strict RLS.
 2. **No Stripe secrets in either frontend repo**  
-   - All Stripe secret usage lives in Supabase Edge Functions (or other server-only environment).
+   - All Stripe secret usage lives in Supabase Edge Functions (configured via Supabase Vault + STEVI admin).
 3. **No bespoke card collection**  
    - Use Stripe Checkout (hosted) for one-time and subscriptions.
    - Use Stripe Customer Portal for self-service subscription management.
@@ -108,7 +158,7 @@ The goal is to add **custom one-time donations**, **monthly recurring donations*
    - creates a Stripe Checkout Session in `mode=payment`
    - returns `session.url` for redirect
 5. Stripe Checkout collects email + name + address (required) and processes payment.
-6. Stripe sends webhooks → Supabase Edge Function `donations_stripe_webhook`:
+6. Stripe sends webhooks → **STEVI webhook relay** → Supabase Edge Function `donations_stripe_webhook`:
    - verifies signature
    - idempotently writes `donations.donation_payments`
    - marks `donations.donation_intents` paid/failed/refunded
@@ -268,6 +318,11 @@ Must enforce:
    - validates token, resolves Stripe customer, creates Stripe Customer Portal session
    - returns `url` redirect
 
+5. `donations_get_checkout_status`
+   - input: `sessionId`
+   - returns: safe “mode + payment_status + amount/currency” for the success page
+   - note: does not expose donor PII
+
 ### 5.2 Webhook function
 
 5. `donations_stripe_webhook`
@@ -283,6 +338,12 @@ Must enforce:
      - `donations.donation_subscriptions`
      - `donations.donors`
      - `donations.stripe_webhook_events`
+
+**Webhook delivery note (important):**
+- Supabase Edge Functions require an Authorization header even when `verify_jwt = false`.
+- Stripe cannot send Supabase auth headers, so the webhook endpoint is implemented as a **STEVI API relay**:
+  - Stripe → `STEVI/src/app/api/donations/stripe-webhook/route.ts` → Supabase `donations_stripe_webhook`
+  - This preserves the “no secrets on the public site” rule and keeps webhook signature verification inside the Edge Function.
 
 ### 5.3 Rate limiting
 
@@ -344,6 +405,40 @@ Implement in `STEVI/src/app/(ops)/ops/admin/website/fundraising/*`:
 ### 7.5 Audit & permissions
 - gate behind `canManageWebsiteContent` (already enforced by layout)
 - all mutations use server actions + audit logging patterns already used in STEVI admin
+
+---
+
+## 11) Deployment checklist (now required to go live)
+
+### Stripe Dashboard
+- Configure Checkout success/cancel URLs to match `iharc.ca` routes:
+  - `/donate/success?session_id={CHECKOUT_SESSION_ID}`
+  - `/donate/cancel`
+- Configure a webhook endpoint pointing to STEVI (relay):
+  - `https://stevi.iharc.ca/api/donations/stripe-webhook`
+  - Event types to enable:
+    - `checkout.session.completed`
+    - `invoice.paid`
+    - `invoice.payment_failed`
+    - `customer.subscription.updated`
+    - `customer.subscription.deleted`
+    - `charge.refunded`
+- Ensure Stripe Customer Portal is enabled for self-serve cancellation + payment method updates.
+
+### Supabase Edge Function secrets (set in the Supabase project)
+- `IHARC_SITE_URL` (e.g., `https://iharc.ca`) — used to generate success/cancel/portal return URLs (no Origin header trust)
+- Stripe configuration is **Vault-backed and admin-managed** (no env-var fallbacks):
+  - Set via **STEVI Admin → Website & Marketing → Fundraising → Stripe configuration**
+  - Stored in Supabase Vault; referenced by `portal.public_settings` keys:
+    - `stripe_donations_mode` (`test` | `live`)
+    - `stripe_donations_test_secret_key_id`, `stripe_donations_test_webhook_secret_id`
+    - `stripe_donations_live_secret_key_id`, `stripe_donations_live_webhook_secret_id`
+- SMTP (for receipts + manage-link email):
+  - `PORTAL_EMAIL_FROM`, `PORTAL_SMTP_HOST`, `PORTAL_SMTP_PORT`, `PORTAL_SMTP_USERNAME`, `PORTAL_SMTP_PASSWORD`, `PORTAL_SMTP_SECURE`
+
+### Public website env vars (build-time)
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
 ---
 
