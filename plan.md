@@ -57,7 +57,7 @@ Order is by typical “day‑of‑work” flow and frequency for frontline users
 6. **Org Hub** (`/ops/org`) *(org admins/reps)*  
    - Acting‑org scoped admin: members, invites, org settings, appointments.  
    - IHARC admins access this hub from **STEVI Admin → Organizations** rather than as a top‑level hub.
-7. **STEVI Admin** (`/ops/hq`) *(IHARC admins only)*  
+7. **STEVI Admin** (`/ops/admin`) *(IHARC admins only)*  
    - STEVI‑wide controls, marketing/content, organizations, inventory settings.
 
 ### What moves out of global nav

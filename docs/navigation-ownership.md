@@ -4,7 +4,7 @@ The Operations rail follows the visit-first IA captured in `plan.md` and enforce
 
 Key references:
 - `plan.md` – current ops navigation IA decisions and open questions.
-- `src/lib/portal-navigation.ts` – Operations rails (ops_frontline, ops_org, ops_hq) covering Today, Clients, Programs, Supplies, Partners, Org hub, and STEVI Admin hub. Visit creation is a hub action, not a global hub.
+- `src/lib/portal-navigation.ts` – Operations rails (ops_frontline, ops_org, ops_admin) covering Today, Clients, Programs, Supplies, Partners, Org hub, and STEVI Admin hub. Visit creation is a hub action, not a global hub.
 - Org Hub is treated as a top-level hub only for org-scoped users; IHARC admins reach it from STEVI Admin.
 - `src/components/workspace/layout/ops-hub-rail.tsx` – thin ops hub rail (desktop).
 - `src/components/shared/layout/app-navigation.tsx` – mobile navigation sheet (hubs-only in ops).

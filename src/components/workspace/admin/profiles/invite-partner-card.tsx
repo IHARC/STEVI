@@ -9,7 +9,7 @@ import { Textarea } from '@shared/ui/textarea';
 import { Badge } from '@shared/ui/badge';
 import { useToast } from '@shared/ui/use-toast';
 import { NO_ORGANIZATION_VALUE } from '@/lib/constants';
-import { sendPartnerInviteAction } from '@/app/(ops)/ops/hq/profiles/actions';
+import { sendPartnerInviteAction } from '@/app/(ops)/ops/admin/profiles/actions';
 import type { OrganizationOption, ProfileInviteSummary } from './types';
 
 type InvitePartnerCardProps = {

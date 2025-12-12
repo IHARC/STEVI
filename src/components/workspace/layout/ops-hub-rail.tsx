@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { APP_ICON_MAP } from '@/lib/app-icons';
@@ -18,7 +18,12 @@ export function OpsHubRail({ navSections }: OpsHubRailProps) {
   const pathname = usePathname() ?? '/';
   const hubs = useMemo(() => buildOpsHubLinks(navSections), [navSections]);
   const activeHub = useMemo(() => hubs.find((hub) => isActive(hub, pathname)) ?? null, [hubs, pathname]);
-  const [recents, setRecents] = useState<OpsHubLink[]>([]);
+  const recents = useMemo(() => {
+    if (!activeHub) return readRecents();
+    const stored = readRecents();
+    const next = [activeHub, ...stored.filter((hub) => hub.id !== activeHub.id)].slice(0, 3);
+    return next.filter((hub) => hub.id !== activeHub.id);
+  }, [activeHub]);
 
   useEffect(() => {
     if (!activeHub) return;
@@ -26,7 +31,6 @@ export function OpsHubRail({ navSections }: OpsHubRailProps) {
     const stored = readRecents();
     const next = [activeHub, ...stored.filter((hub) => hub.id !== activeHub.id)].slice(0, 3);
     writeRecents(next);
-    setRecents(next.filter((hub) => hub.id !== activeHub.id));
   }, [activeHub]);
 
   if (!hubs.length) return null;
@@ -34,7 +38,7 @@ export function OpsHubRail({ navSections }: OpsHubRailProps) {
   return (
     <nav
       aria-label="Operations hubs"
-      className="sticky top-0 hidden h-screen w-52 shrink-0 border-r border-border/60 bg-muted/30 px-3 py-6 lg:block"
+      className="sticky top-16 hidden h-[calc(100vh-4rem)] w-52 shrink-0 border-r border-border/60 bg-muted/30 px-3 py-6 lg:block"
     >
       <div className="flex flex-col gap-4">
         {recents.length ? (

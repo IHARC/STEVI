@@ -100,7 +100,7 @@ export async function saveCatalogItem(formData: FormData) {
     meta: { pk_uuid: data?.id ?? null, slug, title: rawTitle },
   });
 
-  await revalidatePath('/ops/hq/donations');
+  await revalidatePath('/ops/admin/donations');
 }
 
 export async function toggleCatalogItem(formData: FormData) {
@@ -122,7 +122,7 @@ export async function toggleCatalogItem(formData: FormData) {
     meta: { pk_uuid: id, is_active: nextState },
   });
 
-  await revalidatePath('/ops/hq/donations');
+  await revalidatePath('/ops/admin/donations');
 }
 
 export async function importInventoryItem(formData: FormData) {
@@ -191,5 +191,5 @@ export async function importInventoryItem(formData: FormData) {
     meta: { pk_uuid: inserted?.id ?? null, inventory_item_id: inventoryItemId, title },
   });
 
-  await revalidatePath('/ops/hq/donations');
+  await revalidatePath('/ops/admin/donations');
 }

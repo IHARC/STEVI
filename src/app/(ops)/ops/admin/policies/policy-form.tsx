@@ -177,7 +177,7 @@ export function PolicyForm({ mode, action, onDeleteAction, policy, statusOptions
         <div className="flex flex-wrap gap-3">
           <Button type="submit">{mode === 'create' ? 'Create policy' : 'Save changes'}</Button>
           <Button asChild variant="ghost">
-            <Link href="/ops/hq/policies">Back to admin overview</Link>
+            <Link href="/ops/admin/policies">Back to admin overview</Link>
           </Button>
         </div>
       </form>

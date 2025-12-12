@@ -11,7 +11,7 @@ import { Label } from '@shared/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/ui/select';
 import { Checkbox } from '@shared/ui/checkbox';
 import { useToast } from '@shared/ui/use-toast';
-import { sendNotificationAction } from '@/app/(ops)/ops/hq/notifications/actions';
+import { sendNotificationAction } from '@/app/(ops)/ops/admin/notifications/actions';
 import type { NotificationRecipient } from './types';
 
 type ComposeNotificationFormProps = {

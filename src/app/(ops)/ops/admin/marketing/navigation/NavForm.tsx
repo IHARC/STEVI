@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import { Button } from '@shared/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@shared/ui/form';
 import { Input } from '@shared/ui/input';
+import { Label } from '@shared/ui/label';
 import type { NavItem } from '@/lib/marketing/settings';
 import { saveNavigationSettings } from './actions';
 
@@ -57,7 +58,7 @@ export function NavForm({ initialItems, portalCtaLabel }: Props) {
               className="grid gap-2 rounded-lg border border-border bg-card/40 p-3 sm:grid-cols-[1fr,1fr,auto]"
             >
               <div className="space-y-1">
-                <FormLabel htmlFor={`label-${index}`}>Label</FormLabel>
+                <Label htmlFor={`label-${index}`}>Label</Label>
                 <Input
                   id={`label-${index}`}
                   value={item.label}
@@ -67,7 +68,7 @@ export function NavForm({ initialItems, portalCtaLabel }: Props) {
                 />
               </div>
               <div className="space-y-1">
-                <FormLabel htmlFor={`href-${index}`}>Href</FormLabel>
+                <Label htmlFor={`href-${index}`}>Href</Label>
                 <Input
                   id={`href-${index}`}
                   value={item.href}

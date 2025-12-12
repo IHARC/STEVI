@@ -47,7 +47,7 @@ const baseAccess: PortalAccess = {
   organizationId: null,
   organizationName: null,
   canAccessOpsAdmin: false,
-  canAccessOpsHq: false,
+  canAccessOpsSteviAdmin: false,
   canAccessOpsOrg: false,
   canAccessOpsFrontline: false,
   canManageResources: false,
@@ -68,10 +68,10 @@ const baseAccess: PortalAccess = {
 };
 
 describe('resolveLandingPath', () => {
-  it('lands IHARC HQ admins on the operations home', () => {
+  it('lands STEVI Admin users on the operations home', () => {
     const access = {
       ...baseAccess,
-      canAccessOpsHq: true,
+      canAccessOpsSteviAdmin: true,
       canAccessOpsAdmin: true,
       canAccessOpsFrontline: true,
       canAccessOpsOrg: true,
@@ -96,7 +96,7 @@ describe('buildPortalNav', () => {
       canAccessOpsAdmin: true,
       canAccessOpsFrontline: true,
       canAccessOpsOrg: true,
-      canAccessOpsHq: true,
+      canAccessOpsSteviAdmin: true,
       canAccessInventoryOps: true,
       canManageConsents: true,
       organizationId: 12,
@@ -105,14 +105,14 @@ describe('buildPortalNav', () => {
 
     const sections = buildPortalNav(access);
     const sectionIds = sections.map((section) => section.id);
-    expect(sectionIds).toEqual(['ops_frontline', 'ops_hq']);
+    expect(sectionIds).toEqual(['ops_frontline', 'ops_admin']);
 
     const frontline = sections.find((section) => section.id === 'ops_frontline');
     const frontlineGroups = frontline?.groups.map((group) => group.id) ?? [];
     expect(frontlineGroups).toEqual(expect.arrayContaining(['today', 'clients', 'programs', 'supplies', 'partners']));
 
-    const hq = sections.find((section) => section.id === 'ops_hq');
-    expect(hq?.groups[0]?.items.length).toBeGreaterThanOrEqual(4);
+    const admin = sections.find((section) => section.id === 'ops_admin');
+    expect(admin?.groups[0]?.items.length).toBeGreaterThanOrEqual(4);
   });
 
   it('hides sections the user cannot access', () => {
@@ -164,7 +164,8 @@ describe('requireArea guards', () => {
 
 describe('inferPortalAreaFromPath', () => {
   it('maps known prefixes to areas', () => {
-    expect(inferPortalAreaFromPath('/ops/hq')).toBe('ops_hq');
+    expect(inferPortalAreaFromPath('/ops/admin')).toBe('ops_admin');
+    expect(inferPortalAreaFromPath('/ops/hq')).toBe('ops_admin');
     expect(inferPortalAreaFromPath('/ops/org/settings')).toBe('ops_org');
     expect(inferPortalAreaFromPath('/ops/clients')).toBe('ops_frontline');
     expect(inferPortalAreaFromPath('/home')).toBe('client');
@@ -178,7 +179,7 @@ describe('no orphan routes', () => {
       canAccessOpsAdmin: true,
       canAccessOpsFrontline: true,
       canAccessOpsOrg: true,
-      canAccessOpsHq: true,
+      canAccessOpsSteviAdmin: true,
       canAccessInventoryOps: true,
       canManagePolicies: true,
       canManageResources: true,

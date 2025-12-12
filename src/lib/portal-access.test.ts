@@ -127,7 +127,7 @@ describe('loadPortalAccess', () => {
     expect(access?.portalRoles).toEqual(['portal_org_admin']);
     expect(access?.iharcRoles).toEqual(['iharc_admin', 'iharc_staff']);
     expect(access?.canAccessOpsAdmin).toBe(true);
-    expect(access?.canAccessOpsHq).toBe(true);
+    expect(access?.canAccessOpsSteviAdmin).toBe(true);
     expect(access?.canAccessOpsOrg).toBe(true);
     expect(access?.canAccessOpsFrontline).toBe(true);
     expect(access?.canAccessInventoryOps).toBe(true);

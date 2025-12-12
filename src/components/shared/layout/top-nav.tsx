@@ -51,8 +51,8 @@ export function TopNav({
       ? 'Operations portal'
       : activeArea === 'ops_org'
         ? 'Organization hub'
-      : activeArea === 'ops_hq'
-          ? 'STEVI admin portal'
+      : activeArea === 'ops_admin'
+          ? 'STEVI Admin portal'
           : 'Client portal';
 
   return (

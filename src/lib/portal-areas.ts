@@ -1,13 +1,13 @@
 import { stripRouteGroups } from '@/lib/paths';
 import type { PortalAccess } from '@/lib/portal-access';
 
-export type PortalArea = 'client' | 'ops_frontline' | 'ops_org' | 'ops_hq';
+export type PortalArea = 'client' | 'ops_frontline' | 'ops_org' | 'ops_admin';
 
 const LANDING_PATH_BY_AREA: Record<PortalArea, string> = {
   client: '/home',
   ops_frontline: '/ops/today',
   ops_org: '/ops/org',
-  ops_hq: '/ops/hq',
+  ops_admin: '/ops/admin',
 };
 
 type RequireAreaOptions = {
@@ -23,7 +23,7 @@ export type RequireAreaResult =
 export function inferPortalAreaFromPath(pathname: string): PortalArea {
   const cleaned = stripRouteGroups(pathname || '');
 
-  if (cleaned.startsWith('/ops/hq')) return 'ops_hq';
+  if (cleaned.startsWith('/ops/admin') || cleaned.startsWith('/ops/hq')) return 'ops_admin';
   if (cleaned.startsWith('/ops/org')) return 'ops_org';
   if (cleaned.startsWith('/ops')) return 'ops_frontline';
   return 'client';
@@ -33,7 +33,7 @@ export function resolveLandingArea(access: PortalAccess | null): PortalArea {
   if (!access) return 'client';
   if (access.canAccessOpsFrontline) return 'ops_frontline';
   if (access.canAccessOpsOrg) return 'ops_org';
-  if (access.canAccessOpsHq) return 'ops_hq';
+  if (access.canAccessOpsSteviAdmin) return 'ops_admin';
   return 'client';
 }
 
@@ -79,10 +79,10 @@ export function requireArea(
   }
 
   const clientHome = LANDING_PATH_BY_AREA.client;
-  const hasHqAccess = access.canAccessOpsHq;
+  const hasAdminAccess = access.canAccessOpsSteviAdmin;
   const hasFrontlineAccess = access.canAccessOpsFrontline;
   const hasOrgAccess = access.canAccessOpsOrg;
-  const hasOpsAccess = hasHqAccess || hasFrontlineAccess || hasOrgAccess;
+  const hasOpsAccess = hasAdminAccess || hasFrontlineAccess || hasOrgAccess;
   const previewRequested = Boolean(options.preview);
 
   if (area === 'ops_frontline') {
@@ -106,9 +106,9 @@ export function requireArea(
     };
   }
 
-  if (area === 'ops_hq') {
-    if (hasHqAccess) {
-      return { allowed: true, activeArea: 'ops_hq', isPreview: false };
+  if (area === 'ops_admin') {
+    if (hasAdminAccess) {
+      return { allowed: true, activeArea: 'ops_admin', isPreview: false };
     }
     return { allowed: false, redirectPath: landingPath };
   }

@@ -15,8 +15,8 @@ import {
 import { getIharcRoles, getPortalRoles } from '@/lib/enum-values';
 import type { SupabaseServerClient } from '@/lib/supabase/types';
 
-const LIST_ROOT = '/ops/hq/users';
-const SEGMENT_PATHS = ['/ops/hq/users/all', '/ops/hq/users/clients', '/ops/hq/users/partners', '/ops/hq/users/staff'] as const;
+const LIST_ROOT = '/ops/admin/users';
+const SEGMENT_PATHS = ['/ops/admin/users/all', '/ops/admin/users/clients', '/ops/admin/users/partners', '/ops/admin/users/staff'] as const;
 
 type ActionResult<T = void> = { success: true; data?: T } | { success: false; error: string };
 

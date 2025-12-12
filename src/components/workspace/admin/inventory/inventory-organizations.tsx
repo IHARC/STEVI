@@ -24,7 +24,7 @@ import {
   deactivateInventoryOrganizationAction,
   activateInventoryOrganizationAction,
   updateInventoryOrganizationAction,
-} from '@/app/(ops)/ops/hq/inventory/actions';
+} from '@/app/(ops)/ops/admin/inventory/actions';
 import type { InventoryOrganization } from '@/lib/inventory/types';
 
 type InventoryOrganizationsSectionProps = {

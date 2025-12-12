@@ -28,8 +28,8 @@ const canSeeClients = (access: PortalAccess) => access.canAccessOpsFrontline || 
 const canSeePrograms = (access: PortalAccess) => access.canAccessOpsFrontline || access.canAccessOpsAdmin;
 const canSeeSupplies = (access: PortalAccess) => access.canAccessInventoryOps || access.canAccessOpsAdmin;
 const canSeePartners = (access: PortalAccess) => access.canAccessOpsAdmin;
-const canSeeOrganization = (access: PortalAccess) => access.canAccessOpsOrg && !access.canAccessOpsHq;
-const canSeeHq = (access: PortalAccess) => access.canAccessOpsHq;
+const canSeeOrganization = (access: PortalAccess) => access.canAccessOpsOrg && !access.canAccessOpsSteviAdmin;
+const canSeeAdmin = (access: PortalAccess) => access.canAccessOpsSteviAdmin;
 
 const NAV_SECTIONS: NavSectionDefinition[] = [
   {
@@ -113,23 +113,25 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
     ],
   },
   {
-    id: 'ops_hq',
+    id: 'ops_admin',
     label: 'STEVI Admin',
     description: 'STEVI-wide controls and content',
-    area: 'ops_hq',
-    requires: canSeeHq,
+    area: 'ops_admin',
+    requires: canSeeAdmin,
     groups: [
       {
-        id: 'hq-hub',
+        id: 'admin-hub',
         label: 'Admin hub',
         icon: 'building',
         isHub: true,
         items: [
-          { id: 'hq-overview', href: '/ops/hq', label: 'Overview', icon: 'dashboard', match: ['/ops/hq'], exact: true },
-          { id: 'hq-content', href: '/ops/hq#content', label: 'Content & Notifications', icon: 'megaphone', match: ['/ops/hq'] },
-          { id: 'hq-organizations', href: '/ops/hq/organizations', label: 'Organizations', icon: 'globe', match: ['/ops/hq/organizations'] },
-          { id: 'hq-inventory', href: '/ops/hq#inventory', label: 'Inventory & Donations', icon: 'boxes', match: ['/ops/hq'] },
-          { id: 'hq-operations', href: '/ops/hq#operations', label: 'Operations', icon: 'workflow', match: ['/ops/hq'] },
+          { id: 'admin-overview', href: '/ops/admin', label: 'Overview', icon: 'dashboard', match: ['/ops/admin'], exact: true },
+          { id: 'admin-content', href: '/ops/admin/content', label: 'Content & Notifications', icon: 'megaphone', match: ['/ops/admin/content'] },
+          { id: 'admin-organizations', href: '/ops/admin/organizations', label: 'Organizations', icon: 'globe', match: ['/ops/admin/organizations'] },
+          { id: 'admin-users', href: '/ops/admin/users/all', label: 'Users', icon: 'users', match: ['/ops/admin/users'] },
+          { id: 'admin-inventory', href: '/ops/admin/inventory', label: 'Inventory & Donations', icon: 'boxes', match: ['/ops/admin/inventory'] },
+          { id: 'admin-website', href: '/ops/admin/website', label: 'Website & Marketing', icon: 'globe', match: ['/ops/admin/website'] },
+          { id: 'admin-operations', href: '/ops/admin/operations', label: 'Operations', icon: 'workflow', match: ['/ops/admin/operations'] },
         ],
       },
     ],
@@ -211,7 +213,7 @@ export function resolveQuickActions(
     ];
   }
 
-  if (area === 'ops_frontline' || area === 'ops_org' || area === 'ops_hq') {
+  if (area === 'ops_frontline' || area === 'ops_org' || area === 'ops_admin') {
     const actions: QuickAction[] = [];
 
     if (access.canAccessOpsFrontline || access.canAccessOpsAdmin) {
@@ -264,7 +266,7 @@ export function navAreaLabel(area: PortalArea): string {
   switch (area) {
     case 'ops_frontline':
       return 'Operations';
-    case 'ops_hq':
+    case 'ops_admin':
       return 'STEVI Admin';
     case 'ops_org':
       return 'Organization';

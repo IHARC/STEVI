@@ -128,9 +128,9 @@ export async function createResourcePage(formData: FormData) {
     },
   });
 
-  const adminResourcePath = `/ops/hq/resources/${slug}`;
+  const adminResourcePath = `/ops/admin/resources/${slug}`;
 
-  await revalidatePaths('/ops/hq', '/ops/hq/resources', adminResourcePath);
+  await revalidatePaths('/ops/admin', '/ops/admin/resources', adminResourcePath);
 }
 
 export async function updateResourcePage(formData: FormData) {
@@ -234,14 +234,14 @@ export async function updateResourcePage(formData: FormData) {
     },
   });
 
-  const adminResourcePath = `/ops/hq/resources/${slug}`;
+  const adminResourcePath = `/ops/admin/resources/${slug}`;
 
   const legacySlugPath = currentSlug && currentSlug !== slug ? `/resources/${currentSlug}` : null;
-  const legacyAdminPath = currentSlug && currentSlug !== slug ? `/ops/hq/resources/${currentSlug}` : null;
+  const legacyAdminPath = currentSlug && currentSlug !== slug ? `/ops/admin/resources/${currentSlug}` : null;
 
   await revalidatePaths(
-    '/ops/hq',
-    '/ops/hq/resources',
+    '/ops/admin',
+    '/ops/admin/resources',
     adminResourcePath,
     '/resources',
     `/resources/${slug}`,
@@ -277,11 +277,11 @@ export async function deleteResourcePage(formData: FormData) {
   });
 
   await revalidatePaths(
-    '/ops/hq',
-    '/ops/hq/resources',
+    '/ops/admin',
+    '/ops/admin/resources',
     '/resources',
     resourceSlug ? `/resources/${resourceSlug}` : null,
-    resourceSlug ? `/ops/hq/resources/${resourceSlug}` : null,
+    resourceSlug ? `/ops/admin/resources/${resourceSlug}` : null,
     '/sitemap.xml',
   );
 }

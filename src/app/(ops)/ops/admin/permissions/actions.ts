@@ -6,7 +6,7 @@ import { loadPortalAccess } from '@/lib/portal-access';
 import { ensurePortalProfile } from '@/lib/profile';
 import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 
-const PATH = '/ops/hq/permissions';
+const PATH = '/ops/admin/permissions';
 
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;

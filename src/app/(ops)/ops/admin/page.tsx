@@ -3,28 +3,27 @@ import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { resolveLandingPath } from '@/lib/portal-navigation';
 import { PageHeader } from '@shared/layout/page-header';
-import { PageTabNav, type PageTab } from '@shared/layout/page-tab-nav';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { NotificationsChart } from './notifications-chart';
 import { RecentNotifications } from '@workspace/admin/notifications/recent-notifications';
 import { AttentionQueue, type AttentionQueueItem } from './operations/attention-queue';
 import type { NotificationRecord } from '@workspace/admin/notifications/types';
-import { ensureInventoryActor } from '@/lib/inventory/auth';
-import { fetchInventoryBootstrap } from '@/lib/inventory/service';
-import { InventoryHub } from '@workspace/admin/inventory/inventory-hub';
-import { WebsiteBrandingPanel, WebsiteFooterPanel, WebsiteNavigationPanel } from './website/panels';
+import Link from 'next/link';
+import { Button } from '@shared/ui/button';
+import { Badge } from '@shared/ui/badge';
+import { AdminTabs } from './admin-tabs';
 
 export const dynamic = 'force-dynamic';
 
-export default async function OpsHqPage() {
+export default async function OpsAdminPage() {
   const supabase = await createSupabaseRSCClient();
   const access = await loadPortalAccess(supabase);
 
   if (!access) {
-    redirect('/login?next=/ops/hq');
+    redirect('/login?next=/ops/admin');
   }
 
-  if (!access.canAccessOpsHq) {
+  if (!access.canAccessOpsSteviAdmin) {
     redirect(resolveLandingPath(access));
   }
 
@@ -71,7 +70,7 @@ export default async function OpsHqPage() {
       label: 'Pending profiles',
       count: pendingProfileCount,
       description: 'Awaiting approval across tenants',
-      href: '/ops/hq#operations',
+      href: '/ops/admin/operations',
       tone: 'warning',
     },
     {
@@ -87,25 +86,12 @@ export default async function OpsHqPage() {
       label: 'Queued notifications',
       count: queuedNotificationCount,
       description: 'Queued or failed deliveries',
-      href: '/ops/hq#content',
+      href: '/ops/admin/content',
     },
   ];
 
-  let inventoryBootstrap = null;
-  let inventoryActorId: string | null = null;
-  let canManageLocations = false;
   const canManageWebsite = access.canManageWebsiteContent;
-
-  if (access.canAccessInventoryOps) {
-    try {
-      const { profile, roles } = await ensureInventoryActor(supabase);
-      inventoryActorId = profile.id;
-      canManageLocations = roles.includes('iharc_admin');
-      inventoryBootstrap = await fetchInventoryBootstrap(supabase);
-    } catch (error) {
-      console.warn('Inventory unavailable for STEVI Admin', error);
-    }
-  }
+  const canSeeInventory = access.canAccessInventoryOps;
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-8 md:px-6">
@@ -113,71 +99,102 @@ export default async function OpsHqPage() {
         eyebrow="STEVI Admin"
         title="STEVI Administration"
         description="Global controls for content, notifications, inventory, and tenant organizations."
-        primaryAction={{ label: 'Org hub', href: '/ops/org' }}
-        secondaryAction={{ label: 'Frontline view', href: '/ops/today' }}
+        primaryAction={{ label: 'Organizations', href: '/ops/admin/organizations' }}
+        secondaryAction={{ label: 'Users', href: '/ops/admin/users/all' }}
         meta={[{ label: 'IHARC only', tone: 'warning' }, { label: 'No client data', tone: 'neutral' }]}
       />
 
-      <PageTabNav
-        tabs={[
-          { label: 'Overview', href: '/ops/hq', match: ['/ops/hq'] },
-          { label: 'Content', href: '/ops/hq#content' },
-          { label: 'Organizations', href: '/ops/hq/organizations', match: ['/ops/hq/organizations'] },
-          { label: 'Inventory', href: '/ops/hq#inventory' },
-          { label: 'Operations', href: '/ops/hq#operations' },
-        ] satisfies PageTab[]}
-      />
+      <AdminTabs />
 
       <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
-        <Card className="border-border/60" id="content">
+        <Card className="border-border/60">
           <CardHeader className="space-y-1">
             <CardTitle className="text-xl">Notifications</CardTitle>
             <CardDescription>Monitor outbound delivery volume and state.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <NotificationsChart data={trendData} />
-            <RecentNotifications notifications={notifications.slice(0, 12)} />
+            <Button asChild variant="outline" size="sm">
+              <Link href="/ops/admin/content">Open content & notifications</Link>
+            </Button>
           </CardContent>
         </Card>
 
-        <Card className="border-border/60" id="operations">
+        <Card className="border-border/60">
           <CardHeader className="space-y-1">
             <CardTitle className="text-xl">Attention queue</CardTitle>
             <CardDescription>Review approvals, invites, and queued messages.</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-3">
             <AttentionQueue items={attentionItems} />
+            <Button asChild variant="outline" size="sm">
+              <Link href="/ops/admin/operations">Open operations</Link>
+            </Button>
           </CardContent>
         </Card>
       </div>
 
-      {inventoryBootstrap && inventoryActorId ? (
-        <Card className="border-border/60" id="inventory">
+      <RecentNotifications notifications={notifications.slice(0, 12)} />
+
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <Card className="border-border/60">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-xl">Inventory & donations</CardTitle>
-            <CardDescription>Global stock, receipts, and org participation.</CardDescription>
+            <CardTitle className="text-lg">Organizations</CardTitle>
+            <CardDescription>Manage tenants and feature flags.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <InventoryHub bootstrap={inventoryBootstrap} actorProfileId={inventoryActorId} canManageLocations={canManageLocations} />
+          <CardContent>
+            <Button asChild>
+              <Link href="/ops/admin/organizations">Open organizations</Link>
+            </Button>
           </CardContent>
         </Card>
-      ) : null}
 
-      {canManageWebsite ? (
-        <div className="space-y-4" id="content-management">
+        <Card className="border-border/60">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-lg">Users</CardTitle>
+            <CardDescription>Profiles, roles, and access audits.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild>
+              <Link href="/ops/admin/users/all">Open users</Link>
+            </Button>
+          </CardContent>
+        </Card>
+
+        {canSeeInventory ? (
           <Card className="border-border/60">
-            <CardHeader>
-              <CardTitle className="text-xl">Website & content</CardTitle>
-              <CardDescription>Update public branding, navigation, and footer.</CardDescription>
+            <CardHeader className="space-y-1">
+              <CardTitle className="text-lg">Inventory</CardTitle>
+              <CardDescription>Global stock and donations.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <WebsiteBrandingPanel supabase={supabase} access={access} />
-              <WebsiteNavigationPanel supabase={supabase} access={access} />
-              <WebsiteFooterPanel supabase={supabase} access={access} />
+            <CardContent className="flex items-center justify-between gap-2">
+              <Button asChild>
+                <Link href="/ops/admin/inventory">Open inventory</Link>
+              </Button>
+              <Badge variant="secondary" className="text-[11px] uppercase tracking-wide">
+                Enabled
+              </Badge>
             </CardContent>
           </Card>
-        </div>
-      ) : null}
+        ) : null}
+
+        {canManageWebsite ? (
+          <Card className="border-border/60">
+            <CardHeader className="space-y-1">
+              <CardTitle className="text-lg">Website</CardTitle>
+              <CardDescription>Branding and marketing content.</CardDescription>
+            </CardHeader>
+            <CardContent className="flex items-center justify-between gap-2">
+              <Button asChild>
+                <Link href="/ops/admin/website">Open website editor</Link>
+              </Button>
+              <Badge variant="secondary" className="text-[11px] uppercase tracking-wide">
+                Enabled
+              </Badge>
+            </CardContent>
+          </Card>
+        ) : null}
+      </section>
     </div>
   );
 }

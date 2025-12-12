@@ -9,7 +9,7 @@ import { ensurePortalProfile } from '@/lib/profile';
 import { loadPortalAccess } from '@/lib/portal-access';
 import type { SupabaseServerClient } from '@/lib/supabase/types';
 
-const ADMIN_PATHS = ['/ops/hq', '/ops/hq/notifications'] as const;
+const ADMIN_PATHS = ['/ops/admin', '/ops/admin/notifications'] as const;
 
 type ActionResult = { success: true } | { success: false; error: string };
 

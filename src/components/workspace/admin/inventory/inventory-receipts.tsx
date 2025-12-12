@@ -18,7 +18,7 @@ import { Input } from '@shared/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@shared/ui/table';
 import { useToast } from '@shared/ui/use-toast';
-import { updateInventoryTransactionSourceAction } from '@/app/(ops)/ops/hq/inventory/actions';
+import { updateInventoryTransactionSourceAction } from '@/app/(ops)/ops/admin/inventory/actions';
 import type { InventoryOrganization, InventoryReceipt } from '@/lib/inventory/types';
 
 type InventoryReceiptsSectionProps = {

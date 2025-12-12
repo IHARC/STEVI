@@ -5,9 +5,9 @@ import { requireArea } from '@/lib/portal-areas';
 
 export const dynamic = 'force-dynamic';
 
-export default async function HqLayout({ children }: { children: ReactNode }) {
+export default async function AdminLayout({ children }: { children: ReactNode }) {
   const { portalAccess, landingPath, currentPath } = await getPortalRequestContext();
-  const accessCheck = requireArea(portalAccess, 'ops_hq', { currentPath, landingPath });
+  const accessCheck = requireArea(portalAccess, 'ops_admin', { currentPath, landingPath });
   if (!accessCheck.allowed) {
     redirect(accessCheck.redirectPath);
   }

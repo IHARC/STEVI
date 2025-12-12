@@ -63,7 +63,7 @@ const baseAccess: PortalAccess = {
   organizationId: 1,
   organizationName: 'IHARC',
   canAccessOpsAdmin: true,
-  canAccessOpsHq: true,
+  canAccessOpsSteviAdmin: true,
   canAccessOpsOrg: true,
   canAccessOpsFrontline: true,
   canManageResources: true,

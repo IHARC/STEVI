@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@shared/ui/card';
 import { Input } from '@shared/ui/input';
 import { Button } from '@shared/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/ui/select';
-import { upsertRelayAction } from '@/app/(ops)/ops/hq/notifications/actions';
+import { upsertRelayAction } from '@/app/(ops)/ops/admin/notifications/actions';
 
 function SaveButton() {
   const { pending } = useFormStatus();

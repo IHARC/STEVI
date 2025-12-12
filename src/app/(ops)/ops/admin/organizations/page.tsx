@@ -65,11 +65,11 @@ function formatDate(value: string | null) {
   }
 }
 
-export default async function HqOrganizationsPage() {
+export default async function AdminOrganizationsPage() {
   const supabase = await createSupabaseRSCClient();
   const access = await loadPortalAccess(supabase);
 
-  if (!access || !access.canAccessOpsHq) {
+  if (!access || !access.canAccessOpsSteviAdmin) {
     redirect(resolveLandingPath(access));
   }
 
@@ -98,7 +98,7 @@ export default async function HqOrganizationsPage() {
         title="Organizations"
         description="Create and manage partner organizations across STEVI. IHARC admins can onboard and configure any tenant."
         primaryAction={{ label: 'New organization', href: '#create' }}
-        secondaryAction={{ label: 'Back to STEVI Admin', href: '/ops/hq' }}
+        secondaryAction={{ label: 'Back to STEVI Admin', href: '/ops/admin' }}
       />
 
       <section className="grid gap-3 lg:grid-cols-[1.1fr_1fr]" id="create">
@@ -253,10 +253,10 @@ export default async function HqOrganizationsPage() {
                 )}
               </div>
               <Button asChild className="w-full" variant="outline">
-                <Link href={`/ops/hq/organizations/${org.id}`}>Open</Link>
-              </Button>
-            </CardContent>
-          </Card>
+            <Link href={`/ops/admin/organizations/${org.id}`}>Open</Link>
+          </Button>
+        </CardContent>
+      </Card>
         ))}
         {organizations.length === 0 ? (
           <Card className="border-dashed border-border/60">

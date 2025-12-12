@@ -23,7 +23,7 @@ export type PortalAccess = {
   organizationId: number | null;
   organizationName: string | null;
   canAccessOpsAdmin: boolean;
-  canAccessOpsHq: boolean;
+  canAccessOpsSteviAdmin: boolean;
   canAccessOpsOrg: boolean;
   canAccessOpsFrontline: boolean;
   canManageResources: boolean;
@@ -120,7 +120,7 @@ export async function loadPortalAccess(
   const isOrgAdmin = portalRoles.includes('portal_org_admin');
   const isOrgRep = portalRoles.includes('portal_org_rep');
 
-  const canAccessOpsHq = isProfileApproved && isIharcAdmin;
+  const canAccessOpsSteviAdmin = isProfileApproved && isIharcAdmin;
   const canAccessOpsAdmin = isProfileApproved && (isIharcAdmin || isOrgAdmin);
   const canAccessOpsOrg = isProfileApproved && ((isOrgAdmin || isOrgRep) && organizationId !== null || isIharcAdmin);
   const canAccessOpsFrontline = isProfileApproved && (
@@ -154,7 +154,7 @@ export async function loadPortalAccess(
     organizationId,
     organizationName,
     canAccessOpsAdmin,
-    canAccessOpsHq,
+    canAccessOpsSteviAdmin,
     canAccessOpsOrg,
     canAccessOpsFrontline,
     canManageResources,
@@ -317,7 +317,7 @@ function userMenuBlueprint(access: PortalAccess): MenuLinkBlueprint[] {
     {
       href: '/ops/org',
       label: 'Organization hub',
-      requires: (a) => a.canAccessOpsOrg && !a.canAccessOpsHq,
+      requires: (a) => a.canAccessOpsOrg && !a.canAccessOpsSteviAdmin,
     },
     {
       href: '/home?preview=1',
@@ -351,7 +351,7 @@ const HUB_TAB_COMMANDS: { href: string; label: string; group: string; requires: 
   { href: '/ops/programs', label: 'Programs', group: 'Programs', requires: (access) => access.canAccessOpsFrontline || access.canAccessOpsAdmin },
   { href: '/ops/supplies', label: 'Supplies', group: 'Supplies', requires: (access) => access.canAccessInventoryOps || access.canAccessOpsAdmin },
   { href: '/ops/partners', label: 'Partner directory', group: 'Partners', requires: (access) => access.canAccessOpsAdmin },
-  { href: '/ops/org', label: 'Organization hub', group: 'Organization', requires: (access) => access.canAccessOpsOrg && !access.canAccessOpsHq },
+  { href: '/ops/org', label: 'Organization hub', group: 'Organization', requires: (access) => access.canAccessOpsOrg && !access.canAccessOpsSteviAdmin },
 ];
 
 export function buildUserMenuLinks(access: PortalAccess): PortalLink[] {

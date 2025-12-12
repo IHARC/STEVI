@@ -111,7 +111,7 @@ export function UserPeekSheet({ user, roleOptions }: UserPeekSheetProps) {
 
           <div className="flex flex-wrap gap-3">
             <Button asChild variant="outline" size="sm">
-              <Link href={`/ops/hq/users/profile/${user.profileId}`}>Open full profile</Link>
+              <Link href={`/ops/admin/users/profile/${user.profileId}`}>Open full profile</Link>
             </Button>
           </div>
         </div>

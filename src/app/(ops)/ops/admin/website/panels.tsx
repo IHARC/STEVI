@@ -186,7 +186,7 @@ export async function WebsiteContentInventoryPanel(_: PanelProps) {
           description="Track ownership and review cadence for every public asset. Start with a simple list and add cache revalidation hooks."
           action={
             <Button asChild>
-              <Link href="/ops/hq#content">View guidance</Link>
+              <Link href="/ops/admin/content">View guidance</Link>
             </Button>
           }
         />
@@ -200,7 +200,7 @@ export async function buildWebsiteContext() {
   const access = await loadPortalAccess(supabase);
 
   if (!access) {
-    redirect('/login?next=/ops/hq/website');
+    redirect('/login?next=/ops/admin/website');
   }
 
   if (!access.canManageWebsiteContent) {

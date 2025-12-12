@@ -40,36 +40,35 @@ export function AppShell({
   const showClientPreviewBanner = isClientPreview;
 
   return (
-    <div className={cn('ops-shell flex min-h-screen bg-background text-foreground')}>
-      {showNavigation ? (
-        <OpsHubRail navSections={navSections} />
-      ) : null}
-      <div className="flex min-h-screen flex-1 flex-col">
-        <TopNav
-          branding={branding}
-          navigation={navigation}
-          commands={commandPaletteItems}
-          navSections={showNavigation ? navSections : []}
-        />
-        {showClientPreviewBanner ? <ClientPreviewBanner /> : null}
-        <main id="main-content" className="flex-1">
-          <div className="mx-auto w-full max-w-6xl px-4 py-4 md:px-6">
-            <div
-              className={cn(
-                'grid gap-6',
-                showInbox ? 'xl:grid-cols-[minmax(0,1fr)_22rem]' : 'grid-cols-1',
-              )}
-            >
-              <section className="min-w-0">
-                <div className="space-y-6">
-                  {children}
-                </div>
-              </section>
-              {showInbox ? <InboxPanel items={inboxItems} /> : null}
+    <div className={cn('ops-shell min-h-screen bg-background text-foreground')}>
+      <TopNav
+        branding={branding}
+        navigation={navigation}
+        commands={commandPaletteItems}
+        navSections={showNavigation ? navSections : []}
+      />
+      {showClientPreviewBanner ? <ClientPreviewBanner /> : null}
+
+      <div className="flex min-h-[calc(100vh-4rem)]">
+        {showNavigation ? <OpsHubRail navSections={navSections} /> : null}
+        <div className="flex min-h-full flex-1 flex-col">
+          <main id="main-content" className="flex-1">
+            <div className="mx-auto w-full max-w-6xl px-4 py-4 md:px-6">
+              <div
+                className={cn(
+                  'grid gap-6',
+                  showInbox ? 'xl:grid-cols-[minmax(0,1fr)_22rem]' : 'grid-cols-1',
+                )}
+              >
+                <section className="min-w-0">
+                  <div className="space-y-6">{children}</div>
+                </section>
+                {showInbox ? <InboxPanel items={inboxItems} /> : null}
+              </div>
             </div>
-          </div>
-        </main>
-        <SiteFooter />
+          </main>
+          <SiteFooter />
+        </div>
       </div>
     </div>
   );

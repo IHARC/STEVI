@@ -12,7 +12,7 @@ const baseAccess: PortalAccess = {
   organizationId: null,
   organizationName: null,
   canAccessOpsAdmin: false,
-  canAccessOpsHq: false,
+  canAccessOpsSteviAdmin: false,
   canAccessOpsOrg: false,
   canManageResources: false,
   canManagePolicies: false,

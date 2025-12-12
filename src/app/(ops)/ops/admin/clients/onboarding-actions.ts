@@ -60,7 +60,7 @@ export async function resetOnboardingAction(formData: FormData): Promise<AdminAc
     meta: { person_id: personId, reset_by: access.profile.id },
   });
 
-  revalidatePath(`/ops/hq/clients/${personId}`);
+  revalidatePath(`/ops/admin/clients/${personId}`);
   return { status: 'success', message: 'Onboarding reset. Consents now require renewal.' };
 }
 
@@ -114,7 +114,7 @@ export async function resendOnboardingLinkAction(formData: FormData): Promise<Ad
     meta: { person_id: personId, target_profile_id: linkRow.profile_id },
   });
 
-  revalidatePath(`/ops/hq/clients/${personId}`);
+  revalidatePath(`/ops/admin/clients/${personId}`);
   return { status: 'success', message: 'Reminder sent to the linked account.' };
 }
 
@@ -131,6 +131,6 @@ export async function refreshOnboardingStatusAction(formData: FormData): Promise
   }
 
   await getOnboardingStatus({ personId }, supabase);
-  revalidatePath(`/ops/hq/clients/${personId}`);
+  revalidatePath(`/ops/admin/clients/${personId}`);
   return { status: 'success', message: 'Onboarding status refreshed.' };
 }

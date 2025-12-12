@@ -42,7 +42,7 @@ export function UserSavedSearches({ segment, currentParams }: Props) {
 
   const navigateWithParams = (params: string) => {
     const qs = params ? `?${params}` : '';
-    router.push(`/ops/hq/users/${segment}${qs}`);
+    router.push(`/ops/admin/users/${segment}${qs}`);
   };
 
   const handleSaveCurrent = () => {

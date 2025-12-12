@@ -39,7 +39,7 @@ export function UserFilterBar({ segment, organizations, statusOptions, roleOptio
   };
 
   return (
-    <form className="grid gap-3 rounded-2xl border border-border/40 bg-card p-3 md:grid-cols-5" action={`/admin/users/${segment}`}>
+    <form className="grid gap-3 rounded-2xl border border-border/40 bg-card p-3 md:grid-cols-5" action={`/ops/admin/users/${segment}`}>
       <input type="hidden" name="q" value={search} />
       <input type="hidden" name="status" value={status} />
       <input type="hidden" name="role" value={role} />

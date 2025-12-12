@@ -227,7 +227,7 @@ async function fetchAdminInboxItems(
         id: 'admin-profiles',
         title: 'Profile approvals',
         description: `${pendingProfiles.count} pending profiles`,
-        href: '/ops/hq#operations',
+        href: '/ops/admin/operations',
         tone: 'warning',
         badge: 'Review',
       });
@@ -238,7 +238,7 @@ async function fetchAdminInboxItems(
         id: 'admin-invites',
         title: 'Pending invites',
         description: `${pendingInvites.count} invites awaiting action`,
-        href: '/ops/hq#operations',
+        href: '/ops/admin/operations',
         tone: 'info',
         badge: 'Invites',
       });
@@ -249,7 +249,7 @@ async function fetchAdminInboxItems(
         id: 'admin-notifications',
         title: 'Unacknowledged notifications',
         description: `${notifications.count} queued/sent notifications`,
-        href: '/ops/hq#content',
+        href: '/ops/admin/content',
         tone: 'info',
         badge: 'Notifications',
       });
@@ -260,7 +260,7 @@ async function fetchAdminInboxItems(
         id: 'admin-cases',
         title: 'Open cases',
         description: `${openCases.count} cases open`,
-        href: '/ops/hq#operations',
+        href: '/ops/admin/operations',
         tone: 'info',
         badge: 'Cases',
       });
@@ -277,8 +277,8 @@ export async function fetchPortalInbox(
   access: PortalAccess,
   area: PortalArea,
 ): Promise<InboxItem[]> {
-  if (area === 'ops_hq') {
-    if (access.canAccessOpsHq) {
+  if (area === 'ops_admin') {
+    if (access.canAccessOpsSteviAdmin) {
       return fetchAdminInboxItems(supabase);
     }
   }

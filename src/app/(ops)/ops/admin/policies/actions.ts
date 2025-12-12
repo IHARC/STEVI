@@ -128,9 +128,9 @@ export async function createPolicy(formData: FormData) {
     },
   });
 
-  const adminPolicyPath = `/ops/hq/policies/${slug}`;
+  const adminPolicyPath = `/ops/admin/policies/${slug}`;
 
-  await revalidatePaths('/ops/hq', '/ops/hq/policies', adminPolicyPath, '/policies', `/policies/${slug}`, '/transparency', '/sitemap.xml');
+  await revalidatePaths('/ops/admin', '/ops/admin/policies', adminPolicyPath, '/policies', `/policies/${slug}`, '/transparency', '/sitemap.xml');
 }
 
 export async function updatePolicy(formData: FormData) {
@@ -212,13 +212,13 @@ export async function updatePolicy(formData: FormData) {
     },
   });
 
-  const adminPolicyPath = `/ops/hq/policies/${slug}`;
+  const adminPolicyPath = `/ops/admin/policies/${slug}`;
   const legacyPolicyPath = currentSlug && currentSlug !== slug ? `/policies/${currentSlug}` : null;
-  const legacyAdminPath = currentSlug && currentSlug !== slug ? `/ops/hq/policies/${currentSlug}` : null;
+  const legacyAdminPath = currentSlug && currentSlug !== slug ? `/ops/admin/policies/${currentSlug}` : null;
 
   await revalidatePaths(
-    '/ops/hq',
-    '/ops/hq/policies',
+    '/ops/admin',
+    '/ops/admin/policies',
     adminPolicyPath,
     '/policies',
     `/policies/${slug}`,
@@ -255,11 +255,11 @@ export async function deletePolicy(formData: FormData) {
   });
 
   await revalidatePaths(
-    '/ops/hq',
-    '/ops/hq/policies',
+    '/ops/admin',
+    '/ops/admin/policies',
     '/policies',
     policySlug ? `/policies/${policySlug}` : null,
-    policySlug ? `/ops/hq/policies/${policySlug}` : null,
+    policySlug ? `/ops/admin/policies/${policySlug}` : null,
     '/transparency',
     '/sitemap.xml',
   );

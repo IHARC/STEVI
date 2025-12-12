@@ -60,18 +60,18 @@ const STATUS_BADGE: Record<string, 'default' | 'secondary' | 'outline'> = {
 
 type PageProps = { params: Promise<{ id: string }> };
 
-export default async function HqOrganizationDetailPage({ params }: PageProps) {
+export default async function AdminOrganizationDetailPage({ params }: PageProps) {
   const { id } = await params;
   const organizationId = Number.parseInt(id, 10);
 
   if (!Number.isFinite(organizationId)) {
-    redirect('/ops/hq/organizations');
+    redirect('/ops/admin/organizations');
   }
 
   const supabase = await createSupabaseRSCClient();
   const access = await loadPortalAccess(supabase);
 
-  if (!access || !access.canAccessOpsHq) {
+  if (!access || !access.canAccessOpsSteviAdmin) {
     redirect(resolveLandingPath(access));
   }
 
@@ -87,7 +87,7 @@ export default async function HqOrganizationDetailPage({ params }: PageProps) {
 
   if (orgError) throw orgError;
   if (!orgRow) {
-    redirect('/ops/hq/organizations');
+    redirect('/ops/admin/organizations');
   }
 
   const selectedFeatures = extractOrgFeatureFlags(orgRow.services_tags);
@@ -98,7 +98,7 @@ export default async function HqOrganizationDetailPage({ params }: PageProps) {
         eyebrow="STEVI Admin"
         title={orgRow.name ?? 'Organization'}
         description="IHARC-wide administration for this tenant. Update details, feature flags, and membership."
-        primaryAction={{ label: 'Back to organizations', href: '/ops/hq/organizations' }}
+        primaryAction={{ label: 'Back to organizations', href: '/ops/admin/organizations' }}
         secondaryAction={{ label: 'View org hub', href: `/ops/org?orgId=${organizationId}` }}
       >
         <div className="flex flex-wrap gap-2">

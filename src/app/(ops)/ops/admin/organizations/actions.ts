@@ -14,7 +14,7 @@ import { getBoolean, getString, parseEnum } from '@/lib/server-actions/form';
 import type { SupabaseServerClient } from '@/lib/supabase/types';
 import type { Database } from '@/types/supabase';
 
-const LIST_PATH = '/ops/hq/organizations';
+const LIST_PATH = '/ops/admin/organizations';
 const detailPath = (organizationId: number | string) => `${LIST_PATH}/${organizationId}`;
 
 type ActionResult = { success: true } | { success: false; error: string };
