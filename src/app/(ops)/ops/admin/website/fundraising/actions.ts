@@ -67,15 +67,50 @@ export async function saveCatalogItem(formData: FormData) {
     throw new Error('Select an inventory item to link.');
   }
   const unitCostInput = (formData.get('unit_cost') as string | null)?.trim() ?? '';
-  const unitCostCents =
-    unitCostInput.length === 0 ? null : Math.max(0, Math.round((Number.parseFloat(unitCostInput) || 0) * 100));
+  const unitCostCents = unitCostInput.length === 0 ? null : (() => {
+    const parsed = Number.parseFloat(unitCostInput);
+    if (!Number.isFinite(parsed) || parsed < 0) {
+      throw new Error('Typical cost must be a valid, non-negative number.');
+    }
+    return Math.round(parsed * 100);
+  })();
+
   const currency = ((formData.get('currency') as string | null)?.trim() || 'CAD').toUpperCase();
-  const defaultQuantity = Math.max(1, parseInt(String(formData.get('default_quantity') ?? '1'), 10) || 1);
-  const priority = Math.max(1, parseInt(String(formData.get('priority') ?? '100'), 10) || 100);
-  const targetBuffer = formData.get('target_buffer')
-    ? parseInt(String(formData.get('target_buffer')), 10) || null
-    : null;
-  const imageUrl = (formData.get('image_url') as string | null)?.trim() || null;
+  if (!['CAD', 'USD'].includes(currency)) {
+    throw new Error('Currency must be CAD or USD.');
+  }
+
+  const defaultQuantityRaw = String(formData.get('default_quantity') ?? '').trim();
+  const defaultQuantity = defaultQuantityRaw.length === 0 ? 1 : Number.parseInt(defaultQuantityRaw, 10);
+  if (!Number.isFinite(defaultQuantity) || defaultQuantity < 1) {
+    throw new Error('Default quantity must be at least 1.');
+  }
+
+  const priorityRaw = String(formData.get('priority') ?? '').trim();
+  const priority = priorityRaw.length === 0 ? 100 : Number.parseInt(priorityRaw, 10);
+  if (!Number.isFinite(priority) || priority < 1) {
+    throw new Error('Priority must be a positive whole number.');
+  }
+
+  const targetBufferRaw = String(formData.get('target_buffer') ?? '').trim();
+  const targetBuffer = targetBufferRaw.length === 0 ? null : Number.parseInt(targetBufferRaw, 10);
+  if (targetBuffer !== null && (!Number.isFinite(targetBuffer) || targetBuffer < 0)) {
+    throw new Error('Target buffer must be a non-negative whole number.');
+  }
+
+  const imageUrlInput = (formData.get('image_url') as string | null)?.trim() || null;
+  const imageUrl = imageUrlInput ? (() => {
+    let url: URL;
+    try {
+      url = new URL(imageUrlInput);
+    } catch {
+      throw new Error('Image URL must be a valid absolute URL.');
+    }
+    if (url.protocol !== 'https:') {
+      throw new Error('Image URL must start with https://');
+    }
+    return url.toString();
+  })() : null;
   const isActive = formData.get('is_active') === 'on';
 
   const payload = {
