@@ -90,9 +90,22 @@ describe('buildOpsHubLinks', () => {
       'Programs',
       'Supplies',
       'Partners',
-      'Org Hub',
       'STEVI Admin',
     ]);
-    expect(hubs).toHaveLength(7);
+    expect(hubs).toHaveLength(6);
+  });
+
+  it('keeps org hub as a primary hub for org-scoped users', () => {
+    const access = {
+      ...baseAccess,
+      canAccessOpsOrg: true,
+      organizationId: 12,
+      organizationName: 'IHARC',
+    } satisfies PortalAccess;
+
+    const sections = buildPortalNav(access);
+    const hubs = buildOpsHubLinks(sections);
+
+    expect(hubs.map((hub) => hub.label)).toEqual(['Org Hub']);
   });
 });

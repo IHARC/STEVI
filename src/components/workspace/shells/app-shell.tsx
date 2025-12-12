@@ -6,6 +6,7 @@ import { InboxPanel } from '@shared/layout/inbox-panel';
 import type { CommandPaletteItem } from '@/lib/portal-access';
 import type { InboxItem } from '@/lib/inbox';
 import { cn } from '@/lib/utils';
+import type { PortalArea } from '@/lib/portal-areas';
 import type { ResolvedBrandingAssets } from '@/lib/marketing/branding';
 import type { UserNavigation } from '@shared/layout/user-nav';
 import type { NavSection } from '@/lib/portal-navigation';
@@ -19,6 +20,8 @@ type AppShellProps = {
   navigation: UserNavigation;
   branding: ResolvedBrandingAssets;
   commandPaletteItems: CommandPaletteItem[];
+  activeArea: PortalArea;
+  currentPathname?: string | null;
 };
 
 export function AppShell({
@@ -29,9 +32,11 @@ export function AppShell({
   navigation,
   branding,
   commandPaletteItems,
+  activeArea,
+  currentPathname,
 }: AppShellProps) {
   const showNavigation = navSections.length > 0;
-  const showInbox = inboxItems.length > 0;
+  const showInbox = shouldShowInbox(activeArea, currentPathname) && inboxItems.length > 0;
   const showClientPreviewBanner = isClientPreview;
 
   return (
@@ -68,4 +73,10 @@ export function AppShell({
       </div>
     </div>
   );
+}
+
+function shouldShowInbox(area: PortalArea, pathname: string | null | undefined) {
+  if (area !== 'ops_frontline') return false;
+  const cleaned = (pathname ?? '').split('?')[0];
+  return cleaned === '/ops/today';
 }

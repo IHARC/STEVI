@@ -28,7 +28,7 @@ const canSeeClients = (access: PortalAccess) => access.canAccessOpsFrontline || 
 const canSeePrograms = (access: PortalAccess) => access.canAccessOpsFrontline || access.canAccessOpsAdmin;
 const canSeeSupplies = (access: PortalAccess) => access.canAccessInventoryOps || access.canAccessOpsAdmin;
 const canSeePartners = (access: PortalAccess) => access.canAccessOpsAdmin;
-const canSeeOrganization = (access: PortalAccess) => access.canAccessOpsOrg || access.canAccessOpsAdmin;
+const canSeeOrganization = (access: PortalAccess) => access.canAccessOpsOrg && !access.canAccessOpsHq;
 const canSeeHq = (access: PortalAccess) => access.canAccessOpsHq;
 
 const NAV_SECTIONS: NavSectionDefinition[] = [

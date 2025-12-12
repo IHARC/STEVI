@@ -25,10 +25,10 @@ Guide implementation of a unified onboarding/consent experience that honours IHA
 | Phase | Goal | Status | Notes |
 | --- | --- | --- | --- |
 | 1. Contract & flows | Freeze definitions, actor matrix, and wizard spine; map policy copy to admin-managed content | **Completed** | Contract published (`docs/onboarding-contract.md`), policy slugs set, actor matrix defined. |
-| 2. Onboarding status service | Central resolver that answers “what’s missing” using existing tables | **Completed** | Resolver implemented in `src/lib/onboarding/status.ts` with unit tests; wired into portal layout guard and onboarding prefill. |
-| 3. Write actions (APIs) | Stable server actions for info upsert, consent capture, sharing choice, account link; each returns status | **Completed** | Server actions added in `app/(portal)/onboarding/actions.ts` with audit logging, registration draft updates, and user-person linking. |
+| 2. Onboarding status service | Central resolver that answers “what’s missing” using existing tables | **Completed** | Resolver implemented in `src/lib/onboarding/status.ts` with unit tests; wired into the client layout guard (`src/app/(client)/layout.tsx`) and onboarding prefill. |
+| 3. Write actions (APIs) | Stable server actions for info upsert, consent capture, sharing choice, account link; each returns status | **Completed** | Server actions added in `src/app/(client)/onboarding/actions.ts` with audit logging, registration draft updates, and user-person linking. |
 | 4. Unified wizard | Single configurable wizard for self/staff/partner using status + actions; pulls live policy copy | **Completed** | `/onboarding` wizard ships with actor-aware steps, live policy content, and progress tracking. |
-| 5. Enforcement | Routing guard + action gating so incomplete onboarding cannot bypass consent rules | **Completed** | Portal layout redirects incomplete clients; support/document/appointment + client case updates and consent edits enforce onboarding server-side; admin client directory filters by onboarding state. |
+| 5. Enforcement | Routing guard + action gating so incomplete onboarding cannot bypass consent rules | **Completed** | Client layout redirects incomplete clients; support/document/appointment + client case updates and consent edits enforce onboarding server-side; admin client directory filters by onboarding state. |
 | 6. Admin tools | Durable admin surfaces to view/reset onboarding and edit consent copy | **Completed** | Admin client view now includes onboarding history timeline and status-filtered directory cards alongside reset/resend tools; policy copy stays admin-managed with cache revalidation. |
 
 ## Phase details & acceptance criteria

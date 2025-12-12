@@ -105,14 +105,11 @@ describe('buildPortalNav', () => {
 
     const sections = buildPortalNav(access);
     const sectionIds = sections.map((section) => section.id);
-    expect(sectionIds).toEqual(['ops_frontline', 'ops_org', 'ops_hq']);
+    expect(sectionIds).toEqual(['ops_frontline', 'ops_hq']);
 
     const frontline = sections.find((section) => section.id === 'ops_frontline');
     const frontlineGroups = frontline?.groups.map((group) => group.id) ?? [];
     expect(frontlineGroups).toEqual(expect.arrayContaining(['today', 'clients', 'programs', 'supplies', 'partners']));
-
-    const org = sections.find((section) => section.id === 'ops_org');
-    expect(org?.groups[0]?.items.length).toBeGreaterThanOrEqual(4);
 
     const hq = sections.find((section) => section.id === 'ops_hq');
     expect(hq?.groups[0]?.items.length).toBeGreaterThanOrEqual(4);

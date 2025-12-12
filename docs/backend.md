@@ -61,7 +61,7 @@ Copy `.env.example` to `.env` and fill the required values. All variables prefix
 - Navigation, layouts, server pages, and server actions consume these capability flags—never raw role strings—to avoid drift and ensure UI/server parity.
 - Inventory tooling still uses `ensureInventoryActor` on top of `PortalAccess` for IHARC-specific roles when needed.
 - Do not add new privileged routes without updating `portal-access.ts`; keep UI links, server guards, and Supabase RLS in sync to prevent privilege escalation.
-- `(portal)/layout.tsx` wraps every portal route with `PortalAccessProvider`, so client components can read `usePortalAccess()` without making extra Supabase calls. Prefer passing `portalAccess` from parents rather than fetching again.
+- Client shell layout `src/app/(client)/layout.tsx` wraps portal routes with `PortalAccessProvider`, so client components can read `usePortalAccess()` without making extra Supabase calls. Prefer passing `portalAccess` from parents rather than fetching again.
 
 ### Adding a New Role or Privileged Feature (checklist)
 1. **Supabase first**: Create/assign the role and permissions in Supabase (`core.roles`, `core.permissions`, `core.role_permissions`, `core.user_roles`). Update any role-granting RPCs if needed.
@@ -79,7 +79,7 @@ Copy `.env.example` to `.env` and fill the required values. All variables prefix
 
 ## Deployment Notes
 
-- GitHub Actions workflow `.github/workflows/main_stevi.yml` builds with Node 24.11.1, runs `npm run build` (lint + default Next build using Turbopack), prunes dev dependencies, bundles the Next standalone output (`.next/standalone` + `.next/static` + `public`), and deploys via `azure/webapps-deploy@v3` using publish profiles. Use `workflow_dispatch` with `slot=staging` to target a staging slot when `AZUREAPPSERVICE_PUBLISHPROFILE_STAGING` is configured.
+- GitHub Actions workflow `.github/workflows/main_stevi.yml` builds with Node 24.11.1, runs `npm run build` (lint + Next build forced to webpack for standalone output), prunes dev dependencies, bundles the Next standalone output (`.next/standalone` + `.next/static` + `public`), and deploys via `azure/webapps-deploy@v3` using publish profiles. Use `workflow_dispatch` with `slot=staging` to target a staging slot when `AZUREAPPSERVICE_PUBLISHPROFILE_STAGING` is configured.
 - App Service settings: set the environment variables above in App Settings (per slot). Keep `WEBSITE_NODE_DEFAULT_VERSION` aligned to Node 24 (24.11.x), and disable platform builds if you are deploying prebuilt artifacts (`SCM_DO_BUILD_DURING_DEPLOYMENT=false`). The start script runs `node .next/standalone/server.js`.
 - Revalidation currently relies on `revalidatePath`. When STEVI begins triggering marketing refreshes, introduce shared cache tags or webhook notifications so both apps stay in sync.
 - Operational items now required on App Service (not handled automatically like SWA):
@@ -89,5 +89,5 @@ Copy `.env.example` to `.env` and fill the required values. All variables prefix
 
 ## Next Steps
 
-- Phase 2 will wire the appointments and document lockers to real Supabase tables.
-- Phase 3 will migrate profile verification, notifications, and metrics admin tooling into STEVI while maintaining read-only access for the marketing site.
+- Wire the Messages page and staff Tasks view to real data (respect consent/RLS) and add audit trails.
+- Add cache revalidation/webhook strategy so marketing and STEVI stay in sync after admin content updates.

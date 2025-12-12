@@ -26,7 +26,7 @@ Environment variables (full notes in `docs/backend.md`):
 - TypeScript + Tailwind CSS with shadcn/ui tokens sourced from `src/styles/theme.css`, Radix primitives, and TipTap for rich text
 - Supabase Auth/Database/Edge Functions shared with the marketing portal (schemas: `portal`, `core`, `case_mgmt`, `inventory`, `donations`)
 - Vitest + Testing Library for unit coverage; Playwright for end-to-end flows
-- Azure App Service (Linux, Node 24.11.x) deployed via GitHub Actions (`.github/workflows/main_stevi.yml`); build entry `node build.js` runs lint + default Next build (Turbopack). Runtime uses the Next standalone output (`node .next/standalone/server.js`).
+- Azure App Service (Linux, Node 24.11.x) deployed via GitHub Actions (`.github/workflows/main_stevi.yml`); build entry `node build.js` runs lint + forces a webpack Next build for standalone output. Runtime uses `.next/standalone/server.js`.
 
 ## Architecture
 
@@ -37,10 +37,11 @@ Environment variables (full notes in `docs/backend.md`):
 
 - ✅ Next.js scaffold, shared layout/providers, shadcn/ui tokens
 - ✅ Supabase clients (server + RSC), auth middleware, separated client/ops navigation
-- ✅ Client portal shells: home, appointments, documents, cases, support, profile, consents (appointments/documents currently read from placeholders)
+- ✅ Client portal shells: home, appointments, documents, cases, support, profile, consents (wired to Supabase + storage)
 - ✅ Admin tools: profiles/invites, resources, policies, notifications, marketing content, inventory, donations
 - ✅ Staff tools: caseload, schedule, outreach log; Organization tools: members/invites/settings
-- 🚧 Wire appointments + documents to Supabase tables/storage; add cache revalidation/webhooks
-- 🚧 Fill out test coverage (Vitest + Playwright) and metrics/governance surfaces if required
+- 🚧 Wire Messages page and staff Tasks view to real data with audit + consent/RLS
+- 🚧 Add cache revalidation/webhook strategy so marketing and STEVI stay in sync
+- 🚧 Increase test coverage (Vitest + Playwright) and flesh out metrics/governance surfaces if kept
 
 See `agents.md` for the latest operator briefing and outstanding work.

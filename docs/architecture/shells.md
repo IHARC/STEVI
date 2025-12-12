@@ -1,6 +1,6 @@
 # Dual Shell Architecture
 
-This document codifies the client/operations shell split for STEVI. It complements the detailed execution notes in `plan.md` and the background in `docs/client-workspace-shell-separation-plan.md`.
+This document codifies the client/operations shell split for STEVI. It complements the execution notes in `plan.md` and the navigation ownership guidance in `docs/navigation-ownership.md`.
 
 ## Intent
 - Isolate the client experience from staff/admin/org tooling while keeping a single Next.js app and host.
@@ -34,6 +34,7 @@ This document codifies the client/operations shell split for STEVI. It complemen
   - Areas: `ops_frontline`, `ops_org`, `ops_hq` (STEVI Admin).
   - Redirects to `/home` when ops access is missing.
   - Navigation contains only ops sections; primary chrome uses a thin hub rail (Today, Clients, Programs, Supplies, Partners, Org Hub, STEVI Admin) with sub-pages living inside each hub.
+  - Org Hub is a primary hub only for org-scoped users; IHARC admins access org hub tools from within STEVI Admin.
   - “Preview client portal” points to `/home?preview=1`.
 - Preview banner lives only in the client shell with an explicit exit path back to the user’s primary ops area.
 - Ops users manage their profile at `/ops/profile`; the client shell keeps `/profile` for client users and preview-only browsing. Shared form components live under `components/shared/profile`.
@@ -63,5 +64,4 @@ This document codifies the client/operations shell split for STEVI. It complemen
 
 ## References
 - `plan.md` (execution tasks)
-- `docs/client-workspace-shell-separation-plan.md`
 - `docs/navigation-ownership.md` (navigation ownership note; supersedes the legacy unified shell doc)
