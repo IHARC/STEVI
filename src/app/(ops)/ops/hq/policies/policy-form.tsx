@@ -5,7 +5,6 @@ import { Label } from '@shared/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/ui/select';
 import { Textarea } from '@shared/ui/textarea';
 import { ResourceRichTextEditor } from '@workspace/admin/resource-rich-text-editor';
-import { PolicyAutosaveClient } from './policy-autosave-client';
 import { type Policy } from '@/lib/policies';
 
 type PolicyFormProps = {
@@ -169,8 +168,6 @@ export function PolicyForm({ mode, action, onDeleteAction, policy, statusOptions
           description="Use headings, bullet lists, and links. Avoid personal health details or identifying information."
           showPreview
         />
-
-        {isEdit && policy?.id ? <PolicyAutosaveClient policyId={policy.id} /> : null}
 
         <div className="rounded-2xl border border-border/15 bg-muted p-3 text-sm text-foreground/80">
           Visibility is controlled by the <strong>Status</strong> field above. Policies set to “Published” appear on the

@@ -97,7 +97,7 @@ export function InventoryLocationsSection({ locations, actorProfileId, canManage
           <DialogTrigger asChild>
             <Button disabled={!canManageLocations}>Create location</Button>
           </DialogTrigger>
-          <LocationDialog
+          <LocationDialogContent
             title="Create location"
             actionLabel="Create location"
             actorProfileId={actorProfileId}
@@ -160,17 +160,17 @@ export function InventoryLocationsSection({ locations, actorProfileId, canManage
         Deleting a location is only allowed when no stock remains and no transactions reference it. Otherwise deactivate to hide it from workflows.
       </CardFooter>
 
-      <LocationDialog
-        title="Edit location"
-        actionLabel="Save changes"
-        actorProfileId={actorProfileId}
-        onSubmit={submitUpdate}
-        isPending={isPending}
-        defaultValues={editing}
-        open={editing !== null}
-        onOpenChange={(open) => !open && setEditing(null)}
-        canManageLocations={canManageLocations}
-      />
+      <Dialog open={editing !== null} onOpenChange={(open) => !open && setEditing(null)}>
+        <LocationDialogContent
+          title="Edit location"
+          actionLabel="Save changes"
+          actorProfileId={actorProfileId}
+          onSubmit={submitUpdate}
+          isPending={isPending}
+          defaultValues={editing}
+          canManageLocations={canManageLocations}
+        />
+      </Dialog>
     </Card>
   );
 }
@@ -182,20 +182,16 @@ type LocationDialogProps = {
   onSubmit: (formData: FormData) => Promise<void>;
   isPending: boolean;
   defaultValues?: InventoryLocation | null;
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
   canManageLocations: boolean;
 };
 
-function LocationDialog({
+function LocationDialogContent({
   title,
   actionLabel,
   actorProfileId,
   onSubmit,
   isPending,
   defaultValues,
-  open,
-  onOpenChange,
   canManageLocations,
 }: LocationDialogProps) {
   const form = useForm<{
@@ -231,106 +227,104 @@ function LocationDialog({
   }, [actorProfileId, defaultValues, form]);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>Track detailed addresses so deliveries and outreach staff know where supplies live.</DialogDescription>
-        </DialogHeader>
-        <Form {...form}>
-          <form action={onSubmit} className="space-y-4">
-            <input type="hidden" {...form.register('actor_profile_id')} />
-            {defaultValues ? <input type="hidden" {...form.register('location_id')} /> : null}
+    <DialogContent className="max-w-lg">
+      <DialogHeader>
+        <DialogTitle>{title}</DialogTitle>
+        <DialogDescription>Track detailed addresses so deliveries and outreach staff know where supplies live.</DialogDescription>
+      </DialogHeader>
+      <Form {...form}>
+        <form action={onSubmit} className="space-y-4">
+          <input type="hidden" {...form.register('actor_profile_id')} />
+          {defaultValues ? <input type="hidden" {...form.register('location_id')} /> : null}
 
+          <FormField
+            control={form.control}
+            name="name"
+            rules={{ required: 'Location name is required' }}
+            render={({ field }) => (
+              <FormItem className="grid gap-2">
+                <FormLabel htmlFor="location_name">Name</FormLabel>
+                <FormControl>
+                  <Input id="location_name" required disabled={!canManageLocations} {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="grid gap-4 sm:grid-cols-2">
             <FormField
               control={form.control}
-              name="name"
-              rules={{ required: 'Location name is required' }}
+              name="code"
+              rules={{ required: 'Code is required' }}
               render={({ field }) => (
                 <FormItem className="grid gap-2">
-                  <FormLabel htmlFor="location_name">Name</FormLabel>
+                  <FormLabel htmlFor="code">Code</FormLabel>
                   <FormControl>
-                    <Input id="location_name" required disabled={!canManageLocations} {...field} />
+                    <Input id="code" placeholder="Short code" required disabled={!canManageLocations} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <FormField
-                control={form.control}
-                name="code"
-                rules={{ required: 'Code is required' }}
-                render={({ field }) => (
-                  <FormItem className="grid gap-2">
-                    <FormLabel htmlFor="code">Code</FormLabel>
-                    <FormControl>
-                      <Input id="code" placeholder="Short code" required disabled={!canManageLocations} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="type"
-                rules={{ required: 'Type is required' }}
-                render={({ field }) => (
-                  <FormItem className="grid gap-2">
-                    <FormLabel htmlFor="type">Type</FormLabel>
-                    <FormControl>
-                      <Input id="type" placeholder="e.g., Warehouse" required disabled={!canManageLocations} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
             <FormField
               control={form.control}
-              name="address"
+              name="type"
+              rules={{ required: 'Type is required' }}
               render={({ field }) => (
                 <FormItem className="grid gap-2">
-                  <FormLabel htmlFor="address">Address</FormLabel>
+                  <FormLabel htmlFor="type">Type</FormLabel>
                   <FormControl>
-                    <Input id="address" placeholder="Street, city" disabled={!canManageLocations} {...field} />
+                    <Input id="type" placeholder="e.g., Warehouse" required disabled={!canManageLocations} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+          </div>
 
-            <FormField
-              control={form.control}
-              name="active"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center gap-2">
-                  <input type="hidden" name="active" value={field.value ? 'on' : ''} />
-                  <FormControl>
-                    <Checkbox
-                      id="location_active"
-                      checked={field.value}
-                      onCheckedChange={(checked) => field.onChange(Boolean(checked))}
-                      disabled={!canManageLocations}
-                    />
-                  </FormControl>
-                  <FormLabel htmlFor="location_active" className="text-sm font-normal text-muted-foreground">
-                    Location is active
-                  </FormLabel>
-                </FormItem>
-              )}
-            />
+          <FormField
+            control={form.control}
+            name="address"
+            render={({ field }) => (
+              <FormItem className="grid gap-2">
+                <FormLabel htmlFor="address">Address</FormLabel>
+                <FormControl>
+                  <Input id="address" placeholder="Street, city" disabled={!canManageLocations} {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            <DialogFooter>
-              <Button type="submit" disabled={isPending || !canManageLocations}>
-                {actionLabel}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+          <FormField
+            control={form.control}
+            name="active"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center gap-2">
+                <input type="hidden" name="active" value={field.value ? 'on' : ''} />
+                <FormControl>
+                  <Checkbox
+                    id="location_active"
+                    checked={field.value}
+                    onCheckedChange={(checked) => field.onChange(Boolean(checked))}
+                    disabled={!canManageLocations}
+                  />
+                </FormControl>
+                <FormLabel htmlFor="location_active" className="text-sm font-normal text-muted-foreground">
+                  Location is active
+                </FormLabel>
+              </FormItem>
+            )}
+          />
+
+          <DialogFooter>
+            <Button type="submit" disabled={isPending || !canManageLocations}>
+              {actionLabel}
+            </Button>
+          </DialogFooter>
+        </form>
+      </Form>
+    </DialogContent>
   );
 }

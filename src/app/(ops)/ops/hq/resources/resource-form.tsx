@@ -6,7 +6,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@shared/ui/textarea';
 import { Checkbox } from '@shared/ui/checkbox';
 import { ResourceRichTextEditor } from '@workspace/admin/resource-rich-text-editor';
-import { ResourceAutosaveClient } from './resource-autosave-client';
 import type { Resource } from '@/lib/resources';
 import { formatEnumLabel } from '@/lib/enum-values';
 import { attachmentsToTextarea, getResourceEmbedDefaults } from './resource-utils';
@@ -223,8 +222,6 @@ export function ResourceForm({ mode, action, onDeleteAction, resource, kindOptio
           description="Use headings, bullet lists, and links so neighbours can scan actions quickly."
           showPreview
         />
-
-        {isEdit && resource?.id ? <ResourceAutosaveClient resourceId={resource.id} /> : null}
 
         <div className="flex items-center gap-2">
           <Checkbox id="resource_is_published" name="is_published" defaultChecked={publishDefault} />

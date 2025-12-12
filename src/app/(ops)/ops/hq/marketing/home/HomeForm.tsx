@@ -7,6 +7,7 @@ import { Button } from '@shared/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@shared/ui/form';
 import { Input } from '@shared/ui/input';
 import { Textarea } from '@shared/ui/textarea';
+import { useToast } from '@shared/ui/use-toast';
 import type { ContextCard, HeroContent } from '@/lib/marketing/settings';
 import { saveHomeSettings, uploadHeroImage } from './actions';
 
@@ -34,6 +35,7 @@ function serializeContext(cards: ContextCard[]) {
 }
 
 export function HomeForm({ hero, contextCards }: Props) {
+  const { toast } = useToast();
   const [cards, setCards] = useState<ContextCard[]>(contextCards);
   const [heroImageUrl, setHeroImageUrl] = useState(hero.imageUrl ?? '');
   const [isUploading, startUpload] = useTransition();
@@ -73,7 +75,11 @@ export function HomeForm({ hero, contextCards }: Props) {
         setHeroImageUrl(result.url);
       } catch (error) {
         console.error(error);
-        alert('Upload failed. Please try again or use a smaller image.');
+        toast({
+          title: 'Upload failed',
+          variant: 'destructive',
+          description: 'Please try again or use a smaller image.',
+        });
       }
     });
   };

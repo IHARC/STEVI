@@ -14,6 +14,8 @@ const CASE_SCHEMA = 'case_mgmt';
 const CASE_TABLE = 'case_management';
 const ACTIVITIES_TABLE = 'people_activities';
 const REGISTRATION_TABLE = 'registration_flows';
+const CASE_SELECT = 'id, person_id, case_number, case_type, status, priority, case_manager_name, case_manager_contact, start_date, end_date';
+const INTAKE_SELECT = 'id, chosen_name, contact_email, contact_phone, status, created_at, metadata, supabase_user_id, profile_id, consent_contact, consent_data_sharing';
 type RegistrationRow = Database['portal']['Tables']['registration_flows']['Row'];
 type ActivityRow = Database['core']['Tables']['people_activities']['Row'];
 
@@ -27,7 +29,7 @@ export async function fetchClientCases(
   const caseMgmt = supabase.schema(CASE_SCHEMA);
   const { data, error } = await caseMgmt
     .from(CASE_TABLE)
-    .select('*')
+    .select(CASE_SELECT)
     .eq('person_id', person.id)
     .order('start_date', { ascending: false });
 
@@ -50,7 +52,7 @@ export async function fetchClientCaseDetail(
   const caseMgmt = supabase.schema(CASE_SCHEMA);
   const { data, error } = await caseMgmt
     .from(CASE_TABLE)
-    .select('*')
+    .select(CASE_SELECT)
     .eq('id', caseId)
     .eq('person_id', person.id)
     .maybeSingle();
@@ -114,7 +116,7 @@ export async function fetchStaffCases(
   const caseMgmt = supabase.schema(CASE_SCHEMA);
   const { data, error } = await caseMgmt
     .from(CASE_TABLE)
-    .select('*')
+    .select(CASE_SELECT)
     .order('start_date', { ascending: false })
     .limit(limit);
 
@@ -133,7 +135,7 @@ export async function fetchStaffCaseDetail(
   const caseMgmt = supabase.schema(CASE_SCHEMA);
   const { data, error } = await caseMgmt
     .from(CASE_TABLE)
-    .select('*')
+    .select(CASE_SELECT)
     .eq('id', caseId)
     .maybeSingle();
 
@@ -175,7 +177,7 @@ export async function fetchPendingIntakes(
   const portal = supabase.schema('portal');
   const { data, error } = await portal
     .from(REGISTRATION_TABLE)
-    .select('*')
+    .select(INTAKE_SELECT)
     .eq('flow_type', 'client_intake')
     .eq('status', 'submitted')
     .order('created_at', { ascending: true })

@@ -9,7 +9,7 @@ import { findPersonForUser } from '@/lib/cases/person';
 import { normalizePhoneNumber } from '@/lib/phone';
 import { normalizeEmail } from '@/lib/email';
 import { normalizePostalCode } from '@/lib/registration';
-import { getBoolean, getNumber, getString } from '@/lib/server-actions/form';
+import { getBoolean, getNumber } from '@/lib/server-actions/form';
 import type { Database } from '@/types/supabase';
 
 export type OnboardingActionState = {

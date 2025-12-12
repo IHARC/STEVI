@@ -42,17 +42,19 @@ export default async function OpsLayout({ children }: { children: ReactNode }) {
     redirect(landingPath);
   }
 
-  const branding = await getBrandingAssetsWithClient(supabase);
-  const navigation = await getUserNavigation(portalAccess);
-
   const quickActions = resolveQuickActions(portalAccess, activeArea, {
     isPreview: previewingClient,
   });
-  const inboxItems = await fetchPortalInbox(supabase, portalAccess, activeArea);
   const actionCommands = quickActions
     .filter((action) => !action.disabled)
     .map((action) => ({ href: action.href, label: action.label, group: 'Actions' }));
-  const entityCommands = await buildEntityCommandPaletteItems(supabase, portalAccess);
+
+  const [branding, navigation, inboxItems, entityCommands] = await Promise.all([
+    getBrandingAssetsWithClient(supabase),
+    getUserNavigation(portalAccess),
+    fetchPortalInbox(supabase, portalAccess, activeArea),
+    buildEntityCommandPaletteItems(supabase, portalAccess),
+  ]);
   const commandPaletteItems = buildCommandPaletteItems(portalAccess, navSections, [
     ...actionCommands,
     ...entityCommands,

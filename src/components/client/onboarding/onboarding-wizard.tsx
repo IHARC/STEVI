@@ -1,7 +1,5 @@
 'use client';
 
-/* eslint-disable react-hooks/incompatible-library */
-
 import { useEffect, useMemo } from 'react';
 import { useFormState } from 'react-dom';
 import { useRouter } from 'next/navigation';
@@ -15,7 +13,6 @@ import {
   recordConsentsAction,
   saveBasicInfoAction,
   saveSharingPreferenceAction,
-  type OnboardingActionState,
 } from '@/app/(client)/onboarding/actions';
 import type { OnboardingStatus } from '@/lib/onboarding/status';
 import type { OnboardingActor } from '@/lib/onboarding/utils';

@@ -11,6 +11,14 @@ import {
   type LowStockItem,
 } from './types';
 
+const ITEMS_SELECT =
+  'id, name, description, category, unit_type, minimum_threshold, cost_per_unit, supplier, active, onhand_qty';
+const LOW_STOCK_SELECT = 'id, name, category, unit_type, onhand_qty, minimum_threshold';
+const LOCATIONS_SELECT = 'id, name, code, type, address, active, created_at, updated_at';
+const ORGANIZATIONS_SELECT = 'id, name, description, website, is_active, created_at, updated_at';
+const RECEIPTS_SELECT =
+  'id, item_id, item_name, location_id, location_name, qty, ref_type, provider_org_id, provider_org_name, notes, unit_cost, created_at, created_by, batch_id, batch_lot_number, batch_expiry_date';
+
 function asNumber(value: unknown, fallback = 0): number {
   if (typeof value === 'number') {
     return Number.isFinite(value) ? value : fallback;
@@ -51,32 +59,18 @@ function mapInventoryItem(row: Record<string, unknown>): InventoryItem {
     supplier: typeof row.supplier === 'string' ? row.supplier : null,
     active: asBoolean(row.active, true),
     onHandQuantity: asNumber(row.onhand_qty),
-    committedQuantity: asNumber(row.committed_qty),
-    availableQuantity: asNumber(row.available_qty ?? row.onhand_qty),
-    lastReceiptAt: typeof row.last_receipt_at === 'string' ? row.last_receipt_at : null,
   };
 }
 
 function mapLowStockItem(row: Record<string, unknown>): LowStockItem {
-  const base: LowStockItem = {
-    id: String(row.item_id ?? row.id ?? crypto.randomUUID()),
-    name: String(row.item_name ?? row.name ?? ''),
+  return {
+    id: String(row.id ?? crypto.randomUUID()),
+    name: String(row.name ?? ''),
     category: typeof row.category === 'string' ? row.category : null,
     unitType: typeof row.unit_type === 'string' ? row.unit_type : null,
-    onHandQuantity: asNumber(row.onhand_qty ?? row.qty_onhand),
+    onHandQuantity: asNumber(row.onhand_qty),
     minimumThreshold: row.minimum_threshold === null || row.minimum_threshold === undefined ? null : asNumber(row.minimum_threshold),
   };
-
-  if (Array.isArray(row.locations)) {
-    base.locations = row.locations.map((location: Record<string, unknown>) => ({
-      id: String(location.id ?? location.location_id ?? crypto.randomUUID()),
-      name: String(location.name ?? location.location_name ?? ''),
-      code: typeof location.code === 'string' ? location.code : null,
-      onHandQuantity: asNumber(location.onhand_qty ?? location.qty_onhand),
-    }));
-  }
-
-  return base;
 }
 
 function mapExpiringItem(row: Record<string, unknown>): ExpiringItem {
@@ -147,8 +141,8 @@ function mapReceipt(row: Record<string, unknown>): InventoryReceipt {
     createdAt: String(row.created_at ?? new Date().toISOString()),
     createdBy: typeof row.created_by === 'string' ? row.created_by : null,
     batchId: typeof row.batch_id === 'string' ? row.batch_id : null,
-    lotNumber: typeof row.lot_number === 'string' ? row.lot_number : null,
-    expiryDate: typeof row.expiry_date === 'string' ? row.expiry_date : null,
+    lotNumber: typeof row.batch_lot_number === 'string' ? row.batch_lot_number : null,
+    expiryDate: typeof row.batch_expiry_date === 'string' ? row.batch_expiry_date : null,
   };
 }
 
@@ -164,7 +158,11 @@ async function rpc<T>(supabase: SupabaseAnyServerClient, fn: string, params?: Re
 }
 
 export async function fetchInventoryItems(supabase: SupabaseAnyServerClient): Promise<InventoryItem[]> {
-  const { data, error } = await supabase.schema('inventory').from('v_items_with_balances').select('*').order('name');
+  const { data, error } = await supabase
+    .schema('inventory')
+    .from('v_items_with_balances')
+    .select(ITEMS_SELECT)
+    .order('name');
   if (error) {
     throw error;
   }
@@ -175,7 +173,7 @@ export async function fetchLowStockItems(supabase: SupabaseAnyServerClient): Pro
   const { data, error } = await supabase
     .schema('inventory')
     .from('v_low_stock')
-    .select('*')
+    .select(LOW_STOCK_SELECT)
     .order('onhand_qty', { ascending: true });
   if (error) {
     throw error;
@@ -193,7 +191,7 @@ export async function fetchInventoryLocations(supabase: SupabaseAnyServerClient)
   const { data, error } = await supabase
     .schema('inventory')
     .from('locations')
-    .select('*')
+    .select(LOCATIONS_SELECT)
     .order('name');
   if (error) {
     throw error;
@@ -206,7 +204,7 @@ export async function fetchInventoryOrganizations(supabase: SupabaseAnyServerCli
   const { data, error } = await supabase
     .schema('core')
     .from('organizations')
-    .select('*')
+    .select(ORGANIZATIONS_SELECT)
     .order('is_active', { ascending: false })
     .order('name');
   if (error) {
@@ -235,7 +233,7 @@ export async function fetchInventoryReceipts(
   let query = supabase
     .schema('inventory')
     .from('v_transactions_with_org')
-    .select('*')
+    .select(RECEIPTS_SELECT)
     .eq('reason_code', 'receipt')
     .order('created_at', { ascending: false })
     .limit(safeLimit);
@@ -291,7 +289,7 @@ export async function fetchInventoryReceiptById(
   const { data, error } = await supabase
     .schema('inventory')
     .from('v_transactions_with_org')
-    .select('*')
+    .select(RECEIPTS_SELECT)
     .eq('id', transactionId)
     .maybeSingle();
 

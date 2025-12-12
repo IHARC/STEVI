@@ -19,14 +19,14 @@ type ActionRunner = (formData: FormData) => Promise<InventoryActionResult<unknow
 
 type InventoryActions = {
   isPending: boolean;
-  createItem: (formData: FormData, onSuccess?: () => void) => Promise<InventoryActionResult>;
-  updateItem: (formData: FormData, onSuccess?: () => void) => Promise<InventoryActionResult>;
-  receiveStock: (formData: FormData, onSuccess?: () => void) => Promise<InventoryActionResult>;
-  transferStock: (formData: FormData, onSuccess?: () => void) => Promise<InventoryActionResult>;
-  adjustStock: (formData: FormData, onSuccess?: () => void) => Promise<InventoryActionResult>;
-  toggleItem: (item: InventoryItem, nextActive: boolean) => Promise<InventoryActionResult>;
-  deleteItem: (item: InventoryItem) => Promise<InventoryActionResult>;
-  bulkReceive: (formData: FormData, onSuccess?: () => void) => Promise<InventoryActionResult>;
+  createItem: (formData: FormData, onSuccess?: () => void) => Promise<InventoryActionResult<unknown>>;
+  updateItem: (formData: FormData, onSuccess?: () => void) => Promise<InventoryActionResult<unknown>>;
+  receiveStock: (formData: FormData, onSuccess?: () => void) => Promise<InventoryActionResult<unknown>>;
+  transferStock: (formData: FormData, onSuccess?: () => void) => Promise<InventoryActionResult<unknown>>;
+  adjustStock: (formData: FormData, onSuccess?: () => void) => Promise<InventoryActionResult<unknown>>;
+  toggleItem: (item: InventoryItem, nextActive: boolean) => Promise<InventoryActionResult<unknown>>;
+  deleteItem: (item: InventoryItem) => Promise<InventoryActionResult<unknown>>;
+  bulkReceive: (formData: FormData, onSuccess?: () => void) => Promise<InventoryActionResult<unknown>>;
 };
 
 type InventoryActionsParams = {

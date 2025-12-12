@@ -1,6 +1,11 @@
 import type { SupabaseAnyServerClient } from '@/lib/supabase/types';
 import type { DonationCatalogItem, DonationCatalogMetrics } from './types';
 
+const CATALOG_ITEM_SELECT =
+  'id, slug, title, short_description, long_description, category, inventory_item_id, unit_cost_cents, currency, default_quantity, priority, target_buffer, image_url, stripe_price_id, is_active';
+const CATALOG_METRICS_SELECT =
+  'catalog_item_id, current_stock, target_buffer, distributed_last_30_days, distributed_last_365_days, inventory_item_name, inventory_item_category, unit_type';
+
 function asNumber(value: unknown): number | null {
   if (value === null || value === undefined) return null;
   if (typeof value === 'number') return Number.isFinite(value) ? value : null;
@@ -30,8 +35,12 @@ export async function fetchDonationCatalogAdmin(
   const donations = supabase.schema('donations');
 
   const [itemsResult, metricsResult] = await Promise.all([
-    donations.from('catalog_items').select('*').order('priority', { ascending: true }).order('title', { ascending: true }),
-    donations.from('catalog_item_metrics').select('*'),
+    donations
+      .from('catalog_items')
+      .select(CATALOG_ITEM_SELECT)
+      .order('priority', { ascending: true })
+      .order('title', { ascending: true }),
+    donations.from('catalog_item_metrics').select(CATALOG_METRICS_SELECT),
   ]);
 
   if (itemsResult.error) throw itemsResult.error;

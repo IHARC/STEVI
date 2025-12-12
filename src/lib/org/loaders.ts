@@ -50,28 +50,30 @@ export type OrgDetail = {
 };
 
 export async function loadOrgDetail(supabase: SupabaseServerClient, organizationId: number): Promise<OrgDetail> {
-  const [members, invites, organizationResult] = await Promise.all([
-    fetchOrgMembersWithRoles(supabase, organizationId),
-    fetchOrgInvites(supabase, organizationId, 30),
-    supabase
-      .schema('core')
-      .from('organizations')
-      .select(
-        'id, name, status, partnership_type, organization_type, website, contact_email, contact_phone, contact_person, contact_title, is_active, updated_at',
-      )
-      .eq('id', organizationId)
-      .maybeSingle(),
-  ]);
+  const [members, invites, organizationResult] = await Promise.all(
+    [
+      fetchOrgMembersWithRoles(supabase, organizationId),
+      fetchOrgInvites(supabase, organizationId, 30),
+      supabase
+        .schema('core')
+        .from('organizations')
+        .select(
+          'id, name, status, partnership_type, organization_type, website, contact_email, contact_phone, contact_person, contact_title, is_active, updated_at',
+        )
+        .eq('id', organizationId)
+        .maybeSingle(),
+    ] as const,
+  );
 
   if (organizationResult.error) {
     throw organizationResult.error;
   }
 
   const organization = (organizationResult.data ?? null) as OrgDetailRecord | null;
-  const approvedMembers = members.filter((member) => member.affiliation_status === 'approved');
-  const adminCount = members.filter((member) => member.portal_roles.includes('portal_org_admin')).length;
-  const repCount = members.filter((member) => member.portal_roles.includes('portal_org_rep')).length;
-  const pendingInvites = invites.filter((invite) => invite.status === 'pending').length;
+  const approvedMembers = members.filter((member: OrgMemberRecord) => member.affiliation_status === 'approved');
+  const adminCount = members.filter((member: OrgMemberRecord) => member.portal_roles.includes('portal_org_admin')).length;
+  const repCount = members.filter((member: OrgMemberRecord) => member.portal_roles.includes('portal_org_rep')).length;
+  const pendingInvites = invites.filter((invite: OrgInviteRecord) => invite.status === 'pending').length;
 
   return {
     organization,

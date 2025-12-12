@@ -229,47 +229,6 @@ export async function updatePolicy(formData: FormData) {
   );
 }
 
-export async function autosavePolicyAction(formData: FormData) {
-  try {
-    const { supabase, portalClient, actorProfile } = await requireAdminContext();
-    const policyId = formData.get('policy_id') as string | null;
-    if (!policyId) {
-      throw new Error('Policy context is required.');
-    }
-
-    const bodyHtmlRaw = (formData.get('body_html') as string | null) ?? '';
-    const summaryRaw = (formData.get('short_summary') as string | null) ?? '';
-    const bodyHtml = sanitizeResourceHtml(bodyHtmlRaw);
-
-    const { error } = await portalClient
-      .from('policies')
-      .update({
-        body_html: bodyHtml,
-        short_summary: summaryRaw.trim() || null,
-        updated_by_profile_id: actorProfile.id,
-      })
-      .eq('id', policyId);
-
-    if (error) {
-      throw error;
-    }
-
-    await logAuditEvent(supabase, {
-      actorProfileId: actorProfile.id,
-      action: 'policy_autosaved',
-      entityType: 'policy',
-      entityRef: buildEntityRef({ schema: 'portal', table: 'policies', id: policyId }),
-      meta: { fields: ['body_html', 'short_summary'] },
-    });
-
-    return { success: true } as const;
-  } catch (error) {
-    console.error('autosavePolicyAction error', error);
-    const message = error instanceof Error ? error.message : 'Unable to autosave right now.';
-    return { success: false, error: message } as const;
-  }
-}
-
 export async function deletePolicy(formData: FormData) {
   const policyId = formData.get('policy_id') as string | null;
   const policySlug = (formData.get('policy_slug') as string | null)?.trim() ?? null;

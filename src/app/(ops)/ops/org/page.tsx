@@ -6,7 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shar
 import { Button } from '@shared/ui/button';
 import { Badge } from '@shared/ui/badge';
 import { resolveLandingPath } from '@/lib/portal-navigation';
-import { loadOrgSelection, loadOrgDetail, type OrgDetailRecord } from '@/lib/org/loaders';
+import { loadOrgSelection, loadOrgDetail } from '@/lib/org/loaders';
+import type { OrgInviteRecord } from '@/lib/org/fetchers';
 import { PageHeader } from '@shared/layout/page-header';
 import { StatTile } from '@shared/ui/stat-tile';
 import { OrgTabs } from './org-tabs';
@@ -106,7 +107,7 @@ export default async function OrgHomePage({ searchParams }: PageProps) {
     );
   }
 
-  const { organization, members, invites, approvedMembers, adminCount, repCount, pendingInvites } = await loadOrgDetail(supabase, targetOrgId);
+  const { organization, invites, approvedMembers, adminCount, repCount, pendingInvites } = await loadOrgDetail(supabase, targetOrgId);
 
   const lastSeenTimestamp = approvedMembers.reduce((latest, member) => {
     const ts = member.last_seen_at ? Date.parse(member.last_seen_at) : 0;

@@ -9,9 +9,6 @@ export type InventoryItem = {
   supplier: string | null;
   active: boolean;
   onHandQuantity: number;
-  committedQuantity: number;
-  availableQuantity: number;
-  lastReceiptAt: string | null;
 };
 
 export type InventorySummary = {
@@ -29,12 +26,6 @@ export type LowStockItem = {
   unitType: string | null;
   onHandQuantity: number;
   minimumThreshold: number | null;
-  locations?: Array<{
-    id: string;
-    name: string;
-    code: string | null;
-    onHandQuantity: number;
-  }>;
 };
 
 export type ExpiringItem = {

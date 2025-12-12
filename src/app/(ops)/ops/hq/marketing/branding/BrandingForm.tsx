@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { Image as ImageIcon, Loader2, Trash2 } from 'lucide-react';
 import { Button } from '@shared/ui/button';
 import { Form, FormField } from '@shared/ui/form';
+import { useToast } from '@shared/ui/use-toast';
 import type { BrandingAssets } from '@/lib/marketing/settings';
 import { saveBrandingSettings, uploadBrandingAsset } from './actions';
 
@@ -28,6 +29,7 @@ type BrandUploadProps = {
 };
 
 export function BrandingForm({ branding }: Props) {
+  const { toast } = useToast();
   const [logoLightUrl, setLogoLightUrl] = useState(branding?.logoLightUrl ?? '');
   const [logoDarkUrl, setLogoDarkUrl] = useState(branding?.logoDarkUrl ?? '');
   const [faviconUrl, setFaviconUrl] = useState(branding?.faviconUrl ?? '');
@@ -54,7 +56,11 @@ export function BrandingForm({ branding }: Props) {
         if (result.kind === 'favicon') setFaviconUrl(result.url);
       } catch (error) {
         console.error(error);
-        alert('Upload failed. Please try again or use a smaller file.');
+        toast({
+          title: 'Upload failed',
+          variant: 'destructive',
+          description: 'Please try again or use a smaller file.',
+        });
       }
     });
   };

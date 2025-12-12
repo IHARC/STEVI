@@ -38,8 +38,10 @@ export default async function ClientShellLayout({ children }: { children: ReactN
 
   const isPreview = accessCheck.isPreview;
   const navSections = buildClientNav();
-  const branding = await getBrandingAssetsWithClient(supabase);
-  const navigation = await getUserNavigation(portalAccess);
+  const [branding, navigation] = await Promise.all([
+    getBrandingAssetsWithClient(supabase),
+    getUserNavigation(portalAccess),
+  ]);
   const primaryNavItems = buildPrimaryNavItems(portalAccess);
 
   const quickActions = resolveQuickActions(portalAccess, 'client', { isPreview });

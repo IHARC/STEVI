@@ -85,6 +85,7 @@ const steviConfig = [
     rules: {
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/no-explicit-any': 'warn',
+      'react-hooks/incompatible-library': 'off',
       'stevi/heading-needs-text-class': 'error',
       'no-restricted-imports': [
         'error',

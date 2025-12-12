@@ -15,6 +15,8 @@ import {
 } from './types';
 
 const DEFAULT_INITIAL_STOCK_NOTES = 'Initial stock recorded in STEVI inventory tools';
+const RECEIPTS_SELECT =
+  'id, item_id, item_name, location_id, location_name, qty, ref_type, provider_org_id, provider_org_name, notes, unit_cost, created_at, created_by, batch_id, batch_lot_number, batch_expiry_date';
 
 function normalizeLocationAddress(address?: string | null) {
   if (!address || address.trim().length === 0) {
@@ -122,7 +124,7 @@ export async function createInventoryItem(
     .schema('core')
     .from('items')
     .insert(payload)
-    .select('*')
+    .select('id, name, description, category, unit_type, minimum_threshold, cost_per_unit, supplier, active')
     .single();
 
   if (error) {
@@ -153,9 +155,6 @@ export async function createInventoryItem(
     supplier: data.supplier ?? payload.supplier ?? null,
     active: data.active ?? payload.active ?? true,
     onHandQuantity: 0,
-    committedQuantity: 0,
-    availableQuantity: 0,
-    lastReceiptAt: null,
   };
 }
 
@@ -274,7 +273,7 @@ export async function createInventoryLocation(
     .schema('inventory')
     .from('locations')
     .insert(payload)
-    .select('*')
+    .select('id, name, code, type, address, active, created_at, updated_at')
     .single();
 
   if (error) {
@@ -342,7 +341,7 @@ export async function createInventoryOrganization(
     .schema('core')
     .from('organizations')
     .insert(payload)
-    .select('*')
+    .select('id, name, description, website, is_active, created_at, updated_at')
     .single();
 
   if (error) {
@@ -429,7 +428,7 @@ export async function updateInventoryTransactionSource(
   const { data, error: fetchError } = await supabase
     .schema('inventory')
     .from('v_transactions_with_org')
-    .select('*')
+    .select(RECEIPTS_SELECT)
     .eq('id', transactionId)
     .maybeSingle();
 
@@ -462,7 +461,7 @@ export async function updateInventoryTransactionSource(
     createdAt: String(data.created_at ?? new Date().toISOString()),
     createdBy: data.created_by ?? null,
     batchId: data.batch_id ?? null,
-    lotNumber: data.lot_number ?? null,
-    expiryDate: data.expiry_date ?? null,
+    lotNumber: data.batch_lot_number ?? null,
+    expiryDate: data.batch_expiry_date ?? null,
   };
 }
