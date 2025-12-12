@@ -8,15 +8,14 @@ test.describe('Client shell', () => {
   });
 });
 
-test.describe('Workspace shell', () => {
-  test('admin routes redirect unauthenticated users', async ({ page }) => {
-    await page.goto('/admin/operations');
-    await expect(page).toHaveURL(/\/login\?next=%2Fadmin%2Foperations/);
-    await expect(page.locator('body')).not.toContainText('Client portal');
+test.describe('Operations shell', () => {
+  test('frontline routes redirect unauthenticated users', async ({ page }) => {
+    await page.goto('/ops/today');
+    await expect(page).toHaveURL(/\/login\?next=%2Fops%2Ftoday/);
   });
 
-  test('staff routes redirect unauthenticated users', async ({ page }) => {
-    await page.goto('/ops/today');
-    await expect(page).toHaveURL(/\/login\?next=%2Fworkspace%2Ftoday/);
+  test('STEVI Admin routes redirect unauthenticated users', async ({ page }) => {
+    await page.goto('/ops/hq');
+    await expect(page).toHaveURL(/\/login\?next=%2Fops%2Fhq/);
   });
 });

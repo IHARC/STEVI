@@ -9,16 +9,16 @@ import { loadPortalAccess } from '@/lib/portal-access';
 import type { SupabaseServerClient } from '@/lib/supabase/types';
 import type { Database } from '@/types/supabase';
 
-const HQ_ROOT_PATH = '/ops/hq';
-const HQ_PROFILES_PATH = '/ops/hq/profiles';
-const HQ_PATHS = [HQ_ROOT_PATH, HQ_PROFILES_PATH] as const;
+const ADMIN_ROOT_PATH = '/ops/hq';
+const ADMIN_PROFILES_PATH = '/ops/hq/profiles';
+const ADMIN_PATHS = [ADMIN_ROOT_PATH, ADMIN_PROFILES_PATH] as const;
 
 type ActionResult<T = void> = { success: true; data?: T } | { success: false; error: string };
 
 type GovernmentRoleType = Database['portal']['Enums']['government_role_type'];
 
 async function revalidateAdminPaths() {
-  await Promise.all(HQ_PATHS.map((path) => revalidatePath(path)));
+  await Promise.all(ADMIN_PATHS.map((path) => revalidatePath(path)));
 }
 
 function readString(formData: FormData, key: string): string | null {

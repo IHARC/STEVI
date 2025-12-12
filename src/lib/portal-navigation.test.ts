@@ -62,6 +62,7 @@ const baseAccess: PortalAccess = {
   canManageOrgUsers: false,
   canManageOrgInvites: false,
   inventoryAllowedRoles: [],
+  actingOrgChoices: [],
   actingOrgChoicesCount: null,
   actingOrgAutoSelected: false,
 };
@@ -108,7 +109,7 @@ describe('buildPortalNav', () => {
 
     const frontline = sections.find((section) => section.id === 'ops_frontline');
     const frontlineGroups = frontline?.groups.map((group) => group.id) ?? [];
-    expect(frontlineGroups).toEqual(expect.arrayContaining(['today', 'clients', 'programs', 'visits', 'supplies', 'partners']));
+    expect(frontlineGroups).toEqual(expect.arrayContaining(['today', 'clients', 'programs', 'supplies', 'partners']));
 
     const org = sections.find((section) => section.id === 'ops_org');
     expect(org?.groups[0]?.items.length).toBeGreaterThanOrEqual(4);
@@ -126,7 +127,6 @@ describe('buildPortalNav', () => {
     expect(groupIds).toContain('today');
     expect(groupIds).toContain('clients');
     expect(groupIds).toContain('programs');
-    expect(groupIds).toContain('visits');
     expect(groupIds).not.toContain('supplies');
     expect(groupIds).not.toContain('partners');
   });

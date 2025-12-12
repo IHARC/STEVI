@@ -9,13 +9,13 @@ This document codifies the client/operations shell split for STEVI. It complemen
 
 ## Route & Layout Map
 - `(client)` route group: `/home`, `/messages`, `/appointments`, `/documents`, `/support`, `/resources`, `/cases`, `/profile`, `/onboarding` (+ supporting client-only routes).
-- `(ops)` route group: `/ops/*` (frontline), `/ops/org/*` (tenant org hub), `/ops/hq/*` (IHARC HQ) plus shared ops primitives (command palette, inbox, navigation).
+- `(ops)` route group: `/ops/*` (frontline), `/ops/org/*` (tenant org hub), `/ops/hq/*` (STEVI Admin) plus shared ops primitives (command palette, inbox, navigation).
 - `/login`, `/register/*`, `/reset-password` remain outside shell groups.
 - Each group owns its layout, theme token file, and navigation surface; no shared chrome between shells.
 
 ## Component Boundaries
 - `src/components/client/**` – client shell UI and hooks.
-- `src/components/workspace/**` – operations UI and hooks (frontline, org, HQ).
+- `src/components/workspace/**` – operations UI and hooks (frontline, org, STEVI Admin).
 - `src/components/shared/**` – primitives, providers, and cross-shell utilities (including shadcn/ui).
 - Lint rules block imports from the opposite shell; shared + `src/lib/**` stay allowed for both.
 - Path aliases:
@@ -31,9 +31,10 @@ This document codifies the client/operations shell split for STEVI. It complemen
   - Otherwise redirect to the ops landing path.
   - Onboarding enforced in the client layout (redirect to `/onboarding?next=...` when incomplete).
 - Operations shell:
-  - Areas: `ops_frontline`, `ops_org`, `ops_hq`.
+  - Areas: `ops_frontline`, `ops_org`, `ops_hq` (STEVI Admin).
   - Redirects to `/home` when ops access is missing.
-  - Navigation contains only ops sections; “Preview client portal” points to `/home?preview=1`.
+  - Navigation contains only ops sections; primary chrome uses a thin hub rail (Today, Clients, Programs, Supplies, Partners, Org Hub, STEVI Admin) with sub-pages living inside each hub.
+  - “Preview client portal” points to `/home?preview=1`.
 - Preview banner lives only in the client shell with an explicit exit path back to the user’s primary ops area.
 - Ops users manage their profile at `/ops/profile`; the client shell keeps `/profile` for client users and preview-only browsing. Shared form components live under `components/shared/profile`.
 

@@ -5,6 +5,7 @@ import { loadPortalAccess } from '@/lib/portal-access';
 import { resolveLandingPath } from '@/lib/portal-navigation';
 import { fetchStaffShifts } from '@/lib/staff/fetchers';
 import { PageHeader } from '@shared/layout/page-header';
+import { PageTabNav, type PageTab } from '@shared/layout/page-tab-nav';
 import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
@@ -12,7 +13,18 @@ import { cn } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
 
-export default async function OpsProgramsPage() {
+type PageProps = { searchParams?: Promise<Record<string, string | string[] | undefined>> };
+
+const VIEWS = ['overview', 'schedule'] as const;
+type ViewId = (typeof VIEWS)[number];
+
+export default async function OpsProgramsPage({ searchParams }: PageProps) {
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const viewParam = resolvedSearchParams?.view;
+  const activeView: ViewId = VIEWS.includes((Array.isArray(viewParam) ? viewParam[0] : viewParam) as ViewId)
+    ? ((Array.isArray(viewParam) ? viewParam[0] : viewParam) as ViewId)
+    : 'overview';
+
   const supabase = await createSupabaseRSCClient();
   const access = await loadPortalAccess(supabase);
 
@@ -27,6 +39,12 @@ export default async function OpsProgramsPage() {
   const shifts = access.canAccessOpsFrontline ? await fetchStaffShifts(supabase, access.userId) : [];
   const todaysPrograms = shifts.slice(0, 3);
 
+  const tabs: PageTab[] = [
+    { label: 'Overview', href: '/ops/programs' },
+    { label: 'Schedule', href: '/ops/programs?view=schedule' },
+  ];
+  const activeHref = activeView === 'schedule' ? '/ops/programs?view=schedule' : '/ops/programs';
+
   return (
     <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-8 md:px-6">
       <PageHeader
@@ -37,45 +55,74 @@ export default async function OpsProgramsPage() {
         meta={[{ label: 'Outreach lives here', tone: 'info' }]}
       />
 
-      <section className="space-y-3">
-        <div className="flex items-center justify-between gap-2">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Today’s programs</h2>
-          <Button asChild variant="outline" size="sm">
-            <Link href="/ops/programs?view=schedule">View schedule</Link>
-          </Button>
-        </div>
-        <div className="grid gap-3 md:grid-cols-2">
-          {todaysPrograms.map((program) => (
-            <ProgramCard key={program.id} program={program} highlight />
-          ))}
-          {todaysPrograms.length === 0 ? (
-            <Card className="border-dashed border-border/60">
-              <CardHeader>
-                <CardTitle className="text-lg">No scheduled programs today</CardTitle>
-                <CardDescription>Shifts and outreach schedules will appear here once assigned.</CardDescription>
-              </CardHeader>
-            </Card>
-          ) : null}
-        </div>
-      </section>
+      <PageTabNav tabs={tabs} activeHref={activeHref} />
 
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">All programs</h2>
-        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-          {shifts.map((program) => (
-            <ProgramCard key={program.id} program={program} />
-          ))}
-          {shifts.length === 0 ? (
-            <Card className="border-dashed border-border/60">
-              <CardHeader>
-                <CardTitle className="text-lg">No programs yet</CardTitle>
-                <CardDescription>Set up programs and shifts to staff coverage and start Visits from context.</CardDescription>
-              </CardHeader>
-            </Card>
-          ) : null}
-        </div>
-      </section>
+      {activeView === 'schedule' ? (
+        <ScheduleView shifts={shifts} />
+      ) : (
+        <>
+          <section className="space-y-3">
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Today’s programs</h2>
+              <Button asChild variant="outline" size="sm">
+                <Link href="/ops/programs?view=schedule">View schedule</Link>
+              </Button>
+            </div>
+            <div className="grid gap-3 md:grid-cols-2">
+              {todaysPrograms.map((program) => (
+                <ProgramCard key={program.id} program={program} highlight />
+              ))}
+              {todaysPrograms.length === 0 ? (
+                <Card className="border-dashed border-border/60">
+                  <CardHeader>
+                    <CardTitle className="text-lg">No scheduled programs today</CardTitle>
+                    <CardDescription>Shifts and outreach schedules will appear here once assigned.</CardDescription>
+                  </CardHeader>
+                </Card>
+              ) : null}
+            </div>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">All programs</h2>
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+              {shifts.map((program) => (
+                <ProgramCard key={program.id} program={program} />
+              ))}
+              {shifts.length === 0 ? (
+                <Card className="border-dashed border-border/60">
+                  <CardHeader>
+                    <CardTitle className="text-lg">No programs yet</CardTitle>
+                    <CardDescription>Set up programs and shifts to staff coverage and start Visits from context.</CardDescription>
+                  </CardHeader>
+                </Card>
+              ) : null}
+            </div>
+          </section>
+        </>
+      )}
     </div>
+  );
+}
+
+function ScheduleView({ shifts }: { shifts: Array<{ id: string; title: string; location: string; startsAt: string; endsAt: string }> }) {
+  return (
+    <section className="space-y-3">
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Schedule</h2>
+      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+        {shifts.map((program) => (
+          <ProgramCard key={program.id} program={program} />
+        ))}
+        {shifts.length === 0 ? (
+          <Card className="border-dashed border-border/60">
+            <CardHeader>
+              <CardTitle className="text-lg">No scheduled programs</CardTitle>
+              <CardDescription>Programs will appear here once assigned to you or your org.</CardDescription>
+            </CardHeader>
+          </Card>
+        ) : null}
+      </div>
+    </section>
   );
 }
 

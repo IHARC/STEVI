@@ -13,11 +13,13 @@ import { cn } from '@/lib/utils';
 import type { NavSection, NavItem as PortalNavItem } from '@/lib/portal-navigation';
 import type { PrimaryNavItem } from '@/lib/primary-nav';
 import { useOptionalPortalLayout } from '@shared/providers/portal-layout-provider';
+import { buildOpsHubLinks, type OpsHubLink } from '@/lib/ops-hubs';
 
 type AppNavigationProps = {
   navSections: NavSection[];
   globalNavItems?: PrimaryNavItem[];
   className?: string;
+  mode?: 'full' | 'hubs';
 };
 
 export function AppNavigationDesktop({ navSections, globalNavItems = [], className }: AppNavigationProps) {
@@ -47,11 +49,14 @@ export function AppNavigationDesktop({ navSections, globalNavItems = [], classNa
   );
 }
 
-export function AppNavigationMobile({ navSections, globalNavItems = [] }: AppNavigationProps) {
+export function AppNavigationMobile({ navSections, globalNavItems = [], mode = 'full' }: AppNavigationProps) {
   const pathname = usePathname() ?? '/';
   const sections = useAugmentedSections(navSections);
   const [open, setOpen] = useState(false);
-  const hasNav = sections.some((section) => section.groups.length > 0);
+  const hubs = mode === 'hubs' ? buildOpsHubLinks(sections) : [];
+  const hasNav = mode === 'hubs'
+    ? hubs.length > 0
+    : sections.some((section) => section.groups.length > 0);
 
   if (!hasNav) return null;
 
@@ -74,13 +79,17 @@ export function AppNavigationMobile({ navSections, globalNavItems = [] }: AppNav
         </SheetHeader>
         <ScrollArea className="h-full">
           <div className="px-4 pb-6">
-            <NavContent
-              navSections={sections}
-              pathname={pathname}
-              onNavigate={() => setOpen(false)}
-              showGlobalNav
-              globalNavItems={globalNavItems}
-            />
+            {mode === 'hubs' ? (
+              <HubContent hubs={hubs} pathname={pathname} onNavigate={() => setOpen(false)} />
+            ) : (
+              <NavContent
+                navSections={sections}
+                pathname={pathname}
+                onNavigate={() => setOpen(false)}
+                showGlobalNav
+                globalNavItems={globalNavItems}
+              />
+            )}
           </div>
         </ScrollArea>
       </SheetContent>
@@ -155,6 +164,21 @@ function NavContent({ navSections, pathname, onNavigate, globalNavItems = [], sh
           </NavigationMenu>
         </section>
       ) : null}
+    </div>
+  );
+}
+
+function HubContent({ hubs, pathname, onNavigate }: { hubs: OpsHubLink[]; pathname: string; onNavigate?: () => void }) {
+  return (
+    <div className="space-y-2">
+      {hubs.map((hub) => (
+        <NavLink
+          key={hub.id}
+          link={hub}
+          pathname={pathname}
+          onNavigate={onNavigate}
+        />
+      ))}
     </div>
   );
 }

@@ -43,6 +43,7 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
         id: 'today',
         label: 'Today',
         icon: 'dashboard',
+        isHub: true,
         items: [
           { id: 'today', href: '/ops/today', label: 'Today', icon: 'dashboard', match: ['/ops/today'], exact: true },
         ],
@@ -52,6 +53,7 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
         label: 'Clients',
         icon: 'users',
         requires: canSeeClients,
+        isHub: true,
         items: [
           { id: 'clients', href: '/ops/clients', label: 'Clients', icon: 'users', match: ['/ops/clients'] },
         ],
@@ -61,17 +63,9 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
         label: 'Programs',
         icon: 'calendarRange',
         requires: canSeePrograms,
+        isHub: true,
         items: [
           { id: 'programs', href: '/ops/programs', label: 'Programs', icon: 'calendarRange', match: ['/ops/programs'] },
-        ],
-      },
-      {
-        id: 'visits',
-        label: 'Visits',
-        icon: 'workflow',
-        requires: canSeeFrontline,
-        items: [
-          { id: 'visits', href: '/ops/visits/new', label: 'Visits', icon: 'workflow', match: ['/ops/visits'] },
         ],
       },
       {
@@ -79,6 +73,7 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
         label: 'Supplies',
         icon: 'boxes',
         requires: canSeeSupplies,
+        isHub: true,
         items: [
           { id: 'supplies', href: '/ops/supplies', label: 'Supplies', icon: 'boxes', match: ['/ops/supplies'] },
         ],
@@ -88,6 +83,7 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
         label: 'Partners',
         icon: 'building',
         requires: canSeePartners,
+        isHub: true,
         items: [
           { id: 'partners', href: '/ops/partners', label: 'Partners', icon: 'building', match: ['/ops/partners'] },
         ],
@@ -105,6 +101,7 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
         id: 'org',
         label: 'Organization',
         icon: 'settings',
+        isHub: true,
         items: [
           { id: 'org-overview', href: '/ops/org', label: 'Overview', icon: 'dashboard', match: ['/ops/org'], exact: true },
           { id: 'org-members', href: '/ops/org/members', label: 'Members', icon: 'users', match: ['/ops/org/members'] },
@@ -117,15 +114,16 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
   },
   {
     id: 'ops_hq',
-    label: 'HQ',
-    description: 'IHARC-wide controls and content',
+    label: 'STEVI Admin',
+    description: 'STEVI-wide controls and content',
     area: 'ops_hq',
     requires: canSeeHq,
     groups: [
       {
         id: 'hq-hub',
-        label: 'HQ Hub',
+        label: 'Admin hub',
         icon: 'building',
+        isHub: true,
         items: [
           { id: 'hq-overview', href: '/ops/hq', label: 'Overview', icon: 'dashboard', match: ['/ops/hq'], exact: true },
           { id: 'hq-content', href: '/ops/hq#content', label: 'Content & Notifications', icon: 'megaphone', match: ['/ops/hq'] },
@@ -152,6 +150,7 @@ function filterGroups(groups: NavGroupDefinition[], access: PortalAccess): NavGr
       label: group.label,
       description: group.description,
       icon: group.icon,
+      isHub: group.isHub,
       items: filterItems(group.items, access),
     }))
     .filter((group) => group.items.length > 0);
@@ -266,7 +265,7 @@ export function navAreaLabel(area: PortalArea): string {
     case 'ops_frontline':
       return 'Operations';
     case 'ops_hq':
-      return 'HQ';
+      return 'STEVI Admin';
     case 'ops_org':
       return 'Organization';
     case 'client':

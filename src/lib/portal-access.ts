@@ -38,6 +38,7 @@ export type PortalAccess = {
   canManageOrgUsers: boolean;
   canManageOrgInvites: boolean;
   inventoryAllowedRoles: IharcRole[];
+  actingOrgChoices: Array<{ id: number; name: string | null }>;
   actingOrgChoicesCount: number | null;
   actingOrgAutoSelected: boolean;
 };
@@ -77,6 +78,7 @@ export async function loadPortalAccess(
 
   let actingOrgChoicesCount: number | null = null;
   let actingOrgAutoSelected = false;
+  let actingOrgChoices: Array<{ id: number; name: string | null }> = [];
 
   const hasOpsRole = isProfileApproved && (portalRoles.length > 0 || iharcRoles.length > 0);
 
@@ -89,6 +91,7 @@ export async function loadPortalAccess(
     }
 
     actingOrgChoicesCount = accessibleOrgSet.size;
+    actingOrgChoices = Array.from(accessibleOrgSet.entries()).map(([id, name]) => ({ id, name }));
 
     if (!organizationId && accessibleOrgSet.size === 1) {
       const [soleOrgId, soleOrgName] = accessibleOrgSet.entries().next().value as [number, string | null];
@@ -166,6 +169,7 @@ export async function loadPortalAccess(
     canManageOrgUsers,
     canManageOrgInvites,
     inventoryAllowedRoles,
+    actingOrgChoices,
     actingOrgChoicesCount,
     actingOrgAutoSelected,
   };

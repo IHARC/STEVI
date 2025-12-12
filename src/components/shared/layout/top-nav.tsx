@@ -14,6 +14,7 @@ import { Button } from '@shared/ui/button';
 import { Badge } from '@shared/ui/badge';
 import { useOptionalPortalLayout } from '@shared/providers/portal-layout-provider';
 import { usePortalAccess } from '@shared/providers/portal-access-provider';
+import { ActingOrgSwitcher } from '@shared/layout/acting-org-switcher';
 import type { CommandPaletteItem } from '@/lib/portal-access';
 import type { ResolvedBrandingAssets } from '@/lib/marketing/branding';
 import type { UserNavigation } from '@shared/layout/user-nav';
@@ -37,10 +38,22 @@ export function TopNav({
   const hasNav = navSections.length > 0;
   const layout = useOptionalPortalLayout();
   const portalAccess = usePortalAccess();
-  const showClientPreviewCta = layout?.activeArea !== 'client';
-  const showMegaMenu = hasNav && layout?.activeArea === 'client';
-  const showActingOrg = layout?.activeArea === 'ops_frontline' || layout?.activeArea === 'ops_org';
+  const activeArea = layout?.activeArea ?? 'client';
+  const showClientPreviewCta = activeArea !== 'client';
+  const showMegaMenu = hasNav && activeArea === 'client';
+  const showActingOrg = activeArea === 'ops_frontline' || activeArea === 'ops_org';
   const actingOrgName = portalAccess?.organizationName ?? (portalAccess?.organizationId ? 'Organization' : 'Not set');
+  const actingOrgChoices = portalAccess?.actingOrgChoices ?? [];
+  const showActingOrgSwitcher = showActingOrg && actingOrgChoices.length > 1;
+  const hamburgerBreakpointClass = 'lg:hidden';
+  const subtitle =
+    activeArea === 'ops_frontline'
+      ? 'Operations portal'
+      : activeArea === 'ops_org'
+        ? 'Organization hub'
+      : activeArea === 'ops_hq'
+          ? 'STEVI admin portal'
+          : 'Client portal';
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background/85 text-foreground shadow-sm backdrop-blur">
@@ -54,8 +67,11 @@ export function TopNav({
         <div className="grid w-full grid-cols-[auto_1fr] items-center gap-3 md:gap-4 lg:grid-cols-[auto_1fr_auto]">
           <div className="flex min-w-0 items-center gap-3">
             {hasNav ? (
-              <div className="lg:hidden">
-                <AppNavigationMobile navSections={navSections} />
+              <div className={hamburgerBreakpointClass}>
+                <AppNavigationMobile
+                  navSections={navSections}
+                  mode={activeArea === 'client' ? 'full' : 'hubs'}
+                />
               </div>
             ) : null}
             <Link
@@ -81,25 +97,38 @@ export function TopNav({
               />
               <span className="text-left leading-tight">
                 <span className="block text-base font-semibold text-foreground">STEVI</span>
-                <span className="block text-xs text-muted-foreground">Client Support Portal</span>
+                <span className="block text-xs text-muted-foreground">{subtitle}</span>
               </span>
             </Link>
           </div>
 
           {showMegaMenu ? (
-            <nav aria-label="Primary navigation" className="hidden min-w-0 lg:flex">
+            <nav aria-label="Primary navigation" className="hidden min-w-0 lg:flex xl:hidden">
               <TopNavMenu navSections={navSections} pathname={pathname} />
             </nav>
           ) : null}
 
           <div className="flex items-center justify-end gap-2">
-            {showActingOrg ? (
+            {showActingOrgSwitcher ? (
+              <ActingOrgSwitcher
+                choices={actingOrgChoices}
+                currentOrganizationId={portalAccess?.organizationId ?? null}
+                className="hidden md:flex"
+              />
+            ) : showActingOrg ? (
               <Badge variant="outline" className="hidden md:inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 <span className="text-[10px] font-semibold text-muted-foreground">Acting org</span>
                 <span className="text-foreground normal-case text-xs font-semibold">{actingOrgName}</span>
               </Badge>
             ) : null}
-            {showActingOrg ? (
+
+            {showActingOrgSwitcher ? (
+              <ActingOrgSwitcher
+                choices={actingOrgChoices}
+                currentOrganizationId={portalAccess?.organizationId ?? null}
+                className="md:hidden"
+              />
+            ) : showActingOrg ? (
               <Badge variant="secondary" className="md:hidden px-2 py-1 text-[11px] font-semibold uppercase tracking-wide">
                 Org: {actingOrgName}
               </Badge>

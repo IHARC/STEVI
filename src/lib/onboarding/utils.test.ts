@@ -27,6 +27,7 @@ const baseAccess: PortalAccess = {
   canReviewProfiles: false,
   canViewMetrics: false,
   inventoryAllowedRoles: [],
+  actingOrgChoices: [],
   actingOrgChoicesCount: null,
   actingOrgAutoSelected: false,
 };

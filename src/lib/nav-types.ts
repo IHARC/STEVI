@@ -15,6 +15,7 @@ export type NavGroup = {
   label: string;
   description?: string;
   icon?: AppIconName;
+  isHub?: boolean;
   items: NavItem[];
 };
 

@@ -7,6 +7,7 @@ import { fetchStaffCaseload } from '@/lib/staff/fetchers';
 import { fetchStaffCases } from '@/lib/cases/fetchers';
 import { getOnboardingStatusForPeople, type OnboardingStatus } from '@/lib/onboarding/status';
 import { PageHeader } from '@shared/layout/page-header';
+import { PageTabNav, type PageTab } from '@shared/layout/page-tab-nav';
 import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
@@ -73,6 +74,12 @@ export default async function OpsClientsPage({ searchParams }: PageProps) {
     return acc;
   }, { COMPLETED: 0, NEEDS_CONSENTS: 0, NOT_STARTED: 0 });
 
+  const tabs: PageTab[] = VIEWS.map((view) => ({
+    label: labelForView(view),
+    href: `/ops/clients?view=${view}`,
+  }));
+  const activeHref = `/ops/clients?view=${activeView}`;
+
   return (
     <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-8 md:px-6">
       <PageHeader
@@ -85,19 +92,7 @@ export default async function OpsClientsPage({ searchParams }: PageProps) {
         meta={[{ label: 'Visit-first', tone: 'info' }, { label: 'Journey timeline', tone: 'neutral' }]}
       />
 
-      <div className="flex flex-wrap items-center gap-2">
-        {VIEWS.map((view) => (
-          <Button
-            key={view}
-            asChild
-            size="sm"
-            variant={activeView === view ? 'secondary' : 'outline'}
-            className="rounded-full"
-          >
-            <Link href={`/ops/clients?view=${view}`}>{labelForView(view)}</Link>
-          </Button>
-        ))}
-      </div>
+      <PageTabNav tabs={tabs} activeHref={activeHref} />
 
       {activeView === 'directory' ? (
         <DirectoryView people={peopleWithOnboarding} statusCounts={statusCounts} />

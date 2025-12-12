@@ -95,7 +95,7 @@ export default async function HqOrganizationDetailPage({ params }: PageProps) {
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8 md:px-6">
       <PageHeader
-        eyebrow="HQ"
+        eyebrow="STEVI Admin"
         title={orgRow.name ?? 'Organization'}
         description="IHARC-wide administration for this tenant. Update details, feature flags, and membership."
         primaryAction={{ label: 'Back to organizations', href: '/ops/hq/organizations' }}
@@ -369,7 +369,7 @@ export default async function HqOrganizationDetailPage({ params }: PageProps) {
               <div className="space-y-1">
                 <Label htmlFor="profile_id">Profile ID</Label>
                 <Input id="profile_id" name="profile_id" placeholder="profile UUID" required />
-                <p className="text-xs text-muted-foreground">Find profile IDs from the HQ Users list.</p>
+                <p className="text-xs text-muted-foreground">Find profile IDs from the STEVI Admin Users list.</p>
               </div>
               <div className="flex flex-col gap-2 text-sm">
                 <label className="flex items-center gap-2">

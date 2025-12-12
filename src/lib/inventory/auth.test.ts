@@ -78,6 +78,7 @@ const baseAccess: PortalAccess = {
   canManageOrgUsers: true,
   canManageOrgInvites: true,
   inventoryAllowedRoles: ['iharc_staff'],
+  actingOrgChoices: [],
   actingOrgChoicesCount: null,
   actingOrgAutoSelected: false,
 };

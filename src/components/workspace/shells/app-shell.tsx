@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 import type { ResolvedBrandingAssets } from '@/lib/marketing/branding';
 import type { UserNavigation } from '@shared/layout/user-nav';
 import type { NavSection } from '@/lib/portal-navigation';
-import { OpsRail } from '@workspace/layout/ops-rail';
+import { OpsHubRail } from '@workspace/layout/ops-hub-rail';
 
 type AppShellProps = {
   children: ReactNode;
@@ -37,7 +37,7 @@ export function AppShell({
   return (
     <div className={cn('ops-shell flex min-h-screen bg-background text-foreground')}>
       {showNavigation ? (
-        <OpsRail navSections={navSections} />
+        <OpsHubRail navSections={navSections} />
       ) : null}
       <div className="flex min-h-screen flex-1 flex-col">
         <TopNav

@@ -3,6 +3,7 @@ import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { resolveLandingPath } from '@/lib/portal-navigation';
 import { PageHeader } from '@shared/layout/page-header';
+import { PageTabNav, type PageTab } from '@shared/layout/page-tab-nav';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { NotificationsChart } from './notifications-chart';
 import { RecentNotifications } from '@workspace/admin/notifications/recent-notifications';
@@ -102,19 +103,29 @@ export default async function OpsHqPage() {
       canManageLocations = roles.includes('iharc_admin');
       inventoryBootstrap = await fetchInventoryBootstrap(supabase);
     } catch (error) {
-      console.warn('Inventory unavailable for HQ', error);
+      console.warn('Inventory unavailable for STEVI Admin', error);
     }
   }
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-8 md:px-6">
       <PageHeader
-        eyebrow="HQ"
-        title="IHARC Operations"
+        eyebrow="STEVI Admin"
+        title="STEVI Administration"
         description="Global controls for content, notifications, inventory, and tenant organizations."
         primaryAction={{ label: 'Org hub', href: '/ops/org' }}
         secondaryAction={{ label: 'Frontline view', href: '/ops/today' }}
         meta={[{ label: 'IHARC only', tone: 'warning' }, { label: 'No client data', tone: 'neutral' }]}
+      />
+
+      <PageTabNav
+        tabs={[
+          { label: 'Overview', href: '/ops/hq', match: ['/ops/hq'] },
+          { label: 'Content', href: '/ops/hq#content' },
+          { label: 'Organizations', href: '/ops/hq/organizations', match: ['/ops/hq/organizations'] },
+          { label: 'Inventory', href: '/ops/hq#inventory' },
+          { label: 'Operations', href: '/ops/hq#operations' },
+        ] satisfies PageTab[]}
       />
 
       <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">

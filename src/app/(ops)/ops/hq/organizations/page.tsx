@@ -94,11 +94,11 @@ export default async function HqOrganizationsPage() {
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8 md:px-6">
       <PageHeader
-        eyebrow="HQ"
+        eyebrow="STEVI Admin"
         title="Organizations"
         description="Create and manage partner organizations across STEVI. IHARC admins can onboard and configure any tenant."
         primaryAction={{ label: 'New organization', href: '#create' }}
-        secondaryAction={{ label: 'Back to HQ', href: '/ops/hq' }}
+        secondaryAction={{ label: 'Back to STEVI Admin', href: '/ops/hq' }}
       />
 
       <section className="grid gap-3 lg:grid-cols-[1.1fr_1fr]" id="create">
