@@ -79,9 +79,9 @@ export default async function OpsClientDetailPage({ params, searchParams }: Page
               <CardDescription>All Visits, tasks, referrals, supplies, and appointments tied to this person.</CardDescription>
             </div>
             <Tabs value={activeFilter} className="md:max-w-xl">
-              <TabsList className="flex flex-wrap justify-end gap-1 bg-transparent p-0">
+              <TabsList className="w-full justify-end gap-1 overflow-x-auto rounded-2xl bg-transparent p-0">
                 {FILTERS.map((filter) => (
-                  <TabsTrigger key={filter} value={filter} className="rounded-full border px-3 py-1 text-xs capitalize">
+                  <TabsTrigger key={filter} value={filter} className="shrink-0 rounded-full border px-3 py-1 text-xs capitalize">
                     <Link href={`/ops/clients/${person.id}?filter=${filter}`}>{filter}</Link>
                   </TabsTrigger>
                 ))}

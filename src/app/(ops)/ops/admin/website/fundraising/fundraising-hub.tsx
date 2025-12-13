@@ -117,23 +117,23 @@ export function FundraisingHub({ catalog, inventoryItems, payments, subscription
   return (
     <div className="space-y-6">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="flex w-full flex-wrap justify-start gap-2 bg-transparent p-0">
-          <TabsTrigger value="dashboard" className="rounded-full border px-4 py-1 text-sm">
+        <TabsList className="w-full justify-start gap-1 overflow-x-auto rounded-2xl">
+          <TabsTrigger value="dashboard" className="shrink-0 rounded-full px-4 text-xs font-semibold">
             Dashboard
           </TabsTrigger>
-          <TabsTrigger value="stripe" className="rounded-full border px-4 py-1 text-sm">
+          <TabsTrigger value="stripe" className="shrink-0 rounded-full px-4 text-xs font-semibold">
             Stripe
           </TabsTrigger>
-          <TabsTrigger value="catalog" className="rounded-full border px-4 py-1 text-sm">
+          <TabsTrigger value="catalog" className="shrink-0 rounded-full px-4 text-xs font-semibold">
             Catalogue
           </TabsTrigger>
-          <TabsTrigger value="donations" className="rounded-full border px-4 py-1 text-sm">
+          <TabsTrigger value="donations" className="shrink-0 rounded-full px-4 text-xs font-semibold">
             Donations
           </TabsTrigger>
-          <TabsTrigger value="monthly" className="rounded-full border px-4 py-1 text-sm">
+          <TabsTrigger value="monthly" className="shrink-0 rounded-full px-4 text-xs font-semibold">
             Monthly donors
           </TabsTrigger>
-          <TabsTrigger value="webhooks" className="rounded-full border px-4 py-1 text-sm">
+          <TabsTrigger value="webhooks" className="shrink-0 rounded-full px-4 text-xs font-semibold">
             Webhooks
           </TabsTrigger>
         </TabsList>
@@ -527,4 +527,3 @@ export function FundraisingHub({ catalog, inventoryItems, payments, subscription
     </div>
   );
 }
-
