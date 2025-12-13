@@ -382,7 +382,7 @@ export async function upsertStripeDonationsCredentialsAction(formData: FormData)
   const secretKey = (formData.get('stripe_secret_key') as string | null)?.trim() ?? '';
   const webhookSecret = (formData.get('stripe_webhook_secret') as string | null)?.trim() ?? '';
 
-  const { error } = await supabase.rpc('donations_admin_upsert_stripe_credentials', {
+  const { error } = await supabase.schema('donations').rpc('donations_admin_upsert_stripe_credentials', {
     p_actor_profile_id: actorProfileId,
     p_mode: mode,
     p_stripe_secret_key: secretKey,
@@ -412,7 +412,7 @@ export async function setStripeDonationsModeAction(formData: FormData) {
     throw new Error('Select test or live mode.');
   }
 
-  const { error } = await supabase.rpc('donations_admin_set_stripe_mode', {
+  const { error } = await supabase.schema('donations').rpc('donations_admin_set_stripe_mode', {
     p_actor_profile_id: actorProfileId,
     p_mode: mode,
   });

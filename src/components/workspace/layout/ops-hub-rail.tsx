@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { APP_ICON_MAP } from '@/lib/app-icons';
@@ -13,25 +13,56 @@ type OpsHubRailProps = {
 };
 
 const RECENTS_KEY = 'stevi.ops.recentHubs';
+const RECENTS_EVENT = 'stevi.ops.recentHubs.updated';
+type StoredHub = Pick<OpsHubLink, 'id' | 'href' | 'label' | 'icon' | 'match' | 'exact'>;
+const EMPTY_RECENTS: StoredHub[] = [];
 
 export function OpsHubRail({ navSections }: OpsHubRailProps) {
   const pathname = usePathname() ?? '/';
   const hubs = useMemo(() => buildOpsHubLinks(navSections), [navSections]);
   const activeHub = useMemo(() => hubs.find((hub) => isActive(hub, pathname)) ?? null, [hubs, pathname]);
+  const [storedRecents, setStoredRecents] = useState<StoredHub[]>(EMPTY_RECENTS);
   const recents = useMemo(() => {
-    if (!activeHub) return readRecents();
-    const stored = readRecents();
-    const next = [activeHub, ...stored.filter((hub) => hub.id !== activeHub.id)].slice(0, 3);
-    return next.filter((hub) => hub.id !== activeHub.id);
-  }, [activeHub]);
+    if (!activeHub) return storedRecents;
+    return storedRecents.filter((hub) => hub.id !== activeHub.id);
+  }, [activeHub, storedRecents]);
+
+  useEffect(() => {
+    const syncFromStorage = () => {
+      const next = readRecentsFromStorage();
+      setStoredRecents((prev) => (areHubsEqual(prev, next) ? prev : next));
+    };
+
+    syncFromStorage();
+
+    const handler = (event: StorageEvent) => {
+      if (event.storageArea !== window.localStorage) return;
+      if (event.key !== RECENTS_KEY) return;
+      syncFromStorage();
+    };
+
+    const localHandler = (event: Event) => {
+      if ((event as CustomEvent<string>).detail !== RECENTS_KEY) return;
+      syncFromStorage();
+    };
+
+    window.addEventListener('storage', handler);
+    window.addEventListener(RECENTS_EVENT, localHandler);
+    return () => {
+      window.removeEventListener('storage', handler);
+      window.removeEventListener(RECENTS_EVENT, localHandler);
+    };
+  }, []);
 
   useEffect(() => {
     if (!activeHub) return;
 
-    const stored = readRecents();
-    const next = [activeHub, ...stored.filter((hub) => hub.id !== activeHub.id)].slice(0, 3);
-    writeRecents(next);
-  }, [activeHub]);
+    const next = normalizeStoredHubs([activeHub, ...storedRecents.filter((hub) => hub.id !== activeHub.id)]).slice(0, 3);
+    if (areHubsEqual(storedRecents, next)) return;
+
+    setStoredRecents(next);
+    writeRecentsToStorage(next);
+  }, [activeHub, storedRecents]);
 
   if (!hubs.length) return null;
 
@@ -94,21 +125,60 @@ function isActive(link: OpsHubLink, pathname: string) {
   return pathname.startsWith(`${hrefPath}/`);
 }
 
-function readRecents(): OpsHubLink[] {
+function areHubsEqual(a: StoredHub[], b: StoredHub[]) {
+  if (a === b) return true;
+  if (a.length !== b.length) return false;
+  for (let index = 0; index < a.length; index += 1) {
+    const left = a[index];
+    const right = b[index];
+    if (left.id !== right.id) return false;
+    if (left.href !== right.href) return false;
+    if (left.label !== right.label) return false;
+    if (left.icon !== right.icon) return false;
+    if (left.exact !== right.exact) return false;
+    const leftMatch = left.match ?? null;
+    const rightMatch = right.match ?? null;
+    if (leftMatch === null && rightMatch === null) continue;
+    if (leftMatch === null || rightMatch === null) return false;
+    if (leftMatch.length !== rightMatch.length) return false;
+    for (let matchIndex = 0; matchIndex < leftMatch.length; matchIndex += 1) {
+      if (leftMatch[matchIndex] !== rightMatch[matchIndex]) return false;
+    }
+  }
+  return true;
+}
+
+function normalizeStoredHubs(hubs: StoredHub[]): StoredHub[] {
+  return hubs
+    .filter((hub) => hub && typeof hub.id === 'string' && typeof hub.href === 'string' && typeof hub.label === 'string')
+    .map((hub) => ({
+      id: hub.id,
+      href: hub.href,
+      label: hub.label,
+      icon: hub.icon,
+      exact: hub.exact,
+      match: hub.match,
+    }));
+}
+
+function readRecentsFromStorage(): StoredHub[] {
   try {
     const raw = window.localStorage.getItem(RECENTS_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw) as OpsHubLink[];
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter((hub) => hub && typeof hub.id === 'string' && typeof hub.href === 'string' && typeof hub.label === 'string');
+    if (!raw) return EMPTY_RECENTS;
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return EMPTY_RECENTS;
+    return normalizeStoredHubs(parsed as StoredHub[]).slice(0, 3);
   } catch {
-    return [];
+    return EMPTY_RECENTS;
   }
 }
 
-function writeRecents(hubs: OpsHubLink[]) {
-  try {
-    window.localStorage.setItem(RECENTS_KEY, JSON.stringify(hubs));
-  } catch {
-  }
+function writeRecentsToStorage(hubs: StoredHub[]) {
+  const next = normalizeStoredHubs(hubs).slice(0, 3);
+  const nextRaw = JSON.stringify(next);
+  const currentRaw = window.localStorage.getItem(RECENTS_KEY);
+  if (currentRaw === nextRaw) return;
+
+  window.localStorage.setItem(RECENTS_KEY, nextRaw);
+  window.dispatchEvent(new CustomEvent(RECENTS_EVENT, { detail: RECENTS_KEY }));
 }
