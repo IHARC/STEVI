@@ -21,9 +21,7 @@ export function OpsHubRail({ navSections }: OpsHubRailProps) {
   const pathname = usePathname() ?? '/';
   const hubs = useMemo(() => buildOpsHubLinks(navSections), [navSections]);
   const activeHub = useMemo(() => hubs.find((hub) => isActive(hub, pathname)) ?? null, [hubs, pathname]);
-  const [storedRecents, setStoredRecents] = useState<StoredHub[]>(() =>
-    typeof window === 'undefined' ? EMPTY_RECENTS : readRecentsFromStorage(),
-  );
+  const [storedRecents, setStoredRecents] = useState<StoredHub[]>(EMPTY_RECENTS);
   const recents = useMemo(() => {
     if (!activeHub) return storedRecents;
     return storedRecents.filter((hub) => hub.id !== activeHub.id);
@@ -34,6 +32,8 @@ export function OpsHubRail({ navSections }: OpsHubRailProps) {
       const next = readRecentsFromStorage();
       setStoredRecents((prev) => (areHubsEqual(prev, next) ? prev : next));
     };
+
+    syncFromStorage();
 
     const handler = (event: StorageEvent) => {
       if (event.storageArea !== window.localStorage) return;
@@ -57,11 +57,17 @@ export function OpsHubRail({ navSections }: OpsHubRailProps) {
   useEffect(() => {
     if (!activeHub) return;
 
-    const next = normalizeStoredHubs([activeHub, ...storedRecents.filter((hub) => hub.id !== activeHub.id)]).slice(0, 3);
-    if (areHubsEqual(storedRecents, next)) return;
+    const syncActiveHub = () => {
+      const current = readRecentsFromStorage();
+      const next = normalizeStoredHubs([activeHub, ...current.filter((hub) => hub.id !== activeHub.id)]).slice(0, 3);
+      if (!areHubsEqual(current, next)) {
+        writeRecentsToStorage(next);
+      }
+      setStoredRecents((prev) => (areHubsEqual(prev, next) ? prev : next));
+    };
 
-    writeRecentsToStorage(next);
-  }, [activeHub, storedRecents]);
+    syncActiveHub();
+  }, [activeHub]);
 
   if (!hubs.length) return null;
 

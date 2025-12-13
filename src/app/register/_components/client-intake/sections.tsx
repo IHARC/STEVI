@@ -293,7 +293,7 @@ export function SafetySection({ form }: { form: UseFormReturn<ClientIntakeFormVa
 export function DemographicsSection({ form, dobYears }: { form: UseFormReturn<ClientIntakeFormValues>; dobYears: number[] }) {
   return (
     <section className="space-y-4 rounded-xl border border-border/30 p-4">
-      <FormLabel className="text-base font-semibold text-foreground">Optional demographic details</FormLabel>
+      <p className="text-base font-semibold text-foreground">Optional demographic details</p>
       <p className="text-sm text-muted-foreground">
         These questions help IHARC report on equity outcomes. Share only what feels right — skipping them never impacts services.
       </p>
@@ -414,7 +414,7 @@ export function DemographicsSection({ form, dobYears }: { form: UseFormReturn<Cl
 export function ConsentSection({ form }: { form: UseFormReturn<ClientIntakeFormValues> }) {
   return (
     <section className="space-y-3 rounded-xl border border-border/30 bg-muted/30 p-4">
-      <FormLabel className="text-base font-semibold text-foreground">Consents</FormLabel>
+      <p className="text-base font-semibold text-foreground">Consents</p>
       <FormField
         control={form.control}
         name="consent_privacy"

@@ -13,6 +13,7 @@
     "preview": "node .next/standalone/server.js",
     "build": "node build.js",
     "lint": "eslint .",
+    "check:layout": "node scripts/check-shell-width-constraints.js",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",

@@ -200,7 +200,7 @@ export function BasicInfoCard({ onSubmit, state, personId, prefill, disabled }: 
               </div>
 
               <div className="space-y-2">
-                <FormLabel className="text-xs text-foreground">Safe contact channels</FormLabel>
+                <p className="text-xs text-foreground">Safe contact channels</p>
                 <div className="flex flex-wrap gap-4">
                   <FormField
                     control={form.control}

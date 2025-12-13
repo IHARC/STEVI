@@ -24,7 +24,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         { label: 'Content & comms', href: '/ops/admin/content', match: ['/ops/admin/content'] },
         {
           label: 'Website & marketing',
-          href: '/ops/admin/website/branding',
+          href: '/ops/admin/website',
           match: ['/ops/admin/website'],
           items: [
             { label: 'Branding', href: '/ops/admin/website/branding', match: ['/ops/admin/website/branding'] },
@@ -35,8 +35,8 @@ export default async function AdminLayout({ children }: { children: ReactNode })
             { label: 'Footer', href: '/ops/admin/website/footer', match: ['/ops/admin/website/footer'] },
             {
               label: 'Advanced',
-              href: '/ops/admin/website/fundraising',
-              match: ['/ops/admin/website/inventory', '/ops/admin/website/fundraising'],
+              href: '/ops/admin/website/advanced',
+              match: ['/ops/admin/website/advanced'],
               items: [
                 { label: 'Fundraising', href: '/ops/admin/website/fundraising', match: ['/ops/admin/website/fundraising'] },
                 { label: 'Content inventory', href: '/ops/admin/website/inventory', match: ['/ops/admin/website/inventory'] },

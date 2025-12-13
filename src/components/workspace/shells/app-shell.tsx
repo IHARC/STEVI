@@ -11,6 +11,7 @@ import type { ResolvedBrandingAssets } from '@/lib/marketing/branding';
 import type { UserNavigation } from '@shared/layout/user-nav';
 import type { NavSection } from '@/lib/portal-navigation';
 import { OpsHubRail } from '@workspace/layout/ops-hub-rail';
+import { LayoutDebugOverlay } from '@shared/layout/layout-debug-overlay';
 
 type AppShellProps = {
   children: ReactNode;
@@ -41,6 +42,7 @@ export function AppShell({
 
   return (
     <div className={cn('ops-shell min-h-screen bg-background text-foreground')}>
+      <LayoutDebugOverlay />
       <TopNav
         branding={branding}
         navigation={navigation}
@@ -53,15 +55,15 @@ export function AppShell({
         {showNavigation ? <OpsHubRail navSections={navSections} /> : null}
         <div className="flex min-h-full flex-1 flex-col">
           <main id="main-content" className="flex-1">
-            <div className="w-full px-4 py-6 md:px-6 lg:px-8 2xl:px-10">
+            <div className="mx-0 w-full max-w-none px-4 py-6 md:px-6 lg:px-8 2xl:px-10">
               <div
                 className={cn(
-                  'grid w-full gap-6',
+                  'grid w-full max-w-none gap-6',
                   showInbox ? 'xl:grid-cols-[minmax(0,1fr)_22rem]' : 'grid-cols-1',
                 )}
               >
                 <section className="min-w-0 w-full">
-                  <div className="w-full space-y-6">{children}</div>
+                  <div className="mx-0 w-full max-w-none space-y-6">{children}</div>
                 </section>
                 {showInbox ? <InboxPanel items={inboxItems} /> : null}
               </div>

@@ -9,6 +9,7 @@ import type { PrimaryNavItem } from '@/lib/primary-nav';
 import type { ResolvedBrandingAssets } from '@/lib/marketing/branding';
 import type { UserNavigation } from '@shared/layout/user-nav';
 import { cn } from '@/lib/utils';
+import { LayoutDebugOverlay } from '@shared/layout/layout-debug-overlay';
 
 type ClientShellProps = {
   children: ReactNode;
@@ -31,6 +32,7 @@ export function ClientShell({
 
   return (
     <div className="client-shell min-h-screen bg-background text-foreground">
+      <LayoutDebugOverlay />
       <TopNav
         navSections={navSections}
         commands={commandPaletteItems}
@@ -49,8 +51,8 @@ export function ClientShell({
         ) : null}
         <div className="flex min-h-full flex-1 flex-col">
           <main id="main-content" className="flex-1">
-            <div className="w-full px-4 py-6 md:px-6 lg:px-8 2xl:px-10">
-              <div className={cn('w-full space-y-6')}>{children}</div>
+            <div className="mx-0 w-full max-w-none px-4 py-6 md:px-6 lg:px-8 2xl:px-10">
+              <div className={cn('mx-0 w-full max-w-none space-y-6')}>{children}</div>
             </div>
           </main>
           <SiteFooter />
