@@ -6,7 +6,7 @@ import { Badge } from '@shared/ui/badge';
 import { resolveLandingPath } from '@/lib/portal-navigation';
 import type { Database } from '@/types/supabase';
 import { OrgContactSettingsForm, OrgNotesSettingsForm } from './org-settings-form';
-import { OrgTabs } from '../org-tabs';
+import { PageHeader } from '@shared/layout/page-header';
 
 export const dynamic = 'force-dynamic';
 
@@ -80,15 +80,12 @@ export default async function OrgSettingsPage({ searchParams }: PageProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="space-y-1">
-        <p className="text-xs font-medium uppercase text-muted-foreground">Organization</p>
-        <h1 className="text-3xl sm:text-4xl">Settings</h1>
-        <p className="max-w-3xl text-sm text-muted-foreground">
-          Update contact details and coordination notes. Changes stay scoped to your organization and are audited.
-        </p>
-      </header>
-
-      <OrgTabs orgId={targetOrgId} />
+      <PageHeader
+        eyebrow="Organization"
+        title="Settings"
+        description="Update contact details and coordination notes. Changes stay scoped to your organization and are audited."
+        breadcrumbs={[{ label: 'Organization', href: `/ops/org?orgId=${targetOrgId}` }, { label: 'Settings' }]}
+      />
 
       <Card>
         <CardHeader className="flex flex-wrap items-center justify-between gap-3">

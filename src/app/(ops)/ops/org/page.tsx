@@ -10,7 +10,6 @@ import { loadOrgSelection, loadOrgDetail } from '@/lib/org/loaders';
 import type { OrgInviteRecord } from '@/lib/org/fetchers';
 import { PageHeader } from '@shared/layout/page-header';
 import { StatTile } from '@shared/ui/stat-tile';
-import { OrgTabs } from './org-tabs';
 
 export const dynamic = 'force-dynamic';
 
@@ -158,6 +157,7 @@ export default async function OrgHomePage({ searchParams }: PageProps) {
         eyebrow="Organization"
         title={`Manage ${orgName}`}
         description="Track how your team is using STEVI, keep member access healthy, and jump into invites or settings from the same app. All data respects Supabase RLS for your organization."
+        breadcrumbs={[{ label: 'Organization', href: `/ops/org?orgId=${targetOrgId}` }, { label: 'Overview' }]}
         primaryAction={{ label: 'Invite members', href: `/ops/org/invites?orgId=${targetOrgId}` }}
         secondaryAction={{ label: 'Manage members', href: `/ops/org/members?orgId=${targetOrgId}` }}
       >
@@ -172,8 +172,6 @@ export default async function OrgHomePage({ searchParams }: PageProps) {
           </Badge>
         </div>
       </PageHeader>
-
-      <OrgTabs orgId={targetOrgId} />
 
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {summaryCards.map((card) => (

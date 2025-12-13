@@ -61,7 +61,7 @@ export default async function OpsProfilePage() {
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-2">
         <h1 className="text-3xl text-foreground">Operations account settings</h1>
-        <p className="max-w-3xl text-sm text-foreground/70">
+        <p className="text-sm text-foreground/70">
           Update your profile, contact preferences, and password while staying inside the operations shell.
         </p>
       </header>

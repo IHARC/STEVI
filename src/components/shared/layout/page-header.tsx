@@ -86,7 +86,7 @@ export function PageHeader({
             </div>
           ) : null}
         </div>
-        {description ? <div className="max-w-3xl text-base text-muted-foreground">{description}</div> : null}
+        {description ? <div className="text-base text-muted-foreground">{description}</div> : null}
         {actions ? <div className="pt-1">{actions}</div> : null}
         {children}
       </div>

@@ -17,6 +17,7 @@ import { fetchScopedAppointments } from '@/lib/appointments/queries';
 import { confirmAppointment, cancelAppointmentAsStaff } from '@/lib/appointments/actions';
 import type { AppointmentWithRelations } from '@/lib/appointments/types';
 import { toLocalDateTimeInput } from '@/lib/datetime';
+import { PageHeader } from '@shared/layout/page-header';
 
 export const dynamic = 'force-dynamic';
 
@@ -134,13 +135,12 @@ export default async function OrgAppointmentsPage({ searchParams }: PageProps) {
 
   return (
     <div className="space-y-6">
-      <header className="space-y-1">
-        <p className="text-xs font-semibold uppercase text-muted-foreground">Appointments</p>
-        <h1 className="text-3xl text-foreground">Organization requests</h1>
-        <p className="max-w-3xl text-sm text-muted-foreground">
-          Manage appointment requests linked to your organization and confirm times with clients.
-        </p>
-      </header>
+      <PageHeader
+        eyebrow="Organization"
+        title="Appointments"
+        description="Manage appointment requests linked to your organization and confirm times with clients."
+        breadcrumbs={[{ label: 'Organization', href: `/ops/org?orgId=${targetOrgId}` }, { label: 'Appointments' }]}
+      />
 
       <Card>
         <CardHeader>

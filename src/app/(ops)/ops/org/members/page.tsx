@@ -6,7 +6,7 @@ import { Badge } from '@shared/ui/badge';
 import { resolveLandingPath } from '@/lib/portal-navigation';
 import { fetchOrgMembersWithRoles } from '@/lib/org/fetchers';
 import { OrgMembersTable } from './org-members-table';
-import { OrgTabs } from '../org-tabs';
+import { PageHeader } from '@shared/layout/page-header';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,15 +39,12 @@ export default async function OrgMembersPage({ searchParams }: PageProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="space-y-1">
-        <p className="text-xs font-medium uppercase text-muted-foreground">Organization</p>
-        <h1 className="text-3xl sm:text-4xl">Members</h1>
-        <p className="max-w-3xl text-sm text-muted-foreground">
-          All actions respect Supabase row-level security. Use the toggles to keep roles clear and audit-friendly.
-        </p>
-      </header>
-
-      <OrgTabs orgId={targetOrgId} />
+      <PageHeader
+        eyebrow="Organization"
+        title="Members"
+        description="All actions respect Supabase row-level security. Use the toggles to keep roles clear and audit-friendly."
+        breadcrumbs={[{ label: 'Organization', href: `/ops/org?orgId=${targetOrgId}` }, { label: 'Members' }]}
+      />
 
       <div className="grid gap-3 md:grid-cols-2">
         <RoleCard

@@ -70,7 +70,7 @@ export default async function PortalProfilePage() {
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-2">
         <h1 className="text-3xl text-foreground">Account settings</h1>
-        <p className="max-w-3xl text-sm text-foreground/70">
+        <p className="text-sm text-foreground/70">
           Keep your profile details and contact information up to date so neighbours know how you collaborate.
         </p>
       </header>

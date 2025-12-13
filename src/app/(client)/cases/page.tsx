@@ -30,7 +30,7 @@ export default async function ClientCasesPage() {
       <header className="space-y-1">
         <p className="text-xs font-semibold uppercase text-muted-foreground">My support</p>
         <h1 className="text-3xl text-foreground sm:text-4xl">My cases</h1>
-        <p className="max-w-3xl text-sm text-muted-foreground sm:text-base">
+        <p className="text-sm text-muted-foreground sm:text-base">
           View your active cases and share updates with your IHARC team. Staff will reach out using your consent
           preferences.
         </p>

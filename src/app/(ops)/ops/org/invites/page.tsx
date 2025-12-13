@@ -16,7 +16,7 @@ import {
 import { checkRateLimit, type RateLimitResult } from '@/lib/rate-limit';
 import { InviteSheet } from './invite-sheet';
 import { ORG_INVITE_EVENT, ORG_INVITE_RATE_LIMIT } from './constants';
-import { OrgTabs } from '../org-tabs';
+import { PageHeader } from '@shared/layout/page-header';
 
 export const dynamic = 'force-dynamic';
 
@@ -66,18 +66,13 @@ export default async function OrgInvitesPage({ searchParams }: PageProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div className="space-y-1">
-          <p className="text-xs font-medium uppercase text-muted-foreground">Organization</p>
-          <h1 className="text-3xl text-foreground sm:text-4xl">Invitations</h1>
-          <p className="max-w-3xl text-sm text-muted-foreground">
-            Invitations stay locked to your organization by Supabase RLS. Rate limits keep accidental resends in check.
-          </p>
-        </div>
-        <InviteSheet rateLimit={rateLimit} organizationId={targetOrgId} />
-      </header>
-
-      <OrgTabs orgId={targetOrgId} />
+      <PageHeader
+        eyebrow="Organization"
+        title="Invites"
+        description="Invitations stay locked to your organization by Supabase RLS. Rate limits keep accidental resends in check."
+        breadcrumbs={[{ label: 'Organization', href: `/ops/org?orgId=${targetOrgId}` }, { label: 'Invites' }]}
+        actions={<InviteSheet rateLimit={rateLimit} organizationId={targetOrgId} />}
+      />
 
       <Card>
         <CardHeader className="flex flex-wrap items-start justify-between gap-3">
