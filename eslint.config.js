@@ -117,6 +117,24 @@ const steviConfig = [
       ],
     },
   },
+  {
+    files: ['src/components/workspace/shells/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            ...workspaceImportBoundaries,
+            {
+              group: ['@shared/providers/portal-request-context', 'next/headers'],
+              message:
+                'Shell components must not derive layout decisions from request headers/server path inference; use client pathname (usePathname) + shared helpers instead.',
+            },
+          ],
+        },
+      ],
+    },
+  },
 ];
 
 export default steviConfig;

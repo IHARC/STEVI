@@ -23,20 +23,20 @@ export function InventoryHub({ bootstrap, actorProfileId, canManageLocations }: 
   return (
     <div className="space-y-6">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="w-full justify-start gap-1 overflow-x-auto rounded-2xl">
-          <TabsTrigger value="dashboard" className="shrink-0 rounded-full px-4 text-xs font-semibold">
+        <TabsList className="grid h-auto w-full grid-cols-2 gap-1 rounded-2xl sm:grid-cols-3 lg:grid-cols-5">
+          <TabsTrigger value="dashboard" className="w-full rounded-xl px-3 text-xs font-semibold">
             Dashboard
           </TabsTrigger>
-          <TabsTrigger value="items" className="shrink-0 rounded-full px-4 text-xs font-semibold">
+          <TabsTrigger value="items" className="w-full rounded-xl px-3 text-xs font-semibold">
             Items
           </TabsTrigger>
-          <TabsTrigger value="locations" className="shrink-0 rounded-full px-4 text-xs font-semibold">
+          <TabsTrigger value="locations" className="w-full rounded-xl px-3 text-xs font-semibold">
             Locations
           </TabsTrigger>
-          <TabsTrigger value="organizations" className="shrink-0 rounded-full px-4 text-xs font-semibold">
+          <TabsTrigger value="organizations" className="w-full rounded-xl px-3 text-xs font-semibold">
             Organisations
           </TabsTrigger>
-          <TabsTrigger value="receipts" className="shrink-0 rounded-full px-4 text-xs font-semibold">
+          <TabsTrigger value="receipts" className="w-full rounded-xl px-3 text-xs font-semibold">
             Receipts
           </TabsTrigger>
         </TabsList>

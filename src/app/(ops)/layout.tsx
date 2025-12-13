@@ -21,7 +21,6 @@ export default async function OpsLayout({ children }: { children: ReactNode }) {
     landingPath,
     activeArea,
     currentPath,
-    currentPathname,
     supabase,
     isPreviewRequest,
   } = await getPortalRequestContext();
@@ -82,8 +81,6 @@ export default async function OpsLayout({ children }: { children: ReactNode }) {
           navigation={navigation}
           branding={branding}
           commandPaletteItems={commandPaletteItems}
-          activeArea={activeArea}
-          currentPathname={currentPathname}
         >
           {children}
         </AppShell>

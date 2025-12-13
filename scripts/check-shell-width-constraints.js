@@ -39,6 +39,52 @@ for (const target of targets) {
   }
 }
 
+function walkFiles(dir, predicate) {
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  const results = [];
+  for (const entry of entries) {
+    const next = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      results.push(...walkFiles(next, predicate));
+      continue;
+    }
+    if (!predicate(next)) continue;
+    results.push(next);
+  }
+  return results;
+}
+
+// Guardrail: avoid "invisible columns" caused by server-side path inference
+// diverging from client routing. The inbox column must only be defined in a
+// client component that gates on usePathname().
+const allowedInboxColumnFiles = new Set([
+  path.join(repoRoot, 'src/components/workspace/shells/ops-main-grid.tsx'),
+]);
+const allowedInboxPanelImporters = new Set([
+  path.join(repoRoot, 'src/components/workspace/shells/ops-main-grid.tsx'),
+  path.join(repoRoot, 'src/components/shared/layout/inbox-panel.tsx'),
+]);
+
+const srcRoot = path.join(repoRoot, 'src');
+const sourceFiles = walkFiles(srcRoot, (filePath) => filePath.endsWith('.ts') || filePath.endsWith('.tsx'));
+
+for (const fullPath of sourceFiles) {
+  const rel = path.relative(repoRoot, fullPath);
+  const source = fs.readFileSync(fullPath, 'utf8');
+
+  if (source.includes("from '@shared/providers/portal-request-context'") && !rel.startsWith('src/app/')) {
+    failures.push({ file: rel, rule: 'portal-request-context import outside src/app' });
+  }
+
+  if (source.includes("from '@shared/layout/inbox-panel'") && !allowedInboxPanelImporters.has(fullPath)) {
+    failures.push({ file: rel, rule: 'InboxPanel imported outside OpsMainGrid' });
+  }
+
+  if (source.includes('xl:grid-cols-[minmax(0,1fr)_22rem]') && !allowedInboxColumnFiles.has(fullPath)) {
+    failures.push({ file: rel, rule: 'Inbox column grid defined outside OpsMainGrid' });
+  }
+}
+
 if (failures.length) {
   console.error('❌ Shell width guardrail failed.');
   for (const failure of failures) {
@@ -52,4 +98,3 @@ if (failures.length) {
 }
 
 console.log('✅ Shell width guardrail passed.');
-

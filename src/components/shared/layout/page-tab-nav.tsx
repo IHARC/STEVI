@@ -37,7 +37,7 @@ export function PageTabNav({
     <nav
       aria-label="Section navigation"
       className={cn(
-        'w-full overflow-x-auto',
+        'w-full',
         variant === 'primary' ? 'pb-1 sm:pb-0' : 'border-b border-border/60 pb-1',
         className,
       )}
@@ -45,8 +45,8 @@ export function PageTabNav({
       <div
         className={cn(
           variant === 'primary'
-            ? 'inline-flex min-w-full flex-nowrap gap-1 rounded-2xl bg-muted p-1 shadow-sm sm:min-w-0 sm:flex-wrap'
-            : 'inline-flex min-w-full flex-nowrap gap-2 bg-transparent p-0 sm:min-w-0 sm:flex-wrap',
+            ? 'flex w-full flex-wrap gap-1 rounded-2xl bg-muted p-1 shadow-sm'
+            : 'flex w-full flex-wrap gap-2 bg-transparent p-0',
         )}
       >
         {tabs.map((tab) => {

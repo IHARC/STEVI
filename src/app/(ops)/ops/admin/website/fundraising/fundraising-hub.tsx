@@ -117,30 +117,30 @@ export function FundraisingHub({ catalog, inventoryItems, payments, subscription
   return (
     <div className="space-y-6">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="w-full justify-start gap-1 overflow-x-auto rounded-2xl">
-          <TabsTrigger value="dashboard" className="shrink-0 rounded-full px-4 text-xs font-semibold">
+        <TabsList className="grid h-auto w-full grid-cols-2 gap-1 rounded-2xl sm:grid-cols-3 lg:grid-cols-6">
+          <TabsTrigger value="dashboard" className="w-full rounded-xl px-3 text-xs font-semibold">
             Dashboard
           </TabsTrigger>
-          <TabsTrigger value="stripe" className="shrink-0 rounded-full px-4 text-xs font-semibold">
+          <TabsTrigger value="stripe" className="w-full rounded-xl px-3 text-xs font-semibold">
             Stripe
           </TabsTrigger>
-          <TabsTrigger value="catalog" className="shrink-0 rounded-full px-4 text-xs font-semibold">
+          <TabsTrigger value="catalog" className="w-full rounded-xl px-3 text-xs font-semibold">
             Catalogue
           </TabsTrigger>
-          <TabsTrigger value="donations" className="shrink-0 rounded-full px-4 text-xs font-semibold">
+          <TabsTrigger value="donations" className="w-full rounded-xl px-3 text-xs font-semibold">
             Donations
           </TabsTrigger>
-          <TabsTrigger value="monthly" className="shrink-0 rounded-full px-4 text-xs font-semibold">
+          <TabsTrigger value="monthly" className="w-full rounded-xl px-3 text-xs font-semibold">
             Monthly donors
           </TabsTrigger>
-          <TabsTrigger value="webhooks" className="shrink-0 rounded-full px-4 text-xs font-semibold">
+          <TabsTrigger value="webhooks" className="w-full rounded-xl px-3 text-xs font-semibold">
             Webhooks
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard">
-          <div className="grid gap-4 lg:grid-cols-3">
-            <Card className="border-border/60">
+          <div className="grid gap-4 lg:grid-cols-12">
+            <Card className="border-border/60 lg:col-span-4 xl:col-span-3">
               <CardHeader className="space-y-1">
                 <CardTitle className="text-base">Stripe mode</CardTitle>
                 <CardDescription>Vault-managed secrets. No env fallbacks.</CardDescription>
@@ -153,7 +153,7 @@ export function FundraisingHub({ catalog, inventoryItems, payments, subscription
               </CardContent>
             </Card>
 
-            <Card className="border-border/60">
+            <Card className="border-border/60 lg:col-span-4 xl:col-span-3">
               <CardHeader className="space-y-1">
                 <CardTitle className="text-base">Webhook health</CardTitle>
                 <CardDescription>Most recent succeeded event.</CardDescription>
@@ -164,22 +164,22 @@ export function FundraisingHub({ catalog, inventoryItems, payments, subscription
               </CardContent>
             </Card>
 
-            <Card className="border-border/60">
+            <Card className="border-border/60 lg:col-span-4 xl:col-span-6">
               <CardHeader className="space-y-1">
                 <CardTitle className="text-base">Activity</CardTitle>
                 <CardDescription>Latest rows loaded.</CardDescription>
               </CardHeader>
-              <CardContent className="grid grid-cols-3 gap-3 text-sm">
-                <div className="rounded-xl bg-muted p-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-foreground/60">Payments</p>
+              <CardContent className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-3">
+                <div className="min-w-0 rounded-xl bg-muted p-3">
+                  <p className="text-xs font-semibold text-muted-foreground">Payments</p>
                   <p className="text-lg font-semibold text-foreground">{payments.length}</p>
                 </div>
-                <div className="rounded-xl bg-muted p-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-foreground/60">Subscriptions</p>
+                <div className="min-w-0 rounded-xl bg-muted p-3">
+                  <p className="text-xs font-semibold text-muted-foreground">Subscriptions</p>
                   <p className="text-lg font-semibold text-foreground">{subscriptions.length}</p>
                 </div>
-                <div className="rounded-xl bg-muted p-3">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-foreground/60">Events</p>
+                <div className="min-w-0 rounded-xl bg-muted p-3">
+                  <p className="text-xs font-semibold text-muted-foreground">Events</p>
                   <p className="text-lg font-semibold text-foreground">{webhookEvents.length}</p>
                 </div>
               </CardContent>

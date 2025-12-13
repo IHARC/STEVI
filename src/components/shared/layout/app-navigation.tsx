@@ -37,7 +37,7 @@ export function AppNavigationDesktop({ navSections, globalNavItems = [], classNa
         className,
       )}
     >
-      <ScrollArea className="h-full pr-3">
+      <ScrollArea scrollbar={false} className="h-full pr-3">
         <NavContent
           navSections={sections}
           pathname={pathname}
@@ -77,7 +77,7 @@ export function AppNavigationMobile({ navSections, globalNavItems = [], mode = '
           <SheetTitle className="text-base font-semibold">Navigation</SheetTitle>
           <p className="text-sm text-muted-foreground">Browse sections and tools.</p>
         </SheetHeader>
-        <ScrollArea className="h-full">
+        <ScrollArea scrollbar={false} className="h-full">
           <div className="px-4 pb-6">
             {mode === 'hubs' ? (
               <HubContent hubs={hubs} pathname={pathname} onNavigate={() => setOpen(false)} />

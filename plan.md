@@ -120,6 +120,7 @@ Hard rules:
 2) Admin/settings screens must not use stacked tab rows. Use a single **Settings shell**: left section nav + breadcrumbs + content.
 3) No “Back to …” button for navigation between sibling admin sections; use breadcrumbs/section nav. (Page headers can still have primary actions, but not as a substitute for navigation.)
 4) Horizontal overflow nav is forbidden on desktop; convert to left nav or in-page sections.
+5) Layout-reserved columns (e.g., Ops Inbox) must be gated by the **same route signal as the panel**. Use `usePathname()` (client) plus a shared helper so the grid never reserves an “invisible” column due to server header path inference mismatches.
 
 ## Implementation plan (phases)
 Progress markers use checkboxes to survive handoffs.
@@ -161,6 +162,7 @@ Progress markers use checkboxes to survive handoffs.
 - Acting org is clear; org-switching is explicit; IHARC is a normal org.
 - Cross-org client visibility defaults to “All accessible (by consent)”.
 - All gating is enforced at UI + route + backend layers.
+- Layout columns never reserve blank space due to server/client route detection mismatches (e.g., inbox column appears only when inbox panel renders).
 
 ## Current code pointers (where this standard is implemented)
 - Navigation data (ops + client): `src/lib/portal-navigation.ts`

@@ -9,6 +9,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@sha
 import { AlertCircle, Bell, CheckCircle2, Clock3, X } from 'lucide-react';
 import type { InboxItem } from '@/lib/inbox';
 import { cn } from '@/lib/utils';
+import { cleanPathname, shouldShowOpsInbox } from '@/lib/ops-inbox';
 
 type InboxPanelProps = {
   items: InboxItem[];
@@ -16,7 +17,7 @@ type InboxPanelProps = {
 
 export function InboxPanel({ items }: InboxPanelProps) {
   const pathname = usePathname() ?? '';
-  const cleanedPath = pathname.split('?')[0];
+  const cleanedPath = cleanPathname(pathname);
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
   const [open, setOpen] = useState(false);
 
@@ -25,8 +26,7 @@ export function InboxPanel({ items }: InboxPanelProps) {
     [items, dismissed],
   );
 
-  if (cleanedPath !== '/ops/today') return null;
-  if (!items.length) return null;
+  if (!shouldShowOpsInbox(cleanedPath, items.length)) return null;
 
   function handleDismiss(id: string) {
     setDismissed((prev) => {
