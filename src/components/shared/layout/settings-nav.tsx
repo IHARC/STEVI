@@ -39,7 +39,7 @@ export function SettingsNav({ nav }: { nav: SettingsNavGroup[] }) {
           ) : null}
           <ul className="space-y-1">
             {group.items.map((item) => (
-              <SettingsNavItemRow key={item.href} item={item} activeHref={activeHref} depth={0} />
+              <SettingsNavItemRow key={item.href} item={item} activeHref={activeHref} pathname={cleaned} depth={0} />
             ))}
           </ul>
         </div>
@@ -53,7 +53,7 @@ export function SettingsNavSelect({ nav }: { nav: SettingsNavGroup[] }) {
   const pathname = usePathname() ?? '/';
   const cleaned = pathname.split('?')[0];
   const activeHref = resolveActiveHref(nav, cleaned);
-  const options = flattenNav(nav);
+  const options = flattenNavForMobile(nav, cleaned);
 
   return (
     <div className="rounded-2xl border border-border/60 bg-muted/10 p-3">
@@ -82,13 +82,16 @@ export function SettingsNavSelect({ nav }: { nav: SettingsNavGroup[] }) {
 function SettingsNavItemRow({
   item,
   activeHref,
+  pathname,
   depth,
 }: {
   item: SettingsNavItem;
   activeHref: string;
+  pathname: string;
   depth: number;
 }) {
   const isActive = item.href === activeHref;
+  const inActiveBranch = isItemInBranch(item, pathname);
 
   return (
     <li>
@@ -107,10 +110,16 @@ function SettingsNavItemRow({
       >
         {item.label}
       </Link>
-      {item.items && item.items.length ? (
+      {item.items && item.items.length && inActiveBranch ? (
         <ul className="mt-1 space-y-1">
           {item.items.map((child) => (
-            <SettingsNavItemRow key={child.href} item={child} activeHref={activeHref} depth={depth + 1} />
+            <SettingsNavItemRow
+              key={child.href}
+              item={child}
+              activeHref={activeHref}
+              pathname={pathname}
+              depth={depth + 1}
+            />
           ))}
         </ul>
       ) : null}
@@ -139,20 +148,35 @@ function resolveActiveHref(nav: SettingsNavGroup[], pathname: string) {
   return activeHref;
 }
 
-function flattenNav(nav: SettingsNavGroup[]) {
+function flattenNavForMobile(nav: SettingsNavGroup[], pathname: string) {
   const flattened: Array<{ label: string; href: string }> = [];
 
-  const visit = (item: SettingsNavItem, trail: string[]) => {
+  const visitTopLevel = (item: SettingsNavItem, trail: string[]) => {
     const nextTrail = [...trail, item.label];
     flattened.push({ label: nextTrail.join(' › '), href: item.href });
-    item.items?.forEach((child) => visit(child, nextTrail));
+
+    if (!item.items?.length) return;
+    if (!isItemInBranch(item, pathname)) return;
+    item.items.forEach((child) => visitChild(child, nextTrail));
+  };
+
+  const visitChild = (item: SettingsNavItem, trail: string[]) => {
+    const nextTrail = [...trail, item.label];
+    flattened.push({ label: nextTrail.join(' › '), href: item.href });
+    item.items?.forEach((child) => visitChild(child, nextTrail));
   };
 
   nav.forEach((group) => {
     const baseTrail = group.label ? [group.label] : [];
-    group.items.forEach((item) => visit(item, baseTrail));
+    group.items.forEach((item) => visitTopLevel(item, baseTrail));
   });
 
   return flattened;
 }
 
+function isItemInBranch(item: SettingsNavItem, pathname: string): boolean {
+  const prefixes = item.match ?? [item.href];
+  const directMatch = prefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+  if (directMatch) return true;
+  return (item.items ?? []).some((child) => isItemInBranch(child, pathname));
+}

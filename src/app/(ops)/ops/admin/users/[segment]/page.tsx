@@ -13,6 +13,7 @@ import { Button } from '@shared/ui/button';
 import { UserFilterBar } from '@workspace/admin/users/user-filter-bar';
 import { UserSavedSearches } from '../user-saved-searches';
 import { UserPeekSheet } from '../user-peek-sheet';
+import { UserSegmentSwitcher } from '../user-segment-switcher';
 
 export const dynamic = 'force-dynamic';
 
@@ -101,6 +102,7 @@ export default async function AdminUsersSegmentPage({ params, searchParams }: Pa
         description="Search, approve, and manage user permissions."
         breadcrumbs={[{ label: 'STEVI Admin', href: '/ops/admin' }, { label: 'Users' }]}
         meta={[{ label: segmentLabel, tone: 'neutral' }]}
+        actions={<UserSegmentSwitcher segment={coercedSegment} queryString={currentParamsString} />}
       >
         <div className="flex flex-wrap gap-2 text-xs">
           <Badge variant="secondary">Total {summary.total}</Badge>
