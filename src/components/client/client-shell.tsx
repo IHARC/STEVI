@@ -50,7 +50,7 @@ export function ClientShell({
         <div className="flex min-h-full flex-1 flex-col">
           <main id="main-content" className="flex-1">
             <div className="w-full px-4 py-6 md:px-6 lg:px-8 2xl:px-10">
-              <div className={cn('space-y-6')}>{children}</div>
+              <div className={cn('w-full space-y-6')}>{children}</div>
             </div>
           </main>
           <SiteFooter />

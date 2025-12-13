@@ -56,12 +56,12 @@ export function AppShell({
             <div className="w-full px-4 py-6 md:px-6 lg:px-8 2xl:px-10">
               <div
                 className={cn(
-                  'grid gap-6',
+                  'grid w-full gap-6',
                   showInbox ? 'xl:grid-cols-[minmax(0,1fr)_22rem]' : 'grid-cols-1',
                 )}
               >
-                <section className="min-w-0">
-                  <div className="space-y-6">{children}</div>
+                <section className="min-w-0 w-full">
+                  <div className="w-full space-y-6">{children}</div>
                 </section>
                 {showInbox ? <InboxPanel items={inboxItems} /> : null}
               </div>
