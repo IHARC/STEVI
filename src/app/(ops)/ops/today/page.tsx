@@ -165,8 +165,8 @@ export default async function OpsTodayPage() {
                 <Link href={findPersonHref}>Find or create person</Link>
               </Button>
               <div className="flex items-center gap-2 rounded-lg border border-dashed border-border/60 px-3 py-2 text-xs text-muted-foreground">
-                <span className="font-semibold text-foreground/80">Partners</span>
-                <span>Ask your admin for access to Partner directory and referrals.</span>
+                <span className="font-semibold text-foreground/80">Directory</span>
+                <span>Ask your admin for access to the directory and referrals.</span>
               </div>
               <p className="text-xs text-muted-foreground">Referrals and supplies must be logged inside the Visit.</p>
             </CardContent>
@@ -175,11 +175,11 @@ export default async function OpsTodayPage() {
           <Card className="border-border/70">
             <CardHeader className="space-y-1">
               <CardTitle className="text-lg">Ops orientation</CardTitle>
-              <CardDescription>Use the Ops rail to reach Organization, Partners, and Supplies.</CardDescription>
+              <CardDescription>Use the Ops rail to reach Organization, Directory, and Supplies.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2 text-sm text-muted-foreground">
               <p>Admins can manage access under Organization → Access & roles.</p>
-              <p>Referrals start from a Visit or client record; Partners hub stores directories only.</p>
+              <p>Referrals start from a Visit or client record; the Directory stores organizations and services.</p>
               <Button asChild variant="outline" className="w-full">
                 <Link href="/ops/org">Go to Organization</Link>
               </Button>

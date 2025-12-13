@@ -6,7 +6,6 @@ import { PageHeader } from '@shared/layout/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { AttentionQueue, type AttentionQueueItem } from './attention-queue';
 import type { NotificationRecord } from '@workspace/admin/notifications/types';
-import { AdminTabs } from '../admin-tabs';
 
 export const dynamic = 'force-dynamic';
 
@@ -80,10 +79,8 @@ export default async function AdminOperationsPage() {
         eyebrow="STEVI Admin"
         title="Operations"
         description="Approvals, invites, and system queues that need admin attention."
-        primaryAction={{ label: 'Back to general settings', href: '/ops/admin' }}
+        breadcrumbs={[{ label: 'STEVI Admin', href: '/ops/admin' }, { label: 'Operations' }]}
       />
-
-      <AdminTabs />
 
       <Card className="border-border/60">
         <CardHeader className="space-y-1">

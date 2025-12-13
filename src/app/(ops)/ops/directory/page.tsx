@@ -16,15 +16,15 @@ type OrganizationRow = Pick<
 
 export const dynamic = 'force-dynamic';
 
-export default async function OpsPartnersPage() {
+export default async function OpsDirectoryPage() {
   const supabase = await createSupabaseRSCClient();
   const access = await loadPortalAccess(supabase);
 
   if (!access) {
-    redirect('/login?next=/ops/partners');
+    redirect('/login?next=/ops/directory');
   }
 
-  if (!access.canAccessOpsAdmin) {
+  if (!access.canAccessOpsFrontline && !access.canAccessOpsOrg && !access.canAccessOpsAdmin && !access.canAccessOpsSteviAdmin) {
     redirect(resolveLandingPath(access));
   }
 
@@ -34,8 +34,8 @@ export default async function OpsPartnersPage() {
     <div className="space-y-6">
       <PageHeader
         eyebrow="Operations"
-        title="Partners"
-        description="Directory, services catalog, and agreements. Referrals start from a Visit or client profile."
+        title="Directory"
+        description="Organizations and services directory. Referrals start from a Visit or client profile."
         secondaryAction={{ label: 'Manage org hub', href: '/ops/org' }}
       />
 

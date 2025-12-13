@@ -6,6 +6,7 @@ import {
   fetchStripeWebhookEventsAdmin,
 } from '@/lib/donations/service';
 import { fetchInventoryItems } from '@/lib/inventory/service';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { FundraisingHub } from './fundraising-hub';
 
 export const dynamic = 'force-dynamic';
@@ -50,24 +51,23 @@ export default async function AdminWebsiteFundraisingPage() {
   ]);
 
   return (
-    <div className="flex flex-col gap-6">
-      <header className="space-y-2">
-        <p className="text-xs font-medium uppercase text-muted-foreground">Website & Marketing</p>
-        <h1 className="text-3xl text-foreground sm:text-4xl">Fundraising</h1>
-        <p className="max-w-4xl text-sm text-muted-foreground">
+    <Card className="border-border/60">
+      <CardHeader className="space-y-1">
+        <CardTitle className="text-xl">Fundraising</CardTitle>
+        <CardDescription>
           Manage the symbolic donation catalogue, Stripe bindings, and webhook-backed reconciliation for one-time and monthly donations.
-        </p>
-      </header>
-
-      <FundraisingHub
-        catalog={catalog}
-        inventoryItems={inventoryItems}
-        payments={payments}
-        subscriptions={subscriptions}
-        webhookEvents={webhookEvents}
-        stripeSettings={stripeSettings}
-      />
-    </div>
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <FundraisingHub
+          catalog={catalog}
+          inventoryItems={inventoryItems}
+          payments={payments}
+          subscriptions={subscriptions}
+          webhookEvents={webhookEvents}
+          stripeSettings={stripeSettings}
+        />
+      </CardContent>
+    </Card>
   );
 }
-

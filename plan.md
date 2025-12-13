@@ -1,124 +1,173 @@
-# STEVI Ops Navigation Overhaul Plan
+# STEVI Navigation & App Structure Standard
 
-Last updated: 2025-12-12
-Owner: IHARC / STEVI team (Codex agent)
+Last updated: 2025-12-13  
+Owner: IHARC / STEVI team  
+Scope: **App-wide** navigation and information architecture (IA) standard going forward.
 
 ## Purpose
-Track the high‑level plan, context, and progress for a comprehensive overhaul of the **operations (ops) shell** navigation.  
-This document is intended to survive agent handoffs (fresh Codex sessions), so it includes decisions, rationale, and file pointers.
+Establish a single, durable navigation standard for STEVI that scales to many features, supports multiple user types with gating, and avoids “stacked nav” UI (multiple tab rows / competing controls).
+
+This document is the source of truth for:
+- Navigation hierarchy and allowed patterns
+- Shell separation (Client vs Ops)
+- Role/tenant/capability gating rules
+- Implementation phases and acceptance criteria
 
 ## Product context (why this matters)
-- STEVI is a multi‑tenant SaaS portal for IHARC admins, IHARC staff/volunteers, org admins/reps, and clients.
-- A key demographic is older volunteers and technically‑challenged users. Navigation must be **obvious, low‑cognitive‑load, and consistent**.
-- The app is pre‑production. **No backward‑compat shims or fallbacks** should be introduced; refactors can be clean and direct.
-- UI must strictly adhere to existing **shadcn/ui token system** (see `src/styles/theme.css`, `tailwind.config.ts`).
+STEVI is a multi-tenant portal enabling an integrated continuum of care across organizations. Client data visibility is **cross-org by default** when consent allows. IHARC operates STEVI and also functions as an organization within the same tenant model.
 
-## Current navigation snapshot (ops shell only)
-- Dual shells exist; **client shell is out of scope for this plan**.
-- Ops navigation source of truth:
-  - `src/lib/portal-navigation.ts` (`buildPortalNav`, section/group/item rules)
-  - `src/lib/portal-areas.ts` (area access + landing)
-- Ops layouts:
-  - `src/app/(ops)/layout.tsx` (builds navSections via `buildPortalNav`)
-  - `src/components/workspace/shells/app-shell.tsx` (renders thin ops hub rail + `TopNav`)
-  - `src/components/workspace/layout/ops-hub-rail.tsx` (desktop ops hub rail)
-  - `src/components/shared/layout/app-navigation.tsx` (mobile nav sheet; hubs‑only in ops)
-  - `src/components/shared/layout/top-nav.tsx` (shared top bar)
+Key constraints:
+- Navigation must be obvious and low-cognitive-load (many users are volunteers / low-tech).
+- UI must adhere to shadcn/ui token system (`src/styles/theme.css`, `tailwind.config.ts`).
+- UI hiding is never security: enforce authorization at the route + backend layers.
 
-### Recent fix already shipped (pre‑plan)
-- **Issue:** Desktop widths 1024–1279px had no navigation (OpsRail only at `xl`, hamburger hidden at `lg`).
-- **Fix:** `TopNav` now keeps hamburger visible through `xl` for ops areas and avoids double nav when sidebar is present.  
-  - File: `src/components/shared/layout/top-nav.tsx`
+## Decision summary (the standard)
+### A) Two distinct shells (non-negotiable)
+1) **Client shell**: client-facing portal; minimal, task-focused, no admin concepts.
+2) **Ops shell**: staff/admin portal; hub-and-spoke model; role/tenant/capability gated.
 
-## Goals & constraints
-1. **Thin, non‑overwhelming global nav**: no massive rail with every sub‑page.
-2. **Hub‑and‑spoke IA**: global sidebar shows only top‑level hubs; deeper pages live inside each hub.
-3. **Progressive disclosure**: long‑tail tools collapsed by default.
-4. **Role + context filtering**: users see only what they can act on, for the active acting org.
-5. **Scales to many features** without increasing global hub count.
-6. **Shadcn tokens only**: no custom colors/spacing outside the system.
+Shells must remain visually and structurally distinct (different IA, different chrome).
 
-## Option 1 decision: Ops IA, hub cap, and ordering (RECOMMENDATION)
-**Recommendation:** Adopt a **7‑hub cap** and keep hubs aligned to real frontline/admin workflows.
+### B) Maximum 3 navigation levels (non-negotiable)
+1) **Level 1: Global hubs** (persistent nav)
+2) **Level 2: Section navigation inside a hub** (choose ONE pattern per hub)
+3) **Level 3: In-page navigation** (anchors/stepper/segmented control)
 
-### Global ops hubs (visible in thin sidebar)
-Order is by typical “day‑of‑work” flow and frequency for frontline users; admin hubs appear only when permitted.
+Hard rule: **No stacked routing controls** (e.g., global tabs + nested tabs + feature tabs).
 
-1. **Today** (`/ops/today`)  
-   - Primary working dashboard, visit start/resume, task focus.
-2. **Clients / People** (`/ops/clients`)  
-   - Directory, caseload, consents, person detail flows.
-3. **Programs** (`/ops/programs`)  
-   - Program schedules, appointments, program detail.
-4. **Supplies** (`/ops/supplies`)  
-   - Inventory distribution and ops inventory tasks.
-5. **Partners** (`/ops/partners`) *(admins only)*  
-   - Partner/org directory and relationships.
-6. **Org Hub** (`/ops/org`) *(org admins/reps)*  
-   - Acting‑org scoped admin: members, invites, org settings, appointments.  
-   - IHARC admins access this hub from **STEVI Admin → Organizations** rather than as a top‑level hub.
-7. **STEVI Admin** (`/ops/admin`) *(IHARC admins only)*  
-   - STEVI‑wide controls, marketing/content, organizations, inventory settings.
+### C) When to use tabs vs left section nav
+- **Tabs** are allowed only for **≤5 sibling routes** and must never overflow horizontally.
+- For breadth (admin/settings, large modules): use **left section nav** (grouped + searchable).
+- In-page segmented controls are allowed, but they should not be the primary way to “find” major features.
 
-### What moves out of global nav
-- **Visits** should not be a separate hub. It’s a primary *action* surfaced in:
-  - Today hub landing CTAs and/or Clients hub context.
-  - This keeps the hub list within cap and matches modern SaaS IA (actions within hubs, not top‑level islands).
+### D) Gating model (multi-tenant, multiple roles, many modules)
+Navigation and access are determined by:
+`effectiveAccess = RBAC(role permissions) ∩ actingOrg scope ∩ orgCapabilities(enabled modules) ∩ featureFlags`
 
-### Rationale
-- Matches hub‑and‑spoke patterns in Stripe/Shopify/Linear: small global nav, depth inside hubs.
-- Older/low‑tech users get a short list of destinations with clear labels and predictable placement.
-- The cap enforces scalability; new features must join an existing hub, not inflate the sidebar.
+For features not enabled for an org:
+- IHARC admin: show item with an “enable” affordance (where appropriate).
+- Org admin: optionally show disabled + “contact IHARC to enable”.
+- Non-admin: hide.
 
-## Implementation plan (ops only)
-Progress markers use checkboxes so a new agent can continue cleanly.
+### E) IHARC as an organization (tenant model)
+IHARC exists as a normal organization in the org table; IHARC staff/admins are members of IHARC org.
 
-1. [x] **Define final hub map and labels**
-- Confirm labels (Today, Clients, Programs, Supplies, Partners, Org Hub, STEVI Admin).
-   - Confirm workflow ordering above.
-   - Update `NAV_SECTIONS` grouping if needed.
+Important: **IHARC org is not a security backdoor**. Cross-tenant powers are granted via **platform roles** (e.g., `iharc_admin`), not by being in IHARC org.
 
-2. [x] **Replace ops desktop nav with a thin hub rail**
-   - Delete legacy OpsRail and its usage (no fallback).
-   - Build a small, hub‑only rail from `navSections` (1 link per hub) + small Recents block.
-   - Styling on tokens (muted bg, primary active, focus rings).
+## Canon workflow alignment (ground truth)
+From the canonical scenarios (`docs/Scenarios/Scenarios-1.md`):
+- Clients are the spine; Client Journey is canonical.
+- Encounters are the universal interaction record.
+- Supplies distribution and Referrals are recorded from inside Encounters (not via detours into other hubs).
+- Consent/sharing is always a first-class UI signal.
+- Role-scoped landing reduces cognitive load while preserving one app shell.
 
-3. [x] **Standardize in‑hub secondary nav**
-   - Each hub landing page gets a clear secondary nav (tabs/local list).
-   - Pattern should be shared, token‑based, and consistent.
-   - Sub‑pages removed from global rail.
+## App structure
 
-4. [x] **Add progressive disclosure for long‑tail tools**
-   - Achieved by moving long‑tail tools into hub pages + secondary nav; explicit collapsible “More tools” to add once any hub exceeds ~8‑10 items.
+### 1) Client shell (client portal)
+Goal: minimal destinations; clear next actions; no tenant-switching or admin concepts.
 
-5. [x] **Pinned / Recents shortcuts**
-   - Implemented “Recents” (localStorage) at top of ops hub rail; pinned can follow once we decide persistence model.
+**Primary nav (keep small and stable)**
+- Home
+- Appointments
+- Documents
+- Consents
+- Support
+- Profile
 
-6. [x] **Acting organization switcher**
-   - Replace static badge when multiple orgs exist.
-   - Server action updates acting org + refreshes permissions.
-   - No client‑side role/org fetching.
+Rules:
+- No module surfacing (inventory, org admin, directory) in the client shell.
+- Cross-org collaboration is reflected through consent and “shared with” signals, not navigational complexity.
 
-7. [x] **Guardrails, tests, docs, QA**
-   - Added hub‑cap unit test; update/add Playwright viewport assertions once authed e2e fixtures exist.
-   - Docs updated: nav model, cap, breakpoints, hub ownership.
+### 2) Ops shell (staff/admin portal)
+Goal: hub-and-spoke; scales with breadth; global nav remains thin.
 
-## Open questions / decisions needed
-- Where should the thin hub rail appear at desktop (`lg` vs `xl`)?  
-  Goal: always present where screen width supports it, without clutter.
-- Preferred secondary nav pattern per hub: tabs vs local list?  
-  (Tabs are already used in Org Hub; could standardize.)
-- Do we want pinned items persisted per user now, or stubbed until data model exists?
+#### Level 1: Global hubs (thin sidebar; cap at 7–9, target 7)
+1) Today
+2) Clients
+3) Programs
+4) Supplies
+5) Directory (rename from “Partners” if it is primarily a directory)
+6) Organization (org admin only; tenant-scoped)
+7) STEVI Admin (IHARC super-admin only; platform scope)
 
-## References
-- Navigation data:
-  - `src/lib/portal-navigation.ts`
-  - `src/lib/nav-types.ts`
-- Shell layouts:
-  - `src/app/(ops)/layout.tsx`
+Global rules:
+- Sidebar shows hubs only (no deep-link sprawl).
+- Acting-org context is always visible; switcher appears only when the user can act as multiple orgs.
+- Default acting org for IHARC staff/admins is IHARC org.
+
+#### Level 2: Secondary nav (one pattern per hub)
+Preferred standard for breadth: **left section nav**, grouped and optionally searchable.
+Tabs allowed only for small sibling sets (≤5) and must not stack with other route-nav.
+
+Recommended Level 2 structures:
+- Today: My day / Intake queue / Outreach / Tasks / Recents (role gated)
+- Clients: Search / Caseload / Consents overview (role gated)
+- Programs: Programs / Schedules / Appointments (role gated)
+- Supplies: Stock / Locations / Transactions / Reconciliation (role gated)
+- Directory: Orgs directory / Services directory / Referral destinations (read-only baseline; config lives elsewhere)
+- Organization (org admins): Overview / Members / Invites / Appointments / Settings / Modules (view-only)
+- STEVI Admin: Overview / Organizations (capabilities) / Users & Roles / Content & Notifications / Inventory & Donations / Website & Marketing / Ops configuration
+
+#### Level 3: In-page navigation
+Use anchors/stepper/segmented controls for multi-panel configuration. Do not create additional route-tabs “just to fit”.
+
+## UI rules that prevent the screenshot failure mode
+The screenshot problem is “competing nav layers”: global nav + admin tabs + nested tabs + feature tabs + custom back button.
+
+Hard rules:
+1) A page may have **at most one routing control** visible (tabs OR left section nav), not both.
+2) Admin/settings screens must not use stacked tab rows. Use a single **Settings shell**: left section nav + breadcrumbs + content.
+3) No “Back to …” button for navigation between sibling admin sections; use breadcrumbs/section nav. (Page headers can still have primary actions, but not as a substitute for navigation.)
+4) Horizontal overflow nav is forbidden on desktop; convert to left nav or in-page sections.
+
+## Implementation plan (phases)
+Progress markers use checkboxes to survive handoffs.
+
+### Phase 0 — Codify the standard
+1. [ ] Write the shared nav primitives and rules doc (this file) into team practice.
+2. [ ] Add PR checklist items: 3-level max, no stacked route-nav, tabs ≤5, hub cap.
+
+### Phase 1 — Navigation registry (single source of truth)
+1. [ ] Define a typed nav registry that supports: label/icon, href, match, requires(RBAC), requiresCapability(org), flags.
+2. [ ] Ensure the registry drives: global hubs, secondary nav, breadcrumbs, page titles.
+3. [ ] Confirm route taxonomy separation: client vs ops, plus admin/settings under ops.
+
+### Phase 2 — Admin/settings de-stacking (highest pain, fastest win)
+1. [ ] Introduce an Ops “SettingsShell” layout: left section nav (grouped/searchable) + breadcrumbs.
+2. [ ] Migrate `STEVI Admin` area to SettingsShell first.
+3. [ ] Specifically remove stacked tabs in `Website & Marketing` and similar admin pages.
+
+### Phase 3 — Hub-by-hub normalization
+1. [ ] Ensure each hub uses exactly one Level 2 nav pattern.
+2. [ ] Move “actions” into hubs/pages (e.g., start encounter from Today/Clients) rather than adding hubs.
+3. [ ] Add progressive disclosure (“More tools”) inside hubs if a hub grows beyond ~8–10 items.
+
+### Phase 4 — Gating + org capabilities
+1. [ ] Treat IHARC as a normal org; ensure IHARC users are members of IHARC org.
+2. [ ] Implement capabilities-based visibility (enabled modules per org).
+3. [ ] Ensure cross-org client visibility is default when consent allows; provide “My org only” as optional filter.
+
+### Phase 5 — QA, accessibility, and governance
+1. [ ] Keyboard navigation, focus order, and ARIA for nav components.
+2. [ ] Viewport QA (mobile drawer + tablet + desktop); ensure no “missing nav” breakpoints.
+3. [ ] Instrument nav usage (optional) and review quarterly.
+
+## Acceptance criteria
+- No page shows more than one routing UI control (tabs OR section nav).
+- Tabs never exceed 5 siblings and never overflow horizontally.
+- Admin areas use SettingsShell (left section nav + breadcrumbs); no stacked tabs.
+- Global ops sidebar remains hub-only; no deep-link sprawl.
+- Acting org is clear; org-switching is explicit; IHARC is a normal org.
+- Cross-org client visibility defaults to “All accessible (by consent)”.
+- All gating is enforced at UI + route + backend layers.
+
+## Current code pointers (where this standard is implemented)
+- Navigation data (ops + client): `src/lib/portal-navigation.ts`
+- Area gating and landing: `src/lib/portal-areas.ts`
+- Ops layout: `src/app/(ops)/layout.tsx`
+- Shared shells/nav components:
   - `src/components/workspace/shells/app-shell.tsx`
-- Current rails / menus:
   - `src/components/workspace/layout/ops-hub-rail.tsx`
   - `src/components/shared/layout/app-navigation.tsx`
   - `src/components/shared/layout/top-nav.tsx`
-  - `src/lib/ops-hubs.ts` (hub extraction + cap)

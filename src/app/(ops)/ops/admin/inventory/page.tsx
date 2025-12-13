@@ -8,7 +8,6 @@ import { EmptyState } from '@shared/ui/empty-state';
 import { ensureInventoryActor } from '@/lib/inventory/auth';
 import { fetchInventoryBootstrap } from '@/lib/inventory/service';
 import { InventoryHub } from '@workspace/admin/inventory/inventory-hub';
-import { AdminTabs } from '../admin-tabs';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,9 +26,8 @@ export default async function AdminInventoryPage() {
           eyebrow="STEVI Admin"
           title="Inventory & Donations"
           description="Global inventory tools are not enabled for your role."
-          primaryAction={{ label: 'Back to general settings', href: '/ops/admin' }}
+          breadcrumbs={[{ label: 'STEVI Admin', href: '/ops/admin' }, { label: 'Inventory & donations' }]}
         />
-        <AdminTabs />
         <EmptyState
           title="Inventory access required"
           description="Ask an IHARC super admin to grant inventory permissions."
@@ -48,10 +46,8 @@ export default async function AdminInventoryPage() {
         eyebrow="STEVI Admin"
         title="Inventory & Donations"
         description="Global stock, receipts, and org participation."
-        primaryAction={{ label: 'Back to general settings', href: '/ops/admin' }}
+        breadcrumbs={[{ label: 'STEVI Admin', href: '/ops/admin' }, { label: 'Inventory & donations' }]}
       />
-
-      <AdminTabs />
 
       <Card className="border-border/60">
         <CardHeader className="space-y-1">

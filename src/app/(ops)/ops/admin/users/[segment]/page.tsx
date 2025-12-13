@@ -7,7 +7,6 @@ import { coerceSegment, fetchAdminUsers, fetchAdminUserSummary, parsePageParam, 
 import { getAffiliationStatuses } from '@/lib/enum-values';
 import { getIharcRoles, getPortalRoles, toOptions, formatEnumLabel } from '@/lib/enum-values';
 import { PageHeader } from '@shared/layout/page-header';
-import { PageTabNav, type PageTab } from '@shared/layout/page-tab-nav';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
@@ -38,6 +37,14 @@ export default async function AdminUsersSegmentPage({ params, searchParams }: Pa
   }
 
   const coercedSegment = coerceSegment(segment);
+  const segmentLabel = (
+    {
+      all: 'All users',
+      clients: 'Clients',
+      partners: 'Partners',
+      staff: 'Staff',
+    } satisfies Record<typeof coercedSegment, string>
+  )[coercedSegment];
   const q = getString(resolvedParams, 'q');
   const status = getString(resolvedParams, 'status');
   const role = getString(resolvedParams, 'role');
@@ -92,6 +99,8 @@ export default async function AdminUsersSegmentPage({ params, searchParams }: Pa
         eyebrow="STEVI Admin"
         title="Users"
         description="Search, approve, and manage user permissions."
+        breadcrumbs={[{ label: 'STEVI Admin', href: '/ops/admin' }, { label: 'Users' }]}
+        meta={[{ label: segmentLabel, tone: 'neutral' }]}
       >
         <div className="flex flex-wrap gap-2 text-xs">
           <Badge variant="secondary">Total {summary.total}</Badge>
@@ -102,15 +111,6 @@ export default async function AdminUsersSegmentPage({ params, searchParams }: Pa
           <Badge variant="outline">Staff {summary.staff}</Badge>
         </div>
       </PageHeader>
-
-      <PageTabNav
-        tabs={[
-          { label: 'All', href: '/ops/admin/users/all', match: ['/ops/admin/users/all'] },
-          { label: 'Clients', href: '/ops/admin/users/clients', match: ['/ops/admin/users/clients'] },
-          { label: 'Partners', href: '/ops/admin/users/partners', match: ['/ops/admin/users/partners'] },
-          { label: 'Staff', href: '/ops/admin/users/staff', match: ['/ops/admin/users/staff'] },
-        ] satisfies PageTab[]}
-      />
 
       <UserFilterBar
         segment={coercedSegment}

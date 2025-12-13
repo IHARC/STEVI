@@ -98,7 +98,11 @@ export default async function AdminOrganizationDetailPage({ params }: PageProps)
         eyebrow="STEVI Admin"
         title={orgRow.name ?? 'Organization'}
         description="IHARC-wide administration for this tenant. Update details, feature flags, and membership."
-        primaryAction={{ label: 'Back to organizations', href: '/ops/admin/organizations' }}
+        breadcrumbs={[
+          { label: 'STEVI Admin', href: '/ops/admin' },
+          { label: 'Organizations', href: '/ops/admin/organizations' },
+          { label: orgRow.name ?? 'Organization' },
+        ]}
         secondaryAction={{ label: 'View org hub', href: `/ops/org?orgId=${organizationId}` }}
       >
         <div className="flex flex-wrap gap-2">

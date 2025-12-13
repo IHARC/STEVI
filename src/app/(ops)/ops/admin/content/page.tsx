@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shar
 import type { NotificationRecord } from '@workspace/admin/notifications/types';
 import { NotificationsChart } from '../notifications-chart';
 import { RecentNotifications } from '@workspace/admin/notifications/recent-notifications';
-import { AdminTabs } from '../admin-tabs';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,10 +51,8 @@ export default async function AdminContentPage() {
         eyebrow="STEVI Admin"
         title="Content & Notifications"
         description="Monitor outbound communications and manage public-facing content."
-        primaryAction={{ label: 'Back to general settings', href: '/ops/admin' }}
+        breadcrumbs={[{ label: 'STEVI Admin', href: '/ops/admin' }, { label: 'Content & notifications' }]}
       />
-
-      <AdminTabs />
 
       <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
         <Card className="border-border/60">

@@ -51,7 +51,7 @@ export default async function OpsProgramsPage({ searchParams }: PageProps) {
         eyebrow="Operations"
         title="Programs"
         description="Program cards, schedules, and rosters in one place. Start Visits from a program to keep context."
-        secondaryAction={{ label: 'View partners', href: '/ops/partners' }}
+        secondaryAction={{ label: 'Open directory', href: '/ops/directory' }}
         meta={[{ label: 'Outreach lives here', tone: 'info' }]}
       />
 

@@ -27,7 +27,8 @@ const canSeeFrontline = (access: PortalAccess) => access.canAccessOpsFrontline;
 const canSeeClients = (access: PortalAccess) => access.canAccessOpsFrontline || access.canManageConsents;
 const canSeePrograms = (access: PortalAccess) => access.canAccessOpsFrontline || access.canAccessOpsAdmin;
 const canSeeSupplies = (access: PortalAccess) => access.canAccessInventoryOps || access.canAccessOpsAdmin;
-const canSeePartners = (access: PortalAccess) => access.canAccessOpsAdmin;
+const canSeeDirectory = (access: PortalAccess) =>
+  access.canAccessOpsFrontline || access.canAccessOpsOrg || access.canAccessOpsAdmin || access.canAccessOpsSteviAdmin;
 const canSeeOrganization = (access: PortalAccess) => access.canAccessOpsOrg && !access.canAccessOpsSteviAdmin;
 const canSeeAdmin = (access: PortalAccess) => access.canAccessOpsSteviAdmin;
 
@@ -79,13 +80,13 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
         ],
       },
       {
-        id: 'partners',
-        label: 'Partners',
+        id: 'directory',
+        label: 'Directory',
         icon: 'building',
-        requires: canSeePartners,
+        requires: canSeeDirectory,
         isHub: true,
         items: [
-          { id: 'partners', href: '/ops/partners', label: 'Partners', icon: 'building', match: ['/ops/partners'] },
+          { id: 'directory', href: '/ops/directory', label: 'Directory', icon: 'building', match: ['/ops/directory'] },
         ],
       },
     ],

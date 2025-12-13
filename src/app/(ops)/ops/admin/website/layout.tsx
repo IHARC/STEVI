@@ -5,8 +5,6 @@ import { loadPortalAccess } from '@/lib/portal-access';
 import { resolveLandingPath } from '@/lib/portal-navigation';
 import { ensurePortalProfile } from '@/lib/profile';
 import { PageHeader } from '@shared/layout/page-header';
-import { AdminTabs } from '../admin-tabs';
-import { WebsiteTabs } from './website-tabs';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,13 +28,8 @@ export default async function WebsiteAdminLayout({ children }: { children: React
         eyebrow="STEVI Admin"
         title="Website & Marketing"
         description="Manage public-facing content that powers iharc.ca."
-        primaryAction={{ label: 'Back to general settings', href: '/ops/admin' }}
+        breadcrumbs={[{ label: 'STEVI Admin', href: '/ops/admin' }, { label: 'Website & marketing' }]}
       />
-
-      <AdminTabs />
-      <div className="rounded-2xl border border-border/60 bg-muted/20 px-3 py-2">
-        <WebsiteTabs />
-      </div>
 
       <div className="space-y-6">{children}</div>
     </div>

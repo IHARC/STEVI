@@ -9,7 +9,6 @@ import { AttentionQueue, type AttentionQueueItem } from './operations/attention-
 import type { NotificationRecord } from '@workspace/admin/notifications/types';
 import Link from 'next/link';
 import { Button } from '@shared/ui/button';
-import { AdminTabs } from './admin-tabs';
 
 export const dynamic = 'force-dynamic';
 
@@ -96,8 +95,6 @@ export default async function OpsAdminPage() {
         description="System-wide configuration and status for STEVI."
         meta={[{ label: 'IHARC only', tone: 'warning' }, { label: 'No client data', tone: 'neutral' }]}
       />
-
-      <AdminTabs />
 
       <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
         <Card className="border-border/60">
