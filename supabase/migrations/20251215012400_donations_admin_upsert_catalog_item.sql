@@ -27,7 +27,6 @@ declare
   v_unit_cost_cents integer;
   v_category_label text;
   v_slug text;
-  v_target_buffer integer;
 begin
   select i.name, i.description, i.cost_per_unit, i.minimum_threshold
   into v_title, v_description, v_cost, v_minimum_threshold
@@ -61,8 +60,6 @@ begin
 
   v_slug := left(coalesce(v_slug, concat('donation-', extract(epoch from now())::bigint)), 80);
 
-  v_target_buffer := coalesce(p_target_buffer, v_minimum_threshold);
-
   if array_length(p_category_ids, 1) is null then
     p_category_ids := '{}'::uuid[];
   end if;
@@ -94,7 +91,7 @@ begin
     ) values (
       v_slug,
       v_title,
-      coalesce(p_short_description, nullif(btrim(v_description), '')),
+      p_short_description,
       p_long_description,
       v_category_label,
       p_inventory_item_id,
@@ -102,7 +99,7 @@ begin
       p_currency,
       p_default_quantity,
       p_priority,
-      v_target_buffer,
+      p_target_buffer,
       p_image_url,
       false
     )
@@ -112,7 +109,7 @@ begin
     set
       slug = v_slug,
       title = v_title,
-      short_description = coalesce(p_short_description, nullif(btrim(v_description), '')),
+      short_description = p_short_description,
       long_description = p_long_description,
       category = v_category_label,
       inventory_item_id = p_inventory_item_id,
@@ -120,7 +117,7 @@ begin
       currency = p_currency,
       default_quantity = p_default_quantity,
       priority = p_priority,
-      target_buffer = v_target_buffer,
+      target_buffer = p_target_buffer,
       image_url = p_image_url,
       is_active = false
     where ci.id = p_id

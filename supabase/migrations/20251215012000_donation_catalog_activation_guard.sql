@@ -10,7 +10,17 @@ declare
   public_count integer;
   non_public_count integer;
   inv_cost numeric;
+  stripe_price text;
 begin
+  select ci.stripe_price_id
+  into stripe_price
+  from donations.catalog_items ci
+  where ci.id = p_catalog_item_id;
+
+  if stripe_price is null or stripe_price !~ '^price_' then
+    raise exception 'Cannot activate catalogue item: sync a Stripe price first.' using errcode = 'P0001';
+  end if;
+
   select count(*)
   into public_count
   from donations.catalog_item_categories cic
@@ -62,4 +72,3 @@ create trigger validate_catalog_items_activation
 before insert or update of is_active on donations.catalog_items
 for each row
 execute function donations.validate_catalog_item_activation();
-

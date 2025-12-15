@@ -88,13 +88,14 @@ function CatalogItemForm({
   const activationIssues = useMemo(() => {
     const issues: string[] = [];
     if (!selectedInventoryId) issues.push('Select an inventory item before activating.');
+    if (variant !== 'create' && item && !item.stripePriceId) issues.push('Sync a Stripe price before activating.');
     const hasPublicCategory = selectedCategories.some((category) => category.isActive && category.isPublic);
     const hasNonPublicCategory = selectedCategories.some((category) => !category.isPublic);
     if (!hasPublicCategory) issues.push('Select at least one public category before activating.');
     if (hasNonPublicCategory) issues.push('Remove non-public categories before activating.');
     if (selectedInventory && selectedInventory.costPerUnit === null) issues.push('Set a typical cost on the inventory item before activating.');
     return issues;
-  }, [selectedCategories, selectedInventory, selectedInventoryId]);
+  }, [item, selectedCategories, selectedInventory, selectedInventoryId, variant]);
   const canActivate = activationIssues.length === 0;
 
   return (
