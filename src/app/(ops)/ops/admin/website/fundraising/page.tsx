@@ -41,13 +41,20 @@ export default async function AdminWebsiteFundraisingPage() {
     'stripe_donations_live_webhook_secret_id',
   ];
 
-  const [catalog, inventoryItems, payments, subscriptions, webhookEvents, stripeSettings] = await Promise.all([
+  const emailSettingKeys = [
+    'donations_email_from',
+    'donations_email_provider',
+    'donations_sendgrid_api_key_secret_id',
+  ];
+
+  const [catalog, inventoryItems, payments, subscriptions, webhookEvents, stripeSettings, emailSettings] = await Promise.all([
     fetchDonationCatalogAdmin(supabase),
     fetchInventoryItems(supabase),
     fetchDonationPaymentsAdmin(supabase, { limit: 50 }),
     fetchDonationSubscriptionsAdmin(supabase, { limit: 100 }),
     fetchStripeWebhookEventsAdmin(supabase, { limit: 50 }),
     fetchSettings(supabase, stripeSettingKeys),
+    fetchSettings(supabase, emailSettingKeys),
   ]);
 
   return (
@@ -66,6 +73,7 @@ export default async function AdminWebsiteFundraisingPage() {
           subscriptions={subscriptions}
           webhookEvents={webhookEvents}
           stripeSettings={stripeSettings}
+          emailSettings={emailSettings}
         />
       </CardContent>
     </Card>

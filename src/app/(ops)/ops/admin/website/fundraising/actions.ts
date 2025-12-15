@@ -431,3 +431,37 @@ export async function setStripeDonationsModeAction(formData: FormData) {
 
   await revalidatePath('/ops/admin/website/fundraising');
 }
+
+export async function upsertDonationsEmailCredentialsAction(formData: FormData) {
+  const { supabase, actorProfileId } = await requirePortalAdmin();
+
+  const emailFrom = (formData.get('email_from') as string | null)?.trim() ?? '';
+  if (!emailFrom || !emailFrom.includes('@')) {
+    throw new Error('From address must be a valid email.');
+  }
+
+  const sendgridApiKey = (formData.get('sendgrid_api_key') as string | null)?.trim() ?? '';
+  if (!sendgridApiKey) {
+    throw new Error('SendGrid API key is required.');
+  }
+
+  const { error } = await supabase.schema('donations').rpc('donations_admin_upsert_email_credentials', {
+    p_actor_profile_id: actorProfileId,
+    p_email_from: emailFrom,
+    p_sendgrid_api_key: sendgridApiKey,
+  });
+
+  if (error) {
+    throw new Error(error.message || 'Unable to update donations email configuration.');
+  }
+
+  await logAuditEvent(supabase, {
+    actorProfileId,
+    action: 'donations_email_config_updated',
+    entityType: 'donations_email_config',
+    entityRef: buildEntityRef({ schema: 'portal', table: 'public_settings', id: 'donations_email_config' }),
+    meta: { email_from: emailFrom, provider: 'sendgrid' },
+  });
+
+  await revalidatePath('/ops/admin/website/fundraising');
+}

@@ -19,6 +19,7 @@ import {
   resendDonationManageLinkAction,
   reprocessStripeWebhookEventAction,
   setStripeDonationsModeAction,
+  upsertDonationsEmailCredentialsAction,
   upsertStripeDonationsCredentialsAction,
 } from './actions';
 
@@ -29,6 +30,7 @@ type FundraisingHubProps = {
   subscriptions: DonationSubscriptionAdminRow[];
   webhookEvents: StripeWebhookEventAdminRow[];
   stripeSettings: Record<string, string | null>;
+  emailSettings: Record<string, string | null>;
 };
 
 function formatMoney(amountCents: number, currency = 'CAD') {
@@ -56,7 +58,15 @@ function formatWhen(value: string | null) {
 
 const DEFAULT_TAB = 'dashboard';
 
-export function FundraisingHub({ catalog, inventoryItems, payments, subscriptions, webhookEvents, stripeSettings }: FundraisingHubProps) {
+export function FundraisingHub({
+  catalog,
+  inventoryItems,
+  payments,
+  subscriptions,
+  webhookEvents,
+  stripeSettings,
+  emailSettings,
+}: FundraisingHubProps) {
   const [activeTab, setActiveTab] = useState<string>(DEFAULT_TAB);
   const [paymentQuery, setPaymentQuery] = useState('');
   const [subscriptionQuery, setSubscriptionQuery] = useState('');
@@ -74,6 +84,12 @@ export function FundraisingHub({ catalog, inventoryItems, payments, subscription
   );
   const hasLiveKeys = Boolean(
     stripeSettings.stripe_donations_live_secret_key_id && stripeSettings.stripe_donations_live_webhook_secret_id,
+  );
+
+  const hasDonationsEmailConfig = Boolean(
+    emailSettings.donations_email_from &&
+      (emailSettings.donations_email_provider?.trim().toLowerCase() ?? 'sendgrid') === 'sendgrid' &&
+      emailSettings.donations_sendgrid_api_key_secret_id,
   );
 
   const filteredPayments = useMemo(() => {
@@ -117,12 +133,15 @@ export function FundraisingHub({ catalog, inventoryItems, payments, subscription
   return (
     <div className="space-y-6">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid h-auto w-full grid-cols-2 gap-1 rounded-2xl sm:grid-cols-3 lg:grid-cols-6">
+        <TabsList className="grid h-auto w-full grid-cols-2 gap-1 rounded-2xl sm:grid-cols-3 lg:grid-cols-7">
           <TabsTrigger value="dashboard" className="w-full rounded-xl px-3 text-xs font-semibold">
             Dashboard
           </TabsTrigger>
           <TabsTrigger value="stripe" className="w-full rounded-xl px-3 text-xs font-semibold">
             Stripe
+          </TabsTrigger>
+          <TabsTrigger value="email" className="w-full rounded-xl px-3 text-xs font-semibold">
+            Email
           </TabsTrigger>
           <TabsTrigger value="catalog" className="w-full rounded-xl px-3 text-xs font-semibold">
             Catalogue
@@ -149,6 +168,19 @@ export function FundraisingHub({ catalog, inventoryItems, payments, subscription
                 <div className="text-sm text-muted-foreground">Active</div>
                 <Badge variant={isModeValid ? 'secondary' : 'destructive'} className="capitalize">
                   {stripeMode ?? 'unset'}
+                </Badge>
+              </CardContent>
+            </Card>
+
+            <Card className="border-border/60 lg:col-span-4 xl:col-span-3">
+              <CardHeader className="space-y-1">
+                <CardTitle className="text-base">Donations email</CardTitle>
+                <CardDescription>SendGrid API key stored in Vault.</CardDescription>
+              </CardHeader>
+              <CardContent className="flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">Delivery</div>
+                <Badge variant={hasDonationsEmailConfig ? 'secondary' : 'destructive'}>
+                  {hasDonationsEmailConfig ? 'Configured' : 'Missing'}
                 </Badge>
               </CardContent>
             </Card>
@@ -286,6 +318,61 @@ export function FundraisingHub({ catalog, inventoryItems, payments, subscription
                   </div>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="email">
+          <Card className="border-border/60">
+            <CardHeader className="space-y-1">
+              <CardTitle className="text-xl">Donations email configuration</CardTitle>
+              <CardDescription>
+                Configure the sender used for manage-link emails and donation receipts. Secrets are stored in Supabase Vault.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <form
+                action={upsertDonationsEmailCredentialsAction}
+                className="grid gap-4 rounded-2xl border border-border/40 bg-background p-4 lg:grid-cols-2"
+              >
+                <div className="space-y-2">
+                  <Label htmlFor="donations-email-from">From address</Label>
+                  <Input
+                    id="donations-email-from"
+                    name="email_from"
+                    type="email"
+                    autoComplete="off"
+                    placeholder="IHARC Donations <donations@iharc.ca>"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="donations-sendgrid-key">SendGrid API key</Label>
+                  <Input
+                    id="donations-sendgrid-key"
+                    name="sendgrid_api_key"
+                    type="password"
+                    autoComplete="off"
+                    placeholder="SG.…"
+                    required
+                  />
+                </div>
+
+                <div className="lg:col-span-2">
+                  <Button type="submit" className="w-full">
+                    Save email settings
+                  </Button>
+                </div>
+              </form>
+
+              <Alert>
+                <AlertTitle>Stripe webhook target (required)</AlertTitle>
+                <AlertDescription>
+                  Stripe cannot call Supabase Edge Functions with JWT verification enabled. Keep the Stripe webhook endpoint set to iharc.ca and proxy
+                  into Supabase, then confirm webhook deliveries show up under the Webhooks tab.
+                </AlertDescription>
+              </Alert>
             </CardContent>
           </Card>
         </TabsContent>

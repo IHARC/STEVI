@@ -433,8 +433,12 @@ Implement in `STEVI/src/app/(ops)/ops/admin/website/fundraising/*`:
     - `stripe_donations_mode` (`test` | `live`)
     - `stripe_donations_test_secret_key_id`, `stripe_donations_test_webhook_secret_id`
     - `stripe_donations_live_secret_key_id`, `stripe_donations_live_webhook_secret_id`
-- SMTP (for receipts + manage-link email):
-  - `PORTAL_EMAIL_FROM`, `PORTAL_SMTP_HOST`, `PORTAL_SMTP_PORT`, `PORTAL_SMTP_USERNAME`, `PORTAL_SMTP_PASSWORD`, `PORTAL_SMTP_SECURE`
+- Donations email configuration is **Vault-backed and admin-managed**:
+  - Set via **STEVI Admin → Website & Marketing → Fundraising → Email**
+  - Stored in Supabase Vault; referenced by `portal.public_settings` keys:
+    - `donations_email_from`
+    - `donations_email_provider` (currently `sendgrid`)
+    - `donations_sendgrid_api_key_secret_id`
 
 ### Public website env vars (build-time)
 - `NEXT_PUBLIC_SUPABASE_URL`
