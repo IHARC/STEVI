@@ -12,6 +12,7 @@ import { RadioGroup, RadioGroupItem } from '@shared/ui/radio-group';
 import { resolveLandingPath } from '@/lib/portal-navigation';
 import { PageHeader } from '@shared/layout/page-header';
 import { Checkbox } from '@shared/ui/checkbox';
+import { choiceCardVariants } from '@shared/ui/choice-card';
 
 export const dynamic = 'force-dynamic';
 
@@ -121,7 +122,7 @@ function ConsentForm({
           {['email', 'phone', 'both', 'none'].map((option) => (
             <label
               key={option}
-              className="flex cursor-pointer items-start gap-3 rounded-xl border border-border/40 bg-background px-3 py-3 text-left text-foreground shadow-sm transition hover:border-primary/60 hover:bg-muted focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2 focus-within:ring-offset-background"
+              className={choiceCardVariants({ surface: 'background', padding: 'compact' })}
             >
               <RadioGroupItem value={option} />
               <div>

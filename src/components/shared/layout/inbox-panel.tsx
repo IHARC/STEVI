@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
+import { Panel } from '@shared/ui/panel';
 import { ScrollArea } from '@shared/ui/scroll-area';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@shared/ui/sheet';
 import { AlertCircle, Bell, CheckCircle2, Clock3, X } from 'lucide-react';
@@ -93,44 +94,43 @@ function InboxList({ items, onDismiss }: { items: InboxItem[]; onDismiss: (id: s
   return (
     <ul className="space-y-3">
       {items.map((item) => (
-        <li
-          key={item.id}
-          className="rounded-2xl border border-border/30 bg-card p-4 shadow-sm transition hover:border-primary/40 hover:shadow-md"
-        >
-          <div className="flex items-start justify-between gap-3">
-            <div className="space-y-1">
-              <p className="text-sm font-medium text-foreground">
-                <a href={item.href} className="underline-offset-4 hover:underline">
-                  {item.title}
-                </a>
-              </p>
-              {item.description ? (
-                <p className="text-sm text-muted-foreground">{item.description}</p>
-              ) : null}
-              {item.meta ? (
-                <p className="text-xs text-muted-foreground">
-                  {Object.entries(item.meta)
-                    .map(([key, value]) => `${key}: ${value}`)
-                    .join(' · ')}
+        <Panel key={item.id} asChild interactive>
+          <li>
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-foreground">
+                  <a href={item.href} className="underline-offset-4 hover:underline">
+                    {item.title}
+                  </a>
                 </p>
-              ) : null}
+                {item.description ? (
+                  <p className="text-sm text-muted-foreground">{item.description}</p>
+                ) : null}
+                {item.meta ? (
+                  <p className="text-xs text-muted-foreground">
+                    {Object.entries(item.meta)
+                      .map(([key, value]) => `${key}: ${value}`)
+                      .join(' · ')}
+                  </p>
+                ) : null}
+              </div>
+              <div className="flex flex-col items-end gap-1">
+                {item.badge ? <Badge variant="outline">{item.badge}</Badge> : null}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="text-muted-foreground hover:text-foreground"
+                  onClick={() => onDismiss(item.id)}
+                  aria-label="Dismiss item"
+                >
+                  <X className="h-4 w-4" aria-hidden />
+                </Button>
+              </div>
             </div>
-            <div className="flex flex-col items-end gap-1">
-              {item.badge ? <Badge variant="outline">{item.badge}</Badge> : null}
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="text-muted-foreground hover:text-foreground"
-                onClick={() => onDismiss(item.id)}
-                aria-label="Dismiss item"
-              >
-                <X className="h-4 w-4" aria-hidden />
-              </Button>
-            </div>
-          </div>
-          <TonePill tone={item.tone} />
-        </li>
+            <TonePill tone={item.tone} />
+          </li>
+        </Panel>
       ))}
     </ul>
   );

@@ -7,6 +7,8 @@ import { useForm } from 'react-hook-form';
 import { Alert, AlertDescription, AlertTitle } from '@shared/ui/alert';
 import { Button } from '@shared/ui/button';
 import { Checkbox } from '@shared/ui/checkbox';
+import { choiceCardVariants } from '@shared/ui/choice-card';
+import { FormSection } from '@shared/ui/form-section';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@shared/ui/form';
 import { Input } from '@shared/ui/input';
 import {
@@ -151,88 +153,91 @@ export function ClientClaimForm({
             )}
           />
 
-          <fieldset className="grid gap-3 rounded-xl border border-border/30 p-4">
-            <legend className="text-sm font-semibold text-foreground">Who are we linking?</legend>
-            <FormField
-              control={form.control}
-              name="chosen_name"
-              rules={{ required: 'Provide your preferred name' }}
-              render={({ field }) => (
-                <FormItem className="grid gap-2">
-                  <FormLabel htmlFor="chosen_name">Chosen or preferred name *</FormLabel>
-                  <FormControl>
-                    <Input
-                      id="chosen_name"
-                      required
-                      maxLength={120}
-                      placeholder="Name your outreach worker knows you by"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          <div className="grid gap-2 md:grid-cols-2">
-            <div className="grid gap-1.5">
-              <FormLabel htmlFor="dob_month">Birth month *</FormLabel>
-              <Select
-                value={dobMonth}
-                onValueChange={(value) => {
-                  setDobMonth(value);
-                  form.setValue('dob_month', value);
-                }}
-              >
-                <SelectTrigger id="dob_month">
-                  <SelectValue placeholder="Month" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">Prefer not to say</SelectItem>
-                  {MONTHS.map(({ value, label }) => (
-                    <SelectItem key={value} value={String(value)}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-1.5">
-              <FormLabel htmlFor="dob_year">Birth year *</FormLabel>
-              <Select
-                value={dobYear}
-                onValueChange={(value) => {
-                  setDobYear(value);
-                  form.setValue('dob_year', value);
-                }}
-              >
-                <SelectTrigger id="dob_year">
-                  <SelectValue placeholder="Year" />
-                </SelectTrigger>
-                <SelectContent className="max-h-64">
-                  <SelectItem value="">Prefer not to say</SelectItem>
-                  {dobYears.map((year) => (
-                    <SelectItem key={year} value={String(year)}>
-                      {year}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </fieldset>
+          <FormSection asChild>
+            <fieldset className="grid gap-3">
+              <legend className="text-sm font-semibold text-foreground">Who are we linking?</legend>
+              <FormField
+                control={form.control}
+                name="chosen_name"
+                rules={{ required: 'Provide your preferred name' }}
+                render={({ field }) => (
+                  <FormItem className="grid gap-2">
+                    <FormLabel htmlFor="chosen_name">Chosen or preferred name *</FormLabel>
+                    <FormControl>
+                      <Input
+                        id="chosen_name"
+                        required
+                        maxLength={120}
+                        placeholder="Name your outreach worker knows you by"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="grid gap-2 md:grid-cols-2">
+                <div className="grid gap-1.5">
+                  <FormLabel htmlFor="dob_month">Birth month *</FormLabel>
+                  <Select
+                    value={dobMonth}
+                    onValueChange={(value) => {
+                      setDobMonth(value);
+                      form.setValue('dob_month', value);
+                    }}
+                  >
+                    <SelectTrigger id="dob_month">
+                      <SelectValue placeholder="Month" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Prefer not to say</SelectItem>
+                      {MONTHS.map(({ value, label }) => (
+                        <SelectItem key={value} value={String(value)}>
+                          {label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-1.5">
+                  <FormLabel htmlFor="dob_year">Birth year *</FormLabel>
+                  <Select
+                    value={dobYear}
+                    onValueChange={(value) => {
+                      setDobYear(value);
+                      form.setValue('dob_year', value);
+                    }}
+                  >
+                    <SelectTrigger id="dob_year">
+                      <SelectValue placeholder="Year" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-64">
+                      <SelectItem value="">Prefer not to say</SelectItem>
+                      {dobYears.map((year) => (
+                        <SelectItem key={year} value={String(year)}>
+                          {year}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </fieldset>
+          </FormSection>
 
-        <fieldset className="space-y-3 rounded-xl border border-border/30 p-4">
-          <legend className="text-sm font-semibold text-foreground">
-            Where should we send login confirmations?
-          </legend>
-          <RadioGroup
-            value={contactMethod}
-            onValueChange={(value) => {
-              setContactMethod(value as ContactMethod);
-              form.setValue('contact_method', value as ContactMethod);
-            }}
-            className="grid gap-3 md:grid-cols-2"
-          >
+        <FormSection asChild>
+          <fieldset className="space-y-3">
+            <legend className="text-sm font-semibold text-foreground">
+              Where should we send login confirmations?
+            </legend>
+            <RadioGroup
+              value={contactMethod}
+              onValueChange={(value) => {
+                setContactMethod(value as ContactMethod);
+                form.setValue('contact_method', value as ContactMethod);
+              }}
+              className="grid gap-3 md:grid-cols-2"
+            >
             <ContactMethodOption
               value="email"
               title="Email"
@@ -296,7 +301,8 @@ export function ClientClaimForm({
               )}
             />
           )}
-        </fieldset>
+          </fieldset>
+        </FormSection>
 
         <div className="grid gap-2 md:grid-cols-2">
           <FormField
@@ -387,7 +393,8 @@ export function ClientClaimForm({
           )}
         />
 
-        <fieldset className="space-y-3 rounded-xl border border-border/30 p-4">
+        <FormSection asChild>
+          <fieldset className="space-y-3">
           <legend className="text-sm font-semibold text-foreground">Consent</legend>
           <FormField
             control={form.control}
@@ -452,7 +459,8 @@ export function ClientClaimForm({
               </FormItem>
             )}
           />
-        </fieldset>
+          </fieldset>
+        </FormSection>
       </section>
 
       <div className="flex items-center justify-between gap-4">
@@ -478,7 +486,7 @@ function ContactMethodOption({
   return (
     <label
       htmlFor={`contact_method_${value}`}
-      className="flex cursor-pointer items-start gap-3 rounded-xl border border-border/40 bg-card p-3 text-left text-sm font-medium text-foreground shadow-sm transition hover:border-primary/60 hover:bg-muted focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2 focus-within:ring-offset-background"
+      className={choiceCardVariants()}
     >
       <RadioGroupItem id={`contact_method_${value}`} value={value} className="mt-1" />
       <span>

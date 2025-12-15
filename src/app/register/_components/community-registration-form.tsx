@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form';
 import { Alert, AlertDescription, AlertTitle } from '@shared/ui/alert';
 import { Button } from '@shared/ui/button';
 import { Checkbox } from '@shared/ui/checkbox';
+import { FormSection } from '@shared/ui/form-section';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@shared/ui/form';
 import { Input } from '@shared/ui/input';
 
@@ -191,7 +192,8 @@ export function CommunityRegistrationForm({
             )}
           />
 
-          <div className="space-y-3 rounded-xl border border-border/30 p-4">
+          <FormSection asChild>
+            <div className="space-y-3">
             <FormField
               control={form.control}
               name="consent_privacy"
@@ -256,7 +258,8 @@ export function CommunityRegistrationForm({
                 </FormItem>
               )}
             />
-          </div>
+            </div>
+          </FormSection>
         </section>
 
         <div className="flex items-center justify-between gap-4">

@@ -4,6 +4,7 @@ import { startTransition, useActionState, useEffect, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { Alert, AlertDescription, AlertTitle } from '@shared/ui/alert';
 import { Button } from '@shared/ui/button';
+import { choiceCardVariants } from '@shared/ui/choice-card';
 import { Input } from '@shared/ui/input';
 import { Label } from '@shared/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/ui/select';
@@ -331,7 +332,7 @@ function AffiliationOption({ id, value, title, description }: AffiliationOptionP
   return (
     <label
       htmlFor={id}
-      className="flex cursor-pointer items-start gap-3 rounded-xl border border-border/40 bg-card p-4 text-sm font-medium text-foreground shadow-sm transition hover:border-primary/60 hover:bg-muted focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2 focus-within:ring-offset-background"
+      className={choiceCardVariants({ padding: 'md' })}
     >
       <RadioGroupItem id={id} value={value} className="mt-1" />
       <span>
@@ -341,4 +342,3 @@ function AffiliationOption({ id, value, title, description }: AffiliationOptionP
     </label>
   );
 }
-

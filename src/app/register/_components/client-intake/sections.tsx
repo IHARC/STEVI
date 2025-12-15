@@ -4,6 +4,8 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@share
 import { RadioGroup, RadioGroupItem } from '@shared/ui/radio-group';
 import { Input } from '@shared/ui/input';
 import { Checkbox } from '@shared/ui/checkbox';
+import { choiceCardVariants } from '@shared/ui/choice-card';
+import { FormSection } from '@shared/ui/form-section';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/ui/select';
 import { Textarea } from '@shared/ui/textarea';
 import type { UseFormReturn } from 'react-hook-form';
@@ -39,18 +41,20 @@ export function ContactPreferenceSection({
         control={form.control}
         name="contact_choice"
         render={({ field }) => (
-          <FormItem className="space-y-3 rounded-xl border border-border/30 p-4">
-            <FormLabel className="text-base font-semibold text-foreground">How should we stay in touch about your services?</FormLabel>
-            <input type="hidden" name="contact_choice" value={field.value} />
-            <FormControl>
-              <RadioGroup value={field.value} onValueChange={(value) => field.onChange(value as ContactChoice)} className="grid gap-3 md:grid-cols-2">
-                <ContactOption value="email" title="Email" description="We’ll send confirmations and updates to the inbox you share." />
-                <ContactOption value="phone" title="Mobile phone" description="We’ll use text messages and call if it’s safe." />
-                <ContactOption value="both" title="Both email and phone" description="Ideal if your phone changes often but you can access email at times." />
-                <ContactOption value="none" title="I don’t have either right now" description="We’ll generate an 8-digit code you can bring to outreach or the library to finish sign-up." />
-              </RadioGroup>
-            </FormControl>
-          </FormItem>
+          <FormSection asChild>
+            <FormItem className="space-y-3">
+              <FormLabel className="text-base font-semibold text-foreground">How should we stay in touch about your services?</FormLabel>
+              <input type="hidden" name="contact_choice" value={field.value} />
+              <FormControl>
+                <RadioGroup value={field.value} onValueChange={(value) => field.onChange(value as ContactChoice)} className="grid gap-3 md:grid-cols-2">
+                  <ContactOption value="email" title="Email" description="We’ll send confirmations and updates to the inbox you share." />
+                  <ContactOption value="phone" title="Mobile phone" description="We’ll use text messages and call if it’s safe." />
+                  <ContactOption value="both" title="Both email and phone" description="Ideal if your phone changes often but you can access email at times." />
+                  <ContactOption value="none" title="I don’t have either right now" description="We’ll generate an 8-digit code you can bring to outreach or the library to finish sign-up." />
+                </RadioGroup>
+              </FormControl>
+            </FormItem>
+          </FormSection>
         )}
       />
 
@@ -210,55 +214,57 @@ export function SafetySection({ form }: { form: UseFormReturn<ClientIntakeFormVa
         control={form.control}
         name="safe_call"
         render={({ field }) => (
-          <FormItem className="space-y-3 rounded-xl border border-border/30 p-4">
-            <FormLabel className="text-base font-semibold text-foreground">Is it safe for us to…</FormLabel>
-            <div className="space-y-3">
-              <div className="flex items-start gap-3 text-sm text-foreground">
-                <input type="hidden" name="safe_call" value={field.value ? 'on' : ''} />
-                <FormControl>
-                  <Checkbox id="safe_call" checked={field.value} onCheckedChange={(checked) => field.onChange(Boolean(checked))} className="mt-1" />
-                </FormControl>
-                <FormLabel htmlFor="safe_call" className="font-normal">
-                  Call this phone number
-                </FormLabel>
+          <FormSection asChild>
+            <FormItem className="space-y-3">
+              <FormLabel className="text-base font-semibold text-foreground">Is it safe for us to…</FormLabel>
+              <div className="space-y-3">
+                <div className="flex items-start gap-3 text-sm text-foreground">
+                  <input type="hidden" name="safe_call" value={field.value ? 'on' : ''} />
+                  <FormControl>
+                    <Checkbox id="safe_call" checked={field.value} onCheckedChange={(checked) => field.onChange(Boolean(checked))} className="mt-1" />
+                  </FormControl>
+                  <FormLabel htmlFor="safe_call" className="font-normal">
+                    Call this phone number
+                  </FormLabel>
+                </div>
+                <FormField
+                  control={form.control}
+                  name="safe_text"
+                  render={({ field: textField }) => (
+                    <div className="flex items-start gap-3 text-sm text-foreground">
+                      <input type="hidden" name="safe_text" value={textField.value ? 'on' : ''} />
+                      <FormControl>
+                        <Checkbox id="safe_text" checked={textField.value} onCheckedChange={(checked) => textField.onChange(Boolean(checked))} className="mt-1" />
+                      </FormControl>
+                      <FormLabel htmlFor="safe_text" className="font-normal">
+                        Send text messages
+                      </FormLabel>
+                    </div>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="safe_voicemail"
+                  render={({ field: voicemailField }) => (
+                    <div className="flex items-start gap-3 text-sm text-foreground">
+                      <input type="hidden" name="safe_voicemail" value={voicemailField.value ? 'on' : ''} />
+                      <FormControl>
+                        <Checkbox
+                          id="safe_voicemail"
+                          checked={voicemailField.value}
+                          onCheckedChange={(checked) => voicemailField.onChange(Boolean(checked))}
+                          className="mt-1"
+                        />
+                      </FormControl>
+                      <FormLabel htmlFor="safe_voicemail" className="font-normal">
+                        Leave a voicemail if you miss our call
+                      </FormLabel>
+                    </div>
+                  )}
+                />
               </div>
-              <FormField
-                control={form.control}
-                name="safe_text"
-                render={({ field: textField }) => (
-                  <div className="flex items-start gap-3 text-sm text-foreground">
-                    <input type="hidden" name="safe_text" value={textField.value ? 'on' : ''} />
-                    <FormControl>
-                      <Checkbox id="safe_text" checked={textField.value} onCheckedChange={(checked) => textField.onChange(Boolean(checked))} className="mt-1" />
-                    </FormControl>
-                    <FormLabel htmlFor="safe_text" className="font-normal">
-                      Send text messages
-                    </FormLabel>
-                  </div>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="safe_voicemail"
-                render={({ field: voicemailField }) => (
-                  <div className="flex items-start gap-3 text-sm text-foreground">
-                    <input type="hidden" name="safe_voicemail" value={voicemailField.value ? 'on' : ''} />
-                    <FormControl>
-                      <Checkbox
-                        id="safe_voicemail"
-                        checked={voicemailField.value}
-                        onCheckedChange={(checked) => voicemailField.onChange(Boolean(checked))}
-                        className="mt-1"
-                      />
-                    </FormControl>
-                    <FormLabel htmlFor="safe_voicemail" className="font-normal">
-                      Leave a voicemail if you miss our call
-                    </FormLabel>
-                  </div>
-                )}
-              />
-            </div>
-          </FormItem>
+            </FormItem>
+          </FormSection>
         )}
       />
 
@@ -292,7 +298,8 @@ export function SafetySection({ form }: { form: UseFormReturn<ClientIntakeFormVa
 
 export function DemographicsSection({ form, dobYears }: { form: UseFormReturn<ClientIntakeFormValues>; dobYears: number[] }) {
   return (
-    <section className="space-y-4 rounded-xl border border-border/30 p-4">
+    <FormSection asChild>
+      <section className="space-y-4">
       <p className="text-base font-semibold text-foreground">Optional demographic details</p>
       <p className="text-sm text-muted-foreground">
         These questions help IHARC report on equity outcomes. Share only what feels right — skipping them never impacts services.
@@ -407,13 +414,15 @@ export function DemographicsSection({ form, dobYears }: { form: UseFormReturn<Cl
           )}
         />
       </div>
-    </section>
+      </section>
+    </FormSection>
   );
 }
 
 export function ConsentSection({ form }: { form: UseFormReturn<ClientIntakeFormValues> }) {
   return (
-    <section className="space-y-3 rounded-xl border border-border/30 bg-muted/30 p-4">
+    <FormSection asChild surface="soft">
+      <section className="space-y-3">
       <p className="text-base font-semibold text-foreground">Consents</p>
       <FormField
         control={form.control}
@@ -484,7 +493,8 @@ export function ConsentSection({ form }: { form: UseFormReturn<ClientIntakeFormV
           </FormItem>
         )}
       />
-    </section>
+      </section>
+    </FormSection>
   );
 }
 
@@ -517,7 +527,14 @@ function ContactOption({ value, title, description }: { value: ContactChoice; ti
   return (
     <label
       htmlFor={`contact_choice_${value}`}
-      className="flex cursor-pointer flex-col gap-2 rounded-lg border border-border/30 bg-card/80 px-4 py-3 shadow-sm transition hover:border-primary/50"
+      className={choiceCardVariants({
+        layout: 'column',
+        surface: 'cardSoft',
+        borderTone: 'subtle',
+        radius: 'lg',
+        padding: 'stack',
+        hover: 'border',
+      })}
     >
       <div className="flex items-center justify-between gap-3">
         <span className="text-base font-semibold text-foreground">{title}</span>

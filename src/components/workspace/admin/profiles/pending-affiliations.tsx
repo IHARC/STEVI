@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shar
 import { Combobox, type ComboboxOption } from '@shared/ui/combobox';
 import { Input } from '@shared/ui/input';
 import { NativeSelect } from '@shared/ui/native-select';
+import { Panel } from '@shared/ui/panel';
 import { ScrollArea } from '@shared/ui/scroll-area';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@shared/ui/sheet';
 import { useToast } from '@shared/ui/use-toast';
@@ -216,46 +217,49 @@ function PendingAffiliationsContent({
         ) : (
           <>
             <div className="grid gap-6 lg:grid-cols-[minmax(320px,440px),1fr]">
-              <section className="rounded-2xl border border-border/20 bg-background shadow-sm">
-                <div className="flex items-center justify-between gap-2 border-b border-border/15 px-4 py-3">
-                  <Badge variant="secondary">{filteredPending.length} shown</Badge>
-                  <span className="text-xs text-muted-foreground">Select a request to review</span>
-                </div>
+              <Panel asChild surface="background" borderTone="subtle" padding="none">
+                <section>
+                  <div className="flex items-center justify-between gap-2 border-b border-border/15 px-4 py-3">
+                    <Badge variant="secondary">{filteredPending.length} shown</Badge>
+                    <span className="text-xs text-muted-foreground">Select a request to review</span>
+                  </div>
 
-                <ScrollArea className="h-[62vh] pr-1">
-                  <ul className="space-y-2 p-3">
-                    {filteredPending.map((entry) => {
-                      const isSelected = entry.id === selectedEntry?.id;
-                      const requestedDate = formatDate(entry.affiliationRequestedAt);
-                      return (
-                        <li key={entry.id}>
-                          <button
-                            type="button"
-                            onClick={() => handleSelect(entry.id)}
-                            className={cn(
-                              'w-full rounded-2xl border border-border/20 bg-card p-3 text-left shadow-sm transition hover:border-primary/30 hover:shadow-md',
-                              isSelected ? 'border-primary/50' : null,
-                            )}
-                          >
-                            <div className="flex items-start justify-between gap-3">
-                              <div className="min-w-0">
-                                <p className="truncate text-sm font-semibold text-foreground">{entry.displayName}</p>
-                                <p className="truncate text-xs text-muted-foreground">
-                                  {entry.positionTitle ?? entry.organizationName ?? '—'}
-                                </p>
-                              </div>
-                              <Badge variant="outline">{AFFILIATION_LABELS[entry.affiliationType]}</Badge>
-                            </div>
-                            {requestedDate ? (
-                              <p className="mt-2 text-xs text-muted-foreground">Requested {requestedDate}</p>
-                            ) : null}
-                          </button>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </ScrollArea>
-              </section>
+                  <ScrollArea className="h-[62vh] pr-1">
+                    <ul className="space-y-2 p-3">
+                      {filteredPending.map((entry) => {
+                        const isSelected = entry.id === selectedEntry?.id;
+                        const requestedDate = formatDate(entry.affiliationRequestedAt);
+                        return (
+                          <li key={entry.id}>
+                            <Panel
+                              asChild
+                              borderTone="subtle"
+                              padding="sm"
+                              interactive
+                              className={cn('w-full text-left', isSelected ? 'border-primary/50' : null)}
+                            >
+                              <button type="button" onClick={() => handleSelect(entry.id)}>
+                                <div className="flex items-start justify-between gap-3">
+                                  <div className="min-w-0">
+                                    <p className="truncate text-sm font-semibold text-foreground">{entry.displayName}</p>
+                                    <p className="truncate text-xs text-muted-foreground">
+                                      {entry.positionTitle ?? entry.organizationName ?? '—'}
+                                    </p>
+                                  </div>
+                                  <Badge variant="outline">{AFFILIATION_LABELS[entry.affiliationType]}</Badge>
+                                </div>
+                                {requestedDate ? (
+                                  <p className="mt-2 text-xs text-muted-foreground">Requested {requestedDate}</p>
+                                ) : null}
+                              </button>
+                            </Panel>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </ScrollArea>
+                </section>
+              </Panel>
 
               <aside className="hidden lg:block">
                 {selectedEntry ? (
@@ -338,7 +342,8 @@ function PendingAffiliationEditor({
   );
 
   return (
-    <article className="space-y-4 rounded-2xl border border-border/20 bg-card p-4 shadow-sm">
+    <Panel asChild borderTone="subtle" className="space-y-4">
+      <article>
       <header className="space-y-1">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h3 className="text-lg font-semibold text-foreground">{entry.displayName}</h3>
@@ -398,6 +403,7 @@ function PendingAffiliationEditor({
           </Button>
         </div>
       </div>
-    </article>
+      </article>
+    </Panel>
   );
 }

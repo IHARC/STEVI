@@ -6,6 +6,8 @@ import { useFormStatus } from 'react-dom';
 import { useForm } from 'react-hook-form';
 import { Alert, AlertDescription, AlertTitle } from '@shared/ui/alert';
 import { Button } from '@shared/ui/button';
+import { choiceCardVariants } from '@shared/ui/choice-card';
+import { FormSection } from '@shared/ui/form-section';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@shared/ui/form';
 import { Input } from '@shared/ui/input';
 import { RadioGroup, RadioGroupItem } from '@shared/ui/radio-group';
@@ -191,7 +193,8 @@ export function ConcernReportForm({
             control={form.control}
             name="contact_preference"
             render={({ field }) => (
-              <FormItem className="space-y-3 rounded-xl border border-border/30 p-4">
+              <FormSection asChild>
+                <FormItem className="space-y-3">
                 <FormLabel className="text-sm font-medium text-foreground">How should we follow up?</FormLabel>
                 <input type="hidden" name="contact_preference" value={field.value} />
                 <FormControl>
@@ -259,7 +262,8 @@ export function ConcernReportForm({
                     )}
                   />
                 ) : null}
-              </FormItem>
+                </FormItem>
+              </FormSection>
             )}
           />
 
@@ -303,7 +307,7 @@ function ContactOption({
   return (
     <label
       htmlFor={`contact_preference_${value}`}
-      className="flex cursor-pointer items-start gap-3 rounded-xl border border-border/40 bg-card p-4 text-left text-sm font-medium text-foreground shadow-sm transition hover:border-primary/60 hover:bg-muted focus-within:outline-none focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2 focus-within:ring-offset-background"
+      className={choiceCardVariants({ padding: 'md' })}
     >
       <RadioGroupItem id={`contact_preference_${value}`} value={value} className="mt-1" />
       <span>
