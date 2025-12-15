@@ -128,6 +128,7 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
         items: [
           { id: 'admin-overview', href: '/ops/admin', label: 'General settings', icon: 'dashboard', match: ['/ops/admin'], exact: true },
           { id: 'admin-content', href: '/ops/admin/content', label: 'Content & Notifications', icon: 'megaphone', match: ['/ops/admin/content'] },
+          { id: 'admin-integrations', href: '/ops/admin/integrations', label: 'Integrations & AI', icon: 'lab', match: ['/ops/admin/integrations'] },
           { id: 'admin-organizations', href: '/ops/admin/organizations', label: 'Organizations', icon: 'globe', match: ['/ops/admin/organizations'] },
           { id: 'admin-users', href: '/ops/admin/users/all', label: 'Users', icon: 'users', match: ['/ops/admin/users'] },
           { id: 'admin-inventory', href: '/ops/admin/inventory', label: 'Inventory & Donations', icon: 'boxes', match: ['/ops/admin/inventory'] },
