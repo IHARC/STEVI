@@ -8,6 +8,7 @@ import { Badge } from '@shared/ui/badge';
 import { Combobox } from '@shared/ui/combobox';
 import { Input } from '@shared/ui/input';
 import { Label } from '@shared/ui/label';
+import { NativeCheckbox } from '@shared/ui/native-checkbox';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@shared/ui/sheet';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@shared/ui/table';
@@ -305,12 +306,12 @@ export function DonationCatalogAdmin({ inventoryItems, catalogInventoryItemIds, 
                   <div className="flex flex-wrap gap-4 pt-1 text-sm text-foreground">
                     <label className="inline-flex items-center gap-2">
                       <input type="hidden" name="is_public" value="off" />
-                      <input type="checkbox" name="is_public" value="on" defaultChecked className="h-4 w-4" />
+                      <NativeCheckbox name="is_public" value="on" defaultChecked />
                       Public
                     </label>
                     <label className="inline-flex items-center gap-2">
                       <input type="hidden" name="is_active" value="off" />
-                      <input type="checkbox" name="is_active" value="on" defaultChecked className="h-4 w-4" />
+                      <NativeCheckbox name="is_active" value="on" defaultChecked />
                       Active
                     </label>
                   </div>
@@ -349,24 +350,12 @@ export function DonationCatalogAdmin({ inventoryItems, catalogInventoryItemIds, 
                         <div className="flex flex-wrap gap-4 pt-1 text-sm text-foreground">
                           <label className="inline-flex items-center gap-2">
                             <input type="hidden" name="is_public" value="off" />
-                            <input
-                              type="checkbox"
-                              name="is_public"
-                              value="on"
-                              defaultChecked={category.isPublic}
-                              className="h-4 w-4"
-                            />
+                            <NativeCheckbox name="is_public" value="on" defaultChecked={category.isPublic} />
                             Public
                           </label>
                           <label className="inline-flex items-center gap-2">
                             <input type="hidden" name="is_active" value="off" />
-                            <input
-                              type="checkbox"
-                              name="is_active"
-                              value="on"
-                              defaultChecked={category.isActive}
-                              className="h-4 w-4"
-                            />
+                            <NativeCheckbox name="is_active" value="on" defaultChecked={category.isActive} />
                             Active
                           </label>
                         </div>

@@ -214,7 +214,7 @@ export function LayoutDebugOverlay() {
         </p>
 
         {suspects.chainSuspects.length || suspects.subtreeSuspects.length ? (
-          <div className="rounded-lg border border-amber-300/40 bg-amber-50/40 p-2 text-amber-900 dark:border-amber-300/30 dark:bg-amber-900/10 dark:text-amber-100">
+          <div className="rounded-lg border border-warning/40 bg-warning/10 p-2 text-warning">
             <p className="font-semibold">Potential constraints</p>
             {suspects.chainSuspects.length ? (
               <div className="mt-2">

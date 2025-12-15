@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Button } from '@shared/ui/button';
 import { Input } from '@shared/ui/input';
+import { NativeSelect } from '@shared/ui/native-select';
 import { Textarea } from '@shared/ui/textarea';
 import { Badge } from '@shared/ui/badge';
 import { useToast } from '@shared/ui/use-toast';
@@ -118,10 +119,10 @@ export function InvitePartnerCard({ organizations, recentInvites }: InvitePartne
               <span className="text-xs uppercase text-muted-foreground">
                 Affiliation type
               </span>
-              <select
+              <NativeSelect
                 name="invite_affiliation_type"
                 defaultValue="agency_partner"
-                className="rounded-lg border border-border/40 bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                className="rounded-lg"
                 disabled={isPending}
               >
                 {AFFILIATION_OPTIONS.map((option) => (
@@ -129,7 +130,7 @@ export function InvitePartnerCard({ organizations, recentInvites }: InvitePartne
                     {option.label}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </label>
           </div>
           <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_200px] md:items-end">
@@ -137,11 +138,11 @@ export function InvitePartnerCard({ organizations, recentInvites }: InvitePartne
               <span className="text-xs uppercase text-muted-foreground">
                 Organization (optional)
               </span>
-              <select
+              <NativeSelect
                 name="invite_organization_id"
                 value={selectedOrg}
                 onChange={(event) => setSelectedOrg(event.target.value)}
-                className="rounded-lg border border-border/40 bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                className="rounded-lg"
                 disabled={isPending}
               >
                 <option value={NO_ORGANIZATION_VALUE}>Select organization</option>
@@ -150,7 +151,7 @@ export function InvitePartnerCard({ organizations, recentInvites }: InvitePartne
                     {option.label}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </label>
             <Button type="submit" disabled={isPending}>
               Send invitation
@@ -172,7 +173,7 @@ export function InvitePartnerCard({ organizations, recentInvites }: InvitePartne
         {recentInvites.length ? (
           <div className="space-y-3">
             <p className="text-xs uppercase text-muted-foreground">Recent invites</p>
-            <ul className="divide-y divide-outline/20 rounded-xl border border-border/30">
+            <ul className="divide-y divide-border/20 rounded-xl border border-border/30">
               {recentInvites.map((invite) => (
                 <li key={invite.id} className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>

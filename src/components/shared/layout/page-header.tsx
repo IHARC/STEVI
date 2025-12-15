@@ -39,9 +39,9 @@ type PageHeaderProps = {
 };
 
 const metaToneClasses: Record<NonNullable<HeaderMeta['tone']>, string> = {
-  info: 'border-primary/30 text-primary',
-  success: 'border-emerald-400/60 text-emerald-700 dark:text-emerald-200',
-  warning: 'border-amber-300/60 text-amber-800 dark:text-amber-100',
+  info: 'border-info/30 text-info',
+  success: 'border-success/40 text-success',
+  warning: 'border-warning/40 text-warning',
   neutral: 'border-border text-muted-foreground',
 };
 

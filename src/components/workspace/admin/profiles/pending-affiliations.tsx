@@ -7,6 +7,7 @@ import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Combobox, type ComboboxOption } from '@shared/ui/combobox';
 import { Input } from '@shared/ui/input';
+import { NativeSelect } from '@shared/ui/native-select';
 import { ScrollArea } from '@shared/ui/scroll-area';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@shared/ui/sheet';
 import { useToast } from '@shared/ui/use-toast';
@@ -375,15 +376,15 @@ function PendingAffiliationEditor({
           {entry.affiliationType === 'government_partner' ? (
             <label className="grid gap-2 text-sm text-foreground">
               <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Role type</span>
-              <select
+              <NativeSelect
                 value={govRoleValue}
                 onChange={(event) => onGovRoleChange(event.target.value)}
                 disabled={isPending}
-                className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                className="rounded-lg"
               >
                 <option value="staff">Public servant / staff</option>
                 <option value="politician">Elected leadership</option>
-              </select>
+              </NativeSelect>
             </label>
           ) : null}
         </div>

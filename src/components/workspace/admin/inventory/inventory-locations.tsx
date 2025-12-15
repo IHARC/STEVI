@@ -88,7 +88,7 @@ export function InventoryLocationsSection({ locations, actorProfileId, canManage
           <CardTitle className="text-base font-semibold">Locations</CardTitle>
           <p className="text-sm text-muted-foreground">Warehouses, outreach lockers, and mobile units that hold inventory.</p>
           {!canManageLocations ? (
-            <p className="text-xs text-amber-600">
+            <p className="text-xs text-warning">
               Viewing only: only IHARC admins can add or edit locations.
             </p>
           ) : null}

@@ -12,10 +12,8 @@ type StatTileProps = {
 
 const toneClassMap: Record<NonNullable<StatTileProps['tone']>, string> = {
   default: 'border-border/70 bg-card text-foreground',
-  warning:
-    'border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-50',
-  info:
-    'border-primary/30 bg-primary/10 text-primary dark:border-primary/40 dark:bg-primary/15 dark:text-primary-foreground',
+  warning: 'border-warning/30 bg-warning/10 text-warning',
+  info: 'border-info/30 bg-info/10 text-info',
 };
 
 export function StatTile({ label, value, tone = 'default', icon: Icon, footnote }: StatTileProps) {

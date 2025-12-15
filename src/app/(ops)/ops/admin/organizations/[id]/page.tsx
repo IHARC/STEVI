@@ -12,6 +12,8 @@ import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Input } from '@shared/ui/input';
 import { Label } from '@shared/ui/label';
+import { NativeCheckbox } from '@shared/ui/native-checkbox';
+import { NativeSelect } from '@shared/ui/native-select';
 import { Textarea } from '@shared/ui/textarea';
 import { Separator } from '@shared/ui/separator';
 import { OrgMembersTable } from '../../../org/members/org-members-table';
@@ -139,48 +141,38 @@ export default async function AdminOrganizationDetailPage({ params }: PageProps)
 
               <div className="grid gap-3 md:grid-cols-3">
                 <Field label="Status" id="status">
-                  <select id="status" name="status" defaultValue={orgRow.status ?? 'active'} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                  <NativeSelect id="status" name="status" defaultValue={orgRow.status ?? 'active'}>
                     {STATUS_OPTIONS.map((value) => (
                       <option key={value} value={value ?? ''}>
                         {value?.replaceAll('_', ' ') ?? 'active'}
                       </option>
                     ))}
-                  </select>
+                  </NativeSelect>
                 </Field>
                 <Field label="Organization type" id="organization_type">
-                  <select
-                    id="organization_type"
-                    name="organization_type"
-                    defaultValue={orgRow.organization_type ?? ''}
-                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                  >
+                  <NativeSelect id="organization_type" name="organization_type" defaultValue={orgRow.organization_type ?? ''}>
                     <option value="">Not set</option>
                     {ORG_TYPE_OPTIONS.map((value) => (
                       <option key={value} value={value}>
                         {value.replaceAll('_', ' ')}
                       </option>
                     ))}
-                  </select>
+                  </NativeSelect>
                 </Field>
                 <Field label="Partnership type" id="partnership_type">
-                  <select
-                    id="partnership_type"
-                    name="partnership_type"
-                    defaultValue={orgRow.partnership_type ?? ''}
-                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                  >
+                  <NativeSelect id="partnership_type" name="partnership_type" defaultValue={orgRow.partnership_type ?? ''}>
                     <option value="">Not set</option>
                     {PARTNERSHIP_OPTIONS.map((value) => (
                       <option key={value} value={value}>
                         {value.replaceAll('_', ' ')}
                       </option>
                     ))}
-                  </select>
+                  </NativeSelect>
                 </Field>
               </div>
 
               <div className="flex items-center gap-2">
-                <input id="is_active" name="is_active" type="checkbox" defaultChecked={orgRow.is_active ?? false} className="h-4 w-4" />
+                <NativeCheckbox id="is_active" name="is_active" defaultChecked={orgRow.is_active ?? false} />
                 <Label htmlFor="is_active">Active</Label>
               </div>
 
@@ -377,11 +369,11 @@ export default async function AdminOrganizationDetailPage({ params }: PageProps)
               </div>
               <div className="flex flex-col gap-2 text-sm">
                 <label className="flex items-center gap-2">
-                  <input type="checkbox" name="make_admin" className="h-4 w-4" />
+                  <NativeCheckbox name="make_admin" />
                   <span>Grant org admin</span>
                 </label>
                 <label className="flex items-center gap-2">
-                  <input type="checkbox" name="make_rep" className="h-4 w-4" defaultChecked />
+                  <NativeCheckbox name="make_rep" defaultChecked />
                   <span>Grant org representative</span>
                 </label>
               </div>

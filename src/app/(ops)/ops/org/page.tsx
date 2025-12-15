@@ -192,7 +192,7 @@ export default async function OrgHomePage({ searchParams }: PageProps) {
             {recentActivity.length === 0 ? (
               <p className="text-sm text-muted-foreground">No member activity yet.</p>
             ) : (
-              <ul className="divide-y divide-outline/15">
+              <ul className="divide-y divide-border/15">
                 {recentActivity.map((member) => (
                   <li key={member.id} className="flex items-center justify-between gap-3 py-3">
                     <div className="space-y-1">
@@ -264,7 +264,7 @@ export default async function OrgHomePage({ searchParams }: PageProps) {
             {invites.length === 0 ? (
               <p className="text-sm text-muted-foreground">No invites sent yet.</p>
             ) : (
-              <ul className="divide-y divide-outline/15">
+              <ul className="divide-y divide-border/15">
                 {invites.slice(0, 6).map((invite) => (
                   <InviteListItem key={invite.id} invite={invite} />
                 ))}

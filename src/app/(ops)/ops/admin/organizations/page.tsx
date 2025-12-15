@@ -11,6 +11,8 @@ import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Input } from '@shared/ui/input';
 import { Label } from '@shared/ui/label';
+import { NativeCheckbox } from '@shared/ui/native-checkbox';
+import { NativeSelect } from '@shared/ui/native-select';
 import { Textarea } from '@shared/ui/textarea';
 import { createOrganizationAction } from './actions';
 
@@ -128,43 +130,35 @@ export default async function AdminOrganizationsPage() {
               <div className="grid gap-3 md:grid-cols-3">
                 <div className="space-y-1">
                   <Label htmlFor="status">Status</Label>
-                  <select id="status" name="status" className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                  <NativeSelect id="status" name="status">
                     {STATUS_OPTIONS.map((value) => (
                       <option key={value} value={value ?? ''}>
                         {value?.replaceAll('_', ' ') ?? 'active'}
                       </option>
                     ))}
-                  </select>
+                  </NativeSelect>
                 </div>
                 <div className="space-y-1">
                   <Label htmlFor="organization_type">Organization type</Label>
-                  <select
-                    id="organization_type"
-                    name="organization_type"
-                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                  >
+                  <NativeSelect id="organization_type" name="organization_type">
                     <option value="">Not set</option>
                     {ORG_TYPE_OPTIONS.map((value) => (
                       <option key={value} value={value}>
                         {value.replaceAll('_', ' ')}
                       </option>
                     ))}
-                  </select>
+                  </NativeSelect>
                 </div>
                 <div className="space-y-1">
                   <Label htmlFor="partnership_type">Partnership type</Label>
-                  <select
-                    id="partnership_type"
-                    name="partnership_type"
-                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                  >
+                  <NativeSelect id="partnership_type" name="partnership_type">
                     <option value="">Not set</option>
                     {PARTNERSHIP_OPTIONS.map((value) => (
                       <option key={value} value={value}>
                         {value.replaceAll('_', ' ')}
                       </option>
                     ))}
-                  </select>
+                  </NativeSelect>
                 </div>
               </div>
 
@@ -173,7 +167,7 @@ export default async function AdminOrganizationsPage() {
                 <div className="grid gap-2 sm:grid-cols-2">
                   {ORG_FEATURE_OPTIONS.map((feature) => (
                     <label key={feature.value} className="flex items-center gap-2 text-sm">
-                      <input type="checkbox" name="features" value={feature.value} className="h-4 w-4" />
+                      <NativeCheckbox name="features" value={feature.value} />
                       <span>{feature.label}</span>
                     </label>
                   ))}
@@ -181,7 +175,7 @@ export default async function AdminOrganizationsPage() {
               </div>
 
               <div className="flex items-center gap-2">
-                <input id="is_active" name="is_active" type="checkbox" defaultChecked className="h-4 w-4" />
+                <NativeCheckbox id="is_active" name="is_active" defaultChecked />
                 <Label htmlFor="is_active">Active</Label>
               </div>
 

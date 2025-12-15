@@ -28,13 +28,13 @@ export function ContactPreferenceSection({
   form,
   contactChoice,
   shouldHideCredentials,
-}: {
-  form: UseFormReturn<ClientIntakeFormValues>;
-  contactChoice: ContactChoice;
-  shouldHideCredentials: boolean;
-}) {
+  }: {
+    form: UseFormReturn<ClientIntakeFormValues>;
+    contactChoice: ContactChoice;
+    shouldHideCredentials: boolean;
+  }) {
   return (
-    <section className="space-y-[calc(2rem-0.75rem)]">
+    <section className="space-y-5">
       <FormField
         control={form.control}
         name="contact_choice"
@@ -299,15 +299,15 @@ export function DemographicsSection({ form, dobYears }: { form: UseFormReturn<Cl
       </p>
       <div className="grid gap-3 md:grid-cols-2">
         <FormField
-          control={form.control}
-          name="dob_month"
-          render={({ field }) => (
-            <FormItem className="grid gap-[calc(0.5rem-(0.25rem/2))]">
-              <FormLabel htmlFor="dob_month">Birth month</FormLabel>
-              <input type="hidden" name="dob_month" value={field.value ?? ''} />
-              <FormControl>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger id="dob_month">
+        control={form.control}
+        name="dob_month"
+        render={({ field }) => (
+          <FormItem className="grid gap-1.5">
+            <FormLabel htmlFor="dob_month">Birth month</FormLabel>
+            <input type="hidden" name="dob_month" value={field.value ?? ''} />
+            <FormControl>
+              <Select value={field.value} onValueChange={field.onChange}>
+                <SelectTrigger id="dob_month">
                     <SelectValue placeholder="Select month" />
                   </SelectTrigger>
                   <SelectContent>
@@ -324,15 +324,15 @@ export function DemographicsSection({ form, dobYears }: { form: UseFormReturn<Cl
           )}
         />
         <FormField
-          control={form.control}
-          name="dob_year"
-          render={({ field }) => (
-            <FormItem className="grid gap-[calc(0.5rem-(0.25rem/2))]">
-              <FormLabel htmlFor="dob_year">Birth year</FormLabel>
-              <input type="hidden" name="dob_year" value={field.value ?? ''} />
-              <FormControl>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger id="dob_year">
+        control={form.control}
+        name="dob_year"
+        render={({ field }) => (
+          <FormItem className="grid gap-1.5">
+            <FormLabel htmlFor="dob_year">Birth year</FormLabel>
+            <input type="hidden" name="dob_year" value={field.value ?? ''} />
+            <FormControl>
+              <Select value={field.value} onValueChange={field.onChange}>
+                <SelectTrigger id="dob_year">
                     <SelectValue placeholder="Select year" />
                   </SelectTrigger>
                   <SelectContent className="max-h-64">
