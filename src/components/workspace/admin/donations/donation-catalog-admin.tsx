@@ -2,7 +2,14 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { importInventoryItem, saveCatalogItem, syncCatalogItemStripeAction, toggleCatalogItem } from '@/app/(ops)/ops/admin/donations/actions';
+import {
+  createCatalogCategory,
+  importInventoryItem,
+  saveCatalogItem,
+  syncCatalogItemStripeAction,
+  toggleCatalogItem,
+  updateCatalogCategory,
+} from '@/app/(ops)/ops/admin/donations/actions';
 import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Combobox } from '@shared/ui/combobox';
@@ -14,7 +21,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@shared/ui/sheet';
 import { Textarea } from '@shared/ui/textarea';
 import { Checkbox } from '@shared/ui/checkbox';
 import { ToggleGroup, ToggleGroupItem } from '@shared/ui/toggle-group';
-import type { DonationCatalogItem } from '@/lib/donations/types';
+import type { DonationCatalogCategory, DonationCatalogItem } from '@/lib/donations/types';
 import type { DonationCatalogAdminStats } from '@/lib/donations/service';
 import type { InventoryItem } from '@/lib/inventory/types';
 import { cn } from '@/lib/utils';
@@ -24,6 +31,7 @@ import { useMediaQuery } from '@/hooks/use-media-query';
 type Props = {
   inventoryItems: InventoryItem[];
   catalogInventoryItemIds: string[];
+  categories: DonationCatalogCategory[];
   items: DonationCatalogItem[];
   total: number;
   stats: DonationCatalogAdminStats;
@@ -41,16 +49,19 @@ const currencyOptions = ['CAD', 'USD'];
 function CatalogItemForm({
   item,
   inventoryItems,
+  categories,
   variant = 'edit',
 }: {
   item?: DonationCatalogItem;
   inventoryItems: InventoryItem[];
+  categories: DonationCatalogCategory[];
   variant?: 'edit' | 'create';
 }) {
   const inventoryId = item?.inventoryItemId ?? '';
   const metrics = item?.metrics;
-  const [isActive, setIsActive] = useState<boolean>(item?.isActive ?? true);
+  const [isActive, setIsActive] = useState<boolean>(variant === 'create' ? false : (item?.isActive ?? true));
   const [selectedInventoryId, setSelectedInventoryId] = useState(inventoryId);
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>(item?.categoryIds ?? []);
 
   const inventoryOptions = useMemo(
     () =>
@@ -61,6 +72,30 @@ function CatalogItemForm({
       })),
     [inventoryItems],
   );
+
+  const selectedInventory = useMemo(
+    () => inventoryItems.find((inv) => inv.id === selectedInventoryId) ?? null,
+    [inventoryItems, selectedInventoryId],
+  );
+
+  const categoryById = useMemo(() => new Map(categories.map((category) => [category.id, category])), [categories]);
+
+  const selectedCategories = useMemo(
+    () => selectedCategoryIds.map((id) => categoryById.get(id)).filter(Boolean) as DonationCatalogCategory[],
+    [categoryById, selectedCategoryIds],
+  );
+
+  const activationIssues = useMemo(() => {
+    const issues: string[] = [];
+    if (!selectedInventoryId) issues.push('Select an inventory item before activating.');
+    const hasPublicCategory = selectedCategories.some((category) => category.isActive && category.isPublic);
+    const hasNonPublicCategory = selectedCategories.some((category) => !category.isPublic);
+    if (!hasPublicCategory) issues.push('Select at least one public category before activating.');
+    if (hasNonPublicCategory) issues.push('Remove non-public categories before activating.');
+    if (selectedInventory && selectedInventory.costPerUnit === null) issues.push('Set a typical cost on the inventory item before activating.');
+    return issues;
+  }, [selectedCategories, selectedInventory, selectedInventoryId]);
+  const canActivate = activationIssues.length === 0;
 
   return (
     <form
@@ -96,14 +131,8 @@ function CatalogItemForm({
 
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor={`title-${item?.id ?? 'new'}`}>Title</Label>
-          <Input
-            id={`title-${item?.id ?? 'new'}`}
-            name="title"
-            defaultValue={item?.title}
-            placeholder="Warm winter kit"
-            required
-          />
+          <Label>Title (from inventory)</Label>
+          <Input value={selectedInventory?.name ?? item?.title ?? ''} disabled placeholder="Select an inventory item" />
         </div>
         <div className="space-y-2">
           <Label htmlFor={`slug-${item?.id ?? 'new'}`}>Slug</Label>
@@ -115,13 +144,37 @@ function CatalogItemForm({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor={`category-${item?.id ?? 'new'}`}>Category</Label>
-          <Input
-            id={`category-${item?.id ?? 'new'}`}
-            name="category"
-            defaultValue={item?.category ?? ''}
-            placeholder="Warmth, Hygiene, Nutrition"
-          />
+          <Label>Categories</Label>
+          <div className="space-y-2">
+            {selectedCategoryIds.map((categoryId) => (
+              <input key={categoryId} type="hidden" name="category_ids" value={categoryId} />
+            ))}
+            <ToggleGroup
+              type="multiple"
+              value={selectedCategoryIds}
+              onValueChange={(value) => setSelectedCategoryIds(value)}
+              className="flex flex-wrap justify-start"
+            >
+              {categories
+                .filter((category) => category.isActive)
+                .map((category) => (
+                  <ToggleGroupItem
+                    key={category.id}
+                    value={category.id}
+                    aria-label={category.label}
+                    className={cn(!category.isPublic && 'border-destructive/40 text-destructive')}
+                  >
+                    {category.label}
+                  </ToggleGroupItem>
+                ))}
+            </ToggleGroup>
+            {categories.length === 0 ? (
+              <p className="text-xs text-foreground/60">Create categories first, then tag catalogue items.</p>
+            ) : null}
+            {selectedCategories.some((category) => !category.isPublic) ? (
+              <p className="text-xs text-destructive">Non-public categories cannot be used on active marketing items.</p>
+            ) : null}
+          </div>
         </div>
         <div className="space-y-2">
           <Label htmlFor={`inventory-${item?.id ?? 'new'}`}>Inventory item</Label>
@@ -136,16 +189,15 @@ function CatalogItemForm({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor={`unit-cost-${item?.id ?? 'new'}`}>Typical cost (dollars)</Label>
+          <Label>Typical cost (from inventory)</Label>
           <Input
-            id={`unit-cost-${item?.id ?? 'new'}`}
-            name="unit_cost"
-            type="number"
-            min="0"
-            step="0.01"
-            inputMode="decimal"
-            defaultValue={item?.unitCostCents ? (item.unitCostCents / 100).toFixed(2) : ''}
-            placeholder="15.00"
+            value={
+              selectedInventory?.costPerUnit === null || selectedInventory?.costPerUnit === undefined
+                ? ''
+                : selectedInventory.costPerUnit.toFixed(2)
+            }
+            disabled
+            placeholder="Set cost_per_unit on the inventory item"
           />
         </div>
         <div className="space-y-2">
@@ -232,13 +284,32 @@ function CatalogItemForm({
         <label className="inline-flex items-center gap-2 text-sm font-medium text-foreground">
           <Checkbox
             checked={isActive}
-            onCheckedChange={(value) => setIsActive(Boolean(value))}
+            onCheckedChange={(value) => {
+              const next = Boolean(value);
+              if (next && !canActivate) {
+                setIsActive(false);
+                return;
+              }
+              setIsActive(next);
+            }}
+            disabled={!isActive && !canActivate}
             aria-label="Toggle marketing visibility"
           />
           Visible on marketing site
         </label>
         <Button type="submit">{variant === 'create' ? 'Add item' : 'Save changes'}</Button>
       </div>
+
+      {!canActivate ? (
+        <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-xs text-destructive">
+          <p className="font-semibold">Cannot activate yet</p>
+          <ul className="mt-2 list-disc space-y-1 pl-5">
+            {activationIssues.map((issue) => (
+              <li key={issue}>{issue}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       {item ? (
         <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/20 pt-3 text-xs text-foreground/70">
@@ -285,7 +356,7 @@ function CatalogItemForm({
   );
 }
 
-export function DonationCatalogAdmin({ inventoryItems, catalogInventoryItemIds, items, total, stats, initial }: Props) {
+export function DonationCatalogAdmin({ inventoryItems, catalogInventoryItemIds, categories, items, total, stats, initial }: Props) {
   const isLargeScreen = useMediaQuery('(min-width: 1024px)');
   const router = useRouter();
   const pathname = usePathname() ?? '/ops/admin/website/fundraising';
@@ -295,6 +366,7 @@ export function DonationCatalogAdmin({ inventoryItems, catalogInventoryItemIds, 
   const [selectedId, setSelectedId] = useState<string>(() => items[0]?.id ?? '');
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
 
   useEffect(() => {
     return () => {
@@ -319,6 +391,7 @@ export function DonationCatalogAdmin({ inventoryItems, catalogInventoryItemIds, 
   }
 
   const inventoryById = useMemo(() => new Map(inventoryItems.map((item) => [item.id, item])), [inventoryItems]);
+  const categoryById = useMemo(() => new Map(categories.map((category) => [category.id, category])), [categories]);
 
   const catalogInventoryIds = useMemo(() => new Set(catalogInventoryItemIds), [catalogInventoryItemIds]);
   const importableInventory = useMemo(() => inventoryItems.filter((item) => item.active && !catalogInventoryIds.has(item.id)), [
@@ -350,10 +423,15 @@ export function DonationCatalogAdmin({ inventoryItems, catalogInventoryItemIds, 
             Search and edit items in a split view (only one editor renders at a time for scalability).
           </p>
         </div>
-        <Button type="button" onClick={handleCreate} className="gap-2">
-          <Plus className="h-4 w-4" aria-hidden />
-          New item
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button type="button" variant="secondary" onClick={() => setCategoriesOpen(true)}>
+            Manage categories
+          </Button>
+          <Button type="button" onClick={handleCreate} className="gap-2">
+            <Plus className="h-4 w-4" aria-hidden />
+            New item
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(320px,440px),1fr]">
@@ -480,6 +558,13 @@ export function DonationCatalogAdmin({ inventoryItems, catalogInventoryItemIds, 
                   {visibleCatalog.map((item) => {
                     const inventoryLabel =
                       item.metrics.inventoryItemName ?? inventoryById.get(item.inventoryItemId)?.name ?? 'Inventory item';
+                    const categoryLabels = item.categoryIds
+                      .map((categoryId) => categoryById.get(categoryId)?.label ?? null)
+                      .filter((value): value is string => Boolean(value));
+                    const categorySummary =
+                      categoryLabels.length === 0
+                        ? item.category ?? 'Uncategorized'
+                        : `${categoryLabels.slice(0, 2).join(', ')}${categoryLabels.length > 2 ? ` +${categoryLabels.length - 2}` : ''}`;
                     const isSelected = item.id === selectedId;
                     return (
                       <li
@@ -499,7 +584,7 @@ export function DonationCatalogAdmin({ inventoryItems, catalogInventoryItemIds, 
                               <div className="min-w-0">
                                 <p className="truncate text-sm font-semibold text-foreground">{item.title}</p>
                                 <p className="truncate text-xs text-muted-foreground">
-                                  {item.category ?? 'Uncategorized'} · {inventoryLabel}
+                                  {categorySummary} · {inventoryLabel}
                                 </p>
                               </div>
                               <Badge variant={item.isActive ? 'outline' : 'secondary'}>{item.isActive ? 'Active' : 'Hidden'}</Badge>
@@ -576,7 +661,7 @@ export function DonationCatalogAdmin({ inventoryItems, catalogInventoryItemIds, 
           <div className="hidden lg:block">
             {selectedItem ? (
               <div className="sticky top-28 max-h-[calc(100vh-9rem)] overflow-y-auto pr-1">
-                <CatalogItemForm key={selectedItem.id} item={selectedItem} inventoryItems={inventoryItems} />
+                <CatalogItemForm key={selectedItem.id} item={selectedItem} inventoryItems={inventoryItems} categories={categories} />
               </div>
             ) : (
               <EmptyState
@@ -628,7 +713,7 @@ export function DonationCatalogAdmin({ inventoryItems, catalogInventoryItemIds, 
             </SheetTitle>
           </SheetHeader>
           <div className="mt-4 max-h-[80vh] overflow-y-auto pr-1">
-            <CatalogItemForm inventoryItems={inventoryItems} variant="create" />
+            <CatalogItemForm inventoryItems={inventoryItems} categories={categories} variant="create" />
           </div>
         </SheetContent>
       </Sheet>
@@ -642,10 +727,116 @@ export function DonationCatalogAdmin({ inventoryItems, catalogInventoryItemIds, 
           </SheetHeader>
           <div className="mt-4 max-h-[80vh] overflow-y-auto pr-1">
             {selectedItem ? (
-              <CatalogItemForm key={selectedItem.id} item={selectedItem} inventoryItems={inventoryItems} />
+              <CatalogItemForm key={selectedItem.id} item={selectedItem} inventoryItems={inventoryItems} categories={categories} />
             ) : (
               <EmptyState title="Select an item" description="Choose a catalogue item from the list to edit it." />
             )}
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      <Sheet open={categoriesOpen} onOpenChange={setCategoriesOpen}>
+        <SheetContent side="right" className="w-full max-w-[720px]">
+          <SheetHeader className="text-left">
+            <SheetTitle>Donation categories</SheetTitle>
+          </SheetHeader>
+          <div className="mt-4 space-y-6 overflow-y-auto pr-1">
+            <form action={createCatalogCategory} className="space-y-3 rounded-2xl border border-border/15 bg-background p-4 shadow-sm">
+              <p className="text-sm font-semibold text-foreground">Create category</p>
+              <div className="grid gap-3 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="new-category-label">Label</Label>
+                  <Input id="new-category-label" name="label" placeholder="Winter Clothing" required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="new-category-slug">Slug (optional)</Label>
+                  <Input id="new-category-slug" name="slug" placeholder="winter-clothing" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="new-category-sort">Sort order</Label>
+                  <Input id="new-category-sort" name="sort_order" type="number" min="0" defaultValue={100} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Flags</Label>
+                  <div className="flex flex-wrap gap-4 pt-1 text-sm text-foreground">
+                    <label className="inline-flex items-center gap-2">
+                      <input type="hidden" name="is_public" value="off" />
+                      <input type="checkbox" name="is_public" value="on" defaultChecked className="h-4 w-4" />
+                      Public
+                    </label>
+                    <label className="inline-flex items-center gap-2">
+                      <input type="hidden" name="is_active" value="off" />
+                      <input type="checkbox" name="is_active" value="on" defaultChecked className="h-4 w-4" />
+                      Active
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <Button type="submit">Create category</Button>
+            </form>
+
+            <div className="space-y-3">
+              <p className="text-sm font-semibold text-foreground">Existing categories</p>
+              {categories.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No categories yet.</p>
+              ) : (
+                <div className="space-y-3">
+                  {categories.map((category) => (
+                    <form
+                      key={category.id}
+                      action={updateCatalogCategory}
+                      className="grid gap-3 rounded-2xl border border-border/15 bg-background p-4 shadow-sm md:grid-cols-2"
+                    >
+                      <input type="hidden" name="id" value={category.id} />
+                      <div className="space-y-2">
+                        <Label>Label</Label>
+                        <Input name="label" defaultValue={category.label} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Slug</Label>
+                        <Input name="slug" defaultValue={category.slug} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Sort order</Label>
+                        <Input name="sort_order" type="number" min="0" defaultValue={category.sortOrder} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Flags</Label>
+                        <div className="flex flex-wrap gap-4 pt-1 text-sm text-foreground">
+                          <label className="inline-flex items-center gap-2">
+                            <input type="hidden" name="is_public" value="off" />
+                            <input
+                              type="checkbox"
+                              name="is_public"
+                              value="on"
+                              defaultChecked={category.isPublic}
+                              className="h-4 w-4"
+                            />
+                            Public
+                          </label>
+                          <label className="inline-flex items-center gap-2">
+                            <input type="hidden" name="is_active" value="off" />
+                            <input
+                              type="checkbox"
+                              name="is_active"
+                              value="on"
+                              defaultChecked={category.isActive}
+                              className="h-4 w-4"
+                            />
+                            Active
+                          </label>
+                        </div>
+                      </div>
+                      <div className="md:col-span-2">
+                        <Button type="submit" variant="secondary">
+                          Save
+                        </Button>
+                      </div>
+                    </form>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </SheetContent>
       </Sheet>

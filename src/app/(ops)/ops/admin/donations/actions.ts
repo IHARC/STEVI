@@ -23,6 +23,19 @@ function normalizeSlug(input: string): string {
   );
 }
 
+function uniqStrings(values: string[]): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const value of values) {
+    const trimmed = value.trim();
+    if (!trimmed) continue;
+    if (seen.has(trimmed)) continue;
+    seen.add(trimmed);
+    out.push(trimmed);
+  }
+  return out;
+}
+
 async function requirePortalAdmin(): Promise<AdminContext> {
   const supabase = await createSupabaseServerClient();
   const access = await loadPortalAccess(supabase);
@@ -52,31 +65,15 @@ export async function saveCatalogItem(formData: FormData) {
   const { supabase, donationsClient, actorProfileId } = await requirePortalAdmin();
 
   const id = (formData.get('id') as string | null)?.trim() || null;
-  const rawTitle = (formData.get('title') as string | null)?.trim() ?? '';
-  if (!rawTitle) {
-    throw new Error('Add a title for this item.');
-  }
-
   const slugInput = (formData.get('slug') as string | null)?.trim() ?? '';
-  const slug = normalizeSlug(slugInput || rawTitle);
-  const shortDescription = (formData.get('short_description') as string | null)?.trim() || null;
+  const shortDescriptionInput = (formData.get('short_description') as string | null)?.trim() || null;
   const longDescription = (formData.get('long_description') as string | null)?.trim() || null;
-  const category = (formData.get('category') as string | null)?.trim() || null;
   const inventoryItemId = (formData.get('inventory_item_id') as string | null)?.trim() || null;
   if (!inventoryItemId) {
     throw new Error('Select an inventory item to link.');
   }
-  const unitCostInput = (formData.get('unit_cost') as string | null)?.trim() ?? '';
-  const unitCostCents =
-    unitCostInput.length === 0
-      ? null
-      : (() => {
-          const parsed = Number.parseFloat(unitCostInput);
-          if (!Number.isFinite(parsed) || parsed < 0) {
-            throw new Error('Typical cost must be a valid, non-negative number.');
-          }
-          return Math.round(parsed * 100);
-        })();
+
+  const categoryIds = uniqStrings(formData.getAll('category_ids').map((value) => String(value)));
 
   const currency = ((formData.get('currency') as string | null)?.trim() || 'CAD').toUpperCase();
   if (!['CAD', 'USD'].includes(currency)) {
@@ -116,37 +113,34 @@ export async function saveCatalogItem(formData: FormData) {
         return url.toString();
       })()
     : null;
-  const isActive = formData.get('is_active') === 'on';
+  const shouldBeActive = formData.get('is_active') === 'on';
 
-  const payload = {
-    slug,
-    title: rawTitle,
-    short_description: shortDescription,
-    long_description: longDescription,
-    category,
-    inventory_item_id: inventoryItemId,
-    unit_cost_cents: unitCostCents,
-    currency,
-    default_quantity: defaultQuantity,
-    priority,
-    target_buffer: targetBuffer,
-    image_url: imageUrl,
-    is_active: isActive,
-  };
+  const slug = slugInput;
 
-  const query = id ? donationsClient.from('catalog_items').update(payload).eq('id', id) : donationsClient.from('catalog_items').insert(payload);
+  const { data: catalogItemId, error: upsertError } = await donationsClient.rpc('admin_upsert_catalog_item', {
+    p_inventory_item_id: inventoryItemId,
+    p_slug: slug,
+    p_short_description: shortDescriptionInput,
+    p_long_description: longDescription,
+    p_currency: currency,
+    p_default_quantity: defaultQuantity,
+    p_priority: priority,
+    p_target_buffer: targetBuffer,
+    p_image_url: imageUrl,
+    p_category_ids: categoryIds,
+    p_should_be_active: shouldBeActive,
+    p_id: id,
+  });
 
-  const { data, error: upsertError } = await query.select('id').maybeSingle();
-  if (upsertError) {
-    throw upsertError;
-  }
+  if (upsertError) throw upsertError;
+  if (!catalogItemId) throw new Error('Unable to save catalogue item.');
 
   await logAuditEvent(supabase, {
     actorProfileId,
     action: id ? 'donation_catalog_updated' : 'donation_catalog_created',
     entityType: 'donation_catalog_item',
-    entityRef: buildEntityRef({ schema: 'donations', table: 'catalog_items', id: data?.id ?? null }),
-    meta: { pk_uuid: data?.id ?? null, slug, title: rawTitle },
+    entityRef: buildEntityRef({ schema: 'donations', table: 'catalog_items', id: String(catalogItemId) }),
+    meta: { pk_uuid: String(catalogItemId), slug, inventory_item_id: inventoryItemId, category_ids: categoryIds, is_active: shouldBeActive },
   });
 
   await revalidatePath('/ops/admin/website/fundraising');
@@ -159,6 +153,66 @@ export async function toggleCatalogItem(formData: FormData) {
     throw new Error('Missing catalogue item id.');
   }
   const nextState = (formData.get('next_state') as string | null) === 'activate';
+
+  if (nextState) {
+    const { data: catalogRow, error: catalogError } = await donationsClient
+      .from('catalog_items')
+      .select('inventory_item_id')
+      .eq('id', id)
+      .maybeSingle();
+    if (catalogError) throw catalogError;
+    if (!catalogRow || typeof catalogRow.inventory_item_id !== 'string') throw new Error('Catalogue item not found.');
+
+    const { data: assignmentRows, error: assignmentError } = await donationsClient
+      .from('catalog_item_categories')
+      .select('category_id')
+      .eq('catalog_item_id', id);
+    if (assignmentError) throw assignmentError;
+    const categoryIds = uniqStrings(
+      ((assignmentRows ?? []) as { category_id?: unknown }[])
+        .map((row) => (typeof row.category_id === 'string' ? row.category_id : ''))
+        .filter(Boolean),
+    );
+    if (categoryIds.length === 0) {
+      throw new Error('Select at least one public category before activating.');
+    }
+
+    const { data: categoryRows, error: categoryError } = await donationsClient
+      .from('catalog_categories')
+      .select('id, label, sort_order, is_active, is_public')
+      .in('id', categoryIds);
+    if (categoryError) throw categoryError;
+    const categories = (categoryRows ?? []) as { id: string; label: string; sort_order: number | null; is_active: boolean | null; is_public: boolean | null }[];
+    if (categories.some((category) => category.is_public === false)) {
+      throw new Error('Remove non-public categories before activating.');
+    }
+    const activePublic = categories.filter((category) => category.is_active !== false && category.is_public !== false);
+    if (activePublic.length === 0) {
+      throw new Error('Select at least one public category before activating.');
+    }
+    activePublic.sort((a, b) => (a.sort_order ?? 100) - (b.sort_order ?? 100) || a.label.localeCompare(b.label));
+    const primaryCategoryLabel = activePublic[0]?.label ?? null;
+
+    const { data: inventoryRow, error: inventoryError } = await supabase
+      .schema('inventory')
+      .from('v_items_with_balances')
+      .select('name, cost_per_unit')
+      .eq('id', catalogRow.inventory_item_id)
+      .maybeSingle();
+    if (inventoryError) throw inventoryError;
+    if (!inventoryRow) throw new Error('Inventory item not found.');
+    const cost = inventoryRow.cost_per_unit === null || inventoryRow.cost_per_unit === undefined ? null : Number.parseFloat(String(inventoryRow.cost_per_unit));
+    const unitCostCents = cost !== null && Number.isFinite(cost) ? Math.max(0, Math.round(cost * 100)) : null;
+    if (unitCostCents === null) throw new Error('Set a typical cost on the inventory item before activating.');
+
+    const title = String(inventoryRow.name ?? '').trim() || 'Donation item';
+
+    const { error: normalizeError } = await donationsClient
+      .from('catalog_items')
+      .update({ title, category: primaryCategoryLabel, unit_cost_cents: unitCostCents })
+      .eq('id', id);
+    if (normalizeError) throw normalizeError;
+  }
 
   const { error } = await donationsClient.from('catalog_items').update({ is_active: nextState }).eq('id', id);
   if (error) throw error;
@@ -181,16 +235,6 @@ export async function importInventoryItem(formData: FormData) {
     throw new Error('Select an inventory item to import.');
   }
 
-  const { data: existing, error: existingError } = await donationsClient
-    .from('catalog_items')
-    .select('id')
-    .eq('inventory_item_id', inventoryItemId)
-    .maybeSingle();
-  if (existingError) throw existingError;
-  if (existing) {
-    throw new Error('This inventory item is already in the donation catalogue.');
-  }
-
   const { data: inventoryRow, error: inventoryError } = await supabase
     .schema('inventory')
     .from('v_items_with_balances')
@@ -211,7 +255,9 @@ export async function importInventoryItem(formData: FormData) {
 
   const title = String(inventoryRow.name ?? 'Donation item');
   const slug = normalizeSlug(title);
-  const category = typeof inventoryRow.category === 'string' ? inventoryRow.category : null;
+
+  const inventoryCategoryLabel = typeof inventoryRow.category === 'string' && inventoryRow.category.trim().length > 0 ? inventoryRow.category.trim() : null;
+  const inventoryCategorySlug = inventoryCategoryLabel ? normalizeSlug(inventoryCategoryLabel) : null;
 
   const { data: inserted, error: insertError } = await donationsClient
     .from('catalog_items')
@@ -219,17 +265,51 @@ export async function importInventoryItem(formData: FormData) {
       inventory_item_id: inventoryItemId,
       title,
       slug,
-      category,
       unit_cost_cents: unitCostCents,
       target_buffer: targetBuffer,
       default_quantity: 1,
       priority: 100,
       currency: 'CAD',
-      is_active: true,
+      // Imported items require category tagging before they can be activated on the public site.
+      is_active: false,
     })
     .select('id')
     .maybeSingle();
-  if (insertError) throw insertError;
+  if (insertError) {
+    const message = typeof (insertError as { message?: unknown }).message === 'string' ? String((insertError as { message?: unknown }).message) : '';
+    if (message.toLowerCase().includes('catalog_items_inventory_item_id_unique')) {
+      throw new Error('This inventory item is already in the donation catalogue.');
+    }
+    throw insertError;
+  }
+
+  if (inserted?.id && inventoryCategoryLabel && inventoryCategorySlug) {
+    const { data: categoryRow, error: categoryError } = await donationsClient
+      .from('catalog_categories')
+      .select('id')
+      .eq('slug', inventoryCategorySlug)
+      .maybeSingle();
+    if (categoryError) throw categoryError;
+
+    let categoryId = categoryRow?.id ?? null;
+    if (!categoryId) {
+      // Default to non-public so sensitive inventory categories (e.g. harm reduction) never leak to marketing by default.
+      const { data: created, error: createError } = await donationsClient
+        .from('catalog_categories')
+        .insert({ slug: inventoryCategorySlug, label: inventoryCategoryLabel, is_public: false, is_active: true, sort_order: 100 })
+        .select('id')
+        .maybeSingle();
+      if (createError) throw createError;
+      categoryId = created?.id ?? null;
+    }
+
+    if (categoryId) {
+      const { error: assignError } = await donationsClient
+        .from('catalog_item_categories')
+        .insert({ catalog_item_id: inserted.id, category_id: categoryId });
+      if (assignError) throw assignError;
+    }
+  }
 
   await logAuditEvent(supabase, {
     actorProfileId,
@@ -237,6 +317,76 @@ export async function importInventoryItem(formData: FormData) {
     entityType: 'donation_catalog_item',
     entityRef: buildEntityRef({ schema: 'donations', table: 'catalog_items', id: inserted?.id ?? null }),
     meta: { pk_uuid: inserted?.id ?? null, inventory_item_id: inventoryItemId, title },
+  });
+
+  await revalidatePath('/ops/admin/website/fundraising');
+}
+
+export async function createCatalogCategory(formData: FormData) {
+  const { supabase, donationsClient, actorProfileId } = await requirePortalAdmin();
+
+  const label = String(formData.get('label') ?? '').trim();
+  if (!label) throw new Error('Category label is required.');
+
+  const slugInput = String(formData.get('slug') ?? '').trim();
+  const slug = normalizeSlug(slugInput || label);
+
+  const sortOrderRaw = String(formData.get('sort_order') ?? '').trim();
+  const sortOrder = sortOrderRaw.length === 0 ? 100 : Number.parseInt(sortOrderRaw, 10);
+  if (!Number.isFinite(sortOrder) || sortOrder < 0) throw new Error('Sort order must be a non-negative whole number.');
+
+  const isPublic = formData.getAll('is_public').includes('on');
+  const isActive = formData.getAll('is_active').includes('on');
+
+  const { data, error } = await donationsClient
+    .from('catalog_categories')
+    .insert({ slug, label, sort_order: sortOrder, is_public: isPublic, is_active: isActive })
+    .select('id')
+    .maybeSingle();
+  if (error) throw error;
+
+  await logAuditEvent(supabase, {
+    actorProfileId,
+    action: 'donation_catalog_category_created',
+    entityType: 'donation_catalog_category',
+    entityRef: buildEntityRef({ schema: 'donations', table: 'catalog_categories', id: data?.id ?? null }),
+    meta: { pk_uuid: data?.id ?? null, slug, label, is_public: isPublic, is_active: isActive, sort_order: sortOrder },
+  });
+
+  await revalidatePath('/ops/admin/website/fundraising');
+}
+
+export async function updateCatalogCategory(formData: FormData) {
+  const { supabase, donationsClient, actorProfileId } = await requirePortalAdmin();
+
+  const id = String(formData.get('id') ?? '').trim();
+  if (!id) throw new Error('Missing category id.');
+
+  const label = String(formData.get('label') ?? '').trim();
+  if (!label) throw new Error('Category label is required.');
+
+  const slugInput = String(formData.get('slug') ?? '').trim();
+  const slug = normalizeSlug(slugInput || label);
+
+  const sortOrderRaw = String(formData.get('sort_order') ?? '').trim();
+  const sortOrder = sortOrderRaw.length === 0 ? 100 : Number.parseInt(sortOrderRaw, 10);
+  if (!Number.isFinite(sortOrder) || sortOrder < 0) throw new Error('Sort order must be a non-negative whole number.');
+
+  const isPublic = formData.getAll('is_public').includes('on');
+  const isActive = formData.getAll('is_active').includes('on');
+
+  const { error } = await donationsClient
+    .from('catalog_categories')
+    .update({ slug, label, sort_order: sortOrder, is_public: isPublic, is_active: isActive })
+    .eq('id', id);
+  if (error) throw error;
+
+  await logAuditEvent(supabase, {
+    actorProfileId,
+    action: 'donation_catalog_category_updated',
+    entityType: 'donation_catalog_category',
+    entityRef: buildEntityRef({ schema: 'donations', table: 'catalog_categories', id }),
+    meta: { pk_uuid: id, slug, label, is_public: isPublic, is_active: isActive, sort_order: sortOrder },
   });
 
   await revalidatePath('/ops/admin/website/fundraising');
@@ -464,4 +614,3 @@ export async function upsertDonationsEmailCredentialsAction(formData: FormData) 
 
   await revalidatePath('/ops/admin/integrations/donations');
 }
-

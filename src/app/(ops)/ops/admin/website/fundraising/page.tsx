@@ -1,6 +1,11 @@
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import Link from 'next/link';
-import { fetchDonationCatalogAdminPage, fetchDonationCatalogAdminStats, fetchDonationCatalogInventoryItemIds } from '@/lib/donations/service';
+import {
+  fetchDonationCatalogAdminPage,
+  fetchDonationCatalogAdminStats,
+  fetchDonationCatalogCategories,
+  fetchDonationCatalogInventoryItemIds,
+} from '@/lib/donations/service';
 import { fetchInventoryItems } from '@/lib/inventory/service';
 import { DonationCatalogAdmin } from '@/components/workspace/admin/donations/donation-catalog-admin';
 import { Alert, AlertDescription, AlertTitle } from '@shared/ui/alert';
@@ -43,11 +48,12 @@ export default async function AdminWebsiteFundraisingPage({ searchParams }: Page
   const pageSizeRaw = parsePositiveInt(pageSizeParam, 50);
   const pageSize = pageSizeRaw === 25 || pageSizeRaw === 50 || pageSizeRaw === 100 ? pageSizeRaw : 50;
 
-  const [catalogStats, catalogPage, catalogInventoryItemIds, inventoryItems] = await Promise.all([
+  const [catalogStats, catalogPage, catalogInventoryItemIds, inventoryItems, categories] = await Promise.all([
     fetchDonationCatalogAdminStats(supabase, { search: q }),
     fetchDonationCatalogAdminPage(supabase, { search: q, status, sort, page, pageSize }),
     fetchDonationCatalogInventoryItemIds(supabase),
     fetchInventoryItems(supabase),
+    fetchDonationCatalogCategories(supabase),
   ]);
 
   return (
@@ -76,6 +82,7 @@ export default async function AdminWebsiteFundraisingPage({ searchParams }: Page
             key={`${q}:${status}:${sort}:${page}:${pageSize}`}
             inventoryItems={inventoryItems}
             catalogInventoryItemIds={catalogInventoryItemIds}
+            categories={categories}
             items={catalogPage.items}
             total={catalogPage.total}
             stats={catalogStats}

@@ -1,10 +1,11 @@
 import type { SupabaseAnyServerClient } from '@/lib/supabase/types';
-import type { DonationCatalogItem, DonationCatalogMetrics } from './types';
+import type { DonationCatalogCategory, DonationCatalogItem, DonationCatalogMetrics } from './types';
 
 const CATALOG_ITEM_SELECT =
   'id, slug, title, short_description, long_description, category, inventory_item_id, unit_cost_cents, currency, default_quantity, priority, target_buffer, image_url, stripe_product_id, stripe_price_id, is_active';
 const CATALOG_METRICS_SELECT =
   'catalog_item_id, current_stock, target_buffer, distributed_last_30_days, distributed_last_365_days, inventory_item_name, inventory_item_category, unit_type';
+const CATALOG_CATEGORY_SELECT = 'id, slug, label, sort_order, is_active, is_public';
 
 function asNumber(value: unknown): number | null {
   if (value === null || value === undefined) return null;
@@ -32,6 +33,55 @@ function defaultMetrics(): DonationCatalogMetrics {
     inventoryItemCategory: null,
     inventoryUnitType: null,
   };
+}
+
+export async function fetchDonationCatalogCategories(
+  supabase: SupabaseAnyServerClient,
+): Promise<DonationCatalogCategory[]> {
+  const donations = supabase.schema('donations');
+  const { data, error } = await donations
+    .from('catalog_categories')
+    .select(CATALOG_CATEGORY_SELECT)
+    .order('sort_order', { ascending: true })
+    .order('label', { ascending: true });
+  if (error) throw error;
+
+  return ((data ?? []) as Record<string, unknown>[]).map((row) => ({
+    id: String(row.id),
+    slug: String(row.slug ?? ''),
+    label: String(row.label ?? ''),
+    sortOrder: asNumber(row.sort_order) ?? 100,
+    isActive: row.is_active !== false,
+    isPublic: row.is_public !== false,
+  }));
+}
+
+async function fetchCatalogCategoryIdsByItemIds(
+  donations: ReturnType<SupabaseAnyServerClient['schema']>,
+  ids: string[],
+): Promise<Map<string, string[]>> {
+  const map = new Map<string, string[]>();
+  if (ids.length === 0) return map;
+
+  const { data, error } = await donations
+    .from('catalog_item_categories')
+    .select('catalog_item_id, category_id')
+    .in('catalog_item_id', ids);
+  if (error) throw error;
+
+  for (const row of (data ?? []) as Record<string, unknown>[]) {
+    const catalogItemId = typeof row.catalog_item_id === 'string' ? row.catalog_item_id : null;
+    const categoryId = typeof row.category_id === 'string' ? row.category_id : null;
+    if (!catalogItemId || !categoryId) continue;
+    const existing = map.get(catalogItemId);
+    if (existing) {
+      existing.push(categoryId);
+    } else {
+      map.set(catalogItemId, [categoryId]);
+    }
+  }
+
+  return map;
 }
 
 export async function fetchDonationCatalogAdmin(
@@ -81,6 +131,7 @@ export async function fetchDonationCatalogAdmin(
       shortDescription: typeof row.short_description === 'string' ? row.short_description : null,
       longDescription: typeof row.long_description === 'string' ? row.long_description : null,
       category: typeof row.category === 'string' ? row.category : null,
+      categoryIds: [],
       inventoryItemId: inventoryId,
       unitCostCents: asNumber(row.unit_cost_cents),
       currency: typeof row.currency === 'string' ? row.currency : 'CAD',
@@ -186,6 +237,7 @@ function mapCatalogRows(rows: Record<string, unknown>[], metricsById: Map<string
       shortDescription: typeof row.short_description === 'string' ? row.short_description : null,
       longDescription: typeof row.long_description === 'string' ? row.long_description : null,
       category: typeof row.category === 'string' ? row.category : null,
+      categoryIds: [],
       inventoryItemId: inventoryId,
       unitCostCents: asNumber(row.unit_cost_cents),
       currency: typeof row.currency === 'string' ? row.currency : 'CAD',
@@ -257,7 +309,11 @@ export async function fetchDonationCatalogAdminPage(
   const rows = (data ?? []) as Record<string, unknown>[];
   const ids = rows.map((row) => String(row.id)).filter(Boolean);
   const metricsById = await fetchCatalogMetricsByIds(donations, ids);
-  let items = mapCatalogRows(rows, metricsById);
+  const categoryIdsByItemId = await fetchCatalogCategoryIdsByItemIds(donations, ids);
+  let items = mapCatalogRows(rows, metricsById).map((item) => ({
+    ...item,
+    categoryIds: categoryIdsByItemId.get(item.id) ?? [],
+  }));
 
   if (sort === 'stock') {
     items = [...items].sort((a, b) => (b.metrics.currentStock ?? 0) - (a.metrics.currentStock ?? 0) || a.title.localeCompare(b.title));

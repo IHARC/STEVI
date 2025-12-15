@@ -8,6 +8,15 @@ export type DonationCatalogMetrics = {
   inventoryUnitType: string | null;
 };
 
+export type DonationCatalogCategory = {
+  id: string;
+  slug: string;
+  label: string;
+  sortOrder: number;
+  isActive: boolean;
+  isPublic: boolean;
+};
+
 export type DonationCatalogItem = {
   id: string;
   slug: string;
@@ -15,6 +24,7 @@ export type DonationCatalogItem = {
   shortDescription: string | null;
   longDescription: string | null;
   category: string | null;
+  categoryIds: string[];
   inventoryItemId: string;
   unitCostCents: number | null;
   currency: string;
