@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
-import { fetchDonationCatalogAdmin, fetchDonationPaymentsAdmin, fetchDonationSubscriptionsAdmin, fetchStripeWebhookEventsAdmin } from '@/lib/donations/service';
+import { fetchDonationCatalogAdminStats, fetchDonationPaymentsAdmin, fetchDonationSubscriptionsAdmin, fetchStripeWebhookEventsAdmin } from '@/lib/donations/service';
 import { PageHeader } from '@shared/layout/page-header';
 import { Button } from '@shared/ui/button';
 import { DonationsIntegrationsHub } from './ui/donations-integrations-hub';
@@ -43,8 +43,8 @@ export default async function OpsAdminDonationsIntegrationsPage() {
     'donations_sendgrid_api_key_secret_id',
   ];
 
-  const [catalog, payments, subscriptions, webhookEvents, stripeSettings, emailSettings] = await Promise.all([
-    fetchDonationCatalogAdmin(supabase),
+  const [catalogStats, payments, subscriptions, webhookEvents, stripeSettings, emailSettings] = await Promise.all([
+    fetchDonationCatalogAdminStats(supabase),
     fetchDonationPaymentsAdmin(supabase, { limit: 50 }),
     fetchDonationSubscriptionsAdmin(supabase, { limit: 100 }),
     fetchStripeWebhookEventsAdmin(supabase, { limit: 50 }),
@@ -67,7 +67,7 @@ export default async function OpsAdminDonationsIntegrationsPage() {
       />
 
       <DonationsIntegrationsHub
-        catalogCount={catalog.length}
+        catalogCount={catalogStats.total}
         payments={payments}
         subscriptions={subscriptions}
         webhookEvents={webhookEvents}
@@ -77,4 +77,3 @@ export default async function OpsAdminDonationsIntegrationsPage() {
     </div>
   );
 }
-

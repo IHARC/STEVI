@@ -96,6 +96,185 @@ export async function fetchDonationCatalogAdmin(
   });
 }
 
+export type DonationCatalogAdminStats = {
+  total: number;
+  active: number;
+  hidden: number;
+};
+
+type DonationCatalogAdminQueryOptions = {
+  search?: string | null;
+};
+
+type DonationCatalogAdminPageOptions = DonationCatalogAdminQueryOptions & {
+  status?: 'all' | 'active' | 'hidden';
+  sort?: 'priority' | 'title' | 'stock';
+  page?: number;
+  pageSize?: number;
+};
+
+type PostgrestOrableQuery<T> = {
+  or: (filters: string) => T;
+};
+
+type PostgrestEqableQuery<T> = {
+  eq: (column: string, value: unknown) => T;
+};
+
+type PostgrestOrderableQuery<T> = {
+  order: (column: string, options?: { ascending?: boolean }) => T;
+};
+
+function normalizeSearchTerm(value: string | null | undefined) {
+  const trimmed = value?.trim() ?? '';
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+function applyCatalogSearch<T>(query: T, search: string | null): T {
+  if (!search) return query;
+  const term = search.replace(/[%_]/g, '\\$&');
+  // PostgREST OR filters are a comma-separated list.
+  const orable = query as unknown as PostgrestOrableQuery<T>;
+  return orable.or(
+    `title.ilike.%${term}%,slug.ilike.%${term}%,category.ilike.%${term}%`,
+  );
+}
+
+function applyCatalogStatus<T>(query: T, status: DonationCatalogAdminPageOptions['status']): T {
+  const eqable = query as unknown as PostgrestEqableQuery<T>;
+  if (status === 'active') return eqable.eq('is_active', true);
+  if (status === 'hidden') return eqable.eq('is_active', false);
+  return query;
+}
+
+async function fetchCatalogMetricsByIds(donations: ReturnType<SupabaseAnyServerClient['schema']>, ids: string[]) {
+  if (ids.length === 0) return new Map<string, DonationCatalogMetrics>();
+  const { data, error } = await donations.from('catalog_item_metrics').select(CATALOG_METRICS_SELECT).in('catalog_item_id', ids);
+  if (error) throw error;
+
+  const metricsById = new Map<string, DonationCatalogMetrics>();
+  for (const row of (data ?? []) as Record<string, unknown>[]) {
+    const catalogItemId = typeof row.catalog_item_id === 'string' ? row.catalog_item_id : null;
+    if (!catalogItemId) continue;
+    metricsById.set(catalogItemId, {
+      currentStock: asNumber(row.current_stock),
+      targetBuffer: asNumber(row.target_buffer),
+      distributedLast30Days: asNumber(row.distributed_last_30_days),
+      distributedLast365Days: asNumber(row.distributed_last_365_days),
+      inventoryItemName: typeof row.inventory_item_name === 'string' ? row.inventory_item_name : null,
+      inventoryItemCategory: typeof row.inventory_item_category === 'string' ? row.inventory_item_category : null,
+      inventoryUnitType: typeof row.unit_type === 'string' ? row.unit_type : null,
+    });
+  }
+
+  return metricsById;
+}
+
+function mapCatalogRows(rows: Record<string, unknown>[], metricsById: Map<string, DonationCatalogMetrics>): DonationCatalogItem[] {
+  return rows.map((row) => {
+    const id = String(row.id);
+    const metrics = metricsById.get(id) ?? defaultMetrics();
+    const inventoryId = typeof row.inventory_item_id === 'string' ? row.inventory_item_id : '';
+    if (!inventoryId) {
+      throw new Error('Catalogue item is missing required inventory mapping.');
+    }
+
+    return {
+      id,
+      slug: String(row.slug ?? ''),
+      title: String(row.title ?? ''),
+      shortDescription: typeof row.short_description === 'string' ? row.short_description : null,
+      longDescription: typeof row.long_description === 'string' ? row.long_description : null,
+      category: typeof row.category === 'string' ? row.category : null,
+      inventoryItemId: inventoryId,
+      unitCostCents: asNumber(row.unit_cost_cents),
+      currency: typeof row.currency === 'string' ? row.currency : 'CAD',
+      defaultQuantity: asNumber(row.default_quantity) ?? 1,
+      priority: asNumber(row.priority) ?? 100,
+      targetBuffer: asNumber(row.target_buffer),
+      imageUrl: typeof row.image_url === 'string' ? row.image_url : null,
+      stripeProductId: typeof row.stripe_product_id === 'string' ? row.stripe_product_id : null,
+      stripePriceId: typeof row.stripe_price_id === 'string' ? row.stripe_price_id : null,
+      isActive: row.is_active !== false,
+      metrics,
+    };
+  });
+}
+
+export async function fetchDonationCatalogAdminStats(
+  supabase: SupabaseAnyServerClient,
+  options: DonationCatalogAdminQueryOptions = {},
+): Promise<DonationCatalogAdminStats> {
+  const donations = supabase.schema('donations');
+  const search = normalizeSearchTerm(options.search ?? null);
+
+  const makeQuery = () => applyCatalogSearch(donations.from('catalog_items'), search);
+
+  const [totalResult, activeResult, hiddenResult] = await Promise.all([
+    makeQuery().select('id', { count: 'exact', head: true }),
+    applyCatalogStatus(makeQuery(), 'active').select('id', { count: 'exact', head: true }),
+    applyCatalogStatus(makeQuery(), 'hidden').select('id', { count: 'exact', head: true }),
+  ] as const);
+
+  if (totalResult.error) throw totalResult.error;
+  if (activeResult.error) throw activeResult.error;
+  if (hiddenResult.error) throw hiddenResult.error;
+
+  return {
+    total: totalResult.count ?? 0,
+    active: activeResult.count ?? 0,
+    hidden: hiddenResult.count ?? 0,
+  };
+}
+
+export async function fetchDonationCatalogAdminPage(
+  supabase: SupabaseAnyServerClient,
+  options: DonationCatalogAdminPageOptions = {},
+): Promise<{ items: DonationCatalogItem[]; total: number }> {
+  const donations = supabase.schema('donations');
+
+  const pageSize = Math.max(1, Math.min(100, options.pageSize ?? 50));
+  const page = Math.max(0, options.page ?? 0);
+  const from = page * pageSize;
+  const to = from + pageSize - 1;
+
+  const status = options.status ?? 'active';
+  const sort = options.sort ?? 'priority';
+  const search = normalizeSearchTerm(options.search ?? null);
+
+  const base = applyCatalogStatus(applyCatalogSearch(donations.from('catalog_items'), search), status);
+  const orderable = base as unknown as PostgrestOrderableQuery<typeof base>;
+
+  // Stock sorting requires a join we don't have in PostgREST, so treat it as priority sorting for paging.
+  const ordered =
+    sort === 'title'
+      ? orderable.order('title', { ascending: true })
+      : orderable.order('priority', { ascending: true }).order('title', { ascending: true });
+
+  const { data, error, count } = await ordered.select(CATALOG_ITEM_SELECT, { count: 'exact' }).range(from, to);
+  if (error) throw error;
+
+  const rows = (data ?? []) as Record<string, unknown>[];
+  const ids = rows.map((row) => String(row.id)).filter(Boolean);
+  const metricsById = await fetchCatalogMetricsByIds(donations, ids);
+  let items = mapCatalogRows(rows, metricsById);
+
+  if (sort === 'stock') {
+    items = [...items].sort((a, b) => (b.metrics.currentStock ?? 0) - (a.metrics.currentStock ?? 0) || a.title.localeCompare(b.title));
+  }
+
+  return { items, total: count ?? 0 };
+}
+
+export async function fetchDonationCatalogInventoryItemIds(supabase: SupabaseAnyServerClient): Promise<string[]> {
+  const donations = supabase.schema('donations');
+  const { data, error } = await donations.from('catalog_items').select('inventory_item_id');
+  if (error) throw error;
+  return ((data ?? []) as { inventory_item_id?: unknown }[])
+    .map((row) => (typeof row.inventory_item_id === 'string' ? row.inventory_item_id : ''))
+    .filter(Boolean);
+}
+
 export type DonationPaymentAdminRow = {
   id: string;
   processedAt: string | null;

@@ -1,43 +1,42 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import { importInventoryItem, saveCatalogItem, syncCatalogItemStripeAction, toggleCatalogItem } from '@/app/(ops)/ops/admin/donations/actions';
 import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
+import { Combobox } from '@shared/ui/combobox';
 import { EmptyState } from '@shared/ui/empty-state';
 import { Input } from '@shared/ui/input';
 import { Label } from '@shared/ui/label';
 import { ScrollArea } from '@shared/ui/scroll-area';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/ui/select';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@shared/ui/sheet';
 import { Textarea } from '@shared/ui/textarea';
 import { Checkbox } from '@shared/ui/checkbox';
 import { ToggleGroup, ToggleGroupItem } from '@shared/ui/toggle-group';
 import type { DonationCatalogItem } from '@/lib/donations/types';
+import type { DonationCatalogAdminStats } from '@/lib/donations/service';
 import type { InventoryItem } from '@/lib/inventory/types';
 import { cn } from '@/lib/utils';
 import { ArrowLeft, ArrowRight, Eye, EyeOff, Plus, RefreshCw, Search, SquarePen } from 'lucide-react';
+import { useMediaQuery } from '@/hooks/use-media-query';
 
 type Props = {
-  catalog: DonationCatalogItem[];
   inventoryItems: InventoryItem[];
+  catalogInventoryItemIds: string[];
+  items: DonationCatalogItem[];
+  total: number;
+  stats: DonationCatalogAdminStats;
+  initial: {
+    q: string;
+    status: 'all' | 'active' | 'hidden';
+    sort: 'priority' | 'title' | 'stock';
+    page: number;
+    pageSize: 25 | 50 | 100;
+  };
 };
 
 const currencyOptions = ['CAD', 'USD'];
-
-function useIsLargeScreen() {
-  const [isLarge, setIsLarge] = useState(false);
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(min-width: 1024px)');
-    const update = () => setIsLarge(mediaQuery.matches);
-    update();
-    mediaQuery.addEventListener('change', update);
-    return () => mediaQuery.removeEventListener('change', update);
-  }, []);
-
-  return isLarge;
-}
 
 function CatalogItemForm({
   item,
@@ -51,6 +50,17 @@ function CatalogItemForm({
   const inventoryId = item?.inventoryItemId ?? '';
   const metrics = item?.metrics;
   const [isActive, setIsActive] = useState<boolean>(item?.isActive ?? true);
+  const [selectedInventoryId, setSelectedInventoryId] = useState(inventoryId);
+
+  const inventoryOptions = useMemo(
+    () =>
+      inventoryItems.map((inv) => ({
+        value: inv.id,
+        label: `${inv.name}${inv.unitType ? ` · ${inv.unitType}` : ''}`,
+        keywords: `${inv.category ?? ''} ${inv.unitType ?? ''}`.trim(),
+      })),
+    [inventoryItems],
+  );
 
   return (
     <form
@@ -115,18 +125,15 @@ function CatalogItemForm({
         </div>
         <div className="space-y-2">
           <Label htmlFor={`inventory-${item?.id ?? 'new'}`}>Inventory item</Label>
-          <Select name="inventory_item_id" defaultValue={inventoryId || undefined} required>
-            <SelectTrigger id={`inventory-${item?.id ?? 'new'}`}>
-              <SelectValue placeholder="Select an inventory item" />
-            </SelectTrigger>
-            <SelectContent>
-              {inventoryItems.map((inv) => (
-                <SelectItem key={inv.id} value={inv.id}>
-                  {inv.name} {inv.unitType ? `· ${inv.unitType}` : ''}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <input type="hidden" name="inventory_item_id" value={selectedInventoryId} />
+          <Combobox
+            value={selectedInventoryId}
+            onValueChange={setSelectedInventoryId}
+            options={inventoryOptions}
+            placeholder="Select an inventory item"
+            searchPlaceholder="Search inventory…"
+            buttonClassName="rounded-md"
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor={`unit-cost-${item?.id ?? 'new'}`}>Typical cost (dollars)</Label>
@@ -143,18 +150,18 @@ function CatalogItemForm({
         </div>
         <div className="space-y-2">
           <Label htmlFor={`currency-${item?.id ?? 'new'}`}>Currency</Label>
-          <Select name="currency" defaultValue={item?.currency ?? 'CAD'}>
-            <SelectTrigger id={`currency-${item?.id ?? 'new'}`}>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {currencyOptions.map((code) => (
-                <SelectItem key={code} value={code}>
-                  {code}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <select
+            id={`currency-${item?.id ?? 'new'}`}
+            name="currency"
+            defaultValue={item?.currency ?? 'CAD'}
+            className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          >
+            {currencyOptions.map((code) => (
+              <option key={code} value={code}>
+                {code}
+              </option>
+            ))}
+          </select>
         </div>
         <div className="space-y-2">
           <Label htmlFor={`default-qty-${item?.id ?? 'new'}`}>Default quantity</Label>
@@ -278,52 +285,52 @@ function CatalogItemForm({
   );
 }
 
-export function DonationCatalogAdmin({ catalog, inventoryItems }: Props) {
-  const isLargeScreen = useIsLargeScreen();
-  const [query, setQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'hidden'>('active');
-  const [sortKey, setSortKey] = useState<'priority' | 'title' | 'stock'>('priority');
-  const [pageSize, setPageSize] = useState<25 | 50 | 100>(50);
-  const [pageIndex, setPageIndex] = useState(0);
-  const [selectedId, setSelectedId] = useState<string>(() => catalog.find((item) => item.isActive)?.id ?? catalog[0]?.id ?? '');
+export function DonationCatalogAdmin({ inventoryItems, catalogInventoryItemIds, items, total, stats, initial }: Props) {
+  const isLargeScreen = useMediaQuery('(min-width: 1024px)');
+  const router = useRouter();
+  const pathname = usePathname() ?? '/ops/admin/website/fundraising';
+  const replaceTimer = useRef<number | null>(null);
+
+  const [queryDraft, setQueryDraft] = useState(initial.q);
+  const [selectedId, setSelectedId] = useState<string>(() => items[0]?.id ?? '');
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
 
+  useEffect(() => {
+    return () => {
+      if (replaceTimer.current) window.clearTimeout(replaceTimer.current);
+    };
+  }, []);
+
+  function replaceParams(next: Partial<Props['initial']>) {
+    const q = next.q ?? initial.q;
+    const status = next.status ?? initial.status;
+    const sort = next.sort ?? initial.sort;
+    const page = next.page ?? initial.page;
+    const pageSize = next.pageSize ?? initial.pageSize;
+
+    const params = new URLSearchParams();
+    if (q.trim()) params.set('q', q.trim());
+    params.set('status', status);
+    params.set('sort', sort);
+    params.set('page', String(page));
+    params.set('pageSize', String(pageSize));
+    router.replace(`${pathname}?${params.toString()}`);
+  }
+
   const inventoryById = useMemo(() => new Map(inventoryItems.map((item) => [item.id, item])), [inventoryItems]);
 
-  const activeCount = useMemo(() => catalog.filter((item) => item.isActive).length, [catalog]);
-  const hiddenCount = useMemo(() => catalog.filter((item) => !item.isActive).length, [catalog]);
-  const catalogInventoryIds = useMemo(() => new Set(catalog.map((item) => item.inventoryItemId)), [catalog]);
-  const importableInventory = useMemo(
-    () => inventoryItems.filter((item) => item.active && !catalogInventoryIds.has(item.id)),
-    [catalogInventoryIds, inventoryItems],
-  );
+  const catalogInventoryIds = useMemo(() => new Set(catalogInventoryItemIds), [catalogInventoryItemIds]);
+  const importableInventory = useMemo(() => inventoryItems.filter((item) => item.active && !catalogInventoryIds.has(item.id)), [
+    catalogInventoryIds,
+    inventoryItems,
+  ]);
 
-  const filteredCatalog = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return catalog
-      .filter((item) => {
-        if (statusFilter === 'active' && !item.isActive) return false;
-        if (statusFilter === 'hidden' && item.isActive) return false;
-        if (!q) return true;
+  const pageCount = Math.max(1, Math.ceil(total / initial.pageSize));
+  const clampedPageIndex = Math.min(initial.page, pageCount - 1);
+  const visibleCatalog = items;
 
-        const inventoryName = item.metrics.inventoryItemName ?? inventoryById.get(item.inventoryItemId)?.name ?? '';
-        const haystack = [item.title, item.slug, item.category, inventoryName].filter(Boolean).join(' ').toLowerCase();
-        return haystack.includes(q);
-      })
-      .sort((a, b) => {
-        if (sortKey === 'title') return a.title.localeCompare(b.title);
-        if (sortKey === 'stock') return (b.metrics.currentStock ?? 0) - (a.metrics.currentStock ?? 0);
-        // priority
-        return (a.priority ?? 0) - (b.priority ?? 0) || a.title.localeCompare(b.title);
-      });
-  }, [catalog, inventoryById, query, sortKey, statusFilter]);
-
-  const pageCount = Math.max(1, Math.ceil(filteredCatalog.length / pageSize));
-  const clampedPageIndex = Math.min(pageIndex, pageCount - 1);
-  const visibleCatalog = filteredCatalog.slice(clampedPageIndex * pageSize, clampedPageIndex * pageSize + pageSize);
-
-  const selectedItem = useMemo(() => catalog.find((item) => item.id === selectedId) ?? null, [catalog, selectedId]);
+  const selectedItem = useMemo(() => items.find((item) => item.id === selectedId) ?? null, [items, selectedId]);
 
   function openEditorForItem(id: string) {
     setSelectedId(id);
@@ -358,12 +365,16 @@ export function DonationCatalogAdmin({ catalog, inventoryItems }: Props) {
                 <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" aria-hidden />
                 <Input
                   id="catalog-search"
-                  value={query}
+                  value={queryDraft}
                   onChange={(event) => {
-                    setQuery(event.target.value);
-                    setPageIndex(0);
+                    const nextValue = event.target.value;
+                    setQueryDraft(nextValue);
+                    if (replaceTimer.current) window.clearTimeout(replaceTimer.current);
+                    replaceTimer.current = window.setTimeout(() => {
+                      replaceParams({ q: nextValue, page: 0 });
+                    }, 250);
                   }}
-                  placeholder="Title, category, slug, inventory…"
+                  placeholder="Title, category, slug…"
                   className="pl-9"
                 />
               </div>
@@ -373,10 +384,10 @@ export function DonationCatalogAdmin({ catalog, inventoryItems }: Props) {
               <Label>Status</Label>
               <ToggleGroup
                 type="single"
-                value={statusFilter}
+                value={initial.status}
                 onValueChange={(value) => {
-                  setStatusFilter((value as typeof statusFilter) || 'all');
-                  setPageIndex(0);
+                  const next = (value as Props['initial']['status']) || 'all';
+                  replaceParams({ status: next, page: 0 });
                 }}
                 variant="outline"
                 size="sm"
@@ -395,51 +406,43 @@ export function DonationCatalogAdmin({ catalog, inventoryItems }: Props) {
 
             <div className="w-[170px] space-y-2">
               <Label htmlFor="catalog-sort">Sort</Label>
-              <Select
-                value={sortKey}
-                onValueChange={(value) => {
-                  setSortKey(value as typeof sortKey);
-                  setPageIndex(0);
+              <select
+                id="catalog-sort"
+                value={initial.sort}
+                onChange={(event) => {
+                  replaceParams({ sort: event.target.value as Props['initial']['sort'], page: 0 });
                 }}
+                className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               >
-                <SelectTrigger id="catalog-sort">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="priority">Priority</SelectItem>
-                  <SelectItem value="title">Title</SelectItem>
-                  <SelectItem value="stock">Stock</SelectItem>
-                </SelectContent>
-              </Select>
+                <option value="priority">Priority</option>
+                <option value="title">Title</option>
+                <option value="stock">Stock</option>
+              </select>
             </div>
 
             <div className="w-[140px] space-y-2">
               <Label htmlFor="catalog-page-size">Page size</Label>
-              <Select
-                value={String(pageSize)}
-                onValueChange={(value) => {
-                  setPageSize(Number.parseInt(value, 10) as typeof pageSize);
-                  setPageIndex(0);
+              <select
+                id="catalog-page-size"
+                value={String(initial.pageSize)}
+                onChange={(event) => {
+                  replaceParams({ pageSize: Number.parseInt(event.target.value, 10) as Props['initial']['pageSize'], page: 0 });
                 }}
+                className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               >
-                <SelectTrigger id="catalog-page-size">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="25">25</SelectItem>
-                  <SelectItem value="50">50</SelectItem>
-                  <SelectItem value="100">100</SelectItem>
-                </SelectContent>
-              </Select>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
             </div>
           </div>
 
           <div className="rounded-2xl border border-border/15 bg-background shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/15 px-4 py-3">
               <div className="flex flex-wrap items-center gap-2">
-                <Badge variant="secondary">{filteredCatalog.length} shown</Badge>
-                <Badge variant="outline">{activeCount} active</Badge>
-                <Badge variant="outline">{hiddenCount} hidden</Badge>
+                <Badge variant="secondary">{total} matching</Badge>
+                <Badge variant="outline">{stats.active} active</Badge>
+                <Badge variant="outline">{stats.hidden} hidden</Badge>
               </div>
 
               <div className="flex items-center gap-2">
@@ -447,8 +450,8 @@ export function DonationCatalogAdmin({ catalog, inventoryItems }: Props) {
                   type="button"
                   size="icon"
                   variant="ghost"
-                  onClick={() => setPageIndex((prev) => Math.max(0, prev - 1))}
-                  disabled={clampedPageIndex === 0}
+                  onClick={() => replaceParams({ page: Math.max(0, clampedPageIndex - 1) })}
+                  disabled={clampedPageIndex <= 0}
                   aria-label="Previous page"
                 >
                   <ArrowLeft className="h-4 w-4" aria-hidden />
@@ -460,7 +463,7 @@ export function DonationCatalogAdmin({ catalog, inventoryItems }: Props) {
                   type="button"
                   size="icon"
                   variant="ghost"
-                  onClick={() => setPageIndex((prev) => Math.min(pageCount - 1, prev + 1))}
+                  onClick={() => replaceParams({ page: Math.min(pageCount - 1, clampedPageIndex + 1) })}
                   disabled={clampedPageIndex >= pageCount - 1}
                   aria-label="Next page"
                 >
@@ -592,11 +595,11 @@ export function DonationCatalogAdmin({ catalog, inventoryItems }: Props) {
             <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
               <div className="rounded-xl bg-muted p-3">
                 <p className="text-xs font-semibold uppercase tracking-wide text-foreground/60">Active items</p>
-                <p className="text-xl font-semibold text-foreground">{activeCount}</p>
+                <p className="text-xl font-semibold text-foreground">{stats.active}</p>
               </div>
               <div className="rounded-xl bg-muted p-3">
                 <p className="text-xs font-semibold uppercase tracking-wide text-foreground/60">Hidden items</p>
-                <p className="text-xl font-semibold text-foreground">{hiddenCount}</p>
+                <p className="text-xl font-semibold text-foreground">{stats.hidden}</p>
               </div>
             </div>
             <div className="mt-4 rounded-xl bg-muted p-3">
@@ -605,18 +608,7 @@ export function DonationCatalogAdmin({ catalog, inventoryItems }: Props) {
                 <p className="mt-2 text-xs text-foreground/70">All active inventory items are already mapped.</p>
               ) : (
                 <form action={importInventoryItem} className="mt-2 space-y-2">
-                  <Select name="inventory_item_id" required>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select an inventory item" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {importableInventory.map((inv) => (
-                        <SelectItem key={inv.id} value={inv.id}>
-                          {inv.name} {inv.unitType ? `· ${inv.unitType}` : ''} {inv.category ? `(${inv.category})` : ''}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <InventoryImportPicker inventoryItems={importableInventory} />
                   <p className="text-xs text-foreground/60">Imports name, category, target buffer, and unit cost. You can edit details after import.</p>
                   <Button type="submit" size="sm" className="w-full">
                     Import selected item
@@ -658,5 +650,32 @@ export function DonationCatalogAdmin({ catalog, inventoryItems }: Props) {
         </SheetContent>
       </Sheet>
     </div>
+  );
+}
+
+function InventoryImportPicker({ inventoryItems }: { inventoryItems: InventoryItem[] }) {
+  const [value, setValue] = useState('');
+  const options = useMemo(
+    () =>
+      inventoryItems.map((inv) => ({
+        value: inv.id,
+        label: `${inv.name}${inv.unitType ? ` · ${inv.unitType}` : ''}${inv.category ? ` (${inv.category})` : ''}`,
+        keywords: `${inv.category ?? ''} ${inv.unitType ?? ''}`.trim(),
+      })),
+    [inventoryItems],
+  );
+
+  return (
+    <>
+      <input type="hidden" name="inventory_item_id" value={value} />
+      <Combobox
+        value={value}
+        onValueChange={setValue}
+        options={options}
+        placeholder="Select an inventory item"
+        searchPlaceholder="Search inventory…"
+        buttonClassName="rounded-md"
+      />
+    </>
   );
 }
