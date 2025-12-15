@@ -20,6 +20,8 @@ import { InventoryReceiptsSection } from '@workspace/admin/inventory/inventory-r
 import { AdjustStockDialog, ReceiveStockDialog, TransferStockDialog } from '@workspace/admin/inventory/items/StockDialogs';
 import { useInventoryActions } from '@workspace/admin/inventory/items/useInventoryActions';
 import { saveCatalogItem, syncCatalogItemStripeAction, removeCatalogItemAction } from '@/app/(ops)/ops/admin/donations/actions';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/ui/select';
+import { Label } from '@shared/ui/label';
 
 type InventoryFormValues = {
   actor_profile_id: string;
@@ -430,6 +432,7 @@ function DonationListingCard({
 
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>(() => listing?.categoryIds ?? []);
   const [isActive, setIsActive] = useState<boolean>(() => listing?.isActive ?? false);
+  const [currency, setCurrency] = useState<string>(() => listing?.currency ?? 'CAD');
 
   const categoryById = useMemo(() => new Map(categories.map((category) => [category.id, category])), [categories]);
   const selectedCategories = useMemo(
@@ -558,15 +561,19 @@ function DonationListingCard({
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="space-y-2">
                 <FormLabel htmlFor="currency">Currency</FormLabel>
-                <select
-                  id="currency"
+                <Select
                   name="currency"
-                  defaultValue={listing?.currency ?? 'CAD'}
-                  className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  value={currency}
+                  onValueChange={setCurrency}
                 >
-                  <option value="CAD">CAD</option>
-                  <option value="USD">USD</option>
-                </select>
+                  <SelectTrigger id="currency">
+                    <SelectValue placeholder="Select currency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="CAD">CAD</SelectItem>
+                    <SelectItem value="USD">USD</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="space-y-2">
                 <FormLabel htmlFor="default_quantity">Default quantity</FormLabel>
@@ -679,9 +686,9 @@ function DonationListingCard({
                   disabled={!canActivate || isPending}
                   onCheckedChange={(checked) => setIsActive(Boolean(checked))}
                 />
-                <label htmlFor="donation_is_active" className={cn('text-sm', !canActivate && 'text-muted-foreground')}>
+                <Label htmlFor="donation_is_active" className={cn('text-sm font-normal', !canActivate && 'text-muted-foreground')}>
                   Active on marketing site
-                </label>
+                </Label>
               </div>
             </div>
 

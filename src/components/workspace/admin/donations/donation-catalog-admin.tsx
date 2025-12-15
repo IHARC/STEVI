@@ -9,6 +9,7 @@ import { Combobox } from '@shared/ui/combobox';
 import { Input } from '@shared/ui/input';
 import { Label } from '@shared/ui/label';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@shared/ui/sheet';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@shared/ui/table';
 import type { DonationCatalogCategory, DonationCatalogItem } from '@/lib/donations/types';
 import type { DonationCatalogAdminStats } from '@/lib/donations/service';
@@ -116,38 +117,48 @@ export function DonationCatalogAdmin({ inventoryItems, catalogInventoryItemIds, 
 
           <div>
             <Label htmlFor="catalog-status">Status</Label>
-            <select
-              id="catalog-status"
-              value={status}
-              onChange={(event) => {
-                const value = event.target.value as Props['initial']['status'];
-                setStatus(value);
-                apply({ status: value, page: 0 });
-              }}
-              className="mt-2 h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            >
-              <option value="active">Active</option>
-              <option value="hidden">Hidden</option>
-              <option value="all">All</option>
-            </select>
+            <div className="mt-2">
+              <Select
+                value={status}
+                onValueChange={(value) => {
+                  const next = value as Props['initial']['status'];
+                  setStatus(next);
+                  apply({ status: next, page: 0 });
+                }}
+              >
+                <SelectTrigger id="catalog-status">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="hidden">Hidden</SelectItem>
+                  <SelectItem value="all">All</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div>
             <Label htmlFor="catalog-sort">Sort</Label>
-            <select
-              id="catalog-sort"
-              value={sort}
-              onChange={(event) => {
-                const value = event.target.value as Props['initial']['sort'];
-                setSort(value);
-                apply({ sort: value, page: 0 });
-              }}
-              className="mt-2 h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            >
-              <option value="priority">Priority</option>
-              <option value="title">Title</option>
-              <option value="stock">Stock</option>
-            </select>
+            <div className="mt-2">
+              <Select
+                value={sort}
+                onValueChange={(value) => {
+                  const next = value as Props['initial']['sort'];
+                  setSort(next);
+                  apply({ sort: next, page: 0 });
+                }}
+              >
+                <SelectTrigger id="catalog-sort">
+                  <SelectValue placeholder="Select sort" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="priority">Priority</SelectItem>
+                  <SelectItem value="title">Title</SelectItem>
+                  <SelectItem value="stock">Stock</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
 
@@ -176,21 +187,26 @@ export function DonationCatalogAdmin({ inventoryItems, catalogInventoryItemIds, 
 
           <div>
             <Label htmlFor="catalog-page-size">Page size</Label>
-            <select
-              id="catalog-page-size"
-              value={pageSize}
-              onChange={(event) => {
-                const value = Number.parseInt(event.target.value, 10) as Props['initial']['pageSize'];
-                if (value !== 25 && value !== 50 && value !== 100) return;
-                setPageSize(value);
-                apply({ pageSize: value, page: 0 });
-              }}
-              className="mt-2 h-9 w-full rounded-md border border-input bg-background px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            >
-              <option value={25}>25</option>
-              <option value={50}>50</option>
-              <option value={100}>100</option>
-            </select>
+            <div className="mt-2">
+              <Select
+                value={String(pageSize)}
+                onValueChange={(value) => {
+                  const parsed = Number.parseInt(value, 10) as Props['initial']['pageSize'];
+                  if (parsed !== 25 && parsed !== 50 && parsed !== 100) return;
+                  setPageSize(parsed);
+                  apply({ pageSize: parsed, page: 0 });
+                }}
+              >
+                <SelectTrigger id="catalog-page-size">
+                  <SelectValue placeholder="Select size" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="25">25</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                  <SelectItem value="100">100</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="flex items-end justify-end gap-2">
@@ -264,7 +280,7 @@ export function DonationCatalogAdmin({ inventoryItems, catalogInventoryItemIds, 
       </div>
 
       <Sheet open={categoriesOpen} onOpenChange={setCategoriesOpen}>
-        <SheetContent side="right" className="w-full max-w-[720px]">
+        <SheetContent side="right" className="w-full max-w-3xl">
           <SheetHeader className="text-left">
             <SheetTitle>Donation categories</SheetTitle>
           </SheetHeader>
@@ -371,4 +387,3 @@ export function DonationCatalogAdmin({ inventoryItems, catalogInventoryItemIds, 
     </div>
   );
 }
-
