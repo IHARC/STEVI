@@ -5,12 +5,21 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 
+const DONATION_CATALOG_PATH = '/ops/supplies/donations';
+
 type AdminContext = {
   supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>;
   donationsClient: ReturnType<Awaited<ReturnType<typeof createSupabaseServerClient>>['schema']>;
   actorProfileId: string;
   accessToken: string;
 };
+
+function revalidateDonationCatalog(inventoryItemId?: string | null) {
+  revalidatePath(DONATION_CATALOG_PATH);
+  if (inventoryItemId) {
+    revalidatePath(`/ops/supplies/items/${inventoryItemId}`);
+  }
+}
 
 function normalizeSlug(input: string): string {
   return (
@@ -115,6 +124,56 @@ export async function saveCatalogItem(formData: FormData) {
     : null;
   const shouldBeActive = formData.get('is_active') === 'on';
 
+  if (shouldBeActive) {
+    if (!id) {
+      throw new Error('Sync a Stripe price before activating.');
+    }
+
+    if (categoryIds.length === 0) {
+      throw new Error('Select at least one public category before activating.');
+    }
+
+    const { data: categoryRows, error: categoryError } = await donationsClient
+      .from('catalog_categories')
+      .select('id, is_active, is_public')
+      .in('id', categoryIds);
+    if (categoryError) throw categoryError;
+    const categories = (categoryRows ?? []) as { id: string; is_active: boolean | null; is_public: boolean | null }[];
+
+    if (categories.some((category) => category.is_public === false)) {
+      throw new Error('Remove non-public categories before activating.');
+    }
+
+    const activePublic = categories.filter((category) => category.is_active !== false && category.is_public !== false);
+    if (activePublic.length === 0) {
+      throw new Error('Select at least one active public category before activating.');
+    }
+
+    const { data: inventoryRow, error: inventoryError } = await supabase
+      .schema('core')
+      .from('items')
+      .select('cost_per_unit')
+      .eq('id', inventoryItemId)
+      .maybeSingle();
+    if (inventoryError) throw inventoryError;
+    const cost = inventoryRow?.cost_per_unit === null || inventoryRow?.cost_per_unit === undefined
+      ? null
+      : Number.parseFloat(String(inventoryRow.cost_per_unit));
+    if (cost === null || !Number.isFinite(cost)) {
+      throw new Error('Set a typical unit cost on the inventory item before activating.');
+    }
+
+    const { data: stripeRow, error: stripeError } = await donationsClient
+      .from('catalog_items')
+      .select('stripe_price_id')
+      .eq('id', id)
+      .maybeSingle();
+    if (stripeError) throw stripeError;
+    if (!stripeRow?.stripe_price_id) {
+      throw new Error('Sync a Stripe price before activating.');
+    }
+  }
+
   const slug = slugInput;
 
   const { data: catalogItemId, error: upsertError } = await donationsClient.rpc('admin_upsert_catalog_item', {
@@ -143,183 +202,50 @@ export async function saveCatalogItem(formData: FormData) {
     meta: { pk_uuid: String(catalogItemId), slug, inventory_item_id: inventoryItemId, category_ids: categoryIds, is_active: shouldBeActive },
   });
 
-  await revalidatePath('/ops/admin/website/fundraising');
+  revalidateDonationCatalog(inventoryItemId);
 }
 
-export async function toggleCatalogItem(formData: FormData) {
+export async function removeCatalogItemAction(formData: FormData) {
   const { supabase, donationsClient, actorProfileId } = await requirePortalAdmin();
-  const id = (formData.get('id') as string | null)?.trim();
-  if (!id) {
-    throw new Error('Missing catalogue item id.');
-  }
-  const nextState = (formData.get('next_state') as string | null) === 'activate';
 
-  if (nextState) {
-    const { data: catalogRow, error: catalogError } = await donationsClient
-      .from('catalog_items')
-      .select('inventory_item_id')
-      .eq('id', id)
-      .maybeSingle();
-    if (catalogError) throw catalogError;
-    if (!catalogRow || typeof catalogRow.inventory_item_id !== 'string') throw new Error('Catalogue item not found.');
-
-    const { data: assignmentRows, error: assignmentError } = await donationsClient
-      .from('catalog_item_categories')
-      .select('category_id')
-      .eq('catalog_item_id', id);
-    if (assignmentError) throw assignmentError;
-    const categoryIds = uniqStrings(
-      ((assignmentRows ?? []) as { category_id?: unknown }[])
-        .map((row) => (typeof row.category_id === 'string' ? row.category_id : ''))
-        .filter(Boolean),
-    );
-    if (categoryIds.length === 0) {
-      throw new Error('Select at least one public category before activating.');
-    }
-
-    const { data: categoryRows, error: categoryError } = await donationsClient
-      .from('catalog_categories')
-      .select('id, label, sort_order, is_active, is_public')
-      .in('id', categoryIds);
-    if (categoryError) throw categoryError;
-    const categories = (categoryRows ?? []) as { id: string; label: string; sort_order: number | null; is_active: boolean | null; is_public: boolean | null }[];
-    if (categories.some((category) => category.is_public === false)) {
-      throw new Error('Remove non-public categories before activating.');
-    }
-    const activePublic = categories.filter((category) => category.is_active !== false && category.is_public !== false);
-    if (activePublic.length === 0) {
-      throw new Error('Select at least one public category before activating.');
-    }
-    activePublic.sort((a, b) => (a.sort_order ?? 100) - (b.sort_order ?? 100) || a.label.localeCompare(b.label));
-    const primaryCategoryLabel = activePublic[0]?.label ?? null;
-
-    const { data: inventoryRow, error: inventoryError } = await supabase
-      .schema('inventory')
-      .from('v_items_with_balances')
-      .select('name, cost_per_unit')
-      .eq('id', catalogRow.inventory_item_id)
-      .maybeSingle();
-    if (inventoryError) throw inventoryError;
-    if (!inventoryRow) throw new Error('Inventory item not found.');
-    const cost = inventoryRow.cost_per_unit === null || inventoryRow.cost_per_unit === undefined ? null : Number.parseFloat(String(inventoryRow.cost_per_unit));
-    const unitCostCents = cost !== null && Number.isFinite(cost) ? Math.max(0, Math.round(cost * 100)) : null;
-    if (unitCostCents === null) throw new Error('Set a typical cost on the inventory item before activating.');
-
-    const title = String(inventoryRow.name ?? '').trim() || 'Donation item';
-
-    const { error: normalizeError } = await donationsClient
-      .from('catalog_items')
-      .update({ title, category: primaryCategoryLabel, unit_cost_cents: unitCostCents })
-      .eq('id', id);
-    if (normalizeError) throw normalizeError;
-  }
-
-  const { error } = await donationsClient.from('catalog_items').update({ is_active: nextState }).eq('id', id);
-  if (error) throw error;
-
-  await logAuditEvent(supabase, {
-    actorProfileId,
-    action: 'donation_catalog_status_changed',
-    entityType: 'donation_catalog_item',
-    entityRef: buildEntityRef({ schema: 'donations', table: 'catalog_items', id }),
-    meta: { pk_uuid: id, is_active: nextState },
-  });
-
-  await revalidatePath('/ops/admin/website/fundraising');
-}
-
-export async function importInventoryItem(formData: FormData) {
-  const { supabase, donationsClient, actorProfileId } = await requirePortalAdmin();
-  const inventoryItemId = (formData.get('inventory_item_id') as string | null)?.trim();
+  const inventoryItemId = (formData.get('inventory_item_id') as string | null)?.trim() || null;
   if (!inventoryItemId) {
-    throw new Error('Select an inventory item to import.');
+    throw new Error('Missing inventory item id.');
   }
 
-  const { data: inventoryRow, error: inventoryError } = await supabase
-    .schema('inventory')
-    .from('v_items_with_balances')
-    .select('id, name, category, cost_per_unit, minimum_threshold')
-    .eq('id', inventoryItemId)
-    .maybeSingle();
-  if (inventoryError) throw inventoryError;
-  if (!inventoryRow) {
-    throw new Error('Inventory item not found.');
-  }
-
-  const unitCost = Number.parseFloat(String(inventoryRow.cost_per_unit ?? '0'));
-  const unitCostCents = Number.isFinite(unitCost) ? Math.max(0, Math.round(unitCost * 100)) : null;
-  const targetBuffer =
-    inventoryRow.minimum_threshold === null || inventoryRow.minimum_threshold === undefined
-      ? null
-      : Number.parseInt(String(inventoryRow.minimum_threshold), 10) || null;
-
-  const title = String(inventoryRow.name ?? 'Donation item');
-  const slug = normalizeSlug(title);
-
-  const inventoryCategoryLabel = typeof inventoryRow.category === 'string' && inventoryRow.category.trim().length > 0 ? inventoryRow.category.trim() : null;
-  const inventoryCategorySlug = inventoryCategoryLabel ? normalizeSlug(inventoryCategoryLabel) : null;
-
-  const { data: inserted, error: insertError } = await donationsClient
+  const { data: existing, error: existingError } = await donationsClient
     .from('catalog_items')
-    .insert({
-      inventory_item_id: inventoryItemId,
-      title,
-      slug,
-      unit_cost_cents: unitCostCents,
-      target_buffer: targetBuffer,
-      default_quantity: 1,
-      priority: 100,
-      currency: 'CAD',
-      // Imported items require category tagging before they can be activated on the public site.
-      is_active: false,
-    })
     .select('id')
+    .eq('inventory_item_id', inventoryItemId)
     .maybeSingle();
-  if (insertError) {
-    const message = typeof (insertError as { message?: unknown }).message === 'string' ? String((insertError as { message?: unknown }).message) : '';
-    if (message.toLowerCase().includes('catalog_items_inventory_item_id_unique')) {
-      throw new Error('This inventory item is already in the donation catalogue.');
-    }
-    throw insertError;
+  if (existingError) throw existingError;
+  if (!existing?.id) {
+    throw new Error('Donation catalogue listing not found.');
   }
 
-  if (inserted?.id && inventoryCategoryLabel && inventoryCategorySlug) {
-    const { data: categoryRow, error: categoryError } = await donationsClient
-      .from('catalog_categories')
-      .select('id')
-      .eq('slug', inventoryCategorySlug)
-      .maybeSingle();
-    if (categoryError) throw categoryError;
+  const catalogItemId = String(existing.id);
 
-    let categoryId = categoryRow?.id ?? null;
-    if (!categoryId) {
-      // Default to non-public so sensitive inventory categories (e.g. harm reduction) never leak to marketing by default.
-      const { data: created, error: createError } = await donationsClient
-        .from('catalog_categories')
-        .insert({ slug: inventoryCategorySlug, label: inventoryCategoryLabel, is_public: false, is_active: true, sort_order: 100 })
-        .select('id')
-        .maybeSingle();
-      if (createError) throw createError;
-      categoryId = created?.id ?? null;
-    }
+  const { error: deleteAssignmentsError } = await donationsClient
+    .from('catalog_item_categories')
+    .delete()
+    .eq('catalog_item_id', catalogItemId);
+  if (deleteAssignmentsError) throw deleteAssignmentsError;
 
-    if (categoryId) {
-      const { error: assignError } = await donationsClient
-        .from('catalog_item_categories')
-        .insert({ catalog_item_id: inserted.id, category_id: categoryId });
-      if (assignError) throw assignError;
-    }
-  }
+  const { error: deleteItemError } = await donationsClient
+    .from('catalog_items')
+    .delete()
+    .eq('id', catalogItemId);
+  if (deleteItemError) throw deleteItemError;
 
   await logAuditEvent(supabase, {
     actorProfileId,
-    action: 'donation_catalog_imported',
+    action: 'donation_catalog_removed',
     entityType: 'donation_catalog_item',
-    entityRef: buildEntityRef({ schema: 'donations', table: 'catalog_items', id: inserted?.id ?? null }),
-    meta: { pk_uuid: inserted?.id ?? null, inventory_item_id: inventoryItemId, title },
+    entityRef: buildEntityRef({ schema: 'donations', table: 'catalog_items', id: catalogItemId }),
+    meta: { pk_uuid: catalogItemId, inventory_item_id: inventoryItemId },
   });
 
-  await revalidatePath('/ops/admin/website/fundraising');
+  revalidateDonationCatalog(inventoryItemId);
 }
 
 export async function createCatalogCategory(formData: FormData) {
@@ -353,7 +279,7 @@ export async function createCatalogCategory(formData: FormData) {
     meta: { pk_uuid: data?.id ?? null, slug, label, is_public: isPublic, is_active: isActive, sort_order: sortOrder },
   });
 
-  await revalidatePath('/ops/admin/website/fundraising');
+  revalidateDonationCatalog(null);
 }
 
 export async function updateCatalogCategory(formData: FormData) {
@@ -389,11 +315,11 @@ export async function updateCatalogCategory(formData: FormData) {
     meta: { pk_uuid: id, slug, label, is_public: isPublic, is_active: isActive, sort_order: sortOrder },
   });
 
-  await revalidatePath('/ops/admin/website/fundraising');
+  revalidateDonationCatalog(null);
 }
 
 export async function syncCatalogItemStripeAction(formData: FormData) {
-  const { supabase, actorProfileId, accessToken } = await requirePortalAdmin();
+  const { supabase, actorProfileId, accessToken, donationsClient } = await requirePortalAdmin();
   const catalogItemId = (formData.get('catalog_item_id') as string | null)?.trim();
   if (!catalogItemId) {
     throw new Error('Missing catalogue item id.');
@@ -419,7 +345,14 @@ export async function syncCatalogItemStripeAction(formData: FormData) {
     meta: { pk_uuid: catalogItemId, stripe_product_id: stripeProductId ?? null, stripe_price_id: stripePriceId ?? null },
   });
 
-  await revalidatePath('/ops/admin/website/fundraising');
+  const { data: inventoryRow, error: inventoryError } = await donationsClient
+    .from('catalog_items')
+    .select('inventory_item_id')
+    .eq('id', catalogItemId)
+    .maybeSingle();
+  if (inventoryError) throw inventoryError;
+  const inventoryItemId = typeof inventoryRow?.inventory_item_id === 'string' ? inventoryRow.inventory_item_id : null;
+  revalidateDonationCatalog(inventoryItemId);
 }
 
 export async function cancelDonationSubscriptionAction(formData: FormData) {

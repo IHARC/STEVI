@@ -1,12 +1,12 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import Link from 'next/link';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@shared/ui/card';
 import { Button } from '@shared/ui/button';
 import { Dialog, DialogTrigger } from '@shared/ui/dialog';
 import { useInventoryActions } from './useInventoryActions';
 import { ItemsTable } from './ItemsTable';
-import { ItemDialog } from './ItemDialog';
 import { AdjustStockDialog, BulkReceiveDialog, ReceiveStockDialog, TransferStockDialog } from './StockDialogs';
 import type { InventoryItem, InventoryLocation, InventoryOrganization } from '@/lib/inventory/types';
 
@@ -14,22 +14,18 @@ type InventoryItemsSectionProps = {
   items: InventoryItem[];
   locations: InventoryLocation[];
   organizations: InventoryOrganization[];
-  categories: string[];
   actorProfileId: string;
 };
 
-export function InventoryItemsSection({ items, locations, organizations, categories, actorProfileId }: InventoryItemsSectionProps) {
-  const [isCreating, setIsCreating] = useState(false);
-  const [itemToEdit, setItemToEdit] = useState<InventoryItem | null>(null);
+export function InventoryItemsSection({ items, locations, organizations, actorProfileId }: InventoryItemsSectionProps) {
   const [itemToReceive, setItemToReceive] = useState<InventoryItem | null>(null);
   const [itemToTransfer, setItemToTransfer] = useState<InventoryItem | null>(null);
   const [itemToAdjust, setItemToAdjust] = useState<InventoryItem | null>(null);
   const [isBulkOpen, setIsBulkOpen] = useState(false);
 
-  const { isPending, createItem, updateItem, receiveStock, transferStock, adjustStock, toggleItem, deleteItem, bulkReceive } =
+  const { isPending, receiveStock, transferStock, adjustStock, toggleItem, deleteItem, bulkReceive } =
     useInventoryActions({ actorProfileId });
 
-  const categoryOptions = useMemo(() => Array.from(new Set(categories)).sort((a, b) => a.localeCompare(b)), [categories]);
   const activeOrganizations = useMemo(() => organizations.filter((org) => org.isActive), [organizations]);
 
   return (
@@ -50,21 +46,9 @@ export function InventoryItemsSection({ items, locations, organizations, categor
               organizations={activeOrganizations}
             />
           </Dialog>
-          <Dialog open={isCreating} onOpenChange={setIsCreating}>
-            <DialogTrigger asChild>
-              <Button>Create item</Button>
-            </DialogTrigger>
-            <ItemDialog
-              title="Create inventory item"
-              actionLabel="Create item"
-              defaultValues={null}
-              categories={categoryOptions}
-              locations={locations}
-              isPending={isPending}
-              onSubmit={(formData) => createItem(formData, () => setIsCreating(false)).then(() => undefined)}
-              actorProfileId={actorProfileId}
-            />
-          </Dialog>
+          <Button asChild>
+            <Link href="/ops/supplies/items/new">Create item</Link>
+          </Button>
         </div>
       </CardHeader>
       <CardContent className="overflow-x-auto">
@@ -74,7 +58,6 @@ export function InventoryItemsSection({ items, locations, organizations, categor
           onReceive={setItemToReceive}
           onTransfer={setItemToTransfer}
           onAdjust={setItemToAdjust}
-          onEdit={setItemToEdit}
           onToggle={(item, next) => toggleItem(item, next)}
           onDelete={(item) => deleteItem(item)}
         />
@@ -83,19 +66,6 @@ export function InventoryItemsSection({ items, locations, organizations, categor
         Manage stock levels using receive, transfer, or adjust actions. Deactivating an item hides it from operational workflows without
         deleting historic transactions.
       </CardFooter>
-
-      <ItemDialog
-        title="Edit inventory item"
-        actionLabel="Save changes"
-        defaultValues={itemToEdit}
-        categories={categoryOptions}
-        locations={locations}
-        isPending={isPending}
-        onSubmit={(formData) => updateItem(formData, () => setItemToEdit(null)).then(() => undefined)}
-        actorProfileId={actorProfileId}
-        open={itemToEdit !== null}
-        onOpenChange={(open) => !open && setItemToEdit(null)}
-      />
 
       <ReceiveStockDialog
         item={itemToReceive}

@@ -95,7 +95,6 @@ export type InventoryBootstrap = {
   locations: InventoryLocation[];
   organizations: InventoryOrganization[];
   receipts: InventoryReceipt[];
-  categories: string[];
 };
 
 export type InventoryItemInput = {

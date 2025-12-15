@@ -6,8 +6,10 @@ import { loadPortalAccess } from '@/lib/portal-access';
 import { resolveLandingPath } from '@/lib/portal-navigation';
 import { PageHeader } from '@shared/layout/page-header';
 import { Badge } from '@shared/ui/badge';
+import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@shared/ui/card';
 import { InventoryHub } from '@workspace/admin/inventory/inventory-hub';
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,8 +40,15 @@ export default async function OpsSuppliesPage() {
       <PageHeader
         eyebrow="Operations"
         title="Supplies"
-        description="Stock summary, donations, and reconciliation. Giving items must be logged from a Visit."
-        meta={[{ label: 'Inventory + donations', tone: 'info' }, { label: 'Visit-first', tone: 'neutral' }]}
+        description="Stock summary, receipts, and (admin-only) donation catalogue listings."
+        meta={[{ label: 'Inventory', tone: 'info' }, { label: 'Visit-first', tone: 'neutral' }]}
+        actions={
+          access.canAccessOpsSteviAdmin ? (
+            <Button asChild variant="secondary" size="sm">
+              <Link href="/ops/supplies/donations">Open donation catalogue</Link>
+            </Button>
+          ) : null
+        }
       />
 
       <div className="grid gap-4 md:grid-cols-3">

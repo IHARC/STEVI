@@ -61,7 +61,7 @@ export default async function OpsAdminDonationsIntegrationsPage() {
         meta={[{ label: 'IHARC only', tone: 'warning' }]}
         actions={
           <Button asChild variant="secondary" size="sm">
-            <Link href="/ops/admin/website/fundraising">Open donations catalogue</Link>
+            <Link href="/ops/supplies/donations">Open donation catalogue</Link>
           </Button>
         }
       />

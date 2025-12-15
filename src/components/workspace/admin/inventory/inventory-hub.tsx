@@ -50,7 +50,6 @@ export function InventoryHub({ bootstrap, actorProfileId, canManageLocations }: 
             items={bootstrap.items}
             locations={bootstrap.locations}
             organizations={bootstrap.organizations}
-            categories={bootstrap.categories}
             actorProfileId={actorProfileId}
           />
         </TabsContent>

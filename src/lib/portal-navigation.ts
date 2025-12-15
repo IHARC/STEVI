@@ -27,6 +27,7 @@ const canSeeFrontline = (access: PortalAccess) => access.canAccessOpsFrontline;
 const canSeeClients = (access: PortalAccess) => access.canAccessOpsFrontline || access.canManageConsents;
 const canSeePrograms = (access: PortalAccess) => access.canAccessOpsFrontline || access.canAccessOpsAdmin;
 const canSeeSupplies = (access: PortalAccess) => access.canAccessInventoryOps || access.canAccessOpsAdmin;
+const canSeeDonationCatalog = (access: PortalAccess) => access.canAccessOpsSteviAdmin;
 const canSeeDirectory = (access: PortalAccess) =>
   access.canAccessOpsFrontline || access.canAccessOpsOrg || access.canAccessOpsAdmin || access.canAccessOpsSteviAdmin;
 const canSeeOrganization = (access: PortalAccess) => access.canAccessOpsOrg && !access.canAccessOpsSteviAdmin;
@@ -77,6 +78,7 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
         isHub: true,
         items: [
           { id: 'supplies', href: '/ops/supplies', label: 'Supplies', icon: 'boxes', match: ['/ops/supplies'] },
+          { id: 'donations', href: '/ops/supplies/donations', label: 'Donation catalogue', icon: 'box', match: ['/ops/supplies/donations'], requires: canSeeDonationCatalog },
         ],
       },
       {
@@ -131,7 +133,6 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
           { id: 'admin-integrations', href: '/ops/admin/integrations', label: 'Integrations & AI', icon: 'lab', match: ['/ops/admin/integrations'] },
           { id: 'admin-organizations', href: '/ops/admin/organizations', label: 'Organizations', icon: 'globe', match: ['/ops/admin/organizations'] },
           { id: 'admin-users', href: '/ops/admin/users/all', label: 'Users', icon: 'users', match: ['/ops/admin/users'] },
-          { id: 'admin-inventory', href: '/ops/admin/inventory', label: 'Inventory & Donations', icon: 'boxes', match: ['/ops/admin/inventory'] },
           { id: 'admin-website', href: '/ops/admin/website/branding', label: 'Website & Marketing', icon: 'globe', match: ['/ops/admin/website'] },
           { id: 'admin-operations', href: '/ops/admin/operations', label: 'Operations', icon: 'workflow', match: ['/ops/admin/operations'] },
         ],

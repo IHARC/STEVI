@@ -1,5 +1,9 @@
+import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
-import Link from 'next/link';
+import { loadPortalAccess } from '@/lib/portal-access';
+import { resolveLandingPath } from '@/lib/portal-navigation';
+import { PageHeader } from '@shared/layout/page-header';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import {
   fetchDonationCatalogAdminPage,
   fetchDonationCatalogAdminStats,
@@ -8,9 +12,6 @@ import {
 } from '@/lib/donations/service';
 import { fetchInventoryItems } from '@/lib/inventory/service';
 import { DonationCatalogAdmin } from '@/components/workspace/admin/donations/donation-catalog-admin';
-import { Alert, AlertDescription, AlertTitle } from '@shared/ui/alert';
-import { Button } from '@shared/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,8 +33,17 @@ function parsePositiveInt(value: string | null, fallback: number) {
   return parsed;
 }
 
-export default async function AdminWebsiteFundraisingPage({ searchParams }: PageProps) {
+export default async function OpsSuppliesDonationsPage({ searchParams }: PageProps) {
   const supabase = await createSupabaseRSCClient();
+  const access = await loadPortalAccess(supabase);
+
+  if (!access) {
+    redirect('/login?next=/ops/supplies/donations');
+  }
+
+  if (!access.canAccessOpsSteviAdmin) {
+    redirect(resolveLandingPath(access));
+  }
 
   const resolvedParams = searchParams ? await searchParams : undefined;
   const q = getString(resolvedParams, 'q') ?? '';
@@ -57,27 +67,20 @@ export default async function AdminWebsiteFundraisingPage({ searchParams }: Page
   ]);
 
   return (
-    <Card className="border-border/60">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-xl">Donations catalogue</CardTitle>
-        <CardDescription>
-          Manage the donation options shown on iharc.ca. Items are inventory-backed and can be synced to Stripe prices.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-6">
-          <Alert>
-            <AlertTitle>Stripe + webhooks moved</AlertTitle>
-            <AlertDescription>
-              Donations Stripe mode, credentials, webhook health, and the reconciliation inbox now live under Integrations.
-            </AlertDescription>
-            <div className="mt-3">
-              <Button asChild variant="secondary" size="sm">
-                <Link href="/ops/admin/integrations/donations">Open donations integrations</Link>
-              </Button>
-            </div>
-          </Alert>
+    <div className="space-y-6">
+      <PageHeader
+        eyebrow="Operations"
+        title="Donation catalogue"
+        description="Manage which inventory-backed items appear on iharc.ca and are available for Stripe-backed fundraising."
+        breadcrumbs={[{ label: 'Supplies', href: '/ops/supplies' }, { label: 'Donation catalogue' }]}
+      />
 
+      <Card className="border-border/60">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-xl">Catalogue overview</CardTitle>
+          <CardDescription>Item-level donation settings live inside each inventory item’s Donations tab.</CardDescription>
+        </CardHeader>
+        <CardContent>
           <DonationCatalogAdmin
             key={`${q}:${status}:${sort}:${page}:${pageSize}`}
             inventoryItems={inventoryItems}
@@ -94,8 +97,9 @@ export default async function AdminWebsiteFundraisingPage({ searchParams }: Page
               pageSize,
             }}
           />
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
+

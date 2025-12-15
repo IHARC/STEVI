@@ -169,6 +169,27 @@ export async function fetchInventoryItems(supabase: SupabaseAnyServerClient): Pr
   return ((data ?? []) as Record<string, unknown>[]).map(mapInventoryItem);
 }
 
+export async function fetchInventoryItemById(
+  supabase: SupabaseAnyServerClient,
+  itemId: string,
+): Promise<InventoryItem | null> {
+  if (!itemId) return null;
+
+  const { data, error } = await supabase
+    .schema('inventory')
+    .from('v_items_with_balances')
+    .select(ITEMS_SELECT)
+    .eq('id', itemId)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  if (!data) return null;
+  return mapInventoryItem(data as Record<string, unknown>);
+}
+
 export async function fetchLowStockItems(supabase: SupabaseAnyServerClient): Promise<LowStockItem[]> {
   const { data, error } = await supabase
     .schema('inventory')
@@ -335,20 +356,11 @@ export async function fetchInventoryBootstrap(supabase: SupabaseAnyServerClient)
     fetchInventoryReceipts(supabase, { limit: 50 }),
   ]);
 
-  const categories = Array.from(
-    new Set(
-      items
-        .map((item) => item.category)
-        .filter((category): category is string => typeof category === 'string' && category.length > 0),
-    ),
-  ).sort((a, b) => a.localeCompare(b));
-
   return {
     items,
     dashboard,
     locations,
     organizations,
     receipts,
-    categories,
   };
 }

@@ -1,12 +1,12 @@
 import { Button } from '@shared/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@shared/ui/table';
 import type { InventoryItem } from '@/lib/inventory/types';
+import Link from 'next/link';
 
 export type ItemsTableHandlers = {
   onReceive: (item: InventoryItem) => void;
   onTransfer: (item: InventoryItem) => void;
   onAdjust: (item: InventoryItem) => void;
-  onEdit: (item: InventoryItem) => void;
   onToggle: (item: InventoryItem, nextActive: boolean) => void;
   onDelete: (item: InventoryItem) => void;
 };
@@ -16,7 +16,7 @@ type ItemsTableProps = {
   isPending: boolean;
 } & ItemsTableHandlers;
 
-export function ItemsTable({ items, isPending, onReceive, onTransfer, onAdjust, onEdit, onToggle, onDelete }: ItemsTableProps) {
+export function ItemsTable({ items, isPending, onReceive, onTransfer, onAdjust, onToggle, onDelete }: ItemsTableProps) {
   return (
     <Table>
       <TableHeader>
@@ -33,7 +33,11 @@ export function ItemsTable({ items, isPending, onReceive, onTransfer, onAdjust, 
       <TableBody>
         {items.map((item) => (
           <TableRow key={item.id} className={!item.active ? 'opacity-60' : undefined}>
-            <TableCell className="font-medium">{item.name}</TableCell>
+            <TableCell className="font-medium">
+              <Link href={`/ops/supplies/items/${item.id}`} className="hover:underline">
+                {item.name}
+              </Link>
+            </TableCell>
             <TableCell>{item.category ?? '—'}</TableCell>
             <TableCell>{item.unitType ?? '—'}</TableCell>
             <TableCell className="text-right">{item.onHandQuantity.toLocaleString()}</TableCell>
@@ -55,8 +59,8 @@ export function ItemsTable({ items, isPending, onReceive, onTransfer, onAdjust, 
               <Button size="sm" variant="outline" onClick={() => onAdjust(item)}>
                 Adjust
               </Button>
-              <Button size="sm" variant="ghost" onClick={() => onEdit(item)}>
-                Edit
+              <Button asChild size="sm" variant="ghost">
+                <Link href={`/ops/supplies/items/${item.id}`}>Open</Link>
               </Button>
               <Button size="sm" variant="ghost" onClick={() => onToggle(item, !item.active)} disabled={isPending}>
                 {item.active ? 'Deactivate' : 'Activate'}
