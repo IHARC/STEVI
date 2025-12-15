@@ -67,13 +67,16 @@ export async function saveCatalogItem(formData: FormData) {
     throw new Error('Select an inventory item to link.');
   }
   const unitCostInput = (formData.get('unit_cost') as string | null)?.trim() ?? '';
-  const unitCostCents = unitCostInput.length === 0 ? null : (() => {
-    const parsed = Number.parseFloat(unitCostInput);
-    if (!Number.isFinite(parsed) || parsed < 0) {
-      throw new Error('Typical cost must be a valid, non-negative number.');
-    }
-    return Math.round(parsed * 100);
-  })();
+  const unitCostCents =
+    unitCostInput.length === 0
+      ? null
+      : (() => {
+          const parsed = Number.parseFloat(unitCostInput);
+          if (!Number.isFinite(parsed) || parsed < 0) {
+            throw new Error('Typical cost must be a valid, non-negative number.');
+          }
+          return Math.round(parsed * 100);
+        })();
 
   const currency = ((formData.get('currency') as string | null)?.trim() || 'CAD').toUpperCase();
   if (!['CAD', 'USD'].includes(currency)) {
@@ -99,18 +102,20 @@ export async function saveCatalogItem(formData: FormData) {
   }
 
   const imageUrlInput = (formData.get('image_url') as string | null)?.trim() || null;
-  const imageUrl = imageUrlInput ? (() => {
-    let url: URL;
-    try {
-      url = new URL(imageUrlInput);
-    } catch {
-      throw new Error('Image URL must be a valid absolute URL.');
-    }
-    if (url.protocol !== 'https:') {
-      throw new Error('Image URL must start with https://');
-    }
-    return url.toString();
-  })() : null;
+  const imageUrl = imageUrlInput
+    ? (() => {
+        let url: URL;
+        try {
+          url = new URL(imageUrlInput);
+        } catch {
+          throw new Error('Image URL must be a valid absolute URL.');
+        }
+        if (url.protocol !== 'https:') {
+          throw new Error('Image URL must start with https://');
+        }
+        return url.toString();
+      })()
+    : null;
   const isActive = formData.get('is_active') === 'on';
 
   const payload = {
@@ -129,9 +134,7 @@ export async function saveCatalogItem(formData: FormData) {
     is_active: isActive,
   };
 
-  const query = id
-    ? donationsClient.from('catalog_items').update(payload).eq('id', id)
-    : donationsClient.from('catalog_items').insert(payload);
+  const query = id ? donationsClient.from('catalog_items').update(payload).eq('id', id) : donationsClient.from('catalog_items').insert(payload);
 
   const { data, error: upsertError } = await query.select('id').maybeSingle();
   if (upsertError) {
@@ -300,7 +303,7 @@ export async function cancelDonationSubscriptionAction(formData: FormData) {
     meta: { stripe_subscription_id: stripeSubscriptionId },
   });
 
-  await revalidatePath('/ops/admin/website/fundraising');
+  await revalidatePath('/ops/admin/integrations/donations');
 }
 
 export async function resendDonationManageLinkAction(formData: FormData) {
@@ -319,11 +322,7 @@ export async function resendDonationManageLinkAction(formData: FormData) {
     throw new Error(response.error.message || 'Unable to send manage link.');
   }
 
-  const { data: donorRow, error: donorError } = await donationsClient
-    .from('donors')
-    .select('id')
-    .eq('email', email)
-    .maybeSingle();
+  const { data: donorRow, error: donorError } = await donationsClient.from('donors').select('id').eq('email', email).maybeSingle();
   if (donorError) throw donorError;
 
   await logAuditEvent(supabase, {
@@ -334,7 +333,7 @@ export async function resendDonationManageLinkAction(formData: FormData) {
     meta: { email },
   });
 
-  await revalidatePath('/ops/admin/website/fundraising');
+  await revalidatePath('/ops/admin/integrations/donations');
 }
 
 export async function reprocessStripeWebhookEventAction(formData: FormData) {
@@ -368,7 +367,7 @@ export async function reprocessStripeWebhookEventAction(formData: FormData) {
     meta: { stripe_event_id: stripeEventId },
   });
 
-  await revalidatePath('/ops/admin/website/fundraising');
+  await revalidatePath('/ops/admin/integrations/donations');
 }
 
 export async function upsertStripeDonationsCredentialsAction(formData: FormData) {
@@ -401,7 +400,7 @@ export async function upsertStripeDonationsCredentialsAction(formData: FormData)
     meta: { mode },
   });
 
-  await revalidatePath('/ops/admin/website/fundraising');
+  await revalidatePath('/ops/admin/integrations/donations');
 }
 
 export async function setStripeDonationsModeAction(formData: FormData) {
@@ -429,7 +428,7 @@ export async function setStripeDonationsModeAction(formData: FormData) {
     meta: { mode },
   });
 
-  await revalidatePath('/ops/admin/website/fundraising');
+  await revalidatePath('/ops/admin/integrations/donations');
 }
 
 export async function upsertDonationsEmailCredentialsAction(formData: FormData) {
@@ -463,5 +462,6 @@ export async function upsertDonationsEmailCredentialsAction(formData: FormData) 
     meta: { email_from: emailFrom, provider: 'sendgrid' },
   });
 
-  await revalidatePath('/ops/admin/website/fundraising');
+  await revalidatePath('/ops/admin/integrations/donations');
 }
+

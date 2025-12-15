@@ -22,7 +22,15 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         { label: 'Organizations', href: '/ops/admin/organizations', match: ['/ops/admin/organizations'] },
         { label: 'Users & access', href: '/ops/admin/users/all', match: ['/ops/admin/users'] },
         { label: 'Content & comms', href: '/ops/admin/content', match: ['/ops/admin/content'] },
-        { label: 'Integrations & AI', href: '/ops/admin/integrations', match: ['/ops/admin/integrations'] },
+        {
+          label: 'Integrations & AI',
+          href: '/ops/admin/integrations',
+          match: ['/ops/admin/integrations'],
+          items: [
+            { label: 'AI & system', href: '/ops/admin/integrations', match: ['/ops/admin/integrations'] },
+            { label: 'Donations (Stripe)', href: '/ops/admin/integrations/donations', match: ['/ops/admin/integrations/donations'] },
+          ],
+        },
         {
           label: 'Website & marketing',
           href: '/ops/admin/website',
@@ -39,7 +47,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
               href: '/ops/admin/website/advanced',
               match: ['/ops/admin/website/advanced'],
               items: [
-                { label: 'Fundraising', href: '/ops/admin/website/fundraising', match: ['/ops/admin/website/fundraising'] },
+                { label: 'Donations catalogue', href: '/ops/admin/website/fundraising', match: ['/ops/admin/website/fundraising'] },
                 { label: 'Content inventory', href: '/ops/admin/website/inventory', match: ['/ops/admin/website/inventory'] },
               ],
             },

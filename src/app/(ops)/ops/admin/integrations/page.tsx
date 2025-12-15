@@ -1,5 +1,6 @@
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { PageHeader } from '@shared/layout/page-header';
+import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
@@ -69,6 +70,21 @@ export default async function OpsAdminIntegrationsPage() {
       />
 
       <div className="grid gap-4 lg:grid-cols-12">
+        <Card className="border-border/60 lg:col-span-12">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-base">Donations (Stripe)</CardTitle>
+            <CardDescription>Stripe mode + secrets, email sender, webhook health, and reconciliation inbox.</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm text-muted-foreground">
+              Moved out of Website → Donations catalogue to keep settings and third-party integrations together.
+            </p>
+            <Button asChild variant="secondary" size="sm">
+              <Link href="/ops/admin/integrations/donations">Open donations integrations</Link>
+            </Button>
+          </CardContent>
+        </Card>
+
         <Card className="border-border/60 lg:col-span-4">
           <CardHeader className="space-y-1">
             <CardTitle className="text-base">OpenAI API key</CardTitle>

@@ -1,80 +1,43 @@
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
-import {
-  fetchDonationCatalogAdmin,
-  fetchDonationPaymentsAdmin,
-  fetchDonationSubscriptionsAdmin,
-  fetchStripeWebhookEventsAdmin,
-} from '@/lib/donations/service';
+import Link from 'next/link';
+import { fetchDonationCatalogAdmin } from '@/lib/donations/service';
 import { fetchInventoryItems } from '@/lib/inventory/service';
+import { DonationCatalogAdmin } from '@/components/workspace/admin/donations/donation-catalog-admin';
+import { Alert, AlertDescription, AlertTitle } from '@shared/ui/alert';
+import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
-import { FundraisingHub } from './fundraising-hub';
 
 export const dynamic = 'force-dynamic';
-
-type SettingRow = { setting_key: string; setting_value: string | null };
-
-async function fetchSettings(
-  supabase: Awaited<ReturnType<typeof createSupabaseRSCClient>>,
-  keys: string[],
-): Promise<Record<string, string | null>> {
-  const { data, error } = await supabase
-    .schema('portal')
-    .from('public_settings')
-    .select('setting_key, setting_value')
-    .in('setting_key', keys);
-
-  if (error) throw error;
-
-  const rows = (data ?? []) as SettingRow[];
-  const byKey = new Map(rows.map((row) => [row.setting_key, row.setting_value]));
-  return Object.fromEntries(keys.map((key) => [key, byKey.get(key) ?? null]));
-}
 
 export default async function AdminWebsiteFundraisingPage() {
   const supabase = await createSupabaseRSCClient();
 
-  const stripeSettingKeys = [
-    'stripe_donations_mode',
-    'stripe_donations_test_secret_key_id',
-    'stripe_donations_test_webhook_secret_id',
-    'stripe_donations_live_secret_key_id',
-    'stripe_donations_live_webhook_secret_id',
-  ];
-
-  const emailSettingKeys = [
-    'donations_email_from',
-    'donations_email_provider',
-    'donations_sendgrid_api_key_secret_id',
-  ];
-
-  const [catalog, inventoryItems, payments, subscriptions, webhookEvents, stripeSettings, emailSettings] = await Promise.all([
-    fetchDonationCatalogAdmin(supabase),
-    fetchInventoryItems(supabase),
-    fetchDonationPaymentsAdmin(supabase, { limit: 50 }),
-    fetchDonationSubscriptionsAdmin(supabase, { limit: 100 }),
-    fetchStripeWebhookEventsAdmin(supabase, { limit: 50 }),
-    fetchSettings(supabase, stripeSettingKeys),
-    fetchSettings(supabase, emailSettingKeys),
-  ]);
+  const [catalog, inventoryItems] = await Promise.all([fetchDonationCatalogAdmin(supabase), fetchInventoryItems(supabase)]);
 
   return (
     <Card className="border-border/60">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-xl">Fundraising</CardTitle>
+        <CardTitle className="text-xl">Donations catalogue</CardTitle>
         <CardDescription>
-          Manage the symbolic donation catalogue, Stripe bindings, and webhook-backed reconciliation for one-time and monthly donations.
+          Manage the donation options shown on iharc.ca. Items are inventory-backed and can be synced to Stripe prices.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <FundraisingHub
-          catalog={catalog}
-          inventoryItems={inventoryItems}
-          payments={payments}
-          subscriptions={subscriptions}
-          webhookEvents={webhookEvents}
-          stripeSettings={stripeSettings}
-          emailSettings={emailSettings}
-        />
+        <div className="space-y-6">
+          <Alert>
+            <AlertTitle>Stripe + webhooks moved</AlertTitle>
+            <AlertDescription>
+              Donations Stripe mode, credentials, webhook health, and the reconciliation inbox now live under Integrations.
+            </AlertDescription>
+            <div className="mt-3">
+              <Button asChild variant="secondary" size="sm">
+                <Link href="/ops/admin/integrations/donations">Open donations integrations</Link>
+              </Button>
+            </div>
+          </Alert>
+
+          <DonationCatalogAdmin catalog={catalog} inventoryItems={inventoryItems} />
+        </div>
       </CardContent>
     </Card>
   );

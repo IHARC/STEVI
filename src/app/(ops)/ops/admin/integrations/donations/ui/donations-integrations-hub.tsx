@@ -1,10 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { DonationCatalogAdmin } from '@/components/workspace/admin/donations/donation-catalog-admin';
-import type { DonationCatalogItem } from '@/lib/donations/types';
 import type { DonationPaymentAdminRow, DonationSubscriptionAdminRow, StripeWebhookEventAdminRow } from '@/lib/donations/service';
-import type { InventoryItem } from '@/lib/inventory/types';
 import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
@@ -21,11 +18,10 @@ import {
   setStripeDonationsModeAction,
   upsertDonationsEmailCredentialsAction,
   upsertStripeDonationsCredentialsAction,
-} from './actions';
+} from '@/app/(ops)/ops/admin/donations/actions';
 
-type FundraisingHubProps = {
-  catalog: DonationCatalogItem[];
-  inventoryItems: InventoryItem[];
+type DonationsIntegrationsHubProps = {
+  catalogCount: number;
   payments: DonationPaymentAdminRow[];
   subscriptions: DonationSubscriptionAdminRow[];
   webhookEvents: StripeWebhookEventAdminRow[];
@@ -56,17 +52,16 @@ function formatWhen(value: string | null) {
   });
 }
 
-const DEFAULT_TAB = 'dashboard';
+const DEFAULT_TAB = 'overview';
 
-export function FundraisingHub({
-  catalog,
-  inventoryItems,
+export function DonationsIntegrationsHub({
+  catalogCount,
   payments,
   subscriptions,
   webhookEvents,
   stripeSettings,
   emailSettings,
-}: FundraisingHubProps) {
+}: DonationsIntegrationsHubProps) {
   const [activeTab, setActiveTab] = useState<string>(DEFAULT_TAB);
   const [paymentQuery, setPaymentQuery] = useState('');
   const [subscriptionQuery, setSubscriptionQuery] = useState('');
@@ -79,6 +74,9 @@ export function FundraisingHub({
 
   const stripeMode = (stripeSettings.stripe_donations_mode?.trim().toLowerCase() ?? null) as 'test' | 'live' | null;
   const isModeValid = stripeMode === 'test' || stripeMode === 'live';
+  const [selectedStripeMode, setSelectedStripeMode] = useState<'test' | 'live' | null>(null);
+  const effectiveStripeMode = selectedStripeMode ?? (isModeValid ? stripeMode : 'test');
+
   const hasTestKeys = Boolean(
     stripeSettings.stripe_donations_test_secret_key_id && stripeSettings.stripe_donations_test_webhook_secret_id,
   );
@@ -133,9 +131,9 @@ export function FundraisingHub({
   return (
     <div className="space-y-6">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid h-auto w-full grid-cols-2 gap-1 rounded-2xl sm:grid-cols-3 lg:grid-cols-7">
-          <TabsTrigger value="dashboard" className="w-full rounded-xl px-3 text-xs font-semibold">
-            Dashboard
+        <TabsList className="grid h-auto w-full grid-cols-2 gap-2 rounded-2xl bg-muted p-2 sm:grid-cols-3 xl:grid-cols-6">
+          <TabsTrigger value="overview" className="w-full rounded-xl px-3 text-xs font-semibold">
+            Overview
           </TabsTrigger>
           <TabsTrigger value="stripe" className="w-full rounded-xl px-3 text-xs font-semibold">
             Stripe
@@ -143,26 +141,30 @@ export function FundraisingHub({
           <TabsTrigger value="email" className="w-full rounded-xl px-3 text-xs font-semibold">
             Email
           </TabsTrigger>
-          <TabsTrigger value="catalog" className="w-full rounded-xl px-3 text-xs font-semibold">
-            Catalogue
-          </TabsTrigger>
           <TabsTrigger value="donations" className="w-full rounded-xl px-3 text-xs font-semibold">
             Donations
           </TabsTrigger>
           <TabsTrigger value="monthly" className="w-full rounded-xl px-3 text-xs font-semibold">
-            Monthly donors
+            Monthly
           </TabsTrigger>
           <TabsTrigger value="webhooks" className="w-full rounded-xl px-3 text-xs font-semibold">
             Webhooks
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="dashboard">
+        <TabsContent value="overview" className="space-y-4">
+          <Alert>
+            <AlertTitle>Catalogue lives under Website</AlertTitle>
+            <AlertDescription>
+              The donation items shown on iharc.ca are managed under Website → Advanced → Donations catalogue. This page is for integrations and reconciliation.
+            </AlertDescription>
+          </Alert>
+
           <div className="grid gap-4 lg:grid-cols-12">
             <Card className="border-border/60 lg:col-span-4 xl:col-span-3">
               <CardHeader className="space-y-1">
                 <CardTitle className="text-base">Stripe mode</CardTitle>
-                <CardDescription>Vault-managed secrets. No env fallbacks.</CardDescription>
+                <CardDescription>Controls which Vault secrets are active.</CardDescription>
               </CardHeader>
               <CardContent className="flex items-center justify-between">
                 <div className="text-sm text-muted-foreground">Active</div>
@@ -196,7 +198,18 @@ export function FundraisingHub({
               </CardContent>
             </Card>
 
-            <Card className="border-border/60 lg:col-span-4 xl:col-span-6">
+            <Card className="border-border/60 lg:col-span-12 xl:col-span-3">
+              <CardHeader className="space-y-1">
+                <CardTitle className="text-base">Catalogue</CardTitle>
+                <CardDescription>Items available for the marketing page.</CardDescription>
+              </CardHeader>
+              <CardContent className="flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">Items</div>
+                <Badge variant="outline">{catalogCount}</Badge>
+              </CardContent>
+            </Card>
+
+            <Card className="border-border/60 lg:col-span-12">
               <CardHeader className="space-y-1">
                 <CardTitle className="text-base">Activity</CardTitle>
                 <CardDescription>Latest rows loaded.</CardDescription>
@@ -223,9 +236,7 @@ export function FundraisingHub({
           <Card className="border-border/60">
             <CardHeader className="space-y-1">
               <CardTitle className="text-xl">Stripe configuration</CardTitle>
-              <CardDescription>
-                Stripe secrets are stored in Supabase Vault and are selected by the active mode.
-              </CardDescription>
+              <CardDescription>Stripe secrets are stored in Supabase Vault and are selected by the active mode.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <Alert>
@@ -245,7 +256,14 @@ export function FundraisingHub({
                   <form action={setStripeDonationsModeAction} className="space-y-3">
                     <div className="space-y-2">
                       <Label htmlFor="stripe-mode">Stripe mode</Label>
-                      <Select name="mode" defaultValue={isModeValid ? stripeMode ?? undefined : undefined} required>
+                      <input type="hidden" name="mode" value={effectiveStripeMode} />
+                      <Select
+                        value={effectiveStripeMode}
+                        onValueChange={(value) => {
+                          if (value === 'test' || value === 'live') setSelectedStripeMode(value);
+                        }}
+                        required
+                      >
                         <SelectTrigger id="stripe-mode">
                           <SelectValue placeholder="Select a mode" />
                         </SelectTrigger>
@@ -349,14 +367,7 @@ export function FundraisingHub({
 
                 <div className="space-y-2">
                   <Label htmlFor="donations-sendgrid-key">SendGrid API key</Label>
-                  <Input
-                    id="donations-sendgrid-key"
-                    name="sendgrid_api_key"
-                    type="password"
-                    autoComplete="off"
-                    placeholder="SG.…"
-                    required
-                  />
+                  <Input id="donations-sendgrid-key" name="sendgrid_api_key" type="password" autoComplete="off" placeholder="SG.…" required />
                 </div>
 
                 <div className="lg:col-span-2">
@@ -369,24 +380,10 @@ export function FundraisingHub({
               <Alert>
                 <AlertTitle>Stripe webhook target (required)</AlertTitle>
                 <AlertDescription>
-                  Stripe cannot call Supabase Edge Functions with JWT verification enabled. Keep the Stripe webhook endpoint set to iharc.ca and proxy
-                  into Supabase, then confirm webhook deliveries show up under the Webhooks tab.
+                  Stripe cannot call Supabase Edge Functions with JWT verification enabled. Keep the Stripe webhook endpoint set to iharc.ca and proxy into
+                  Supabase, then confirm webhook deliveries show up under the Webhooks tab.
                 </AlertDescription>
               </Alert>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="catalog">
-          <Card className="border-border/60">
-            <CardHeader className="space-y-1">
-              <CardTitle className="text-xl">Catalogue</CardTitle>
-              <CardDescription>
-                Items shown on iharc.ca are inventory-backed. Stripe prices are created and managed through the “Sync Stripe price” action.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <DonationCatalogAdmin catalog={catalog} inventoryItems={inventoryItems} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -459,10 +456,8 @@ export function FundraisingHub({
           <Card className="border-border/60">
             <CardHeader className="flex flex-wrap items-start justify-between gap-3">
               <div className="space-y-1">
-                <CardTitle className="text-xl">Monthly donors</CardTitle>
-                <CardDescription>
-                  Active and recently updated subscriptions. Donors manage details through Stripe Customer Portal.
-                </CardDescription>
+                <CardTitle className="text-xl">Monthly subscriptions</CardTitle>
+                <CardDescription>Active and canceled donor subscriptions tracked via Stripe.</CardDescription>
               </div>
               <Badge variant="secondary">{filteredSubscriptions.length} shown</Badge>
             </CardHeader>
@@ -480,31 +475,26 @@ export function FundraisingHub({
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Amount</TableHead>
                     <TableHead>Started</TableHead>
-                    <TableHead>Last payment</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Donor</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Stripe</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredSubscriptions.map((sub) => (
                     <TableRow key={sub.id}>
-                      <TableCell className="text-foreground">{sub.donorEmail ?? '—'}</TableCell>
+                      <TableCell className="whitespace-nowrap">{formatWhen(sub.startedAt)}</TableCell>
                       <TableCell>
-                        <Badge
-                          variant={sub.status === 'active' || sub.status === 'trialing' ? 'secondary' : 'destructive'}
-                          className="capitalize"
-                        >
-                          {sub.status}
+                        <Badge variant={sub.status === 'active' ? 'secondary' : 'outline'} className="capitalize">
+                          {sub.status ?? 'unknown'}
                         </Badge>
                       </TableCell>
-                      <TableCell className="whitespace-nowrap font-medium text-foreground">
-                        {formatMoney(sub.amountCents, sub.currency)}
-                      </TableCell>
-                      <TableCell className="whitespace-nowrap">{formatWhen(sub.startedAt)}</TableCell>
-                      <TableCell className="whitespace-nowrap">{formatWhen(sub.lastPaymentAt)}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{sub.donorEmail ?? '—'}</TableCell>
+                      <TableCell className="whitespace-nowrap font-medium text-foreground">{formatMoney(sub.amountCents, sub.currency)}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{sub.stripeSubscriptionId}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex flex-wrap justify-end gap-2">
                           {sub.donorEmail ? (
