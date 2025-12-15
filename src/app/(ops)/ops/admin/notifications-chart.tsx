@@ -15,7 +15,7 @@ type NotificationsChartProps = {
 export function NotificationsChart({ data }: NotificationsChartProps) {
   return (
     <ChartContainer
-      config={{ notifications: { label: 'Notifications', color: 'hsl(var(--primary))' } }}
+      config={{ notifications: { label: 'Notifications', color: 'primary' } }}
       className="h-64"
     >
       <BarChart data={data}>

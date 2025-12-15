@@ -141,19 +141,19 @@ function TonePill({ tone }: { tone?: InboxItem['tone'] }) {
   const IconComponent = tone === 'success' ? CheckCircle2 : tone === 'warning' ? Clock3 : tone === 'critical' ? AlertCircle : Bell;
   const toneClass =
     tone === 'success'
-      ? 'bg-secondary/15 text-secondary-foreground'
+      ? 'bg-success/10 text-success'
       : tone === 'warning'
-        ? 'bg-primary/10 text-primary'
+        ? 'bg-warning/10 text-warning'
         : tone === 'critical'
-          ? 'bg-destructive/10 text-destructive-foreground'
-          : 'bg-primary/10 text-primary';
+          ? 'bg-destructive/10 text-destructive'
+          : 'bg-info/10 text-info';
   return (
-    <div
-      className={cn(
-        'mt-2 inline-flex items-center gap-1 rounded-full px-2 py-1 text-[0.72rem] font-semibold',
+      <div
+        className={cn(
+        'mt-2 inline-flex items-center gap-1 rounded-full px-2 py-1 text-2xs font-semibold',
         toneClass,
       )}
-    >
+      >
       <IconComponent className="h-3.5 w-3.5" aria-hidden />
       {tone === 'success'
         ? 'On track'

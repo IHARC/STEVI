@@ -225,7 +225,7 @@ export default async function AdminOrganizationsPage() {
                   <Badge variant={org.is_active ? 'secondary' : 'outline'}>{org.is_active ? 'Active' : 'Inactive'}</Badge>
                 </div>
               </div>
-              <div className="flex flex-wrap gap-1 text-[11px] text-muted-foreground">
+              <div className="flex flex-wrap gap-1 text-2xs text-muted-foreground">
                 {org.partnership_type ? <Badge variant="outline" className="capitalize">{org.partnership_type.replaceAll('_', ' ')}</Badge> : null}
                 {org.features.map((feature) => (
                   <Badge key={feature} variant="outline" className="capitalize">

@@ -59,7 +59,7 @@ export function TopNav({
     <header className="sticky top-0 z-50 border-b border-border/60 bg-background text-foreground shadow-sm">
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary/10 focus:px-3 focus:py-2 focus:text-primary-foreground"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary/10 focus:px-3 focus:py-2 focus:text-primary"
       >
         Skip to content
       </a>
@@ -117,7 +117,7 @@ export function TopNav({
               />
             ) : showActingOrg ? (
               <Badge variant="outline" className="hidden md:inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                <span className="text-[10px] font-semibold text-muted-foreground">Acting org</span>
+                <span className="text-3xs font-semibold text-muted-foreground">Acting org</span>
                 <span className="text-foreground normal-case text-xs font-semibold">{actingOrgName}</span>
               </Badge>
             ) : null}
@@ -129,7 +129,7 @@ export function TopNav({
                 className="md:hidden"
               />
             ) : showActingOrg ? (
-              <Badge variant="secondary" className="md:hidden px-2 py-1 text-[11px] font-semibold uppercase tracking-wide">
+              <Badge variant="secondary" className="md:hidden px-2 py-1 text-2xs font-semibold uppercase tracking-wide">
                 Org: {actingOrgName}
               </Badge>
             ) : null}

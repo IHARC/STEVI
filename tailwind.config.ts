@@ -80,6 +80,10 @@ const config = {
         body: ['var(--font-body, var(--font-sans))', ...fontFamily.sans],
         mono: ['var(--font-mono)', ...fontFamily.mono],
       },
+      fontSize: {
+        '2xs': ['0.6875rem', { lineHeight: '1rem' }],
+        '3xs': ['0.625rem', { lineHeight: '0.875rem' }],
+      },
       keyframes: {
         'accordion-down': {
           from: { height: '0' },

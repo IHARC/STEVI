@@ -79,7 +79,7 @@ export function OpsHubRail({ navSections }: OpsHubRailProps) {
       <div className="flex flex-col gap-4">
         {recents.length ? (
           <div className="space-y-2">
-            <p className="px-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Recent</p>
+            <p className="px-2 text-2xs font-semibold uppercase tracking-wide text-muted-foreground">Recent</p>
             <div className="flex flex-col gap-1">
               {recents.map((hub) => (
                 <HubLinkRow key={`recent-${hub.id}`} hub={hub} pathname={pathname} subtle />

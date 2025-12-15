@@ -185,14 +185,14 @@ export function PolicyForm({ mode, action, onDeleteAction, policy, statusOptions
       {isEdit && policy && onDeleteAction ? (
         <form
           action={onDeleteAction}
-          className="rounded-3xl border border-destructive/20 bg-destructive/10 p-4 text-destructive-foreground"
+          className="rounded-3xl border border-destructive/20 bg-destructive/10 p-4 text-destructive"
         >
           <input type="hidden" name="policy_id" value={policy.id} />
           <input type="hidden" name="policy_slug" value={policy.slug} />
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-medium">Danger zone</p>
-              <p className="text-xs text-destructive-foreground/80">
+              <p className="text-xs text-destructive/80">
                 Deleting removes this policy from marketing pages immediately.
               </p>
             </div>

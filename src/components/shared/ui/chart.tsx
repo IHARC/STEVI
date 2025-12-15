@@ -6,11 +6,25 @@ export type ChartConfig = Record<
   string,
   {
     label?: React.ReactNode;
-    color?: string;
+    color?: ChartColorToken;
   }
 >;
 
-type ChartContainerProps = React.ComponentProps<'div'> & {
+export type ChartColorToken =
+  | 'primary'
+  | 'secondary'
+  | 'muted'
+  | 'accent'
+  | 'destructive'
+  | 'info'
+  | 'success'
+  | 'warning';
+
+function resolveChartColor(token: ChartColorToken): string {
+  return `hsl(var(--${token}))`;
+}
+
+type ChartContainerProps = Omit<React.ComponentProps<'div'>, 'style'> & {
   config?: ChartConfig;
   children: React.ReactElement;
 };
@@ -23,10 +37,10 @@ const baseStyles: React.CSSProperties = {
 } as React.CSSProperties;
 
 export const ChartContainer = React.forwardRef<HTMLDivElement, ChartContainerProps>(
-  ({ className, style, config = {}, children, ...props }, ref) => {
+  ({ className, config = {}, children, ...props }, ref) => {
     const colorVars = Object.entries(config).reduce<Record<string, string>>((acc, [key, value]) => {
       if (value.color) {
-        acc[`--color-${key}`] = value.color;
+        acc[`--color-${key}`] = resolveChartColor(value.color);
       }
       return acc;
     }, {});
@@ -38,7 +52,7 @@ export const ChartContainer = React.forwardRef<HTMLDivElement, ChartContainerPro
           'h-full w-full text-xs text-muted-foreground [&_.recharts-cartesian-axis-tick_text]:fill-[var(--chart-axis-color)] [&_.recharts-cartesian-grid_line]:stroke-[var(--chart-grid-color)] [&_.recharts-curve.recharts-tooltip-cursor]:stroke-[var(--chart-cursor-color)] [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-[var(--chart-cursor-fill)] [&_.recharts-layer]:outline-none [&_.recharts-surface]:outline-none',
           className,
         )}
-        style={{ ...baseStyles, ...colorVars, ...(style ?? {}) }}
+        style={{ ...baseStyles, ...colorVars }}
         {...props}
       >
         <Recharts.ResponsiveContainer>{children}</Recharts.ResponsiveContainer>

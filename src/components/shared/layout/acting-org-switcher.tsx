@@ -22,7 +22,7 @@ export function ActingOrgSwitcher({ choices, currentOrganizationId, className }:
 
   return (
     <div className={cn('flex items-center gap-2', className)}>
-      <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Acting org</span>
+      <span className="text-3xs font-semibold uppercase tracking-wide text-muted-foreground">Acting org</span>
       <Select
         value={currentValue}
         onValueChange={(value) => {
@@ -46,4 +46,3 @@ export function ActingOrgSwitcher({ choices, currentOrganizationId, className }:
     </div>
   );
 }
-

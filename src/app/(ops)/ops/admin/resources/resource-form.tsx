@@ -243,14 +243,14 @@ export function ResourceForm({ mode, action, onDeleteAction, resource, kindOptio
       {isEdit && resource && onDeleteAction ? (
         <form
           action={onDeleteAction}
-          className="rounded-3xl border border-destructive/20 bg-destructive/10 p-4 text-destructive-foreground"
+          className="rounded-3xl border border-destructive/20 bg-destructive/10 p-4 text-destructive"
         >
           <input type="hidden" name="resource_id" value={resource.id} />
           <input type="hidden" name="resource_slug" value={resource.slug} />
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-medium">Danger zone</p>
-              <p className="text-xs text-destructive-foreground/80">
+              <p className="text-xs text-destructive/80">
                 Deleting removes this resource from marketing pages immediately.
               </p>
             </div>
