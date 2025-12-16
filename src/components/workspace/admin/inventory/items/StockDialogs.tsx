@@ -6,6 +6,7 @@ import { Button } from '@shared/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@shared/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@shared/ui/form';
 import { Input } from '@shared/ui/input';
+import { Label } from '@shared/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/ui/select';
 import { Textarea } from '@shared/ui/textarea';
 import type { BulkReceiptInput, InventoryItem, InventoryLocation, InventoryOrganization } from '@/lib/inventory/types';
@@ -93,14 +94,14 @@ export function ReceiveStockDialog({ item, locations, organizations, onSubmit, o
         </DialogHeader>
         {item ? (
           <Form {...form}>
-            <form action={onSubmit} className="space-y-4">
-              <input type="hidden" {...form.register('actor_profile_id')} />
-              <input type="hidden" {...form.register('item_id')} />
+	            <form action={onSubmit} className="space-y-4">
+	              <input type="hidden" {...form.register('actor_profile_id')} />
+	              <input type="hidden" {...form.register('item_id')} />
 
-              <div className="space-y-1">
-                <FormLabel>Item</FormLabel>
-                <p className="text-sm font-medium text-foreground">{item.name}</p>
-              </div>
+	              <div className="space-y-1">
+	                <Label>Item</Label>
+	                <p className="text-sm font-medium text-foreground">{item.name}</p>
+	              </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <FormField
@@ -299,13 +300,13 @@ export function TransferStockDialog({ item, locations, onSubmit, onClose, actorP
         </DialogHeader>
         {item ? (
           <Form {...form}>
-            <form action={onSubmit} className="space-y-4">
-              <input type="hidden" {...form.register('actor_profile_id')} />
-              <input type="hidden" {...form.register('item_id')} />
-              <div className="space-y-1">
-                <FormLabel>Item</FormLabel>
-                <p className="text-sm font-medium text-foreground">{item.name}</p>
-              </div>
+	            <form action={onSubmit} className="space-y-4">
+	              <input type="hidden" {...form.register('actor_profile_id')} />
+	              <input type="hidden" {...form.register('item_id')} />
+	              <div className="space-y-1">
+	                <Label>Item</Label>
+	                <p className="text-sm font-medium text-foreground">{item.name}</p>
+	              </div>
               <FormField
                 control={form.control}
                 name="quantity"
@@ -436,13 +437,13 @@ export function AdjustStockDialog({ item, locations, onSubmit, onClose, actorPro
         </DialogHeader>
         {item ? (
           <Form {...form}>
-            <form action={onSubmit} className="space-y-4">
-              <input type="hidden" {...form.register('actor_profile_id')} />
-              <input type="hidden" {...form.register('item_id')} />
-              <div className="space-y-1">
-                <FormLabel>Item</FormLabel>
-                <p className="text-sm font-medium text-foreground">{item.name}</p>
-              </div>
+	            <form action={onSubmit} className="space-y-4">
+	              <input type="hidden" {...form.register('actor_profile_id')} />
+	              <input type="hidden" {...form.register('item_id')} />
+	              <div className="space-y-1">
+	                <Label>Item</Label>
+	                <p className="text-sm font-medium text-foreground">{item.name}</p>
+	              </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <FormField
                   control={form.control}

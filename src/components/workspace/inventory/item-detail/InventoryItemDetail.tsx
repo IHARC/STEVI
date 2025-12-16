@@ -587,7 +587,7 @@ function DonationListingCard({
             </div>
           )}
 
-          <form action={submitSave} className="space-y-6">
+	          <form action={submitSave} className="space-y-6">
             {listing?.id ? <input type="hidden" name="id" value={listing.id} /> : null}
             <input type="hidden" name="inventory_item_id" value={inventoryItem.id} />
             {selectedCategoryIds.map((categoryId) => (
@@ -595,45 +595,45 @@ function DonationListingCard({
             ))}
             <input type="hidden" name="is_active" value={isActive ? 'on' : ''} />
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <FormLabel>Title (from inventory)</FormLabel>
-                <Input value={inventoryItem.name} disabled />
-              </div>
-              <div className="space-y-2">
-                <FormLabel htmlFor="slug">Slug</FormLabel>
-                <Input id="slug" name="slug" defaultValue={listing?.slug ?? ''} placeholder="warm-winter-kit" />
-              </div>
-              <div className="space-y-2 sm:col-span-2">
-                <FormLabel htmlFor="short_description">Short description</FormLabel>
-                <Textarea
-                  id="short_description"
-                  name="short_description"
-                  defaultValue={listing?.shortDescription ?? ''}
-                  placeholder="One-line summary shown on the donation page."
-                  rows={2}
-                />
-              </div>
-              <div className="space-y-2 sm:col-span-2">
-                <FormLabel htmlFor="long_description">Long description</FormLabel>
-                <Textarea
-                  id="long_description"
-                  name="long_description"
-                  defaultValue={listing?.longDescription ?? ''}
-                  placeholder="Optional details, impact notes, or what this kit includes."
-                  rows={4}
-                />
-              </div>
-            </div>
+	            <div className="grid gap-4 sm:grid-cols-2">
+	              <div className="space-y-2">
+	                <Label>Title (from inventory)</Label>
+	                <Input value={inventoryItem.name} disabled />
+	              </div>
+	              <div className="space-y-2">
+	                <Label htmlFor="slug">Slug</Label>
+	                <Input id="slug" name="slug" defaultValue={listing?.slug ?? ''} placeholder="warm-winter-kit" />
+	              </div>
+	              <div className="space-y-2 sm:col-span-2">
+	                <Label htmlFor="short_description">Short description</Label>
+	                <Textarea
+	                  id="short_description"
+	                  name="short_description"
+	                  defaultValue={listing?.shortDescription ?? ''}
+	                  placeholder="One-line summary shown on the donation page."
+	                  rows={2}
+	                />
+	              </div>
+	              <div className="space-y-2 sm:col-span-2">
+	                <Label htmlFor="long_description">Long description</Label>
+	                <Textarea
+	                  id="long_description"
+	                  name="long_description"
+	                  defaultValue={listing?.longDescription ?? ''}
+	                  placeholder="Optional details, impact notes, or what this kit includes."
+	                  rows={4}
+	                />
+	              </div>
+	            </div>
 
-            <div className="grid gap-4 sm:grid-cols-3">
-              <div className="space-y-2">
-                <FormLabel htmlFor="currency">Currency</FormLabel>
-                <Select
-                  name="currency"
-                  value={currency}
-                  onValueChange={setCurrency}
-                >
+	            <div className="grid gap-4 sm:grid-cols-3">
+	              <div className="space-y-2">
+	                <Label htmlFor="currency">Currency</Label>
+	                <Select
+	                  name="currency"
+	                  value={currency}
+	                  onValueChange={setCurrency}
+	                >
                   <SelectTrigger id="currency">
                     <SelectValue placeholder="Select currency" />
                   </SelectTrigger>
@@ -642,49 +642,49 @@ function DonationListingCard({
                     <SelectItem value="USD">USD</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-              <div className="space-y-2">
-                <FormLabel htmlFor="default_quantity">Default quantity</FormLabel>
-                <Input
-                  id="default_quantity"
-                  name="default_quantity"
-                  type="number"
-                  min="1"
-                  defaultValue={listing?.defaultQuantity ?? 1}
-                />
-              </div>
-              <div className="space-y-2">
-                <FormLabel htmlFor="priority">Display priority</FormLabel>
-                <Input id="priority" name="priority" type="number" min="1" defaultValue={listing?.priority ?? 100} />
-              </div>
-              <div className="space-y-2">
-                <FormLabel htmlFor="target_buffer">Target buffer</FormLabel>
-                <Input
-                  id="target_buffer"
-                  name="target_buffer"
-                  type="number"
-                  min="0"
-                  defaultValue={listing?.targetBuffer ?? ''}
-                  placeholder={inventoryItem.minimumThreshold?.toString() ?? 'Optional'}
-                />
-              </div>
-              <div className="space-y-2 sm:col-span-2">
-                <FormLabel htmlFor="image_url">Image URL</FormLabel>
-                <Input
-                  id="image_url"
-                  name="image_url"
-                  type="url"
-                  defaultValue={listing?.imageUrl ?? ''}
-                  placeholder="https://example.com/image.jpg"
-                />
-              </div>
-            </div>
+	              </div>
+	              <div className="space-y-2">
+	                <Label htmlFor="default_quantity">Default quantity</Label>
+	                <Input
+	                  id="default_quantity"
+	                  name="default_quantity"
+	                  type="number"
+	                  min="1"
+	                  defaultValue={listing?.defaultQuantity ?? 1}
+	                />
+	              </div>
+	              <div className="space-y-2">
+	                <Label htmlFor="priority">Display priority</Label>
+	                <Input id="priority" name="priority" type="number" min="1" defaultValue={listing?.priority ?? 100} />
+	              </div>
+	              <div className="space-y-2">
+	                <Label htmlFor="target_buffer">Target buffer</Label>
+	                <Input
+	                  id="target_buffer"
+	                  name="target_buffer"
+	                  type="number"
+	                  min="0"
+	                  defaultValue={listing?.targetBuffer ?? ''}
+	                  placeholder={inventoryItem.minimumThreshold?.toString() ?? 'Optional'}
+	                />
+	              </div>
+	              <div className="space-y-2 sm:col-span-2">
+	                <Label htmlFor="image_url">Image URL</Label>
+	                <Input
+	                  id="image_url"
+	                  name="image_url"
+	                  type="url"
+	                  defaultValue={listing?.imageUrl ?? ''}
+	                  placeholder="https://example.com/image.jpg"
+	                />
+	              </div>
+	            </div>
 
-            <div className="space-y-2">
-              <FormLabel>Categories</FormLabel>
-              {categories.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Create donation categories first, then tag this listing.</p>
-              ) : (
+	            <div className="space-y-2">
+	              <Label>Categories</Label>
+	              {categories.length === 0 ? (
+	                <p className="text-sm text-muted-foreground">Create donation categories first, then tag this listing.</p>
+	              ) : (
                 <>
                   <ToggleGroup
                     type="multiple"

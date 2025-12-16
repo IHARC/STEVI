@@ -21,59 +21,57 @@ export function InventoryHub({ bootstrap, actorProfileId, canManageLocations }: 
   const [activeTab, setActiveTab] = useState<string>(DEFAULT_TAB);
 
   return (
-    <div className="space-y-6">
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid h-auto w-full grid-cols-2 gap-1 rounded-2xl sm:grid-cols-3 lg:grid-cols-5">
-          <TabsTrigger value="dashboard" className="w-full rounded-xl px-3 text-xs font-semibold">
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-3">
+      <TabsList className="grid h-auto w-full grid-cols-2 gap-1 rounded-2xl sm:grid-cols-3 lg:grid-cols-5">
+        <TabsTrigger value="dashboard" className="w-full rounded-xl px-3 text-xs font-semibold">
             Dashboard
-          </TabsTrigger>
-          <TabsTrigger value="items" className="w-full rounded-xl px-3 text-xs font-semibold">
+        </TabsTrigger>
+        <TabsTrigger value="items" className="w-full rounded-xl px-3 text-xs font-semibold">
             Items
-          </TabsTrigger>
-          <TabsTrigger value="locations" className="w-full rounded-xl px-3 text-xs font-semibold">
+        </TabsTrigger>
+        <TabsTrigger value="locations" className="w-full rounded-xl px-3 text-xs font-semibold">
             Locations
-          </TabsTrigger>
-          <TabsTrigger value="organizations" className="w-full rounded-xl px-3 text-xs font-semibold">
+        </TabsTrigger>
+        <TabsTrigger value="organizations" className="w-full rounded-xl px-3 text-xs font-semibold">
             Organisations
-          </TabsTrigger>
-          <TabsTrigger value="receipts" className="w-full rounded-xl px-3 text-xs font-semibold">
+        </TabsTrigger>
+        <TabsTrigger value="receipts" className="w-full rounded-xl px-3 text-xs font-semibold">
             Receipts
-          </TabsTrigger>
-        </TabsList>
+        </TabsTrigger>
+      </TabsList>
 
-        <TabsContent value="dashboard">
-          <InventoryDashboardSection dashboard={bootstrap.dashboard} />
-        </TabsContent>
+      <TabsContent value="dashboard" className="mt-0">
+        <InventoryDashboardSection dashboard={bootstrap.dashboard} />
+      </TabsContent>
 
-        <TabsContent value="items">
-          <InventoryItemsSection
-            items={bootstrap.items}
-            locations={bootstrap.locations}
-            organizations={bootstrap.organizations}
-            actorProfileId={actorProfileId}
-          />
-        </TabsContent>
+      <TabsContent value="items" className="mt-0">
+        <InventoryItemsSection
+          items={bootstrap.items}
+          locations={bootstrap.locations}
+          organizations={bootstrap.organizations}
+          actorProfileId={actorProfileId}
+        />
+      </TabsContent>
 
-        <TabsContent value="locations">
-          <InventoryLocationsSection
-            locations={bootstrap.locations}
-            actorProfileId={actorProfileId}
-            canManageLocations={canManageLocations}
-          />
-        </TabsContent>
+      <TabsContent value="locations" className="mt-0">
+        <InventoryLocationsSection
+          locations={bootstrap.locations}
+          actorProfileId={actorProfileId}
+          canManageLocations={canManageLocations}
+        />
+      </TabsContent>
 
-        <TabsContent value="organizations">
-          <InventoryOrganizationsSection organizations={bootstrap.organizations} actorProfileId={actorProfileId} />
-        </TabsContent>
+      <TabsContent value="organizations" className="mt-0">
+        <InventoryOrganizationsSection organizations={bootstrap.organizations} actorProfileId={actorProfileId} />
+      </TabsContent>
 
-        <TabsContent value="receipts">
-          <InventoryReceiptsSection
-            receipts={bootstrap.receipts}
-            organizations={bootstrap.organizations}
-            actorProfileId={actorProfileId}
-          />
-        </TabsContent>
-      </Tabs>
-    </div>
+      <TabsContent value="receipts" className="mt-0">
+        <InventoryReceiptsSection
+          receipts={bootstrap.receipts}
+          organizations={bootstrap.organizations}
+          actorProfileId={actorProfileId}
+        />
+      </TabsContent>
+    </Tabs>
   );
 }

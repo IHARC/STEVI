@@ -136,6 +136,20 @@ describe('loadPortalAccess', () => {
     expect(access?.organizationName).toBe('Org');
   });
 
+  it('grants inventory access to IHARC admins even when inventory roles are not listed', async () => {
+    mockGetInventoryRoles.mockResolvedValueOnce(['iharc_staff']);
+    const supabase = createSupabase({
+      rpcResult: {
+        data: [{ role_name: 'iharc_admin' }],
+        error: null,
+      },
+    });
+    mockEnsurePortalProfile.mockResolvedValue(baseProfile);
+
+    const access = await loadPortalAccess(supabase);
+    expect(access?.canAccessInventoryOps).toBe(true);
+  });
+
   it('returns null when no authenticated user is present', async () => {
     const supabase = createSupabase({ user: null });
     const access = await loadPortalAccess(supabase);

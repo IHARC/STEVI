@@ -26,7 +26,7 @@ export type QuickAction = {
 const canSeeFrontline = (access: PortalAccess) => access.canAccessOpsFrontline;
 const canSeeClients = (access: PortalAccess) => access.canAccessOpsFrontline || access.canManageConsents;
 const canSeePrograms = (access: PortalAccess) => access.canAccessOpsFrontline || access.canAccessOpsAdmin;
-const canSeeSupplies = (access: PortalAccess) => access.canAccessInventoryOps || access.canAccessOpsAdmin;
+const canSeeSupplies = (access: PortalAccess) => access.canAccessInventoryOps;
 const canSeeDonationCatalog = (access: PortalAccess) => access.canAccessOpsSteviAdmin;
 const canSeeDirectory = (access: PortalAccess) =>
   access.canAccessOpsFrontline || access.canAccessOpsOrg || access.canAccessOpsAdmin || access.canAccessOpsSteviAdmin;

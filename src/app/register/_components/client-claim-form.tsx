@@ -11,10 +11,8 @@ import { choiceCardVariants } from '@shared/ui/choice-card';
 import { FormSection } from '@shared/ui/form-section';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@shared/ui/form';
 import { Input } from '@shared/ui/input';
-import {
-  RadioGroup,
-  RadioGroupItem,
-} from '@shared/ui/radio-group';
+import { Label } from '@shared/ui/label';
+import { RadioGroup, RadioGroupItem } from '@shared/ui/radio-group';
 import {
   Select,
   SelectContent,
@@ -176,16 +174,16 @@ export function ClientClaimForm({
                   </FormItem>
                 )}
               />
-              <div className="grid gap-2 md:grid-cols-2">
-                <div className="grid gap-1.5">
-                  <FormLabel htmlFor="dob_month">Birth month *</FormLabel>
-                  <Select
-                    value={dobMonth}
-                    onValueChange={(value) => {
-                      setDobMonth(value);
-                      form.setValue('dob_month', value);
-                    }}
-                  >
+	              <div className="grid gap-2 md:grid-cols-2">
+	                <div className="grid gap-1.5">
+	                  <Label htmlFor="dob_month">Birth month *</Label>
+	                  <Select
+	                    value={dobMonth}
+	                    onValueChange={(value) => {
+	                      setDobMonth(value);
+	                      form.setValue('dob_month', value);
+	                    }}
+	                  >
                     <SelectTrigger id="dob_month">
                       <SelectValue placeholder="Month" />
                     </SelectTrigger>
@@ -198,16 +196,16 @@ export function ClientClaimForm({
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
-                <div className="grid gap-1.5">
-                  <FormLabel htmlFor="dob_year">Birth year *</FormLabel>
-                  <Select
-                    value={dobYear}
-                    onValueChange={(value) => {
-                      setDobYear(value);
-                      form.setValue('dob_year', value);
-                    }}
-                  >
+	                </div>
+	                <div className="grid gap-1.5">
+	                  <Label htmlFor="dob_year">Birth year *</Label>
+	                  <Select
+	                    value={dobYear}
+	                    onValueChange={(value) => {
+	                      setDobYear(value);
+	                      form.setValue('dob_year', value);
+	                    }}
+	                  >
                     <SelectTrigger id="dob_year">
                       <SelectValue placeholder="Year" />
                     </SelectTrigger>

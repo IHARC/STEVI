@@ -131,9 +131,9 @@ export async function loadPortalAccess(
 
   const canManageResources = isProfileApproved && isIharcAdmin;
   const canManagePolicies = isProfileApproved && isIharcAdmin;
-  const canAccessInventoryOps = isProfileApproved && iharcRoles.some((role) =>
+  const canAccessInventoryOps = isProfileApproved && (isIharcAdmin || iharcRoles.some((role) =>
     inventoryAllowedRoles.includes(role),
-  );
+  ));
 
   const canManageNotifications = isProfileApproved && isIharcAdmin;
   const canManageWebsiteContent = isProfileApproved && isIharcAdmin;
@@ -349,7 +349,7 @@ const HUB_TAB_COMMANDS: { href: string; label: string; group: string; requires: 
   { href: '/ops/clients?view=directory', label: 'Client directory', group: 'Clients', requires: (access) => access.canAccessOpsFrontline || access.canManageConsents },
   { href: '/ops/clients?view=caseload', label: 'My caseload', group: 'Clients', requires: (access) => access.canAccessOpsFrontline },
   { href: '/ops/programs', label: 'Programs', group: 'Programs', requires: (access) => access.canAccessOpsFrontline || access.canAccessOpsAdmin },
-  { href: '/ops/supplies', label: 'Supplies', group: 'Supplies', requires: (access) => access.canAccessInventoryOps || access.canAccessOpsAdmin },
+  { href: '/ops/supplies', label: 'Supplies', group: 'Supplies', requires: (access) => access.canAccessInventoryOps },
   { href: '/ops/directory', label: 'Directory', group: 'Directory', requires: (access) => access.canAccessOpsFrontline || access.canAccessOpsOrg || access.canAccessOpsAdmin || access.canAccessOpsSteviAdmin },
   { href: '/ops/org', label: 'Organization hub', group: 'Organization', requires: (access) => access.canAccessOpsOrg && !access.canAccessOpsSteviAdmin },
 ];

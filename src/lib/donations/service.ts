@@ -260,12 +260,12 @@ export async function fetchDonationCatalogAdminStats(
   const donations = supabase.schema('donations');
   const search = normalizeSearchTerm(options.search ?? null);
 
-  const makeQuery = () => applyCatalogSearch(donations.from('catalog_items'), search);
+  const makeQuery = () => applyCatalogSearch(donations.from('catalog_items').select('id', { count: 'exact', head: true }), search);
 
   const [totalResult, activeResult, hiddenResult] = await Promise.all([
-    makeQuery().select('id', { count: 'exact', head: true }),
-    applyCatalogStatus(makeQuery(), 'active').select('id', { count: 'exact', head: true }),
-    applyCatalogStatus(makeQuery(), 'hidden').select('id', { count: 'exact', head: true }),
+    makeQuery(),
+    applyCatalogStatus(makeQuery(), 'active'),
+    applyCatalogStatus(makeQuery(), 'hidden'),
   ] as const);
 
   if (totalResult.error) throw totalResult.error;
@@ -294,7 +294,10 @@ export async function fetchDonationCatalogAdminPage(
   const sort = options.sort ?? 'priority';
   const search = normalizeSearchTerm(options.search ?? null);
 
-  const base = applyCatalogStatus(applyCatalogSearch(donations.from('catalog_items'), search), status);
+  const base = applyCatalogStatus(
+    applyCatalogSearch(donations.from('catalog_items').select(CATALOG_ITEM_SELECT, { count: 'exact' }), search),
+    status,
+  );
   const orderable = base as unknown as PostgrestOrderableQuery<typeof base>;
 
   // Stock sorting requires a join we don't have in PostgREST, so treat it as priority sorting for paging.
@@ -303,7 +306,7 @@ export async function fetchDonationCatalogAdminPage(
       ? orderable.order('title', { ascending: true })
       : orderable.order('priority', { ascending: true }).order('title', { ascending: true });
 
-  const { data, error, count } = await ordered.select(CATALOG_ITEM_SELECT, { count: 'exact' }).range(from, to);
+  const { data, error, count } = await ordered.range(from, to);
   if (error) throw error;
 
   const rows = (data ?? []) as Record<string, unknown>[];

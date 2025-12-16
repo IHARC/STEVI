@@ -15,6 +15,7 @@ import {
 } from '@shared/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@shared/ui/form';
 import { Input } from '@shared/ui/input';
+import { Label } from '@shared/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@shared/ui/table';
 import { useToast } from '@shared/ui/use-toast';
@@ -160,15 +161,15 @@ function UpdateSourceDialog({ receipt, organizations, actorProfileId, isPending,
           <DialogTitle>Update receipt source</DialogTitle>
           <DialogDescription>Attach or correct the provider for this receipt. This keeps reporting accurate across teams.</DialogDescription>
         </DialogHeader>
-        {receipt ? (
-          <Form {...form}>
-            <form action={onSubmit} className="space-y-4">
-              <input type="hidden" {...form.register('actor_profile_id')} />
-              <input type="hidden" {...form.register('transaction_id')} />
-              <div className="grid gap-1">
-                <FormLabel>Item</FormLabel>
-                <p className="text-sm font-medium text-foreground">{receipt.itemName}</p>
-              </div>
+	        {receipt ? (
+	          <Form {...form}>
+	            <form action={onSubmit} className="space-y-4">
+	              <input type="hidden" {...form.register('actor_profile_id')} />
+	              <input type="hidden" {...form.register('transaction_id')} />
+	              <div className="grid gap-1">
+	                <Label>Item</Label>
+	                <p className="text-sm font-medium text-foreground">{receipt.itemName}</p>
+	              </div>
               <FormField
                 control={form.control}
                 name="source_type"

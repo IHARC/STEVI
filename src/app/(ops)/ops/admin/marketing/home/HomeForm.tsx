@@ -6,6 +6,7 @@ import { Image as ImageIcon, Loader2, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@shared/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@shared/ui/form';
 import { Input } from '@shared/ui/input';
+import { Label } from '@shared/ui/label';
 import { Textarea } from '@shared/ui/textarea';
 import { useToast } from '@shared/ui/use-toast';
 import type { ContextCard, HeroContent } from '@/lib/marketing/settings';
@@ -294,7 +295,7 @@ export function HomeForm({ hero, contextCards }: Props) {
                 className="grid gap-2 rounded-lg border border-border bg-card/40 p-3 md:grid-cols-[1fr,1fr]"
               >
                 <div className="space-y-1">
-                  <FormLabel htmlFor={`card-id-${index}`}>ID / anchor</FormLabel>
+                  <Label htmlFor={`card-id-${index}`}>ID / anchor</Label>
                   <Input
                     id={`card-id-${index}`}
                     value={card.id}
@@ -304,7 +305,7 @@ export function HomeForm({ hero, contextCards }: Props) {
                   />
                 </div>
                 <div className="space-y-1">
-                  <FormLabel htmlFor={`card-title-${index}`}>Title</FormLabel>
+                  <Label htmlFor={`card-title-${index}`}>Title</Label>
                   <Input
                     id={`card-title-${index}`}
                     value={card.title}
@@ -313,7 +314,7 @@ export function HomeForm({ hero, contextCards }: Props) {
                   />
                 </div>
                 <div className="space-y-1 md:col-span-2">
-                  <FormLabel htmlFor={`card-description-${index}`}>Description</FormLabel>
+                  <Label htmlFor={`card-description-${index}`}>Description</Label>
                   <Textarea
                     id={`card-description-${index}`}
                     value={card.description}
@@ -322,7 +323,7 @@ export function HomeForm({ hero, contextCards }: Props) {
                   />
                 </div>
                 <div className="space-y-1">
-                  <FormLabel htmlFor={`card-href-${index}`}>Href</FormLabel>
+                  <Label htmlFor={`card-href-${index}`}>Href</Label>
                   <Input
                     id={`card-href-${index}`}
                     value={card.href}
