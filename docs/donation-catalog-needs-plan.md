@@ -69,31 +69,11 @@ This plan builds on what already exists:
 - A public categories view (ordered chips): `portal.donation_catalog_categories_public` exposing `slug,label,sort_order`
 
 ## Cross-app Cache Revalidation (critical)
-Marketing site caches donation catalog via a Next tag (`marketing:donation-catalog`). Today STEVI revalidates **STEVI paths** only.
+Marketing site caches donation catalog. Updates propagate automatically via a timed cache (60s).
 
-### Add on marketing site
-- A secure route handler, e.g. `POST /api/revalidate/donation-catalog`
-  - Verifies a shared secret header (env var)
-  - Calls `invalidateDonationCatalog()` (tag revalidate)
-
-### Add in STEVI
-- After successful donation admin actions:
-  - `saveCatalogItem`, category create/update, Stripe sync, remove listing
-  - Call the marketing revalidation endpoint.
-- After inventory stock mutations:
-  - Receive/adjust/transfer actions should revalidate marketing too (at least globally; ideally only if item is in catalogue).
-
-### Security + config (required)
-- Marketing env:
-  - `MARKETING_REVALIDATE_SECRET` (server-only)
-- STEVI env:
-  - `MARKETING_REVALIDATE_DONATION_CATALOG_URL` (server-only, e.g. `https://iharc.ca/api/revalidate/donation-catalog`)
-  - `MARKETING_REVALIDATE_SECRET` (server-only, must match marketing)
-- Request contract:
-  - Method: `POST`
-  - Header: `x-revalidate-secret: <secret>`
-  - Response: `200` JSON on success; `401` on auth failure.
-- Failure semantics: revalidation failures must surface to staff (no silent success). Retrying is manual (trigger another save/stock mutation).
+Plan:
+- Keep the donation catalogue cache TTL at 60 seconds.
+- Do not add cross-app invalidation hooks or secrets (pre-production; keep operations simple).
 
 ## Implementation Phases
 ### Phase 1 — iharc.ca UX (public site)
@@ -107,9 +87,7 @@ Marketing site caches donation catalog via a Next tag (`marketing:donation-catal
 - Inventory item Donations tab: add a “Marketing preview” block with the same computed fields so staff see what will rank.
 
 ### Phase 3 — Revalidation plumbing
-- Marketing: add secure revalidation endpoint + env var.
-- STEVI: call endpoint from donation admin actions + inventory stock actions.
-- Add lightweight retry logic only if explicitly desired (no silent failures).
+- No cross-app revalidation plumbing (timed cache only).
 
 ### Phase 4 — QA + rollout
 - Add tests:

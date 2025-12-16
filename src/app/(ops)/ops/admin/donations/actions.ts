@@ -4,7 +4,6 @@ import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { logAuditEvent, buildEntityRef } from '@/lib/audit';
-import { revalidateMarketingDonationCatalog } from '@/lib/marketing/revalidate';
 
 const DONATION_CATALOG_PATH = '/ops/supplies/donations';
 
@@ -15,12 +14,11 @@ type AdminContext = {
   accessToken: string;
 };
 
-async function revalidateDonationCatalog(inventoryItemId?: string | null) {
+function revalidateDonationCatalog(inventoryItemId?: string | null) {
   revalidatePath(DONATION_CATALOG_PATH);
   if (inventoryItemId) {
     revalidatePath(`/ops/supplies/items/${inventoryItemId}`);
   }
-  await revalidateMarketingDonationCatalog();
 }
 
 function normalizeSlug(input: string): string {
@@ -204,7 +202,7 @@ export async function saveCatalogItem(formData: FormData) {
     meta: { pk_uuid: String(catalogItemId), slug, inventory_item_id: inventoryItemId, category_ids: categoryIds, is_active: shouldBeActive },
   });
 
-  await revalidateDonationCatalog(inventoryItemId);
+  revalidateDonationCatalog(inventoryItemId);
 }
 
 export async function removeCatalogItemAction(formData: FormData) {
@@ -247,7 +245,7 @@ export async function removeCatalogItemAction(formData: FormData) {
     meta: { pk_uuid: catalogItemId, inventory_item_id: inventoryItemId },
   });
 
-  await revalidateDonationCatalog(inventoryItemId);
+  revalidateDonationCatalog(inventoryItemId);
 }
 
 export async function createCatalogCategory(formData: FormData) {
@@ -281,7 +279,7 @@ export async function createCatalogCategory(formData: FormData) {
     meta: { pk_uuid: data?.id ?? null, slug, label, is_public: isPublic, is_active: isActive, sort_order: sortOrder },
   });
 
-  await revalidateDonationCatalog(null);
+  revalidateDonationCatalog(null);
 }
 
 export async function updateCatalogCategory(formData: FormData) {
@@ -317,7 +315,7 @@ export async function updateCatalogCategory(formData: FormData) {
     meta: { pk_uuid: id, slug, label, is_public: isPublic, is_active: isActive, sort_order: sortOrder },
   });
 
-  await revalidateDonationCatalog(null);
+  revalidateDonationCatalog(null);
 }
 
 export async function syncCatalogItemStripeAction(formData: FormData) {
@@ -354,7 +352,7 @@ export async function syncCatalogItemStripeAction(formData: FormData) {
     .maybeSingle();
   if (inventoryError) throw inventoryError;
   const inventoryItemId = typeof inventoryRow?.inventory_item_id === 'string' ? inventoryRow.inventory_item_id : null;
-  await revalidateDonationCatalog(inventoryItemId);
+  revalidateDonationCatalog(inventoryItemId);
 }
 
 export async function cancelDonationSubscriptionAction(formData: FormData) {
