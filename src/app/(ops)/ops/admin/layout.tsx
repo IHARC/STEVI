@@ -22,15 +22,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         { label: 'Organizations', href: '/ops/admin/organizations', match: ['/ops/admin/organizations'] },
         { label: 'Users & access', href: '/ops/admin/users/all', match: ['/ops/admin/users'] },
         { label: 'Content & comms', href: '/ops/admin/content', match: ['/ops/admin/content'] },
-        {
-          label: 'Integrations & AI',
-          href: '/ops/admin/integrations',
-          match: ['/ops/admin/integrations'],
-          items: [
-            { label: 'AI & system', href: '/ops/admin/integrations', match: ['/ops/admin/integrations'] },
-            { label: 'Donations (Stripe)', href: '/ops/admin/integrations/donations', match: ['/ops/admin/integrations/donations'] },
-          ],
-        },
+        { label: 'Integrations', href: '/ops/admin/integrations', match: ['/ops/admin/integrations'] },
         {
           label: 'Website & marketing',
           href: '/ops/admin/website',

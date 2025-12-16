@@ -26,7 +26,8 @@ export type QuickAction = {
 const canSeeFrontline = (access: PortalAccess) => access.canAccessOpsFrontline;
 const canSeeClients = (access: PortalAccess) => access.canAccessOpsFrontline || access.canManageConsents;
 const canSeePrograms = (access: PortalAccess) => access.canAccessOpsFrontline || access.canAccessOpsAdmin;
-const canSeeSupplies = (access: PortalAccess) => access.canAccessInventoryOps;
+const canSeeInventory = (access: PortalAccess) => access.canAccessInventoryOps;
+const canSeeFundraising = (access: PortalAccess) => access.canAccessOpsSteviAdmin;
 const canSeeDirectory = (access: PortalAccess) =>
   access.canAccessOpsFrontline || access.canAccessOpsOrg || access.canAccessOpsAdmin || access.canAccessOpsSteviAdmin;
 const canSeeOrganization = (access: PortalAccess) => access.canAccessOpsOrg && !access.canAccessOpsSteviAdmin;
@@ -70,13 +71,23 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
         ],
       },
       {
-        id: 'supplies',
-        label: 'Supplies',
+        id: 'inventory',
+        label: 'Inventory',
         icon: 'boxes',
-        requires: canSeeSupplies,
+        requires: canSeeInventory,
         isHub: true,
         items: [
-          { id: 'supplies', href: '/ops/supplies', label: 'Supplies', icon: 'boxes', match: ['/ops/supplies'] },
+          { id: 'inventory', href: '/ops/inventory', label: 'Inventory', icon: 'boxes', match: ['/ops/inventory'] },
+        ],
+      },
+      {
+        id: 'fundraising',
+        label: 'Fundraising',
+        icon: 'handHeart',
+        requires: canSeeFundraising,
+        isHub: true,
+        items: [
+          { id: 'fundraising', href: '/ops/fundraising', label: 'Fundraising', icon: 'handHeart', match: ['/ops/fundraising'] },
         ],
       },
       {
@@ -128,7 +139,7 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
         items: [
           { id: 'admin-overview', href: '/ops/admin', label: 'General settings', icon: 'dashboard', match: ['/ops/admin'], exact: true },
           { id: 'admin-content', href: '/ops/admin/content', label: 'Content & Notifications', icon: 'megaphone', match: ['/ops/admin/content'] },
-          { id: 'admin-integrations', href: '/ops/admin/integrations', label: 'Integrations & AI', icon: 'lab', match: ['/ops/admin/integrations'] },
+          { id: 'admin-integrations', href: '/ops/admin/integrations', label: 'Integrations', icon: 'lab', match: ['/ops/admin/integrations'] },
           { id: 'admin-organizations', href: '/ops/admin/organizations', label: 'Organizations', icon: 'globe', match: ['/ops/admin/organizations'] },
           { id: 'admin-users', href: '/ops/admin/users/all', label: 'Users', icon: 'users', match: ['/ops/admin/users'] },
           { id: 'admin-website', href: '/ops/admin/website/branding', label: 'Website & Marketing', icon: 'globe', match: ['/ops/admin/website'] },

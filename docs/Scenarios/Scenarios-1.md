@@ -12,7 +12,7 @@ Use these end-to-end scenarios when designing, building, and testing the Encount
 ### 1) Outreach: hand warmers + water; pneumonia disclosed; client exists
 - Actor: Outreach worker (field role).
 - Flow: From Today/Clients → open client → New Encounter (type Outreach) → add items given (hand warmers, water) → note health concern (pneumonia).
-- Outcome: Supplies decremented; Encounter logged to Client Journey; no nav detour into Supplies.
+- Outcome: Supplies decremented; Encounter logged to Client Journey; no nav detour into Inventory.
 
 ### 2) Drop-in lunch → mental health support; client exists; multiple orgs
 - Actor: Salvation Army staff running a program.
@@ -32,7 +32,7 @@ Use these end-to-end scenarios when designing, building, and testing the Encount
 ### Canonical rules validated by these scenarios
 1) Clients are the spine; Client Journey is canonical.
 2) Encounter (formerly “Visit”) is the universal interaction record; all frontline actions happen inside it.
-3) Supplies distribution is recorded inside Encounters; Supplies hub is for stock/reconciliation only.
+3) Supplies distribution is recorded inside Encounters; Inventory hub is for stock/reconciliation only.
 4) Referrals are initiated from the client/Encounter; Partners hub is the directory/config surface.
 5) Role-based landing and visibility keep low-tech users focused while preserving one shell.
 6) Consent/sharing is a first-class UI signal on Client and every Encounter/Referral.

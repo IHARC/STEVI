@@ -86,7 +86,7 @@ Goal: hub-and-spoke; scales with breadth; global nav remains thin.
 1) Today
 2) Clients
 3) Programs
-4) Supplies
+4) Inventory
 5) Directory (rename from “Partners” if it is primarily a directory)
 6) Organization (org admin only; tenant-scoped)
 7) STEVI Admin (IHARC super-admin only; platform scope)
@@ -104,7 +104,7 @@ Recommended Level 2 structures:
 - Today: My day / Intake queue / Outreach / Tasks / Recents (role gated)
 - Clients: Search / Caseload / Consents overview (role gated)
 - Programs: Programs / Schedules / Appointments (role gated)
-- Supplies: Stock / Locations / Transactions / Reconciliation (role gated)
+- Inventory: Stock / Locations / Transactions / Reconciliation (role gated)
 - Directory: Orgs directory / Services directory / Referral destinations (read-only baseline; config lives elsewhere)
 - Organization (org admins): Overview / Members / Invites / Appointments / Settings / Modules (view-only)
 - STEVI Admin: Overview / Organizations (capabilities) / Users & Roles / Content & Notifications / Inventory & Donations / Website & Marketing / Ops configuration

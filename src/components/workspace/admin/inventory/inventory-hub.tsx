@@ -1,6 +1,5 @@
 'use client';
 
-import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs';
@@ -16,9 +15,7 @@ type InventoryHubProps = {
   bootstrap: InventoryBootstrap;
   actorProfileId: string;
   canManageLocations: boolean;
-  activeTab: 'dashboard' | 'items' | 'locations' | 'organizations' | 'receipts' | 'donations';
-  showDonationCatalogueTab?: boolean;
-  donationCatalogueContent?: ReactNode;
+  activeTab: 'dashboard' | 'items' | 'locations' | 'organizations' | 'receipts';
 };
 
 export function InventoryHub({
@@ -26,11 +23,8 @@ export function InventoryHub({
   actorProfileId,
   canManageLocations,
   activeTab,
-  showDonationCatalogueTab = false,
-  donationCatalogueContent,
 }: InventoryHubProps) {
   const searchParams = useSearchParams();
-  const railColumns = showDonationCatalogueTab ? 'lg:grid-cols-6' : 'lg:grid-cols-5';
 
   const buildHref = (tab: InventoryHubProps['activeTab']) => {
     const params = new URLSearchParams(searchParams?.toString());
@@ -40,7 +34,7 @@ export function InventoryHub({
       params.set('tab', tab);
     }
     const query = params.toString();
-    return query ? `/ops/supplies?${query}` : '/ops/supplies';
+    return query ? `/ops/inventory?${query}` : '/ops/inventory';
   };
 
   return (
@@ -48,7 +42,7 @@ export function InventoryHub({
       <TabsList
         className={cn(
           'grid h-auto w-full grid-cols-2 gap-1 rounded-2xl sm:grid-cols-3',
-          railColumns,
+          'lg:grid-cols-5',
         )}
       >
         <TabsTrigger value="dashboard" asChild className="w-full rounded-xl px-3 text-xs font-semibold">
@@ -66,11 +60,6 @@ export function InventoryHub({
         <TabsTrigger value="receipts" asChild className="w-full rounded-xl px-3 text-xs font-semibold">
           <Link href={buildHref('receipts')}>Receipts</Link>
         </TabsTrigger>
-        {showDonationCatalogueTab ? (
-          <TabsTrigger value="donations" asChild className="w-full rounded-xl px-3 text-xs font-semibold">
-            <Link href={buildHref('donations')}>Donation catalogue</Link>
-          </TabsTrigger>
-        ) : null}
       </TabsList>
 
       <TabsContent value="dashboard" className="mt-0">
@@ -105,16 +94,6 @@ export function InventoryHub({
           actorProfileId={actorProfileId}
         />
       </TabsContent>
-
-      {showDonationCatalogueTab ? (
-        <TabsContent value="donations" className="mt-0">
-          {donationCatalogueContent ?? (
-            <div className="rounded-2xl border border-border/15 bg-background p-6 text-sm text-muted-foreground shadow-sm">
-              Loading donation catalogue…
-            </div>
-          )}
-        </TabsContent>
-      ) : null}
     </Tabs>
   );
 }

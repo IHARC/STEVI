@@ -13,6 +13,7 @@ import {
   Flame,
   FlaskConical,
   Globe2,
+  HandHeart,
   Home,
   IdCard,
   Inbox,
@@ -63,6 +64,7 @@ export const APP_ICON_MAP = {
   approval: ClipboardCheck,
   workflow: Workflow,
   flame: Flame,
+  handHeart: HandHeart,
 } as const satisfies Record<string, LucideIcon>;
 
 export type AppIconName = keyof typeof APP_ICON_MAP;

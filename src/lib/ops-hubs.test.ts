@@ -88,11 +88,12 @@ describe('buildOpsHubLinks', () => {
       'Today',
       'Clients',
       'Programs',
-      'Supplies',
+      'Inventory',
+      'Fundraising',
       'Directory',
       'STEVI Admin',
     ]);
-    expect(hubs).toHaveLength(6);
+    expect(hubs).toHaveLength(7);
   });
 
   it('keeps org hub as a primary hub for org-scoped users', () => {

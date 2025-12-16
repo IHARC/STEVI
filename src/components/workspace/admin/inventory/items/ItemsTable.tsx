@@ -34,7 +34,7 @@ export function ItemsTable({ items, isPending, onReceive, onTransfer, onAdjust, 
         {items.map((item) => (
           <TableRow key={item.id} className={!item.active ? 'opacity-60' : undefined}>
             <TableCell className="font-medium">
-              <Link href={`/ops/supplies/items/${item.id}`} className="hover:underline">
+              <Link href={`/ops/inventory/items/${item.id}`} className="hover:underline">
                 {item.name}
               </Link>
             </TableCell>
@@ -60,7 +60,7 @@ export function ItemsTable({ items, isPending, onReceive, onTransfer, onAdjust, 
                 Adjust
               </Button>
               <Button asChild size="sm" variant="ghost">
-                <Link href={`/ops/supplies/items/${item.id}`}>Open</Link>
+                <Link href={`/ops/inventory/items/${item.id}`}>Open</Link>
               </Button>
               <Button size="sm" variant="ghost" onClick={() => onToggle(item, !item.active)} disabled={isPending}>
                 {item.active ? 'Deactivate' : 'Activate'}

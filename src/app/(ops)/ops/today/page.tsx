@@ -175,7 +175,7 @@ export default async function OpsTodayPage() {
           <Card className="border-border/70">
             <CardHeader className="space-y-1">
               <CardTitle className="text-lg">Ops orientation</CardTitle>
-              <CardDescription>Use the Ops rail to reach Organization, Directory, and Supplies.</CardDescription>
+              <CardDescription>Use the Ops rail to reach Organization, Directory, and Inventory.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2 text-sm text-muted-foreground">
               <p>Admins can manage access under Organization → Access & roles.</p>

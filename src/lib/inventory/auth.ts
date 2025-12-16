@@ -31,7 +31,7 @@ export async function ensureInventoryActor(
 
   if (error || !user) {
     if (redirectOnFailure) {
-      redirect('/login?next=/ops/supplies');
+      redirect('/login?next=/ops/inventory');
     }
     throw new InventoryAccessError('Sign in to continue.');
   }
@@ -39,7 +39,7 @@ export async function ensureInventoryActor(
   const access = await loadPortalAccess(supabase);
   if (!access) {
     if (redirectOnFailure) {
-      redirect('/login?next=/ops/supplies');
+      redirect('/login?next=/ops/inventory');
     }
     throw new InventoryAccessError('Sign in to continue.');
   }

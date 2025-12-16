@@ -176,7 +176,7 @@ export function DonationCatalogAdmin({ inventoryItems, catalogInventoryItemIds, 
                 onValueChange={(value) => {
                   setAddInventoryId(value);
                   if (value) {
-                    router.push(`/ops/supplies/items/${value}?tab=donations`);
+                    router.push(`/ops/fundraising/items/${value}`);
                   }
                 }}
                 options={availableInventoryOptions}
@@ -186,7 +186,7 @@ export function DonationCatalogAdmin({ inventoryItems, catalogInventoryItemIds, 
               />
             </div>
             <p className="mt-2 text-xs text-muted-foreground">
-              Donation settings are configured per item on the item detail screen.
+              Donation settings are configured per item on the fundraising detail screen.
             </p>
           </div>
 
@@ -261,7 +261,7 @@ export function DonationCatalogAdmin({ inventoryItems, catalogInventoryItemIds, 
               return (
               <TableRow key={item.id} className={cn(!item.isActive && 'opacity-70')}>
                 <TableCell className="font-medium">
-                  <Link href={`/ops/supplies/items/${item.inventoryItemId}?tab=donations`} className="hover:underline">
+                  <Link href={`/ops/fundraising/items/${item.inventoryItemId}`} className="hover:underline">
                     {item.title}
                   </Link>
                   <div className="mt-1 text-xs text-muted-foreground">/{item.slug}</div>
@@ -282,7 +282,7 @@ export function DonationCatalogAdmin({ inventoryItems, catalogInventoryItemIds, 
                 </TableCell>
                 <TableCell className="text-right">
                   <Button asChild size="sm" variant="outline">
-                    <Link href={`/ops/supplies/items/${item.inventoryItemId}?tab=donations`}>Open</Link>
+                    <Link href={`/ops/fundraising/items/${item.inventoryItemId}`}>Open</Link>
                   </Button>
                 </TableCell>
               </TableRow>

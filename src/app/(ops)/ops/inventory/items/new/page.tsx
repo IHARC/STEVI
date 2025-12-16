@@ -9,12 +9,12 @@ import { InventoryItemCreate } from '@/components/workspace/inventory/item-detai
 
 export const dynamic = 'force-dynamic';
 
-export default async function OpsSuppliesNewItemPage() {
+export default async function OpsInventoryNewItemPage() {
   const supabase = await createSupabaseRSCClient();
   const access = await loadPortalAccess(supabase);
 
   if (!access) {
-    redirect('/login?next=/ops/supplies/items/new');
+    redirect('/login?next=/ops/inventory/items/new');
   }
 
   if (!access.canAccessInventoryOps && !access.canAccessOpsAdmin) {
@@ -39,8 +39,8 @@ export default async function OpsSuppliesNewItemPage() {
         title="Create inventory item"
         description="Add a new item for outreach and donation-backed supplies."
         breadcrumbs={[
-          { label: 'Supplies', href: '/ops/supplies' },
-          { label: 'Items', href: '/ops/supplies' },
+          { label: 'Inventory', href: '/ops/inventory' },
+          { label: 'Items', href: '/ops/inventory' },
           { label: 'Create item' },
         ]}
       />
@@ -49,4 +49,3 @@ export default async function OpsSuppliesNewItemPage() {
     </div>
   );
 }
-

@@ -132,8 +132,8 @@ describe('ensureInventoryActor', () => {
   it('redirects to login when configured to redirect on failure', async () => {
     const supabase = createSupabase(null);
 
-    await expect(ensureInventoryActor(supabase, true)).rejects.toThrow('redirect:/login?next=/ops/supplies');
-    expect(redirectMock).toHaveBeenCalledWith('/login?next=/ops/supplies');
+    await expect(ensureInventoryActor(supabase, true)).rejects.toThrow('redirect:/login?next=/ops/inventory');
+    expect(redirectMock).toHaveBeenCalledWith('/login?next=/ops/inventory');
   });
 });
 

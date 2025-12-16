@@ -33,7 +33,7 @@ This document codifies the client/operations shell split for STEVI. It complemen
 - Operations shell:
   - Areas: `ops_frontline`, `ops_org`, `ops_admin` (STEVI Admin).
   - Redirects to `/home` when ops access is missing.
-  - Navigation contains only ops sections; primary chrome uses a thin hub rail (Today, Clients, Programs, Supplies, Partners, Org Hub, STEVI Admin) with sub-pages living inside each hub.
+  - Navigation contains only ops sections; primary chrome uses a thin hub rail (Today, Clients, Programs, Inventory, Partners, Org Hub, STEVI Admin) with sub-pages living inside each hub.
   - Org Hub is a primary hub only for org-scoped users; IHARC admins access org hub tools from within STEVI Admin.
   - “Preview client portal” points to `/home?preview=1`.
 - Preview banner lives only in the client shell with an explicit exit path back to the user’s primary ops area.

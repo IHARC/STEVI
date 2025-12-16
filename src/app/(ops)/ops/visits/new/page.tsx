@@ -117,7 +117,7 @@ export default async function NewVisitPage() {
               {' '}before logging so Visits capture the right context.
             </li>
             <li>
-              <Link href="/ops/supplies" className="font-semibold text-foreground hover:underline">Review supplies</Link>
+              <Link href="/ops/inventory" className="font-semibold text-foreground hover:underline">Review inventory</Link>
               {' '}to prep stock and keep Visit adjustments in sync with inventory controls.
             </li>
           </ul>

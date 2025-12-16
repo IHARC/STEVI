@@ -47,7 +47,7 @@ export function InventoryItemsSection({ items, locations, organizations, actorPr
             />
           </Dialog>
           <Button asChild>
-            <Link href="/ops/supplies/items/new">Create item</Link>
+            <Link href="/ops/inventory/items/new">Create item</Link>
           </Button>
         </div>
       </CardHeader>

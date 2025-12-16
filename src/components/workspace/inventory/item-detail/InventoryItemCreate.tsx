@@ -64,11 +64,11 @@ export function InventoryItemCreate({ actorProfileId, categories, locations }: P
     }
     const itemId = (result.data as { item?: { id?: unknown } } | undefined)?.item?.id;
     if (typeof itemId === 'string' && itemId.length > 0) {
-      router.push(`/ops/supplies/items/${itemId}`);
+      router.push(`/ops/inventory/items/${itemId}`);
       return;
     }
     toast({ title: 'Item created', description: 'Open the item list to continue.' });
-    router.push('/ops/supplies');
+    router.push('/ops/inventory');
   };
 
   return (
@@ -259,7 +259,7 @@ export function InventoryItemCreate({ actorProfileId, categories, locations }: P
             />
 
             <div className="flex items-center justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => router.push('/ops/supplies')} disabled={isPending}>
+              <Button type="button" variant="outline" onClick={() => router.push('/ops/inventory')} disabled={isPending}>
                 Cancel
               </Button>
               <Button type="submit" disabled={isPending}>
@@ -272,4 +272,3 @@ export function InventoryItemCreate({ actorProfileId, categories, locations }: P
     </Card>
   );
 }
-

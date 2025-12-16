@@ -32,7 +32,7 @@ import type {
   InventoryReceipt,
 } from '@/lib/inventory/types';
 
-const INVENTORY_PATH = '/ops/supplies';
+const INVENTORY_PATH = '/ops/inventory';
 
 type ActionResult<T = void> = { success: true; data?: T } | { success: false; error: string };
 

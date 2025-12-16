@@ -22,7 +22,7 @@ This plan builds on what already exists:
 
 ## Current State (confirmed)
 ### STEVI surfaces
-- Catalogue overview: `/ops/supplies/donations` (`src/app/(ops)/ops/supplies/donations/page.tsx`).
+- Catalogue overview: `/ops/inventory` (Inventory hub; donation overview TBD).
 - Per-item donation listing editor (includes target buffer, categories, activation gating, Stripe sync):
   - `src/components/workspace/inventory/item-detail/InventoryItemDetail.tsx` (`DonationListingCard`).
 - Admin actions with audit + revalidation:

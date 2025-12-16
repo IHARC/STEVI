@@ -1,33 +1,18 @@
 import { notFound, redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
-import { ensureInventoryActor } from '@/lib/inventory/auth';
-import {
-  fetchInventoryItemById,
-  fetchInventoryItems,
-  fetchInventoryLocations,
-  fetchInventoryOrganizations,
-  fetchInventoryReceipts,
-} from '@/lib/inventory/service';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { resolveLandingPath } from '@/lib/portal-navigation';
 import { PageHeader } from '@shared/layout/page-header';
-import { InventoryItemDetail } from '@/components/workspace/inventory/item-detail/InventoryItemDetail';
+import { fetchInventoryItemById } from '@/lib/inventory/service';
 import { fetchDonationCatalogCategories } from '@/lib/donations/service';
 import type { DonationCatalogCategory, DonationCatalogItem, DonationCatalogMetrics } from '@/lib/donations/types';
+import { DonationListingCard } from '@/components/workspace/fundraising/donation-listing-card';
 
 export const dynamic = 'force-dynamic';
 
 type PageProps = {
   params: Promise<{ itemId: string }>;
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
-
-function getString(params: Record<string, string | string[] | undefined> | undefined, key: string) {
-  const value = params?.[key];
-  if (typeof value === 'string') return value;
-  if (Array.isArray(value)) return value[0] ?? null;
-  return null;
-}
 
 function asNumber(value: unknown): number | null {
   if (value === null || value === undefined) return null;
@@ -134,72 +119,40 @@ async function fetchDonationListingForItem(
   return { item, categories };
 }
 
-export default async function OpsSuppliesItemDetailPage({ params, searchParams }: PageProps) {
+export default async function OpsFundraisingDonationListingPage({ params }: PageProps) {
   const supabase = await createSupabaseRSCClient();
   const access = await loadPortalAccess(supabase);
   const { itemId } = await params;
 
   if (!access) {
-    redirect(`/login?next=${encodeURIComponent(`/ops/supplies/items/${itemId}`)}`);
+    redirect(`/login?next=${encodeURIComponent(`/ops/fundraising/items/${itemId}`)}`);
   }
 
-  if (!access.canAccessInventoryOps && !access.canAccessOpsAdmin) {
+  if (!access.canAccessOpsSteviAdmin) {
     redirect(resolveLandingPath(access));
   }
 
-  const { profile } = await ensureInventoryActor(supabase, true);
-
-  const [item, locations, organizations, receipts, allItems] = await Promise.all([
-    fetchInventoryItemById(supabase, itemId),
-    fetchInventoryLocations(supabase),
-    fetchInventoryOrganizations(supabase),
-    fetchInventoryReceipts(supabase, { itemId, limit: 200 }),
-    fetchInventoryItems(supabase),
-  ]);
-
+  const item = await fetchInventoryItemById(supabase, itemId);
   if (!item) {
     notFound();
   }
 
-  const categories = Array.from(
-    new Set(
-      allItems
-        .map((entry) => entry.category)
-        .filter((category): category is string => typeof category === 'string' && category.trim().length > 0),
-    ),
-  ).sort((a, b) => a.localeCompare(b));
-
-  const resolvedParams = searchParams ? await searchParams : undefined;
-  const tab = getString(resolvedParams, 'tab');
-  const initialTab = tab === 'stock' || tab === 'donations' ? tab : 'inventory';
-
-  const canManageDonations = access.canAccessOpsSteviAdmin;
-  const donation = canManageDonations ? await fetchDonationListingForItem(supabase, itemId) : null;
+  const donation = await fetchDonationListingForItem(supabase, itemId);
 
   return (
     <div className="space-y-6">
       <PageHeader
         eyebrow="Operations"
         title={item.name}
-        description="Inventory details, stock history, and donation catalogue settings."
-        breadcrumbs={[
-          { label: 'Supplies', href: '/ops/supplies' },
-          { label: 'Items', href: '/ops/supplies' },
-          { label: item.name },
-        ]}
+        description="Donation catalogue settings and Stripe sync."
+        breadcrumbs={[{ label: 'Fundraising', href: '/ops/fundraising' }, { label: 'Catalogue', href: '/ops/fundraising?tab=catalogue' }, { label: item.name }]}
       />
 
-      <InventoryItemDetail
-        item={item}
-        categories={categories}
-        locations={locations}
-        organizations={organizations}
-        receipts={receipts}
-        actorProfileId={profile.id}
-        canManageDonations={canManageDonations}
-        donation={donation?.item ?? null}
-        donationCategories={donation?.categories ?? []}
-        initialTab={initialTab}
+      <DonationListingCard
+        inventoryItem={item}
+        actorProfileId={access.profile.id}
+        listing={donation.item}
+        categories={donation.categories}
       />
     </div>
   );

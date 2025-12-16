@@ -5,7 +5,8 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 
-const DONATION_CATALOG_PATH = '/ops/supplies';
+const DONATION_CATALOG_PATH = '/ops/fundraising';
+const INTEGRATIONS_PATH = '/ops/admin/integrations';
 
 type AdminContext = {
   supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>;
@@ -17,8 +18,12 @@ type AdminContext = {
 function revalidateDonationCatalog(inventoryItemId?: string | null) {
   revalidatePath(DONATION_CATALOG_PATH);
   if (inventoryItemId) {
-    revalidatePath(`/ops/supplies/items/${inventoryItemId}`);
+    revalidatePath(`/ops/fundraising/items/${inventoryItemId}`);
   }
+}
+
+function revalidateFundraisingActivity() {
+  revalidatePath(DONATION_CATALOG_PATH);
 }
 
 function normalizeSlug(input: string): string {
@@ -386,7 +391,7 @@ export async function cancelDonationSubscriptionAction(formData: FormData) {
     meta: { stripe_subscription_id: stripeSubscriptionId },
   });
 
-  await revalidatePath('/ops/admin/integrations/donations');
+  revalidateFundraisingActivity();
 }
 
 export async function resendDonationManageLinkAction(formData: FormData) {
@@ -416,7 +421,7 @@ export async function resendDonationManageLinkAction(formData: FormData) {
     meta: { email },
   });
 
-  await revalidatePath('/ops/admin/integrations/donations');
+  revalidateFundraisingActivity();
 }
 
 export async function reprocessStripeWebhookEventAction(formData: FormData) {
@@ -450,7 +455,8 @@ export async function reprocessStripeWebhookEventAction(formData: FormData) {
     meta: { stripe_event_id: stripeEventId },
   });
 
-  await revalidatePath('/ops/admin/integrations/donations');
+  revalidateFundraisingActivity();
+  revalidatePath(INTEGRATIONS_PATH);
 }
 
 export async function upsertStripeDonationsCredentialsAction(formData: FormData) {
@@ -483,7 +489,7 @@ export async function upsertStripeDonationsCredentialsAction(formData: FormData)
     meta: { mode },
   });
 
-  await revalidatePath('/ops/admin/integrations/donations');
+  revalidatePath(INTEGRATIONS_PATH);
 }
 
 export async function setStripeDonationsModeAction(formData: FormData) {
@@ -511,7 +517,7 @@ export async function setStripeDonationsModeAction(formData: FormData) {
     meta: { mode },
   });
 
-  await revalidatePath('/ops/admin/integrations/donations');
+  revalidatePath(INTEGRATIONS_PATH);
 }
 
 export async function upsertDonationsEmailCredentialsAction(formData: FormData) {
@@ -545,5 +551,5 @@ export async function upsertDonationsEmailCredentialsAction(formData: FormData) 
     meta: { email_from: emailFrom, provider: 'sendgrid' },
   });
 
-  await revalidatePath('/ops/admin/integrations/donations');
+  revalidatePath(INTEGRATIONS_PATH);
 }
