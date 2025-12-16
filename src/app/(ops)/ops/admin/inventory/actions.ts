@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 import { ensureInventoryActor, InventoryAccessError, requireInventoryAdmin } from '@/lib/inventory/auth';
+import { revalidateMarketingDonationCatalog } from '@/lib/marketing/revalidate';
 import {
   adjustInventoryStock,
   bulkReceiveInventoryStock,
@@ -90,6 +91,7 @@ function getOptionalString(formData: FormData, key: string): string | null {
 async function runInventoryMutation<T = void>(
   formData: FormData,
   mutate: InventoryMutation,
+  { revalidateMarketing = false }: { revalidateMarketing?: boolean } = {},
 ): Promise<ActionResult<T>> {
   try {
     const supabase = await createSupabaseServerClient();
@@ -103,6 +105,9 @@ async function runInventoryMutation<T = void>(
     const result = await mutate(context, supabase, formData);
 
     await revalidatePath(INVENTORY_PATH);
+    if (revalidateMarketing) {
+      await revalidateMarketingDonationCatalog();
+    }
 
     return { success: true, data: result as T };
   } catch (error: unknown) {
@@ -122,7 +127,9 @@ async function runInventoryMutation<T = void>(
 export async function createInventoryItemAction(
   formData: FormData,
 ): Promise<ActionResult<{ item: InventoryItem }>> {
-  return runInventoryMutation(formData, async ({ profile }, supabase) => {
+  return runInventoryMutation(
+    formData,
+    async ({ profile }, supabase) => {
     const item = await createInventoryItem(supabase, {
       name: getRequiredString(formData, 'name', 'Name is required.'),
       description: getOptionalString(formData, 'description'),
@@ -149,11 +156,15 @@ export async function createInventoryItemAction(
     });
 
     return { item };
-  });
+    },
+    { revalidateMarketing: true },
+  );
 }
 
 export async function updateInventoryItemAction(formData: FormData): Promise<ActionResult> {
-  return runInventoryMutation(formData, async ({ profile }, supabase) => {
+  return runInventoryMutation(
+    formData,
+    async ({ profile }, supabase) => {
     const itemId = getRequiredString(formData, 'item_id', 'Item context missing.');
 
     await updateInventoryItem(supabase, itemId, {
@@ -173,11 +184,15 @@ export async function updateInventoryItemAction(formData: FormData): Promise<Act
       entityType: 'inventory_item',
       entityRef: buildEntityRef({ schema: 'core', table: 'items', id: itemId }),
     });
-  });
+    },
+    { revalidateMarketing: true },
+  );
 }
 
 export async function deleteInventoryItemAction(formData: FormData): Promise<ActionResult> {
-  return runInventoryMutation(formData, async ({ profile }, supabase) => {
+  return runInventoryMutation(
+    formData,
+    async ({ profile }, supabase) => {
     const itemId = getRequiredString(formData, 'item_id', 'Item context missing.');
 
     await deleteInventoryItem(supabase, itemId);
@@ -188,11 +203,15 @@ export async function deleteInventoryItemAction(formData: FormData): Promise<Act
       entityType: 'inventory_item',
       entityRef: buildEntityRef({ schema: 'core', table: 'items', id: itemId }),
     });
-  });
+    },
+    { revalidateMarketing: true },
+  );
 }
 
 export async function toggleInventoryItemStatusAction(formData: FormData): Promise<ActionResult> {
-  return runInventoryMutation(formData, async ({ profile }, supabase) => {
+  return runInventoryMutation(
+    formData,
+    async ({ profile }, supabase) => {
     const itemId = getRequiredString(formData, 'item_id', 'Item context missing.');
     const active = normalizeBoolean(formData.get('active'), true);
 
@@ -204,11 +223,15 @@ export async function toggleInventoryItemStatusAction(formData: FormData): Promi
       entityType: 'inventory_item',
       entityRef: buildEntityRef({ schema: 'core', table: 'items', id: itemId }),
     });
-  });
+    },
+    { revalidateMarketing: true },
+  );
 }
 
 export async function receiveInventoryStockAction(formData: FormData): Promise<ActionResult> {
-  return runInventoryMutation(formData, async ({ profile }, supabase) => {
+  return runInventoryMutation(
+    formData,
+    async ({ profile }, supabase) => {
     await receiveInventoryStock(supabase, {
       itemId: getRequiredString(formData, 'item_id', 'Select an item to receive stock for.'),
       locationId: getRequiredString(formData, 'location_id', 'Select a location.'),
@@ -231,11 +254,15 @@ export async function receiveInventoryStockAction(formData: FormData): Promise<A
         id: getRequiredString(formData, 'item_id', 'Select an item to receive stock for.'),
       }),
     });
-  });
+    },
+    { revalidateMarketing: true },
+  );
 }
 
 export async function bulkReceiveInventoryStockAction(formData: FormData): Promise<ActionResult> {
-  return runInventoryMutation(formData, async ({ profile }, supabase) => {
+  return runInventoryMutation(
+    formData,
+    async ({ profile }, supabase) => {
     const payloadRaw = getRequiredString(formData, 'items', 'Receipt payload missing.');
 
     let payload: BulkReceiptInput;
@@ -257,11 +284,15 @@ export async function bulkReceiveInventoryStockAction(formData: FormData): Promi
         total_items: payload.items.length,
       },
     });
-  });
+    },
+    { revalidateMarketing: true },
+  );
 }
 
 export async function transferInventoryStockAction(formData: FormData): Promise<ActionResult> {
-  return runInventoryMutation(formData, async ({ profile }, supabase) => {
+  return runInventoryMutation(
+    formData,
+    async ({ profile }, supabase) => {
     await transferInventoryStock(supabase, {
       itemId: getRequiredString(formData, 'item_id', 'Select an item.'),
       fromLocationId: getRequiredString(formData, 'from_location_id', 'Select the source location.'),
@@ -280,11 +311,15 @@ export async function transferInventoryStockAction(formData: FormData): Promise<
         id: getRequiredString(formData, 'item_id', 'Select an item.'),
       }),
     });
-  });
+    },
+    { revalidateMarketing: true },
+  );
 }
 
 export async function adjustInventoryStockAction(formData: FormData): Promise<ActionResult> {
-  return runInventoryMutation(formData, async ({ profile }, supabase) => {
+  return runInventoryMutation(
+    formData,
+    async ({ profile }, supabase) => {
     await adjustInventoryStock(supabase, {
       itemId: getRequiredString(formData, 'item_id', 'Select an item.'),
       locationId: getRequiredString(formData, 'location_id', 'Select a location.'),
@@ -304,7 +339,9 @@ export async function adjustInventoryStockAction(formData: FormData): Promise<Ac
         id: getRequiredString(formData, 'item_id', 'Select an item.'),
       }),
     });
-  });
+    },
+    { revalidateMarketing: true },
+  );
 }
 
 export async function createInventoryLocationAction(

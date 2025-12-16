@@ -17,6 +17,7 @@ import type { DonationCatalogAdminStats } from '@/lib/donations/service';
 import type { InventoryItem } from '@/lib/inventory/types';
 import { createCatalogCategory, updateCatalogCategory } from '@/app/(ops)/ops/admin/donations/actions';
 import { cn } from '@/lib/utils';
+import { computeDonationNeedMetrics } from '@/lib/donations/need-math';
 
 type Props = {
   inventoryItems: InventoryItem[];
@@ -236,6 +237,9 @@ export function DonationCatalogAdmin({ inventoryItems, catalogInventoryItemIds, 
               <TableHead>Item</TableHead>
               <TableHead>Category</TableHead>
               <TableHead className="text-right">Stock</TableHead>
+              <TableHead className="text-right">Target</TableHead>
+              <TableHead className="text-right">Short by</TableHead>
+              <TableHead className="text-right">Need %</TableHead>
               <TableHead className="text-right">Priority</TableHead>
               <TableHead className="text-right">Status</TableHead>
               <TableHead className="text-right">Stripe</TableHead>
@@ -243,7 +247,15 @@ export function DonationCatalogAdmin({ inventoryItems, catalogInventoryItemIds, 
             </TableRow>
           </TableHeader>
           <TableBody>
-            {items.map((item) => (
+            {items.map((item) => {
+              const need = computeDonationNeedMetrics({
+                targetBuffer: item.targetBuffer ?? item.metrics.targetBuffer,
+                currentStock: item.metrics.currentStock,
+                distributedLast30Days: item.metrics.distributedLast30Days,
+              });
+              const stock = item.metrics.currentStock;
+
+              return (
               <TableRow key={item.id} className={cn(!item.isActive && 'opacity-70')}>
                 <TableCell className="font-medium">
                   <Link href={`/ops/supplies/items/${item.inventoryItemId}?tab=donations`} className="hover:underline">
@@ -252,7 +264,10 @@ export function DonationCatalogAdmin({ inventoryItems, catalogInventoryItemIds, 
                   <div className="mt-1 text-xs text-muted-foreground">/{item.slug}</div>
                 </TableCell>
                 <TableCell>{item.category ?? '—'}</TableCell>
-                <TableCell className="text-right">{(item.metrics.currentStock ?? 0).toLocaleString()}</TableCell>
+                <TableCell className="text-right">{stock === null ? '—' : stock.toLocaleString()}</TableCell>
+                <TableCell className="text-right">{need.targetBuffer === null ? '—' : need.targetBuffer.toLocaleString()}</TableCell>
+                <TableCell className="text-right">{need.shortBy === null ? '—' : need.shortBy.toLocaleString()}</TableCell>
+                <TableCell className="text-right">{need.needPct === null ? '—' : `${Math.round(need.needPct * 100)}%`}</TableCell>
                 <TableCell className="text-right">{item.priority.toLocaleString()}</TableCell>
                 <TableCell className="text-right">
                   <Badge variant={item.isActive ? 'secondary' : 'outline'}>{item.isActive ? 'Active' : 'Hidden'}</Badge>
@@ -268,10 +283,11 @@ export function DonationCatalogAdmin({ inventoryItems, catalogInventoryItemIds, 
                   </Button>
                 </TableCell>
               </TableRow>
-            ))}
+              );
+            })}
             {items.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="py-8 text-center text-sm text-muted-foreground">
+                <TableCell colSpan={10} className="py-8 text-center text-sm text-muted-foreground">
                   No catalogue items match your filters.
                 </TableCell>
               </TableRow>

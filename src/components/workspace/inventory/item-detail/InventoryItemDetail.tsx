@@ -12,10 +12,12 @@ import { Textarea } from '@shared/ui/textarea';
 import { Checkbox } from '@shared/ui/checkbox';
 import { Badge } from '@shared/ui/badge';
 import { ToggleGroup, ToggleGroupItem } from '@shared/ui/toggle-group';
+import { Progress } from '@shared/ui/progress';
 import { useToast } from '@shared/ui/use-toast';
 import { cn } from '@/lib/utils';
 import type { InventoryItem, InventoryLocation, InventoryOrganization, InventoryReceipt } from '@/lib/inventory/types';
 import type { DonationCatalogCategory, DonationCatalogItem } from '@/lib/donations/types';
+import { computeDonationNeedMetrics } from '@/lib/donations/need-math';
 import { InventoryReceiptsSection } from '@workspace/admin/inventory/inventory-receipts';
 import { AdjustStockDialog, ReceiveStockDialog, TransferStockDialog } from '@workspace/admin/inventory/items/StockDialogs';
 import { useInventoryActions } from '@workspace/admin/inventory/items/useInventoryActions';
@@ -453,6 +455,13 @@ function DonationListingCard({
   })();
 
   const canActivate = activationIssues.length === 0;
+  const marketingPreview = listing?.id
+    ? computeDonationNeedMetrics({
+        targetBuffer: listing.targetBuffer ?? listing.metrics.targetBuffer,
+        currentStock: listing.metrics.currentStock,
+        distributedLast30Days: listing.metrics.distributedLast30Days,
+      })
+    : null;
 
   const submitSave = async (formData: FormData) => {
     formData.set('actor_profile_id', actorProfileId);
@@ -519,6 +528,65 @@ function DonationListingCard({
           </div>
         </CardHeader>
         <CardContent>
+          {marketingPreview ? (
+            <div className="mb-6 space-y-4 rounded-2xl border border-border/15 bg-background p-4 shadow-sm">
+              <div className="space-y-1">
+                <p className="text-sm font-semibold text-foreground">Marketing preview</p>
+                <p className="text-sm text-muted-foreground">These metrics drive “Most needed” ranking on iharc.ca.</p>
+              </div>
+
+              {marketingPreview.targetBuffer !== null && marketingPreview.targetBuffer > 0 && marketingPreview.currentStock !== null ? (
+                <div className="space-y-2">
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+                    <span className="text-muted-foreground">
+                      On hand <span className="font-semibold text-foreground">{marketingPreview.currentStock.toLocaleString()}</span>
+                      {' / '}
+                      Target <span className="font-semibold text-foreground">{marketingPreview.targetBuffer.toLocaleString()}</span>
+                    </span>
+                    {marketingPreview.shortBy !== null ? (
+                      <Badge variant={marketingPreview.shortBy > 0 ? 'destructive' : 'outline'}>
+                        Short by {marketingPreview.shortBy.toLocaleString()}
+                      </Badge>
+                    ) : null}
+                  </div>
+                  <Progress
+                    value={Math.min(100, (marketingPreview.currentStock / marketingPreview.targetBuffer) * 100)}
+                    aria-label="On hand versus target"
+                  />
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Set a positive target buffer to compute shortfall and ranking metrics.
+                </p>
+              )}
+
+              <div className="grid gap-3 sm:grid-cols-3">
+                <div className="rounded-xl border border-border/10 bg-background p-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Need %</p>
+                  <p className="mt-1 text-sm font-semibold text-foreground">
+                    {marketingPreview.needPct === null ? '—' : `${Math.round(marketingPreview.needPct * 100)}%`}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-border/10 bg-background p-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Burn rate</p>
+                  <p className="mt-1 text-sm font-semibold text-foreground">
+                    {marketingPreview.burnRatePerDay === null ? '—' : `${marketingPreview.burnRatePerDay.toFixed(1)}/day`}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-border/10 bg-background p-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Days of stock</p>
+                  <p className="mt-1 text-sm font-semibold text-foreground">
+                    {marketingPreview.daysOfStock === null ? '—' : `~${Math.round(marketingPreview.daysOfStock)} days`}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="mb-6 rounded-2xl border border-border/15 bg-background p-4 text-sm text-muted-foreground shadow-sm">
+              Save the catalogue listing to see how it will rank on iharc.ca.
+            </div>
+          )}
+
           <form action={submitSave} className="space-y-6">
             {listing?.id ? <input type="hidden" name="id" value={listing.id} /> : null}
             <input type="hidden" name="inventory_item_id" value={inventoryItem.id} />
