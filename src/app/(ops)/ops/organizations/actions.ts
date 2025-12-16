@@ -13,6 +13,11 @@ import type { Database } from '@/types/supabase';
 const LIST_PATH = '/ops/organizations';
 const detailPath = (organizationId: number | string) => `${LIST_PATH}/${organizationId}`;
 
+export type CreateOrganizationState = {
+  status: 'idle' | 'success' | 'error';
+  message?: string;
+};
+
 type OrganizationStatus = Database['core']['Enums']['organization_status_enum'];
 type OrganizationType = Database['core']['Enums']['organization_type'];
 type PartnershipType = Database['core']['Enums']['partnership_type'];
@@ -108,49 +113,60 @@ async function refreshUserClaims(supabase: SupabaseServerClient, userId: string 
   await supabase.rpc('refresh_user_permissions', { user_uuid: userId });
 }
 
-export async function createOrganizationAction(formData: FormData): Promise<void> {
-  const name = requireField(formData, 'name', 'Organization name is required.');
-  const website = getString(formData, 'website');
-  const status = parseEnum(getString(formData, 'status'), ORGANIZATION_STATUS_OPTIONS) ?? 'active';
-  const organizationType = parseEnum(getString(formData, 'organization_type'), ORGANIZATION_TYPE_OPTIONS);
-  const partnershipType = parseEnum(getString(formData, 'partnership_type'), PARTNERSHIP_TYPE_OPTIONS);
-  const isActive = getBoolean(formData, 'is_active', false);
-  const notes = getString(formData, 'notes');
-  const features = readFeatureSelection(formData);
+export async function createOrganizationAction(
+  _prevState: CreateOrganizationState,
+  formData: FormData,
+): Promise<CreateOrganizationState> {
+  try {
+    const name = requireField(formData, 'name', 'Organization name is required.');
+    const website = getString(formData, 'website');
+    const status = parseEnum(getString(formData, 'status'), ORGANIZATION_STATUS_OPTIONS) ?? 'active';
+    const organizationType = parseEnum(getString(formData, 'organization_type'), ORGANIZATION_TYPE_OPTIONS);
+    const partnershipType = parseEnum(getString(formData, 'partnership_type'), PARTNERSHIP_TYPE_OPTIONS);
+    const isActive = getBoolean(formData, 'is_active', false);
+    const notes = getString(formData, 'notes');
+    const features = readFeatureSelection(formData);
 
-  const { supabase, core, actorProfile } = await requireIharcAdminContext();
+    const { supabase, core, actorProfile } = await requireIharcAdminContext();
 
-  const now = new Date().toISOString();
-  const servicesTags = features.length ? mergeFeatureFlagsIntoTags(null, features) : null;
+    const now = new Date().toISOString();
+    const servicesTags = features.length ? mergeFeatureFlagsIntoTags(null, features) : null;
 
-  const insert = await core
-    .from('organizations')
-    .insert({
-      name,
-      website,
-      organization_type: organizationType,
-      partnership_type: partnershipType,
-      status,
-      is_active: isActive,
-      notes,
-      created_by: actorProfile.id,
-      updated_by: actorProfile.id,
-      created_at: now,
-      updated_at: now,
-      services_tags: servicesTags,
-    })
-    .select('id')
-    .single();
+    const insert = await core
+      .from('organizations')
+      .insert({
+        name,
+        website,
+        organization_type: organizationType,
+        partnership_type: partnershipType,
+        status,
+        is_active: isActive,
+        notes,
+        created_by: actorProfile.id,
+        updated_by: actorProfile.id,
+        created_at: now,
+        updated_at: now,
+        services_tags: servicesTags,
+      })
+      .select('id')
+      .single();
 
-  await logAuditEvent(supabase, {
-    actorProfileId: actorProfile.id,
-    action: 'organization_created',
-    entityType: 'organization',
-    entityRef: buildEntityRef({ schema: 'core', table: 'organizations', id: insert.data.id }),
-    meta: { pk_int: insert.data.id, name, status, features },
-  });
+    await logAuditEvent(supabase, {
+      actorProfileId: actorProfile.id,
+      action: 'organization_created',
+      entityType: 'organization',
+      entityRef: buildEntityRef({ schema: 'core', table: 'organizations', id: insert.data.id }),
+      meta: { pk_int: insert.data.id, name, status, features },
+    });
 
-  await revalidatePath(LIST_PATH);
+    await revalidatePath(LIST_PATH);
+
+    return { status: 'success', message: 'Organization created.' };
+  } catch (error) {
+    console.error('createOrganizationAction error', error);
+    const message = error instanceof Error ? error.message : 'Unable to create organization.';
+    return { status: 'error', message };
+  }
 }
 
 export async function updateOrganizationAction(formData: FormData): Promise<void> {
@@ -356,4 +372,3 @@ export async function attachOrgMemberAction(formData: FormData): Promise<void> {
 
   await Promise.all([revalidatePath(LIST_PATH), revalidatePath(detailPath(organizationId))]);
 }
-
