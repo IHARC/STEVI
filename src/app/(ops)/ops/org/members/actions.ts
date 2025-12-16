@@ -7,7 +7,7 @@ import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 import { loadPortalAccess } from '@/lib/portal-access';
 import type { SupabaseServerClient } from '@/lib/supabase/types';
 
-const MEMBERS_PATH = '/ops/org/members';
+const membersPath = (organizationId: number) => `/ops/organizations/${organizationId}`;
 
 type ActionResult = { success: true } | { success: false; error: string };
 
@@ -25,21 +25,21 @@ async function requireOrgAdminContext(targetOrgId: number | null) {
     throw new Error('Sign in to continue.');
   }
 
-  const canAdminAnyOrg = access.canAccessOpsAdmin;
-  const orgId = targetOrgId ?? access.organizationId ?? null;
+  const isIharcAdmin = access.iharcRoles.includes('iharc_admin');
+  const orgId = isIharcAdmin ? (targetOrgId ?? access.organizationId ?? null) : access.organizationId ?? null;
 
   if (!orgId) {
     throw new Error('Select an organization to manage.');
   }
 
-  const canAdminThisOrg = canAdminAnyOrg || (access.canManageOrgUsers && access.organizationId === orgId);
+  const canAdminThisOrg = isIharcAdmin || (access.canManageOrgUsers && access.organizationId === orgId);
   if (!canAdminThisOrg) {
     throw new Error('Organization admin access is required.');
   }
 
   const actorProfile = await ensurePortalProfile(supabase, access.userId);
   const portal = supabase.schema('portal');
-  return { supabase, portal, actorProfile, orgId, canAdminAnyOrg }; 
+  return { supabase, portal, actorProfile, orgId, isIharcAdmin };
 }
 
 async function setRole(
@@ -75,7 +75,7 @@ export async function toggleMemberRoleAction(formData: FormData): Promise<Action
 
     const orgIdValue = formData.get('organization_id');
     const parsedOrgId = typeof orgIdValue === 'string' ? Number.parseInt(orgIdValue, 10) : null;
-    const { supabase, portal, actorProfile, orgId, canAdminAnyOrg } = await requireOrgAdminContext(
+    const { supabase, portal, actorProfile, orgId, isIharcAdmin } = await requireOrgAdminContext(
       Number.isFinite(parsedOrgId) ? parsedOrgId : null,
     );
 
@@ -89,7 +89,7 @@ export async function toggleMemberRoleAction(formData: FormData): Promise<Action
       throw memberError ?? new Error('Member not found.');
     }
 
-    if (!canAdminAnyOrg && member.organization_id !== orgId) {
+    if (!isIharcAdmin && member.organization_id !== orgId) {
       throw new Error('You can only manage members in your organization.');
     }
 
@@ -103,7 +103,7 @@ export async function toggleMemberRoleAction(formData: FormData): Promise<Action
     meta: { role: roleName, organization_id: orgId },
   });
 
-    await revalidatePath(MEMBERS_PATH);
+    await revalidatePath(membersPath(orgId));
 
     return { success: true };
   } catch (error) {
@@ -122,7 +122,7 @@ export async function removeMemberAction(formData: FormData): Promise<ActionResu
 
     const orgIdValue = formData.get('organization_id');
     const parsedOrgId = typeof orgIdValue === 'string' ? Number.parseInt(orgIdValue, 10) : null;
-    const { supabase, portal, actorProfile, orgId, canAdminAnyOrg } = await requireOrgAdminContext(
+    const { supabase, portal, actorProfile, orgId, isIharcAdmin } = await requireOrgAdminContext(
       Number.isFinite(parsedOrgId) ? parsedOrgId : null,
     );
 
@@ -136,7 +136,7 @@ export async function removeMemberAction(formData: FormData): Promise<ActionResu
       throw memberError ?? new Error('Member not found.');
     }
 
-    if (!canAdminAnyOrg && member.organization_id !== orgId) {
+    if (!isIharcAdmin && member.organization_id !== orgId) {
       throw new Error('You can only remove members from your organization.');
     }
 
@@ -164,7 +164,7 @@ export async function removeMemberAction(formData: FormData): Promise<ActionResu
     meta: { organization_id: orgId },
   });
 
-    await revalidatePath(MEMBERS_PATH);
+    await revalidatePath(membersPath(orgId));
 
     return { success: true };
   } catch (error) {

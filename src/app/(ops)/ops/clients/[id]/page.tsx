@@ -55,7 +55,7 @@ export default async function OpsClientDetailPage({ params, searchParams }: Page
 
   const orgLabel = access.organizationName ?? 'Unassigned org';
   const orgMissing = !access.organizationId && (access.canAccessOpsFrontline || access.canAccessOpsAdmin);
-  const newVisitHref = orgMissing ? '/ops/org' : `/ops/visits/new?personId=${person.id}`;
+  const newVisitHref = `/ops/visits/new?personId=${person.id}`;
 
   const filteredActivities = activities.filter((activity) => filterActivity(activity.activityType, activeFilter));
 
@@ -65,7 +65,7 @@ export default async function OpsClientDetailPage({ params, searchParams }: Page
         eyebrow="Client"
         title={`${person.first_name ?? 'Person'} ${person.last_name ?? ''}`.trim() || 'Client profile'}
         description="Journey timeline shows everything that happened with this person. Start a Visit to add notes, supplies, tasks, or referrals in one place."
-        primaryAction={{ label: orgMissing ? 'Select org to start Visit' : 'New Visit', href: newVisitHref }}
+        primaryAction={{ label: orgMissing ? 'Select acting org to start Visit' : 'New Visit', href: newVisitHref }}
         secondaryAction={{ label: 'Find another client', href: '/ops/clients' }}
         breadcrumbs={[{ label: 'Clients', href: '/ops/clients' }, { label: 'Profile' }]}
         meta={[{ label: `Created by ${orgLabel}`, tone: 'neutral' }, { label: person.data_sharing_consent ? 'Sharing: org/partners' : 'Sharing: restricted', tone: person.data_sharing_consent ? 'info' : 'warning' }]}
@@ -134,10 +134,10 @@ export default async function OpsClientDetailPage({ params, searchParams }: Page
                 <Link href={newVisitHref}>New Visit</Link>
               </Button>
               <Button asChild variant="outline" className="w-full">
-                <Link href={orgMissing ? '/ops/org' : `${newVisitHref}&action=referral`}>Add referral</Link>
+                <Link href={`${newVisitHref}&action=referral`}>Add referral</Link>
               </Button>
               <Button asChild variant="outline" className="w-full">
-                <Link href={orgMissing ? '/ops/org' : `${newVisitHref}&action=note`}>Add note</Link>
+                <Link href={`${newVisitHref}&action=note`}>Add note</Link>
               </Button>
               <p className="text-xs text-muted-foreground">Supplies and referrals must be logged from a Visit.</p>
             </CardContent>

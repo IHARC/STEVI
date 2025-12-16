@@ -8,7 +8,7 @@ import { loadPortalAccess } from '@/lib/portal-access';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { ORG_INVITE_EVENT, ORG_INVITE_RATE_LIMIT, formatInviteCooldown } from './constants';
 
-const INVITES_PATH = '/ops/org/invites';
+const invitesPath = (organizationId: number) => `/ops/organizations/${organizationId}`;
 
 export type OrgInviteFormState = {
   status: 'idle' | 'success' | 'error';
@@ -46,10 +46,10 @@ export async function createOrgInviteAction(
       return { status: 'error', message: 'Sign in to continue.' };
     }
 
-    const canAdminAnyOrg = access.canAccessOpsAdmin;
-    const orgId = access.organizationId ?? targetOrgId;
+    const isIharcAdmin = access.iharcRoles.includes('iharc_admin');
+    const orgId = isIharcAdmin ? (access.organizationId ?? targetOrgId) : access.organizationId;
 
-    if (!orgId || (!canAdminAnyOrg && !access.canManageOrgInvites)) {
+    if (!orgId || (!isIharcAdmin && !access.canManageOrgInvites)) {
       return { status: 'error', message: 'Organization admin access is required.' };
     }
 
@@ -98,7 +98,7 @@ export async function createOrgInviteAction(
       meta: { organization_id: orgId, email },
     });
 
-    await revalidatePath(INVITES_PATH);
+    await revalidatePath(invitesPath(orgId));
 
     return { status: 'success', message: 'Invitation sent. Recipients receive a secure link.' };
   } catch (error) {

@@ -48,25 +48,58 @@ const createSupabase = (
     user = { id: 'user-1', email: 'taylor@example.com' },
     rpcResult = { data: [], error: null },
     orgResult = { data: { name: 'Org' }, error: null },
+    iharcOrgResult = { data: { id: 99, name: 'IHARC', is_active: true }, error: null },
     accessibleOrgsResult = { data: [{ id: 10, name: 'Org', is_active: true }], error: null },
     userPeopleResult = { data: [{ person_id: 77 }], error: null },
     orgPeopleResult = { data: [{ organization_id: 10, end_date: null }], error: null },
+    profileUpdateResult = { error: null },
   }: {
     user?: Record<string, unknown> | null;
     rpcResult?: { data: unknown; error: Error | null };
     orgResult?: { data: unknown; error: Error | null };
+    iharcOrgResult?: { data: unknown; error: Error | null };
     accessibleOrgsResult?: { data: unknown; error: Error | null };
     userPeopleResult?: { data: unknown; error: Error | null };
     orgPeopleResult?: { data: unknown; error: Error | null };
+    profileUpdateResult?: { error: Error | null };
   },
 ): SupabaseAnyServerClient =>
-  ({
+  (() => {
+    const profileUpdate = vi.fn().mockReturnValue({
+      eq: vi.fn().mockResolvedValue(profileUpdateResult),
+    });
+
+    let orgIlikeActive = false;
+    const orgQuery: Record<string, unknown> = {};
+    Object.assign(orgQuery, {
+      ilike: vi.fn().mockImplementation(() => {
+        orgIlikeActive = true;
+        return orgQuery;
+      }),
+      in: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockResolvedValue(accessibleOrgsResult),
+      maybeSingle: vi.fn().mockImplementation(() => {
+        const result = orgIlikeActive ? iharcOrgResult : orgResult;
+        orgIlikeActive = false;
+        return Promise.resolve(result);
+      }),
+    });
+
+    return {
     auth: {
       getUser: vi.fn().mockResolvedValue({ data: { user }, error: null }),
     },
     rpc: vi.fn().mockResolvedValue(rpcResult),
     schema: vi.fn().mockReturnValue({
       from: vi.fn().mockImplementation((table: string) => {
+        if (table === 'profiles') {
+          return {
+            update: profileUpdate,
+          };
+        }
+
         if (table === 'user_people') {
           return {
             select: vi.fn().mockReturnValue({
@@ -86,14 +119,6 @@ const createSupabase = (
         }
 
         if (table === 'organizations') {
-          const orgQuery = {
-            in: vi.fn().mockReturnThis(),
-            eq: vi.fn().mockReturnThis(),
-            order: vi.fn().mockReturnThis(),
-            limit: vi.fn().mockResolvedValue(accessibleOrgsResult),
-            maybeSingle: vi.fn().mockResolvedValue(orgResult),
-          };
-
           return {
             select: vi.fn().mockReturnValue(orgQuery),
           };
@@ -106,7 +131,9 @@ const createSupabase = (
         };
       }),
     }),
-  } as unknown as SupabaseAnyServerClient);
+      __profileUpdate: profileUpdate,
+    } as unknown as SupabaseAnyServerClient;
+  })();
 
 afterEach(() => {
   vi.clearAllMocks();
@@ -148,6 +175,25 @@ describe('loadPortalAccess', () => {
 
     const access = await loadPortalAccess(supabase);
     expect(access?.canAccessInventoryOps).toBe(true);
+  });
+
+  it('defaults IHARC admins to the IHARC organization when no acting org is selected', async () => {
+    const supabase = createSupabase({
+      rpcResult: {
+        data: [{ role_name: 'iharc_admin' }],
+        error: null,
+      },
+      userPeopleResult: { data: [], error: null },
+    }) as SupabaseAnyServerClient & { __profileUpdate: ReturnType<typeof vi.fn> };
+
+    mockEnsurePortalProfile.mockResolvedValue({ ...baseProfile, organization_id: null });
+
+    const access = await loadPortalAccess(supabase);
+
+    expect(access?.organizationId).toBe(99);
+    expect(access?.organizationName).toBe('IHARC');
+    expect(access?.actingOrgChoices).toEqual([{ id: 99, name: 'IHARC' }]);
+    expect(supabase.__profileUpdate).toHaveBeenCalledWith({ organization_id: 99, requested_organization_name: null });
   });
 
   it('returns null when no authenticated user is present', async () => {

@@ -24,7 +24,7 @@ export default async function NewVisitPage() {
 
   const canStartVisit = access.canAccessOpsAdmin || access.canAccessOpsFrontline;
   const orgMissing = canStartVisit && !access.organizationId;
-  const orgSelectionHref = (access.canAccessOpsOrg || access.canManageOrgUsers) ? '/ops/org' : '/ops/profile';
+  const orgSelectionHref = '/ops/profile';
   const orgOptionsCount = access.actingOrgChoicesCount;
 
   if (orgMissing) {
@@ -48,10 +48,10 @@ export default async function NewVisitPage() {
             <CardDescription>Visit creation is blocked until you pick which organization you’re acting on behalf of.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 text-sm text-foreground/80">
-            <p>Choose your org from the Organization hub. This ensures every Visit, referral, and supply adjustment records provenance.</p>
+            <p>Pick your acting org from account settings (or use the Acting org switcher in the header). This ensures every Visit, referral, and supply adjustment records provenance.</p>
             <div className="flex flex-col gap-2 sm:flex-row">
               <Button asChild className="flex-1">
-                <Link href={orgSelectionHref}>Open organization hub</Link>
+                <Link href={orgSelectionHref}>Open account settings</Link>
               </Button>
               <Button asChild variant="outline" className="flex-1">
                 <Link href="/ops/today">Return to Today</Link>

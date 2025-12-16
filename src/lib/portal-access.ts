@@ -72,6 +72,8 @@ export async function loadPortalAccess(
     role.startsWith('iharc_'),
   );
 
+  const isIharcAdmin = iharcRoles.includes('iharc_admin');
+
   let organizationId = profile.organization_id ?? null;
   let organizationName = organizationId ? await fetchOrganizationName(supabase, organizationId) : null;
   const isProfileApproved = profile.affiliation_status === 'approved';
@@ -83,15 +85,39 @@ export async function loadPortalAccess(
   const hasOpsRole = isProfileApproved && (portalRoles.length > 0 || iharcRoles.length > 0);
 
   if (hasOpsRole) {
+    const iharcOrganization = isIharcAdmin ? await fetchIharcOrganization(supabase) : null;
     const accessibleOrganizations = await fetchAccessibleOrganizations(supabase, user.id);
     const accessibleOrgSet = new Map<number, string | null>();
     accessibleOrganizations.forEach((org) => accessibleOrgSet.set(org.id, org.name ?? null));
+
+    if (iharcOrganization) {
+      accessibleOrgSet.set(iharcOrganization.id, iharcOrganization.name ?? null);
+    }
+
     if (organizationId !== null && !accessibleOrgSet.has(organizationId)) {
       accessibleOrgSet.set(organizationId, organizationName ?? null);
     }
 
     actingOrgChoicesCount = accessibleOrgSet.size;
     actingOrgChoices = Array.from(accessibleOrgSet.entries()).map(([id, name]) => ({ id, name }));
+
+    if (isIharcAdmin && !organizationId && iharcOrganization) {
+      const { error } = await supabase
+        .schema('portal')
+        .from('profiles')
+        .update({ organization_id: iharcOrganization.id, requested_organization_name: null })
+        .eq('id', profile.id);
+
+      if (!error) {
+        organizationId = iharcOrganization.id;
+        organizationName = iharcOrganization.name ?? organizationName;
+        actingOrgAutoSelected = true;
+        profile = { ...profile, organization_id: iharcOrganization.id };
+        await refreshUserPermissions(supabase, user.id);
+      } else if (process.env.NODE_ENV !== 'production') {
+        console.warn('Unable to auto-select IHARC acting org for admin', error);
+      }
+    }
 
     if (!organizationId && accessibleOrgSet.size === 1) {
       const [soleOrgId, soleOrgName] = accessibleOrgSet.entries().next().value as [number, string | null];
@@ -116,13 +142,14 @@ export async function loadPortalAccess(
     }
   }
 
-  const isIharcAdmin = iharcRoles.includes('iharc_admin');
   const isOrgAdmin = portalRoles.includes('portal_org_admin');
   const isOrgRep = portalRoles.includes('portal_org_rep');
+  const isAgencyPartner = profile.affiliation_type === 'agency_partner';
+  const isOrgMember = isAgencyPartner && organizationId !== null;
 
   const canAccessOpsSteviAdmin = isProfileApproved && isIharcAdmin;
   const canAccessOpsAdmin = isProfileApproved && (isIharcAdmin || isOrgAdmin);
-  const canAccessOpsOrg = isProfileApproved && ((isOrgAdmin || isOrgRep) && organizationId !== null || isIharcAdmin);
+  const canAccessOpsOrg = isProfileApproved && (isIharcAdmin || ((isOrgAdmin || isOrgRep || isOrgMember) && organizationId !== null));
   const canAccessOpsFrontline = isProfileApproved && (
     iharcRoles.some((role) => ['iharc_admin', 'iharc_supervisor', 'iharc_staff', 'iharc_volunteer'].includes(role)) ||
     isOrgAdmin ||
@@ -142,7 +169,7 @@ export async function loadPortalAccess(
   const canReviewProfiles = isProfileApproved && isIharcAdmin;
   const canViewMetrics = isProfileApproved && isIharcAdmin;
   const canManageOrgUsers = isProfileApproved && (isIharcAdmin || (isOrgAdmin && organizationId !== null));
-  const canManageOrgInvites = isProfileApproved && (isIharcAdmin || (isOrgAdmin && organizationId !== null));
+  const canManageOrgInvites = isProfileApproved && (isIharcAdmin || ((isOrgAdmin || isOrgRep) && organizationId !== null));
 
   return {
     userId: user.id,
@@ -214,6 +241,31 @@ async function fetchOrganizationName(supabase: SupabaseAnyServerClient, organiza
   }
 
   return data?.name ?? null;
+}
+
+async function fetchIharcOrganization(
+  supabase: SupabaseAnyServerClient,
+): Promise<{ id: number; name: string | null } | null> {
+  const { data, error } = await supabase
+    .schema('core')
+    .from('organizations')
+    .select('id, name, is_active')
+    .ilike('name', 'iharc')
+    .eq('is_active', true)
+    .maybeSingle();
+
+  if (error) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn('Unable to load IHARC organization', error);
+    }
+    return null;
+  }
+
+  if (!data || typeof data.id !== 'number') {
+    return null;
+  }
+
+  return { id: data.id, name: typeof data.name === 'string' ? data.name : null };
 }
 
 async function fetchAccessibleOrganizations(
@@ -315,11 +367,6 @@ function userMenuBlueprint(access: PortalAccess): MenuLinkBlueprint[] {
       requires: (a) => a.canAccessOpsFrontline,
     },
     {
-      href: '/ops/org',
-      label: 'Organization hub',
-      requires: (a) => a.canAccessOpsOrg && !a.canAccessOpsSteviAdmin,
-    },
-    {
       href: '/home?preview=1',
       label: 'Preview client portal',
       requires: (a) => a.canAccessOpsFrontline || a.canAccessOpsAdmin || a.canAccessOpsOrg,
@@ -351,7 +398,6 @@ const HUB_TAB_COMMANDS: { href: string; label: string; group: string; requires: 
   { href: '/ops/programs', label: 'Programs', group: 'Programs', requires: (access) => access.canAccessOpsFrontline || access.canAccessOpsAdmin },
   { href: '/ops/inventory', label: 'Inventory', group: 'Inventory', requires: (access) => access.canAccessInventoryOps },
   { href: '/ops/organizations', label: 'Organizations', group: 'Organizations', requires: (access) => access.canAccessOpsFrontline || access.canAccessOpsOrg || access.canAccessOpsAdmin || access.canAccessOpsSteviAdmin },
-  { href: '/ops/org', label: 'Organization hub', group: 'Organization', requires: (access) => access.canAccessOpsOrg && !access.canAccessOpsSteviAdmin },
 ];
 
 export function buildUserMenuLinks(access: PortalAccess): PortalLink[] {

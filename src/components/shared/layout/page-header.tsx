@@ -33,6 +33,7 @@ type PageHeaderProps = {
   helperLink?: HeaderAction;
   meta?: HeaderMeta[];
   align?: 'start' | 'center';
+  density?: 'default' | 'compact';
   children?: ReactNode;
   actions?: ReactNode;
   breadcrumbs?: HeaderBreadcrumb[];
@@ -54,15 +55,17 @@ export function PageHeader({
   helperLink,
   meta = [],
   align = 'start',
+  density = 'default',
   children,
   actions,
   breadcrumbs = [],
 }: PageHeaderProps) {
   const alignment = align === 'center' ? 'items-center justify-center text-center' : 'items-start justify-between';
   const textAlign = align === 'center' ? 'items-center text-center' : 'items-start text-left';
+  const densityClasses = density === 'compact' ? 'gap-3 pb-4' : 'gap-4 pb-6';
 
   return (
-    <header className={cn('flex flex-wrap gap-4 border-b border-border/60 pb-6', alignment)}>
+    <header className={cn('flex flex-wrap border-b border-border/60', densityClasses, alignment)}>
       <div className={cn('flex flex-1 flex-col gap-3', textAlign)}>
         {breadcrumbs.length ? <BreadcrumbNav breadcrumbs={breadcrumbs} /> : null}
         {eyebrow ? (

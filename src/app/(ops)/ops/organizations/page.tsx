@@ -6,7 +6,6 @@ import { resolveLandingPath } from '@/lib/portal-navigation';
 import { PageHeader } from '@shared/layout/page-header';
 import { Badge } from '@shared/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
-import { Button } from '@shared/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@shared/ui/table';
 import type { Database } from '@/types/supabase';
 import { CreateOrganizationDialog } from './create-organization-dialog';
@@ -50,8 +49,12 @@ export default async function OpsOrganizationsPage() {
     redirect(resolveLandingPath(access));
   }
 
+  const isInternalIharc = access.iharcRoles.length > 0;
   const canManageOrganizations = access.canAccessOpsSteviAdmin;
-  const organizations = await fetchOrganizations(supabase);
+  const orgScopedViewer = !canManageOrganizations && !isInternalIharc;
+  const visibleOrgId = orgScopedViewer ? access.organizationId : null;
+  const organizations = visibleOrgId === null && orgScopedViewer ? [] : await fetchOrganizations(supabase, visibleOrgId);
+  const canOpenOrganizations = canManageOrganizations || isInternalIharc || access.canAccessOpsOrg;
 
   return (
     <div className="flex flex-col gap-6">
@@ -59,27 +62,26 @@ export default async function OpsOrganizationsPage() {
         eyebrow="Operations"
         title="Organizations"
         description="Browse partner organizations. IHARC admins can create, update, and retire organizations."
-        secondaryAction={{ label: 'Open org hub', href: '/ops/org' }}
       />
-
-      {canManageOrganizations ? (
-        <div className="flex items-center justify-end">
-          <CreateOrganizationDialog action={createOrganizationAction} />
-        </div>
-      ) : null}
 
       {organizations.length === 0 ? (
         <Card className="border-dashed border-border/60">
-          <CardHeader>
-            <CardTitle className="text-lg">No partners yet</CardTitle>
-            <CardDescription>Add partner orgs to surface in referrals and destination selection.</CardDescription>
+          <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="space-y-1">
+              <CardTitle className="text-lg">No partners yet</CardTitle>
+              <CardDescription>Add partner orgs to surface in referrals and destination selection.</CardDescription>
+            </div>
+            {canManageOrganizations ? <CreateOrganizationDialog action={createOrganizationAction} /> : null}
           </CardHeader>
         </Card>
       ) : (
         <Card className="border-border/60">
-          <CardHeader>
-            <CardTitle className="text-base font-semibold">Organizations</CardTitle>
-            <CardDescription>Browse partner details and open a specific organization to manage settings.</CardDescription>
+          <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="space-y-1">
+              <CardTitle className="text-base font-semibold">Organizations</CardTitle>
+              <CardDescription>Browse partner details and open a specific organization to manage settings.</CardDescription>
+            </div>
+            {canManageOrganizations ? <CreateOrganizationDialog action={createOrganizationAction} /> : null}
           </CardHeader>
           <CardContent className="overflow-x-auto">
             <Table>
@@ -92,14 +94,13 @@ export default async function OpsOrganizationsPage() {
                   <TableHead>Updated</TableHead>
                   <TableHead>Website</TableHead>
                   <TableHead>Status</TableHead>
-                  {canManageOrganizations ? <TableHead className="text-right">Actions</TableHead> : null}
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {organizations.map((org) => (
                   <TableRow key={org.id} className={org.is_active === false ? 'opacity-60' : undefined}>
                     <TableCell className="font-medium">
-                      {canManageOrganizations ? (
+                      {canOpenOrganizations ? (
                         <Link
                           href={`/ops/organizations/${org.id}`}
                           className="text-foreground underline-offset-4 hover:underline"
@@ -139,13 +140,6 @@ export default async function OpsOrganizationsPage() {
                         {org.status ?? (org.is_active === false ? 'inactive' : 'active')}
                       </Badge>
                     </TableCell>
-                    {canManageOrganizations ? (
-                      <TableCell className="text-right">
-                        <Button asChild size="sm" variant="ghost">
-                          <Link href={`/ops/org?orgId=${org.id}`}>Org hub</Link>
-                        </Button>
-                      </TableCell>
-                    ) : null}
                   </TableRow>
                 ))}
               </TableBody>
@@ -157,13 +151,22 @@ export default async function OpsOrganizationsPage() {
   );
 }
 
-async function fetchOrganizations(supabase: Awaited<ReturnType<typeof createSupabaseRSCClient>>): Promise<OrganizationRow[]> {
+async function fetchOrganizations(
+  supabase: Awaited<ReturnType<typeof createSupabaseRSCClient>>,
+  onlyOrganizationId: number | null,
+): Promise<OrganizationRow[]> {
   const core = supabase.schema('core');
-  const { data, error } = await core
+  let query = core
     .from('organizations')
     .select('id, name, website, organization_type, partnership_type, status, is_active, services_tags, updated_at')
     .order('updated_at', { ascending: false })
     .limit(200);
+
+  if (onlyOrganizationId !== null) {
+    query = query.eq('id', onlyOrganizationId);
+  }
+
+  const { data, error } = await query;
 
   if (error) throw error;
   return (data ?? []) as OrganizationRow[];

@@ -11,7 +11,7 @@ import { buildPrimaryNavItems } from '@/lib/primary-nav';
 import { getBrandingAssetsWithClient } from '@/lib/marketing/branding';
 import { getUserNavigation } from '@shared/layout/user-nav';
 import { getOnboardingStatusForUser } from '@/lib/onboarding/status';
-import { landingPathForArea, requireArea, resolveLandingArea } from '@/lib/portal-areas';
+import { inferPortalAreaFromPath, requireArea, resolveLandingPath } from '@/lib/portal-areas';
 import '@/styles/theme.client.css';
 
 export const dynamic = 'force-dynamic';
@@ -53,9 +53,10 @@ export default async function ClientShellLayout({ children }: { children: ReactN
     ? baseCommandPaletteItems.map((item) => ({ ...item, href: appendPreviewParam(item.href) }))
     : baseCommandPaletteItems;
 
-  const primaryArea = resolveLandingArea(portalAccess);
+  const primaryLandingPath = resolveLandingPath(portalAccess);
+  const primaryArea = inferPortalAreaFromPath(primaryLandingPath);
   const primaryAreaLabel = navAreaLabel(primaryArea);
-  const previewExitPath = landingPathForArea(primaryArea);
+  const previewExitPath = primaryLandingPath;
 
   const shouldGateOnboarding =
     !isPreview &&

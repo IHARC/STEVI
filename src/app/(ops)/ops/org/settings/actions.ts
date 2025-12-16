@@ -11,7 +11,7 @@ export type OrgSettingsFormState = {
   message?: string;
 };
 
-const SETTINGS_PATH = '/ops/org/settings';
+const settingsPath = (organizationId: number) => `/ops/organizations/${organizationId}`;
 
 function readOptionalString(formData: FormData, key: string): string | null | undefined {
   if (!formData.has(key)) return undefined;
@@ -42,12 +42,12 @@ export async function updateOrgSettingsAction(
       return { status: 'error', message: 'Sign in to continue.' };
     }
 
-    const canAdminAnyOrg = access.canAccessOpsAdmin;
+    const isIharcAdmin = access.iharcRoles.includes('iharc_admin');
     const orgIdRaw = formData.get('organization_id');
     const parsedOrgId = typeof orgIdRaw === 'string' ? Number.parseInt(orgIdRaw, 10) : null;
-    const orgId = access.organizationId ?? (Number.isFinite(parsedOrgId) ? parsedOrgId : null);
+    const orgId = isIharcAdmin ? (access.organizationId ?? (Number.isFinite(parsedOrgId) ? parsedOrgId : null)) : access.organizationId;
 
-    if (!orgId || (!canAdminAnyOrg && !access.canManageOrgUsers)) {
+    if (!orgId || (!isIharcAdmin && !access.canManageOrgUsers)) {
       return { status: 'error', message: 'Organization admin access is required.' };
     }
 
@@ -107,7 +107,7 @@ export async function updateOrgSettingsAction(
       meta: { updated_keys: Object.keys(updates) },
     });
 
-    await revalidatePath(SETTINGS_PATH);
+    await revalidatePath(settingsPath(orgId));
 
     return { status: 'success', message: 'Settings updated.' };
   } catch (error) {

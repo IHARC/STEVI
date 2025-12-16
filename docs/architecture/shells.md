@@ -9,7 +9,7 @@ This document codifies the client/operations shell split for STEVI. It complemen
 
 ## Route & Layout Map
 - `(client)` route group: `/home`, `/messages`, `/appointments`, `/documents`, `/support`, `/resources`, `/cases`, `/profile`, `/onboarding` (+ supporting client-only routes).
-- `(ops)` route group: `/ops/*` (frontline), `/ops/org/*` (tenant org hub), `/ops/admin/*` (STEVI Admin) plus shared ops primitives (command palette, inbox, navigation).
+- `(ops)` route group: `/ops/*` (shared ops shell), `/ops/admin/*` (STEVI Admin) plus shared ops primitives (command palette, inbox, navigation). Org administration now lives under `/ops/organizations/*`.
 - `/login`, `/register/*`, `/reset-password` remain outside shell groups.
 - Each group owns its layout, theme token file, and navigation surface; no shared chrome between shells.
 
@@ -31,10 +31,10 @@ This document codifies the client/operations shell split for STEVI. It complemen
   - Otherwise redirect to the ops landing path.
   - Onboarding enforced in the client layout (redirect to `/onboarding?next=...` when incomplete).
 - Operations shell:
-  - Areas: `ops_frontline`, `ops_org`, `ops_admin` (STEVI Admin).
+  - Areas: `ops_frontline`, `ops_admin` (STEVI Admin).
   - Redirects to `/home` when ops access is missing.
-  - Navigation contains only ops sections; primary chrome uses a thin hub rail (Today, Clients, Programs, Inventory, Partners, Org Hub, STEVI Admin) with sub-pages living inside each hub.
-  - Org Hub is a primary hub only for org-scoped users; IHARC admins access org hub tools from within STEVI Admin.
+  - Navigation contains only ops sections; primary chrome uses a thin hub rail (Today, Clients, Programs, Inventory, Fundraising, Organizations, STEVI Admin) with sub-pages living inside each hub.
+  - Org-scoped users see **Organizations** as their primary hub and manage membership/invites/settings from the org detail page (`/ops/organizations/[id]`).
   - “Preview client portal” points to `/home?preview=1`.
 - Preview banner lives only in the client shell with an explicit exit path back to the user’s primary ops area.
 - Ops users manage their profile at `/ops/profile`; the client shell keeps `/profile` for client users and preview-only browsing. Shared form components live under `components/shared/profile`.

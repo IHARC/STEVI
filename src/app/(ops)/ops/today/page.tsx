@@ -35,9 +35,9 @@ export default async function OpsTodayPage() {
   const findPersonHref = '/ops/clients?view=directory';
   const canStartVisit = access.canAccessOpsFrontline || access.canAccessOpsAdmin;
   const orgMissing = canStartVisit && !access.organizationId;
-  const newVisitHref = canStartVisit ? (orgMissing ? '/ops/org' : '/ops/visits/new') : findPersonHref;
+  const newVisitHref = canStartVisit ? '/ops/visits/new' : findPersonHref;
   const visitAction = canStartVisit
-    ? { label: orgMissing ? 'Select org to start Visit' : 'New Visit', href: newVisitHref }
+    ? { label: orgMissing ? 'Select acting org to start Visit' : 'New Visit', href: newVisitHref }
     : { label: 'Find or create person', href: findPersonHref };
 
   return (
@@ -181,7 +181,7 @@ export default async function OpsTodayPage() {
               <p>Admins can manage access under Organization → Access & roles.</p>
               <p>Referrals start from a Visit or client record; Organizations stores partner contacts and services.</p>
               <Button asChild variant="outline" className="w-full">
-                <Link href="/ops/org">Go to Organization</Link>
+                <Link href="/ops/organizations">Go to Organizations</Link>
               </Button>
             </CardContent>
           </Card>

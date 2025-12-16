@@ -3,6 +3,7 @@ import { buildPortalNav, flattenNavItemsForCommands } from './portal-navigation'
 import { inferPortalAreaFromPath, requireArea, resolveLandingPath } from './portal-areas';
 import type { PortalAccess } from './portal-access';
 import type { PortalProfile } from './profile';
+import type { IharcRole } from './ihar-auth';
 
 function buildProfile(overrides: Partial<PortalProfile> = {}): PortalProfile {
   const baseProfile: PortalProfile = {
@@ -17,13 +18,13 @@ function buildProfile(overrides: Partial<PortalProfile> = {}): PortalProfile {
     updated_at: new Date().toISOString(),
     display_name_confirmed_at: null,
     position_title: null,
-    affiliation_type: {} as PortalProfile['affiliation_type'],
+    affiliation_type: 'community_member',
     affiliation_status: 'approved' as PortalProfile['affiliation_status'],
     affiliation_requested_at: null,
     affiliation_reviewed_at: null,
     affiliation_reviewed_by: null,
-    homelessness_experience: {} as PortalProfile['homelessness_experience'],
-    substance_use_experience: {} as PortalProfile['substance_use_experience'],
+    homelessness_experience: 'none',
+    substance_use_experience: 'none',
     has_signed_petition: false,
     petition_signed_at: null,
     government_role_type: null,
@@ -75,12 +76,13 @@ describe('resolveLandingPath', () => {
       canAccessOpsAdmin: true,
       canAccessOpsFrontline: true,
       canAccessOpsOrg: true,
+      iharcRoles: ['iharc_admin'] as IharcRole[],
     };
-    expect(resolveLandingPath(access)).toBe('/ops/today');
+    expect(resolveLandingPath(access)).toBe('/ops/admin');
   });
 
   it('lands frontline-only users on operations today', () => {
-    const access = { ...baseAccess, canAccessOpsFrontline: true };
+    const access = { ...baseAccess, canAccessOpsFrontline: true, iharcRoles: ['iharc_staff'] as IharcRole[] };
     expect(resolveLandingPath(access)).toBe('/ops/today');
   });
 
@@ -166,7 +168,7 @@ describe('inferPortalAreaFromPath', () => {
   it('maps known prefixes to areas', () => {
     expect(inferPortalAreaFromPath('/ops/admin')).toBe('ops_admin');
     expect(inferPortalAreaFromPath('/ops/hq')).toBe('ops_admin');
-    expect(inferPortalAreaFromPath('/ops/org/settings')).toBe('ops_org');
+    expect(inferPortalAreaFromPath('/ops/organizations/12?tab=members')).toBe('ops_frontline');
     expect(inferPortalAreaFromPath('/ops/clients')).toBe('ops_frontline');
     expect(inferPortalAreaFromPath('/home')).toBe('client');
   });

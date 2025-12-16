@@ -17,13 +17,13 @@ function buildProfile(overrides: Partial<PortalProfile> = {}): PortalProfile {
     updated_at: new Date().toISOString(),
     display_name_confirmed_at: null,
     position_title: null,
-    affiliation_type: {} as PortalProfile['affiliation_type'],
+    affiliation_type: 'community_member',
     affiliation_status: 'approved' as PortalProfile['affiliation_status'],
     affiliation_requested_at: null,
     affiliation_reviewed_at: null,
     affiliation_reviewed_by: null,
-    homelessness_experience: {} as PortalProfile['homelessness_experience'],
-    substance_use_experience: {} as PortalProfile['substance_use_experience'],
+    homelessness_experience: 'none',
+    substance_use_experience: 'none',
     has_signed_petition: false,
     petition_signed_at: null,
     government_role_type: null,
@@ -96,9 +96,10 @@ describe('buildOpsHubLinks', () => {
     expect(hubs).toHaveLength(7);
   });
 
-  it('keeps org hub as a primary hub for org-scoped users', () => {
+  it('keeps organizations as the primary hub for org-scoped users', () => {
     const access = {
       ...baseAccess,
+      profile: buildProfile({ affiliation_type: 'agency_partner' }),
       canAccessOpsOrg: true,
       organizationId: 12,
       organizationName: 'IHARC',
@@ -107,6 +108,6 @@ describe('buildOpsHubLinks', () => {
     const sections = buildPortalNav(access);
     const hubs = buildOpsHubLinks(sections);
 
-    expect(hubs.map((hub) => hub.label)).toEqual(['Org Hub']);
+    expect(hubs.map((hub) => hub.label)).toEqual(['Organizations']);
   });
 });

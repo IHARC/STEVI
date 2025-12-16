@@ -1,5 +1,6 @@
 import { Button } from '@shared/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@shared/ui/table';
+import { SortableTableHead, type ListSortOrder } from '@shared/list/sortable-table-head';
 import type { InventoryItem } from '@/lib/inventory/types';
 import Link from 'next/link';
 
@@ -14,19 +15,66 @@ export type ItemsTableHandlers = {
 type ItemsTableProps = {
   items: InventoryItem[];
   isPending: boolean;
+  sortBy: 'name' | 'category' | 'unitType' | 'onHandQuantity' | 'minimumThreshold' | 'active';
+  sortOrder: ListSortOrder;
+  onSort: (key: ItemsTableProps['sortBy']) => void;
 } & ItemsTableHandlers;
 
-export function ItemsTable({ items, isPending, onReceive, onTransfer, onAdjust, onToggle, onDelete }: ItemsTableProps) {
+export function ItemsTable({
+  items,
+  isPending,
+  sortBy,
+  sortOrder,
+  onSort,
+  onReceive,
+  onTransfer,
+  onAdjust,
+  onToggle,
+  onDelete,
+}: ItemsTableProps) {
   return (
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Item</TableHead>
-          <TableHead>Category</TableHead>
-          <TableHead>Unit</TableHead>
-          <TableHead className="text-right">On hand</TableHead>
-          <TableHead className="text-right">Threshold</TableHead>
-          <TableHead className="text-right">Status</TableHead>
+          <SortableTableHead
+            label="Item"
+            active={sortBy === 'name'}
+            order={sortBy === 'name' ? sortOrder : undefined}
+            onClick={() => onSort('name')}
+          />
+          <SortableTableHead
+            label="Category"
+            active={sortBy === 'category'}
+            order={sortBy === 'category' ? sortOrder : undefined}
+            onClick={() => onSort('category')}
+          />
+          <SortableTableHead
+            label="Unit"
+            active={sortBy === 'unitType'}
+            order={sortBy === 'unitType' ? sortOrder : undefined}
+            onClick={() => onSort('unitType')}
+          />
+          <SortableTableHead
+            label="On hand"
+            active={sortBy === 'onHandQuantity'}
+            order={sortBy === 'onHandQuantity' ? sortOrder : undefined}
+            onClick={() => onSort('onHandQuantity')}
+            align="right"
+          />
+          <SortableTableHead
+            label="Threshold"
+            active={sortBy === 'minimumThreshold'}
+            order={sortBy === 'minimumThreshold' ? sortOrder : undefined}
+            onClick={() => onSort('minimumThreshold')}
+            align="right"
+          />
+          <SortableTableHead
+            label="Status"
+            active={sortBy === 'active'}
+            order={sortBy === 'active' ? sortOrder : undefined}
+            onClick={() => onSort('active')}
+            align="right"
+          />
           <TableHead className="text-right">Actions</TableHead>
         </TableRow>
       </TableHeader>

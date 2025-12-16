@@ -30,7 +30,8 @@ const canSeeInventory = (access: PortalAccess) => access.canAccessInventoryOps;
 const canSeeFundraising = (access: PortalAccess) => access.canAccessOpsSteviAdmin;
 const canSeeOrganizations = (access: PortalAccess) =>
   access.canAccessOpsFrontline || access.canAccessOpsOrg || access.canAccessOpsAdmin || access.canAccessOpsSteviAdmin;
-const canSeeOrganization = (access: PortalAccess) => access.canAccessOpsOrg && !access.canAccessOpsSteviAdmin;
+const canSeeOrgScopedOrganizations = (access: PortalAccess) =>
+  access.canAccessOpsOrg && access.profile.affiliation_type === 'agency_partner' && access.iharcRoles.length === 0;
 const canSeeAdmin = (access: PortalAccess) => access.canAccessOpsSteviAdmin;
 
 const NAV_SECTIONS: NavSectionDefinition[] = [
@@ -103,23 +104,25 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
     ],
   },
   {
-    id: 'ops_org',
-    label: 'Org Hub',
-    description: 'Tenant administration scoped to the acting organization',
-    area: 'ops_org',
-    requires: canSeeOrganization,
+    id: 'ops_org_scoped',
+    label: 'Organizations',
+    description: 'Organization settings and membership for partner teams',
+    area: 'ops_frontline',
+    requires: canSeeOrgScopedOrganizations,
     groups: [
       {
-        id: 'org',
-        label: 'Organization',
-        icon: 'settings',
+        id: 'organizations',
+        label: 'Organizations',
+        icon: 'building',
         isHub: true,
         items: [
-          { id: 'org-overview', href: '/ops/org', label: 'Overview', icon: 'dashboard', match: ['/ops/org'], exact: true },
-          { id: 'org-members', href: '/ops/org/members', label: 'Members', icon: 'users', match: ['/ops/org/members'] },
-          { id: 'org-invites', href: '/ops/org/invites', label: 'Invites', icon: 'message', match: ['/ops/org/invites'] },
-          { id: 'org-appointments', href: '/ops/org/appointments', label: 'Appointments', icon: 'calendar', match: ['/ops/org/appointments'] },
-          { id: 'org-settings', href: '/ops/org/settings', label: 'Settings', icon: 'settings', match: ['/ops/org/settings'] },
+          {
+            id: 'organizations',
+            href: '/ops/organizations',
+            label: 'Organizations',
+            icon: 'building',
+            match: ['/ops/organizations'],
+          },
         ],
       },
     ],
@@ -224,17 +227,17 @@ export function resolveQuickActions(
     ];
   }
 
-  if (area === 'ops_frontline' || area === 'ops_org' || area === 'ops_admin') {
+  if (area === 'ops_frontline' || area === 'ops_admin') {
     const actions: QuickAction[] = [];
 
     if (access.canAccessOpsFrontline || access.canAccessOpsAdmin) {
       actions.push({
         id: 'ops-new-visit',
         label: 'New Visit',
-        href: orgMissing ? '/ops/org' : '/ops/visits/new',
+        href: '/ops/visits/new',
         description: orgMissing ? 'Select an acting org to start a Visit' : 'Start a Visit from your current context',
         icon: 'calendar',
-        disabled: previewDisabled || orgMissing,
+        disabled: previewDisabled,
         disabledReason: previewDisabled
           ? 'Not available in preview'
           : requiresOrgSelection
@@ -256,10 +259,11 @@ export function resolveQuickActions(
     }
 
     if (access.canManageOrgInvites) {
+      const inviteHref = access.organizationId ? `/ops/organizations/${access.organizationId}?tab=invites` : '/ops/organizations';
       actions.push({
         id: 'ops-invite-member',
         label: 'Invite member',
-        href: '/ops/org/invites',
+        href: inviteHref,
         description: 'Send an access invite',
         icon: 'chat',
         disabled: previewDisabled,
@@ -279,8 +283,6 @@ export function navAreaLabel(area: PortalArea): string {
       return 'Operations';
     case 'ops_admin':
       return 'STEVI Admin';
-    case 'ops_org':
-      return 'Organization';
     case 'client':
     default:
       return 'Client portal';

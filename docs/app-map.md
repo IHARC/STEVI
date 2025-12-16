@@ -74,9 +74,8 @@ Shell component: `@workspace/shells/app-shell`
 Behavior to be aware of:
 - **No client preview**: ops routes reject client preview mode; ops users should exit preview back to their landing path.
 
-Ops has three *areas* (guards + landing behavior are centralized):
-- `ops_frontline` (Today/Clients/Programs/Inventory/Fundraising/Organizations directory)
-- `ops_org` (org-tenant hub)
+Ops has two *areas* (guards + landing behavior are centralized):
+- `ops_frontline` (Today/Clients/Programs/Inventory/Fundraising/Organizations)
 - `ops_admin` (STEVI Admin)
 
 Area inference + guards:
@@ -106,8 +105,11 @@ All roles are loaded via Supabase RPC `get_user_roles` in `src/lib/portal-access
 - `canAccessInventoryOps`
 - plus admin/content/policy/etc flags (see file)
 
-Important constraint for upcoming org-tenant work:
-- “Org user”/`portal_user` is a tenant member, but today the org hub is primarily gated by `canAccessOpsOrg` (org admin/rep). If we want standard org users to have a real tenant workspace, we must introduce an explicit “org workspace access” capability that does **not** implicitly grant frontline/admin capabilities.
+Org-scoped users:
+- “Org user”/`portal_user` (agency partner) can access `/ops/organizations` and view **their own** org detail **Overview**.
+- “Org rep” (`portal_org_rep`) can manage invites/appointments for **their own** org.
+- “Org admin” (`portal_org_admin`) can manage members + settings for **their own** org.
+- IHARC admins (`iharc_admin`) can access and administer **all** orgs.
 
 ### Acting organization
 Acting org context comes from:
@@ -171,15 +173,8 @@ Hubs per `src/lib/portal-navigation.ts`:
   - `/ops/inventory/items/[itemId]`
 - Fundraising: `/ops/fundraising` (tabs managed within the page)
 - Fundraising detail: `/ops/fundraising/items/[itemId]`
-- Organizations directory: `/ops/organizations` and `/ops/organizations/[id]`
-
-#### Org hub (ops_org)
-Current routes (SettingsShell):
-- `/ops/org` (overview)
-- `/ops/org/members`
-- `/ops/org/invites`
-- `/ops/org/appointments`
-- `/ops/org/settings`
+- Organizations directory: `/ops/organizations`
+- Organization detail (role-gated tabs): `/ops/organizations/[id]` with `?tab=settings|members|invites|appointments`
 
 #### STEVI Admin (ops_admin)
 Admin “settings shell” root: `/ops/admin`
@@ -211,7 +206,8 @@ Admin modules present in the repo but not currently exposed as routes:
 ### Deprecated / pending removal
 - `/ops/hq/*` is a legacy path and now redirects to `/ops/admin/*` (`src/app/(ops)/ops/hq/[[...path]]/page.tsx`).
 - Legacy `/ops/directory` route was removed in favor of `/ops/organizations` (folder may still exist but should not be used).
-- Legacy `/ops/admin/organizations/*` pages were removed in favor of `/ops/organizations` + org hub tooling (folder may still exist but should not be used).
+- Legacy `/ops/admin/organizations/*` pages were removed in favor of `/ops/organizations` + consolidated org detail tabs (folder may still exist but should not be used).
+- Legacy `/ops/org/*` org hub routes were removed; use `/ops/organizations/[id]` tabs instead.
 
 ## Feature inventory (working checklist)
 
@@ -235,12 +231,13 @@ Admin modules present in the repo but not currently exposed as routes:
 - [ ] Visit-first flow beyond scaffolding (currently `/ops/visits/new` + hub links)
 
 ### Org tenant hub
-- [x] Members (org admin)
-- [x] Invites (org admin)
-- [x] Settings (org admin; scoped)
-- [x] Appointments (org scope)
+- [x] Org-scoped access to Organizations list/detail
+- [x] Members (org admin) via org detail tab
+- [x] Invites (org admin/rep) via org detail tab
+- [x] Settings (org admin) via org detail tab
+- [x] Appointments (org admin/rep) via org detail tab
 - [ ] Org workspace for standard org users (`portal_user`) with read-only operational context (inventory/donations/programs/etc)
-- [ ] Consolidate org admin “detail” editing into the org hub (single tabbed interface; remove duplicate detail surfaces)
+- [x] Consolidated org admin tooling into `/ops/organizations/[id]` (single tabbed interface; removed `/ops/org/*`)
 
 ### STEVI Admin
 - [x] Users & access management

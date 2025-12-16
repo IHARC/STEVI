@@ -33,9 +33,9 @@ export default async function ProgramDetailPage({ params }: PageProps) {
   }
 
   const orgMissing = (access.canAccessOpsFrontline || access.canAccessOpsAdmin) && !access.organizationId;
-  const newVisitHref = orgMissing ? '/ops/org' : `/ops/visits/new?programId=${program.id}`;
+  const newVisitHref = `/ops/visits/new?programId=${program.id}`;
   const visitAction = orgMissing
-    ? { label: 'Select org to start Visit', href: '/ops/org' }
+    ? { label: 'Select acting org to start Visit', href: newVisitHref }
     : { label: 'Start Visit in this program', href: newVisitHref };
 
   return (

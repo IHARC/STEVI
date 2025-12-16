@@ -115,7 +115,7 @@ async function touchAppointmentListings() {
   revalidatePath('/appointments');
   revalidatePath('/home');
   revalidatePath('/ops/programs');
-  revalidatePath('/ops/org/appointments');
+  revalidatePath('/ops/organizations');
 }
 
 export async function requestAppointmentAction(

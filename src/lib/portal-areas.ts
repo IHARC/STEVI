@@ -1,12 +1,11 @@
 import { stripRouteGroups } from '@/lib/paths';
 import type { PortalAccess } from '@/lib/portal-access';
 
-export type PortalArea = 'client' | 'ops_frontline' | 'ops_org' | 'ops_admin';
+export type PortalArea = 'client' | 'ops_frontline' | 'ops_admin';
 
 const LANDING_PATH_BY_AREA: Record<PortalArea, string> = {
   client: '/home',
   ops_frontline: '/ops/today',
-  ops_org: '/ops/org',
   ops_admin: '/ops/admin',
 };
 
@@ -24,17 +23,23 @@ export function inferPortalAreaFromPath(pathname: string): PortalArea {
   const cleaned = stripRouteGroups(pathname || '');
 
   if (cleaned.startsWith('/ops/admin') || cleaned.startsWith('/ops/hq')) return 'ops_admin';
-  if (cleaned.startsWith('/ops/org')) return 'ops_org';
   if (cleaned.startsWith('/ops')) return 'ops_frontline';
   return 'client';
 }
 
-export function resolveLandingArea(access: PortalAccess | null): PortalArea {
-  if (!access) return 'client';
-  if (access.canAccessOpsFrontline) return 'ops_frontline';
-  if (access.canAccessOpsOrg) return 'ops_org';
-  if (access.canAccessOpsSteviAdmin) return 'ops_admin';
-  return 'client';
+function defaultLandingPath(access: PortalAccess | null): string {
+  if (!access) return LANDING_PATH_BY_AREA.client;
+
+  if (access.canAccessOpsSteviAdmin) {
+    return LANDING_PATH_BY_AREA.ops_admin;
+  }
+
+  const hasOpsAccess = access.canAccessOpsFrontline || access.canAccessOpsOrg || access.canAccessOpsAdmin;
+  if (hasOpsAccess) {
+    return access.iharcRoles.length > 0 ? LANDING_PATH_BY_AREA.ops_frontline : '/ops/organizations';
+  }
+
+  return LANDING_PATH_BY_AREA.client;
 }
 
 export function landingPathForArea(area: PortalArea): string {
@@ -42,8 +47,8 @@ export function landingPathForArea(area: PortalArea): string {
 }
 
 export function resolveLandingPath(access: PortalAccess | null): string {
-  const landingArea = resolveLandingArea(access);
-  const landingPath = landingPathForArea(landingArea);
+  const landingPath = defaultLandingPath(access);
+  const landingArea = inferPortalAreaFromPath(landingPath);
   const result = requireArea(access, landingArea, { landingPath });
 
   if (!result.allowed) {
@@ -70,7 +75,7 @@ export function requireArea(
   area: PortalArea,
   options: RequireAreaOptions = {},
 ): RequireAreaResult {
-  const landingPath = options.landingPath ?? landingPathForArea(resolveLandingArea(access));
+  const landingPath = options.landingPath ?? defaultLandingPath(access);
   const currentPath = options.currentPath ? stripRouteGroups(options.currentPath) : null;
 
   if (!access) {
@@ -86,17 +91,16 @@ export function requireArea(
   const previewRequested = Boolean(options.preview);
 
   if (area === 'ops_frontline') {
-    if (hasFrontlineAccess) {
+    if (hasFrontlineAccess || hasOrgAccess || hasAdminAccess) {
       return { allowed: true, activeArea: 'ops_frontline', isPreview: false };
     }
 
-    const redirectPath = hasOrgAccess ? LANDING_PATH_BY_AREA.ops_org : clientHome;
-    return { allowed: false, redirectPath };
+    return { allowed: false, redirectPath: clientHome };
   }
 
   if (area === 'client') {
     if (hasOpsAccess && !previewRequested) {
-      return { allowed: false, redirectPath: landingPathForArea(resolveLandingArea(access)) };
+      return { allowed: false, redirectPath: landingPath };
     }
 
     return {
@@ -111,14 +115,6 @@ export function requireArea(
       return { allowed: true, activeArea: 'ops_admin', isPreview: false };
     }
     return { allowed: false, redirectPath: landingPath };
-  }
-
-  if (area === 'ops_org') {
-    if (hasOrgAccess) {
-      return { allowed: true, activeArea: 'ops_org', isPreview: false };
-    }
-    const redirectPath = hasFrontlineAccess ? LANDING_PATH_BY_AREA.ops_frontline : landingPath;
-    return { allowed: false, redirectPath };
   }
 
   return { allowed: false, redirectPath: clientHome };

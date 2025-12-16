@@ -178,7 +178,7 @@ async function fetchOrgInboxItems(
           id: `invite-${invite.id}`,
           title: invite.display_name ?? invite.email,
           description: 'Pending organization invite',
-          href: '/ops/org/invites',
+          href: `/ops/organizations/${access.organizationId}?tab=invites`,
           tone: 'warning',
           badge: 'Pending',
         });
@@ -195,7 +195,7 @@ async function fetchOrgInboxItems(
         id: `member-${member.id}`,
         title: member.display_name ?? 'Member approval',
         description: 'Approve or decline member access',
-        href: '/ops/org/members',
+        href: `/ops/organizations/${access.organizationId}?tab=members`,
         tone: 'warning',
         badge: 'Approval',
       });
@@ -213,10 +213,6 @@ export async function fetchPortalInbox(
   area: PortalArea,
 ): Promise<InboxItem[]> {
   if (area === 'ops_admin') return [];
-
-  if (area === 'ops_org') {
-    return fetchOrgInboxItems(supabase, access);
-  }
 
   if (area === 'ops_frontline') {
     if (access.canAccessOpsFrontline || access.canAccessOpsAdmin) {

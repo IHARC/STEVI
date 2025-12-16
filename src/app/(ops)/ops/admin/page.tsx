@@ -75,7 +75,7 @@ export default async function OpsAdminPage() {
       label: 'Pending invites',
       count: pendingInviteCount,
       description: 'Org access requests across tenants',
-      href: '/ops/org/invites',
+      href: '/ops/organizations',
       tone: 'warning',
     },
     {
