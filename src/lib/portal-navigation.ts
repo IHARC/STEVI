@@ -28,7 +28,7 @@ const canSeeClients = (access: PortalAccess) => access.canAccessOpsFrontline || 
 const canSeePrograms = (access: PortalAccess) => access.canAccessOpsFrontline || access.canAccessOpsAdmin;
 const canSeeInventory = (access: PortalAccess) => access.canAccessInventoryOps;
 const canSeeFundraising = (access: PortalAccess) => access.canAccessOpsSteviAdmin;
-const canSeeDirectory = (access: PortalAccess) =>
+const canSeeOrganizations = (access: PortalAccess) =>
   access.canAccessOpsFrontline || access.canAccessOpsOrg || access.canAccessOpsAdmin || access.canAccessOpsSteviAdmin;
 const canSeeOrganization = (access: PortalAccess) => access.canAccessOpsOrg && !access.canAccessOpsSteviAdmin;
 const canSeeAdmin = (access: PortalAccess) => access.canAccessOpsSteviAdmin;
@@ -91,13 +91,13 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
         ],
       },
       {
-        id: 'directory',
-        label: 'Directory',
+        id: 'organizations',
+        label: 'Organizations',
         icon: 'building',
-        requires: canSeeDirectory,
+        requires: canSeeOrganizations,
         isHub: true,
         items: [
-          { id: 'directory', href: '/ops/directory', label: 'Directory', icon: 'building', match: ['/ops/directory'] },
+          { id: 'organizations', href: '/ops/organizations', label: 'Organizations', icon: 'building', match: ['/ops/organizations'] },
         ],
       },
     ],
@@ -140,7 +140,6 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
           { id: 'admin-overview', href: '/ops/admin', label: 'General settings', icon: 'dashboard', match: ['/ops/admin'], exact: true },
           { id: 'admin-content', href: '/ops/admin/content', label: 'Content & Notifications', icon: 'megaphone', match: ['/ops/admin/content'] },
           { id: 'admin-integrations', href: '/ops/admin/integrations', label: 'Integrations', icon: 'lab', match: ['/ops/admin/integrations'] },
-          { id: 'admin-organizations', href: '/ops/admin/organizations', label: 'Organizations', icon: 'globe', match: ['/ops/admin/organizations'] },
           { id: 'admin-users', href: '/ops/admin/users/all', label: 'Users', icon: 'users', match: ['/ops/admin/users'] },
           { id: 'admin-website', href: '/ops/admin/website/branding', label: 'Website & Marketing', icon: 'globe', match: ['/ops/admin/website'] },
           { id: 'admin-operations', href: '/ops/admin/operations', label: 'Operations', icon: 'workflow', match: ['/ops/admin/operations'] },

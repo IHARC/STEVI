@@ -109,7 +109,7 @@ describe('buildPortalNav', () => {
 
     const frontline = sections.find((section) => section.id === 'ops_frontline');
     const frontlineGroups = frontline?.groups.map((group) => group.id) ?? [];
-    expect(frontlineGroups).toEqual(expect.arrayContaining(['today', 'clients', 'programs', 'inventory', 'directory']));
+    expect(frontlineGroups).toEqual(expect.arrayContaining(['today', 'clients', 'programs', 'inventory', 'organizations']));
 
     const admin = sections.find((section) => section.id === 'ops_admin');
     expect(admin?.groups[0]?.items.length).toBeGreaterThanOrEqual(4);
@@ -125,7 +125,7 @@ describe('buildPortalNav', () => {
     expect(groupIds).toContain('clients');
     expect(groupIds).toContain('programs');
     expect(groupIds).not.toContain('inventory');
-    expect(groupIds).toContain('directory');
+    expect(groupIds).toContain('organizations');
   });
 
   it('never includes client portal sections in the ops shell', () => {

@@ -122,12 +122,6 @@ export type InventoryLocationInput = {
   active?: boolean;
 };
 
-export type InventoryOrganizationInput = {
-  name: string;
-  description?: string | null;
-  website?: string | null;
-};
-
 export type StockReceiptInput = {
   itemId: string;
   locationId: string;

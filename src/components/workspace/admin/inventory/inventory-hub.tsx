@@ -7,7 +7,6 @@ import type { InventoryBootstrap } from '@/lib/inventory/types';
 import { InventoryDashboardSection } from './inventory-dashboard';
 import { InventoryItemsSection } from './inventory-items';
 import { InventoryLocationsSection } from './inventory-locations';
-import { InventoryOrganizationsSection } from './inventory-organizations';
 import { InventoryReceiptsSection } from './inventory-receipts';
 import { cn } from '@/lib/utils';
 
@@ -15,7 +14,7 @@ type InventoryHubProps = {
   bootstrap: InventoryBootstrap;
   actorProfileId: string;
   canManageLocations: boolean;
-  activeTab: 'dashboard' | 'items' | 'locations' | 'organizations' | 'receipts';
+  activeTab: 'dashboard' | 'items' | 'locations' | 'receipts';
 };
 
 export function InventoryHub({
@@ -42,7 +41,7 @@ export function InventoryHub({
       <TabsList
         className={cn(
           'grid h-auto w-full grid-cols-2 gap-1 rounded-2xl sm:grid-cols-3',
-          'lg:grid-cols-5',
+          'lg:grid-cols-4',
         )}
       >
         <TabsTrigger value="dashboard" asChild className="w-full rounded-xl px-3 text-xs font-semibold">
@@ -53,9 +52,6 @@ export function InventoryHub({
         </TabsTrigger>
         <TabsTrigger value="locations" asChild className="w-full rounded-xl px-3 text-xs font-semibold">
           <Link href={buildHref('locations')}>Locations</Link>
-        </TabsTrigger>
-        <TabsTrigger value="organizations" asChild className="w-full rounded-xl px-3 text-xs font-semibold">
-          <Link href={buildHref('organizations')}>Organisations</Link>
         </TabsTrigger>
         <TabsTrigger value="receipts" asChild className="w-full rounded-xl px-3 text-xs font-semibold">
           <Link href={buildHref('receipts')}>Receipts</Link>
@@ -81,10 +77,6 @@ export function InventoryHub({
           actorProfileId={actorProfileId}
           canManageLocations={canManageLocations}
         />
-      </TabsContent>
-
-      <TabsContent value="organizations" className="mt-0">
-        <InventoryOrganizationsSection organizations={bootstrap.organizations} actorProfileId={actorProfileId} />
       </TabsContent>
 
       <TabsContent value="receipts" className="mt-0">

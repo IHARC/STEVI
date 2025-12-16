@@ -12,7 +12,7 @@ type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
-type InventoryTab = 'dashboard' | 'items' | 'locations' | 'organizations' | 'receipts';
+type InventoryTab = 'dashboard' | 'items' | 'locations' | 'receipts';
 
 function getString(params: Record<string, string | string[] | undefined> | undefined, key: string) {
   const value = params?.[key];
@@ -22,7 +22,7 @@ function getString(params: Record<string, string | string[] | undefined> | undef
 }
 
 function parseTab(value: string | null): InventoryTab {
-  if (value === 'items' || value === 'locations' || value === 'organizations' || value === 'receipts') {
+  if (value === 'items' || value === 'locations' || value === 'receipts') {
     return value;
   }
   return 'dashboard';

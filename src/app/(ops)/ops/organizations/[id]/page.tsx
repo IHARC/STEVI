@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
@@ -16,12 +17,8 @@ import { NativeCheckbox } from '@shared/ui/native-checkbox';
 import { NativeSelect } from '@shared/ui/native-select';
 import { Textarea } from '@shared/ui/textarea';
 import { Separator } from '@shared/ui/separator';
-import { OrgMembersTable } from '../../../org/members/org-members-table';
-import {
-  attachOrgMemberAction,
-  deleteOrganizationAction,
-  updateOrganizationAction,
-} from '../actions';
+import { OrgMembersTable } from '../../org/members/org-members-table';
+import { attachOrgMemberAction, deleteOrganizationAction, updateOrganizationAction } from '../actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -62,34 +59,33 @@ const STATUS_BADGE: Record<string, 'default' | 'secondary' | 'outline'> = {
 
 type PageProps = { params: Promise<{ id: string }> };
 
-export default async function AdminOrganizationDetailPage({ params }: PageProps) {
+export default async function OrganizationDetailPage({ params }: PageProps) {
   const { id } = await params;
   const organizationId = Number.parseInt(id, 10);
 
   if (!Number.isFinite(organizationId)) {
-    redirect('/ops/admin/organizations');
+    redirect('/ops/organizations');
   }
 
   const supabase = await createSupabaseRSCClient();
   const access = await loadPortalAccess(supabase);
 
-  if (!access || !access.canAccessOpsSteviAdmin) {
+  if (!access) {
+    redirect(`/login?next=/ops/organizations/${organizationId}`);
+  }
+
+  if (!access.canAccessOpsSteviAdmin) {
     redirect(resolveLandingPath(access));
   }
 
   const [{ data: orgRow, error: orgError }, members] = await Promise.all([
-    supabase
-      .schema('core')
-      .from('organizations')
-      .select('*')
-      .eq('id', organizationId)
-      .maybeSingle(),
+    supabase.schema('core').from('organizations').select('*').eq('id', organizationId).maybeSingle(),
     fetchOrgMembersWithRoles(supabase, organizationId),
   ]);
 
   if (orgError) throw orgError;
   if (!orgRow) {
-    redirect('/ops/admin/organizations');
+    redirect('/ops/organizations');
   }
 
   const selectedFeatures = extractOrgFeatureFlags(orgRow.services_tags);
@@ -97,15 +93,15 @@ export default async function AdminOrganizationDetailPage({ params }: PageProps)
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        eyebrow="STEVI Admin"
+        eyebrow="Operations"
         title={orgRow.name ?? 'Organization'}
-        description="IHARC-wide administration for this tenant. Update details, feature flags, and membership."
+        description="Manage this partner’s details, feature flags, and membership. All changes are audit logged."
         breadcrumbs={[
-          { label: 'STEVI Admin', href: '/ops/admin' },
-          { label: 'Organizations', href: '/ops/admin/organizations' },
+          { label: 'Operations', href: '/ops/today' },
+          { label: 'Organizations', href: '/ops/organizations' },
           { label: orgRow.name ?? 'Organization' },
         ]}
-        secondaryAction={{ label: 'View org hub', href: `/ops/org?orgId=${organizationId}` }}
+        secondaryAction={{ label: 'Open org hub', href: `/ops/org?orgId=${organizationId}` }}
       >
         <div className="flex flex-wrap gap-2">
           <Badge variant={STATUS_BADGE[orgRow.status ?? 'active'] ?? 'outline'} className="capitalize">
@@ -122,12 +118,7 @@ export default async function AdminOrganizationDetailPage({ params }: PageProps)
             <CardDescription>Edit core attributes, services, and contact details.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <form
-              action={async (formData) => {
-                await updateOrganizationAction(formData);
-              }}
-              className="space-y-4"
-            >
+            <form action={updateOrganizationAction} className="space-y-4">
               <input type="hidden" name="organization_id" value={organizationId} />
 
               <div className="grid gap-3 md:grid-cols-2">
@@ -135,7 +126,7 @@ export default async function AdminOrganizationDetailPage({ params }: PageProps)
                   <Input id="name" name="name" defaultValue={orgRow.name ?? ''} required />
                 </Field>
                 <Field label="Website" id="website">
-                  <Input id="website" name="website" type="url" defaultValue={orgRow.website ?? ''} placeholder="https://example.org" />
+                  <Input id="website" name="website" type="url" defaultValue={orgRow.website ?? ''} />
                 </Field>
               </div>
 
@@ -247,11 +238,9 @@ export default async function AdminOrganizationDetailPage({ params }: PageProps)
                 <div className="grid gap-2 sm:grid-cols-2">
                   {ORG_FEATURE_OPTIONS.map((feature) => (
                     <label key={feature.value} className="flex items-center gap-2 text-sm">
-                      <input
-                        type="checkbox"
+                      <NativeCheckbox
                         name="features"
                         value={feature.value}
-                        className="h-4 w-4"
                         defaultChecked={selectedFeatures.includes(feature.value)}
                       />
                       <span>{feature.label}</span>
@@ -309,21 +298,19 @@ export default async function AdminOrganizationDetailPage({ params }: PageProps)
                   'None enabled'
                 )}
               </Fact>
+              <Button asChild variant="outline">
+                <Link href={`/ops/org?orgId=${organizationId}`}>Go to org hub</Link>
+              </Button>
             </CardContent>
           </Card>
 
-          <Card className="border-destructive/40 border">
+          <Card className="border border-destructive/40">
             <CardHeader>
               <CardTitle className="text-xl text-destructive">Delete organization</CardTitle>
               <CardDescription>Permanently remove this organization after clearing all memberships and links.</CardDescription>
             </CardHeader>
             <CardContent>
-              <form
-                action={async (formData) => {
-                  await deleteOrganizationAction(formData);
-                }}
-                className="space-y-3"
-              >
+              <form action={deleteOrganizationAction} className="space-y-3">
                 <input type="hidden" name="organization_id" value={organizationId} />
                 <div className="space-y-1">
                   <Label htmlFor="confirm_name">Type the organization name to confirm</Label>
@@ -355,12 +342,7 @@ export default async function AdminOrganizationDetailPage({ params }: PageProps)
             <CardDescription>Link an existing profile and optionally grant org roles.</CardDescription>
           </CardHeader>
           <CardContent>
-            <form
-              action={async (formData) => {
-                await attachOrgMemberAction(formData);
-              }}
-              className="space-y-3"
-            >
+            <form action={attachOrgMemberAction} className="space-y-3">
               <input type="hidden" name="organization_id" value={organizationId} />
               <div className="space-y-1">
                 <Label htmlFor="profile_id">Profile ID</Label>
@@ -404,3 +386,4 @@ function Fact({ label, children }: { label: string; children: React.ReactNode })
     </div>
   );
 }
+

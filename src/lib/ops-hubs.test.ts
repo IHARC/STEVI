@@ -90,7 +90,7 @@ describe('buildOpsHubLinks', () => {
       'Programs',
       'Inventory',
       'Fundraising',
-      'Directory',
+      'Organizations',
       'STEVI Admin',
     ]);
     expect(hubs).toHaveLength(7);

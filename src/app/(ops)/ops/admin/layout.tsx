@@ -19,7 +19,6 @@ export default async function AdminLayout({ children }: { children: ReactNode })
       label: 'STEVI Admin',
       items: [
         { label: 'General settings', href: '/ops/admin', match: ['/ops/admin'] },
-        { label: 'Organizations', href: '/ops/admin/organizations', match: ['/ops/admin/organizations'] },
         { label: 'Users & access', href: '/ops/admin/users/all', match: ['/ops/admin/users'] },
         { label: 'Content & comms', href: '/ops/admin/content', match: ['/ops/admin/content'] },
         { label: 'Integrations', href: '/ops/admin/integrations', match: ['/ops/admin/integrations'] },

@@ -6,8 +6,6 @@ import {
   type InventoryItemWithInitialStockInput,
   type InventoryLocation,
   type InventoryLocationInput,
-  type InventoryOrganization,
-  type InventoryOrganizationInput,
   type InventoryReceipt,
   type StockAdjustmentInput,
   type StockReceiptInput,
@@ -88,28 +86,6 @@ function prepareLocationUpdatePayload(input: InventoryLocationInput) {
     type: input.type,
     address: normalizeLocationAddress(input.address),
     active: input.active ?? true,
-    updated_at: now,
-  };
-}
-
-function prepareOrganizationPayload(input: InventoryOrganizationInput) {
-  const now = new Date().toISOString();
-  return {
-    name: input.name,
-    description: input.description ?? null,
-    website: input.website ?? null,
-    is_active: true,
-    created_at: now,
-    updated_at: now,
-  };
-}
-
-function prepareOrganizationUpdatePayload(input: InventoryOrganizationInput) {
-  const now = new Date().toISOString();
-  return {
-    name: input.name,
-    description: input.description ?? null,
-    website: input.website ?? null,
     updated_at: now,
   };
 }
@@ -326,80 +302,6 @@ export async function toggleInventoryLocationActive(
     .from('locations')
     .update({ active, updated_at: new Date().toISOString() })
     .eq('id', locationId);
-
-  if (error) {
-    throw error;
-  }
-}
-
-export async function createInventoryOrganization(
-  supabase: SupabaseAnyServerClient,
-  input: InventoryOrganizationInput,
-): Promise<InventoryOrganization> {
-  const payload = prepareOrganizationPayload(input);
-  const { data, error } = await supabase
-    .schema('core')
-    .from('organizations')
-    .insert(payload)
-    .select('id, name, description, website, is_active, created_at, updated_at')
-    .single();
-
-  if (error) {
-    throw error;
-  }
-
-  return {
-    id: Number.parseInt(String(data.id), 10),
-    name: data.name ?? payload.name,
-    description: data.description ?? payload.description ?? null,
-    website: data.website ?? payload.website ?? null,
-    isActive: data.is_active ?? true,
-    createdAt: data.created_at ?? payload.created_at ?? null,
-    updatedAt: data.updated_at ?? payload.updated_at ?? null,
-  };
-}
-
-export async function updateInventoryOrganization(
-  supabase: SupabaseAnyServerClient,
-  organizationId: number,
-  input: InventoryOrganizationInput,
-): Promise<void> {
-  const payload = prepareOrganizationUpdatePayload(input);
-  const { error } = await supabase
-    .schema('core')
-    .from('organizations')
-    .update(payload)
-    .eq('id', organizationId);
-
-  if (error) {
-    throw error;
-  }
-}
-
-export async function deactivateInventoryOrganization(
-  supabase: SupabaseAnyServerClient,
-  organizationId: number,
-): Promise<void> {
-  const { error } = await supabase
-    .schema('core')
-    .from('organizations')
-    .update({ is_active: false, updated_at: new Date().toISOString() })
-    .eq('id', organizationId);
-
-  if (error) {
-    throw error;
-  }
-}
-
-export async function activateInventoryOrganization(
-  supabase: SupabaseAnyServerClient,
-  organizationId: number,
-): Promise<void> {
-  const { error } = await supabase
-    .schema('core')
-    .from('organizations')
-    .update({ is_active: true, updated_at: new Date().toISOString() })
-    .eq('id', organizationId);
 
   if (error) {
     throw error;

@@ -9,9 +9,6 @@ import {
   bulkReceiveInventoryStock,
   createInventoryItem,
   createInventoryLocation,
-  createInventoryOrganization,
-  activateInventoryOrganization,
-  deactivateInventoryOrganization,
   deleteInventoryItem,
   deleteInventoryLocation,
   receiveInventoryStock,
@@ -20,7 +17,6 @@ import {
   transferInventoryStock,
   updateInventoryItem,
   updateInventoryLocation,
-  updateInventoryOrganization,
   updateInventoryTransactionSource,
 } from '@/lib/inventory/mutations';
 import { fetchInventoryReceiptById } from '@/lib/inventory/service';
@@ -28,7 +24,6 @@ import type {
   BulkReceiptInput,
   InventoryItem,
   InventoryLocation,
-  InventoryOrganization,
   InventoryReceipt,
 } from '@/lib/inventory/types';
 
@@ -386,89 +381,6 @@ export async function deleteInventoryLocationAction(formData: FormData): Promise
       action: 'inventory_location_deleted',
       entityType: 'inventory_location',
       entityRef: buildEntityRef({ schema: 'inventory', table: 'locations', id: locationId }),
-    });
-  });
-}
-
-export async function createInventoryOrganizationAction(
-  formData: FormData,
-): Promise<ActionResult<{ organization: InventoryOrganization }>> {
-  return runInventoryMutation(formData, async ({ profile }, supabase) => {
-    const organization = await createInventoryOrganization(supabase, {
-      name: getRequiredString(formData, 'name', 'Organization name is required.'),
-      description: getOptionalString(formData, 'description'),
-      website: getOptionalString(formData, 'website'),
-    });
-
-    await logAuditEvent(supabase, {
-      actorProfileId: profile.id,
-      action: 'inventory_organization_created',
-      entityType: 'inventory_organization',
-      entityRef: buildEntityRef({ schema: 'core', table: 'organizations', id: organization.id }),
-      meta: { pk_int: organization.id, name: organization.name },
-    });
-
-    return { organization };
-  });
-}
-
-export async function updateInventoryOrganizationAction(formData: FormData): Promise<ActionResult> {
-  return runInventoryMutation(formData, async ({ profile }, supabase) => {
-    const organizationId = parseNumber(formData.get('organization_id'), { required: true });
-    if (organizationId === null) {
-      throw new InventoryAccessError('Organization context missing.');
-    }
-
-    await updateInventoryOrganization(supabase, organizationId, {
-      name: getRequiredString(formData, 'name', 'Organization name is required.'),
-      description: getOptionalString(formData, 'description'),
-      website: getOptionalString(formData, 'website'),
-    });
-
-    await logAuditEvent(supabase, {
-      actorProfileId: profile.id,
-      action: 'inventory_organization_updated',
-      entityType: 'inventory_organization',
-      entityRef: buildEntityRef({ schema: 'core', table: 'organizations', id: organizationId }),
-      meta: { pk_int: organizationId },
-    });
-  });
-}
-
-export async function activateInventoryOrganizationAction(formData: FormData): Promise<ActionResult> {
-  return runInventoryMutation(formData, async ({ profile }, supabase) => {
-    const organizationId = parseNumber(formData.get('organization_id'), { required: true });
-    if (organizationId === null) {
-      throw new InventoryAccessError('Organization context missing.');
-    }
-
-    await activateInventoryOrganization(supabase, organizationId);
-
-    await logAuditEvent(supabase, {
-      actorProfileId: profile.id,
-      action: 'inventory_organization_activated',
-      entityType: 'inventory_organization',
-      entityRef: buildEntityRef({ schema: 'core', table: 'organizations', id: organizationId }),
-      meta: { pk_int: organizationId },
-    });
-  });
-}
-
-export async function deactivateInventoryOrganizationAction(formData: FormData): Promise<ActionResult> {
-  return runInventoryMutation(formData, async ({ profile }, supabase) => {
-    const organizationId = parseNumber(formData.get('organization_id'), { required: true });
-    if (organizationId === null) {
-      throw new InventoryAccessError('Organization context missing.');
-    }
-
-    await deactivateInventoryOrganization(supabase, organizationId);
-
-    await logAuditEvent(supabase, {
-      actorProfileId: profile.id,
-      action: 'inventory_organization_deactivated',
-      entityType: 'inventory_organization',
-      entityRef: buildEntityRef({ schema: 'core', table: 'organizations', id: organizationId }),
-      meta: { pk_int: organizationId },
     });
   });
 }
