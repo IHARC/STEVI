@@ -27,7 +27,6 @@ const canSeeFrontline = (access: PortalAccess) => access.canAccessOpsFrontline;
 const canSeeClients = (access: PortalAccess) => access.canAccessOpsFrontline || access.canManageConsents;
 const canSeePrograms = (access: PortalAccess) => access.canAccessOpsFrontline || access.canAccessOpsAdmin;
 const canSeeSupplies = (access: PortalAccess) => access.canAccessInventoryOps;
-const canSeeDonationCatalog = (access: PortalAccess) => access.canAccessOpsSteviAdmin;
 const canSeeDirectory = (access: PortalAccess) =>
   access.canAccessOpsFrontline || access.canAccessOpsOrg || access.canAccessOpsAdmin || access.canAccessOpsSteviAdmin;
 const canSeeOrganization = (access: PortalAccess) => access.canAccessOpsOrg && !access.canAccessOpsSteviAdmin;
@@ -78,7 +77,6 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
         isHub: true,
         items: [
           { id: 'supplies', href: '/ops/supplies', label: 'Supplies', icon: 'boxes', match: ['/ops/supplies'] },
-          { id: 'donations', href: '/ops/supplies/donations', label: 'Donation catalogue', icon: 'box', match: ['/ops/supplies/donations'], requires: canSeeDonationCatalog },
         ],
       },
       {

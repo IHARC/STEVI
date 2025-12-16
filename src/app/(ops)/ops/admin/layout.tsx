@@ -29,7 +29,6 @@ export default async function AdminLayout({ children }: { children: ReactNode })
           items: [
             { label: 'AI & system', href: '/ops/admin/integrations', match: ['/ops/admin/integrations'] },
             { label: 'Donations (Stripe)', href: '/ops/admin/integrations/donations', match: ['/ops/admin/integrations/donations'] },
-            { label: 'Donation catalogue', href: '/ops/supplies/donations', match: ['/ops/supplies/donations'] },
           ],
         },
         {

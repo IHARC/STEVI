@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@shared/ui/button';
 import { Badge } from '@shared/ui/badge';
 import { Combobox } from '@shared/ui/combobox';
@@ -50,6 +50,8 @@ function buildUrl(pathname: string, params: Record<string, string | number | nul
 export function DonationCatalogAdmin({ inventoryItems, catalogInventoryItemIds, categories, items, total, stats, initial }: Props) {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const tab = searchParams?.get('tab');
 
   const [q, setQ] = useState(initial.q);
   const [status, setStatus] = useState<Props['initial']['status']>(initial.status);
@@ -80,6 +82,7 @@ export function DonationCatalogAdmin({ inventoryItems, catalogInventoryItemIds, 
       sort: next.sort ?? sort,
       page: next.page ?? 0,
       pageSize: next.pageSize ?? pageSize,
+      tab: tab ?? undefined,
     };
     router.replace(buildUrl(pathname, params));
   };

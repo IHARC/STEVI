@@ -12,7 +12,7 @@ describe('ops inbox visibility', () => {
     expect(shouldShowOpsInbox('/ops/today', 1)).toBe(true);
     expect(shouldShowOpsInbox('/ops/today?x=1', 1)).toBe(true);
     expect(shouldShowOpsInbox('/ops/today', 0)).toBe(false);
-    expect(shouldShowOpsInbox('/ops/supplies/donations', 99)).toBe(false);
+    expect(shouldShowOpsInbox('/ops/supplies?tab=donations', 99)).toBe(false);
     expect(shouldShowOpsInbox(null, 99)).toBe(false);
   });
 });

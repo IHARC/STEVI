@@ -5,7 +5,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 
-const DONATION_CATALOG_PATH = '/ops/supplies/donations';
+const DONATION_CATALOG_PATH = '/ops/supplies';
 
 type AdminContext = {
   supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>;

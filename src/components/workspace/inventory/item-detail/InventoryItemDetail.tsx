@@ -765,7 +765,7 @@ function DonationListingCard({
                 Remove listing
               </Button>
               <div className="flex items-center gap-2">
-                <Button type="button" variant="outline" onClick={() => router.push('/ops/supplies/donations')} disabled={isPending}>
+                <Button type="button" variant="outline" onClick={() => router.push('/ops/supplies?tab=donations')} disabled={isPending}>
                   Open catalogue list
                 </Button>
                 <Button type="submit" disabled={isPending}>
