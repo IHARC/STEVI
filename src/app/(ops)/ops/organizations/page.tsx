@@ -1,15 +1,12 @@
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { resolveLandingPath } from '@/lib/portal-navigation';
 import { PageHeader } from '@shared/layout/page-header';
-import { Badge } from '@shared/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@shared/ui/table';
 import type { Database } from '@/types/supabase';
 import { CreateOrganizationDialog } from './create-organization-dialog';
 import { createOrganizationAction } from './actions';
+import { OrganizationsList } from '@workspace/organizations/organizations-list';
 
 type OrganizationRow = Pick<
   Database['core']['Tables']['organizations']['Row'],
@@ -26,18 +23,49 @@ type OrganizationRow = Pick<
 
 export const dynamic = 'force-dynamic';
 
-const dateFormatter = new Intl.DateTimeFormat('en-CA', { dateStyle: 'medium', timeStyle: 'short' });
+type PageProps = {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
 
-function formatDate(value: string | null) {
-  if (!value) return 'Never';
-  try {
-    return dateFormatter.format(new Date(value));
-  } catch {
-    return value;
-  }
+type ListPageSize = 25 | 50 | 100;
+type ListSortOrder = 'ASC' | 'DESC';
+type SortKey = 'name' | 'organization_type' | 'partnership_type' | 'updated_at' | 'status';
+type StatusFilter = 'all' | 'active' | 'inactive' | 'pending' | 'under_review';
+
+function getString(params: Record<string, string | string[] | undefined> | undefined, key: string) {
+  const value = params?.[key];
+  if (typeof value === 'string') return value;
+  if (Array.isArray(value)) return value[0] ?? null;
+  return null;
 }
 
-export default async function OpsOrganizationsPage() {
+function parsePage(value: string | null) {
+  const parsed = Number.parseInt(value ?? '1', 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
+}
+
+function parsePageSize(value: string | null): ListPageSize {
+  const parsed = Number.parseInt(value ?? '25', 10);
+  return parsed === 50 ? 50 : parsed === 100 ? 100 : 25;
+}
+
+function parseSortOrder(value: string | null): ListSortOrder {
+  return value === 'ASC' ? 'ASC' : 'DESC';
+}
+
+function parseSortKey(value: string | null): SortKey {
+  if (value === 'name' || value === 'organization_type' || value === 'partnership_type' || value === 'status' || value === 'updated_at') {
+    return value;
+  }
+  return 'updated_at';
+}
+
+function parseStatusFilter(value: string | null): StatusFilter {
+  if (value === 'active' || value === 'inactive' || value === 'pending' || value === 'under_review') return value;
+  return 'all';
+}
+
+export default async function OpsOrganizationsPage({ searchParams }: PageProps) {
   const supabase = await createSupabaseRSCClient();
   const access = await loadPortalAccess(supabase);
 
@@ -53,7 +81,19 @@ export default async function OpsOrganizationsPage() {
   const canManageOrganizations = access.canAccessOpsSteviAdmin;
   const orgScopedViewer = !canManageOrganizations && !isInternalIharc;
   const visibleOrgId = orgScopedViewer ? access.organizationId : null;
-  const organizations = visibleOrgId === null && orgScopedViewer ? [] : await fetchOrganizations(supabase, visibleOrgId);
+  const resolvedParams = searchParams ? await searchParams : undefined;
+  const query = {
+    q: (getString(resolvedParams, 'q') ?? '').trim(),
+    status: parseStatusFilter(getString(resolvedParams, 'status')),
+    page: parsePage(getString(resolvedParams, 'page')),
+    pageSize: parsePageSize(getString(resolvedParams, 'pageSize')),
+    sortBy: parseSortKey(getString(resolvedParams, 'sortBy')),
+    sortOrder: parseSortOrder(getString(resolvedParams, 'sortOrder')),
+  } as const;
+
+  const { organizations, totalCount } = visibleOrgId === null && orgScopedViewer
+    ? { organizations: [] as OrganizationRow[], totalCount: 0 }
+    : await fetchOrganizationsPage(supabase, visibleOrgId, query);
   const canOpenOrganizations = canManageOrganizations || isInternalIharc || access.canAccessOpsOrg;
 
   return (
@@ -64,131 +104,58 @@ export default async function OpsOrganizationsPage() {
         description="Browse partner organizations. IHARC admins can create, update, and retire organizations."
       />
 
-      {organizations.length === 0 ? (
-        <Card className="border-dashed border-border/60">
-          <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div className="space-y-1">
-              <CardTitle className="text-lg">No partners yet</CardTitle>
-              <CardDescription>Add partner orgs to surface in referrals and destination selection.</CardDescription>
-            </div>
-            {canManageOrganizations ? <CreateOrganizationDialog action={createOrganizationAction} /> : null}
-          </CardHeader>
-        </Card>
-      ) : (
-        <Card className="border-border/60">
-          <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div className="space-y-1">
-              <CardTitle className="text-base font-semibold">Organizations</CardTitle>
-              <CardDescription>Browse partner details and open a specific organization to manage settings.</CardDescription>
-            </div>
-            {canManageOrganizations ? <CreateOrganizationDialog action={createOrganizationAction} /> : null}
-          </CardHeader>
-          <CardContent className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Organization</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Partnership</TableHead>
-                  <TableHead>Services</TableHead>
-                  <TableHead>Updated</TableHead>
-                  <TableHead>Website</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {organizations.map((org) => (
-                  <TableRow key={org.id} className={org.is_active === false ? 'opacity-60' : undefined}>
-                    <TableCell className="font-medium">
-                      {canOpenOrganizations ? (
-                        <Link
-                          href={`/ops/organizations/${org.id}`}
-                          className="text-foreground underline-offset-4 hover:underline"
-                        >
-                          {org.name}
-                        </Link>
-                      ) : (
-                        org.name
-                      )}
-                    </TableCell>
-                    <TableCell className="capitalize text-muted-foreground">
-                      {org.organization_type?.replaceAll('_', ' ') ?? 'Not set'}
-                    </TableCell>
-                    <TableCell className="capitalize text-muted-foreground">
-                      {org.partnership_type?.replaceAll('_', ' ') ?? 'Not set'}
-                    </TableCell>
-                    <TableCell>
-                      <ServiceTags services={org.services_tags} />
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">{formatDate(org.updated_at ?? null)}</TableCell>
-                    <TableCell>
-                      {org.website ? (
-                        <a
-                          href={org.website}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-primary underline-offset-4 hover:underline"
-                        >
-                          {org.website}
-                        </a>
-                      ) : (
-                        <span className="text-muted-foreground">—</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={resolveStatusVariant(org.status, org.is_active)} className="capitalize">
-                        {org.status ?? (org.is_active === false ? 'inactive' : 'active')}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      )}
+      <OrganizationsList
+        key={`${query.q}|${query.status}|${query.page}|${query.pageSize}|${query.sortBy}|${query.sortOrder}`}
+        organizations={organizations}
+        totalCount={totalCount}
+        query={query}
+        canOpenOrganizations={canOpenOrganizations}
+        createAction={canManageOrganizations ? <CreateOrganizationDialog action={createOrganizationAction} /> : undefined}
+      />
     </div>
   );
 }
 
-async function fetchOrganizations(
+async function fetchOrganizationsPage(
   supabase: Awaited<ReturnType<typeof createSupabaseRSCClient>>,
   onlyOrganizationId: number | null,
-): Promise<OrganizationRow[]> {
+  query: {
+    q: string;
+    status: StatusFilter;
+    page: number;
+    pageSize: ListPageSize;
+    sortBy: SortKey;
+    sortOrder: ListSortOrder;
+  },
+): Promise<{ organizations: OrganizationRow[]; totalCount: number }> {
   const core = supabase.schema('core');
-  let query = core
+  let builder = core
     .from('organizations')
-    .select('id, name, website, organization_type, partnership_type, status, is_active, services_tags, updated_at')
-    .order('updated_at', { ascending: false })
-    .limit(200);
+    .select('id, name, website, organization_type, partnership_type, status, is_active, services_tags, updated_at', {
+      count: 'exact',
+    });
 
   if (onlyOrganizationId !== null) {
-    query = query.eq('id', onlyOrganizationId);
+    builder = builder.eq('id', onlyOrganizationId);
   }
 
-  const { data, error } = await query;
+  if (query.status !== 'all') {
+    builder = builder.eq('status', query.status);
+  }
+
+  const searchTerm = query.q.trim().replaceAll(',', ' ');
+  if (searchTerm) {
+    builder = builder.or(`name.ilike.%${searchTerm}%,website.ilike.%${searchTerm}%`);
+  }
+
+  builder = builder.order(query.sortBy, { ascending: query.sortOrder === 'ASC' });
+  const from = (query.page - 1) * query.pageSize;
+  const to = from + query.pageSize - 1;
+  const { data, error, count } = await builder.range(from, to);
 
   if (error) throw error;
-  return (data ?? []) as OrganizationRow[];
-}
-
-function resolveStatusVariant(status: OrganizationRow['status'], isActive: boolean | null) {
-  if (isActive === false || status === 'inactive') return 'secondary';
-  if (status === 'pending' || status === 'under_review') return 'outline';
-  return 'default';
-}
-
-function ServiceTags({ services }: { services: unknown }) {
-  const list = Array.isArray(services) ? services : [];
-  if (!list.length) return <span className="text-muted-foreground">—</span>;
-
-  return (
-    <div className="flex flex-wrap gap-2">
-      {list.map((item, idx) => (
-        <Badge key={`${item}-${idx}`} variant="outline" className="text-xs capitalize">
-          {String(item).replaceAll('_', ' ')}
-        </Badge>
-      ))}
-    </div>
-  );
+  return {
+    organizations: (data ?? []) as OrganizationRow[],
+    totalCount: count ?? 0,
+  };
 }

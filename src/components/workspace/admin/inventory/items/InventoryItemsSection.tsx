@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@shared/ui/card';
@@ -67,11 +67,6 @@ function compareStrings(a: string, b: string) {
 }
 
 export function InventoryItemsSection({ items, locations, organizations, actorProfileId }: InventoryItemsSectionProps) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const baseParams = useMemo(() => new URLSearchParams(searchParams?.toString()), [searchParams]);
-
   const [itemToReceive, setItemToReceive] = useState<InventoryItem | null>(null);
   const [itemToTransfer, setItemToTransfer] = useState<InventoryItem | null>(null);
   const [itemToAdjust, setItemToAdjust] = useState<InventoryItem | null>(null);
@@ -82,42 +77,112 @@ export function InventoryItemsSection({ items, locations, organizations, actorPr
 
   const activeOrganizations = useMemo(() => organizations.filter((org) => org.isActive), [organizations]);
 
-  const query = useMemo(() => {
-    const q = getParam(baseParams, 'items_q');
-    const status = (getParam(baseParams, 'items_status') as StatusFilter) || 'all';
-    const category = getParam(baseParams, 'items_category') || 'all';
-    const page = parsePage(getParam(baseParams, 'items_page'));
-    const pageSize = parsePageSize(getParam(baseParams, 'items_pageSize'));
-    const sortBy =
-      (getParam(baseParams, 'items_sortBy') as ItemsSortKey) ||
-      'name';
-    const sortOrder = parseSortOrder(getParam(baseParams, 'items_sortOrder'));
-    return {
-      q,
-      status: status === 'active' || status === 'inactive' ? status : 'all',
-      category,
-      page,
-      pageSize,
-      sortBy,
-      sortOrder,
-    };
-  }, [baseParams]);
+  return (
+    <Card className="border-border/60">
+      <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <CardTitle className="text-base font-semibold">Inventory items</CardTitle>
+        <div className="flex items-center gap-2">
+          <Dialog open={isBulkOpen} onOpenChange={setIsBulkOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline">Bulk receive</Button>
+            </DialogTrigger>
+            <BulkReceiveDialog
+              isPending={isPending}
+              onSubmit={(formData) => bulkReceive(formData, () => setIsBulkOpen(false)).then(() => undefined)}
+              actorProfileId={actorProfileId}
+              items={items}
+              locations={locations}
+              organizations={activeOrganizations}
+            />
+          </Dialog>
+          <Button asChild>
+            <Link href="/ops/inventory/items/new">Create item</Link>
+          </Button>
+        </div>
+      </CardHeader>
+      <InventoryItemsList
+        items={items}
+        isPending={isPending}
+        onReceive={setItemToReceive}
+        onTransfer={setItemToTransfer}
+        onAdjust={setItemToAdjust}
+        onToggle={(item, next) => toggleItem(item, next)}
+        onDelete={(item) => deleteItem(item)}
+      />
+      <CardFooter className="text-xs text-muted-foreground">
+        Manage stock levels using receive, transfer, or adjust actions. Deactivating an item hides it from operational workflows without
+        deleting historic transactions.
+      </CardFooter>
 
-  const [q, setQ] = useState(query.q);
-  const [status, setStatus] = useState<StatusFilter>(query.status);
-  const [category, setCategory] = useState<string>(query.category);
-  const [pageSize, setPageSize] = useState<ListPageSize>(query.pageSize);
-  const [sortBy, setSortBy] = useState<ItemsSortKey>(query.sortBy);
-  const [sortOrder, setSortOrder] = useState<ListSortOrder>(query.sortOrder);
+      <ReceiveStockDialog
+        item={itemToReceive}
+        locations={locations}
+        organizations={activeOrganizations}
+        isPending={isPending}
+        onClose={() => setItemToReceive(null)}
+        onSubmit={(formData) => receiveStock(formData, () => setItemToReceive(null)).then(() => undefined)}
+        actorProfileId={actorProfileId}
+      />
 
-  useEffect(() => {
-    setQ(query.q);
-    setStatus(query.status);
-    setCategory(query.category || 'all');
-    setPageSize(query.pageSize);
-    setSortBy(query.sortBy);
-    setSortOrder(query.sortOrder);
-  }, [query.category, query.pageSize, query.q, query.sortBy, query.sortOrder, query.status]);
+      <TransferStockDialog
+        item={itemToTransfer}
+        locations={locations}
+        isPending={isPending}
+        onClose={() => setItemToTransfer(null)}
+        onSubmit={(formData) => transferStock(formData, () => setItemToTransfer(null)).then(() => undefined)}
+        actorProfileId={actorProfileId}
+      />
+
+      <AdjustStockDialog
+        item={itemToAdjust}
+        locations={locations}
+        isPending={isPending}
+        onClose={() => setItemToAdjust(null)}
+        onSubmit={(formData) => adjustStock(formData, () => setItemToAdjust(null)).then(() => undefined)}
+        actorProfileId={actorProfileId}
+      />
+    </Card>
+  );
+}
+
+type InventoryItemsListProps = {
+  items: InventoryItem[];
+  isPending: boolean;
+  onReceive: (item: InventoryItem) => void;
+  onTransfer: (item: InventoryItem) => void;
+  onAdjust: (item: InventoryItem) => void;
+  onToggle: (item: InventoryItem, nextActive: boolean) => void;
+  onDelete: (item: InventoryItem) => void;
+};
+
+function InventoryItemsList(props: InventoryItemsListProps) {
+  const searchParams = useSearchParams();
+  const key = searchParams?.toString() ?? '';
+  return <InventoryItemsListBody key={key} {...props} />;
+}
+
+function InventoryItemsListBody({ items, isPending, onReceive, onTransfer, onAdjust, onToggle, onDelete }: InventoryItemsListProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const baseParams = new URLSearchParams(searchParams?.toString());
+
+  const initialQ = getParam(baseParams, 'items_q');
+  const initialStatusRaw = getParam(baseParams, 'items_status');
+  const initialStatus: StatusFilter = initialStatusRaw === 'active' || initialStatusRaw === 'inactive' ? initialStatusRaw : 'all';
+  const initialCategory = getParam(baseParams, 'items_category') || 'all';
+  const initialPage = parsePage(getParam(baseParams, 'items_page'));
+  const initialPageSize = parsePageSize(getParam(baseParams, 'items_pageSize'));
+  const initialSortBy = (getParam(baseParams, 'items_sortBy') as ItemsSortKey) || 'name';
+  const sortOrderRaw = getParam(baseParams, 'items_sortOrder');
+  const initialSortOrder: ListSortOrder = sortOrderRaw ? parseSortOrder(sortOrderRaw) : 'ASC';
+
+  const [q, setQ] = useState(initialQ);
+  const [status, setStatus] = useState<StatusFilter>(initialStatus);
+  const [category, setCategory] = useState<string>(initialCategory);
+  const [pageSize, setPageSize] = useState<ListPageSize>(initialPageSize);
+  const [sortBy, setSortBy] = useState<ItemsSortKey>(initialSortBy);
+  const [sortOrder, setSortOrder] = useState<ListSortOrder>(initialSortOrder);
 
   const categoryOptions = useMemo(() => {
     const unique = new Set<string>();
@@ -161,12 +226,12 @@ export function InventoryItemsSection({ items, locations, organizations, actorPr
 
   const totalCount = sorted.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
-  const page = Math.min(Math.max(query.page, 1), totalPages);
+  const page = Math.min(Math.max(initialPage, 1), totalPages);
   const showingStart = totalCount === 0 ? 0 : (page - 1) * pageSize + 1;
   const showingEnd = totalCount === 0 ? 0 : Math.min(totalCount, page * pageSize);
   const pageItems = useMemo(() => sorted.slice(showingStart - 1, showingEnd), [showingEnd, showingStart, sorted]);
 
-  const apply = (next: Partial<typeof query>) => {
+  const apply = (next: { q?: string; status?: StatusFilter; category?: string; page?: number; pageSize?: ListPageSize; sortBy?: ItemsSortKey; sortOrder?: ListSortOrder }) => {
     const merged = {
       q: next.q ?? q,
       status: next.status ?? status,
@@ -207,182 +272,127 @@ export function InventoryItemsSection({ items, locations, organizations, actorPr
   };
 
   return (
-    <Card className="border-border/60">
-      <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <CardTitle className="text-base font-semibold">Inventory items</CardTitle>
-        <div className="flex items-center gap-2">
-          <Dialog open={isBulkOpen} onOpenChange={setIsBulkOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline">Bulk receive</Button>
-            </DialogTrigger>
-            <BulkReceiveDialog
-              isPending={isPending}
-              onSubmit={(formData) => bulkReceive(formData, () => setIsBulkOpen(false)).then(() => undefined)}
-              actorProfileId={actorProfileId}
-              items={items}
-              locations={locations}
-              organizations={activeOrganizations}
-            />
-          </Dialog>
-          <Button asChild>
-            <Link href="/ops/inventory/items/new">Create item</Link>
+    <CardContent className="space-y-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="flex min-w-[260px] flex-1 items-center gap-2">
+          <Label htmlFor="inventory-items-search" className="sr-only">Search items</Label>
+          <Input
+            id="inventory-items-search"
+            value={q}
+            onChange={(event) => setQ(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') apply({ q, page: 1 });
+            }}
+            placeholder="Search items"
+            className="h-8"
+          />
+          <Button variant="secondary" size="sm" className="h-8" onClick={() => apply({ q, page: 1 })}>
+            Apply
           </Button>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex min-w-[260px] flex-1 items-center gap-2">
-            <Label htmlFor="inventory-items-search" className="sr-only">Search items</Label>
-            <Input
-              id="inventory-items-search"
-              value={q}
-              onChange={(event) => setQ(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') apply({ q, page: 1 });
-              }}
-              placeholder="Search items"
-              className="h-8"
-            />
-            <Button variant="secondary" size="sm" className="h-8" onClick={() => apply({ q, page: 1 })}>
-              Apply
-            </Button>
-          </div>
 
-          <div className="min-w-[140px]">
-            <Label htmlFor="inventory-items-status" className="sr-only">Status</Label>
-            <Select
-              value={status}
-              onValueChange={(value) => {
-                const next = (value as StatusFilter) ?? 'all';
-                setStatus(next);
-                apply({ status: next, page: 1 });
-              }}
-            >
-              <SelectTrigger id="inventory-items-status" className="h-8 px-2 py-1 text-xs">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All statuses</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="min-w-[180px]">
-            <Label htmlFor="inventory-items-category" className="sr-only">Category</Label>
-            <Select
-              value={category}
-              onValueChange={(value) => {
-                const next = value || 'all';
-                setCategory(next);
-                apply({ category: next, page: 1 });
-              }}
-            >
-              <SelectTrigger id="inventory-items-category" className="h-8 px-2 py-1 text-xs">
-                <SelectValue placeholder="Category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All categories</SelectItem>
-                {categoryOptions.map((value) => (
-                  <SelectItem key={value} value={value}>
-                    {value}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="ml-auto flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="h-8" onClick={clearFilters}>
-              Clear
-            </Button>
-          </div>
-        </div>
-
-        <div className="border-t border-border/10 pt-2">
-          <ListPaginationControls
-            page={page}
-            totalPages={totalPages}
-            pageSize={pageSize}
-            pageSizeId="inventory-items-page-size-top"
-            totalCount={totalCount}
-            showingStart={showingStart}
-            showingEnd={showingEnd}
-            onPageSizeChange={(size) => {
-              setPageSize(size);
-              apply({ pageSize: size, page: 1 });
+        <div className="min-w-[140px]">
+          <Label htmlFor="inventory-items-status" className="sr-only">Status</Label>
+          <Select
+            value={status}
+            onValueChange={(value) => {
+              const next: StatusFilter = value === 'active' || value === 'inactive' ? value : 'all';
+              setStatus(next);
+              apply({ status: next, page: 1 });
             }}
-            onPrev={() => apply({ page: Math.max(1, page - 1) })}
-            onNext={() => apply({ page: Math.min(totalPages, page + 1) })}
-          />
+          >
+            <SelectTrigger id="inventory-items-status" className="h-8 px-2 py-1 text-xs">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All statuses</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="inactive">Inactive</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
-        <div className="overflow-x-auto">
-          <ItemsTable
-            items={pageItems}
-            isPending={isPending}
-            sortBy={sortBy}
-            sortOrder={sortOrder}
-            onSort={handleSort}
-            onReceive={setItemToReceive}
-            onTransfer={setItemToTransfer}
-            onAdjust={setItemToAdjust}
-            onToggle={(item, next) => toggleItem(item, next)}
-            onDelete={(item) => deleteItem(item)}
-          />
-        </div>
-
-        <div className="border-t border-border/10 pt-2">
-          <ListPaginationControls
-            page={page}
-            totalPages={totalPages}
-            pageSize={pageSize}
-            pageSizeId="inventory-items-page-size-bottom"
-            totalCount={totalCount}
-            showingStart={showingStart}
-            showingEnd={showingEnd}
-            onPageSizeChange={(size) => {
-              setPageSize(size);
-              apply({ pageSize: size, page: 1 });
+        <div className="min-w-[180px]">
+          <Label htmlFor="inventory-items-category" className="sr-only">Category</Label>
+          <Select
+            value={category}
+            onValueChange={(value) => {
+              const next = value || 'all';
+              setCategory(next);
+              apply({ category: next, page: 1 });
             }}
-            onPrev={() => apply({ page: Math.max(1, page - 1) })}
-            onNext={() => apply({ page: Math.min(totalPages, page + 1) })}
-          />
+          >
+            <SelectTrigger id="inventory-items-category" className="h-8 px-2 py-1 text-xs">
+              <SelectValue placeholder="Category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All categories</SelectItem>
+              {categoryOptions.map((value) => (
+                <SelectItem key={value} value={value}>
+                  {value}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-      </CardContent>
-      <CardFooter className="text-xs text-muted-foreground">
-        Manage stock levels using receive, transfer, or adjust actions. Deactivating an item hides it from operational workflows without
-        deleting historic transactions.
-      </CardFooter>
 
-      <ReceiveStockDialog
-        item={itemToReceive}
-        locations={locations}
-        organizations={activeOrganizations}
-        isPending={isPending}
-        onClose={() => setItemToReceive(null)}
-        onSubmit={(formData) => receiveStock(formData, () => setItemToReceive(null)).then(() => undefined)}
-        actorProfileId={actorProfileId}
-      />
+        <div className="ml-auto flex items-center gap-2">
+          <Button variant="ghost" size="sm" className="h-8" onClick={clearFilters}>
+            Clear
+          </Button>
+        </div>
+      </div>
 
-      <TransferStockDialog
-        item={itemToTransfer}
-        locations={locations}
-        isPending={isPending}
-        onClose={() => setItemToTransfer(null)}
-        onSubmit={(formData) => transferStock(formData, () => setItemToTransfer(null)).then(() => undefined)}
-        actorProfileId={actorProfileId}
-      />
+      <div className="border-t border-border/10 pt-2">
+        <ListPaginationControls
+          page={page}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          pageSizeId="inventory-items-page-size-top"
+          totalCount={totalCount}
+          showingStart={showingStart}
+          showingEnd={showingEnd}
+          onPageSizeChange={(size) => {
+            setPageSize(size);
+            apply({ pageSize: size, page: 1 });
+          }}
+          onPrev={() => apply({ page: Math.max(1, page - 1) })}
+          onNext={() => apply({ page: Math.min(totalPages, page + 1) })}
+        />
+      </div>
 
-      <AdjustStockDialog
-        item={itemToAdjust}
-        locations={locations}
-        isPending={isPending}
-        onClose={() => setItemToAdjust(null)}
-        onSubmit={(formData) => adjustStock(formData, () => setItemToAdjust(null)).then(() => undefined)}
-        actorProfileId={actorProfileId}
-      />
-    </Card>
+      <div className="overflow-x-auto">
+        <ItemsTable
+          items={pageItems}
+          isPending={isPending}
+          sortBy={sortBy}
+          sortOrder={sortOrder}
+          onSort={handleSort}
+          onReceive={onReceive}
+          onTransfer={onTransfer}
+          onAdjust={onAdjust}
+          onToggle={onToggle}
+          onDelete={onDelete}
+        />
+      </div>
+
+      <div className="border-t border-border/10 pt-2">
+        <ListPaginationControls
+          page={page}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          pageSizeId="inventory-items-page-size-bottom"
+          totalCount={totalCount}
+          showingStart={showingStart}
+          showingEnd={showingEnd}
+          onPageSizeChange={(size) => {
+            setPageSize(size);
+            apply({ pageSize: size, page: 1 });
+          }}
+          onPrev={() => apply({ page: Math.max(1, page - 1) })}
+          onNext={() => apply({ page: Math.min(totalPages, page + 1) })}
+        />
+      </div>
+    </CardContent>
   );
 }
