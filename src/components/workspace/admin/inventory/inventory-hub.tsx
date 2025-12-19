@@ -25,9 +25,9 @@ export function InventoryHub({
 
   const buildHref = (tab: InventoryHubProps['activeTab']) => {
     const params = new URLSearchParams(searchParams?.toString());
-    params.set('tab', tab);
+    params.set('view', tab);
     const query = params.toString();
-    return query ? `/ops/inventory?${query}` : `/ops/inventory?tab=${tab}`;
+    return query ? `/ops/inventory?${query}` : `/ops/inventory?view=${tab}`;
   };
 
   return (

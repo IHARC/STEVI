@@ -4,7 +4,7 @@ STEVI now standardizes on the shadcn/ui token model. All primitives read from a 
 
 ## Token sources
 
-- **Colors**: Light/dark palettes for background, foreground, primary, secondary, accent, muted, destructive, border, input, ring, card, and popover are defined as HSL variables inside `:root`/`.dark`.
+- **Colors**: Light/dark palettes for background, foreground, primary, secondary, accent, muted, destructive, border, input, ring, card, and popover are defined as HSL variables inside `:root`/`.dark`. Ops overrides live in `src/styles/theme.ops.css` (red/black/white with neutral grays).
 - **Radius**: `--radius` drives the `rounded-*` scale (lg/md/sm) set in `tailwind.config.ts`.
 - **Typography**: `--font-sans`, `--font-heading`, and `--font-mono` live in `src/styles/theme.css`. If we adopt `next/font`, wire those CSS variables in `src/app/layout.tsx`. Use Tailwind `font-sans`/`font-mono` utilities rather than hard-coded stacks.
 
@@ -13,6 +13,7 @@ STEVI now standardizes on the shadcn/ui token model. All primitives read from a 
 - Prefer semantic utilities (`text-foreground`, `bg-card`, `text-destructive`, `border-muted`) over hex values. If you need emphasis, use opacity (`/80`) instead of bespoke colors.
 - For destructive or warning states, use `text-destructive`, `border-destructive`, `bg-destructive/10`, or `text-amber-600` for warnings. Avoid legacy `text-error` or `text-warning-foreground` classes.
 - Buttons, inputs, alerts, dialogs, sheets, tabs, tables, breadcrumbs, navigation, and forms must come from `@/components/ui` primitives. Do not reintroduce bespoke styling or third‑party UI kits.
+- Use neutral `accent` surfaces for hover/ghost states; reserve `primary` for CTAs and active indicators.
 - Keep spacing and layout with Tailwind primitives; do not reintroduce generated token utilities or Material letter-spacing helpers.
 
 ## When adding tokens

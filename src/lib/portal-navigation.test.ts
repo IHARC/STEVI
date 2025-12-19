@@ -145,7 +145,7 @@ describe('requireArea guards', () => {
     const noPreview = requireArea(opsAdmin, 'client', { preview: false, landingPath });
     expect(noPreview.allowed).toBe(false);
     if (!noPreview.allowed) {
-      expect(noPreview.redirectPath).toBe('/ops/today');
+      expect(noPreview.redirectPath).toBe(landingPath);
     }
 
     const withPreview = requireArea(opsAdmin, 'client', { preview: true, landingPath });

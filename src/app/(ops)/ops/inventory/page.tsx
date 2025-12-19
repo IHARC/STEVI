@@ -5,6 +5,7 @@ import { loadPortalAccess } from '@/lib/portal-access';
 import { resolveLandingPath } from '@/lib/portal-navigation';
 import { PageHeader } from '@shared/layout/page-header';
 import { InventoryHub } from '@workspace/admin/inventory/inventory-hub';
+import { normalizeEnumParam, toSearchParams } from '@/lib/search-params';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,28 +13,14 @@ type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
-type InventoryTab = 'dashboard' | 'items' | 'locations' | 'receipts';
-
-function getString(params: Record<string, string | string[] | undefined> | undefined, key: string) {
-  const value = params?.[key];
-  if (typeof value === 'string') return value;
-  if (Array.isArray(value)) return value[0] ?? null;
-  return null;
-}
-
-function parseTab(value: string | null): InventoryTab {
-  if (value === 'items' || value === 'locations' || value === 'receipts') {
-    return value;
-  }
-  return 'dashboard';
-}
+const VIEWS = ['dashboard', 'items', 'locations', 'receipts'] as const;
 
 export default async function OpsInventoryPage({ searchParams }: PageProps) {
   const supabase = await createSupabaseRSCClient();
   const access = await loadPortalAccess(supabase);
 
   if (!access) {
-    redirect(`/login?next=${encodeURIComponent('/ops/inventory?tab=dashboard')}`);
+    redirect(`/login?next=${encodeURIComponent('/ops/inventory?view=dashboard')}`);
   }
 
   if (!access.canAccessInventoryOps) {
@@ -41,7 +28,11 @@ export default async function OpsInventoryPage({ searchParams }: PageProps) {
   }
 
   const resolvedParams = searchParams ? await searchParams : undefined;
-  const tab = parseTab(getString(resolvedParams, 'tab'));
+  const params = toSearchParams(resolvedParams);
+  const { value: tab, redirected } = normalizeEnumParam(params, 'view', VIEWS, 'dashboard');
+  if (redirected) {
+    redirect(`/ops/inventory?${params.toString()}`);
+  }
 
   const bootstrap = await fetchInventoryBootstrap(supabase);
   const canManageLocations = access.iharcRoles.includes('iharc_admin');

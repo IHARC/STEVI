@@ -4,6 +4,7 @@ import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { resolveLandingPath } from '@/lib/portal-navigation';
 import { fetchStaffCaseActivities } from '@/lib/cases/fetchers';
+import { normalizeEnumParam, toSearchParams } from '@/lib/search-params';
 import { PageHeader } from '@shared/layout/page-header';
 import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
@@ -31,6 +32,11 @@ export default async function OpsClientDetailPage({ params, searchParams }: Page
   const activeFilter: FilterId = FILTERS.includes((Array.isArray(filterValue) ? filterValue[0] : filterValue) as FilterId)
     ? ((Array.isArray(filterValue) ? filterValue[0] : filterValue) as FilterId)
     : 'all';
+  const canonicalParams = toSearchParams(filterParam);
+  const { redirected } = normalizeEnumParam(canonicalParams, 'view', ['directory'] as const, 'directory');
+  if (redirected) {
+    redirect(`/ops/clients/${id}?${canonicalParams.toString()}`);
+  }
 
   const personId = Number.parseInt(id, 10);
   if (!personId || Number.isNaN(personId)) notFound();
@@ -39,7 +45,7 @@ export default async function OpsClientDetailPage({ params, searchParams }: Page
   const access = await loadPortalAccess(supabase);
 
   if (!access) {
-    redirect(`/login?next=/ops/clients/${id}`);
+    redirect(`/login?next=${encodeURIComponent(`/ops/clients/${id}?view=directory`)}`);
   }
 
   if (!access.canAccessOpsFrontline && !access.canAccessOpsAdmin && !access.canManageConsents) {
@@ -82,7 +88,7 @@ export default async function OpsClientDetailPage({ params, searchParams }: Page
               <TabsList className="h-auto w-full flex-wrap justify-end gap-1 bg-transparent p-0">
                 {FILTERS.map((filter) => (
                   <TabsTrigger key={filter} value={filter} className="rounded-full border px-3 py-1 text-xs capitalize">
-                    <Link href={`/ops/clients/${person.id}?filter=${filter}`}>{filter}</Link>
+                    <Link href={`/ops/clients/${person.id}?filter=${filter}&view=directory`}>{filter}</Link>
                   </TabsTrigger>
                 ))}
               </TabsList>

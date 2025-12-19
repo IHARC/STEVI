@@ -426,7 +426,7 @@ export function ClientsDirectoryTable({ items, totalCount, query, loadError, onb
                 <TableCell className="hidden md:table-cell">{formatTimestamp(item.updated_at)}</TableCell>
                 <TableCell className="text-right">
                   <Button asChild size="sm" variant="outline">
-                    <Link href={`/ops/clients/${item.id}`}>Open</Link>
+                    <Link href={`/ops/clients/${item.id}?view=directory`}>Open</Link>
                   </Button>
                 </TableCell>
               </TableRow>

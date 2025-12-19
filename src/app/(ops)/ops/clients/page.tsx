@@ -15,6 +15,7 @@ import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@shared/ui/table';
 import { ClientsDirectoryTable } from '@workspace/clients/clients-directory-table';
+import { normalizeEnumParam, paramsToRecord, toSearchParams } from '@/lib/search-params';
 
 type DirectoryItem = Database['core']['Functions']['get_people_list_with_types']['Returns'][number];
 type PersonWithOnboarding = DirectoryItem & { onboarding?: OnboardingStatus | null };
@@ -28,12 +29,14 @@ type ViewId = (typeof VIEWS)[number];
 
 export default async function OpsClientsPage({ searchParams }: PageProps) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
-  const viewParam = resolvedSearchParams?.view;
-  const activeView: ViewId = VIEWS.includes((Array.isArray(viewParam) ? viewParam[0] : viewParam) as ViewId)
-    ? ((Array.isArray(viewParam) ? viewParam[0] : viewParam) as ViewId)
-    : 'directory';
+  const params = toSearchParams(resolvedSearchParams);
+  const { value: activeView, redirected } = normalizeEnumParam(params, 'view', VIEWS, 'directory');
+  if (redirected) {
+    redirect(`/ops/clients?${params.toString()}`);
+  }
 
-  const directoryQuery = parseDirectoryQuery(resolvedSearchParams);
+  const normalizedParams = paramsToRecord(params);
+  const directoryQuery = parseDirectoryQuery(normalizedParams);
 
   const supabase = await createSupabaseRSCClient();
   const access = await loadPortalAccess(supabase);
@@ -237,7 +240,7 @@ function CaseloadView({ caseload }: { caseload: Awaited<ReturnType<typeof fetchS
                 </TableCell>
                 <TableCell className="text-right">
                   <Button asChild size="sm" variant="outline">
-                    <Link href={`/ops/clients/${item.id}`}>Open</Link>
+                    <Link href={`/ops/clients/${item.id}?view=directory`}>Open</Link>
                   </Button>
                 </TableCell>
               </TableRow>
@@ -288,7 +291,7 @@ function ActivityView({ cases }: { cases: Awaited<ReturnType<typeof fetchStaffCa
                 </TableCell>
                 <TableCell className="text-right">
                   <Button asChild size="sm" variant="outline">
-                    <Link href={`/ops/clients/${item.personId}?case=${item.id}`}>Open</Link>
+                    <Link href={`/ops/clients/${item.personId}?case=${item.id}&view=directory`}>Open</Link>
                   </Button>
                 </TableCell>
               </TableRow>

@@ -10,6 +10,7 @@ import {
 } from '@/lib/inventory/service';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { resolveLandingPath } from '@/lib/portal-navigation';
+import { normalizeEnumParam, toSearchParams } from '@/lib/search-params';
 import { PageHeader } from '@shared/layout/page-header';
 import { InventoryItemDetail } from '@/components/workspace/inventory/item-detail/InventoryItemDetail';
 
@@ -20,20 +21,19 @@ type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
-function getString(params: Record<string, string | string[] | undefined> | undefined, key: string) {
-  const value = params?.[key];
-  if (typeof value === 'string') return value;
-  if (Array.isArray(value)) return value[0] ?? null;
-  return null;
-}
-
 export default async function OpsInventoryItemDetailPage({ params, searchParams }: PageProps) {
   const supabase = await createSupabaseRSCClient();
   const access = await loadPortalAccess(supabase);
   const { itemId } = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const canonicalParams = toSearchParams(resolvedSearchParams);
+  const { redirected } = normalizeEnumParam(canonicalParams, 'view', ['items'] as const, 'items');
+  if (redirected) {
+    redirect(`/ops/inventory/items/${itemId}?${canonicalParams.toString()}`);
+  }
 
   if (!access) {
-    redirect(`/login?next=${encodeURIComponent(`/ops/inventory/items/${itemId}`)}`);
+    redirect(`/login?next=${encodeURIComponent(`/ops/inventory/items/${itemId}?view=items`)}`);
   }
 
   if (!access.canAccessInventoryOps && !access.canAccessOpsAdmin) {
@@ -62,8 +62,7 @@ export default async function OpsInventoryItemDetailPage({ params, searchParams 
     ),
   ).sort((a, b) => a.localeCompare(b));
 
-  const resolvedParams = searchParams ? await searchParams : undefined;
-  const tab = getString(resolvedParams, 'tab');
+  const tab = canonicalParams.get('tab');
   const initialTab = tab === 'stock' ? 'stock' : 'inventory';
 
   return (
@@ -73,8 +72,8 @@ export default async function OpsInventoryItemDetailPage({ params, searchParams 
         title={item.name}
         description="Inventory details and stock history."
         breadcrumbs={[
-          { label: 'Inventory', href: '/ops/inventory?tab=items' },
-          { label: 'Items', href: '/ops/inventory?tab=items' },
+          { label: 'Inventory', href: '/ops/inventory?view=items' },
+          { label: 'Items', href: '/ops/inventory?view=items' },
           { label: item.name },
         ]}
       />

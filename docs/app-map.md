@@ -12,7 +12,7 @@ This document is a practical “map” of STEVI’s information architecture:
 - tenancy model (IHARC platform admins + org tenants + per-org capabilities)
 
 It is meant to be read alongside:
-- `plan.md` (navigation standard + IA decisions)
+- `docs/ui-standards.md` (app‑wide UI standards + navigation conventions)
 - `docs/navigation-ownership.md`
 - `src/lib/portal-navigation.ts` (Ops hubs and gating)
 - `src/lib/client-navigation.ts` (Client portal nav)
@@ -168,7 +168,7 @@ Hubs per `src/lib/portal-navigation.ts`:
 - Today: `/ops/today`
 - Clients: `/ops/clients` (supports `?view=directory|caseload|activity`) and `/ops/clients/[id]`
 - Programs: `/ops/programs` (supports `?view=schedule`) and `/ops/programs/[id]`
-- Inventory: `/ops/inventory` (supports `?tab=dashboard|items|locations|receipts`), plus:
+- Inventory: `/ops/inventory` (supports `?view=dashboard|items|locations|receipts`), plus:
   - `/ops/inventory/items/new`
   - `/ops/inventory/items/[itemId]`
 - Fundraising: `/ops/fundraising` (tabs managed within the page)

@@ -1,6 +1,6 @@
 # Dual Shell Architecture
 
-This document codifies the client/operations shell split for STEVI. It complements the execution notes in `plan.md` and the navigation ownership guidance in `docs/navigation-ownership.md`.
+This document codifies the client/operations shell split for STEVI. It complements `docs/ui-standards.md` and the navigation ownership guidance in `docs/navigation-ownership.md`.
 
 ## Intent
 - Isolate the client experience from staff/admin/org tooling while keeping a single Next.js app and host.
@@ -63,5 +63,5 @@ This document codifies the client/operations shell split for STEVI. It complemen
 - Keep Supabase schema untouched; no DB migrations are part of this split.
 
 ## References
-- `plan.md` (execution tasks)
+- `docs/ui-standards.md` (UI standards + navigation conventions)
 - `docs/navigation-ownership.md` (navigation ownership note; supersedes the legacy unified shell doc)

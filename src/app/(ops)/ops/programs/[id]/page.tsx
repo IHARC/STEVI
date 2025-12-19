@@ -4,22 +4,29 @@ import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { resolveLandingPath } from '@/lib/portal-navigation';
 import { fetchStaffShifts } from '@/lib/staff/fetchers';
+import { normalizeEnumParam, toSearchParams } from '@/lib/search-params';
 import { PageHeader } from '@shared/layout/page-header';
 import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 
-type PageProps = { params: Promise<{ id: string }> };
+type PageProps = { params: Promise<{ id: string }>; searchParams?: Promise<Record<string, string | string[] | undefined>> };
 
 export const dynamic = 'force-dynamic';
 
-export default async function ProgramDetailPage({ params }: PageProps) {
+export default async function ProgramDetailPage({ params, searchParams }: PageProps) {
   const { id } = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const canonicalParams = toSearchParams(resolvedSearchParams);
+  const { redirected } = normalizeEnumParam(canonicalParams, 'view', ['overview'] as const, 'overview');
+  if (redirected) {
+    redirect(`/ops/programs/${id}?${canonicalParams.toString()}`);
+  }
   const supabase = await createSupabaseRSCClient();
   const access = await loadPortalAccess(supabase);
 
   if (!access) {
-    redirect(`/login?next=/ops/programs/${id}`);
+    redirect(`/login?next=${encodeURIComponent(`/ops/programs/${id}?view=overview`)}`);
   }
 
   if (!access.canAccessOpsFrontline && !access.canAccessOpsAdmin) {

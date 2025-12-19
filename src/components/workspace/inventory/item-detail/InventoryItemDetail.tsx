@@ -77,7 +77,7 @@ export function InventoryItemDetail({
           item={item}
           actorProfileId={actorProfileId}
           categoryOptions={categoryOptions}
-          onBack={() => router.push('/ops/inventory?tab=items')}
+          onBack={() => router.push('/ops/inventory?view=items')}
         />
       </TabsContent>
 

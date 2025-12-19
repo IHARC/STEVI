@@ -4,17 +4,24 @@ import { ensureInventoryActor } from '@/lib/inventory/auth';
 import { fetchInventoryItems, fetchInventoryLocations } from '@/lib/inventory/service';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { resolveLandingPath } from '@/lib/portal-navigation';
+import { normalizeEnumParam, toSearchParams } from '@/lib/search-params';
 import { PageHeader } from '@shared/layout/page-header';
 import { InventoryItemCreate } from '@/components/workspace/inventory/item-detail/InventoryItemCreate';
 
 export const dynamic = 'force-dynamic';
 
-export default async function OpsInventoryNewItemPage() {
+export default async function OpsInventoryNewItemPage({ searchParams }: { searchParams?: Promise<Record<string, string | string[] | undefined>> }) {
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const canonicalParams = toSearchParams(resolvedSearchParams);
+  const { redirected } = normalizeEnumParam(canonicalParams, 'view', ['items'] as const, 'items');
+  if (redirected) {
+    redirect(`/ops/inventory/items/new?${canonicalParams.toString()}`);
+  }
   const supabase = await createSupabaseRSCClient();
   const access = await loadPortalAccess(supabase);
 
   if (!access) {
-    redirect('/login?next=/ops/inventory/items/new');
+    redirect(`/login?next=${encodeURIComponent('/ops/inventory/items/new?view=items')}`);
   }
 
   if (!access.canAccessInventoryOps && !access.canAccessOpsAdmin) {
@@ -39,8 +46,8 @@ export default async function OpsInventoryNewItemPage() {
         title="Create inventory item"
         description="Add a new item for outreach and donation-backed supplies."
         breadcrumbs={[
-          { label: 'Inventory', href: '/ops/inventory?tab=items' },
-          { label: 'Items', href: '/ops/inventory?tab=items' },
+          { label: 'Inventory', href: '/ops/inventory?view=items' },
+          { label: 'Items', href: '/ops/inventory?view=items' },
           { label: 'Create item' },
         ]}
       />

@@ -10,20 +10,21 @@ import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { cn } from '@/lib/utils';
+import { normalizeEnumParam, toSearchParams } from '@/lib/search-params';
 
 export const dynamic = 'force-dynamic';
 
 type PageProps = { searchParams?: Promise<Record<string, string | string[] | undefined>> };
 
 const VIEWS = ['overview', 'schedule'] as const;
-type ViewId = (typeof VIEWS)[number];
 
 export default async function OpsProgramsPage({ searchParams }: PageProps) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
-  const viewParam = resolvedSearchParams?.view;
-  const activeView: ViewId = VIEWS.includes((Array.isArray(viewParam) ? viewParam[0] : viewParam) as ViewId)
-    ? ((Array.isArray(viewParam) ? viewParam[0] : viewParam) as ViewId)
-    : 'overview';
+  const params = toSearchParams(resolvedSearchParams);
+  const { value: activeView, redirected } = normalizeEnumParam(params, 'view', VIEWS, 'overview');
+  if (redirected) {
+    redirect(`/ops/programs?${params.toString()}`);
+  }
 
   const supabase = await createSupabaseRSCClient();
   const access = await loadPortalAccess(supabase);
@@ -146,7 +147,7 @@ function ProgramCard({ program, highlight }: { program: { id: string; title: str
           <Badge variant="outline">Shift log</Badge>
         </div>
         <Button asChild className="w-full">
-          <Link href={`/ops/programs/${program.id}`}>Open program</Link>
+          <Link href={`/ops/programs/${program.id}?view=overview`}>Open program</Link>
         </Button>
       </CardContent>
     </Card>
