@@ -39,8 +39,8 @@ export default async function OpsInventoryNewItemPage() {
         title="Create inventory item"
         description="Add a new item for outreach and donation-backed supplies."
         breadcrumbs={[
-          { label: 'Inventory', href: '/ops/inventory' },
-          { label: 'Items', href: '/ops/inventory' },
+          { label: 'Inventory', href: '/ops/inventory?tab=items' },
+          { label: 'Items', href: '/ops/inventory?tab=items' },
           { label: 'Create item' },
         ]}
       />

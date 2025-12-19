@@ -92,7 +92,7 @@ export default async function NewVisitPage() {
             <Link href={logHref}>Open Today</Link>
           </Button>
           <Button asChild variant="outline" className="w-full md:w-auto">
-            <Link href="/ops/clients">Find a client</Link>
+            <Link href="/ops/clients?view=directory">Find a client</Link>
           </Button>
         </CardContent>
       </Card>
@@ -113,11 +113,11 @@ export default async function NewVisitPage() {
               {' '}to anchor the Visit and keep intake aligned to your org.
             </li>
             <li>
-              <Link href="/ops/programs" className="font-semibold text-foreground hover:underline">Check programs & shifts</Link>
+              <Link href="/ops/programs?view=overview" className="font-semibold text-foreground hover:underline">Check programs & shifts</Link>
               {' '}before logging so Visits capture the right context.
             </li>
             <li>
-              <Link href="/ops/inventory" className="font-semibold text-foreground hover:underline">Review inventory</Link>
+              <Link href="/ops/inventory?tab=dashboard" className="font-semibold text-foreground hover:underline">Review inventory</Link>
               {' '}to prep stock and keep Visit adjustments in sync with inventory controls.
             </li>
           </ul>

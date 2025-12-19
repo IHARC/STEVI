@@ -76,20 +76,22 @@ function SettingsNavItemRow({
           onNavigate();
         }}
         className={cn(
-          'flex items-center rounded-lg px-2 py-2 text-sm transition-colors',
+          'flex items-center rounded-lg border border-transparent px-2 py-2 text-sm transition-colors',
           depth === 0 ? 'font-medium' : 'font-normal',
           depth > 0 ? 'pl-6' : null,
           isActive
-            ? 'bg-muted text-foreground'
-            : 'text-muted-foreground hover:bg-muted/70 hover:text-foreground',
+            ? 'bg-secondary/70 text-foreground border-primary/30'
+            : inActiveBranch
+              ? 'text-foreground/80 hover:bg-muted/70 hover:text-foreground'
+              : 'text-muted-foreground hover:bg-muted/70 hover:text-foreground',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
         )}
         aria-current={isActive ? 'page' : undefined}
       >
         {item.label}
       </Link>
-      {item.items && item.items.length && inActiveBranch ? (
-        <ul className="mt-1 space-y-1">
+      {item.items && item.items.length ? (
+        <ul className="mt-1 space-y-1 border-l border-border/50 pl-3">
           {item.items.map((child) => (
             <SettingsNavItemRow
               key={child.href}

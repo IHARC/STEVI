@@ -119,7 +119,7 @@ export default async function OnboardingPage({ searchParams }: PageProps) {
           <CardContent className="flex flex-wrap gap-3 pt-2">
             {access.canAccessOpsAdmin ? (
               <Button asChild size="sm" variant="secondary">
-                <Link href="/ops/clients">Find existing client</Link>
+                <Link href="/ops/clients?view=directory">Find existing client</Link>
               </Button>
             ) : null}
             {access.canAccessOpsFrontline ? (

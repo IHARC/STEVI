@@ -45,8 +45,8 @@ export default async function ProgramDetailPage({ params }: PageProps) {
         title={program.title}
         description="Roster, attendance, and shift context for this program. Start Visits from here to keep provenance."
         primaryAction={visitAction}
-        secondaryAction={{ label: 'Back to programs', href: '/ops/programs' }}
-        breadcrumbs={[{ label: 'Programs', href: '/ops/programs' }, { label: program.title }]}
+        secondaryAction={{ label: 'Back to programs', href: '/ops/programs?view=overview' }}
+        breadcrumbs={[{ label: 'Programs', href: '/ops/programs?view=overview' }, { label: program.title }]}
         meta={[{ label: program.location, tone: 'info' }]}
       />
 
@@ -64,7 +64,7 @@ export default async function ProgramDetailPage({ params }: PageProps) {
             </div>
             <p className="text-muted-foreground">Wire roster to staffing data when available. Keep shift notes inside Visits to preserve provenance.</p>
             <Button asChild variant="outline" className="w-full">
-              <Link href="/ops/programs">Manage schedule</Link>
+              <Link href="/ops/programs?view=schedule">Manage schedule</Link>
             </Button>
           </CardContent>
         </Card>

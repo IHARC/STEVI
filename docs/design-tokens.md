@@ -6,7 +6,7 @@ STEVI now standardizes on the shadcn/ui token model. All primitives read from a 
 
 - **Colors**: Light/dark palettes for background, foreground, primary, secondary, accent, muted, destructive, border, input, ring, card, and popover are defined as HSL variables inside `:root`/`.dark`.
 - **Radius**: `--radius` drives the `rounded-*` scale (lg/md/sm) set in `tailwind.config.ts`.
-- **Typography**: `--font-sans`, `--font-heading`, and `--font-mono` are wired to `next/font` in `src/app/layout.tsx`. Use Tailwind `font-sans`/`font-mono` utilities rather than hard-coded stacks.
+- **Typography**: `--font-sans`, `--font-heading`, and `--font-mono` live in `src/styles/theme.css`. If we adopt `next/font`, wire those CSS variables in `src/app/layout.tsx`. Use Tailwind `font-sans`/`font-mono` utilities rather than hard-coded stacks.
 
 ## Usage guidelines
 

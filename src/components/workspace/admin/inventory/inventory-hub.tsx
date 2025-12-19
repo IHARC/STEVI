@@ -1,14 +1,12 @@
 'use client';
 
-import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs';
+import { PageTabNav, type PageTab } from '@shared/layout/page-tab-nav';
 import type { InventoryBootstrap } from '@/lib/inventory/types';
 import { InventoryDashboardSection } from './inventory-dashboard';
 import { InventoryItemsSection } from './inventory-items';
 import { InventoryLocationsSection } from './inventory-locations';
 import { InventoryReceiptsSection } from './inventory-receipts';
-import { cn } from '@/lib/utils';
 
 type InventoryHubProps = {
   bootstrap: InventoryBootstrap;
@@ -27,65 +25,51 @@ export function InventoryHub({
 
   const buildHref = (tab: InventoryHubProps['activeTab']) => {
     const params = new URLSearchParams(searchParams?.toString());
-    if (tab === 'dashboard') {
-      params.delete('tab');
-    } else {
-      params.set('tab', tab);
-    }
+    params.set('tab', tab);
     const query = params.toString();
-    return query ? `/ops/inventory?${query}` : '/ops/inventory';
+    return query ? `/ops/inventory?${query}` : `/ops/inventory?tab=${tab}`;
   };
 
   return (
-    <Tabs value={activeTab} className="space-y-3">
-      <TabsList
-        className={cn(
-          'grid h-auto w-full grid-cols-2 gap-1 rounded-2xl sm:grid-cols-3',
-          'lg:grid-cols-4',
-        )}
-      >
-        <TabsTrigger value="dashboard" asChild className="w-full rounded-xl px-3 text-xs font-semibold">
-          <Link href={buildHref('dashboard')}>Dashboard</Link>
-        </TabsTrigger>
-        <TabsTrigger value="items" asChild className="w-full rounded-xl px-3 text-xs font-semibold">
-          <Link href={buildHref('items')}>Items</Link>
-        </TabsTrigger>
-        <TabsTrigger value="locations" asChild className="w-full rounded-xl px-3 text-xs font-semibold">
-          <Link href={buildHref('locations')}>Locations</Link>
-        </TabsTrigger>
-        <TabsTrigger value="receipts" asChild className="w-full rounded-xl px-3 text-xs font-semibold">
-          <Link href={buildHref('receipts')}>Receipts</Link>
-        </TabsTrigger>
-      </TabsList>
+    <div className="space-y-3">
+      <PageTabNav
+        tabs={[
+          { label: 'Dashboard', href: buildHref('dashboard') },
+          { label: 'Items', href: buildHref('items') },
+          { label: 'Locations', href: buildHref('locations') },
+          { label: 'Receipts', href: buildHref('receipts') },
+        ] satisfies PageTab[]}
+        activeHref={buildHref(activeTab)}
+      />
 
-      <TabsContent value="dashboard" className="mt-0">
+      {activeTab === 'dashboard' ? (
         <InventoryDashboardSection dashboard={bootstrap.dashboard} />
-      </TabsContent>
+      ) : null}
 
-      <TabsContent value="items" className="mt-0">
+      {activeTab === 'items' ? (
         <InventoryItemsSection
           items={bootstrap.items}
           locations={bootstrap.locations}
           organizations={bootstrap.organizations}
           actorProfileId={actorProfileId}
         />
-      </TabsContent>
+      ) : null}
 
-      <TabsContent value="locations" className="mt-0">
+      {activeTab === 'locations' ? (
         <InventoryLocationsSection
           locations={bootstrap.locations}
           actorProfileId={actorProfileId}
           canManageLocations={canManageLocations}
         />
-      </TabsContent>
+      ) : null}
 
-      <TabsContent value="receipts" className="mt-0">
+      {activeTab === 'receipts' ? (
         <InventoryReceiptsSection
           receipts={bootstrap.receipts}
           organizations={bootstrap.organizations}
           actorProfileId={actorProfileId}
         />
-      </TabsContent>
-    </Tabs>
+      ) : null}
+    </div>
   );
 }

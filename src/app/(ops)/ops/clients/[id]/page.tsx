@@ -66,8 +66,8 @@ export default async function OpsClientDetailPage({ params, searchParams }: Page
         title={`${person.first_name ?? 'Person'} ${person.last_name ?? ''}`.trim() || 'Client profile'}
         description="Journey timeline shows everything that happened with this person. Start a Visit to add notes, supplies, tasks, or referrals in one place."
         primaryAction={{ label: orgMissing ? 'Select acting org to start Visit' : 'New Visit', href: newVisitHref }}
-        secondaryAction={{ label: 'Find another client', href: '/ops/clients' }}
-        breadcrumbs={[{ label: 'Clients', href: '/ops/clients' }, { label: 'Profile' }]}
+        secondaryAction={{ label: 'Find another client', href: '/ops/clients?view=directory' }}
+        breadcrumbs={[{ label: 'Clients', href: '/ops/clients?view=directory' }, { label: 'Profile' }]}
         meta={[{ label: `Created by ${orgLabel}`, tone: 'neutral' }, { label: person.data_sharing_consent ? 'Sharing: org/partners' : 'Sharing: restricted', tone: person.data_sharing_consent ? 'info' : 'warning' }]}
       />
 

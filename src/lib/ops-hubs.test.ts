@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildPortalNav } from './portal-navigation';
-import { buildOpsHubLinks } from './ops-hubs';
+import { buildOpsHubNav } from './ops-hubs';
 import type { PortalAccess } from './portal-access';
 import type { PortalProfile } from './profile';
 
@@ -67,7 +67,7 @@ const baseAccess: PortalAccess = {
   actingOrgAutoSelected: false,
 };
 
-describe('buildOpsHubLinks', () => {
+describe('buildOpsHubNav', () => {
   it('builds a capped, ordered hub list for ops users', () => {
     const access = {
       ...baseAccess,
@@ -82,7 +82,7 @@ describe('buildOpsHubLinks', () => {
     } satisfies PortalAccess;
 
     const sections = buildPortalNav(access);
-    const hubs = buildOpsHubLinks(sections);
+    const hubs = buildOpsHubNav(sections);
 
     expect(hubs.map((hub) => hub.label)).toEqual([
       'Today',
@@ -106,7 +106,7 @@ describe('buildOpsHubLinks', () => {
     } satisfies PortalAccess;
 
     const sections = buildPortalNav(access);
-    const hubs = buildOpsHubLinks(sections);
+    const hubs = buildOpsHubNav(sections);
 
     expect(hubs.map((hub) => hub.label)).toEqual(['Organizations']);
   });

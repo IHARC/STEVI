@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { Menu } from 'lucide-react';
 import { Button } from '@shared/ui/button';
 import { ScrollArea } from '@shared/ui/scroll-area';
@@ -13,7 +13,8 @@ import { cn } from '@/lib/utils';
 import type { NavSection, NavItem as PortalNavItem } from '@/lib/portal-navigation';
 import type { PrimaryNavItem } from '@/lib/primary-nav';
 import { useOptionalPortalLayout } from '@shared/providers/portal-layout-provider';
-import { buildOpsHubLinks, type OpsHubLink } from '@/lib/ops-hubs';
+import { buildOpsHubNav, type OpsHubNavItem } from '@/lib/ops-hubs';
+import { isNavItemActive } from '@/lib/nav-active';
 
 type AppNavigationProps = {
   navSections: NavSection[];
@@ -24,6 +25,7 @@ type AppNavigationProps = {
 
 export function AppNavigationDesktop({ navSections, globalNavItems = [], className }: AppNavigationProps) {
   const pathname = usePathname() ?? '/';
+  const searchParams = useSearchParams();
   const sections = useAugmentedSections(navSections);
   const hasNav = sections.some((section) => section.groups.length > 0);
 
@@ -41,6 +43,7 @@ export function AppNavigationDesktop({ navSections, globalNavItems = [], classNa
         <NavContent
           navSections={sections}
           pathname={pathname}
+          searchParams={searchParams}
           globalNavItems={globalNavItems}
           showGlobalNav={false}
         />
@@ -51,9 +54,10 @@ export function AppNavigationDesktop({ navSections, globalNavItems = [], classNa
 
 export function AppNavigationMobile({ navSections, globalNavItems = [], mode = 'full' }: AppNavigationProps) {
   const pathname = usePathname() ?? '/';
+  const searchParams = useSearchParams();
   const sections = useAugmentedSections(navSections);
   const [open, setOpen] = useState(false);
-  const hubs = mode === 'hubs' ? buildOpsHubLinks(sections) : [];
+  const hubs = mode === 'hubs' ? buildOpsHubNav(sections) : [];
   const hasNav = mode === 'hubs'
     ? hubs.length > 0
     : sections.some((section) => section.groups.length > 0);
@@ -80,11 +84,12 @@ export function AppNavigationMobile({ navSections, globalNavItems = [], mode = '
         <ScrollArea scrollbar={false} className="h-full">
           <div className="px-4 pb-6">
             {mode === 'hubs' ? (
-              <HubContent hubs={hubs} pathname={pathname} onNavigate={() => setOpen(false)} />
+              <HubContent hubs={hubs} pathname={pathname} searchParams={searchParams} onNavigate={() => setOpen(false)} />
             ) : (
               <NavContent
                 navSections={sections}
                 pathname={pathname}
+                searchParams={searchParams}
                 onNavigate={() => setOpen(false)}
                 showGlobalNav
                 globalNavItems={globalNavItems}
@@ -100,12 +105,13 @@ export function AppNavigationMobile({ navSections, globalNavItems = [], mode = '
 type NavContentProps = {
   navSections: NavSection[];
   pathname: string;
+  searchParams: ReturnType<typeof useSearchParams>;
   onNavigate?: () => void;
   globalNavItems?: PrimaryNavItem[];
   showGlobalNav?: boolean;
 };
 
-function NavContent({ navSections, pathname, onNavigate, globalNavItems = [], showGlobalNav = true }: NavContentProps) {
+function NavContent({ navSections, pathname, searchParams, onNavigate, globalNavItems = [], showGlobalNav = true }: NavContentProps) {
   return (
     <div className="flex flex-col gap-4">
       {navSections.map((section) => (
@@ -130,6 +136,7 @@ function NavContent({ navSections, pathname, onNavigate, globalNavItems = [], sh
                             <NavLink
                               link={item}
                               pathname={pathname}
+                              searchParams={searchParams}
                               onNavigate={onNavigate}
                             />
                           </NavigationMenuLink>
@@ -155,6 +162,7 @@ function NavContent({ navSections, pathname, onNavigate, globalNavItems = [], sh
                     <NavLink
                       link={primaryNavToNavItem(item)}
                       pathname={pathname}
+                      searchParams={searchParams}
                       onNavigate={onNavigate}
                     />
                   </NavigationMenuLink>
@@ -168,29 +176,62 @@ function NavContent({ navSections, pathname, onNavigate, globalNavItems = [], sh
   );
 }
 
-function HubContent({ hubs, pathname, onNavigate }: { hubs: OpsHubLink[]; pathname: string; onNavigate?: () => void }) {
+function HubContent({
+  hubs,
+  pathname,
+  searchParams,
+  onNavigate,
+}: {
+  hubs: OpsHubNavItem[];
+  pathname: string;
+  searchParams: ReturnType<typeof useSearchParams>;
+  onNavigate?: () => void;
+}) {
   return (
-    <div className="space-y-2">
-      {hubs.map((hub) => (
-        <NavLink
-          key={hub.id}
-          link={hub}
-          pathname={pathname}
-          onNavigate={onNavigate}
-        />
-      ))}
+    <div className="space-y-3">
+      {hubs.map((hub) => {
+        const isActive = isNavItemActive(hub, pathname, searchParams) || hub.items.some((item) => isNavItemActive(item, pathname, searchParams));
+        return (
+          <div key={hub.id} className="space-y-1">
+            <NavLink
+              link={hub}
+              pathname={pathname}
+              searchParams={searchParams}
+              onNavigate={onNavigate}
+              activeOverride={isActive}
+            />
+            {hub.items.length > 1 ? (
+              <div className="space-y-1 pl-4">
+                {hub.items.map((item) => (
+                  <NavLink
+                    key={item.id}
+                    link={item}
+                    pathname={pathname}
+                    searchParams={searchParams}
+                    onNavigate={onNavigate}
+                    size="sub"
+                  />
+                ))}
+              </div>
+            ) : null}
+          </div>
+        );
+      })}
     </div>
   );
 }
 
 type NavLinkProps = {
-  link: Pick<PortalNavItem, 'href' | 'icon' | 'label' | 'match' | 'exact'>;
+  link: Pick<PortalNavItem, 'href' | 'icon' | 'label' | 'match' | 'exact' | 'query'>;
   pathname: string;
+  searchParams: ReturnType<typeof useSearchParams>;
   onNavigate?: () => void;
+  size?: 'base' | 'sub';
+  activeOverride?: boolean;
 };
 
-function NavLink({ link, pathname, onNavigate }: NavLinkProps) {
-  const active = isLinkActive(link, pathname);
+function NavLink({ link, pathname, searchParams, onNavigate, size = 'base', activeOverride }: NavLinkProps) {
+  const active = activeOverride ?? isNavItemActive(link, pathname, searchParams);
   const IconComponent = link.icon ? APP_ICON_MAP[link.icon] : null;
 
   return (
@@ -199,13 +240,14 @@ function NavLink({ link, pathname, onNavigate }: NavLinkProps) {
       aria-current={active ? 'page' : undefined}
       onClick={onNavigate}
       className={cn(
-        'flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background min-h-[44px]',
+        'flex w-full items-center gap-2 rounded-lg border border-transparent px-3 py-2 font-medium transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+        size === 'sub' ? 'min-h-[36px] text-sm' : 'min-h-[44px] text-sm',
         active
-          ? 'bg-primary/10 text-primary ring-1 ring-primary/50'
-          : 'text-muted-foreground',
+          ? 'bg-secondary/70 text-foreground border-primary/30'
+          : 'text-muted-foreground hover:text-foreground',
       )}
     >
-      {IconComponent ? <IconComponent className="h-4 w-4" aria-hidden /> : null}
+      {IconComponent && size === 'base' ? <IconComponent className="h-4 w-4" aria-hidden /> : null}
       <span className="truncate">{link.label}</span>
     </Link>
   );
@@ -248,21 +290,6 @@ function appendPreviewParam(href: string): string {
   } catch {
     return href.includes('?') ? `${href}&preview=1` : `${href}?preview=1`;
   }
-}
-
-function isLinkActive(link: Pick<PortalNavItem, 'href' | 'match' | 'exact'>, pathname: string): boolean {
-  const hrefPath = link.href.split('?')[0];
-  const matchPrefixes = link.match ?? [];
-  if (matchPrefixes.length > 0) {
-    return matchPrefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
-  }
-
-  if ('exact' in link && link.exact) {
-    return pathname === hrefPath;
-  }
-
-  if (pathname === hrefPath) return true;
-  return pathname.startsWith(`${hrefPath}/`);
 }
 
 function primaryNavToNavItem(item: PrimaryNavItem): Pick<PortalNavItem, 'href' | 'icon' | 'label' | 'match'> {

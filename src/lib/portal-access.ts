@@ -395,8 +395,8 @@ function linkIsAllowed(entry: { requires?: (access: PortalAccess) => boolean }, 
 const HUB_TAB_COMMANDS: { href: string; label: string; group: string; requires: (access: PortalAccess) => boolean }[] = [
   { href: '/ops/clients?view=directory', label: 'Client directory', group: 'Clients', requires: (access) => access.canAccessOpsFrontline || access.canManageConsents },
   { href: '/ops/clients?view=caseload', label: 'My caseload', group: 'Clients', requires: (access) => access.canAccessOpsFrontline },
-  { href: '/ops/programs', label: 'Programs', group: 'Programs', requires: (access) => access.canAccessOpsFrontline || access.canAccessOpsAdmin },
-  { href: '/ops/inventory', label: 'Inventory', group: 'Inventory', requires: (access) => access.canAccessInventoryOps },
+  { href: '/ops/programs?view=overview', label: 'Programs', group: 'Programs', requires: (access) => access.canAccessOpsFrontline || access.canAccessOpsAdmin },
+  { href: '/ops/inventory?tab=dashboard', label: 'Inventory', group: 'Inventory', requires: (access) => access.canAccessInventoryOps },
   { href: '/ops/organizations', label: 'Organizations', group: 'Organizations', requires: (access) => access.canAccessOpsFrontline || access.canAccessOpsOrg || access.canAccessOpsAdmin || access.canAccessOpsSteviAdmin },
 ];
 

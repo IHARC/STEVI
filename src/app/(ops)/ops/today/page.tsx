@@ -123,7 +123,7 @@ export default async function OpsTodayPage() {
               ))}
               {shifts.length === 0 ? <p className="text-muted-foreground">No scheduled shifts today.</p> : null}
               <Button asChild variant="outline" className="w-full">
-                <Link href="/ops/programs">Open programs</Link>
+                <Link href="/ops/programs?view=overview">Open programs</Link>
               </Button>
             </CardContent>
           </Card>

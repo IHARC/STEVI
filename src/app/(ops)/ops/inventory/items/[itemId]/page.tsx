@@ -73,8 +73,8 @@ export default async function OpsInventoryItemDetailPage({ params, searchParams 
         title={item.name}
         description="Inventory details and stock history."
         breadcrumbs={[
-          { label: 'Inventory', href: '/ops/inventory' },
-          { label: 'Items', href: '/ops/inventory' },
+          { label: 'Inventory', href: '/ops/inventory?tab=items' },
+          { label: 'Items', href: '/ops/inventory?tab=items' },
           { label: item.name },
         ]}
       />

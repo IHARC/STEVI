@@ -58,7 +58,27 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
         requires: canSeeClients,
         isHub: true,
         items: [
-          { id: 'clients', href: '/ops/clients', label: 'Clients', icon: 'users', match: ['/ops/clients'] },
+          {
+            id: 'clients-directory',
+            href: '/ops/clients?view=directory',
+            label: 'Directory',
+            match: ['/ops/clients'],
+            query: { view: 'directory' },
+          },
+          {
+            id: 'clients-caseload',
+            href: '/ops/clients?view=caseload',
+            label: 'Caseload',
+            match: ['/ops/clients'],
+            query: { view: 'caseload' },
+          },
+          {
+            id: 'clients-activity',
+            href: '/ops/clients?view=activity',
+            label: 'Activity',
+            match: ['/ops/clients'],
+            query: { view: 'activity' },
+          },
         ],
       },
       {
@@ -68,7 +88,20 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
         requires: canSeePrograms,
         isHub: true,
         items: [
-          { id: 'programs', href: '/ops/programs', label: 'Programs', icon: 'calendarRange', match: ['/ops/programs'] },
+          {
+            id: 'programs-overview',
+            href: '/ops/programs?view=overview',
+            label: 'Overview',
+            match: ['/ops/programs'],
+            query: { view: 'overview' },
+          },
+          {
+            id: 'programs-schedule',
+            href: '/ops/programs?view=schedule',
+            label: 'Schedule',
+            match: ['/ops/programs'],
+            query: { view: 'schedule' },
+          },
         ],
       },
       {
@@ -78,7 +111,34 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
         requires: canSeeInventory,
         isHub: true,
         items: [
-          { id: 'inventory', href: '/ops/inventory', label: 'Inventory', icon: 'boxes', match: ['/ops/inventory'] },
+          {
+            id: 'inventory-dashboard',
+            href: '/ops/inventory?tab=dashboard',
+            label: 'Dashboard',
+            match: ['/ops/inventory'],
+            query: { tab: 'dashboard' },
+          },
+          {
+            id: 'inventory-items',
+            href: '/ops/inventory?tab=items',
+            label: 'Items',
+            match: ['/ops/inventory'],
+            query: { tab: 'items' },
+          },
+          {
+            id: 'inventory-locations',
+            href: '/ops/inventory?tab=locations',
+            label: 'Locations',
+            match: ['/ops/inventory'],
+            query: { tab: 'locations' },
+          },
+          {
+            id: 'inventory-receipts',
+            href: '/ops/inventory?tab=receipts',
+            label: 'Receipts',
+            match: ['/ops/inventory'],
+            query: { tab: 'receipts' },
+          },
         ],
       },
       {
@@ -250,7 +310,7 @@ export function resolveQuickActions(
       actions.push({
         id: 'ops-find-person',
         label: 'Find or create person',
-        href: '/ops/clients',
+        href: '/ops/clients?view=directory',
         description: 'Search existing records or start intake',
         icon: 'file',
         disabled: previewDisabled,

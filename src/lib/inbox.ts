@@ -133,7 +133,7 @@ async function fetchStaffInboxItems(
         id: `shift-${nextShift.id}`,
         title: nextShift.title || 'Upcoming shift',
         description: nextShift.location,
-        href: '/ops/programs',
+        href: '/ops/programs?view=overview',
         tone: 'success',
         badge: `${nextShift.startsAt}–${nextShift.endsAt}`.trim(),
       });

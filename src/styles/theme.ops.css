@@ -1,59 +1,59 @@
 .ops-shell {
-  --background: 0 0% 99%;
-  --foreground: 222 47% 10%;
+  --background: 0 0% 98%;
+  --foreground: 0 0% 8%;
 
   --card: 0 0% 100%;
-  --card-foreground: 222 47% 12%;
+  --card-foreground: 0 0% 10%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 222 47% 12%;
+  --popover-foreground: 0 0% 10%;
 
-  --primary: 350 78% 46%;
+  --primary: 350 82% 46%;
   --primary-foreground: 0 0% 98%;
 
-  --secondary: 230 20% 94%;
-  --secondary-foreground: 222 47% 12%;
+  --secondary: 0 0% 96%;
+  --secondary-foreground: 0 0% 12%;
 
-  --muted: 230 18% 92%;
-  --muted-foreground: 224 16% 40%;
+  --muted: 0 0% 93%;
+  --muted-foreground: 0 0% 38%;
 
-  --accent: 280 67% 45%;
-  --accent-foreground: 0 0% 98%;
+  --accent: 0 0% 94%;
+  --accent-foreground: 0 0% 12%;
 
   --destructive: 0 72% 48%;
   --destructive-foreground: 0 0% 98%;
 
-  --border: 230 20% 86%;
-  --input: 230 20% 86%;
-  --ring: 350 78% 46%;
+  --border: 0 0% 86%;
+  --input: 0 0% 86%;
+  --ring: 350 82% 46%;
 }
 
 .dark .ops-shell {
-  --background: 223 15% 9%;
-  --foreground: 220 23% 95%;
+  --background: 0 0% 8%;
+  --foreground: 0 0% 96%;
 
-  --card: 222 16% 11%;
-  --card-foreground: 220 23% 95%;
+  --card: 0 0% 10%;
+  --card-foreground: 0 0% 96%;
 
-  --popover: 222 16% 11%;
-  --popover-foreground: 220 23% 95%;
+  --popover: 0 0% 10%;
+  --popover-foreground: 0 0% 96%;
 
-  --primary: 345 75% 60%;
+  --primary: 350 82% 58%;
   --primary-foreground: 0 0% 98%;
 
-  --secondary: 225 15% 18%;
-  --secondary-foreground: 220 23% 95%;
+  --secondary: 0 0% 16%;
+  --secondary-foreground: 0 0% 96%;
 
-  --muted: 222 12% 20%;
-  --muted-foreground: 220 18% 75%;
+  --muted: 0 0% 20%;
+  --muted-foreground: 0 0% 72%;
 
-  --accent: 272 60% 58%;
-  --accent-foreground: 225 20% 12%;
+  --accent: 0 0% 18%;
+  --accent-foreground: 0 0% 96%;
 
   --destructive: 0 72% 52%;
   --destructive-foreground: 0 0% 98%;
 
-  --border: 220 15% 24%;
-  --input: 220 15% 24%;
-  --ring: 345 75% 60%;
+  --border: 0 0% 22%;
+  --input: 0 0% 22%;
+  --ring: 350 82% 58%;
 }

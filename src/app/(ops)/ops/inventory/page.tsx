@@ -33,7 +33,7 @@ export default async function OpsInventoryPage({ searchParams }: PageProps) {
   const access = await loadPortalAccess(supabase);
 
   if (!access) {
-    redirect('/login?next=/ops/inventory');
+    redirect(`/login?next=${encodeURIComponent('/ops/inventory?tab=dashboard')}`);
   }
 
   if (!access.canAccessInventoryOps) {

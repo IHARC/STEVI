@@ -29,7 +29,7 @@ export default async function OpsProgramsPage({ searchParams }: PageProps) {
   const access = await loadPortalAccess(supabase);
 
   if (!access) {
-    redirect('/login?next=/ops/programs');
+    redirect(`/login?next=${encodeURIComponent('/ops/programs?view=overview')}`);
   }
 
   if (!access.canAccessOpsFrontline && !access.canAccessOpsAdmin) {
@@ -40,10 +40,10 @@ export default async function OpsProgramsPage({ searchParams }: PageProps) {
   const todaysPrograms = shifts.slice(0, 3);
 
   const tabs: PageTab[] = [
-    { label: 'Overview', href: '/ops/programs' },
+    { label: 'Overview', href: '/ops/programs?view=overview' },
     { label: 'Schedule', href: '/ops/programs?view=schedule' },
   ];
-  const activeHref = activeView === 'schedule' ? '/ops/programs?view=schedule' : '/ops/programs';
+  const activeHref = activeView === 'schedule' ? '/ops/programs?view=schedule' : '/ops/programs?view=overview';
 
   return (
     <div className="space-y-6">

@@ -68,7 +68,7 @@ export function InventoryItemCreate({ actorProfileId, categories, locations }: P
       return;
     }
     toast({ title: 'Item created', description: 'Open the item list to continue.' });
-    router.push('/ops/inventory');
+    router.push('/ops/inventory?tab=items');
   };
 
   return (
@@ -259,7 +259,7 @@ export function InventoryItemCreate({ actorProfileId, categories, locations }: P
             />
 
             <div className="flex items-center justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => router.push('/ops/inventory')} disabled={isPending}>
+              <Button type="button" variant="outline" onClick={() => router.push('/ops/inventory?tab=items')} disabled={isPending}>
                 Cancel
               </Button>
               <Button type="submit" disabled={isPending}>

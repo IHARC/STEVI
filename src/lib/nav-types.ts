@@ -8,6 +8,7 @@ export type NavItem = {
   icon?: AppIconName;
   match?: string[];
   exact?: boolean;
+  query?: Record<string, string | null>;
 };
 
 export type NavGroup = {
