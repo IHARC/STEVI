@@ -4,6 +4,8 @@ const SUPABASE_URL_KEYS = ['E2E_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_URL', 'SUPA
 const SUPABASE_ANON_KEYS = ['E2E_SUPABASE_ANON_KEY', 'NEXT_PUBLIC_SUPABASE_ANON_KEY', 'SUPABASE_ANON_KEY'] as const;
 
 export const CRUD_SLUG_PREFIX = 'e2e-crud-resource-';
+export const POLICY_SLUG_PREFIX = 'e2e-policy-';
+export const ORG_NAME_PREFIX = 'E2E Org ';
 
 export type CrudEnv = {
   supabaseUrl: string;
@@ -12,8 +14,17 @@ export type CrudEnv = {
   adminPassword: string;
 };
 
+export type OnboardingResetEnv = CrudEnv & {
+  clientEmail: string;
+  clientPassword: string;
+};
+
 type CrudEnvResolution =
   | { ready: true; env: CrudEnv }
+  | { ready: false; reason: string };
+
+type OnboardingResetEnvResolution =
+  | { ready: true; env: OnboardingResetEnv }
   | { ready: false; reason: string };
 
 function firstEnv(keys: readonly string[]) {
@@ -51,10 +62,55 @@ export function resolveCrudEnv(): CrudEnvResolution {
   };
 }
 
-export function buildCrudSlug() {
+export function resolveOnboardingResetEnv(): OnboardingResetEnvResolution {
+  const supabaseUrl = firstEnv(SUPABASE_URL_KEYS);
+  const supabaseAnonKey = firstEnv(SUPABASE_ANON_KEYS);
+  const adminEmail = process.env.E2E_TEST_EMAIL ?? '';
+  const adminPassword = process.env.E2E_TEST_PASSWORD ?? '';
+  const clientEmail = process.env.E2E_CLIENT_EMAIL ?? '';
+  const clientPassword = process.env.E2E_CLIENT_PASSWORD ?? '';
+
+  const missing: string[] = [];
+  if (!supabaseUrl) missing.push('NEXT_PUBLIC_SUPABASE_URL (or E2E_SUPABASE_URL)');
+  if (!supabaseAnonKey) missing.push('NEXT_PUBLIC_SUPABASE_ANON_KEY (or E2E_SUPABASE_ANON_KEY)');
+  if (!adminEmail) missing.push('E2E_TEST_EMAIL');
+  if (!adminPassword) missing.push('E2E_TEST_PASSWORD');
+  if (!clientEmail) missing.push('E2E_CLIENT_EMAIL');
+  if (!clientPassword) missing.push('E2E_CLIENT_PASSWORD');
+
+  if (missing.length > 0) {
+    return { ready: false, reason: `Missing required env vars: ${missing.join(', ')}` };
+  }
+
+  return {
+    ready: true,
+    env: {
+      supabaseUrl,
+      supabaseAnonKey,
+      adminEmail,
+      adminPassword,
+      clientEmail,
+      clientPassword,
+    },
+  };
+}
+
+function buildStampedValue(prefix: string) {
   const stamp = new Date().toISOString().replace(/[:.]/g, '-');
   const random = Math.random().toString(16).slice(2, 8);
-  return `${CRUD_SLUG_PREFIX}${stamp}-${random}`;
+  return `${prefix}${stamp}-${random}`;
+}
+
+export function buildCrudSlug() {
+  return buildStampedValue(CRUD_SLUG_PREFIX);
+}
+
+export function buildPolicySlug() {
+  return buildStampedValue(POLICY_SLUG_PREFIX);
+}
+
+export function buildOrganizationName() {
+  return buildStampedValue(ORG_NAME_PREFIX);
 }
 
 export async function createAuthedSupabase(env: CrudEnv): Promise<SupabaseClient> {
@@ -97,6 +153,112 @@ export async function fetchAdminProfileId(supabase: SupabaseClient): Promise<str
   return profile.id;
 }
 
+async function fetchUserIdForCredentials(env: OnboardingResetEnv): Promise<string> {
+  const supabase = createClient(env.supabaseUrl, env.supabaseAnonKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  });
+
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: env.clientEmail,
+    password: env.clientPassword,
+  });
+
+  if (error || !data.user?.id) {
+    throw new Error(`Unable to authenticate E2E client user: ${error?.message ?? 'no user returned'}`);
+  }
+
+  return data.user.id;
+}
+
+export async function resetClientOnboarding(env: OnboardingResetEnv, supabase?: SupabaseClient) {
+  const client = supabase ?? (await createAuthedSupabase(env));
+  const clientUserId = await fetchUserIdForCredentials(env);
+
+  const portal = client.schema('portal');
+  const core = client.schema('core');
+  const caseMgmt = client.schema('case_mgmt');
+
+  const { data: profile, error: profileError } = await portal
+    .from('profiles')
+    .select('id')
+    .eq('user_id', clientUserId)
+    .maybeSingle();
+
+  if (profileError) {
+    throw new Error(`Unable to resolve client profile id: ${profileError.message}`);
+  }
+
+  const profileId = profile?.id ?? null;
+
+  const { data: link, error: linkError } = await core
+    .from('user_people')
+    .select('person_id')
+    .eq('user_id', clientUserId)
+    .order('linked_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (linkError) {
+    throw new Error(`Unable to resolve client person link: ${linkError.message}`);
+  }
+
+  const personId = link?.person_id ?? null;
+
+  if (clientUserId || profileId) {
+    let registrationQuery = portal.from('registration_flows').delete().eq('flow_type', 'client_onboarding');
+    if (clientUserId && profileId) {
+      registrationQuery = registrationQuery.or(`supabase_user_id.eq.${clientUserId},profile_id.eq.${profileId}`);
+    } else if (clientUserId) {
+      registrationQuery = registrationQuery.eq('supabase_user_id', clientUserId);
+    } else if (profileId) {
+      registrationQuery = registrationQuery.eq('profile_id', profileId);
+    }
+
+    const { error: registrationError } = await registrationQuery;
+    if (registrationError) {
+      throw new Error(`Unable to remove client onboarding drafts: ${registrationError.message}`);
+    }
+  }
+
+  if (personId) {
+    let intakeQuery = caseMgmt.from('client_intakes').delete().eq('person_id', personId);
+    if (profileId) {
+      intakeQuery = intakeQuery.eq('intake_worker', profileId);
+    }
+
+    const { error: intakeError } = await intakeQuery;
+    if (intakeError) {
+      throw new Error(`Unable to remove client intake records: ${intakeError.message}`);
+    }
+
+    const { data: adminUser, error: adminUserError } = await client.auth.getUser();
+    if (adminUserError) {
+      throw new Error(`Unable to resolve admin user for onboarding reset: ${adminUserError.message}`);
+    }
+
+    const { error: consentResetError } = await core
+      .from('people')
+      .update({
+        data_sharing_consent: null,
+        updated_at: new Date().toISOString(),
+        updated_by: adminUser.user?.id ?? null,
+      })
+      .eq('id', personId);
+
+    if (consentResetError) {
+      throw new Error(`Unable to reset client sharing consent: ${consentResetError.message}`);
+    }
+  }
+
+  const { error: unlinkError } = await core.from('user_people').delete().eq('user_id', clientUserId);
+  if (unlinkError) {
+    throw new Error(`Unable to remove client account link: ${unlinkError.message}`);
+  }
+}
+
 export async function cleanupResourcePages(env: CrudEnv, supabase?: SupabaseClient) {
   const client = supabase ?? (await createAuthedSupabase(env));
   const { error } = await client
@@ -108,6 +270,36 @@ export async function cleanupResourcePages(env: CrudEnv, supabase?: SupabaseClie
   if (error) {
     throw new Error(
       `E2E cleanup failed for portal.resource_pages. Manual cleanup: delete where slug like '${CRUD_SLUG_PREFIX}%'. ${error.message}`,
+    );
+  }
+}
+
+export async function cleanupPolicies(env: CrudEnv, supabase?: SupabaseClient) {
+  const client = supabase ?? (await createAuthedSupabase(env));
+  const { error } = await client
+    .schema('portal')
+    .from('policies')
+    .delete()
+    .like('slug', `${POLICY_SLUG_PREFIX}%`);
+
+  if (error) {
+    throw new Error(
+      `E2E cleanup failed for portal.policies. Manual cleanup: delete where slug like '${POLICY_SLUG_PREFIX}%'. ${error.message}`,
+    );
+  }
+}
+
+export async function cleanupOrganizations(env: CrudEnv, supabase?: SupabaseClient) {
+  const client = supabase ?? (await createAuthedSupabase(env));
+  const { error } = await client
+    .schema('core')
+    .from('organizations')
+    .delete()
+    .like('name', `${ORG_NAME_PREFIX}%`);
+
+  if (error) {
+    throw new Error(
+      `E2E cleanup failed for core.organizations. Manual cleanup: delete where name like '${ORG_NAME_PREFIX}%'. ${error.message}`,
     );
   }
 }

@@ -86,7 +86,7 @@ export function LoginForm({ action, nextPath, initialState }: LoginFormProps) {
   return (
     <Form {...form}>
       <form action={formAction} className="grid gap-6">
-        <input type="hidden" {...form.register('next')} />
+        <input type="hidden" name="next" value={nextPath} />
 
         {formError ? (
           <Alert variant="destructive" className="text-sm" role="status" aria-live="polite">

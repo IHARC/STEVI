@@ -1,5 +1,5 @@
 import { createServerClient } from '@supabase/ssr';
-import type { User } from '@supabase/supabase-js';
+import type { User } from '@supabase/auth-js';
 import type { CookieMethodsServer } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import type { Database } from '@/types/supabase';

@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices, type PlaywrightTestConfig } from '@playwright/test';
 
 const ENV_FILES = ['.env', '.env.local', '.env.e2e.local'];
 const lockedKeys = new Set(Object.keys(process.env));
@@ -31,7 +31,7 @@ function loadEnvFile(fileName: string) {
 ENV_FILES.forEach(loadEnvFile);
 
 const baseURL = process.env.E2E_BASE_URL || 'http://localhost:3000';
-const webServer = process.env.E2E_BASE_URL
+const webServer: PlaywrightTestConfig['webServer'] = process.env.E2E_BASE_URL
   ? undefined
   : {
       command: 'npm run dev -- --hostname 127.0.0.1 --port 3000',

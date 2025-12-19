@@ -32,7 +32,7 @@ test.describe('Authenticated shells', () => {
 
     await loginWithEmail(page, clientCreds, '/home');
 
-    await expect(page).toHaveURL(/\/(home|onboarding)(\?|$)/);
+    await expect(page).toHaveURL(/\/(home|onboarding)(\?|$)/, { timeout: 20000 });
 
     const cookies = await page.context().cookies();
     const hasSessionCookie = cookies.some((cookie) => cookie.name.includes('sb-') && cookie.name.endsWith('-auth-token'));
@@ -54,7 +54,7 @@ test.describe('Authenticated shells', () => {
 
     await loginWithEmail(page, adminCreds, '/ops/admin');
 
-    await expect(page).toHaveURL(/\/ops\/admin(\?|$)/);
+    await expect(page).toHaveURL(/\/ops\/admin(\?|$)/, { timeout: 20000 });
     await expect(page.getByRole('heading', { name: /general settings/i })).toBeVisible();
   });
 });

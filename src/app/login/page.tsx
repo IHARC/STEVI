@@ -70,6 +70,17 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       return { error: 'Enter your password to continue.', contactMethod };
     }
 
+    const redirectAfterLogin = async (supa: Awaited<ReturnType<typeof createSupabaseServerClient>>) => {
+      const resolvedNext = resolveNextPath(rawNext, '');
+      if (resolvedNext) {
+        redirect(resolvedNext);
+      }
+
+      const access = await loadPortalAccess(supa);
+      const destination = resolveNextPath(rawNext, resolveLandingPath(access));
+      redirect(destination);
+    };
+
     if (contactMethod === 'email') {
       const email = (formData.get('email') as string | null)?.trim().toLowerCase();
       if (!email) {
@@ -82,9 +93,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         return { error: error.message, contactMethod: 'email' };
       }
 
-      const access = await loadPortalAccess(supa);
-      const destination = resolveNextPath(rawNext, resolveLandingPath(access));
-      redirect(destination);
+      await redirectAfterLogin(supa);
+      return { error: 'We could not finish signing you in. Please try again.', contactMethod: 'email' };
     }
 
     const rawPhone = (formData.get('phone') as string | null) ?? '';
@@ -102,9 +112,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       return { error: error.message, contactMethod: 'phone' };
     }
 
-    const access = await loadPortalAccess(supa);
-    const destination = resolveNextPath(rawNext, resolveLandingPath(access));
-    redirect(destination);
+    await redirectAfterLogin(supa);
+    return { error: 'We could not finish signing you in. Please try again.', contactMethod: 'phone' };
   }
 
   return (
