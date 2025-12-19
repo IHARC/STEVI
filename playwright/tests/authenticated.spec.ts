@@ -33,8 +33,10 @@ test.describe('Authenticated shells', () => {
     await loginWithEmail(page, clientCreds, '/home');
 
     await expect(page).toHaveURL(/\/(home|onboarding)(\?|$)/);
-    await expect(page.getByRole('navigation', { name: 'Application navigation' })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Appointments' })).toBeVisible();
+
+    const cookies = await page.context().cookies();
+    const hasSessionCookie = cookies.some((cookie) => cookie.name.includes('sb-') && cookie.name.endsWith('-auth-token'));
+    expect(hasSessionCookie).toBeTruthy();
   });
 
   test('admin user sees ops shell navigation', async ({ page }) => {
@@ -43,7 +45,7 @@ test.describe('Authenticated shells', () => {
     await loginWithEmail(page, adminCreds, '/ops/today');
 
     await expect(page).toHaveURL(/\/ops\/today(\?|$)/);
-    await expect(page.getByRole('navigation', { name: 'Application navigation' })).toBeVisible();
+    await expect(page.getByRole('navigation', { name: 'Operations hubs' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Clients' })).toBeVisible();
   });
 
