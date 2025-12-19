@@ -39,15 +39,15 @@ declare
   v_total_count bigint;
   v_privacy_check boolean := false;
 begin
-  -- Privacy protection: require search term for community members
+  -- Privacy protection: require search term for client records
   if p_person_types is not null then
     select exists(
       select 1 from unnest(p_person_types) as pt
-      where pt::text in ('community_member', 'potential_client')
+      where pt::text in ('client', 'potential_client')
     ) into v_privacy_check;
 
     if v_privacy_check and (p_search_term is null or length(trim(p_search_term)) < 2) then
-      raise exception 'Search term of at least 2 characters required for community member records (privacy protection)';
+      raise exception 'Search term of at least 2 characters required for client records (privacy protection)';
     end if;
   end if;
 
@@ -121,4 +121,3 @@ begin
   offset v_offset;
 end;
 $function$;
-

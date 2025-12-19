@@ -7,7 +7,6 @@ export type PersonCategory = Database['core']['Enums']['person_category'];
 export const PERSON_TYPE_VALUES: PersonType[] = [
   'client',
   'former_client',
-  'community_member',
   'potential_client',
   'resident',
   'concerned_citizen',
@@ -41,6 +40,5 @@ export function formatEnumLabel(value: string) {
 }
 
 export function requiresPrivacySearch(personTypes: PersonType[]) {
-  return personTypes.includes('community_member') || personTypes.includes('potential_client');
+  return personTypes.includes('client') || personTypes.includes('potential_client');
 }
-

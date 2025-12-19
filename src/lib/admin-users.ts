@@ -287,7 +287,7 @@ export async function fetchAdminUsers(
     );
 
   if (segment === 'clients') {
-    query = query.eq('affiliation_type', 'community_member');
+    query = query.eq('affiliation_type', 'client');
   } else if (segment === 'partners') {
     query = query.in('affiliation_type', PARTNER_AFFILIATIONS);
   }
@@ -377,7 +377,7 @@ export async function fetchAdminUserSummary(
     portal
       .from('profiles')
       .select('id', { count: 'exact', head: true })
-      .eq('affiliation_type', 'community_member'),
+      .eq('affiliation_type', 'client'),
     portal
       .from('profiles')
       .select('id', { count: 'exact', head: true })

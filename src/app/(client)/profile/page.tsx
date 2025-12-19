@@ -77,7 +77,7 @@ export default async function PortalProfilePage() {
 
       {awaitingVerification ? (
         <div className="rounded-2xl border border-primary bg-primary/10 p-4 text-sm text-primary">
-          We are confirming your IHARC team role. You can keep contributing as a community member while we
+          We are confirming your IHARC team role. You can keep contributing as a client while we
           verify.
         </div>
       ) : null}

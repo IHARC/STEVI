@@ -120,7 +120,7 @@ export default async function VolunteerApplicationPage({ searchParams }: Volunte
       try {
         const profile = await ensurePortalProfile(supabase, createdUserId, {
           display_name: fullName,
-          affiliation_type: 'community_member',
+          affiliation_type: 'client',
           position_title: 'Volunteer applicant',
         });
         profileId = profile.id;

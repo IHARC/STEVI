@@ -144,7 +144,7 @@ Entry point: `/register`
 Known flows (route group `src/app/register`):
 - `/register/get-help`
 - `/register/access-services`
-- `/register/community-member`
+- `/register/client`
 - `/register/partner`
 - `/register/volunteer`
 - `/register/report-concern`

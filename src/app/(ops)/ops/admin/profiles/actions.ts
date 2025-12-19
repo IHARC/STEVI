@@ -99,7 +99,7 @@ export async function sendPartnerInviteAction(formData: FormData): Promise<Actio
     const organizationId = normalizeOrganizationId(formData.get('invite_organization_id'));
 
     const allowedAffiliations: PortalProfile['affiliation_type'][] = [
-      'community_member',
+      'client',
       'agency_partner',
       'government_partner',
     ];
@@ -186,7 +186,7 @@ export async function approveAffiliationAction(formData: FormData): Promise<Acti
       governmentRole = requireGovernmentRole(approvedGovernmentRole);
     }
 
-    const elevateRole = pendingProfile.affiliation_type !== 'community_member';
+    const elevateRole = pendingProfile.affiliation_type !== 'client';
 
     const profileUpdate: Partial<PortalProfile> = {
       affiliation_status: 'approved',
@@ -256,7 +256,7 @@ export async function declineAffiliationAction(formData: FormData): Promise<Acti
       requested_government_role: null,
     };
 
-    if (pendingProfile.affiliation_type !== 'community_member') {
+    if (pendingProfile.affiliation_type !== 'client') {
       declineUpdate.organization_id = null;
       declineUpdate.government_role_type = null;
     }

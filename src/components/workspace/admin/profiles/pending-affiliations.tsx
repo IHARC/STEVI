@@ -26,7 +26,7 @@ type PendingAffiliationsSectionProps = {
 const dateFormatter = new Intl.DateTimeFormat('en-CA', { dateStyle: 'medium' });
 
 const AFFILIATION_LABELS: Record<PendingAffiliation['affiliationType'], string> = {
-  community_member: 'Community member',
+  client: 'Client',
   agency_partner: 'Agency partner',
   government_partner: 'Government partner',
 };

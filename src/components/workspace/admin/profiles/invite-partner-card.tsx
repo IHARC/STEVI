@@ -21,7 +21,7 @@ type InvitePartnerCardProps = {
 const AFFILIATION_OPTIONS: { value: ProfileInviteSummary['affiliationType']; label: string }[] = [
   { value: 'agency_partner', label: 'Agency or community partner' },
   { value: 'government_partner', label: 'Government partner' },
-  { value: 'community_member', label: 'Community collaborator' },
+  { value: 'client', label: 'Client' },
 ];
 
 const STATUS_LABELS: Record<ProfileInviteSummary['status'], string> = {

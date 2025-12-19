@@ -13,7 +13,7 @@ import type { Database } from '@/types/supabase';
 import {
   NEW_ORGANIZATION_VALUE,
   NO_ORGANIZATION_VALUE,
-  PUBLIC_MEMBER_ROLE_LABEL,
+  CLIENT_ROLE_LABEL,
 } from '@/lib/constants';
 import type { LivedExperienceStatus } from '@/lib/lived-experience';
 
@@ -67,7 +67,7 @@ export function ProfileDetailsForm({
   const [selectedOrg, setSelectedOrg] = useState(initialOrgSelection);
   const initialAffiliation = allowedAffiliationSet.has(initialValues.affiliationType)
     ? initialValues.affiliationType
-    : affiliationOptions[0]?.value ?? 'community_member';
+    : affiliationOptions[0]?.value ?? 'client';
   const [affiliationType, setAffiliationType] = useState<AffiliationType>(initialAffiliation);
   const [homelessnessExperience, setHomelessnessExperience] = useState<LivedExperienceStatus>(
     initialValues.homelessnessExperience,
@@ -77,17 +77,17 @@ export function ProfileDetailsForm({
   );
 
   useEffect(() => {
-    if (affiliationType === 'community_member') {
+    if (affiliationType === 'client') {
       startTransition(() => {
         setSelectedOrg(NO_ORGANIZATION_VALUE);
       });
     }
   }, [affiliationType]);
 
-  const isAgencyPartner = affiliationType !== 'community_member';
+  const isAgencyPartner = affiliationType !== 'client';
   const requestingNewOrganization = selectedOrg === NEW_ORGANIZATION_VALUE;
   const organizationMap = new Map(organizations.map((org) => [org.id, org.name]));
-  const hideRoleField = affiliationType === 'community_member';
+  const hideRoleField = affiliationType === 'client';
   const pendingVerificationCopy =
     initialValues.affiliationStatus === 'pending'
       ? pendingSummary({
@@ -222,7 +222,7 @@ export function ProfileDetailsForm({
       )}
 
       {hideRoleField ? (
-        <input type="hidden" name="position_title" value={PUBLIC_MEMBER_ROLE_LABEL} />
+        <input type="hidden" name="position_title" value={CLIENT_ROLE_LABEL} />
       ) : null}
 
       <div className="grid gap-2">

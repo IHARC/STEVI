@@ -31,7 +31,7 @@ const mockProfile: PortalProfile = {
   created_at: '2024-01-01T00:00:00Z',
   updated_at: '2024-01-01T00:00:00Z',
   affiliation_status: 'approved',
-  affiliation_type: 'community_member',
+  affiliation_type: 'client',
   has_signed_petition: false,
   homelessness_experience: 'none',
   substance_use_experience: 'none',

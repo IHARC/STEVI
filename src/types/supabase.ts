@@ -6258,7 +6258,6 @@ export type Database = {
       person_type:
         | "client"
         | "former_client"
-        | "community_member"
         | "potential_client"
         | "resident"
         | "concerned_citizen"
@@ -11123,7 +11122,7 @@ export type Database = {
     Enums: {
       affiliation_status: "approved" | "pending" | "revoked"
       affiliation_type:
-        | "community_member"
+        | "client"
         | "agency_partner"
         | "government_partner"
       comment_type: "question" | "suggestion" | "response" | "official_note"
@@ -12601,7 +12600,6 @@ export const Constants = {
       person_type: [
         "client",
         "former_client",
-        "community_member",
         "potential_client",
         "resident",
         "concerned_citizen",
@@ -13029,7 +13027,7 @@ export const Constants = {
     Enums: {
       affiliation_status: ["approved", "pending", "revoked"],
       affiliation_type: [
-        "community_member",
+        "client",
         "agency_partner",
         "government_partner",
       ],

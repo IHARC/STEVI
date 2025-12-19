@@ -61,14 +61,14 @@ export function resolveInitialProfileValues(
 
   const currentAffiliation = allowedAffiliations.includes(profile.affiliation_type as AffiliationType)
     ? (profile.affiliation_type as AffiliationType)
-    : allowedAffiliations[0] ?? 'community_member';
+    : allowedAffiliations[0] ?? 'client';
 
   const initialOrganizationId = organizations.some((org) => Number(org.id) === Number(profile.organization_id))
     ? String(profile.organization_id)
     : null;
 
   const initialValues = {
-    displayName: profile.display_name ?? 'Community member',
+    displayName: profile.display_name ?? 'Client',
     organizationId: initialOrganizationId,
     positionTitle: profile.position_title,
     affiliationType: currentAffiliation,

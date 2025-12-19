@@ -358,7 +358,7 @@ export async function sendInviteAction(formData: FormData): Promise<ActionResult
     const displayName = (formData.get('invite_display_name') as string | null) ?? null;
     const positionTitle = (formData.get('invite_position_title') as string | null) ?? null;
     const affiliationType =
-      parseAffiliationType(formData.get('invite_affiliation_type') as string | null, profileEnums) ?? 'community_member';
+      parseAffiliationType(formData.get('invite_affiliation_type') as string | null, profileEnums) ?? 'client';
     const organizationId = normalizeOrganizationId(formData.get('invite_organization_id'));
     const message = (formData.get('invite_message') as string | null) ?? null;
 

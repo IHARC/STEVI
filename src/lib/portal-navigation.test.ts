@@ -18,7 +18,7 @@ function buildProfile(overrides: Partial<PortalProfile> = {}): PortalProfile {
     updated_at: new Date().toISOString(),
     display_name_confirmed_at: null,
     position_title: null,
-    affiliation_type: 'community_member',
+    affiliation_type: 'client',
     affiliation_status: 'approved' as PortalProfile['affiliation_status'],
     affiliation_requested_at: null,
     affiliation_reviewed_at: null,

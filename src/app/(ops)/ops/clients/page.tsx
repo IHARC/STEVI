@@ -184,7 +184,7 @@ async function loadDirectory(
     return {
       items: [],
       totalCount: 0,
-      error: 'Search term of at least 2 characters is required when including community member or potential client records (privacy protection).',
+      error: 'Search term of at least 2 characters is required when including client or potential client records (privacy protection).',
     };
   }
 

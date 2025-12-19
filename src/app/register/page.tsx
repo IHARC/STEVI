@@ -41,9 +41,9 @@ const ACTIONS: Array<{
     glyph: LogIn,
   },
   {
-    title: 'Join as a community member',
+    title: 'Join as a client',
     description: 'Follow neighbourhood updates, raise concerns, and collaborate on local solutions.',
-    href: (next) => makeNextAwareHref('/register/community-member', next),
+    href: (next) => makeNextAwareHref('/register/client', next),
     glyph: UsersRound,
   },
   {

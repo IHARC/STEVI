@@ -1,5 +1,5 @@
 import type { Database } from '@/types/supabase';
-import { PUBLIC_MEMBER_ROLE_LABEL } from '@/lib/constants';
+import { CLIENT_ROLE_LABEL } from '@/lib/constants';
 import type { SupabaseAnyServerClient } from '@/lib/supabase/types';
 
 export type PortalProfile = Database['portal']['Tables']['profiles']['Row'];
@@ -74,21 +74,21 @@ export async function ensurePortalProfile(
     }
   };
 
-  const ensureCommunityMemberTitle = async (profile: PortalProfile): Promise<PortalProfile> => {
-    if (profile.position_title || profile.affiliation_type !== 'community_member') {
+  const ensureClientTitle = async (profile: PortalProfile): Promise<PortalProfile> => {
+    if (profile.position_title || profile.affiliation_type !== 'client') {
       return profile;
     }
 
     const { data, error } = await portal
       .from('profiles')
-      .update({ position_title: PUBLIC_MEMBER_ROLE_LABEL })
+      .update({ position_title: CLIENT_ROLE_LABEL })
       .eq('id', profile.id)
       .select('*')
       .maybeSingle();
 
     if (error) {
       if (process.env.NODE_ENV !== 'production' && isPostgrestErrorLike(error)) {
-        console.warn('Failed to backfill community member position title', error);
+        console.warn('Failed to backfill client position title', error);
       }
       return profile;
     }
@@ -102,7 +102,7 @@ export async function ensurePortalProfile(
     if (existingProfile.user_id) {
       await refreshUserClaims(existingProfile.user_id);
     }
-    return ensureCommunityMemberTitle(existingProfile);
+    return ensureClientTitle(existingProfile);
   }
 
   // Guard against rare race where a duplicate is created between fetch and insert.
@@ -122,18 +122,18 @@ export async function ensurePortalProfile(
     throw duplicateProfileError();
   }
 
-  const affiliationType = defaults?.affiliation_type ?? 'community_member';
-  const isCommunityMember = affiliationType === 'community_member';
-  const affiliationStatus = defaults?.affiliation_status ?? (isCommunityMember ? 'approved' : 'pending');
+  const affiliationType = defaults?.affiliation_type ?? 'client';
+  const isClient = affiliationType === 'client';
+  const affiliationStatus = defaults?.affiliation_status ?? (isClient ? 'approved' : 'pending');
   const affiliationRequestedAt =
     defaults?.affiliation_requested_at ?? (affiliationStatus === 'pending' ? new Date().toISOString() : null);
-  const positionTitle = defaults?.position_title ?? (isCommunityMember ? PUBLIC_MEMBER_ROLE_LABEL : null);
+  const positionTitle = defaults?.position_title ?? (isClient ? CLIENT_ROLE_LABEL : null);
   const homelessnessExperience = defaults?.homelessness_experience ?? 'none';
   const substanceUseExperience = defaults?.substance_use_experience ?? 'none';
 
   const insertPayload = {
     user_id: userId,
-    display_name: defaults?.display_name ?? 'Community Member',
+    display_name: defaults?.display_name ?? 'Client',
     organization_id: defaults?.organization_id ?? null,
     rules_acknowledged_at: defaults?.rules_acknowledged_at ?? null,
     position_title: positionTitle,
@@ -163,7 +163,7 @@ export async function ensurePortalProfile(
     if (isPostgrestErrorLike(insertError) && isUniqueViolation(insertError)) {
       const profile = await fetchProfileByUserId();
       if (profile) {
-        return ensureCommunityMemberTitle(profile);
+        return ensureClientTitle(profile);
       }
     }
 
@@ -180,7 +180,7 @@ export async function ensurePortalProfile(
 
   await refreshUserClaims(userId);
 
-  return ensureCommunityMemberTitle(inserted);
+  return ensureClientTitle(inserted);
 }
 
 export async function getUserEmailForProfile(supabase: SupabaseAnyServerClient, profileId: string) {

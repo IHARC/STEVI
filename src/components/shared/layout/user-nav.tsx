@@ -27,7 +27,7 @@ export async function getUserNavigation(accessOverride?: PortalAccess | null): P
   }
 
   const { profile } = access;
-  const displayName = profile.display_name || 'Community member';
+  const displayName = profile.display_name || 'Client';
   const positionTitle = profile.position_title;
   const awaitingVerification = profile.affiliation_status === 'pending';
   const affiliationRevoked = profile.affiliation_status === 'revoked';

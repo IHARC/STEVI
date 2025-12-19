@@ -253,7 +253,7 @@ function buildPrefill({
   draft: RegistrationDraft | null;
   fallbackName: string | null;
 }): OnboardingPrefill {
-  const chosenName = person?.first_name ?? draft?.chosen_name ?? fallbackName ?? 'Community member';
+  const chosenName = person?.first_name ?? draft?.chosen_name ?? fallbackName ?? 'Client';
   const legalName = person?.last_name ?? draft?.legal_name ?? null;
   const pronouns = person?.preferred_pronouns ?? draft?.pronouns ?? null;
   const email = person?.email ?? draft?.contact_email ?? null;

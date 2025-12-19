@@ -1,9 +1,9 @@
 import { redirect } from 'next/navigation';
 import {
-  CommunityRegistrationForm,
-  COMMUNITY_REGISTRATION_INITIAL_STATE,
-  type CommunityRegistrationState,
-} from '@/app/register/_components/community-registration-form';
+  ClientRegistrationForm,
+  CLIENT_REGISTRATION_INITIAL_STATE,
+  type ClientRegistrationState,
+} from '@/app/register/_components/client-registration-form';
 import { resolveNextPath } from '@/lib/auth';
 import { emptyToNull } from '@/lib/registration';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
@@ -16,11 +16,11 @@ export const dynamic = 'force-dynamic';
 
 type SearchParams = Record<string, string | string[]>;
 
-type CommunityRegistrationPageProps = {
+type ClientRegistrationPageProps = {
   searchParams?: Promise<SearchParams>;
 };
 
-export default async function CommunityRegistrationPage({ searchParams }: CommunityRegistrationPageProps) {
+export default async function ClientRegistrationPage({ searchParams }: ClientRegistrationPageProps) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const nextPath = resolveNextPath(resolvedSearchParams?.next);
 
@@ -33,10 +33,10 @@ export default async function CommunityRegistrationPage({ searchParams }: Commun
     redirect(nextPath);
   }
 
-  async function registerCommunityMember(
-    prevState: CommunityRegistrationState,
+  async function registerClient(
+    prevState: ClientRegistrationState,
     formData: FormData,
-  ): Promise<CommunityRegistrationState> {
+  ): Promise<ClientRegistrationState> {
     'use server';
 
     const displayName = emptyToNull(formData.get('display_name')) ?? '';
@@ -110,11 +110,11 @@ export default async function CommunityRegistrationPage({ searchParams }: Commun
       try {
         const profile = await ensurePortalProfile(supabase, createdUserId, {
           display_name: displayName,
-          affiliation_type: 'community_member',
+          affiliation_type: 'client',
         });
         profileId = profile.id;
       } catch (profileError) {
-        console.warn('Unable to ensure community profile during registration', profileError);
+        console.warn('Unable to ensure client profile during registration', profileError);
       }
     }
 
@@ -124,7 +124,7 @@ export default async function CommunityRegistrationPage({ searchParams }: Commun
     };
 
     const { error: insertError } = await portal.from('registration_flows').insert({
-      flow_type: 'community_registration',
+      flow_type: 'client_registration',
       status: 'submitted',
       chosen_name: displayName,
       contact_email: email,
@@ -137,7 +137,7 @@ export default async function CommunityRegistrationPage({ searchParams }: Commun
     });
 
     if (insertError) {
-      console.error('Failed to store community registration submission', insertError);
+      console.error('Failed to store client registration submission', insertError);
     }
 
     if (sessionAvailable && profileId) {
@@ -155,9 +155,9 @@ export default async function CommunityRegistrationPage({ searchParams }: Commun
 
   return (
     <FormPageShell maxWidth="form-md">
-      <CommunityRegistrationForm
-        action={registerCommunityMember}
-        initialState={COMMUNITY_REGISTRATION_INITIAL_STATE}
+      <ClientRegistrationForm
+        action={registerClient}
+        initialState={CLIENT_REGISTRATION_INITIAL_STATE}
         nextPath={nextPath}
       />
     </FormPageShell>

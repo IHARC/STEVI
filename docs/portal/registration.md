@@ -8,7 +8,7 @@ All public-facing registration flows now write to `portal.registration_flows`. T
 
 | Column | Notes |
 | --- | --- |
-| `flow_type` | One of `client_intake`, `client_claim`, `community_registration`, `partner_application`, `volunteer_application`, `concern_report`. |
+| `flow_type` | One of `client_intake`, `client_claim`, `client_registration`, `partner_application`, `volunteer_application`, `concern_report`. |
 | `status` | `pending`, `submitted`, `claimed`, or any staff-defined status. Client flows default to `submitted`; partner/volunteer start as `pending`. |
 | `portal_code` | 8-digit tracking code. Generated for every record so staff can look up by code during in-person support. |
 | `contact_email` / `contact_phone` | Optional contact details. Phone numbers are normalized (`+1XXXXXXXXXX`). |
@@ -57,12 +57,12 @@ Route: `/register/access-services`
 
 If the user cannot complete the claim immediately (no active session after sign-up), the submission is stored with `flow_type = 'client_claim'`. Staff should build tooling to surface these pending claims and run `claim_registration_flow` after confirming the user’s identity.
 
-## Community Member Registration
+## Client Registration
 
-Route: `/register/community-member`
+Route: `/register/client`
 
-* Creates an account + profile (`affiliation_type = 'community_member'`).
-* Stores the submission with `flow_type = 'community_registration'` and captures a boolean `metadata.consent_updates`.
+* Creates an account + profile (`affiliation_type = 'client'`).
+* Stores the submission with `flow_type = 'client_registration'` and captures a boolean `metadata.consent_updates`.
 * Staff tooling can use this table to audit unsubscribes or re-send welcome content.
 
 ## Partner Applications
@@ -78,8 +78,8 @@ Route: `/register/partner`
 
 Route: `/register/volunteer`
 
-* Similar to community registrations but stores volunteer-specific metadata: `pronouns`, `interests`, `availability`, `consent_screening`.
-* Profiles default to `affiliation_type = 'community_member'` with `position_title = 'Volunteer applicant'`.
+* Similar to client registrations but stores volunteer-specific metadata: `pronouns`, `interests`, `availability`, `consent_screening`.
+* Profiles default to `affiliation_type = 'client'` with `position_title = 'Volunteer applicant'`.
 * Staff can update `status` to reflect screening progress and schedule orientation using the stored contact info.
 * When a volunteer is approved, move their record into the canonical `portal.volunteer_profiles` + `portal.volunteer_role_assignments` / `portal.volunteer_status_assignments` tables (admin schema removed). Use the registration row’s contact details to seed the volunteer profile and log the action to `portal.audit_log`.
 

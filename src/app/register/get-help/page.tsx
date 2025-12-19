@@ -178,7 +178,7 @@ export default async function ClientIntakePage({ searchParams }: ClientIntakePag
       try {
         const profile = await ensurePortalProfile(supabase, createdUserId, {
           display_name: chosenName,
-          affiliation_type: 'community_member',
+          affiliation_type: 'client',
           position_title: 'Client',
         });
         profileId = profile.id;

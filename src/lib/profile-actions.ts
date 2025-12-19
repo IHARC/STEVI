@@ -6,7 +6,7 @@ import { normalizeLivedExperience, type LivedExperienceStatus } from '@/lib/live
 import {
   NEW_ORGANIZATION_VALUE,
   NO_ORGANIZATION_VALUE,
-  PUBLIC_MEMBER_ROLE_LABEL,
+  CLIENT_ROLE_LABEL,
 } from '@/lib/constants';
 import type { PortalProfile } from '@/lib/profile';
 import type { Database } from '@/types/supabase';
@@ -75,8 +75,8 @@ export function makeProfileActions({
       return { status: 'idle', error: 'Share the name neighbours should see.' };
     }
 
-    const isCommunityMember = affiliationType === 'community_member';
-    const finalPositionTitle = isCommunityMember ? PUBLIC_MEMBER_ROLE_LABEL : positionTitleInput;
+    const isClient = affiliationType === 'client';
+    const finalPositionTitle = isClient ? CLIENT_ROLE_LABEL : positionTitleInput;
 
     const organizationChanged = organizationId !== (profile.organization_id === null ? null : Number(profile.organization_id));
     const requestingOrganization = affiliationType === 'agency_partner' && requestedOrganizationName !== null;
@@ -90,7 +90,7 @@ export function makeProfileActions({
     let affiliationReviewedAt = profile.affiliation_reviewed_at;
     let affiliationReviewedBy = profile.affiliation_reviewed_by;
 
-    if (isCommunityMember) {
+    if (isClient) {
       organizationId = null;
       requestedOrganizationName = null;
       affiliationStatus = 'approved';

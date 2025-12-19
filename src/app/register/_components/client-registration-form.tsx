@@ -11,17 +11,17 @@ import { FormSection } from '@shared/ui/form-section';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@shared/ui/form';
 import { Input } from '@shared/ui/input';
 
-export type CommunityRegistrationState = {
+export type ClientRegistrationState = {
   status: 'idle' | 'success';
   error?: string;
   message?: string;
 };
 
-export const COMMUNITY_REGISTRATION_INITIAL_STATE: CommunityRegistrationState = {
+export const CLIENT_REGISTRATION_INITIAL_STATE: ClientRegistrationState = {
   status: 'idle',
 };
 
-type CommunityRegistrationValues = {
+type ClientRegistrationValues = {
   next: string;
   display_name: string;
   email: string;
@@ -32,19 +32,19 @@ type CommunityRegistrationValues = {
   consent_updates: boolean;
 };
 
-type CommunityRegistrationFormProps = {
-  action: (state: CommunityRegistrationState, formData: FormData) => Promise<CommunityRegistrationState>;
-  initialState?: CommunityRegistrationState;
+type ClientRegistrationFormProps = {
+  action: (state: ClientRegistrationState, formData: FormData) => Promise<ClientRegistrationState>;
+  initialState?: ClientRegistrationState;
   nextPath: string;
 };
 
-export function CommunityRegistrationForm({
+export function ClientRegistrationForm({
   action,
-  initialState = COMMUNITY_REGISTRATION_INITIAL_STATE,
+  initialState = CLIENT_REGISTRATION_INITIAL_STATE,
   nextPath,
-}: CommunityRegistrationFormProps) {
+}: ClientRegistrationFormProps) {
   const [state, formAction] = useActionState(action, initialState);
-  const form = useForm<CommunityRegistrationValues>({
+  const form = useForm<ClientRegistrationValues>({
     defaultValues: {
       next: nextPath,
       display_name: '',
@@ -77,7 +77,7 @@ export function CommunityRegistrationForm({
         <section className="space-y-3">
           <header>
             <p className="text-xs uppercase text-muted-foreground">Neighbour updates</p>
-            <h1 className="text-xl font-medium text-foreground">Join as a community member</h1>
+            <h1 className="text-xl font-medium text-foreground">Join as a client</h1>
             <p className="mt-2 text-sm text-muted-foreground">
               Get email updates about IHARC programs, submit feedback, and follow progress on local initiatives.
             </p>

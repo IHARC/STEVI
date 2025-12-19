@@ -107,7 +107,7 @@ export default async function HomePage() {
     meetingUrl: appt.meeting_url,
   }));
 
-  const preferredName = profile.display_name || 'Community member';
+  const preferredName = profile.display_name || 'Client';
   const preferredPronouns = person?.preferred_pronouns ?? 'Not provided';
   const preferredContact = person?.preferred_contact_method ?? 'Not provided';
 

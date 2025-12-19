@@ -47,7 +47,7 @@ export async function GET(request: Request) {
   }
 
   if (scope === 'client') {
-    queryBuilder.eq('affiliation_type', 'community_member');
+    queryBuilder.eq('affiliation_type', 'client');
   }
 
   const { data, error } = await queryBuilder;

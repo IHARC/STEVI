@@ -119,7 +119,7 @@ export function ClientsDirectoryTable({ items, totalCount, query, loadError, onb
 
   const privacySearchRequired = requiresPrivacySearch(types);
   const privacyError = privacySearchRequired && q.trim().length < 2
-    ? 'Search term of at least 2 characters is required when including community member or potential client records (privacy protection).'
+    ? 'Search term of at least 2 characters is required when including client or potential client records (privacy protection).'
     : null;
 
   const apply = (next: Partial<Props['query']> & { page?: number }) => {
@@ -326,7 +326,7 @@ export function ClientsDirectoryTable({ items, totalCount, query, loadError, onb
 
 	        {privacySearchRequired ? (
 	          <p className="text-xs text-muted-foreground">
-	            Privacy protection: community member/potential client records require a search term.
+            Privacy protection: client/potential client records require a search term.
 	          </p>
 	        ) : null}
 
