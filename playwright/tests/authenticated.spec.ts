@@ -21,7 +21,7 @@ async function loginWithEmail(page: Page, creds: Credentials, nextPath: string) 
   }
 
   await page.goto(`/login?next=${encodeURIComponent(nextPath)}`);
-  await page.getByLabel('Email').fill(creds.email);
+  await page.getByRole('textbox', { name: 'Email' }).fill(creds.email);
   await page.getByLabel('Password').fill(creds.password);
   await page.getByRole('button', { name: /sign in/i }).click();
 }

@@ -76,22 +76,15 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         return { error: 'Enter the email you used to register.', contactMethod: 'email' };
       }
 
-      try {
-        const supa = await createSupabaseServerClient();
-        const { error } = await supa.auth.signInWithPassword({ email, password });
-        if (error) {
-          return { error: error.message, contactMethod: 'email' };
-        }
-
-        const access = await loadPortalAccess(supa);
-        const destination = resolveNextPath(rawNext, resolveLandingPath(access));
-        redirect(destination);
-      } catch (error) {
-        if (error instanceof Error) {
-          return { error: error.message, contactMethod: 'email' };
-        }
-        return { error: 'Unable to sign you in right now.', contactMethod: 'email' };
+      const supa = await createSupabaseServerClient();
+      const { error } = await supa.auth.signInWithPassword({ email, password });
+      if (error) {
+        return { error: error.message, contactMethod: 'email' };
       }
+
+      const access = await loadPortalAccess(supa);
+      const destination = resolveNextPath(rawNext, resolveLandingPath(access));
+      redirect(destination);
     }
 
     const rawPhone = (formData.get('phone') as string | null) ?? '';
@@ -103,22 +96,15 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       };
     }
 
-    try {
-      const supa = await createSupabaseServerClient();
-      const { error } = await supa.auth.signInWithPassword({ phone: normalizedPhone, password });
-      if (error) {
-        return { error: error.message, contactMethod: 'phone' };
-      }
-
-      const access = await loadPortalAccess(supa);
-      const destination = resolveNextPath(rawNext, resolveLandingPath(access));
-      redirect(destination);
-    } catch (error) {
-      if (error instanceof Error) {
-        return { error: error.message, contactMethod: 'phone' };
-      }
-      return { error: 'Unable to sign you in right now.', contactMethod: 'phone' };
+    const supa = await createSupabaseServerClient();
+    const { error } = await supa.auth.signInWithPassword({ phone: normalizedPhone, password });
+    if (error) {
+      return { error: error.message, contactMethod: 'phone' };
     }
+
+    const access = await loadPortalAccess(supa);
+    const destination = resolveNextPath(rawNext, resolveLandingPath(access));
+    redirect(destination);
   }
 
   return (

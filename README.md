@@ -19,6 +19,8 @@ read-only; both apps share the same Supabase project.
 Environment variables (full notes in `docs/backend.md`):
 - Required: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_SITE_URL`
 - Optional: `PORTAL_ALERTS_SECRET` (Edge Function trigger), `NEXT_PUBLIC_GA4_ID`, `NEXT_PUBLIC_ANALYTICS_DISABLED`, `SUPABASE_SERVICE_ROLE_KEY` (local scripts only)
+- E2E credentials (Playwright): `E2E_TEST_EMAIL`, `E2E_TEST_PASSWORD`, `E2E_CLIENT_EMAIL`, `E2E_CLIENT_PASSWORD`
+- E2E CRUD tests use the Supabase URL + anon key above, create `portal.resource_pages` rows prefixed with `e2e-crud-resource-`, and scrub them during teardown. If teardown fails, delete rows where `slug like 'e2e-crud-resource-%'`.
 
 ## Tech Stack
 

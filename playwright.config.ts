@@ -2,8 +2,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { defineConfig, devices } from '@playwright/test';
 
-const envPath = path.resolve(process.cwd(), '.env.e2e.local');
-if (fs.existsSync(envPath)) {
+const ENV_FILES = ['.env', '.env.local', '.env.e2e.local'];
+const lockedKeys = new Set(Object.keys(process.env));
+
+function loadEnvFile(fileName: string) {
+  const envPath = path.resolve(process.cwd(), fileName);
+  if (!fs.existsSync(envPath)) return;
+
   const contents = fs.readFileSync(envPath, 'utf8');
   for (const line of contents.split(/\r?\n/)) {
     const trimmed = line.trim();
@@ -11,6 +16,7 @@ if (fs.existsSync(envPath)) {
     const equalsIndex = trimmed.indexOf('=');
     if (equalsIndex <= 0) continue;
     const key = trimmed.slice(0, equalsIndex).trim();
+    if (lockedKeys.has(key)) continue;
     let value = trimmed.slice(equalsIndex + 1).trim();
     if (
       (value.startsWith('"') && value.endsWith('"')) ||
@@ -18,11 +24,11 @@ if (fs.existsSync(envPath)) {
     ) {
       value = value.slice(1, -1);
     }
-    if (!process.env[key]) {
-      process.env[key] = value;
-    }
+    process.env[key] = value;
   }
 }
+
+ENV_FILES.forEach(loadEnvFile);
 
 const baseURL = process.env.E2E_BASE_URL || 'http://localhost:3000';
 const webServer = process.env.E2E_BASE_URL
@@ -52,5 +58,6 @@ export default defineConfig({
   },
   reporter: process.env.CI ? 'github' : [['list'], ['html', { open: 'never' }]],
   snapshotDir: './playwright/snapshots',
+  globalTeardown: './playwright/global-teardown.ts',
   webServer,
 });

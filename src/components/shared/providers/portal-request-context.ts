@@ -23,15 +23,26 @@ export type PortalRequestContextValue = {
 
 export async function getPortalRequestContext(): Promise<PortalRequestContextValue> {
   const headerList = await headers();
+  const rawPathCandidates = [
+    headerList.get('x-stevi-path'),
+    headerList.get('x-invoke-path'),
+    headerList.get('next-url'),
+    headerList.get('x-next-url'),
+    headerList.get('x-forwarded-uri'),
+    headerList.get('x-forwarded-path'),
+    headerList.get('x-original-url'),
+    headerList.get('x-original-uri'),
+    headerList.get('x-ms-original-url'),
+    headerList.get('x-rewrite-url'),
+    headerList.get('x-url'),
+    headerList.get('x-pathname'),
+    headerList.get('x-request-uri'),
+  ];
+
   const rawPath =
-    headerList.get('x-invoke-path') ??
-    headerList.get('next-url') ??
-    headerList.get('x-forwarded-path') ??
-    headerList.get('x-forwarded-uri') ??
-    headerList.get('x-original-url') ??
-    headerList.get('x-ms-original-url') ??
-    headerList.get('x-rewrite-url') ??
-    headerList.get('x-request-uri');
+    rawPathCandidates.find((value) => Boolean(value) && value !== '/') ??
+    rawPathCandidates.find((value) => Boolean(value)) ??
+    null;
 
   const normalizedPath = normalizePathFromHeader(rawPath, '/');
 

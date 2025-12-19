@@ -23,7 +23,7 @@ export async function createSupabaseServerClient() {
               path: '/',
               sameSite: 'lax',
               httpOnly: true,
-              secure: true,
+              secure: process.env.NODE_ENV === 'production',
               ...options,
             });
           } catch (error) {
