@@ -85,7 +85,7 @@ jobs:
             echo "No CSS assets found under .next/standalone/.next/static/css" >&2
             exit 1
           fi
-          if ! node -e "const m=require('./.next/server/middleware-manifest.json'); if (!m.sortedMiddleware || m.sortedMiddleware.length === 0) process.exit(1);"; then
+          if ! node -e "const m=require('./.next/server/middleware-manifest.json'); const hasMiddleware = (m.sortedMiddleware && m.sortedMiddleware.length > 0) || (m.middleware && Object.keys(m.middleware).length > 0) || (m.functions && Object.keys(m.functions).length > 0); if (!hasMiddleware) process.exit(1);"; then
             echo "Proxy build validation failed: proxy manifest has no entries" >&2
             cat .next/server/middleware-manifest.json || true
             exit 1
@@ -111,7 +111,7 @@ jobs:
             echo "Deployment bundle validation failed: .next/standalone/.next/static missing" >&2
             exit 1
           fi
-          if ! node -e "const m=require('./deployment/.next/standalone/.next/server/middleware-manifest.json'); if (!m.sortedMiddleware || m.sortedMiddleware.length === 0) process.exit(1);"; then
+          if ! node -e "const m=require('./deployment/.next/standalone/.next/server/middleware-manifest.json'); const hasMiddleware = (m.sortedMiddleware && m.sortedMiddleware.length > 0) || (m.middleware && Object.keys(m.middleware).length > 0) || (m.functions && Object.keys(m.functions).length > 0); if (!hasMiddleware) process.exit(1);"; then
             echo "Deployment bundle validation failed: proxy manifest has no entries" >&2
             cat deployment/.next/standalone/.next/server/middleware-manifest.json || true
             exit 1
