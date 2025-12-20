@@ -46,7 +46,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const landingPath = resolveLandingPath(portalAccess);
 
   // Only persist an explicit next param. If none was provided, let post-auth logic
-  // choose the right destination (so admins land in /admin instead of /home).
+  // choose the right destination (so ops users land on /ops/today instead of /home).
   const nextPath = resolveNextPath(rawNextParam, portalAccess ? landingPath : '');
 
   if (user) {

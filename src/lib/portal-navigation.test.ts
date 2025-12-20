@@ -69,7 +69,7 @@ const baseAccess: PortalAccess = {
 };
 
 describe('resolveLandingPath', () => {
-  it('lands STEVI Admin users on the operations home', () => {
+  it('lands STEVI Admin users on operations today', () => {
     const access = {
       ...baseAccess,
       canAccessOpsSteviAdmin: true,
@@ -78,11 +78,22 @@ describe('resolveLandingPath', () => {
       canAccessOpsOrg: true,
       iharcRoles: ['iharc_admin'] as IharcRole[],
     };
-    expect(resolveLandingPath(access)).toBe('/ops/admin');
+    expect(resolveLandingPath(access)).toBe('/ops/today');
   });
 
   it('lands frontline-only users on operations today', () => {
     const access = { ...baseAccess, canAccessOpsFrontline: true, iharcRoles: ['iharc_staff'] as IharcRole[] };
+    expect(resolveLandingPath(access)).toBe('/ops/today');
+  });
+
+  it('lands organization-scoped ops users on operations today', () => {
+    const access = {
+      ...baseAccess,
+      canAccessOpsOrg: true,
+      organizationId: 12,
+      organizationName: 'Partner Org',
+      profile: buildProfile({ affiliation_type: 'agency_partner' }),
+    };
     expect(resolveLandingPath(access)).toBe('/ops/today');
   });
 

@@ -34,6 +34,11 @@ test.describe('Authenticated shells', () => {
 
     await expect(page).toHaveURL(/\/(home|onboarding)(\?|$)/, { timeout: 20000 });
 
+    const appNav = page.getByRole('navigation', { name: 'Application navigation' });
+    await expect(appNav).toBeVisible();
+    await expect(appNav.getByRole('link', { name: 'Support requests' })).toBeVisible();
+    await expect(page.getByRole('navigation', { name: 'Operations hubs' })).toHaveCount(0);
+
     const cookies = await page.context().cookies();
     const hasSessionCookie = cookies.some((cookie) => cookie.name.includes('sb-') && cookie.name.endsWith('-auth-token'));
     expect(hasSessionCookie).toBeTruthy();
@@ -47,6 +52,8 @@ test.describe('Authenticated shells', () => {
     await expect(page).toHaveURL(/\/ops\/today(\?|$)/);
     await expect(page.getByRole('navigation', { name: 'Operations hubs' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Clients' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Open command palette' })).toBeEnabled();
+    await expect(page.getByRole('navigation', { name: 'Application navigation' })).toHaveCount(0);
   });
 
   test('admin user can access ops admin shell', async ({ page }) => {
@@ -56,5 +63,17 @@ test.describe('Authenticated shells', () => {
 
     await expect(page).toHaveURL(/\/ops\/admin(\?|$)/, { timeout: 20000 });
     await expect(page.getByRole('heading', { name: /general settings/i })).toBeVisible();
+  });
+
+  test('ops user can preview the client portal', async ({ page }) => {
+    test.skip(!adminCreds.email || !adminCreds.password, 'E2E admin credentials missing.');
+
+    await loginWithEmail(page, adminCreds, '/home?preview=1');
+
+    await expect(page).toHaveURL(/\/home\?preview=1/);
+    const previewBanner = page.getByRole('status');
+    await expect(previewBanner).toBeVisible();
+    await expect(previewBanner).toContainText(/client preview/i);
+    await expect(page.getByRole('link', { name: /exit preview/i })).toBeVisible();
   });
 });

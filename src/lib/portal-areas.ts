@@ -30,13 +30,10 @@ export function inferPortalAreaFromPath(pathname: string): PortalArea {
 function defaultLandingPath(access: PortalAccess | null): string {
   if (!access) return LANDING_PATH_BY_AREA.client;
 
-  if (access.canAccessOpsSteviAdmin) {
-    return LANDING_PATH_BY_AREA.ops_admin;
-  }
-
-  const hasOpsAccess = access.canAccessOpsFrontline || access.canAccessOpsOrg || access.canAccessOpsAdmin;
+  const hasOpsAccess =
+    access.canAccessOpsFrontline || access.canAccessOpsOrg || access.canAccessOpsAdmin || access.canAccessOpsSteviAdmin;
   if (hasOpsAccess) {
-    return access.iharcRoles.length > 0 ? LANDING_PATH_BY_AREA.ops_frontline : '/ops/organizations';
+    return LANDING_PATH_BY_AREA.ops_frontline;
   }
 
   return LANDING_PATH_BY_AREA.client;

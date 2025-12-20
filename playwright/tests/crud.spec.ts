@@ -16,6 +16,27 @@ import {
 } from '../utils/e2e-supabase';
 
 const envResult = resolveCrudEnv();
+const cleanupTasks = [cleanupResourcePages, cleanupPolicies, cleanupOrganizations];
+
+async function cleanupCrudData(supabase: SupabaseClient | null) {
+  if (!envResult.ready) return;
+
+  const errors: string[] = [];
+
+  for (const cleanup of cleanupTasks) {
+    try {
+      await cleanup(envResult.env, supabase ?? undefined);
+    } catch (error) {
+      errors.push(String(error));
+    }
+  }
+
+  if (errors.length > 0) {
+    const message = errors.join('\n');
+    console.error(message);
+    throw new Error(message);
+  }
+}
 
 test.describe('Supabase CRUD (resource pages)', () => {
   const skipReason = envResult.ready ? undefined : envResult.reason;
@@ -31,23 +52,11 @@ test.describe('Supabase CRUD (resource pages)', () => {
   });
 
   test.afterAll(async () => {
-    if (!envResult.ready) return;
-    const errors: string[] = [];
-    const cleanupTasks = [cleanupResourcePages, cleanupPolicies, cleanupOrganizations];
+    await cleanupCrudData(supabase);
+  });
 
-    for (const cleanup of cleanupTasks) {
-      try {
-        await cleanup(envResult.env, supabase ?? undefined);
-      } catch (error) {
-        errors.push(String(error));
-      }
-    }
-
-    if (errors.length > 0) {
-      const message = errors.join('\n');
-      console.error(message);
-      throw new Error(message);
-    }
+  test.afterEach(async () => {
+    await cleanupCrudData(supabase);
   });
 
   test('creates, reads, updates, and deletes a resource page', async () => {
