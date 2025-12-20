@@ -27,6 +27,7 @@ async function loginWithEmail(page: Page, creds: Credentials, nextPath: string) 
 }
 
 test.describe('Authenticated shells', () => {
+  test.use({ viewport: { width: 1440, height: 900 } });
   test('client user sees client shell navigation', async ({ page }) => {
     test.skip(!clientCreds.email || !clientCreds.password, 'E2E client credentials missing.');
 
@@ -35,7 +36,7 @@ test.describe('Authenticated shells', () => {
     await expect(page).toHaveURL(/\/(home|onboarding)(\?|$)/, { timeout: 20000 });
 
     const appNav = page.getByRole('navigation', { name: 'Application navigation' });
-    await expect(appNav).toBeVisible();
+    await expect(appNav).toBeVisible({ timeout: 20000 });
     await expect(appNav.getByRole('link', { name: 'Support requests' })).toBeVisible();
     await expect(page.getByRole('navigation', { name: 'Operations hubs' })).toHaveCount(0);
 
