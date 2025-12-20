@@ -16,7 +16,7 @@ function getFunctionsBaseUrl() {
 }
 
 export async function POST(req: Request) {
-  const anonKey = requireEnv('SUPABASE_ANON_KEY');
+  const publishableKey = requireEnv('SUPABASE_PUBLISHABLE_KEY');
 
   const stripeSignature = req.headers.get('stripe-signature') ?? '';
   const contentType = req.headers.get('content-type') ?? 'application/json';
@@ -28,8 +28,8 @@ export async function POST(req: Request) {
   const forwarded = await fetch(url, {
     method: 'POST',
     headers: {
-      authorization: `Bearer ${anonKey}`,
-      apikey: anonKey,
+      authorization: `Bearer ${publishableKey}`,
+      apikey: publishableKey,
       'content-type': contentType,
       ...(stripeSignature ? { 'stripe-signature': stripeSignature } : {}),
     },

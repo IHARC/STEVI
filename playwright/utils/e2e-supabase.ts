@@ -1,7 +1,11 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 const SUPABASE_URL_KEYS = ['E2E_SUPABASE_URL', 'NEXT_PUBLIC_SUPABASE_URL', 'SUPABASE_URL'] as const;
-const SUPABASE_ANON_KEYS = ['E2E_SUPABASE_ANON_KEY', 'NEXT_PUBLIC_SUPABASE_ANON_KEY', 'SUPABASE_ANON_KEY'] as const;
+const SUPABASE_PUBLISHABLE_KEYS = [
+  'E2E_SUPABASE_PUBLISHABLE_KEY',
+  'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY',
+  'SUPABASE_PUBLISHABLE_KEY',
+] as const;
 
 export const CRUD_SLUG_PREFIX = 'e2e-crud-resource-';
 export const POLICY_SLUG_PREFIX = 'e2e-policy-';
@@ -9,7 +13,7 @@ export const ORG_NAME_PREFIX = 'E2E Org ';
 
 export type CrudEnv = {
   supabaseUrl: string;
-  supabaseAnonKey: string;
+  supabasePublishableKey: string;
   adminEmail: string;
   adminPassword: string;
 };
@@ -37,13 +41,13 @@ function firstEnv(keys: readonly string[]) {
 
 export function resolveCrudEnv(): CrudEnvResolution {
   const supabaseUrl = firstEnv(SUPABASE_URL_KEYS);
-  const supabaseAnonKey = firstEnv(SUPABASE_ANON_KEYS);
+  const supabasePublishableKey = firstEnv(SUPABASE_PUBLISHABLE_KEYS);
   const adminEmail = process.env.E2E_TEST_EMAIL ?? '';
   const adminPassword = process.env.E2E_TEST_PASSWORD ?? '';
 
   const missing: string[] = [];
   if (!supabaseUrl) missing.push('NEXT_PUBLIC_SUPABASE_URL (or E2E_SUPABASE_URL)');
-  if (!supabaseAnonKey) missing.push('NEXT_PUBLIC_SUPABASE_ANON_KEY (or E2E_SUPABASE_ANON_KEY)');
+  if (!supabasePublishableKey) missing.push('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (or E2E_SUPABASE_PUBLISHABLE_KEY)');
   if (!adminEmail) missing.push('E2E_TEST_EMAIL');
   if (!adminPassword) missing.push('E2E_TEST_PASSWORD');
 
@@ -55,7 +59,7 @@ export function resolveCrudEnv(): CrudEnvResolution {
     ready: true,
     env: {
       supabaseUrl,
-      supabaseAnonKey,
+      supabasePublishableKey,
       adminEmail,
       adminPassword,
     },
@@ -64,7 +68,7 @@ export function resolveCrudEnv(): CrudEnvResolution {
 
 export function resolveOnboardingResetEnv(): OnboardingResetEnvResolution {
   const supabaseUrl = firstEnv(SUPABASE_URL_KEYS);
-  const supabaseAnonKey = firstEnv(SUPABASE_ANON_KEYS);
+  const supabasePublishableKey = firstEnv(SUPABASE_PUBLISHABLE_KEYS);
   const adminEmail = process.env.E2E_TEST_EMAIL ?? '';
   const adminPassword = process.env.E2E_TEST_PASSWORD ?? '';
   const clientEmail = process.env.E2E_CLIENT_EMAIL ?? '';
@@ -72,7 +76,7 @@ export function resolveOnboardingResetEnv(): OnboardingResetEnvResolution {
 
   const missing: string[] = [];
   if (!supabaseUrl) missing.push('NEXT_PUBLIC_SUPABASE_URL (or E2E_SUPABASE_URL)');
-  if (!supabaseAnonKey) missing.push('NEXT_PUBLIC_SUPABASE_ANON_KEY (or E2E_SUPABASE_ANON_KEY)');
+  if (!supabasePublishableKey) missing.push('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (or E2E_SUPABASE_PUBLISHABLE_KEY)');
   if (!adminEmail) missing.push('E2E_TEST_EMAIL');
   if (!adminPassword) missing.push('E2E_TEST_PASSWORD');
   if (!clientEmail) missing.push('E2E_CLIENT_EMAIL');
@@ -86,7 +90,7 @@ export function resolveOnboardingResetEnv(): OnboardingResetEnvResolution {
     ready: true,
     env: {
       supabaseUrl,
-      supabaseAnonKey,
+      supabasePublishableKey,
       adminEmail,
       adminPassword,
       clientEmail,
@@ -114,7 +118,7 @@ export function buildOrganizationName() {
 }
 
 export async function createAuthedSupabase(env: CrudEnv): Promise<SupabaseClient> {
-  const supabase = createClient(env.supabaseUrl, env.supabaseAnonKey, {
+  const supabase = createClient(env.supabaseUrl, env.supabasePublishableKey, {
     auth: {
       persistSession: false,
       autoRefreshToken: false,
@@ -154,7 +158,7 @@ export async function fetchAdminProfileId(supabase: SupabaseClient): Promise<str
 }
 
 async function fetchUserIdForCredentials(env: OnboardingResetEnv): Promise<string> {
-  const supabase = createClient(env.supabaseUrl, env.supabaseAnonKey, {
+  const supabase = createClient(env.supabaseUrl, env.supabasePublishableKey, {
     auth: {
       persistSession: false,
       autoRefreshToken: false,

@@ -1,5 +1,4 @@
 import { createServerClient } from '@supabase/ssr';
-import type { User } from '@supabase/auth-js';
 import type { CookieMethodsServer } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import type { Database } from '@/types/supabase';
@@ -7,18 +6,14 @@ import { getSupabaseEnvOrNull } from '@/lib/supabase/config';
 
 type CookieBatch = Parameters<NonNullable<CookieMethodsServer['setAll']>>[0];
 
-export type SessionUpdateResult = {
-  response: NextResponse;
-  user: User | null;
-};
-
 /**
- * Refresh the Supabase session inside the Next.js proxy.
+ * Refresh the Supabase session inside the Next.js Proxy (formerly Middleware).
  *
- * Mirrors the canonical pattern from Supabase SSR docs:
- * https://supabase.com/docs/guides/auth/server-side/nextjs
+ * Supabase SSR requires the Proxy to refresh auth tokens because Server Components
+ * cannot set cookies. Keep this focused on token refresh and request headers;
+ * authorization decisions must happen in server actions/route handlers.
  */
-export async function updateSession(request: NextRequest): Promise<SessionUpdateResult> {
+export async function refreshSupabaseSession(request: NextRequest): Promise<NextResponse> {
   const env = getSupabaseEnvOrNull();
   const requestHeaders = new Headers(request.headers);
   const requestPath = `${request.nextUrl.pathname}${request.nextUrl.search}`;
@@ -31,10 +26,10 @@ export async function updateSession(request: NextRequest): Promise<SessionUpdate
   let response = NextResponse.next({ request: { headers: requestHeaders } });
 
   if (!env) {
-    return { response, user: null };
+    return response;
   }
 
-  const supabase = createServerClient<Database>(env.url, env.anonKey, {
+  const supabase = createServerClient<Database>(env.url, env.publishableKey, {
     cookies: {
       getAll() {
         return request.cookies.getAll();
@@ -57,9 +52,10 @@ export async function updateSession(request: NextRequest): Promise<SessionUpdate
     },
   });
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { error } = await supabase.auth.getClaims();
+  if (error && process.env.NODE_ENV !== 'production') {
+    console.warn('Supabase Proxy session refresh failed', error);
+  }
 
-  return { response, user };
+  return response;
 }

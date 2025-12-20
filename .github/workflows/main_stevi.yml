@@ -22,9 +22,9 @@ env:
   APP_NAME: STEVI
   NODE_VERSION: "24.12.0"
   NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
   SUPABASE_URL: ${{ secrets.SUPABASE_URL || secrets.NEXT_PUBLIC_SUPABASE_URL }}
-  SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY || secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+  SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY || secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
   NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
   NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
   PORTAL_ALERTS_SECRET: ${{ secrets.PORTAL_ALERTS_SECRET }}
@@ -86,7 +86,7 @@ jobs:
             exit 1
           fi
           if ! node -e "const m=require('./.next/server/middleware-manifest.json'); if (!m.sortedMiddleware || m.sortedMiddleware.length === 0) process.exit(1);"; then
-            echo "Proxy build validation failed: .next/server/middleware-manifest.json has no entries" >&2
+            echo "Proxy build validation failed: proxy manifest has no entries" >&2
             cat .next/server/middleware-manifest.json || true
             exit 1
           fi
@@ -112,7 +112,7 @@ jobs:
             exit 1
           fi
           if ! node -e "const m=require('./deployment/.next/standalone/.next/server/middleware-manifest.json'); if (!m.sortedMiddleware || m.sortedMiddleware.length === 0) process.exit(1);"; then
-            echo "Deployment bundle validation failed: proxy manifest is empty" >&2
+            echo "Deployment bundle validation failed: proxy manifest has no entries" >&2
             cat deployment/.next/standalone/.next/server/middleware-manifest.json || true
             exit 1
           fi

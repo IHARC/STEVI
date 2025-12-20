@@ -113,15 +113,6 @@ export async function sendPartnerInviteAction(formData: FormData): Promise<Actio
 
     const context = await loadModeratorContext();
 
-    const {
-      data: sessionData,
-      error: sessionError,
-    } = await context.supabase.auth.getSession();
-
-    if (sessionError || !sessionData.session?.access_token) {
-      throw sessionError ?? new Error('Current session missing. Refresh and try again.');
-    }
-
     const response = await context.supabase.functions.invoke('portal-admin-invite', {
       body: {
         email,
@@ -132,7 +123,6 @@ export async function sendPartnerInviteAction(formData: FormData): Promise<Actio
         message,
         actorProfileId: context.actorProfile.id,
       },
-      headers: { Authorization: `Bearer ${sessionData.session.access_token}` },
     });
 
     if (response.error) {

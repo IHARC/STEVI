@@ -17,9 +17,9 @@ Copy `.env.example` to `.env` and fill the required values. All variables prefix
 | Variable | Required | Description |
 | --- | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | ✅ | Supabase project URL shared with marketing + STEVI OPS. |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✅ | Publishable Supabase key (JWT). Must match the marketing site to preserve session portability. |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | ✅ | Supabase publishable key (JWT). Must match the marketing site to preserve session portability. |
 | `SUPABASE_URL` | ✅ | Same as `NEXT_PUBLIC_SUPABASE_URL`, kept private in App Service for server actions. |
-| `SUPABASE_ANON_KEY` | ✅ | Same as `NEXT_PUBLIC_SUPABASE_ANON_KEY`, kept private for server actions. |
+| `SUPABASE_PUBLISHABLE_KEY` | ✅ | Same as `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, kept private for server actions. |
 | `SUPABASE_SERVICE_ROLE_KEY` | ☐ | Optional. Used for CLI scripts or local tooling; never ship to the client. |
 | `PORTAL_ALERTS_SECRET` | ☐ | Bearer token for invoking the `portal-alerts` Edge Function (notifications queue). Leave unset to skip the function call locally. |
 | `NEXT_PUBLIC_APP_URL` | ✅ | Canonical STEVI URL (`https://stevi.iharc.ca` in production). Used in auth redirects and sitemap metadata. |
@@ -29,7 +29,7 @@ Copy `.env.example` to `.env` and fill the required values. All variables prefix
 
 ## Supabase Usage
 
-- **Clients**: `createSupabaseClient`, `createSupabaseRSCClient`, and `createSupabaseServerClient` mirror the marketing app. They rely exclusively on the publishable anon key and shared cookies for auth continuity.
+- **Clients**: `createSupabaseClient`, `createSupabaseRSCClient`, and `createSupabaseServerClient` mirror the marketing app. They rely on the Supabase publishable key and shared cookies for auth continuity.
 - **Schemas**:
   - `portal`: `profiles`, `profile_invites`, `profile_contacts`, `resource_pages`, `policies`, `notifications`, `public_settings`, `registration_flows`, `audit_log`.
   - `core`: `people`, `people_activities`, `person_access_grants`, `organizations`, org memberships, contact details.

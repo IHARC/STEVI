@@ -7,11 +7,11 @@ import { getSupabaseEnv } from '@/lib/supabase/config';
 type CookieBatch = Parameters<NonNullable<CookieMethodsServer['setAll']>>[0];
 
 export async function createSupabaseRSCClient() {
-  const { url, anonKey } = getSupabaseEnv();
+  const { url, publishableKey } = getSupabaseEnv();
 
   const cookieStore = await cookies();
 
-  return createServerClient<Database>(url, anonKey, {
+  return createServerClient<Database>(url, publishableKey, {
     cookies: {
       getAll() {
         return cookieStore.getAll();

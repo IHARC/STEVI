@@ -362,15 +362,6 @@ export async function sendInviteAction(formData: FormData): Promise<ActionResult
     const organizationId = normalizeOrganizationId(formData.get('invite_organization_id'));
     const message = (formData.get('invite_message') as string | null) ?? null;
 
-    const {
-      data: session,
-      error: sessionError,
-    } = await supabase.auth.getSession();
-
-    if (sessionError || !session.session?.access_token) {
-      throw sessionError ?? new Error('Missing session token. Refresh and try again.');
-    }
-
     const isElevated = hasElevatedAdmin(access);
     const isOrgAdmin = hasOrgAdmin(access);
     if (!isElevated) {
@@ -389,7 +380,6 @@ export async function sendInviteAction(formData: FormData): Promise<ActionResult
         message,
         actorProfileId: actorProfile.id,
       },
-      headers: { Authorization: `Bearer ${session.session.access_token}` },
     });
 
     if (response.error) {

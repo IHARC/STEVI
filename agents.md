@@ -23,7 +23,7 @@ STEVI (Supportive Technology to Enable Vulnerable Individuals) is IHARC’s mult
 - **Hosting/build**: Azure App Service (Linux, Node 24). `npm run build` → `node build.js` (runs `eslint .`, forces webpack via `NEXT_FORCE_WEBPACK=1`, emits `.next/standalone`, copies static into `.next/standalone/.next/static`). GitHub Actions `.github/workflows/main_stevi.yml` deploys via publish profiles. Runtime: `node .next/standalone/server.js`.
 - **Auth/session**: Supabase Auth via `@supabase/ssr` cookies. Use `createSupabaseServerClient` in actions/route handlers (can set cookies). `createSupabaseRSCClient` is read‑only. Proxy `updateSession` refreshes sessions and applies CSP/HSTS/etc. Most authed routes export `dynamic = 'force-dynamic'`.
 - **Caching**: No custom CDN layer. Use `revalidatePath`/`revalidateTag` from server actions; avoid static rendering for authed content.
-- **Environment**: `.env.example` is current. Required: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_SITE_URL`. Optional: `PORTAL_ALERTS_SECRET`, `NEXT_PUBLIC_GA4_ID`, `NEXT_PUBLIC_ANALYTICS_DISABLED`, `SUPABASE_SERVICE_ROLE_KEY` (local scripts only), `NEXT_PUBLIC_MARKETING_URL` (telemetry allowlist). Never commit secrets.
+- **Environment**: `.env.example` is current. Required: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_SITE_URL`. Optional: `PORTAL_ALERTS_SECRET`, `NEXT_PUBLIC_GA4_ID`, `NEXT_PUBLIC_ANALYTICS_DISABLED`, `SUPABASE_SERVICE_ROLE_KEY` (local scripts only), `NEXT_PUBLIC_MARKETING_URL` (telemetry allowlist). Never commit secrets.
 
 ## Repository layout
 - **Dual shells**:

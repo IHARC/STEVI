@@ -12,7 +12,6 @@ type AdminContext = {
   supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>;
   donationsClient: ReturnType<Awaited<ReturnType<typeof createSupabaseServerClient>>['schema']>;
   actorProfileId: string;
-  accessToken: string;
 };
 
 function revalidateDonationCatalog(inventoryItemId?: string | null) {
@@ -62,16 +61,10 @@ async function requirePortalAdmin(): Promise<AdminContext> {
     throw new Error('IHARC admin access is required.');
   }
 
-  const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-  if (sessionError || !sessionData.session?.access_token) {
-    throw sessionError ?? new Error('Missing session token. Refresh and try again.');
-  }
-
   return {
     supabase,
     donationsClient: supabase.schema('donations'),
     actorProfileId: access.profile.id,
-    accessToken: sessionData.session.access_token,
   };
 }
 
@@ -324,7 +317,7 @@ export async function updateCatalogCategory(formData: FormData) {
 }
 
 export async function syncCatalogItemStripeAction(formData: FormData) {
-  const { supabase, actorProfileId, accessToken, donationsClient } = await requirePortalAdmin();
+  const { supabase, actorProfileId, donationsClient } = await requirePortalAdmin();
   const catalogItemId = (formData.get('catalog_item_id') as string | null)?.trim();
   if (!catalogItemId) {
     throw new Error('Missing catalogue item id.');
@@ -332,7 +325,6 @@ export async function syncCatalogItemStripeAction(formData: FormData) {
 
   const response = await supabase.functions.invoke('donations_admin_sync_catalog_item_stripe', {
     body: { catalogItemId },
-    headers: { Authorization: `Bearer ${accessToken}` },
   });
 
   if (response.error) {
@@ -361,7 +353,7 @@ export async function syncCatalogItemStripeAction(formData: FormData) {
 }
 
 export async function cancelDonationSubscriptionAction(formData: FormData) {
-  const { supabase, donationsClient, actorProfileId, accessToken } = await requirePortalAdmin();
+  const { supabase, donationsClient, actorProfileId } = await requirePortalAdmin();
   const stripeSubscriptionId = (formData.get('stripe_subscription_id') as string | null)?.trim();
   if (!stripeSubscriptionId) {
     throw new Error('Missing Stripe subscription id.');
@@ -369,7 +361,6 @@ export async function cancelDonationSubscriptionAction(formData: FormData) {
 
   const response = await supabase.functions.invoke('donations_admin_cancel_subscription', {
     body: { stripeSubscriptionId },
-    headers: { Authorization: `Bearer ${accessToken}` },
   });
 
   if (response.error) {
@@ -395,7 +386,7 @@ export async function cancelDonationSubscriptionAction(formData: FormData) {
 }
 
 export async function resendDonationManageLinkAction(formData: FormData) {
-  const { supabase, donationsClient, actorProfileId, accessToken } = await requirePortalAdmin();
+  const { supabase, donationsClient, actorProfileId } = await requirePortalAdmin();
   const email = (formData.get('email') as string | null)?.trim().toLowerCase();
   if (!email || !email.includes('@')) {
     throw new Error('Provide a valid email.');
@@ -403,7 +394,6 @@ export async function resendDonationManageLinkAction(formData: FormData) {
 
   const response = await supabase.functions.invoke('donations_admin_resend_manage_link', {
     body: { email },
-    headers: { Authorization: `Bearer ${accessToken}` },
   });
 
   if (response.error) {
@@ -425,7 +415,7 @@ export async function resendDonationManageLinkAction(formData: FormData) {
 }
 
 export async function reprocessStripeWebhookEventAction(formData: FormData) {
-  const { supabase, donationsClient, actorProfileId, accessToken } = await requirePortalAdmin();
+  const { supabase, donationsClient, actorProfileId } = await requirePortalAdmin();
   const stripeEventId = (formData.get('stripe_event_id') as string | null)?.trim();
   if (!stripeEventId) {
     throw new Error('Missing Stripe event id.');
@@ -433,7 +423,6 @@ export async function reprocessStripeWebhookEventAction(formData: FormData) {
 
   const response = await supabase.functions.invoke('donations_admin_reprocess_webhook_event', {
     body: { stripeEventId },
-    headers: { Authorization: `Bearer ${accessToken}` },
   });
 
   if (response.error) {

@@ -1,5 +1,5 @@
-import { NextResponse, type NextRequest } from 'next/server';
-import { updateSession } from '@/lib/supabase/proxy';
+import type { NextRequest } from 'next/server';
+import { refreshSupabaseSession } from '@/lib/supabase/proxy';
 
 const GA_HOSTS = [
   'https://www.googletagmanager.com',
@@ -50,31 +50,13 @@ const SECURITY_HEADERS: Record<string, string> = {
 };
 
 export async function proxy(request: NextRequest) {
-  const { response, user } = await updateSession(request);
-  let finalResponse = response;
-  const { pathname, search } = request.nextUrl;
-  const isPublicPath =
-    pathname.startsWith('/login') ||
-    pathname.startsWith('/register') ||
-    pathname.startsWith('/reset-password') ||
-    pathname.startsWith('/auth') ||
-    pathname.startsWith('/api');
-
-  if (!user && !isPublicPath) {
-    const nextParam = encodeURIComponent(`${pathname}${search}`);
-    const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = '/login';
-    loginUrl.search = `?next=${nextParam}`;
-    const redirectResponse = NextResponse.redirect(loginUrl);
-    response.cookies.getAll().forEach((cookie) => redirectResponse.cookies.set(cookie));
-    finalResponse = redirectResponse;
-  }
+  const response = await refreshSupabaseSession(request);
 
   Object.entries(SECURITY_HEADERS).forEach(([key, value]) => {
-    finalResponse.headers.set(key, value);
+    response.headers.set(key, value);
   });
 
-  return finalResponse;
+  return response;
 }
 
 export const config = {
