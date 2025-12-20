@@ -5,7 +5,7 @@ This document captures the backend expectations for running the STEVI portal alo
 ## Platform Summary
 
 - **Framework**: Next.js 16 (App Router, React 19). SSR and RSC are enabled; most routes force dynamic rendering to respect Supabase auth context.
-- **Hosting**: Azure App Service (Linux, Node 24 LTS / 24.11.x) at `stevi.iharc.ca`, deployed via GitHub Actions workflow `.github/workflows/main_stevi.yml` using publish profiles.
+- **Hosting**: Azure App Service (Linux, Node 24 LTS / 24.12.x) at `stevi.iharc.ca`, deployed via GitHub Actions workflow `.github/workflows/main_stevi.yml` using publish profiles.
 - **Data Layer**: Shared Supabase project with the marketing site (`iharc.ca`) and STEVI OPS. Schemas of interest: `portal`, `core`, `case_mgmt`, `inventory`, `donations`.
 - **Authentication**: Supabase Auth session cookies managed via `@supabase/ssr`. The same Supabase URL and publishable key must be used across all IHARC apps.
 - **Caching**: Next.js data cache only. We rely on `revalidatePath`/`revalidateTag` for targeted busting; no Edge CDN custom layer is configured yet.
@@ -79,8 +79,8 @@ Copy `.env.example` to `.env` and fill the required values. All variables prefix
 
 ## Deployment Notes
 
-- GitHub Actions workflow `.github/workflows/main_stevi.yml` builds with Node 24.11.1, runs `npm run build` (lint + Next build forced to webpack for standalone output), prunes dev dependencies, bundles the Next standalone output (`.next/standalone` + `.next/static` + `public`), and deploys via `azure/webapps-deploy@v3` using publish profiles. Use `workflow_dispatch` with `slot=staging` to target a staging slot when `AZUREAPPSERVICE_PUBLISHPROFILE_STAGING` is configured.
-- App Service settings: set the environment variables above in App Settings (per slot). Keep `WEBSITE_NODE_DEFAULT_VERSION` aligned to Node 24 (24.11.x), and disable platform builds if you are deploying prebuilt artifacts (`SCM_DO_BUILD_DURING_DEPLOYMENT=false`). The start script runs `node .next/standalone/server.js`.
+- GitHub Actions workflow `.github/workflows/main_stevi.yml` builds with Node 24.12.0, runs `npm run build` (lint + Next build forced to webpack for standalone output), prunes dev dependencies, bundles the Next standalone output (`.next/standalone` + `.next/static` + `public`), and deploys via `azure/webapps-deploy@v3` using publish profiles. Use `workflow_dispatch` with `slot=staging` to target a staging slot when `AZUREAPPSERVICE_PUBLISHPROFILE_STAGING` is configured.
+- App Service settings: set the environment variables above in App Settings (per slot). Keep `WEBSITE_NODE_DEFAULT_VERSION` aligned to Node 24 (24.12.x), and disable platform builds if you are deploying prebuilt artifacts (`SCM_DO_BUILD_DURING_DEPLOYMENT=false`). The start script runs `node .next/standalone/server.js`.
 - Revalidation currently relies on `revalidatePath`. When STEVI begins triggering marketing refreshes, introduce shared cache tags or webhook notifications so both apps stay in sync.
 - Operational items now required on App Service (not handled automatically like SWA):
   - Enable `alwaysOn`, HTTP logging, and Application Insights with 5xx/latency alerts.

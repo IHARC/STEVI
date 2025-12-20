@@ -2,7 +2,7 @@
 
 /**
  * STEVI build entry for CI and local reproducibility.
- * Runs lint + Next.js build using the default SWC pipeline on Node 24.11.1+.
+ * Runs lint + Next.js build using the default SWC pipeline on Node 24.12.0+.
  */
 
 import { execSync } from 'child_process';
@@ -13,7 +13,7 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const required = { major: 24, minor: 11, patch: 1 };
+const required = { major: 24, minor: 12, patch: 0 };
 const [major, minor, patch] = process.versions.node.split('.').map((part) => Number.parseInt(part, 10));
 const versionTooLow =
   !Number.isFinite(major) ||

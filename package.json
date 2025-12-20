@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "engines": {
-    "node": ">=24.11.1 <25"
+    "node": ">=24.12.0 <25"
   },
   "scripts": {
     "preinstall": "node scripts/check-node-version.js",
@@ -51,7 +51,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "lucide-react": "^0.544.0",
-    "next": "^16.0.7",
+    "next": "^16.1.0",
     "next-themes": "^0.4.6",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
@@ -59,7 +59,6 @@
     "recharts": "^2.11.0",
     "sanitize-html": "^2.17.0",
     "sonner": "^1.7.4",
-    "supabase": "^2.65.0",
     "tailwind-merge": "^1.14.0",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^4.1.13"
@@ -76,7 +75,7 @@
     "autoprefixer": "^10.4.22",
     "es-abstract": "^1.23.3",
     "eslint": "^9.31.0",
-    "eslint-config-next": "16.0.6",
+    "eslint-config-next": "16.1.0",
     "eslint-plugin-react-hooks": "^7.0.0",
     "postcss": "^8.4.39",
     "tailwindcss": "^3.4.5",
