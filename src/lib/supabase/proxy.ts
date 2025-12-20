@@ -13,7 +13,7 @@ export type SessionUpdateResult = {
 };
 
 /**
- * Refresh the Supabase session inside middleware.
+ * Refresh the Supabase session inside the Next.js proxy.
  *
  * Mirrors the canonical pattern from Supabase SSR docs:
  * https://supabase.com/docs/guides/auth/server-side/nextjs

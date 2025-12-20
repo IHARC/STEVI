@@ -86,7 +86,7 @@ jobs:
             exit 1
           fi
           if ! node -e "const m=require('./.next/server/middleware-manifest.json'); if (!m.sortedMiddleware || m.sortedMiddleware.length === 0) process.exit(1);"; then
-            echo "Middleware build validation failed: .next/server/middleware-manifest.json has no entries" >&2
+            echo "Proxy build validation failed: .next/server/middleware-manifest.json has no entries" >&2
             cat .next/server/middleware-manifest.json || true
             exit 1
           fi
@@ -112,7 +112,7 @@ jobs:
             exit 1
           fi
           if ! node -e "const m=require('./deployment/.next/standalone/.next/server/middleware-manifest.json'); if (!m.sortedMiddleware || m.sortedMiddleware.length === 0) process.exit(1);"; then
-            echo "Deployment bundle validation failed: middleware manifest is empty" >&2
+            echo "Deployment bundle validation failed: proxy manifest is empty" >&2
             cat deployment/.next/standalone/.next/server/middleware-manifest.json || true
             exit 1
           fi

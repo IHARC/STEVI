@@ -38,7 +38,7 @@ Environment variables (full notes in `docs/backend.md`):
 ## Migration Status
 
 - ✅ Next.js scaffold, shared layout/providers, shadcn/ui tokens
-- ✅ Supabase clients (server + RSC), auth middleware, separated client/ops navigation
+- ✅ Supabase clients (server + RSC), auth proxy, separated client/ops navigation
 - ✅ Client portal shells: home, appointments, documents, cases, support, profile, consents (wired to Supabase + storage)
 - ✅ Admin tools: profiles/invites, resources, policies, notifications, marketing content, inventory, donations
 - ✅ Staff tools: caseload, schedule, outreach log; Organization tools: members/invites/settings

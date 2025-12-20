@@ -53,7 +53,7 @@ This document codifies the client/operations shell split for STEVI. It complemen
 2. Relocate components into `components/client`, `components/workspace`, or `components/shared`; update imports to new aliases.
 3. Apply shell themes and add layout-level guards using `requireArea`.
 4. Update navigation: client-only nav for `(client)`, ops-only nav for `(ops)`; preview link → `/home?preview=1`.
-5. Update `middleware.ts`/`resolveLandingPath` to leverage `requireArea`.
+5. Update `proxy.ts`/`resolveLandingPath` to leverage `requireArea`.
 6. Run lint, typecheck, Vitest, and Playwright smoke; fix any boundary or guard regressions.
 7. Deploy as a single app service; no legacy redirects or compatibility shims.
 
