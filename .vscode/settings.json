@@ -21,4 +21,11 @@
   "[typescript]": {
     "editor.defaultFormatter": "denoland.vscode-deno"
   }
+ ,"remote.restoreForwardedPorts": false
+ ,"window.openFilesInNewWindow": "on"
+ ,"window.restoreWindows": "none"
+
+
+
 }
+
