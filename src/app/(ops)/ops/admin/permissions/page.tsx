@@ -5,12 +5,18 @@ import { resolveLandingPath } from '@/lib/portal-navigation';
 import { PageHeader } from '@shared/layout/page-header';
 import { RoleTemplateManager } from '@workspace/admin/permissions/role-template-manager';
 import { OrgRoleManager } from '@workspace/admin/permissions/org-role-manager';
+import type { Database } from '@/types/supabase';
 
 export const dynamic = 'force-dynamic';
 
 type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
+
+type OrgRoleSummary = Pick<
+  Database['core']['Tables']['org_roles']['Row'],
+  'id' | 'name' | 'display_name' | 'description' | 'template_id'
+>;
 
 function readOrgId(params: Record<string, string | string[] | undefined> | undefined): number | null {
   if (!params) return null;
@@ -65,7 +71,7 @@ export default async function AdminPermissionsPage({ searchParams }: PageProps) 
 
   if (orgRolesResult.error) throw orgRolesResult.error;
 
-  const orgRoles = orgRolesResult.data ?? [];
+  const orgRoles = (orgRolesResult.data ?? []) as OrgRoleSummary[];
   const orgRoleIds = orgRoles.map((role) => role.id);
 
   const orgRolePermissionsResult = orgRoleIds.length

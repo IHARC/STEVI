@@ -576,6 +576,12 @@ function MembersTab({
     );
   }
 
+  const roleOptions = roles.map((role) => ({
+    id: role.id,
+    name: role.name,
+    displayName: role.display_name ?? null,
+  }));
+
   return (
     <section className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
       <Card className="border-border/60">
@@ -584,7 +590,12 @@ function MembersTab({
           <CardDescription>Membership changes are audit logged and scoped by Supabase row-level security.</CardDescription>
         </CardHeader>
         <CardContent className="overflow-x-auto">
-          <OrgMembersTable members={members} roles={roles} currentProfileId={currentProfileId} organizationId={organizationId} />
+          <OrgMembersTable
+            members={members}
+            roles={roleOptions}
+            currentProfileId={currentProfileId}
+            organizationId={organizationId}
+          />
         </CardContent>
       </Card>
 
@@ -603,10 +614,10 @@ function MembersTab({
                 <p className="text-xs text-muted-foreground">Find profile IDs from the STEVI Admin Users list.</p>
               </div>
               <div className="flex flex-col gap-2 text-sm">
-                {roles.map((role) => (
+                {roleOptions.map((role) => (
                   <label key={role.id} className="flex items-center gap-2">
                     <NativeCheckbox name="role_ids" value={role.id} defaultChecked={role.name === 'org_rep'} />
-                    <span>{role.display_name ?? role.name.replaceAll('_', ' ')}</span>
+                    <span>{role.displayName ?? role.name.replaceAll('_', ' ')}</span>
                   </label>
                 ))}
               </div>

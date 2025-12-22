@@ -7,7 +7,6 @@ import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { mergeFeatureFlagsIntoTags, ORG_FEATURE_KEYS, type OrgFeatureKey } from '@/lib/organizations';
 import { getBoolean, getString, parseEnum } from '@/lib/server-actions/form';
-import type { SupabaseServerClient } from '@/lib/supabase/types';
 import type { Database } from '@/types/supabase';
 
 const LIST_PATH = '/ops/organizations';

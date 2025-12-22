@@ -37,6 +37,13 @@ function makeProfileError(step: string, error: PostgrestErrorLike): Error {
   return new Error('We could not load your profile right now. Please try again.');
 }
 
+async function refreshUserClaims(supabase: SupabaseAnyServerClient, profileId: string) {
+  const { error } = await supabase.schema('portal').rpc('portal_refresh_profile_claims', { p_profile_id: profileId });
+  if (error && process.env.NODE_ENV !== 'production') {
+    console.warn('Failed to refresh profile claims', error);
+  }
+}
+
 export async function ensurePortalProfile(
   supabase: SupabaseAnyServerClient,
   userId: string,
@@ -165,7 +172,7 @@ export async function ensurePortalProfile(
     throw insertError;
   }
 
-  await refreshUserClaims(userId);
+  await refreshUserClaims(supabase, inserted.id);
 
   return ensureClientTitle(inserted);
 }

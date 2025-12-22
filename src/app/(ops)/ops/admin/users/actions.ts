@@ -5,6 +5,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { logAuditEvent, buildEntityRef } from '@/lib/audit';
+import type { Database } from '@/types/supabase';
 import {
   loadProfileEnums,
   normalizeOrganizationId,
@@ -17,6 +18,7 @@ const LIST_ROOT = '/ops/admin/users';
 const SEGMENT_PATHS = ['/ops/admin/users/all', '/ops/admin/users/clients', '/ops/admin/users/partners', '/ops/admin/users/staff'] as const;
 
 type ActionResult<T = void> = { success: true; data?: T } | { success: false; error: string };
+type OrgRoleLookup = Pick<Database['core']['Tables']['org_roles']['Row'], 'id' | 'organization_id' | 'name'>;
 
 const SAFE_ERROR_MESSAGES = new Set([
   'Sign in to continue.',
@@ -290,7 +292,7 @@ export async function toggleOrgRoleAction(formData: FormData): Promise<ActionRes
     }
 
     const orgRoles = supabase.schema('core').from('org_roles');
-    let orgRole: { id: string; organization_id: number; name: string } | null = null;
+    let orgRole: OrgRoleLookup | null = null;
 
     if (typeof roleId === 'string' && roleId) {
       const { data, error } = await orgRoles
@@ -298,7 +300,7 @@ export async function toggleOrgRoleAction(formData: FormData): Promise<ActionRes
         .eq('id', roleId)
         .maybeSingle();
       if (error) throw error;
-      orgRole = data as typeof orgRole;
+      orgRole = (data as OrgRoleLookup | null) ?? null;
     } else if (typeof roleName === 'string' && roleName) {
       const { data, error } = await orgRoles
         .select('id, organization_id, name')
@@ -306,7 +308,7 @@ export async function toggleOrgRoleAction(formData: FormData): Promise<ActionRes
         .eq('organization_id', organizationId)
         .maybeSingle();
       if (error) throw error;
-      orgRole = data as typeof orgRole;
+      orgRole = (data as OrgRoleLookup | null) ?? null;
     }
 
     if (!orgRole || orgRole.organization_id !== organizationId) {
