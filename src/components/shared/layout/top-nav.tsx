@@ -42,6 +42,9 @@ export function TopNav({
   const showClientPreviewCta = activeArea !== 'client';
   const showMegaMenu = hasNav && activeArea === 'client';
   const showActingOrg = activeArea === 'ops_frontline' || activeArea === 'app_admin';
+  const showAdminSwitcher = Boolean(portalAccess?.canAccessOpsSteviAdmin) && (activeArea === 'ops_frontline' || activeArea === 'app_admin');
+  const adminSwitchHref = activeArea === 'app_admin' ? '/ops/today' : '/app-admin';
+  const adminSwitchLabel = activeArea === 'app_admin' ? 'Operations' : 'STEVI Admin';
   const actingOrgName = portalAccess?.organizationName ?? (portalAccess?.organizationId ? 'Organization' : 'Not set');
   const actingOrgChoices = portalAccess?.actingOrgChoices ?? [];
   const showActingOrgSwitcher = showActingOrg && actingOrgChoices.length > 1;
@@ -107,6 +110,15 @@ export function TopNav({
           ) : null}
 
           <div className="flex items-center justify-end gap-2">
+            {showAdminSwitcher ? (
+              <Link
+                href={adminSwitchHref}
+                className="hidden md:inline-flex items-center rounded-full border border-border/50 bg-muted/30 px-2.5 py-1 text-2xs font-semibold uppercase tracking-wide text-muted-foreground transition-colors hover:border-border/80 hover:text-foreground"
+                aria-label={`Switch to ${adminSwitchLabel}`}
+              >
+                {adminSwitchLabel}
+              </Link>
+            ) : null}
             {showActingOrgSwitcher ? (
               <ActingOrgSwitcher
                 choices={actingOrgChoices}
