@@ -79,7 +79,24 @@ export function OrgRoleManager({
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
-  const permissionGroups = useMemo(() => buildPermissionGroups(permissions), [permissions]);
+  const [filter, setFilter] = useState('');
+  const normalizedFilter = filter.trim().toLowerCase();
+  const filteredPermissions = useMemo(() => {
+    if (!normalizedFilter) return permissions;
+    return permissions.filter((permission) => {
+      const name = permission.name.toLowerCase();
+      const description = permission.description?.toLowerCase() ?? '';
+      const domain = permission.domain?.toLowerCase() ?? '';
+      const category = permission.category?.toLowerCase() ?? '';
+      return (
+        name.includes(normalizedFilter) ||
+        description.includes(normalizedFilter) ||
+        domain.includes(normalizedFilter) ||
+        category.includes(normalizedFilter)
+      );
+    });
+  }, [permissions, normalizedFilter]);
+  const permissionGroups = useMemo(() => buildPermissionGroups(filteredPermissions), [filteredPermissions]);
 
   const [rolePermissionState, setRolePermissionState] = useState<Record<string, Set<string>>>(() => {
     const initial: Record<string, Set<string>> = {};
@@ -123,9 +140,10 @@ export function OrgRoleManager({
         toast({ title: 'Role creation failed', description: result.error, variant: 'destructive' });
         return;
       }
-      toast({ title: 'Org role created', description: 'Refresh to see the new role.' });
+      toast({ title: 'Org role created' });
       form.reset();
       setNewRoleTemplate('');
+      router.refresh();
     });
   };
 
@@ -166,6 +184,9 @@ export function OrgRoleManager({
   const handleApplyTemplate = (orgRoleId: string) => {
     const templateId = templateSelection[orgRoleId];
     if (!templateId) return;
+    if (!window.confirm('Apply this template? Existing custom permissions will be replaced.')) {
+      return;
+    }
     startTransition(async () => {
       const formData = new FormData();
       formData.append('org_role_id', orgRoleId);
@@ -175,7 +196,8 @@ export function OrgRoleManager({
         toast({ title: 'Template apply failed', description: result.error, variant: 'destructive' });
         return;
       }
-      toast({ title: 'Template applied', description: 'Refresh to see updated permissions.' });
+      toast({ title: 'Template applied' });
+      router.refresh();
     });
   };
 
@@ -248,6 +270,18 @@ export function OrgRoleManager({
 
       {selectedOrg ? (
         <div className="grid gap-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <Label htmlFor="org-role-permission-filter" className="text-xs text-muted-foreground">
+              Filter permissions
+            </Label>
+            <Input
+              id="org-role-permission-filter"
+              value={filter}
+              onChange={(event) => setFilter(event.target.value)}
+              placeholder="Search permissions..."
+              className="h-8 w-full max-w-[240px]"
+            />
+          </div>
           {roles.map((role) => {
             const assigned = rolePermissionState[role.id] ?? new Set();
             return (
@@ -323,6 +357,9 @@ export function OrgRoleManager({
                       </div>
                     </div>
                   ))}
+                  {permissionGroups.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">No permissions match this filter.</p>
+                  ) : null}
                 </CardContent>
               </Card>
             );

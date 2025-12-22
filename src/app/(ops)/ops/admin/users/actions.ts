@@ -32,6 +32,8 @@ const SAFE_ERROR_MESSAGES = new Set([
   'Select an organization to continue.',
   'Provide a valid email.',
   'Profile not found.',
+  'At least one IHARC admin is required.',
+  'At least one org admin is required.',
 ]);
 
 function getErrorMessage(error: unknown): string {
@@ -217,6 +219,17 @@ export async function toggleGlobalRoleAction(formData: FormData): Promise<Action
     }
 
     const globalRoles = supabase.schema('core').from('user_global_roles');
+    if (!enable && globalRole.name === 'iharc_admin') {
+      const { count, error: countError } = await globalRoles
+        .select('id', { count: 'exact', head: true })
+        .eq('role_id', globalRole.id);
+      if (countError) {
+        throw countError;
+      }
+      if ((count ?? 0) <= 1) {
+        throw new Error('At least one IHARC admin is required.');
+      }
+    }
     const { error } = enable
       ? await globalRoles.insert({ user_id: profileRow.user_id, role_id: globalRole.id, granted_by: access.userId }, { onConflict: 'user_id,role_id' })
       : await globalRoles.delete().match({ user_id: profileRow.user_id, role_id: globalRole.id });
@@ -316,6 +329,18 @@ export async function toggleOrgRoleAction(formData: FormData): Promise<ActionRes
     }
 
     const userOrgRoles = supabase.schema('core').from('user_org_roles');
+    if (!enable && orgRole.name === 'org_admin') {
+      const { count, error: countError } = await userOrgRoles
+        .select('id', { count: 'exact', head: true })
+        .eq('organization_id', organizationId)
+        .eq('org_role_id', orgRole.id);
+      if (countError) {
+        throw countError;
+      }
+      if ((count ?? 0) <= 1) {
+        throw new Error('At least one org admin is required.');
+      }
+    }
     const { error } = enable
       ? await userOrgRoles.insert({ user_id: profileRow.user_id, organization_id: organizationId, org_role_id: orgRole.id, granted_by: access.userId }, { onConflict: 'user_id,organization_id,org_role_id' })
       : await userOrgRoles.delete().match({ user_id: profileRow.user_id, organization_id: organizationId, org_role_id: orgRole.id });

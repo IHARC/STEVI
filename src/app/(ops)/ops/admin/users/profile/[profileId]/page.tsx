@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { resolveLandingPath } from '@/lib/portal-navigation';
-import { fetchAdminUserDetail, loadProfileEnums } from '@/lib/admin-users';
+import { fetchAdminUserDetail, fetchUserOrgPermissions, loadProfileEnums } from '@/lib/admin-users';
 import { formatEnumLabel, getGlobalRoles, toOptions } from '@/lib/enum-values';
 import { fetchOrgRoles } from '@/lib/org/fetchers';
 import { PageHeader } from '@shared/layout/page-header';
@@ -58,6 +58,11 @@ export default async function AdminUserProfilePage({ params }: PageProps) {
   }));
 
   const isElevated = access.isGlobalAdmin;
+  const effectivePermissions = await fetchUserOrgPermissions(
+    supabase,
+    detail.profile.user_id,
+    detail.profile.organization_id,
+  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -86,6 +91,7 @@ export default async function AdminUserProfilePage({ params }: PageProps) {
               orgRoleOptions={orgRoleOptions}
               isElevated={isElevated}
               canManageOrgRoles={access.canManageOrgUsers}
+              effectivePermissions={effectivePermissions}
             />
           </CardContent>
         </Card>

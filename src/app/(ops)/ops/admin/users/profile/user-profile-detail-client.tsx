@@ -8,6 +8,7 @@ import { Checkbox } from '@shared/ui/checkbox';
 import { Separator } from '@shared/ui/separator';
 import { useToast } from '@shared/ui/use-toast';
 import { ProfileUpdateForm } from '@workspace/admin/users/profile/profile-forms';
+import { formatEnumLabel } from '@/lib/enum-values';
 import { archiveUserAction, toggleGlobalRoleAction, toggleOrgRoleAction, updateProfileAction } from '../actions';
 
 type RoleSet = { global: string[]; org: string[] };
@@ -33,6 +34,7 @@ type Props = {
   orgRoleOptions: OrgRoleOption[];
   isElevated: boolean;
   canManageOrgRoles: boolean;
+  effectivePermissions: string[];
 };
 
 export function UserProfileDetailClient({
@@ -46,6 +48,7 @@ export function UserProfileDetailClient({
   orgRoleOptions,
   isElevated,
   canManageOrgRoles,
+  effectivePermissions,
 }: Props) {
   const router = useRouter();
   const { toast } = useToast();
@@ -211,6 +214,23 @@ export function UserProfileDetailClient({
             disabled={isPending}
             organizationSelected={orgRoleAvailable}
           />
+        </div>
+
+        <div className="rounded-2xl border border-border/30 bg-muted p-3">
+          <h4 className="text-sm font-semibold text-foreground">Effective permissions</h4>
+          {!orgRoleAvailable ? (
+            <p className="text-xs text-muted-foreground">Assign an organization to view effective permissions.</p>
+          ) : effectivePermissions.length === 0 ? (
+            <p className="text-xs text-muted-foreground">No permissions found for this organization.</p>
+          ) : (
+            <div className="mt-2 flex flex-wrap gap-1">
+              {effectivePermissions.map((permission) => (
+                <Badge key={permission} variant="outline" className="text-xs">
+                  {formatEnumLabel(permission)}
+                </Badge>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

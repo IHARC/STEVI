@@ -115,6 +115,19 @@ export async function toggleMemberRoleAction(formData: FormData): Promise<Action
       throw new Error('Role does not belong to this organization.');
     }
 
+    if (!enable && orgRole.name === 'org_admin') {
+      const { count, error: countError } = await supabase
+        .schema('core')
+        .from('user_org_roles')
+        .select('id', { count: 'exact', head: true })
+        .eq('organization_id', orgId)
+        .eq('org_role_id', orgRole.id);
+      if (countError) throw countError;
+      if ((count ?? 0) <= 1) {
+        throw new Error('At least one org admin is required.');
+      }
+    }
+
     await setRole(supabase, {
       profileId,
       orgRoleId: orgRoleId,

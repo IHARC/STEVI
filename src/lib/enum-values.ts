@@ -8,12 +8,11 @@ export type EnumSource = {
   table: string;
   column: string;
   prefix?: string;
-  domainEquals?: string;
 };
 
 function cacheKey(source: EnumSource) {
-  const { schema, table, column, prefix, domainEquals } = source;
-  return [schema, table, column, prefix ?? '', domainEquals ?? ''].join('::');
+  const { schema, table, column, prefix } = source;
+  return [schema, table, column, prefix ?? ''].join('::');
 }
 
 function normalizeValues(values: Array<string | null | undefined>): string[] {
@@ -49,30 +48,6 @@ async function fetchDistinctValues(
 
   const promise = (async () => {
     const client = supabase.schema(source.schema);
-
-    // Special case: permission-domain based filtering (used for inventory roles)
-    if (source.table === 'role_permissions' && source.domainEquals) {
-      const { data: perms, error: permError } = await client
-        .from('permissions')
-        .select('id')
-        .eq('domain', source.domainEquals);
-      if (permError) throw permError;
-      const permIds = (perms ?? []).map((row: { id: string }) => row.id);
-      if (permIds.length === 0) return [];
-      const { data: rolePerms, error: rolePermError } = await client
-        .from('role_permissions')
-        .select('role_id')
-        .in('permission_id', permIds);
-      if (rolePermError) throw rolePermError;
-      const roleIds = (rolePerms ?? []).map((row: { role_id: string }) => row.role_id);
-      if (roleIds.length === 0) return [];
-      const { data: roles, error: rolesError } = await client
-        .from('roles')
-        .select('name')
-        .in('id', roleIds);
-      if (rolesError) throw rolesError;
-      return normalizeValues((roles ?? []).map((row: { name: string }) => row.name));
-    }
 
     let query = client.from(source.table).select(source.column, { distinct: true });
     if (source.prefix) {

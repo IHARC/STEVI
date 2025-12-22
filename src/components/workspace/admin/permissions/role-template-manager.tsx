@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import { useToast } from '@shared/ui/use-toast';
 import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
@@ -62,8 +63,26 @@ function buildPermissionGroups(permissions: Permission[]): PermissionGroup[] {
 
 export function RoleTemplateManager({ templates, permissions, templatePermissions }: Props) {
   const { toast } = useToast();
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const permissionGroups = useMemo(() => buildPermissionGroups(permissions), [permissions]);
+  const [filter, setFilter] = useState('');
+  const normalizedFilter = filter.trim().toLowerCase();
+  const filteredPermissions = useMemo(() => {
+    if (!normalizedFilter) return permissions;
+    return permissions.filter((permission) => {
+      const name = permission.name.toLowerCase();
+      const description = permission.description?.toLowerCase() ?? '';
+      const domain = permission.domain?.toLowerCase() ?? '';
+      const category = permission.category?.toLowerCase() ?? '';
+      return (
+        name.includes(normalizedFilter) ||
+        description.includes(normalizedFilter) ||
+        domain.includes(normalizedFilter) ||
+        category.includes(normalizedFilter)
+      );
+    });
+  }, [permissions, normalizedFilter]);
+  const permissionGroups = useMemo(() => buildPermissionGroups(filteredPermissions), [filteredPermissions]);
 
   const [templateState, setTemplateState] = useState<Record<string, Set<string>>>(() => {
     const initial: Record<string, Set<string>> = {};
@@ -86,8 +105,9 @@ export function RoleTemplateManager({ templates, permissions, templatePermission
         toast({ title: 'Template creation failed', description: result.error, variant: 'destructive' });
         return;
       }
-      toast({ title: 'Template created', description: 'Refresh to see the new template.' });
+      toast({ title: 'Template created' });
       form.reset();
+      router.refresh();
     });
   };
 
@@ -162,6 +182,19 @@ export function RoleTemplateManager({ templates, permissions, templatePermission
         </CardContent>
       </Card>
 
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <Label htmlFor="template-permission-filter" className="text-xs text-muted-foreground">
+          Filter permissions
+        </Label>
+        <Input
+          id="template-permission-filter"
+          value={filter}
+          onChange={(event) => setFilter(event.target.value)}
+          placeholder="Search permissions..."
+          className="h-8 w-full max-w-[240px]"
+        />
+      </div>
+
       <div className="grid gap-4">
         {templates.map((template) => {
           const assigned = templateState[template.id] ?? new Set();
@@ -206,6 +239,9 @@ export function RoleTemplateManager({ templates, permissions, templatePermission
                     </div>
                   </div>
                 ))}
+                {permissionGroups.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">No permissions match this filter.</p>
+                ) : null}
               </CardContent>
             </Card>
           );

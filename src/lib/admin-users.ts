@@ -62,6 +62,7 @@ export type AdminUserDetail = {
   email: string | null;
   organization: { id: number; name: string; status: string | null } | null;
   roles: { global: string[]; org: string[] };
+  effectivePermissions?: string[];
   auditEvents: Array<{
     id: string;
     action: string;
@@ -93,6 +94,54 @@ export async function loadProfileEnums(supabase: SupabaseAnyServerClient): Promi
     affiliationStatuses: affiliationStatuses as AffiliationStatus[],
     governmentRoleTypes: governmentRoleTypes as GovernmentRoleType[],
   };
+}
+
+export async function fetchUserOrgPermissions(
+  supabase: SupabaseAnyServerClient,
+  userId: string | null,
+  organizationId: number | null,
+): Promise<string[]> {
+  if (!userId || !organizationId) {
+    return [];
+  }
+
+  const { data: roleRows, error: roleError } = await supabase
+    .schema('core')
+    .from('user_org_roles')
+    .select('org_role_id')
+    .eq('user_id', userId)
+    .eq('organization_id', organizationId);
+
+  if (roleError) {
+    throw roleError;
+  }
+
+  const roleIds = (roleRows ?? [])
+    .map((row: { org_role_id: string | null }) => row.org_role_id)
+    .filter((id: string | null): id is string => Boolean(id));
+
+  if (roleIds.length === 0) {
+    return [];
+  }
+
+  const { data: permissionRows, error: permError } = await supabase
+    .schema('core')
+    .from('org_role_permissions')
+    .select('permissions(name)')
+    .in('org_role_id', roleIds);
+
+  if (permError) {
+    throw permError;
+  }
+
+  const permissions = new Set<string>();
+  (permissionRows ?? []).forEach((row: { permissions: { name: string } | null }) => {
+    if (row.permissions?.name) {
+      permissions.add(row.permissions.name);
+    }
+  });
+
+  return Array.from(permissions).sort((a, b) => a.localeCompare(b));
 }
 
 function parsePageNumber(value: number | string | undefined, fallback = 1): number {
