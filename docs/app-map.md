@@ -89,11 +89,11 @@ Ops utility routes (not hubs, but live and linked from hub actions):
 ## Tenancy & permissions (current model)
 
 ### Role sources
-All roles are loaded via Supabase RPC `get_user_roles` in `src/lib/portal-access.ts` and are treated as the source of truth (no JWT fallbacks).
+Role/permission context is loaded via Supabase RPCs (`core.get_actor_global_roles`, `core.get_actor_org_roles`, `core.get_actor_org_permissions`, `core.get_actor_permissions_summary`) in `src/lib/portal-access.ts` and treated as the source of truth (no JWT fallbacks).
 
 ### Current role families
-- Platform roles (IHARC): `iharc_admin`, `iharc_supervisor`, `iharc_staff`, `iharc_volunteer` (`src/lib/ihar-auth.ts`)
-- Portal roles (tenant/org): `portal_org_admin`, `portal_org_rep`, `portal_user`
+- Global roles (IHARC): `iharc_admin` (global admin)
+- Org roles (tenant/org): `org_admin`, `org_rep`, `org_member`, `org_marketing` plus IHARC org roles (`iharc_staff`, `iharc_supervisor`, `iharc_volunteer`)
 
 ### Capability flags (derived)
 `src/lib/portal-access.ts` derives capability booleans consumed by nav, routes, and actions:
@@ -106,8 +106,8 @@ All roles are loaded via Supabase RPC `get_user_roles` in `src/lib/portal-access
 - plus admin/content/policy/etc flags (see file)
 
 Org-scoped users:
-- “Org user”/`portal_user` (agency partner) can access `/ops/organizations` and view **their own** org detail **Overview**.
-- “Org rep” (`portal_org_rep`) can manage invites/appointments for **their own** org.
+- “Org member”/`org_member` (agency partner) can access `/ops/organizations` and view **their own** org detail **Overview**.
+- “Org rep” (`org_rep`) can manage invites/appointments for **their own** org.
 - “Org admin” (`portal_org_admin`) can manage members + settings for **their own** org.
 - IHARC admins (`iharc_admin`) can access and administer **all** orgs.
 

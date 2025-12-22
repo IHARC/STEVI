@@ -111,6 +111,8 @@ export async function loadPortalAccess(
         organizationName = iharcOrganization.name ?? organizationName;
         actingOrgAutoSelected = true;
         profile = { ...profile, organization_id: iharcOrganization.id };
+        actingOrgChoices = [{ id: iharcOrganization.id, name: iharcOrganization.name ?? null }];
+        actingOrgChoicesCount = actingOrgChoices.length;
       } else if (process.env.NODE_ENV !== 'production') {
         console.warn('Unable to auto-select IHARC acting org for admin', error);
       }
@@ -148,14 +150,14 @@ export async function loadPortalAccess(
   const canAccessOpsOrg = isProfileApproved && (isGlobalAdmin || hasPermission('portal.access_org') || hasPermission('portal.manage_org_users') || hasPermission('portal.manage_org_invites'));
   const canAccessOpsFrontline = isProfileApproved && (isGlobalAdmin || hasPermission('portal.access_frontline'));
 
-  const canManageResources = isProfileApproved && hasPermission('portal.manage_resources');
-  const canManagePolicies = isProfileApproved && hasPermission('portal.manage_policies');
+  const canManageResources = isProfileApproved && isGlobalAdmin;
+  const canManagePolicies = isProfileApproved && isGlobalAdmin;
   const canAccessInventoryOps = isProfileApproved && (hasPermission('inventory.read') || hasPermission('inventory.admin'));
   const canManageInventoryLocations = isProfileApproved && hasPermission('inventory.admin');
 
-  const canManageNotifications = isProfileApproved && hasPermission('portal.manage_notifications');
-  const canManageWebsiteContent = isProfileApproved && hasPermission('portal.manage_website');
-  const canManageSiteFooter = isProfileApproved && hasPermission('portal.manage_footer');
+  const canManageNotifications = isProfileApproved && isGlobalAdmin;
+  const canManageWebsiteContent = isProfileApproved && isGlobalAdmin;
+  const canManageSiteFooter = isProfileApproved && isGlobalAdmin;
   const canManageConsents = isProfileApproved && hasPermission('portal.manage_consents');
   const canReviewProfiles = isProfileApproved && hasPermission('portal.review_profiles');
   const canViewMetrics = isProfileApproved && hasPermission('portal.view_metrics');

@@ -38,13 +38,14 @@ Copy `.env.example` to `.env` and fill the required values. All variables prefix
   - `donations`: `catalog_items`, `catalog_item_metrics` (linked to inventory items).
   - Do **not** add tables without coordination; inspect production schema via Supabase MCP before shipping mutations.
 - **RPC / Functions**:
-  - `get_user_roles`, `portal_log_audit_event`, `portal_queue_notification`, `portal_check_rate_limit`, `portal_get_user_email`, `refresh_user_permissions`, `set_profile_role`, `claim_registration_flow`, `get_people_list_with_types`.
+  - `core.get_actor_global_roles`, `core.get_actor_org_roles`, `core.get_actor_org_permissions`, `core.get_actor_permissions_summary`
+  - `portal_log_audit_event`, `portal_queue_notification`, `portal_check_rate_limit`, `portal_get_user_email`, `claim_registration_flow`, `get_people_list_with_types`.
   - Staff views: `core.staff_caseload`, `core.staff_shifts_today`, `core.staff_outreach_logs`.
   - Inventory RPCs: `receive_stock`, `receive_stock_with_source`, `transfer_stock`, `adjust_stock`, `update_transaction_source`.
   - Edge Function `portal-alerts` is invoked from `queuePortalNotification` when `PORTAL_ALERTS_SECRET` is configured. Keep the function source in the marketing repo until consolidated.
 - **Admin tools**:
-  - `/admin/profiles` calls `portal.profiles`, `portal.profile_invites`, and `refresh_user_permissions` to approve or decline partner access, logging every decision through `portal_log_audit_event`.
-  - Invitations originate from STEVI via `portal-admin-invite`; approvals refresh permissions via `refresh_user_permissions`.
+  - `/admin/profiles` calls `portal.profiles` and `portal.profile_invites` to approve or decline partner access, logging every decision through `portal_log_audit_event`.
+  - Invitations originate from STEVI via `portal-admin-invite`; role assignments use the org/global role tables (no JWT refresh RPCs).
   - `/admin/notifications` queues outreach updates by invoking `portal_queue_notification` and surfaces delivery history from `portal.notifications`.
 - **Storage**:
   - Secure documents live in the `portal-attachments` bucket (managed via Supabase storage policies).
@@ -57,14 +58,15 @@ Copy `.env.example` to `.env` and fill the required values. All variables prefix
 
 ## Authorization & Role Separation
 
-- `src/lib/portal-access.ts` is the single source of truth for portal authorization. It pulls roles from the Supabase RPC `get_user_roles(user_uuid)` (no JWT fallbacks) and derives capability flags (`canManageResources`, `canManagePolicies`, `canManageWebsiteContent`, `canManageNotifications`, `canManageOrgUsers/Invites`, `canAccessOpsFrontline`, `canAccessOpsOrg`, `canAccessOpsSteviAdmin`, etc.).
+- `src/lib/portal-access.ts` is the single source of truth for portal authorization. It pulls role/permission context from `core.get_actor_*` RPCs (no JWT fallbacks) and derives capability flags (`canManageResources`, `canManagePolicies`, `canManageWebsiteContent`, `canManageNotifications`, `canManageOrgUsers/Invites`, `canAccessOpsFrontline`, `canAccessOpsOrg`, `canAccessOpsSteviAdmin`, etc.).
 - Navigation, layouts, server pages, and server actions consume these capability flags—never raw role strings—to avoid drift and ensure UI/server parity.
 - Inventory tooling still uses `ensureInventoryActor` on top of `PortalAccess` for IHARC-specific roles when needed.
+- Marketing content, resource library, policies, and notifications are IHARC-global-admin only.
 - Do not add new privileged routes without updating `portal-access.ts`; keep UI links, server guards, and Supabase RLS in sync to prevent privilege escalation.
 - Client shell layout `src/app/(client)/layout.tsx` wraps portal routes with `PortalAccessProvider`, so client components can read `usePortalAccess()` without making extra Supabase calls. Prefer passing `portalAccess` from parents rather than fetching again.
 
 ### Adding a New Role or Privileged Feature (checklist)
-1. **Supabase first**: Create/assign the role and permissions in Supabase (`core.roles`, `core.permissions`, `core.role_permissions`, `core.user_roles`). Update any role-granting RPCs if needed.
+1. **Supabase first**: Create/assign the role and permissions in Supabase (`core.permissions`, `core.role_templates`, `core.role_template_permissions`, `core.org_roles`, `core.org_role_permissions`, `core.user_org_roles`, `core.global_roles`, `core.user_global_roles`).
 2. **Capability flag**: Add a boolean to `src/lib/portal-access.ts` that derives from the new role/permission (e.g., `canManageX`).
 3. **UI & routing**: Gate new pages, server actions, and nav links using that capability flag. Add links via the unified nav config in `portal-navigation.ts` instead of hard-coding paths.
 4. **RLS**: Ensure the target tables/RPCs enforce the same role in their policies. Never rely solely on UI hiding.

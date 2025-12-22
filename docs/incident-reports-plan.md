@@ -11,7 +11,8 @@ to roll out to partner organizations without hardening**.
 - Allow frontline outreach workers (IHARC + partner org users) to create and manage incident reports for tracking.
 - Incidents are **org-scoped** in v1 (no cross-org sharing).
 - Support a **module toggle** per organization.
-- Use the **existing role/permission system** (`core.permissions`, `core.roles`, `core.role_permissions`, `core.user_roles`) and the
+- Use the **existing role/permission system** (`core.permissions`, `core.role_templates`, `core.role_template_permissions`,
+  `core.org_roles`, `core.org_role_permissions`, `core.user_org_roles`, `core.global_roles`, `core.user_global_roles`) and the
   admin flows already present in STEVI (user management + permission granting).
 - Enforce “no free-text individuals”: people involved must be either a linked `core.people` record **or** an explicit “Unknown party”
   entry with a description; never a single free-text person field on the incident itself.
@@ -56,10 +57,10 @@ Do not proceed to UI work until these are addressed.
 
 - Auth/session: `@supabase/ssr` cookies. Use server actions/route handlers + `createSupabaseServerClient`.
 - Access model is computed server-side in `STEVI/src/lib/portal-access.ts` and used for nav gating.
-- Admin “Users” management already exists and assigns roles via `portal.rpc('set_profile_role', ...)` and calls
-  `refresh_user_permissions` to refresh JWT claims.
+- Admin “Users” management already exists and assigns roles via org/global role tables (no JWT refresh RPCs).
 - Permission primitives:
-  - `core.permissions`, `core.role_permissions`, `core.roles`, `core.user_roles` exist with RLS suitable for admin management.
+  - `core.permissions`, `core.role_templates`, `core.role_template_permissions`, `core.org_roles`, `core.org_role_permissions`,
+    `core.user_org_roles`, `core.global_roles`, `core.user_global_roles` exist with RLS suitable for admin management.
   - `public.has_permission_single(permission_name text)` exists and is already used in some RLS policies.
 
 ## High-level design (v1)
@@ -149,13 +150,12 @@ Deliverable: `case_mgmt.incidents` is org-scoped and module-gated.
 Deliverable: admins can grant incident permissions to roles and assign those roles to users.
 
 1. Add the incident permissions in `core.permissions` (domain/category fields filled consistently).
-2. Create system roles in `core.roles` (suggested):
+2. Create role templates in `core.role_templates` (suggested):
    - `portal_incidents_reporter`
    - `portal_incidents_manager`
-3. Grant permissions to those roles in `core.role_permissions`.
+3. Grant permissions to those templates in `core.role_template_permissions`, then apply the template to org roles as needed.
 4. Ensure org admins can assign these roles to users in their org (STEVI code change):
-   - `STEVI/src/app/(ops)/ops/admin/users/actions.ts` currently restricts org admins to `{portal_org_admin, portal_org_rep, portal_user}`.
-   - Expand allowlist to include the new `portal_incidents_*` roles (still scoped to users within the same org).
+   - `STEVI/src/app/(ops)/ops/admin/users/actions.ts` should allow assigning org roles scoped to the same org.
 
 Optional but recommended:
 - Implement the missing permissions management page (only `actions.ts` exists today):
@@ -169,7 +169,7 @@ Deliverable: incidents module is visible only when enabled for the org and permi
 1. Add org feature option:
    - Update `STEVI/src/lib/organizations.ts` to include `{ value: 'incidents', label: 'Incidents' }`.
 2. Add permission awareness to `PortalAccess`:
-   - Extend `STEVI/src/lib/portal-access.ts` to fetch current user’s permissions (via `core.get_user_permissions(auth.uid())`)
+   - Extend `STEVI/src/lib/portal-access.ts` to fetch current user’s permissions (via `core.get_actor_permissions_summary`)
      and expose a list like `access.permissions: string[]`.
    - Add derived booleans like `canViewIncidents`, `canCreateIncidents`, etc. using `access.permissions`.
 3. Add derived feature flags:
@@ -237,4 +237,3 @@ When ready to share incidents across orgs:
 3. Create roles + permissions; assign to one pilot org user.
 4. Enable `incidents` for a single pilot organization.
 5. Validate RLS boundaries + audit logging before wider enablement.
-
