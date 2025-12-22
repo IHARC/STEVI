@@ -63,7 +63,7 @@ Core routes:
 - `/profile`
 - `/profile/consents`
 
-### Ops shell (staff / tenant / admin portal)
+### Ops shell (staff / tenant portal)
 Route group: `src/app/(ops)`  
 Primary nav registry: `src/lib/portal-navigation.ts`
 Layout + theme:
@@ -74,9 +74,8 @@ Shell component: `@workspace/shells/app-shell`
 Behavior to be aware of:
 - **No client preview**: ops routes reject client preview mode; ops users should exit preview back to their landing path.
 
-Ops has two *areas* (guards + landing behavior are centralized):
+Ops has one *area* (guards + landing behavior are centralized):
 - `ops_frontline` (Today/Clients/Programs/Inventory/Fundraising/Organizations)
-- `ops_admin` (STEVI Admin)
 
 Area inference + guards:
 - `src/lib/portal-areas.ts`
@@ -84,7 +83,17 @@ Area inference + guards:
 Ops utility routes (not hubs, but live and linked from hub actions):
 - `/ops/profile` (operations account settings; affiliation + org selection)
 - `/ops/visits/new` (Visit-first entry point; currently scaffolding + org gating)
-- `/ops/hq/[[...path]]` → legacy redirect to `/ops/admin/*`
+
+### App Admin shell (IHARC super admin portal)
+Route group: `src/app/(app-admin)`  
+Base path: `/app-admin`  
+Layout + theme:
+- `src/app/(app-admin)/app-admin/layout.tsx`
+- `src/styles/theme.ops.css`
+Shell component: `@workspace/shells/app-shell`
+
+App admin *area* (guards + landing behavior are centralized):
+- `app_admin` (STEVI Admin)
 
 ## Tenancy & permissions (current model)
 
@@ -176,27 +185,27 @@ Hubs per `src/lib/portal-navigation.ts`:
 - Organizations directory: `/ops/organizations`
 - Organization detail (role-gated tabs): `/ops/organizations/[id]` with `?tab=settings|members|invites|appointments`
 
-#### STEVI Admin (ops_admin)
-Admin “settings shell” root: `/ops/admin`
+### App Admin portal (app_admin)
+Admin “settings shell” root: `/app-admin`
 
 Live admin routes (as of 2025-12-16):
-- Overview: `/ops/admin`
-- Content & notifications: `/ops/admin/content`
-- Integrations: `/ops/admin/integrations`
-- Users: `/ops/admin/users`, `/ops/admin/users/[segment]`, `/ops/admin/users/profile/[profileId]`
-- Operations: `/ops/admin/operations`
+- Overview: `/app-admin`
+- Content & notifications: `/app-admin/content`
+- Integrations: `/app-admin/integrations`
+- Users: `/app-admin/users`, `/app-admin/users/[segment]`, `/app-admin/users/profile/[profileId]`
+- Operations: `/app-admin/operations`
 - Website & marketing (page-level routes):
-  - `/ops/admin/website` (index)
-  - `/ops/admin/website/branding`
-  - `/ops/admin/website/home`
-  - `/ops/admin/website/navigation`
-  - `/ops/admin/website/programs`
-  - `/ops/admin/website/supports`
-  - `/ops/admin/website/inventory`
-  - `/ops/admin/website/footer`
+  - `/app-admin/website` (index)
+  - `/app-admin/website/branding`
+  - `/app-admin/website/home`
+  - `/app-admin/website/navigation`
+  - `/app-admin/website/programs`
+  - `/app-admin/website/supports`
+  - `/app-admin/website/inventory`
+  - `/app-admin/website/footer`
 
 Admin modules present in the repo but not currently exposed as routes:
-- Several subfolders under `src/app/(ops)/ops/admin/*` contain actions/components (e.g., `policies`, `resources`, `notifications`, `organizations`, `consents`) but do not have `page.tsx` routes yet. Treat them as “in progress” until wired into navigation and given real URLs.
+- Several subfolders under `src/app/(app-admin)/app-admin/*` contain actions/components (e.g., `policies`, `resources`, `notifications`, `organizations`, `consents`) but do not have `page.tsx` routes yet. Treat them as “in progress” until wired into navigation and given real URLs.
 
 ### API routes (server-only)
 - `/api/appointments/search-profiles` (used by appointment profile search UI)
@@ -204,9 +213,8 @@ Admin modules present in the repo but not currently exposed as routes:
 - `/api/telemetry` (client/server telemetry collection)
 
 ### Deprecated / pending removal
-- `/ops/hq/*` is a legacy path and now redirects to `/ops/admin/*` (`src/app/(ops)/ops/hq/[[...path]]/page.tsx`).
 - Legacy `/ops/directory` route was removed in favor of `/ops/organizations` (folder may still exist but should not be used).
-- Legacy `/ops/admin/organizations/*` pages were removed in favor of `/ops/organizations` + consolidated org detail tabs (folder may still exist but should not be used).
+- Legacy `/app-admin/organizations/*` pages were removed in favor of `/ops/organizations` + consolidated org detail tabs (folder may still exist but should not be used).
 - Legacy `/ops/org/*` org hub routes were removed; use `/ops/organizations/[id]` tabs instead.
 
 ## Feature inventory (working checklist)

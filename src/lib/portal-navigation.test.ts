@@ -105,7 +105,7 @@ describe('resolveLandingPath', () => {
 });
 
 describe('buildPortalNav', () => {
-  it('includes frontline, org, and HQ sections when access allows', () => {
+  it('includes frontline sections when access allows', () => {
     const access = {
       ...baseAccess,
       canAccessOpsAdmin: true,
@@ -120,14 +120,12 @@ describe('buildPortalNav', () => {
 
     const sections = buildPortalNav(access);
     const sectionIds = sections.map((section) => section.id);
-    expect(sectionIds).toEqual(['ops_frontline', 'ops_admin']);
+    expect(sectionIds).toEqual(['ops_frontline']);
 
     const frontline = sections.find((section) => section.id === 'ops_frontline');
     const frontlineGroups = frontline?.groups.map((group) => group.id) ?? [];
     expect(frontlineGroups).toEqual(expect.arrayContaining(['today', 'clients', 'programs', 'inventory', 'organizations']));
 
-    const admin = sections.find((section) => section.id === 'ops_admin');
-    expect(admin?.groups[0]?.items.length).toBeGreaterThanOrEqual(4);
   });
 
   it('hides sections the user cannot access', () => {
@@ -179,8 +177,7 @@ describe('requireArea guards', () => {
 
 describe('inferPortalAreaFromPath', () => {
   it('maps known prefixes to areas', () => {
-    expect(inferPortalAreaFromPath('/ops/admin')).toBe('ops_admin');
-    expect(inferPortalAreaFromPath('/ops/hq')).toBe('ops_admin');
+    expect(inferPortalAreaFromPath('/app-admin')).toBe('app_admin');
     expect(inferPortalAreaFromPath('/ops/organizations/12?tab=members')).toBe('ops_frontline');
     expect(inferPortalAreaFromPath('/ops/clients')).toBe('ops_frontline');
     expect(inferPortalAreaFromPath('/home')).toBe('client');

@@ -12,7 +12,7 @@ import { Panel } from '@shared/ui/panel';
 import { ScrollArea } from '@shared/ui/scroll-area';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@shared/ui/sheet';
 import { useToast } from '@shared/ui/use-toast';
-import { approveAffiliationAction, declineAffiliationAction } from '@/app/(ops)/ops/admin/profiles/actions';
+import { approveAffiliationAction, declineAffiliationAction } from '@/app/(app-admin)/app-admin/profiles/actions';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { cn } from '@/lib/utils';
 import type { OrganizationOption, PendingAffiliation } from './types';

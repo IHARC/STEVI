@@ -15,7 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import type { DonationCatalogCategory, DonationCatalogItem } from '@/lib/donations/types';
 import type { DonationCatalogAdminStats } from '@/lib/donations/service';
 import type { InventoryItem } from '@/lib/inventory/types';
-import { createCatalogCategory, updateCatalogCategory } from '@/app/(ops)/ops/admin/donations/actions';
+import { createCatalogCategory, updateCatalogCategory } from '@/app/(app-admin)/app-admin/donations/actions';
 import { cn } from '@/lib/utils';
 import { computeDonationNeedMetrics } from '@/lib/donations/need-math';
 

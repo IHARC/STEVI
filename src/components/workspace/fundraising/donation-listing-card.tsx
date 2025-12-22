@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@shared/ui/textarea';
 import { ToggleGroup, ToggleGroupItem } from '@shared/ui/toggle-group';
 import { useToast } from '@shared/ui/use-toast';
-import { removeCatalogItemAction, saveCatalogItem, syncCatalogItemStripeAction } from '@/app/(ops)/ops/admin/donations/actions';
+import { removeCatalogItemAction, saveCatalogItem, syncCatalogItemStripeAction } from '@/app/(app-admin)/app-admin/donations/actions';
 
 export function DonationListingCard({
   inventoryItem,

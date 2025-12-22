@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shar
 import { Input } from '@shared/ui/input';
 import { Label } from '@shared/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/ui/select';
-import { setStripeDonationsModeAction, upsertStripeDonationsCredentialsAction } from '@/app/(ops)/ops/admin/donations/actions';
+import { setStripeDonationsModeAction, upsertStripeDonationsCredentialsAction } from '@/app/(app-admin)/app-admin/donations/actions';
 
 type Props = {
   stripeSettings: Record<string, string | null>;

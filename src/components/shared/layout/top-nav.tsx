@@ -41,7 +41,7 @@ export function TopNav({
   const activeArea = layout?.activeArea ?? 'client';
   const showClientPreviewCta = activeArea !== 'client';
   const showMegaMenu = hasNav && activeArea === 'client';
-  const showActingOrg = activeArea === 'ops_frontline' || activeArea === 'ops_admin';
+  const showActingOrg = activeArea === 'ops_frontline' || activeArea === 'app_admin';
   const actingOrgName = portalAccess?.organizationName ?? (portalAccess?.organizationId ? 'Organization' : 'Not set');
   const actingOrgChoices = portalAccess?.actingOrgChoices ?? [];
   const showActingOrgSwitcher = showActingOrg && actingOrgChoices.length > 1;
@@ -49,7 +49,7 @@ export function TopNav({
   const subtitle =
     activeArea === 'ops_frontline'
       ? 'Operations portal'
-      : activeArea === 'ops_admin'
+      : activeArea === 'app_admin'
           ? 'STEVI Admin portal'
           : 'Client portal';
 

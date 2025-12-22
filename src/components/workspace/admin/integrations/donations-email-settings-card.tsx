@@ -5,7 +5,7 @@ import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Input } from '@shared/ui/input';
 import { Label } from '@shared/ui/label';
-import { upsertDonationsEmailCredentialsAction } from '@/app/(ops)/ops/admin/donations/actions';
+import { upsertDonationsEmailCredentialsAction } from '@/app/(app-admin)/app-admin/donations/actions';
 
 type Props = {
   emailSettings: Record<string, string | null>;

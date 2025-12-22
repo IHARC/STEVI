@@ -11,7 +11,7 @@ import { Input } from '@shared/ui/input';
 import { Label } from '@shared/ui/label';
 import { Textarea } from '@shared/ui/textarea';
 import { formatEnumLabel } from '@/lib/enum-values';
-import { createRoleTemplateAction, toggleRoleTemplatePermissionAction } from '@/app/(ops)/ops/admin/permissions/actions';
+import { createRoleTemplateAction, toggleRoleTemplatePermissionAction } from '@/app/(app-admin)/app-admin/permissions/actions';
 
 type RoleTemplate = {
   id: string;

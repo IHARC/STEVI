@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shar
 import { Input } from '@shared/ui/input';
 import { Label } from '@shared/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@shared/ui/table';
-import { cancelDonationSubscriptionAction, resendDonationManageLinkAction } from '@/app/(ops)/ops/admin/donations/actions';
+import { cancelDonationSubscriptionAction, resendDonationManageLinkAction } from '@/app/(app-admin)/app-admin/donations/actions';
 
 function formatMoney(amountCents: number, currency = 'CAD') {
   return new Intl.NumberFormat('en-CA', {

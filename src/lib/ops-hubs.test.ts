@@ -94,9 +94,8 @@ describe('buildOpsHubNav', () => {
       'Inventory',
       'Fundraising',
       'Organizations',
-      'STEVI Admin',
     ]);
-    expect(hubs).toHaveLength(7);
+    expect(hubs).toHaveLength(6);
   });
 
   it('keeps organizations as the primary hub for org-scoped users', () => {

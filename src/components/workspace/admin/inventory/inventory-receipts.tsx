@@ -21,7 +21,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useToast } from '@shared/ui/use-toast';
 import { ListPaginationControls, type ListPageSize } from '@shared/list/pagination-controls';
 import { SortableTableHead, type ListSortOrder } from '@shared/list/sortable-table-head';
-import { updateInventoryTransactionSourceAction } from '@/app/(ops)/ops/admin/inventory/actions';
+import { updateInventoryTransactionSourceAction } from '@/app/(app-admin)/app-admin/inventory/actions';
 import type { InventoryOrganization, InventoryReceipt } from '@/lib/inventory/types';
 
 type InventoryReceiptsSectionProps = {

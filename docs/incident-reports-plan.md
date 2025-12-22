@@ -36,7 +36,7 @@ to roll out to partner organizations without hardening**.
 
 ### Module toggle already exists in STEVI (frontend-side)
 
-- Org feature flags are stored in `core.organizations.services_tags` (JSONB) and edited in STEVI’s ops admin org pages.
+- Org feature flags are stored in `core.organizations.services_tags` (JSONB) and edited in STEVI’s app admin org pages.
 - Frontend helpers live in `STEVI/src/lib/organizations.ts` (`extractOrgFeatureFlags`, `mergeFeatureFlagsIntoTags`).
 
 ### Critical security blockers (must fix before shipping anything)
@@ -155,11 +155,11 @@ Deliverable: admins can grant incident permissions to roles and assign those rol
    - `portal_incidents_manager`
 3. Grant permissions to those templates in `core.role_template_permissions`, then apply the template to org roles as needed.
 4. Ensure org admins can assign these roles to users in their org (STEVI code change):
-   - `STEVI/src/app/(ops)/ops/admin/users/actions.ts` should allow assigning org roles scoped to the same org.
+   - `STEVI/src/app/(app-admin)/app-admin/users/actions.ts` should allow assigning org roles scoped to the same org.
 
 Optional but recommended:
 - Implement the missing permissions management page (only `actions.ts` exists today):
-  - Route: `STEVI/src/app/(ops)/ops/admin/permissions/page.tsx`
+  - Route: `STEVI/src/app/(app-admin)/app-admin/permissions/page.tsx`
   - UI: show roles + permissions list filtered by domain/category; enable toggling via `togglePermissionAction`.
 
 ### Phase 3 — STEVI feature flag + access wiring

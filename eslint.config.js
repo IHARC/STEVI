@@ -107,7 +107,7 @@ const steviConfig = [
     },
   },
   {
-    files: ['src/app/(ops)/**/*.{ts,tsx}', 'src/components/workspace/**/*.{ts,tsx}'],
+    files: ['src/app/(ops)/**/*.{ts,tsx}', 'src/app/(app-admin)/**/*.{ts,tsx}', 'src/components/workspace/**/*.{ts,tsx}'],
     rules: {
       'no-restricted-imports': [
         'error',

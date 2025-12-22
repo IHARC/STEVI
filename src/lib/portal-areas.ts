@@ -1,12 +1,12 @@
 import { stripRouteGroups } from '@/lib/paths';
 import type { PortalAccess } from '@/lib/portal-access';
 
-export type PortalArea = 'client' | 'ops_frontline' | 'ops_admin';
+export type PortalArea = 'client' | 'ops_frontline' | 'app_admin';
 
 const LANDING_PATH_BY_AREA: Record<PortalArea, string> = {
   client: '/home',
   ops_frontline: '/ops/today',
-  ops_admin: '/ops/admin',
+  app_admin: '/app-admin',
 };
 
 type RequireAreaOptions = {
@@ -22,7 +22,7 @@ export type RequireAreaResult =
 export function inferPortalAreaFromPath(pathname: string): PortalArea {
   const cleaned = stripRouteGroups(pathname || '');
 
-  if (cleaned.startsWith('/ops/admin') || cleaned.startsWith('/ops/hq')) return 'ops_admin';
+  if (cleaned.startsWith('/app-admin')) return 'app_admin';
   if (cleaned.startsWith('/ops')) return 'ops_frontline';
   return 'client';
 }
@@ -107,9 +107,9 @@ export function requireArea(
     };
   }
 
-  if (area === 'ops_admin') {
+  if (area === 'app_admin') {
     if (hasAdminAccess) {
-      return { allowed: true, activeArea: 'ops_admin', isPreview: false };
+      return { allowed: true, activeArea: 'app_admin', isPreview: false };
     }
     return { allowed: false, redirectPath: landingPath };
   }

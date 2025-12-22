@@ -144,7 +144,7 @@ export default async function OpsFundraisingHubPage({ searchParams }: PageProps)
         meta={[{ label: 'IHARC only', tone: 'warning' }]}
         actions={
           <Button asChild variant="secondary" size="sm">
-            <Link href="/ops/admin/integrations">Integration settings</Link>
+            <Link href="/app-admin/integrations">Integration settings</Link>
           </Button>
         }
       />
@@ -227,7 +227,7 @@ export default async function OpsFundraisingHubPage({ searchParams }: PageProps)
               </CardHeader>
               <CardContent>
                 <Button asChild variant="outline" size="sm">
-                  <Link href="/ops/admin/integrations">Open integration settings</Link>
+                  <Link href="/app-admin/integrations">Open integration settings</Link>
                 </Button>
               </CardContent>
             </Card>

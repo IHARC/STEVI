@@ -32,8 +32,6 @@ const canSeeOrganizations = (access: PortalAccess) =>
   access.canAccessOpsFrontline || access.canAccessOpsOrg || access.canAccessOpsAdmin || access.canAccessOpsSteviAdmin;
 const canSeeOrgScopedOrganizations = (access: PortalAccess) =>
   access.canAccessOpsOrg && access.profile.affiliation_type === 'agency_partner' && !access.isIharcMember && !access.isGlobalAdmin;
-const canSeeAdmin = (access: PortalAccess) => access.canAccessOpsSteviAdmin;
-
 const NAV_SECTIONS: NavSectionDefinition[] = [
   {
     id: 'ops_frontline',
@@ -187,29 +185,6 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
       },
     ],
   },
-  {
-    id: 'ops_admin',
-    label: 'STEVI Admin',
-    description: 'STEVI-wide controls and content',
-    area: 'ops_admin',
-    requires: canSeeAdmin,
-    groups: [
-      {
-        id: 'admin-hub',
-        label: 'Admin hub',
-        icon: 'building',
-        isHub: true,
-        items: [
-          { id: 'admin-overview', href: '/ops/admin', label: 'General settings', icon: 'dashboard', match: ['/ops/admin'], exact: true },
-          { id: 'admin-content', href: '/ops/admin/content', label: 'Content & Notifications', icon: 'megaphone', match: ['/ops/admin/content'] },
-          { id: 'admin-integrations', href: '/ops/admin/integrations', label: 'Integrations', icon: 'lab', match: ['/ops/admin/integrations'] },
-          { id: 'admin-users', href: '/ops/admin/users/all', label: 'Users', icon: 'users', match: ['/ops/admin/users'] },
-          { id: 'admin-website', href: '/ops/admin/website/branding', label: 'Website & Marketing', icon: 'globe', match: ['/ops/admin/website'] },
-          { id: 'admin-operations', href: '/ops/admin/operations', label: 'Operations', icon: 'workflow', match: ['/ops/admin/operations'] },
-        ],
-      },
-    ],
-  },
 ];
 
 function filterItems(items: NavItemDefinition[], access: PortalAccess): NavItem[] {
@@ -287,7 +262,7 @@ export function resolveQuickActions(
     ];
   }
 
-  if (area === 'ops_frontline' || area === 'ops_admin') {
+  if (area === 'ops_frontline') {
     const actions: QuickAction[] = [];
 
     if (access.canAccessOpsFrontline || access.canAccessOpsAdmin) {
@@ -341,7 +316,7 @@ export function navAreaLabel(area: PortalArea): string {
   switch (area) {
     case 'ops_frontline':
       return 'Operations';
-    case 'ops_admin':
+    case 'app_admin':
       return 'STEVI Admin';
     case 'client':
     default:

@@ -10,7 +10,7 @@ import {
   toggleInventoryItemStatusAction,
   transferInventoryStockAction,
   updateInventoryItemAction,
-} from '@/app/(ops)/ops/admin/inventory/actions';
+} from '@/app/(app-admin)/app-admin/inventory/actions';
 import type { InventoryItem } from '@/lib/inventory/types';
 
 export type InventoryActionResult<T = void> = { success: true; data?: T } | { success: false; error: string };

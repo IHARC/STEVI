@@ -1,11 +1,12 @@
 # Navigation Ownership (Visit-First)
 
-The Operations rail follows the visit-first IA captured in `docs/ui-standards.md` and enforced in `src/lib/portal-navigation.ts`. This is the source of truth for navigation, guards, and UX enforcement across the staff/org/STEVI Admin shell.
+The Operations rail follows the visit-first IA captured in `docs/ui-standards.md` and enforced in `src/lib/portal-navigation.ts`. This is the source of truth for navigation, guards, and UX enforcement across the staff/org shell.
 
 Key references:
 - `docs/ui-standards.md` – app‑wide UI standards, including canonical hub `view` params.
-- `src/lib/portal-navigation.ts` – Operations rails (ops_frontline, ops_admin) covering Today, Clients, Programs, Inventory, Fundraising, Organizations, and STEVI Admin hub. Visit creation is a hub action, not a global hub.
+- `src/lib/portal-navigation.ts` – Operations rails (ops_frontline) covering Today, Clients, Programs, Inventory, Fundraising, and Organizations. Visit creation is a hub action, not a global hub.
 - Organization administration is consolidated into the org detail surface at `/ops/organizations/[id]` (tabs via `?tab=...`), and is role-gated there.
+- App Admin navigation is owned by `src/app/(app-admin)/app-admin/layout.tsx` (settings shell nav groups).
 - `src/components/workspace/layout/ops-hub-rail.tsx` – thin ops hub rail (desktop).
 - `src/components/shared/layout/app-navigation.tsx` – mobile navigation sheet (hubs + sub‑pages in ops).
 - `src/components/shared/layout/top-nav.tsx` – top chrome without client mega menu when in ops; acting-org switcher shown in ops.

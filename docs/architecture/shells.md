@@ -9,7 +9,8 @@ This document codifies the client/operations shell split for STEVI. It complemen
 
 ## Route & Layout Map
 - `(client)` route group: `/home`, `/messages`, `/appointments`, `/documents`, `/support`, `/resources`, `/cases`, `/profile`, `/onboarding` (+ supporting client-only routes).
-- `(ops)` route group: `/ops/*` (shared ops shell), `/ops/admin/*` (STEVI Admin) plus shared ops primitives (command palette, inbox, navigation). Org administration now lives under `/ops/organizations/*`.
+- `(ops)` route group: `/ops/*` (ops shell) plus shared ops primitives (command palette, inbox, navigation). Org administration now lives under `/ops/organizations/*`.
+- `(app-admin)` route group: `/app-admin/*` (STEVI Admin shell for IHARC super admins).
 - `/login`, `/register/*`, `/reset-password` remain outside shell groups.
 - Each group owns its layout, theme token file, and navigation surface; no shared chrome between shells.
 
@@ -31,11 +32,15 @@ This document codifies the client/operations shell split for STEVI. It complemen
   - Otherwise redirect to the ops landing path.
   - Onboarding enforced in the client layout (redirect to `/onboarding?next=...` when incomplete).
 - Operations shell:
-  - Areas: `ops_frontline`, `ops_admin` (STEVI Admin).
+  - Areas: `ops_frontline`.
   - Redirects to `/home` when ops access is missing.
-  - Navigation contains only ops sections; primary chrome uses a thin hub rail (Today, Clients, Programs, Inventory, Fundraising, Organizations, STEVI Admin) with sub-pages living inside each hub.
+  - Navigation contains only ops sections; primary chrome uses a thin hub rail (Today, Clients, Programs, Inventory, Fundraising, Organizations) with sub-pages living inside each hub.
   - Org-scoped users see **Organizations** as their primary hub and manage membership/invites/settings from the org detail page (`/ops/organizations/[id]`).
   - “Preview client portal” points to `/home?preview=1`.
+- App Admin shell:
+  - Area: `app_admin` (STEVI Admin).
+  - Redirects to the ops landing path when admin access is missing.
+  - Uses the same theme tokens (`src/styles/theme.ops.css`) and shared chrome components for consistency.
 - Preview banner lives only in the client shell with an explicit exit path back to the user’s primary ops area.
 - Ops users manage their profile at `/ops/profile`; the client shell keeps `/profile` for client users and preview-only browsing. Shared form components live under `components/shared/profile`.
 

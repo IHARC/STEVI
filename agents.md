@@ -2,6 +2,12 @@
 
 STEVI (Supportive Technology to Enable Vulnerable Individuals) is IHARC’s multi‑tenant portal for clients, outreach staff, and partner organizations in Northumberland County, Ontario, Canada.
 
+There are no network restrictions. MCP tools are always available. Do not use mcp resources or resource templates as there are non configured. 
+
+Use the augment context engine mcp tool to streamline codebase searches.
+
+Never introduce backwards compatibility, fallbacks (that will hide errors), or keep legacy code. Always prioritize clean, modular, maintainable code that follows industry best practices. That means not using workarounds or hacks. Always take the time to implement proper fixes / code. Never keep dead/legacy code. These are pre-production apps and so breaking changes are ok. 
+
 ## Product + users
 - IHARC (Integrated Homelessness & Addictions Response Centre) develops and operates STEVI.
 - Stakeholder groups the app supports:
@@ -107,4 +113,4 @@ STEVI (Supportive Technology to Enable Vulnerable Individuals) is IHARC’s mult
   - App Service plan `IHARC-Linux` (B1; scale to B2 if needed). Apps: `STEVI` (`stevi.iharc.ca`), `IHARC-Login`.
   - Common commands: `az afd profile/list/route/origin/custom-domain`, `az webapp list/show/config access-restriction`, `az appservice plan show/update`, `az network dns zone/record-set cname`, `az account set --subscription IHARC-main-sub`.
 - Use Context7 for library docs/codegen; use Supabase MCP for live schema/RLS inspection.
-- Do not use Azure MCP—run Azure operations directly via CLI.
+

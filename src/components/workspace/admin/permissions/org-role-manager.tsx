@@ -16,7 +16,7 @@ import {
   applyTemplateToOrgRoleAction,
   createOrgRoleAction,
   toggleOrgRolePermissionAction,
-} from '@/app/(ops)/ops/admin/permissions/actions';
+} from '@/app/(app-admin)/app-admin/permissions/actions';
 
 type Organization = { id: number; name: string | null };
 type RoleTemplate = { id: string; name: string; display_name: string };
@@ -124,7 +124,7 @@ export function OrgRoleManager({
     const next = new URLSearchParams(searchParams?.toString());
     if (value) next.set('org', value);
     else next.delete('org');
-    router.push(`/ops/admin/permissions?${next.toString()}`);
+    router.push(`/app-admin/permissions?${next.toString()}`);
   };
 
   const handleCreateOrgRole = (event: React.FormEvent<HTMLFormElement>) => {

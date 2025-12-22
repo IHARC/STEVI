@@ -428,6 +428,11 @@ function userMenuBlueprint(access: PortalAccess): MenuLinkBlueprint[] {
       requires: (a) => a.canAccessOpsFrontline,
     },
     {
+      href: '/app-admin',
+      label: 'STEVI Admin',
+      requires: (a) => a.canAccessOpsSteviAdmin,
+    },
+    {
       href: '/home?preview=1',
       label: 'Preview client portal',
       requires: (a) => a.canAccessOpsFrontline || a.canAccessOpsAdmin || a.canAccessOpsOrg,

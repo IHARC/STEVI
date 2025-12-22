@@ -30,14 +30,14 @@ test.describe('Login layout', () => {
   });
 });
 
-test.describe('Operations shell', () => {
+test.describe('Ops & App Admin shells', () => {
   test('frontline routes redirect unauthenticated users', async ({ page }) => {
     await page.goto('/ops/today');
     await expect(page).toHaveURL(/\/login\?next=%2Fops%2Ftoday/);
   });
 
   test('STEVI Admin routes redirect unauthenticated users', async ({ page }) => {
-    await page.goto('/ops/hq');
-    await expect(page).toHaveURL(/\/login\?next=%2Fops%2Fhq/);
+    await page.goto('/app-admin');
+    await expect(page).toHaveURL(/\/login\?next=%2Fapp-admin/);
   });
 });

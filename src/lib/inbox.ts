@@ -212,7 +212,7 @@ export async function fetchPortalInbox(
   access: PortalAccess,
   area: PortalArea,
 ): Promise<InboxItem[]> {
-  if (area === 'ops_admin') return [];
+  if (area === 'app_admin') return [];
 
   if (area === 'ops_frontline') {
     if (access.canAccessOpsFrontline || access.canAccessOpsAdmin) {

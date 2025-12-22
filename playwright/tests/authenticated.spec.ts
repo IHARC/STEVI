@@ -57,12 +57,12 @@ test.describe('Authenticated shells', () => {
     await expect(page.getByRole('navigation', { name: 'Application navigation' })).toHaveCount(0);
   });
 
-  test('admin user can access ops admin shell', async ({ page }) => {
+  test('admin user can access app admin shell', async ({ page }) => {
     test.skip(!adminCreds.email || !adminCreds.password, 'E2E admin credentials missing.');
 
-    await loginWithEmail(page, adminCreds, '/ops/admin');
+    await loginWithEmail(page, adminCreds, '/app-admin');
 
-    await expect(page).toHaveURL(/\/ops\/admin(\?|$)/, { timeout: 20000 });
+    await expect(page).toHaveURL(/\/app-admin(\?|$)/, { timeout: 20000 });
     await expect(page.getByRole('heading', { name: /general settings/i })).toBeVisible();
   });
 

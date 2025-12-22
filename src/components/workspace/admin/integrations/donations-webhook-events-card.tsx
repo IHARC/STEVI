@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shar
 import { Input } from '@shared/ui/input';
 import { Label } from '@shared/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@shared/ui/table';
-import { reprocessStripeWebhookEventAction } from '@/app/(ops)/ops/admin/donations/actions';
+import { reprocessStripeWebhookEventAction } from '@/app/(app-admin)/app-admin/donations/actions';
 
 function formatWhen(value: string | null) {
   if (!value) return '—';
