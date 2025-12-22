@@ -3,7 +3,6 @@ import { buildPortalNav, flattenNavItemsForCommands } from './portal-navigation'
 import { inferPortalAreaFromPath, requireArea, resolveLandingPath } from './portal-areas';
 import type { PortalAccess } from './portal-access';
 import type { PortalProfile } from './profile';
-import type { IharcRole } from './ihar-auth';
 
 function buildProfile(overrides: Partial<PortalProfile> = {}): PortalProfile {
   const baseProfile: PortalProfile = {
@@ -43,8 +42,11 @@ const baseAccess: PortalAccess = {
   email: 'user@example.com',
   profile: buildProfile(),
   isProfileApproved: true,
-  iharcRoles: [],
-  portalRoles: [],
+  isGlobalAdmin: false,
+  iharcOrganizationId: null,
+  isIharcMember: false,
+  orgRoles: [],
+  orgPermissions: [],
   organizationId: null,
   organizationName: null,
   canAccessOpsAdmin: false,
@@ -54,6 +56,7 @@ const baseAccess: PortalAccess = {
   canManageResources: false,
   canManagePolicies: false,
   canAccessInventoryOps: false,
+  canManageInventoryLocations: false,
   canManageNotifications: false,
   canReviewProfiles: false,
   canViewMetrics: false,
@@ -62,7 +65,6 @@ const baseAccess: PortalAccess = {
   canManageConsents: false,
   canManageOrgUsers: false,
   canManageOrgInvites: false,
-  inventoryAllowedRoles: [],
   actingOrgChoices: [],
   actingOrgChoicesCount: null,
   actingOrgAutoSelected: false,
@@ -76,13 +78,13 @@ describe('resolveLandingPath', () => {
       canAccessOpsAdmin: true,
       canAccessOpsFrontline: true,
       canAccessOpsOrg: true,
-      iharcRoles: ['iharc_admin'] as IharcRole[],
+      isGlobalAdmin: true,
     };
     expect(resolveLandingPath(access)).toBe('/ops/today');
   });
 
   it('lands frontline-only users on operations today', () => {
-    const access = { ...baseAccess, canAccessOpsFrontline: true, iharcRoles: ['iharc_staff'] as IharcRole[] };
+    const access = { ...baseAccess, canAccessOpsFrontline: true };
     expect(resolveLandingPath(access)).toBe('/ops/today');
   });
 

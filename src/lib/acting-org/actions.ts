@@ -30,8 +30,5 @@ export async function setActingOrganization(organizationId: number | null, retur
     throw new Error('Unable to switch organizations right now.');
   }
 
-  await supabase.rpc('refresh_user_permissions', { user_uuid: access.userId });
-
   redirect(returnTo || '/ops/today');
 }
-

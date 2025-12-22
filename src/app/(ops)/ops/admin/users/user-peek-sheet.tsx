@@ -5,37 +5,19 @@ import Link from 'next/link';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@shared/ui/sheet';
 import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
-import { Separator } from '@shared/ui/separator';
-import { Checkbox } from '@shared/ui/checkbox';
 import { useToast } from '@shared/ui/use-toast';
-import { toggleRoleAction, updateProfileAction } from './actions';
+import { updateProfileAction } from './actions';
 import type { AdminUserListItem } from '@/lib/admin-users';
 
 type UserPeekSheetProps = {
   user: AdminUserListItem;
-  roleOptions: { value: string; label: string }[];
 };
 
-export function UserPeekSheet({ user, roleOptions }: UserPeekSheetProps) {
+export function UserPeekSheet({ user }: UserPeekSheetProps) {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const roles = useMemo(() => new Set([...(user.roles.portal ?? []), ...(user.roles.iharc ?? [])]), [user.roles]);
-
-  const handleRoleToggle = (role: string, enable: boolean) => {
-    startTransition(async () => {
-      const formData = new FormData();
-      formData.append('profile_id', user.profileId);
-      formData.append('role_name', role);
-      formData.append('enable', String(enable));
-      const result = await toggleRoleAction(formData);
-      if (!result.success) {
-        toast({ title: 'Role update failed', description: result.error, variant: 'destructive' });
-      } else {
-        toast({ title: enable ? 'Role granted' : 'Role removed', description: role });
-      }
-    });
-  };
+  const roles = useMemo(() => new Set([...(user.roles.global ?? []), ...(user.roles.org ?? [])]), [user.roles]);
 
   const handleApprove = () => {
     startTransition(async () => {
@@ -89,23 +71,11 @@ export function UserPeekSheet({ user, roleOptions }: UserPeekSheetProps) {
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-medium text-foreground">Approve profile</p>
-                <p className="text-xs text-muted-foreground">Sets status to approved and refreshes permissions.</p>
+                <p className="text-xs text-muted-foreground">Sets status to approved for portal access.</p>
               </div>
               <Button size="sm" onClick={handleApprove} disabled={isPending || user.affiliationStatus === 'approved'}>
                 Approve
               </Button>
-            </div>
-            <Separator />
-            <div className="flex flex-col gap-2">
-              {roleOptions.map((role) => (
-                <RoleToggle
-                  key={role.value}
-                  label={role.label}
-                  checked={roles.has(role.value)}
-                  onChange={(checked) => handleRoleToggle(role.value, checked)}
-                  disabled={isPending}
-                />
-              ))}
             </div>
           </div>
 
@@ -117,26 +87,5 @@ export function UserPeekSheet({ user, roleOptions }: UserPeekSheetProps) {
         </div>
       </SheetContent>
     </Sheet>
-  );
-}
-
-type RoleToggleProps = {
-  label: string;
-  checked: boolean;
-  onChange: (checked: boolean) => void;
-  disabled?: boolean;
-};
-
-function RoleToggle({ label, checked, onChange, disabled }: RoleToggleProps) {
-  return (
-    <label className="flex items-center justify-between gap-3 rounded-xl border border-border/15 bg-background px-3 py-1 text-sm text-foreground">
-      <span>{label}</span>
-      <Checkbox
-        checked={checked}
-        onCheckedChange={(value) => onChange(Boolean(value))}
-        disabled={disabled}
-        aria-label={label}
-      />
-    </label>
   );
 }

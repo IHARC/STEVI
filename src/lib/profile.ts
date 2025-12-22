@@ -64,16 +64,6 @@ export async function ensurePortalProfile(
     return data ?? null;
   };
 
-  const refreshUserClaims = async (userIdToRefresh: string) => {
-    try {
-      await supabase.rpc('refresh_user_permissions', { user_uuid: userIdToRefresh });
-    } catch (claimError) {
-      if (process.env.NODE_ENV !== 'production') {
-        console.warn('Failed to refresh user claims', claimError);
-      }
-    }
-  };
-
   const ensureClientTitle = async (profile: PortalProfile): Promise<PortalProfile> => {
     if (profile.position_title || profile.affiliation_type !== 'client') {
       return profile;
@@ -99,9 +89,6 @@ export async function ensurePortalProfile(
   const existingProfile = await fetchProfileByUserId();
 
   if (existingProfile) {
-    if (existingProfile.user_id) {
-      await refreshUserClaims(existingProfile.user_id);
-    }
     return ensureClientTitle(existingProfile);
   }
 

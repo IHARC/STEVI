@@ -31,7 +31,7 @@ const canSeeFundraising = (access: PortalAccess) => access.canAccessOpsSteviAdmi
 const canSeeOrganizations = (access: PortalAccess) =>
   access.canAccessOpsFrontline || access.canAccessOpsOrg || access.canAccessOpsAdmin || access.canAccessOpsSteviAdmin;
 const canSeeOrgScopedOrganizations = (access: PortalAccess) =>
-  access.canAccessOpsOrg && access.profile.affiliation_type === 'agency_partner' && access.iharcRoles.length === 0;
+  access.canAccessOpsOrg && access.profile.affiliation_type === 'agency_partner' && !access.isIharcMember && !access.isGlobalAdmin;
 const canSeeAdmin = (access: PortalAccess) => access.canAccessOpsSteviAdmin;
 
 const NAV_SECTIONS: NavSectionDefinition[] = [

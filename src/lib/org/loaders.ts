@@ -71,8 +71,8 @@ export async function loadOrgDetail(supabase: SupabaseServerClient, organization
 
   const organization = (organizationResult.data ?? null) as OrgDetailRecord | null;
   const approvedMembers = members.filter((member: OrgMemberRecord) => member.affiliation_status === 'approved');
-  const adminCount = members.filter((member: OrgMemberRecord) => member.portal_roles.includes('portal_org_admin')).length;
-  const repCount = members.filter((member: OrgMemberRecord) => member.portal_roles.includes('portal_org_rep')).length;
+  const adminCount = members.filter((member: OrgMemberRecord) => member.org_roles.some((role) => role.name === 'org_admin')).length;
+  const repCount = members.filter((member: OrgMemberRecord) => member.org_roles.some((role) => role.name === 'org_rep')).length;
   const pendingInvites = invites.filter((invite: OrgInviteRecord) => invite.status === 'pending').length;
 
   return {

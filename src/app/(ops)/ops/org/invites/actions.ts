@@ -46,7 +46,7 @@ export async function createOrgInviteAction(
       return { status: 'error', message: 'Sign in to continue.' };
     }
 
-    const isIharcAdmin = access.iharcRoles.includes('iharc_admin');
+    const isIharcAdmin = access.isGlobalAdmin;
     const orgId = isIharcAdmin ? (access.organizationId ?? targetOrgId) : access.organizationId;
 
     if (!orgId || (!isIharcAdmin && !access.canManageOrgInvites)) {

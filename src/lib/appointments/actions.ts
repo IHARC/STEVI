@@ -63,7 +63,7 @@ type AppointmentScopeRow = {
 };
 
 function isIharcAdmin(access: Awaited<ReturnType<typeof loadPortalAccess>>): boolean {
-  return access?.iharcRoles.includes('iharc_admin') ?? false;
+  return access?.isGlobalAdmin ?? false;
 }
 
 async function fetchAppointmentScope(

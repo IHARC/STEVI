@@ -33,7 +33,8 @@ export function UserSavedSearches({ segment, currentParams }: Props) {
   const presets: SavedSearch[] = useMemo(
     () => [
       { id: 'pending', label: 'Pending approvals', params: buildParams({ status: 'pending' }) },
-      { id: 'org-admins', label: 'Org admins', params: buildParams({ role: 'portal_org_admin' }) },
+      { id: 'org-admins', label: 'Org admins', params: buildParams({ role: 'org_admin' }) },
+      { id: 'iharc-admins', label: 'IHARC admins', params: buildParams({ role: 'iharc_admin' }) },
       { id: 'no-org', label: 'No org linked', params: buildParams({ org: 'none' }) },
       { id: 'revoked', label: 'Revoked', params: buildParams({ status: 'revoked' }) },
     ],

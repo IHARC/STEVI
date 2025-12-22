@@ -305,8 +305,8 @@ export async function adjustInventoryStockAction(formData: FormData): Promise<Ac
 export async function createInventoryLocationAction(
   formData: FormData,
 ): Promise<ActionResult<{ location: InventoryLocation }>> {
-  return runInventoryMutation(formData, async ({ profile, roles }, supabase) => {
-    requireInventoryAdmin(roles);
+  return runInventoryMutation(formData, async ({ profile, canManageLocations }, supabase) => {
+    requireInventoryAdmin(canManageLocations);
 
     const location = await createInventoryLocation(supabase, {
       name: getRequiredString(formData, 'name', 'Location name is required.'),
@@ -328,8 +328,8 @@ export async function createInventoryLocationAction(
 }
 
 export async function updateInventoryLocationAction(formData: FormData): Promise<ActionResult> {
-  return runInventoryMutation(formData, async ({ profile, roles }, supabase) => {
-    requireInventoryAdmin(roles);
+  return runInventoryMutation(formData, async ({ profile, canManageLocations }, supabase) => {
+    requireInventoryAdmin(canManageLocations);
 
     const locationId = getRequiredString(formData, 'location_id', 'Location context missing.');
 
@@ -351,8 +351,8 @@ export async function updateInventoryLocationAction(formData: FormData): Promise
 }
 
 export async function toggleInventoryLocationAction(formData: FormData): Promise<ActionResult> {
-  return runInventoryMutation(formData, async ({ profile, roles }, supabase) => {
-    requireInventoryAdmin(roles);
+  return runInventoryMutation(formData, async ({ profile, canManageLocations }, supabase) => {
+    requireInventoryAdmin(canManageLocations);
 
     const locationId = getRequiredString(formData, 'location_id', 'Location context missing.');
     const active = normalizeBoolean(formData.get('active'), true);
@@ -369,8 +369,8 @@ export async function toggleInventoryLocationAction(formData: FormData): Promise
 }
 
 export async function deleteInventoryLocationAction(formData: FormData): Promise<ActionResult> {
-  return runInventoryMutation(formData, async ({ profile, roles }, supabase) => {
-    requireInventoryAdmin(roles);
+  return runInventoryMutation(formData, async ({ profile, canManageLocations }, supabase) => {
+    requireInventoryAdmin(canManageLocations);
 
     const locationId = getRequiredString(formData, 'location_id', 'Location context missing.');
 

@@ -103,9 +103,8 @@ export const enumSources = {
   resourceKinds: { schema: 'portal', table: 'resource_pages', column: 'kind' },
   resourceEmbedPlacement: { schema: 'portal', table: 'resource_pages', column: 'embed_placement' },
   livedExperienceStatuses: { schema: 'portal', table: 'profiles', column: 'homelessness_experience' },
-  portalRoles: { schema: 'core', table: 'roles', column: 'name', prefix: 'portal_' },
-  iharcRoles: { schema: 'core', table: 'roles', column: 'name', prefix: 'iharc_' },
-  inventoryRoles: { schema: 'core', table: 'role_permissions', column: 'role_id', domainEquals: 'inventory' },
+  globalRoles: { schema: 'core', table: 'global_roles', column: 'name' },
+  orgRoles: { schema: 'core', table: 'org_roles', column: 'name' },
 } as const;
 
 export async function getGrantScopes(supabase: SupabaseAnyServerClient): Promise<string[]> {
@@ -144,14 +143,10 @@ export async function getLivedExperienceStatuses(supabase: SupabaseAnyServerClie
   return fetchDistinctValues(supabase, enumSources.livedExperienceStatuses);
 }
 
-export async function getPortalRoles(supabase: SupabaseAnyServerClient): Promise<string[]> {
-  return fetchDistinctValues(supabase, enumSources.portalRoles);
+export async function getGlobalRoles(supabase: SupabaseAnyServerClient): Promise<string[]> {
+  return fetchDistinctValues(supabase, enumSources.globalRoles);
 }
 
-export async function getIharcRoles(supabase: SupabaseAnyServerClient): Promise<string[]> {
-  return fetchDistinctValues(supabase, enumSources.iharcRoles);
-}
-
-export async function getInventoryRoles(supabase: SupabaseAnyServerClient): Promise<string[]> {
-  return fetchDistinctValues(supabase, enumSources.inventoryRoles);
+export async function getOrgRoleNames(supabase: SupabaseAnyServerClient): Promise<string[]> {
+  return fetchDistinctValues(supabase, enumSources.orgRoles);
 }

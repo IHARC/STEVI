@@ -77,7 +77,7 @@ export default async function OpsOrganizationsPage({ searchParams }: PageProps) 
     redirect(resolveLandingPath(access));
   }
 
-  const isInternalIharc = access.iharcRoles.length > 0;
+  const isInternalIharc = access.isIharcMember || access.isGlobalAdmin;
   const canManageOrganizations = access.canAccessOpsSteviAdmin;
   const orgScopedViewer = !canManageOrganizations && !isInternalIharc;
   const visibleOrgId = orgScopedViewer ? access.organizationId : null;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
@@ -8,10 +8,11 @@ import { Checkbox } from '@shared/ui/checkbox';
 import { Separator } from '@shared/ui/separator';
 import { useToast } from '@shared/ui/use-toast';
 import { ProfileUpdateForm } from '@workspace/admin/users/profile/profile-forms';
-import { archiveUserAction, toggleRoleAction, updateProfileAction } from '../actions';
+import { archiveUserAction, toggleGlobalRoleAction, toggleOrgRoleAction, updateProfileAction } from '../actions';
 
-type RoleSet = { portal: string[]; iharc: string[] };
+type RoleSet = { global: string[]; org: string[] };
 type Option = { value: string; label: string };
+type OrgRoleOption = { id: string; name: string; label: string; description?: string | null };
 
 type Props = {
   profile: {
@@ -28,11 +29,11 @@ type Props = {
   affiliationStatuses: string[];
   governmentRoleTypes: string[];
   organizations: { id: number; name: string }[];
-  roleOptions: Option[];
+  globalRoleOptions: Option[];
+  orgRoleOptions: OrgRoleOption[];
   isElevated: boolean;
+  canManageOrgRoles: boolean;
 };
-
-const ORG_LEVEL_ROLES = new Set(['portal_org_admin', 'portal_org_rep', 'portal_user']);
 
 export function UserProfileDetailClient({
   profile,
@@ -41,20 +42,24 @@ export function UserProfileDetailClient({
   affiliationStatuses,
   governmentRoleTypes,
   organizations,
-  roleOptions,
+  globalRoleOptions,
+  orgRoleOptions,
   isElevated,
+  canManageOrgRoles,
 }: Props) {
   const router = useRouter();
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
-  const [roleState, setRoleState] = useState<Set<string>>(
-    () => new Set([...(roles.portal ?? []), ...(roles.iharc ?? [])]),
+  const [globalRoleState, setGlobalRoleState] = useState<Set<string>>(
+    () => new Set(roles.global ?? []),
+  );
+  const [orgRoleState, setOrgRoleState] = useState<Set<string>>(
+    () => new Set(roles.org ?? []),
   );
 
-  const portalRoleOptions = useMemo(() => roleOptions.filter((r) => r.value.startsWith('portal_')), [roleOptions]);
-  const iharcRoleOptions = useMemo(() => roleOptions.filter((r) => r.value.startsWith('iharc_')), [roleOptions]);
-
-  const canToggleRole = (roleName: string) => isElevated || ORG_LEVEL_ROLES.has(roleName);
+  const canToggleGlobal = isElevated;
+  const canToggleOrg = isElevated || canManageOrgRoles;
+  const orgRoleAvailable = Boolean(profile.organization_id);
 
   const handleUpdateProfile = async (formData: FormData) => {
     startTransition(async () => {
@@ -68,25 +73,25 @@ export function UserProfileDetailClient({
     });
   };
 
-  const handleRoleToggle = (roleName: string, enable: boolean) => {
-    if (!canToggleRole(roleName)) return;
+  const handleGlobalRoleToggle = (roleName: string, enable: boolean) => {
+    if (!canToggleGlobal) return;
     startTransition(async () => {
       const formData = new FormData();
       formData.append('profile_id', profile.id);
       formData.append('role_name', roleName);
       formData.append('enable', String(enable));
 
-      setRoleState((prev) => {
+      setGlobalRoleState((prev) => {
         const next = new Set(prev);
         if (enable) next.add(roleName);
         else next.delete(roleName);
         return next;
       });
 
-      const result = await toggleRoleAction(formData);
+      const result = await toggleGlobalRoleAction(formData);
       if (!result.success) {
         toast({ title: 'Role update failed', description: result.error, variant: 'destructive' });
-        setRoleState((prev) => {
+        setGlobalRoleState((prev) => {
           const next = new Set(prev);
           if (enable) next.delete(roleName);
           else next.add(roleName);
@@ -96,6 +101,41 @@ export function UserProfileDetailClient({
       }
 
       toast({ title: enable ? 'Role granted' : 'Role removed', description: roleName });
+      router.refresh();
+    });
+  };
+
+  const handleOrgRoleToggle = (role: OrgRoleOption, enable: boolean) => {
+    if (!canToggleOrg || !orgRoleAvailable) return;
+    if (!profile.organization_id) return;
+    startTransition(async () => {
+      const formData = new FormData();
+      formData.append('profile_id', profile.id);
+      formData.append('org_role_id', role.id);
+      formData.append('role_name', role.name);
+      formData.append('organization_id', String(profile.organization_id));
+      formData.append('enable', String(enable));
+
+      setOrgRoleState((prev) => {
+        const next = new Set(prev);
+        if (enable) next.add(role.name);
+        else next.delete(role.name);
+        return next;
+      });
+
+      const result = await toggleOrgRoleAction(formData);
+      if (!result.success) {
+        toast({ title: 'Role update failed', description: result.error, variant: 'destructive' });
+        setOrgRoleState((prev) => {
+          const next = new Set(prev);
+          if (enable) next.delete(role.name);
+          else next.add(role.name);
+          return next;
+        });
+        return;
+      }
+
+      toast({ title: enable ? 'Role granted' : 'Role removed', description: role.label });
       router.refresh();
     });
   };
@@ -133,14 +173,21 @@ export function UserProfileDetailClient({
             <h3 className="text-base font-semibold text-foreground">Permissions</h3>
             <p className="text-xs text-muted-foreground">
               {isElevated
-                ? 'IHARC admins can grant any role.'
-                : 'Org admins can grant org-scoped roles for their tenant.'}
+                ? 'IHARC admins can grant global roles and org roles.'
+                : canManageOrgRoles
+                  ? 'Org admins can grant org-scoped roles for their organization.'
+                  : 'Read-only access to roles for this profile.'}
             </p>
           </div>
           <div className="flex flex-wrap gap-1">
-            {Array.from(roleState).map((role) => (
-              <Badge key={role} variant={role.startsWith('portal_') ? 'outline' : 'secondary'} className="capitalize text-xs">
-                {role.replace('portal_', '').replace('iharc_', '').replaceAll('_', ' ')}
+            {Array.from(globalRoleState).map((role) => (
+              <Badge key={role} variant="secondary" className="capitalize text-xs">
+                {role.replaceAll('_', ' ')}
+              </Badge>
+            ))}
+            {Array.from(orgRoleState).map((role) => (
+              <Badge key={role} variant="outline" className="capitalize text-xs">
+                {role.replaceAll('_', ' ')}
               </Badge>
             ))}
           </div>
@@ -148,20 +195,21 @@ export function UserProfileDetailClient({
 
         <div className="grid gap-4 md:grid-cols-2">
           <RoleGroup
-            title="Portal roles"
-            options={portalRoleOptions}
-            roleState={roleState}
-            onToggle={handleRoleToggle}
-            canToggleRole={canToggleRole}
+            title="Global roles"
+            options={globalRoleOptions}
+            roleState={globalRoleState}
+            onToggle={handleGlobalRoleToggle}
+            canToggleRole={() => canToggleGlobal}
             disabled={isPending}
           />
-          <RoleGroup
-            title="IHARC roles"
-            options={iharcRoleOptions}
-            roleState={roleState}
-            onToggle={handleRoleToggle}
-            canToggleRole={canToggleRole}
+          <OrgRoleGroup
+            title="Organization roles"
+            options={orgRoleOptions}
+            roleState={orgRoleState}
+            onToggle={handleOrgRoleToggle}
+            canToggleRole={() => canToggleOrg}
             disabled={isPending}
+            organizationSelected={orgRoleAvailable}
           />
         </div>
       </section>
@@ -216,6 +264,60 @@ function RoleGroup({
         })}
         {options.length === 0 ? (
           <p className="text-xs text-muted-foreground">No roles available.</p>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function OrgRoleGroup({
+  title,
+  options,
+  roleState,
+  onToggle,
+  canToggleRole,
+  disabled,
+  organizationSelected,
+}: {
+  title: string;
+  options: OrgRoleOption[];
+  roleState: Set<string>;
+  onToggle: (role: OrgRoleOption, enable: boolean) => void;
+  canToggleRole: (role: OrgRoleOption) => boolean;
+  disabled: boolean;
+  organizationSelected: boolean;
+}) {
+  return (
+    <div className="space-y-2 rounded-2xl border border-border/30 bg-muted p-3">
+      <h4 className="text-sm font-semibold text-foreground">{title}</h4>
+      <div className="space-y-1">
+        {!organizationSelected ? (
+          <p className="text-xs text-muted-foreground">Assign an organization to manage org roles.</p>
+        ) : (
+          options.map((role) => {
+            const checked = roleState.has(role.name);
+            const allowed = canToggleRole(role);
+            return (
+              <label
+                key={role.id}
+                className="flex items-center justify-between gap-3 rounded-xl border border-border/15 bg-background px-3 py-2 text-sm"
+              >
+                <span className={allowed ? 'text-foreground' : 'text-muted-foreground'}>
+                  {role.label}
+                  {role.description ? <span className="block text-xs text-muted-foreground">{role.description}</span> : null}
+                </span>
+                <Checkbox
+                  checked={checked}
+                  onCheckedChange={(value) => onToggle(role, Boolean(value))}
+                  disabled={disabled || !allowed}
+                  aria-label={role.label}
+                />
+              </label>
+            );
+          })
+        )}
+        {organizationSelected && options.length === 0 ? (
+          <p className="text-xs text-muted-foreground">No org roles available.</p>
         ) : null}
       </div>
     </div>

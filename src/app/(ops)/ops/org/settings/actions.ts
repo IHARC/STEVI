@@ -42,7 +42,7 @@ export async function updateOrgSettingsAction(
       return { status: 'error', message: 'Sign in to continue.' };
     }
 
-    const isIharcAdmin = access.iharcRoles.includes('iharc_admin');
+    const isIharcAdmin = access.isGlobalAdmin;
     const orgIdRaw = formData.get('organization_id');
     const parsedOrgId = typeof orgIdRaw === 'string' ? Number.parseInt(orgIdRaw, 10) : null;
     const orgId = isIharcAdmin ? (access.organizationId ?? (Number.isFinite(parsedOrgId) ? parsedOrgId : null)) : access.organizationId;

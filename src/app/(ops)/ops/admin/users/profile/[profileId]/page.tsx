@@ -3,7 +3,8 @@ import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { resolveLandingPath } from '@/lib/portal-navigation';
 import { fetchAdminUserDetail, loadProfileEnums } from '@/lib/admin-users';
-import { getIharcRoles, getPortalRoles, toOptions } from '@/lib/enum-values';
+import { formatEnumLabel, getGlobalRoles, toOptions } from '@/lib/enum-values';
+import { fetchOrgRoles } from '@/lib/org/fetchers';
 import { PageHeader } from '@shared/layout/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { UserProfileDetailClient } from '../user-profile-detail-client';
@@ -32,11 +33,10 @@ export default async function AdminUserProfilePage({ params }: PageProps) {
     redirect('/ops/admin/users/all');
   }
 
-  const [{ affiliationTypes, affiliationStatuses, governmentRoleTypes }, organizationsResult, portalRoles, iharcRoles] = await Promise.all([
+  const [{ affiliationTypes, affiliationStatuses, governmentRoleTypes }, organizationsResult, globalRolesRaw] = await Promise.all([
     loadProfileEnums(supabase),
     supabase.schema('core').from('organizations').select('id, name').order('name').limit(200),
-    getPortalRoles(supabase),
-    getIharcRoles(supabase),
+    access.isGlobalAdmin ? getGlobalRoles(supabase) : Promise.resolve([]),
   ] as const);
 
   if (organizationsResult.error) throw organizationsResult.error;
@@ -45,10 +45,19 @@ export default async function AdminUserProfilePage({ params }: PageProps) {
     name: o.name ?? 'Organization',
   }));
 
-  const filteredPortalRoles = (portalRoles as string[]).filter((role) => role !== 'portal_admin');
-  const roleOptions = toOptions([...filteredPortalRoles, ...(iharcRoles as string[])]);
+  const globalRoles = globalRolesRaw as string[];
+  const globalRoleOptions = toOptions(globalRoles);
 
-  const isElevated = access.iharcRoles.includes('iharc_admin');
+  const orgRoles = detail.profile.organization_id
+    ? await fetchOrgRoles(supabase, detail.profile.organization_id)
+    : [];
+  const orgRoleOptions = orgRoles.map((role) => ({
+    id: role.id,
+    name: role.name,
+    label: role.display_name ?? formatEnumLabel(role.name),
+  }));
+
+  const isElevated = access.isGlobalAdmin;
 
   return (
     <div className="flex flex-col gap-6">
@@ -73,8 +82,10 @@ export default async function AdminUserProfilePage({ params }: PageProps) {
               affiliationStatuses={affiliationStatuses}
               governmentRoleTypes={governmentRoleTypes}
               organizations={organizations}
-              roleOptions={roleOptions}
+              globalRoleOptions={globalRoleOptions}
+              orgRoleOptions={orgRoleOptions}
               isElevated={isElevated}
+              canManageOrgRoles={access.canManageOrgUsers}
             />
           </CardContent>
         </Card>

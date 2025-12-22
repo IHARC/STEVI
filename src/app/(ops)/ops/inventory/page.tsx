@@ -35,7 +35,7 @@ export default async function OpsInventoryPage({ searchParams }: PageProps) {
   }
 
   const bootstrap = await fetchInventoryBootstrap(supabase);
-  const canManageLocations = access.iharcRoles.includes('iharc_admin');
+  const canManageLocations = access.canManageInventoryLocations;
 
   return (
     <div className="space-y-3">

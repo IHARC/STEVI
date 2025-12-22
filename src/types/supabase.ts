@@ -4839,64 +4839,13 @@ export type Database = {
         }
         Relationships: []
       }
-      role_permissions: {
-        Row: {
-          created_at: string | null
-          created_by: string | null
-          granted_at: string | null
-          granted_by: string | null
-          id: string
-          permission_id: string | null
-          role_id: string | null
-          updated_at: string | null
-          updated_by: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          created_by?: string | null
-          granted_at?: string | null
-          granted_by?: string | null
-          id?: string
-          permission_id?: string | null
-          role_id?: string | null
-          updated_at?: string | null
-          updated_by?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          created_by?: string | null
-          granted_at?: string | null
-          granted_by?: string | null
-          id?: string
-          permission_id?: string | null
-          role_id?: string | null
-          updated_at?: string | null
-          updated_by?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "role_permissions_permission_id_fkey"
-            columns: ["permission_id"]
-            isOneToOne: false
-            referencedRelation: "permissions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "role_permissions_role_id_fkey"
-            columns: ["role_id"]
-            isOneToOne: false
-            referencedRelation: "roles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      roles: {
+
+      global_roles: {
         Row: {
           created_at: string | null
           created_by: string | null
           description: string | null
           display_name: string
-          domain: string
           id: string
           is_system_role: boolean | null
           name: string
@@ -4908,7 +4857,6 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           display_name: string
-          domain?: string
           id?: string
           is_system_role?: boolean | null
           name: string
@@ -4920,7 +4868,6 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           display_name?: string
-          domain?: string
           id?: string
           is_system_role?: boolean | null
           name?: string
@@ -4928,6 +4875,307 @@ export type Database = {
           updated_by?: string | null
         }
         Relationships: []
+      }
+      org_role_permissions: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          granted_at: string | null
+          granted_by: string | null
+          id: string
+          org_role_id: string
+          permission_id: string
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          org_role_id: string
+          permission_id: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          org_role_id?: string
+          permission_id?: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_role_permissions_org_role_id_fkey"
+            columns: ["org_role_id"]
+            isOneToOne: false
+            referencedRelation: "org_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_role_permissions_permission_id_fkey"
+            columns: ["permission_id"]
+            isOneToOne: false
+            referencedRelation: "permissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      org_roles: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          display_name: string
+          id: string
+          name: string
+          organization_id: number
+          template_id: string | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          display_name: string
+          id?: string
+          name: string
+          organization_id: number
+          template_id?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          display_name?: string
+          id?: string
+          name?: string
+          organization_id?: number
+          template_id?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_roles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_roles_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "role_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      role_template_permissions: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          granted_at: string | null
+          granted_by: string | null
+          id: string
+          permission_id: string
+          template_id: string
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          permission_id: string
+          template_id: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          permission_id?: string
+          template_id?: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_template_permissions_permission_id_fkey"
+            columns: ["permission_id"]
+            isOneToOne: false
+            referencedRelation: "permissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_template_permissions_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "role_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      role_templates: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          display_name: string
+          id: string
+          name: string
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          display_name: string
+          id?: string
+          name: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          display_name?: string
+          id?: string
+          name?: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      user_global_roles: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          granted_at: string | null
+          granted_by: string | null
+          id: string
+          role_id: string
+          updated_at: string | null
+          updated_by: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          role_id: string
+          updated_at?: string | null
+          updated_by?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          role_id?: string
+          updated_at?: string | null
+          updated_by?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_global_roles_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "global_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_global_roles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_org_roles: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          granted_at: string | null
+          granted_by: string | null
+          id: string
+          org_role_id: string
+          organization_id: number
+          updated_at: string | null
+          updated_by: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          org_role_id: string
+          organization_id: number
+          updated_at?: string | null
+          updated_by?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          org_role_id?: string
+          organization_id?: number
+          updated_at?: string | null
+          updated_by?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_org_roles_org_role_id_fkey"
+            columns: ["org_role_id"]
+            isOneToOne: false
+            referencedRelation: "org_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_org_roles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_org_roles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       schema_versions: {
         Row: {
@@ -5264,50 +5512,6 @@ export type Database = {
           updated_by?: string | null
         }
         Relationships: []
-      }
-      user_roles: {
-        Row: {
-          created_at: string | null
-          created_by: string | null
-          granted_at: string | null
-          granted_by: string | null
-          id: string
-          role_id: string | null
-          updated_at: string | null
-          updated_by: string | null
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          created_by?: string | null
-          granted_at?: string | null
-          granted_by?: string | null
-          id?: string
-          role_id?: string | null
-          updated_at?: string | null
-          updated_by?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          created_by?: string | null
-          granted_at?: string | null
-          granted_by?: string | null
-          id?: string
-          role_id?: string | null
-          updated_at?: string | null
-          updated_by?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_roles_role_id_fkey"
-            columns: ["role_id"]
-            isOneToOne: false
-            referencedRelation: "roles"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       vehicle_activities: {
         Row: {
@@ -5794,28 +5998,39 @@ export type Database = {
           privacy_level: string
         }[]
       }
-      get_user_permissions: {
-        Args: { user_uuid?: string }
-        Returns: {
-          permission_name: string
-        }[]
-      }
-      get_user_roles: {
-        Args: { user_uuid?: string }
+      get_actor_global_roles: {
+        Args: { p_user?: string }
         Returns: {
           role_name: string
         }[]
       }
-      has_permission: { Args: { permission_name: string }; Returns: boolean }
-      is_user_in_roles: {
-        Args: { p_roles: string[]; p_user?: string }
+      get_actor_org_permissions: {
+        Args: { p_org_id?: number | null }
+        Returns: {
+          permission_name: string
+        }[]
+      }
+      get_actor_org_roles: {
+        Args: { p_org_id?: number | null }
+        Returns: {
+          role_display_name: string | null
+          role_id: string
+          role_name: string
+        }[]
+      }
+      get_actor_permissions_summary: {
+        Args: { p_user?: string }
+        Returns: {
+          permission_name: string
+        }[]
+      }
+      get_iharc_org_id: { Args: never; Returns: number }
+      has_org_permission: {
+        Args: { p_org_id: number; permission_name: string; p_user?: string }
         Returns: boolean
       }
-      refresh_user_permissions: { Args: { user_uuid?: string }; Returns: Json }
-      remove_user_role: {
-        Args: { role_name: string; target_user_id: string }
-        Returns: boolean
-      }
+      is_global_admin: { Args: { p_user?: string }; Returns: boolean }
+      is_org_member: { Args: { p_org_id: number; p_user?: string }; Returns: boolean }
       staff_caseload: {
         Args: { staff_uuid: string }
         Returns: {

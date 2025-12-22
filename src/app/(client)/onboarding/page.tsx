@@ -72,7 +72,7 @@ export default async function OnboardingPage({ searchParams }: PageProps) {
 
   // Onboarding wizard is intended for clients (self-serve) or staff/partners assisting clients.
   // IHARC admins should use admin tools instead of this flow.
-  if (access.iharcRoles.includes('iharc_admin')) {
+  if (access.isGlobalAdmin) {
     redirect(resolveLandingPath(access));
   }
 

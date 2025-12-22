@@ -1,8 +1,6 @@
 import type { AppIconName } from '@/lib/app-icons';
 import { ensurePortalProfile, type PortalProfile } from '@/lib/profile';
-import { type IharcRole, type PortalRole } from '@/lib/ihar-auth';
 import type { SupabaseAnyServerClient } from '@/lib/supabase/types';
-import { getInventoryRoles } from '@/lib/enum-values';
 import { buildPortalNav, flattenNavItemsForCommands, type NavSection } from '@/lib/portal-navigation';
 
 export type PortalLink = {
@@ -18,8 +16,11 @@ export type PortalAccess = {
   email: string | null;
   profile: PortalProfile;
   isProfileApproved: boolean;
-  iharcRoles: IharcRole[];
-  portalRoles: PortalRole[];
+  isGlobalAdmin: boolean;
+  iharcOrganizationId: number | null;
+  isIharcMember: boolean;
+  orgRoles: Array<{ id: string; name: string; displayName: string | null }>;
+  orgPermissions: string[];
   organizationId: number | null;
   organizationName: string | null;
   canAccessOpsAdmin: boolean;
@@ -29,6 +30,7 @@ export type PortalAccess = {
   canManageResources: boolean;
   canManagePolicies: boolean;
   canAccessInventoryOps: boolean;
+  canManageInventoryLocations: boolean;
   canManageNotifications: boolean;
   canReviewProfiles: boolean;
   canViewMetrics: boolean;
@@ -37,7 +39,6 @@ export type PortalAccess = {
   canManageConsents: boolean;
   canManageOrgUsers: boolean;
   canManageOrgInvites: boolean;
-  inventoryAllowedRoles: IharcRole[];
   actingOrgChoices: Array<{ id: number; name: string | null }>;
   actingOrgChoicesCount: number | null;
   actingOrgAutoSelected: boolean;
@@ -62,17 +63,8 @@ export async function loadPortalAccess(
   }
 
   let profile = await ensurePortalProfile(supabase, user.id);
-  const roles = await fetchUserRoles(supabase, user.id);
-
-  const iharcRoles = roles.filter((role): role is IharcRole => role.startsWith('iharc_'));
-  const portalRoles = roles
-    .filter((role): role is PortalRole => role.startsWith('portal_'))
-    .filter((role) => role !== 'portal_admin');
-  const inventoryAllowedRoles = (await getInventoryRoles(supabase)).filter((role): role is IharcRole =>
-    role.startsWith('iharc_'),
-  );
-
-  const isIharcAdmin = iharcRoles.includes('iharc_admin');
+  const globalRoles = await fetchGlobalRoles(supabase, user.id);
+  const isGlobalAdmin = globalRoles.includes('iharc_admin');
 
   let organizationId = profile.organization_id ?? null;
   let organizationName = organizationId ? await fetchOrganizationName(supabase, organizationId) : null;
@@ -81,12 +73,15 @@ export async function loadPortalAccess(
   let actingOrgChoicesCount: number | null = null;
   let actingOrgAutoSelected = false;
   let actingOrgChoices: Array<{ id: number; name: string | null }> = [];
+  let isIharcMember = false;
+  const iharcOrganization = await fetchIharcOrganization(supabase);
+  const iharcOrganizationId = iharcOrganization?.id ?? null;
+  const permissionSummary = await fetchPermissionSummary(supabase, user.id);
 
-  const hasOpsRole = isProfileApproved && (portalRoles.length > 0 || iharcRoles.length > 0);
+  const hasOpsRole = isProfileApproved && (permissionSummary.length > 0 || isGlobalAdmin);
 
   if (hasOpsRole) {
-    const iharcOrganization = isIharcAdmin ? await fetchIharcOrganization(supabase) : null;
-    const accessibleOrganizations = await fetchAccessibleOrganizations(supabase, user.id);
+    const accessibleOrganizations = await fetchAccessibleOrganizations(supabase, user.id, isGlobalAdmin);
     const accessibleOrgSet = new Map<number, string | null>();
     accessibleOrganizations.forEach((org) => accessibleOrgSet.set(org.id, org.name ?? null));
 
@@ -100,8 +95,11 @@ export async function loadPortalAccess(
 
     actingOrgChoicesCount = accessibleOrgSet.size;
     actingOrgChoices = Array.from(accessibleOrgSet.entries()).map(([id, name]) => ({ id, name }));
+    if (iharcOrganizationId) {
+      isIharcMember = accessibleOrgSet.has(iharcOrganizationId);
+    }
 
-    if (isIharcAdmin && !organizationId && iharcOrganization) {
+    if (isGlobalAdmin && !organizationId && iharcOrganization) {
       const { error } = await supabase
         .schema('portal')
         .from('profiles')
@@ -113,7 +111,6 @@ export async function loadPortalAccess(
         organizationName = iharcOrganization.name ?? organizationName;
         actingOrgAutoSelected = true;
         profile = { ...profile, organization_id: iharcOrganization.id };
-        await refreshUserPermissions(supabase, user.id);
       } else if (process.env.NODE_ENV !== 'production') {
         console.warn('Unable to auto-select IHARC acting org for admin', error);
       }
@@ -132,7 +129,6 @@ export async function loadPortalAccess(
         organizationName = soleOrgName ?? organizationName;
         actingOrgAutoSelected = true;
         profile = { ...profile, organization_id: soleOrgId };
-        await refreshUserPermissions(supabase, user.id);
       } else if (process.env.NODE_ENV !== 'production') {
         console.warn('Unable to auto-select acting org', error);
       }
@@ -142,42 +138,40 @@ export async function loadPortalAccess(
     }
   }
 
-  const isOrgAdmin = portalRoles.includes('portal_org_admin');
-  const isOrgRep = portalRoles.includes('portal_org_rep');
-  const isAgencyPartner = profile.affiliation_type === 'agency_partner';
-  const isOrgMember = isAgencyPartner && organizationId !== null;
+  const orgRoles = organizationId ? await fetchOrgRoles(supabase, organizationId) : [];
+  const orgPermissions = organizationId ? await fetchOrgPermissions(supabase, organizationId) : [];
+  const effectivePermissions = organizationId ? orgPermissions : permissionSummary;
+  const hasPermission = (permissionName: string) => effectivePermissions.includes(permissionName);
 
-  const canAccessOpsSteviAdmin = isProfileApproved && isIharcAdmin;
-  const canAccessOpsAdmin = isProfileApproved && (isIharcAdmin || isOrgAdmin);
-  const canAccessOpsOrg = isProfileApproved && (isIharcAdmin || ((isOrgAdmin || isOrgRep || isOrgMember) && organizationId !== null));
-  const canAccessOpsFrontline = isProfileApproved && (
-    iharcRoles.some((role) => ['iharc_admin', 'iharc_supervisor', 'iharc_staff', 'iharc_volunteer'].includes(role)) ||
-    isOrgAdmin ||
-    isOrgRep
-  );
+  const canAccessOpsSteviAdmin = isProfileApproved && isGlobalAdmin;
+  const canAccessOpsAdmin = isProfileApproved && (isGlobalAdmin || hasPermission('portal.manage_org_users') || hasPermission('portal.admin'));
+  const canAccessOpsOrg = isProfileApproved && (isGlobalAdmin || hasPermission('portal.access_org') || hasPermission('portal.manage_org_users') || hasPermission('portal.manage_org_invites'));
+  const canAccessOpsFrontline = isProfileApproved && (isGlobalAdmin || hasPermission('portal.access_frontline'));
 
-  const canManageResources = isProfileApproved && isIharcAdmin;
-  const canManagePolicies = isProfileApproved && isIharcAdmin;
-  const canAccessInventoryOps = isProfileApproved && (isIharcAdmin || iharcRoles.some((role) =>
-    inventoryAllowedRoles.includes(role),
-  ));
+  const canManageResources = isProfileApproved && hasPermission('portal.manage_resources');
+  const canManagePolicies = isProfileApproved && hasPermission('portal.manage_policies');
+  const canAccessInventoryOps = isProfileApproved && (hasPermission('inventory.read') || hasPermission('inventory.admin'));
+  const canManageInventoryLocations = isProfileApproved && hasPermission('inventory.admin');
 
-  const canManageNotifications = isProfileApproved && isIharcAdmin;
-  const canManageWebsiteContent = isProfileApproved && isIharcAdmin;
-  const canManageSiteFooter = isProfileApproved && isIharcAdmin;
-  const canManageConsents = isProfileApproved && isIharcAdmin;
-  const canReviewProfiles = isProfileApproved && isIharcAdmin;
-  const canViewMetrics = isProfileApproved && isIharcAdmin;
-  const canManageOrgUsers = isProfileApproved && (isIharcAdmin || (isOrgAdmin && organizationId !== null));
-  const canManageOrgInvites = isProfileApproved && (isIharcAdmin || ((isOrgAdmin || isOrgRep) && organizationId !== null));
+  const canManageNotifications = isProfileApproved && hasPermission('portal.manage_notifications');
+  const canManageWebsiteContent = isProfileApproved && hasPermission('portal.manage_website');
+  const canManageSiteFooter = isProfileApproved && hasPermission('portal.manage_footer');
+  const canManageConsents = isProfileApproved && hasPermission('portal.manage_consents');
+  const canReviewProfiles = isProfileApproved && hasPermission('portal.review_profiles');
+  const canViewMetrics = isProfileApproved && hasPermission('portal.view_metrics');
+  const canManageOrgUsers = isProfileApproved && hasPermission('portal.manage_org_users');
+  const canManageOrgInvites = isProfileApproved && (hasPermission('portal.manage_org_invites') || hasPermission('portal.manage_org_users'));
 
   return {
     userId: user.id,
     email: user.email ?? null,
     profile,
     isProfileApproved,
-    iharcRoles,
-    portalRoles,
+    isGlobalAdmin,
+    iharcOrganizationId,
+    isIharcMember,
+    orgRoles,
+    orgPermissions,
     organizationId,
     organizationName,
     canAccessOpsAdmin,
@@ -187,6 +181,7 @@ export async function loadPortalAccess(
     canManageResources,
     canManagePolicies,
     canAccessInventoryOps,
+    canManageInventoryLocations,
     canManageNotifications,
     canManageWebsiteContent,
     canReviewProfiles,
@@ -195,18 +190,17 @@ export async function loadPortalAccess(
     canManageConsents,
     canManageOrgUsers,
     canManageOrgInvites,
-    inventoryAllowedRoles,
     actingOrgChoices,
     actingOrgChoicesCount,
     actingOrgAutoSelected,
   };
 }
 
-async function fetchUserRoles(
+async function fetchGlobalRoles(
   supabase: SupabaseAnyServerClient,
   userId: string,
 ): Promise<string[]> {
-  const { data, error } = await supabase.rpc('get_user_roles', { user_uuid: userId });
+  const { data, error } = await supabase.schema('core').rpc('get_actor_global_roles', { p_user: userId });
 
   if (error) {
     throw new Error('Unable to load your roles right now. Please try again or contact support.');
@@ -225,6 +219,85 @@ async function fetchUserRoles(
       return null;
     })
     .filter((role): role is string => Boolean(role));
+}
+
+async function fetchOrgRoles(
+  supabase: SupabaseAnyServerClient,
+  organizationId: number,
+): Promise<Array<{ id: string; name: string; displayName: string | null }>> {
+  const { data, error } = await supabase.schema('core').rpc('get_actor_org_roles', { p_org_id: organizationId });
+
+  if (error) {
+    throw new Error('Unable to load your roles right now. Please try again or contact support.');
+  }
+
+  if (!Array.isArray(data)) {
+    return [];
+  }
+
+  return data
+    .map((entry) => {
+      if (!entry || typeof entry !== 'object') return null;
+      if ('role_id' in entry && 'role_name' in entry) {
+        return {
+          id: String(entry.role_id),
+          name: String(entry.role_name),
+          displayName: typeof entry.role_display_name === 'string' ? entry.role_display_name : null,
+        };
+      }
+      return null;
+    })
+    .filter((entry): entry is { id: string; name: string; displayName: string | null } => Boolean(entry));
+}
+
+async function fetchOrgPermissions(
+  supabase: SupabaseAnyServerClient,
+  organizationId: number,
+): Promise<string[]> {
+  const { data, error } = await supabase.schema('core').rpc('get_actor_org_permissions', { p_org_id: organizationId });
+
+  if (error) {
+    throw new Error('Unable to load your permissions right now. Please try again or contact support.');
+  }
+
+  if (!Array.isArray(data)) {
+    return [];
+  }
+
+  return data
+    .map((entry) => {
+      if (typeof entry === 'string') return entry;
+      if (entry && typeof entry === 'object' && 'permission_name' in entry && typeof entry.permission_name === 'string') {
+        return entry.permission_name;
+      }
+      return null;
+    })
+    .filter((permission): permission is string => Boolean(permission));
+}
+
+async function fetchPermissionSummary(
+  supabase: SupabaseAnyServerClient,
+  userId: string,
+): Promise<string[]> {
+  const { data, error } = await supabase.schema('core').rpc('get_actor_permissions_summary', { p_user: userId });
+
+  if (error) {
+    throw new Error('Unable to load your permissions right now. Please try again or contact support.');
+  }
+
+  if (!Array.isArray(data)) {
+    return [];
+  }
+
+  return data
+    .map((entry) => {
+      if (typeof entry === 'string') return entry;
+      if (entry && typeof entry === 'object' && 'permission_name' in entry && typeof entry.permission_name === 'string') {
+        return entry.permission_name;
+      }
+      return null;
+    })
+    .filter((permission): permission is string => Boolean(permission));
 }
 
 async function fetchOrganizationName(supabase: SupabaseAnyServerClient, organizationId: number): Promise<string | null> {
@@ -271,45 +344,40 @@ async function fetchIharcOrganization(
 async function fetchAccessibleOrganizations(
   supabase: SupabaseAnyServerClient,
   userId: string,
-  limit = 10,
+  isGlobalAdmin: boolean,
+  limit = 50,
 ): Promise<Array<{ id: number; name: string | null }>> {
   try {
     const core = supabase.schema('core');
 
-    const { data: userPeopleRows, error: userPeopleError } = await core
-      .from('user_people')
-      .select('person_id')
-      .eq('user_id', userId);
-
-    if (userPeopleError || !userPeopleRows?.length) {
-      return [];
+    if (isGlobalAdmin) {
+      const { data: organizations, error: orgError } = await core
+        .from('organizations')
+        .select('id, name, is_active')
+        .eq('is_active', true)
+        .order('name')
+        .limit(limit);
+      if (orgError) {
+        if (process.env.NODE_ENV !== 'production') {
+          console.warn('Unable to load organizations for admin', orgError);
+        }
+        return [];
+      }
+      return (organizations ?? []).map((org: { id: number; name: string | null }) => ({ id: org.id, name: org.name ?? null }));
     }
 
-    const personIds = Array.from(
-      new Set(
-        userPeopleRows
-          .map((row: { person_id: number }) => row.person_id)
-          .filter((id: number): id is number => Number.isFinite(id)),
-      ),
-    );
-    if (personIds.length === 0) return [];
+    const { data: roleRows, error: roleError } = await core
+      .from('user_org_roles')
+      .select('organization_id')
+      .eq('user_id', userId);
 
-    const { data: orgPeopleRows, error: orgPeopleError } = await core
-      .from('organization_people')
-      .select('organization_id, end_date')
-      .in('person_id', personIds)
-      .is('end_date', null);
-
-    if (orgPeopleError) {
-      if (process.env.NODE_ENV !== 'production') {
-        console.warn('Unable to load organization memberships', orgPeopleError);
-      }
+    if (roleError || !roleRows?.length) {
       return [];
     }
 
     const orgIds = Array.from(
       new Set(
-        (orgPeopleRows ?? [])
+        (roleRows ?? [])
           .map((row: { organization_id: number | null }) => (row.organization_id ? Number(row.organization_id) : null))
           .filter((id: number | null): id is number => typeof id === 'number' && Number.isFinite(id)),
       ),
@@ -338,16 +406,6 @@ async function fetchAccessibleOrganizations(
       console.warn('Unexpected error while loading accessible organizations', error);
     }
     return [];
-  }
-}
-
-async function refreshUserPermissions(supabase: SupabaseAnyServerClient, userId: string) {
-  try {
-    await supabase.rpc('refresh_user_permissions', { user_uuid: userId });
-  } catch (error) {
-    if (process.env.NODE_ENV !== 'production') {
-      console.warn('Failed to refresh user permissions after org selection', error);
-    }
   }
 }
 

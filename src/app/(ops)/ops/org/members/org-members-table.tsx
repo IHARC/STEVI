@@ -21,12 +21,23 @@ type OrgMembersTableProps = {
   members: OrgMemberRecord[];
   currentProfileId: string;
   organizationId: number;
+  roles: Array<{ id: string; name: string; displayName: string | null }>;
 };
 
 const dateFormatter = new Intl.DateTimeFormat('en-CA', {
   dateStyle: 'medium',
   timeStyle: 'short',
 });
+
+const ROLE_DESCRIPTIONS: Record<string, string> = {
+  org_admin: 'Full org admin access.',
+  org_rep: 'Invite members and coordinate with IHARC.',
+  org_member: 'Standard org member access.',
+  org_marketing: 'Manage website and marketing content.',
+  iharc_staff: 'IHARC staff access.',
+  iharc_supervisor: 'IHARC supervisor access.',
+  iharc_volunteer: 'IHARC volunteer access.',
+};
 
 function formatDate(value: string | null) {
   if (!value) return '—';
@@ -37,71 +48,55 @@ function formatDate(value: string | null) {
   }
 }
 
-function seedSingleRoleState(member?: OrgMemberRecord) {
-  if (!member) return { admin: false, rep: false };
-  const isOrgAdmin = member.portal_roles.includes('portal_org_admin');
-  const isOrgRep = member.portal_roles.includes('portal_org_rep');
-  return { admin: isOrgAdmin, rep: isOrgRep };
-}
-
 function seedRoles(members: OrgMemberRecord[]) {
-  return members.reduce<Record<string, { admin: boolean; rep: boolean }>>((acc, member) => {
-    acc[member.id] = seedSingleRoleState(member);
+  return members.reduce<Record<string, Set<string>>>((acc, member) => {
+    const roles = new Set(member.org_roles.map((role) => role.id));
+    acc[member.id] = roles;
     return acc;
   }, {});
 }
 
-export function OrgMembersTable({ members, currentProfileId, organizationId }: OrgMembersTableProps) {
+export function OrgMembersTable({ members, currentProfileId, organizationId, roles }: OrgMembersTableProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [pendingKey, setPendingKey] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-  const [roleState, setRoleState] = useState<Record<string, { admin: boolean; rep: boolean }>>(() =>
-    seedRoles(members),
-  );
+  const [roleState, setRoleState] = useState<Record<string, Set<string>>>(() => seedRoles(members));
 
   useEffect(() => {
     setRoleState(seedRoles(members));
   }, [members]);
 
-  const handleToggle = (memberId: string, roleName: 'portal_org_admin' | 'portal_org_rep', enable: boolean) => {
-    const key = `${memberId}-${roleName}`;
+  const handleToggle = (memberId: string, orgRoleId: string, enable: boolean) => {
+    const key = `${memberId}-${orgRoleId}`;
     setPendingKey(key);
     startTransition(async () => {
       const formData = new FormData();
       formData.append('profile_id', memberId);
-      formData.append('role_name', roleName);
+      formData.append('org_role_id', orgRoleId);
       formData.append('enable', enable.toString());
       formData.append('organization_id', String(organizationId));
 
       setRoleState((prev) => {
-        const existing = prev[memberId] ?? seedSingleRoleState(members.find((m) => m.id === memberId));
-        return {
-          ...prev,
-          [memberId]: {
-            ...existing,
-            [roleName === 'portal_org_admin' ? 'admin' : 'rep']: enable,
-          },
-        };
+        const next = new Set(prev[memberId] ?? []);
+        if (enable) next.add(orgRoleId);
+        else next.delete(orgRoleId);
+        return { ...prev, [memberId]: next };
       });
 
       const result = await toggleMemberRoleAction(formData);
       if (!result.success) {
         toast({ title: 'Role update failed', description: result.error, variant: 'destructive' });
         setRoleState((prev) => {
-          const existing = prev[memberId] ?? seedSingleRoleState(members.find((m) => m.id === memberId));
-          return {
-            ...prev,
-            [memberId]: {
-              ...existing,
-              [roleName === 'portal_org_admin' ? 'admin' : 'rep']: !enable,
-            },
-          };
+          const next = new Set(prev[memberId] ?? []);
+          if (enable) next.delete(orgRoleId);
+          else next.add(orgRoleId);
+          return { ...prev, [memberId]: next };
         });
       } else {
         toast({
           title: enable ? 'Role granted' : 'Role removed',
-          description: roleName === 'portal_org_admin' ? 'Admin access updated.' : 'Representative access updated.',
+          description: enable ? 'Access updated.' : 'Access removed.',
         });
       }
 
@@ -143,17 +138,10 @@ export function OrgMembersTable({ members, currentProfileId, organizationId }: O
       <TableBody>
         {members.map((member) => {
           const isSelf = member.id === currentProfileId;
-          const baseAdmin = member.portal_roles.includes('portal_org_admin');
-          const baseRep = member.portal_roles.includes('portal_org_rep');
-
-          const state = roleState[member.id] ?? { admin: baseAdmin, rep: baseRep };
-
-          const adminKey = `${member.id}-portal_org_admin`;
-          const repKey = `${member.id}-portal_org_rep`;
           const removeKey = `${member.id}-remove`;
+          const assignedRoles = roleState[member.id] ?? new Set(member.org_roles.map((role) => role.id));
 
           const adminDisabled = isSelf;
-          const repDisabled = isSelf && state.admin;
 
           return (
             <TableRow key={member.id}>
@@ -167,9 +155,14 @@ export function OrgMembersTable({ members, currentProfileId, organizationId }: O
               </TableCell>
               <TableCell>
                 <div className="flex flex-wrap items-center gap-1">
-                  <Badge variant={state.admin ? 'default' : state.rep ? 'secondary' : 'outline'} className="capitalize">
-                    {state.admin ? 'org admin' : state.rep ? 'org rep' : 'member'}
-                  </Badge>
+                  {assignedRoles.size === 0 ? (
+                    <Badge variant="outline" className="capitalize">member</Badge>
+                  ) : null}
+                  {member.org_roles.map((role) => (
+                    <Badge key={role.id} variant="secondary" className="capitalize">
+                      {(role.displayName ?? role.name).replaceAll('_', ' ')}
+                    </Badge>
+                  ))}
                   <Badge variant="outline" className="capitalize text-xs">
                     {member.affiliation_status}
                   </Badge>
@@ -178,22 +171,22 @@ export function OrgMembersTable({ members, currentProfileId, organizationId }: O
               <TableCell>{formatDate(member.last_seen_at)}</TableCell>
               <TableCell className="text-right">
                 <div className="flex flex-col items-end gap-1 text-left">
-                  <RoleToggle
-                    id={`admin-${member.id}`}
-                    label="Org admin"
-                    description="Manage members, invites, and settings."
-                    checked={state.admin}
-                    disabled={adminDisabled || (isPending && pendingKey === adminKey)}
-                    onChange={(checked) => handleToggle(member.id, 'portal_org_admin', checked)}
-                  />
-                  <RoleToggle
-                    id={`rep-${member.id}`}
-                    label="Org representative"
-                    description="Invite members and coordinate with IHARC."
-                    checked={state.rep}
-                    disabled={repDisabled || (isPending && pendingKey === repKey)}
-                    onChange={(checked) => handleToggle(member.id, 'portal_org_rep', checked)}
-                  />
+                  {roles.map((role) => {
+                    const roleKey = `${member.id}-${role.id}`;
+                    const roleLabel = role.displayName ?? role.name;
+                    const description = ROLE_DESCRIPTIONS[role.name] ?? 'Grant or remove access.';
+                    return (
+                      <RoleToggle
+                        key={role.id}
+                        id={`${member.id}-${role.id}`}
+                        label={roleLabel}
+                        description={description}
+                        checked={assignedRoles.has(role.id)}
+                        disabled={adminDisabled || (isPending && pendingKey === roleKey)}
+                        onChange={(checked) => handleToggle(member.id, role.id, checked)}
+                      />
+                    );
+                  })}
                   <Button
                     type="button"
                     variant="ghost"

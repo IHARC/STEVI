@@ -76,7 +76,7 @@ async function requireIharcAdminContext() {
     throw new Error('Sign in to continue.');
   }
 
-  if (!access.iharcRoles.includes('iharc_admin')) {
+  if (!access.isGlobalAdmin) {
     throw new Error('IHARC admin access is required.');
   }
 
@@ -88,29 +88,6 @@ async function requireIharcAdminContext() {
     portal: supabase.schema('portal'),
     actorProfile,
   };
-}
-
-async function setRole(
-  supabase: SupabaseServerClient,
-  profileId: string,
-  roleName: 'portal_org_admin' | 'portal_org_rep',
-  enable: boolean,
-) {
-  const portal = supabase.schema('portal');
-  const { error } = await portal.rpc('set_profile_role', {
-    p_profile_id: profileId,
-    p_role_name: roleName,
-    p_enable: enable,
-  });
-
-  if (error) {
-    throw error;
-  }
-}
-
-async function refreshUserClaims(supabase: SupabaseServerClient, userId: string | null) {
-  if (!userId) return;
-  await supabase.rpc('refresh_user_permissions', { user_uuid: userId });
 }
 
 export async function createOrganizationAction(
@@ -316,18 +293,20 @@ export async function deleteOrganizationAction(formData: FormData): Promise<void
 export async function attachOrgMemberAction(formData: FormData): Promise<void> {
   const organizationId = parseNumericId(formData.get('organization_id'));
   const profileId = getString(formData, 'profile_id');
-  const makeAdmin = getBoolean(formData, 'make_admin', false);
-  const makeRep = getBoolean(formData, 'make_rep', false);
+  const roleIds = formData
+    .getAll('role_ids')
+    .map((entry) => (typeof entry === 'string' ? entry.trim() : null))
+    .filter((value): value is string => Boolean(value));
 
   if (!organizationId || !profileId) {
     throw new Error('Profile and organization are required.');
   }
 
-  if (!makeAdmin && !makeRep) {
+  if (roleIds.length === 0) {
     throw new Error('Select at least one role for the member.');
   }
 
-  const { supabase, portal, actorProfile } = await requireIharcAdminContext();
+  const { supabase, portal, core, actorProfile } = await requireIharcAdminContext();
 
   const { data: profile, error: profileError } = await portal
     .from('profiles')
@@ -355,19 +334,40 @@ export async function attachOrgMemberAction(formData: FormData): Promise<void> {
     throw updateError;
   }
 
-  await Promise.all([
-    setRole(supabase, profileId, 'portal_org_admin', makeAdmin),
-    setRole(supabase, profileId, 'portal_org_rep', makeRep || makeAdmin),
-  ]);
+  const { data: validRoles, error: roleError } = await core
+    .from('org_roles')
+    .select('id')
+    .eq('organization_id', organizationId)
+    .in('id', roleIds);
+  if (roleError) throw roleError;
+  const validRoleIds = new Set((validRoles ?? []).map((role: { id: string }) => role.id));
+  if (validRoleIds.size === 0) {
+    throw new Error('No valid roles selected for this organization.');
+  }
 
-  await refreshUserClaims(supabase, profile.user_id);
+  await core
+    .from('user_org_roles')
+    .delete()
+    .match({ user_id: profile.user_id, organization_id: organizationId });
+
+  const insertRoles = Array.from(validRoleIds).map((roleId) => ({
+    user_id: profile.user_id,
+    organization_id: organizationId,
+    org_role_id: roleId,
+    granted_by: actorProfile.user_id ?? null,
+  }));
+
+  const { error: insertError } = await core
+    .from('user_org_roles')
+    .insert(insertRoles, { onConflict: 'user_id,organization_id,org_role_id' });
+  if (insertError) throw insertError;
 
   await logAuditEvent(supabase, {
     actorProfileId: actorProfile.id,
     action: 'org_member_attached',
     entityType: 'profile',
     entityRef: buildEntityRef({ schema: 'portal', table: 'profiles', id: profileId }),
-    meta: { organization_id: organizationId, make_admin: makeAdmin, make_rep: makeRep },
+    meta: { organization_id: organizationId, role_ids: Array.from(validRoleIds) },
   });
 
   await Promise.all([revalidatePath(LIST_PATH), revalidatePath(detailPath(organizationId))]);

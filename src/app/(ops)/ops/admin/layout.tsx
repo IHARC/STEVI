@@ -20,6 +20,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
       items: [
         { label: 'General settings', href: '/ops/admin', match: ['/ops/admin'] },
         { label: 'Users & access', href: '/ops/admin/users/all', match: ['/ops/admin/users'] },
+        { label: 'Roles & permissions', href: '/ops/admin/permissions', match: ['/ops/admin/permissions'] },
         { label: 'Content & comms', href: '/ops/admin/content', match: ['/ops/admin/content'] },
         { label: 'Integrations', href: '/ops/admin/integrations', match: ['/ops/admin/integrations'] },
         {

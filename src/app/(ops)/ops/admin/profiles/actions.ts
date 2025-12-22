@@ -195,7 +195,7 @@ export async function approveAffiliationAction(formData: FormData): Promise<Acti
       throw updateError;
     }
 
-    await syncOrgRepRole(supabase, profileId, elevateRole);
+    await syncOrgRepRole(supabase, profileId, elevateRole, actorProfile.user_id);
 
   await logAuditEvent(supabase, {
     actorProfileId: actorProfile.id,
@@ -256,7 +256,7 @@ export async function declineAffiliationAction(formData: FormData): Promise<Acti
       throw declineError;
     }
 
-    await syncOrgRepRole(supabase, profileId, false);
+    await syncOrgRepRole(supabase, profileId, false, actorProfile.user_id);
 
     if (pendingProfile.user_id) {
       await ensurePortalProfile(supabase, pendingProfile.user_id).catch((refreshError) => {
@@ -284,15 +284,59 @@ async function syncOrgRepRole(
   supabase: SupabaseServerClient,
   profileId: string,
   elevate: boolean,
+  actorUserId?: string | null,
 ) {
   const portal = supabase.schema('portal');
-  const { error } = await portal.rpc('set_profile_role', {
-    p_profile_id: profileId,
-    p_role_name: 'portal_org_rep',
-    p_enable: elevate,
-  });
+  const { data: profileRow, error: profileError } = await portal
+    .from('profiles')
+    .select('user_id, organization_id')
+    .eq('id', profileId)
+    .maybeSingle();
 
-  if (error) {
-    throw error;
+  if (profileError) {
+    throw profileError;
+  }
+
+  if (!profileRow?.user_id || !profileRow.organization_id) {
+    return;
+  }
+
+  const { data: orgRole, error: roleError } = await supabase
+    .schema('core')
+    .from('org_roles')
+    .select('id, organization_id')
+    .eq('organization_id', profileRow.organization_id)
+    .eq('name', 'org_rep')
+    .maybeSingle();
+
+  if (roleError) {
+    throw roleError;
+  }
+
+  if (!orgRole) {
+    return;
+  }
+
+  const userOrgRoles = supabase.schema('core').from('user_org_roles');
+  if (elevate) {
+    const { error } = await userOrgRoles.insert(
+      {
+        user_id: profileRow.user_id,
+        organization_id: profileRow.organization_id,
+        org_role_id: orgRole.id,
+        granted_by: actorUserId ?? null,
+      },
+      { onConflict: 'user_id,organization_id,org_role_id' },
+    );
+    if (error) {
+      throw error;
+    }
+  } else {
+    const { error } = await userOrgRoles
+      .delete()
+      .match({ user_id: profileRow.user_id, organization_id: profileRow.organization_id, org_role_id: orgRole.id });
+    if (error) {
+      throw error;
+    }
   }
 }

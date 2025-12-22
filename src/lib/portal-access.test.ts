@@ -4,14 +4,9 @@ import type { PortalProfile } from '@/lib/profile';
 import type { SupabaseAnyServerClient } from '@/lib/supabase/types';
 
 const mockEnsurePortalProfile = vi.fn();
-const mockGetInventoryRoles = vi.fn().mockResolvedValue(['iharc_staff']);
 
 vi.mock('@/lib/profile', () => ({
   ensurePortalProfile: (...args: unknown[]) => mockEnsurePortalProfile(...args),
-}));
-
-vi.mock('@/lib/enum-values', () => ({
-  getInventoryRoles: (...args: unknown[]) => mockGetInventoryRoles(...args),
 }));
 
 const baseProfile: PortalProfile = {
@@ -47,18 +42,22 @@ const createSupabase = (
   {
     user = { id: 'user-1', email: 'taylor@example.com' },
     rpcResult = { data: [], error: null },
+    rpcResults = {},
     orgResult = { data: { name: 'Org' }, error: null },
     iharcOrgResult = { data: { id: 99, name: 'IHARC', is_active: true }, error: null },
     accessibleOrgsResult = { data: [{ id: 10, name: 'Org', is_active: true }], error: null },
+    userOrgRolesResult = { data: [{ organization_id: 10 }], error: null },
     userPeopleResult = { data: [{ person_id: 77 }], error: null },
     orgPeopleResult = { data: [{ organization_id: 10, end_date: null }], error: null },
     profileUpdateResult = { error: null },
   }: {
     user?: Record<string, unknown> | null;
     rpcResult?: { data: unknown; error: Error | null };
+    rpcResults?: Record<string, { data: unknown; error: Error | null }>;
     orgResult?: { data: unknown; error: Error | null };
     iharcOrgResult?: { data: unknown; error: Error | null };
     accessibleOrgsResult?: { data: unknown; error: Error | null };
+    userOrgRolesResult?: { data: unknown; error: Error | null };
     userPeopleResult?: { data: unknown; error: Error | null };
     orgPeopleResult?: { data: unknown; error: Error | null };
     profileUpdateResult?: { error: Error | null };
@@ -91,8 +90,19 @@ const createSupabase = (
     auth: {
       getUser: vi.fn().mockResolvedValue({ data: { user }, error: null }),
     },
-    rpc: vi.fn().mockResolvedValue(rpcResult),
+    rpc: vi.fn().mockImplementation((fnName: string) => {
+      if (rpcResults && fnName in rpcResults) {
+        return Promise.resolve(rpcResults[fnName]);
+      }
+      return Promise.resolve(rpcResult);
+    }),
     schema: vi.fn().mockReturnValue({
+      rpc: vi.fn().mockImplementation((fnName: string) => {
+        if (rpcResults && fnName in rpcResults) {
+          return Promise.resolve(rpcResults[fnName]);
+        }
+        return Promise.resolve(rpcResult);
+      }),
       from: vi.fn().mockImplementation((table: string) => {
         if (table === 'profiles') {
           return {
@@ -124,6 +134,14 @@ const createSupabase = (
           };
         }
 
+        if (table === 'user_org_roles') {
+          return {
+            select: vi.fn().mockReturnValue({
+              eq: vi.fn().mockResolvedValue(userOrgRolesResult),
+            }),
+          };
+        }
+
         return {
           select: vi.fn().mockReturnValue({
             eq: vi.fn().mockReturnValue({ maybeSingle: vi.fn().mockResolvedValue(orgResult) }),
@@ -142,17 +160,28 @@ afterEach(() => {
 describe('loadPortalAccess', () => {
   it('derives capability flags from Supabase roles', async () => {
     const supabase = createSupabase({
-      rpcResult: {
-        data: [{ role_name: 'iharc_admin' }, { role_name: 'iharc_staff' }, 'portal_org_admin'],
-        error: null,
+      rpcResults: {
+        get_actor_global_roles: { data: [{ role_name: 'iharc_admin' }], error: null },
+        get_actor_permissions_summary: { data: ['portal.manage_org_users'], error: null },
+        get_actor_org_roles: { data: [{ role_id: 'role-1', role_name: 'org_admin', role_display_name: 'Org Admin' }], error: null },
+        get_actor_org_permissions: {
+          data: [
+            'portal.manage_org_users',
+            'portal.manage_org_invites',
+            'portal.access_frontline',
+            'portal.access_org',
+            'inventory.admin',
+          ],
+          error: null,
+        },
       },
     });
     mockEnsurePortalProfile.mockResolvedValue(baseProfile);
 
     const access = await loadPortalAccess(supabase);
 
-    expect(access?.portalRoles).toEqual(['portal_org_admin']);
-    expect(access?.iharcRoles).toEqual(['iharc_admin', 'iharc_staff']);
+    expect(access?.isGlobalAdmin).toBe(true);
+    expect(access?.orgRoles.map((role) => role.name)).toEqual(['org_admin']);
     expect(access?.canAccessOpsAdmin).toBe(true);
     expect(access?.canAccessOpsSteviAdmin).toBe(true);
     expect(access?.canAccessOpsOrg).toBe(true);
@@ -163,12 +192,13 @@ describe('loadPortalAccess', () => {
     expect(access?.organizationName).toBe('Org');
   });
 
-  it('grants inventory access to IHARC admins even when inventory roles are not listed', async () => {
-    mockGetInventoryRoles.mockResolvedValueOnce(['iharc_staff']);
+  it('grants inventory access to IHARC admins when inventory permissions are present', async () => {
     const supabase = createSupabase({
-      rpcResult: {
-        data: [{ role_name: 'iharc_admin' }],
-        error: null,
+      rpcResults: {
+        get_actor_global_roles: { data: [{ role_name: 'iharc_admin' }], error: null },
+        get_actor_permissions_summary: { data: [], error: null },
+        get_actor_org_roles: { data: [], error: null },
+        get_actor_org_permissions: { data: ['inventory.admin'], error: null },
       },
     });
     mockEnsurePortalProfile.mockResolvedValue(baseProfile);
@@ -179,9 +209,11 @@ describe('loadPortalAccess', () => {
 
   it('defaults IHARC admins to the IHARC organization when no acting org is selected', async () => {
     const supabase = createSupabase({
-      rpcResult: {
-        data: [{ role_name: 'iharc_admin' }],
-        error: null,
+      rpcResults: {
+        get_actor_global_roles: { data: [{ role_name: 'iharc_admin' }], error: null },
+        get_actor_permissions_summary: { data: ['portal.manage_org_users'], error: null },
+        get_actor_org_roles: { data: [], error: null },
+        get_actor_org_permissions: { data: [], error: null },
       },
       userPeopleResult: { data: [], error: null },
     }) as SupabaseAnyServerClient & { __profileUpdate: ReturnType<typeof vi.fn> };
@@ -202,9 +234,9 @@ describe('loadPortalAccess', () => {
     expect(access).toBeNull();
   });
 
-  it('surfaces a friendly error when get_user_roles fails', async () => {
+  it('surfaces a friendly error when role lookup fails', async () => {
     const supabase = createSupabase({
-      rpcResult: { data: null, error: new Error('rpc failure') },
+      rpcResults: { get_actor_global_roles: { data: null, error: new Error('rpc failure') } },
     });
     mockEnsurePortalProfile.mockResolvedValue(baseProfile);
 
@@ -215,9 +247,11 @@ describe('loadPortalAccess', () => {
 describe('buildUserMenuLinks', () => {
   it('includes client preview for staff/admin users', async () => {
     const supabase = createSupabase({
-      rpcResult: {
-        data: [{ role_name: 'iharc_staff' }],
-        error: null,
+      rpcResults: {
+        get_actor_global_roles: { data: [], error: null },
+        get_actor_permissions_summary: { data: ['portal.access_frontline'], error: null },
+        get_actor_org_roles: { data: [], error: null },
+        get_actor_org_permissions: { data: ['portal.access_frontline'], error: null },
       },
     });
     mockEnsurePortalProfile.mockResolvedValue(baseProfile);
@@ -230,9 +264,11 @@ describe('buildUserMenuLinks', () => {
 
   it('omits client preview for client-only users', async () => {
     const supabase = createSupabase({
-      rpcResult: {
-        data: [],
-        error: null,
+      rpcResults: {
+        get_actor_global_roles: { data: [], error: null },
+        get_actor_permissions_summary: { data: [], error: null },
+        get_actor_org_roles: { data: [], error: null },
+        get_actor_org_permissions: { data: [], error: null },
       },
     });
     mockEnsurePortalProfile.mockResolvedValue({ ...baseProfile, affiliation_status: 'approved' });

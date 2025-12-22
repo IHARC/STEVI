@@ -4,7 +4,6 @@ import {
   getAffiliationStatuses,
   getAffiliationTypes,
   getGovernmentRoleTypes,
-  getIharcRoles,
 } from '@/lib/enum-values';
 
 type PortalProfile = Database['portal']['Tables']['profiles']['Row'];
@@ -36,8 +35,8 @@ export type AdminUserListItem = {
   email: string | null;
   lastSeenAt: string | null;
   roles: {
-    portal: string[];
-    iharc: string[];
+    global: string[];
+    org: string[];
   };
 };
 
@@ -62,7 +61,7 @@ export type AdminUserDetail = {
   profile: PortalProfile;
   email: string | null;
   organization: { id: number; name: string; status: string | null } | null;
-  roles: { portal: string[]; iharc: string[] };
+  roles: { global: string[]; org: string[] };
   auditEvents: Array<{
     id: string;
     action: string;
@@ -126,19 +125,15 @@ function normalizeSearchTerm(raw: string | null | undefined): string | null {
   return trimmed.replace(/[%_]/g, (match) => `\\${match}`);
 }
 
-async function fetchUserIdsForRoles(
+async function fetchUserIdsForGlobalRole(
   supabase: SupabaseAnyServerClient,
-  roleNames: string[],
+  roleName: string,
 ): Promise<Set<string>> {
-  if (roleNames.length === 0) {
-    return new Set();
-  }
-
   const { data, error } = await supabase
     .schema('core')
-    .from('user_roles')
-    .select('user_id, roles:roles!inner(name)')
-    .in('roles.name', roleNames)
+    .from('user_global_roles')
+    .select('user_id, global_roles:global_roles!inner(name)')
+    .eq('global_roles.name', roleName)
     .not('user_id', 'is', null);
 
   if (error) {
@@ -146,12 +141,82 @@ async function fetchUserIdsForRoles(
   }
 
   const ids = new Set<string>();
-  (data ?? []).forEach((row: { user_id: string | null; roles: { name: string } | null }) => {
-    if (row.user_id) {
-      ids.add(row.user_id);
-    }
+  (data ?? []).forEach((row: { user_id: string | null }) => {
+    if (row.user_id) ids.add(row.user_id);
   });
   return ids;
+}
+
+async function fetchUserIdsForOrgRole(
+  supabase: SupabaseAnyServerClient,
+  roleName: string,
+): Promise<Set<string>> {
+  const { data, error } = await supabase
+    .schema('core')
+    .from('user_org_roles')
+    .select('user_id, org_roles:org_roles!inner(name)')
+    .eq('org_roles.name', roleName)
+    .not('user_id', 'is', null);
+
+  if (error) {
+    throw error;
+  }
+
+  const ids = new Set<string>();
+  (data ?? []).forEach((row: { user_id: string | null }) => {
+    if (row.user_id) ids.add(row.user_id);
+  });
+  return ids;
+}
+
+async function fetchUserIdsForOrgMembership(
+  supabase: SupabaseAnyServerClient,
+  organizationId: number,
+): Promise<Set<string>> {
+  const { data, error } = await supabase
+    .schema('core')
+    .from('user_org_roles')
+    .select('user_id')
+    .eq('organization_id', organizationId)
+    .not('user_id', 'is', null);
+
+  if (error) {
+    throw error;
+  }
+
+  const ids = new Set<string>();
+  (data ?? []).forEach((row: { user_id: string | null }) => {
+    if (row.user_id) ids.add(row.user_id);
+  });
+  return ids;
+}
+
+async function fetchIharcOrgId(supabase: SupabaseAnyServerClient): Promise<number | null> {
+  const { data, error } = await supabase
+    .schema('core')
+    .from('organizations')
+    .select('id, name, is_active')
+    .ilike('name', 'iharc')
+    .eq('is_active', true)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return typeof data?.id === 'number' ? data.id : null;
+}
+
+function intersectSets(sets: Array<Set<string>>): Set<string> {
+  if (sets.length === 0) return new Set();
+  const [first, ...rest] = sets;
+  const result = new Set<string>();
+  first.forEach((value) => {
+    if (rest.every((set) => set.has(value))) {
+      result.add(value);
+    }
+  });
+  return result;
 }
 
 async function resolveRoleFilteredUserIds(
@@ -159,51 +224,97 @@ async function resolveRoleFilteredUserIds(
   segment: AdminUserSegment,
   roleFilter: string | null,
 ): Promise<Set<string> | null> {
-  const roleNames: string[] = [];
+  const filters: Array<Set<string>> = [];
 
   if (segment === 'staff') {
-    const iharcRoles = await getIharcRoles(supabase);
-    roleNames.push(...iharcRoles);
+    const iharcOrgId = await fetchIharcOrgId(supabase);
+    if (iharcOrgId) {
+      filters.push(await fetchUserIdsForOrgMembership(supabase, iharcOrgId));
+    }
   }
 
   if (roleFilter) {
-    roleNames.push(roleFilter);
+    if (roleFilter === 'iharc_admin') {
+      filters.push(await fetchUserIdsForGlobalRole(supabase, roleFilter));
+    } else {
+      filters.push(await fetchUserIdsForOrgRole(supabase, roleFilter));
+    }
   }
 
-  if (roleNames.length === 0) {
+  if (filters.length === 0) {
     return null;
   }
 
-  return fetchUserIdsForRoles(supabase, roleNames);
+  if (filters.length === 1) {
+    return filters[0];
+  }
+
+  return intersectSets(filters);
 }
 
 async function fetchRoleMap(
   supabase: SupabaseAnyServerClient,
-  userIds: string[],
-): Promise<Map<string, { portal: string[]; iharc: string[] }>> {
-  const roleMap = new Map<string, { portal: string[]; iharc: string[] }>();
+  profiles: PortalProfile[],
+): Promise<Map<string, { global: string[]; org: string[] }>> {
+  const roleMap = new Map<string, { global: string[]; org: string[] }>();
+  if (profiles.length === 0) return roleMap;
+
+  const userIds = Array.from(
+    new Set(
+      profiles
+        .map((profile) => profile.user_id)
+        .filter((id): id is string => typeof id === 'string' && id.length > 0),
+    ),
+  );
+
   if (userIds.length === 0) return roleMap;
 
-  const { data, error } = await supabase
-    .schema('core')
-    .from('user_roles')
-    .select('user_id, roles:roles!inner(name)')
-    .in('user_id', userIds);
-
-  if (error) {
-    throw error;
-  }
-
-  (data ?? []).forEach((row: { user_id: string; roles: { name: string } | null }) => {
-    const userId = row.user_id;
-    const roleName = row.roles?.name;
-    if (!roleName) return;
-    const entry = roleMap.get(userId) ?? { portal: [], iharc: [] };
-    if (roleName.startsWith('portal_')) {
-      entry.portal.push(roleName);
-    } else if (roleName.startsWith('iharc_')) {
-      entry.iharc.push(roleName);
+  const orgByUser = new Map<string, number | null>();
+  const orgIds = new Set<number>();
+  profiles.forEach((profile) => {
+    if (profile.user_id) {
+      orgByUser.set(profile.user_id, profile.organization_id ?? null);
+      if (typeof profile.organization_id === 'number') {
+        orgIds.add(profile.organization_id);
+      }
     }
+  });
+
+  const [globalRows, orgRows] = await Promise.all([
+    supabase
+      .schema('core')
+      .from('user_global_roles')
+      .select('user_id, global_roles:global_roles!inner(name)')
+      .in('user_id', userIds),
+    orgIds.size > 0
+      ? supabase
+          .schema('core')
+          .from('user_org_roles')
+          .select('user_id, organization_id, org_roles:org_roles!inner(name)')
+          .in('user_id', userIds)
+          .in('organization_id', Array.from(orgIds))
+      : Promise.resolve({ data: [], error: null }),
+  ] as const);
+
+  if (globalRows.error) throw globalRows.error;
+  if (orgRows.error) throw orgRows.error;
+
+  (globalRows.data ?? []).forEach((row: { user_id: string; global_roles: { name: string } | null }) => {
+    const userId = row.user_id;
+    const roleName = row.global_roles?.name;
+    if (!roleName) return;
+    const entry = roleMap.get(userId) ?? { global: [], org: [] };
+    entry.global.push(roleName);
+    roleMap.set(userId, entry);
+  });
+
+  (orgRows.data ?? []).forEach((row: { user_id: string; organization_id: number; org_roles: { name: string } | null }) => {
+    const userId = row.user_id;
+    const roleName = row.org_roles?.name;
+    const profileOrgId = orgByUser.get(userId);
+    if (!roleName || profileOrgId === null || profileOrgId !== row.organization_id) return;
+    const entry = roleMap.get(userId) ?? { global: [], org: [] };
+    entry.org.push(roleName);
     roleMap.set(userId, entry);
   });
 
@@ -328,22 +439,14 @@ export async function fetchAdminUsers(
         .filter((id): id is number => typeof id === 'number'),
     ),
   );
-  const userIds = Array.from(
-    new Set(
-      profiles
-        .map((profile) => profile.user_id)
-        .filter((id): id is string => typeof id === 'string' && id.length > 0),
-    ),
-  );
-
   const [orgMap, roleMap, emailMap] = await Promise.all([
     fetchOrganizationMap(supabase, organizationIds),
-    fetchRoleMap(supabase, userIds),
+    fetchRoleMap(supabase, profiles),
     fetchEmailMap(supabase, profiles),
   ]);
 
   const items: AdminUserListItem[] = profiles.map((profile) => {
-    const roles = roleMap.get(profile.user_id ?? '') ?? { portal: [], iharc: [] };
+    const roles = roleMap.get(profile.user_id ?? '') ?? { global: [], org: [] };
     const organization = profile.organization_id ? orgMap.get(profile.organization_id) : null;
     return {
       profileId: profile.id,
@@ -370,9 +473,8 @@ export async function fetchAdminUserSummary(
   supabase: SupabaseAnyServerClient,
 ): Promise<AdminUserSummary> {
   const portal = supabase.schema('portal');
-  const iharcRolesPromise = getIharcRoles(supabase);
 
-  const [all, clients, partners, pending, revoked, staffIds] = await Promise.all([
+  const [all, clients, partners, pending, revoked, iharcOrgId] = await Promise.all([
     portal.from('profiles').select('id', { count: 'exact', head: true }),
     portal
       .from('profiles')
@@ -390,8 +492,10 @@ export async function fetchAdminUserSummary(
       .from('profiles')
       .select('id', { count: 'exact', head: true })
       .eq('affiliation_status', 'revoked'),
-    iharcRolesPromise.then((roles) => fetchUserIdsForRoles(supabase, roles)),
+    fetchIharcOrgId(supabase),
   ]);
+
+  const staffIds = iharcOrgId ? await fetchUserIdsForOrgMembership(supabase, iharcOrgId) : new Set();
 
   return {
     total: all.count ?? 0,
@@ -436,8 +540,8 @@ export async function fetchAdminUserDetail(
     : null;
 
   const userId = profile.user_id;
-  const roleMap = userId ? await fetchRoleMap(supabase, [userId]) : new Map<string, { portal: string[]; iharc: string[] }>();
-  const roles = userId ? roleMap.get(userId) ?? { portal: [], iharc: [] } : { portal: [], iharc: [] };
+  const roleMap = userId ? await fetchRoleMap(supabase, [profile as PortalProfile]) : new Map<string, { global: string[]; org: string[] }>();
+  const roles = userId ? roleMap.get(userId) ?? { global: [], org: [] } : { global: [], org: [] };
 
   const emailMap = await fetchEmailMap(supabase, [profile as PortalProfile]);
   const email = emailMap.get(profile.id) ?? null;

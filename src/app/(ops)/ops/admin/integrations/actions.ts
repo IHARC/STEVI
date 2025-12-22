@@ -19,7 +19,7 @@ async function requirePortalAdmin(): Promise<AdminContext> {
     throw new Error('Sign in to continue.');
   }
 
-  if (!access.iharcRoles.includes('iharc_admin')) {
+  if (!access.isGlobalAdmin) {
     throw new Error('IHARC admin access is required.');
   }
 

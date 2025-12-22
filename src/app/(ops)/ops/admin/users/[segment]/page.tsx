@@ -4,8 +4,7 @@ import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { resolveLandingPath } from '@/lib/portal-navigation';
 import { coerceSegment, fetchAdminUsers, fetchAdminUserSummary, parsePageParam, type AdminUserListResult, type AdminUserSummary } from '@/lib/admin-users';
-import { getAffiliationStatuses } from '@/lib/enum-values';
-import { getIharcRoles, getPortalRoles, toOptions, formatEnumLabel } from '@/lib/enum-values';
+import { getAffiliationStatuses, getGlobalRoles, getOrgRoleNames, toOptions, formatEnumLabel } from '@/lib/enum-values';
 import { PageHeader } from '@shared/layout/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Badge } from '@shared/ui/badge';
@@ -56,7 +55,7 @@ export default async function AdminUsersSegmentPage({ params, searchParams }: Pa
   const affiliationStatus =
     status === 'pending' || status === 'approved' || status === 'revoked' ? status : null;
 
-  const [summaryRaw, listRaw, orgRows, statusesRaw, portalRolesRaw, iharcRolesRaw] = await Promise.all([
+  const [summaryRaw, listRaw, orgRows, statusesRaw, orgRolesRaw, globalRolesRaw] = await Promise.all([
     fetchAdminUserSummary(supabase),
     fetchAdminUsers(supabase, coercedSegment, {
       search: q,
@@ -68,15 +67,15 @@ export default async function AdminUsersSegmentPage({ params, searchParams }: Pa
     }),
     supabase.schema('core').from('organizations').select('id, name').order('name').limit(200),
     getAffiliationStatuses(supabase),
-    getPortalRoles(supabase),
-    getIharcRoles(supabase),
+    getOrgRoleNames(supabase),
+    access.isGlobalAdmin ? getGlobalRoles(supabase) : Promise.resolve([]),
   ] as const);
 
   const summary = summaryRaw as AdminUserSummary;
   const list = listRaw as AdminUserListResult;
   const statuses = statusesRaw as string[];
-  const portalRoles = portalRolesRaw as string[];
-  const iharcRoles = iharcRolesRaw as string[];
+  const orgRoles = orgRolesRaw as string[];
+  const globalRoles = globalRolesRaw as string[];
 
   if (orgRows.error) throw orgRows.error;
   const organizations = (orgRows.data ?? []).map((o: { id: number; name: string | null }) => ({
@@ -85,8 +84,7 @@ export default async function AdminUsersSegmentPage({ params, searchParams }: Pa
   }));
 
   const statusOptions = toOptions(statuses);
-  const filteredPortalRoles = portalRoles.filter((r) => r !== 'portal_admin');
-  const roleOptions = toOptions([...filteredPortalRoles, ...iharcRoles]);
+  const roleOptions = toOptions([...globalRoles, ...orgRoles]);
 
   const currentParamsString = resolvedParams ? new URLSearchParams(Object.entries(resolvedParams).flatMap(([key, value]) => {
     if (value === undefined) return [];
@@ -140,7 +138,7 @@ export default async function AdminUsersSegmentPage({ params, searchParams }: Pa
           </Card>
         ) : (
           list.items.map((user) => {
-            const combinedRoles = new Set([...(user.roles.portal ?? []), ...(user.roles.iharc ?? [])]);
+            const combinedRoles = new Set([...(user.roles.global ?? []), ...(user.roles.org ?? [])]);
             return (
               <Card key={user.profileId} className="border-border/60">
                 <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
@@ -156,14 +154,14 @@ export default async function AdminUsersSegmentPage({ params, searchParams }: Pa
                     </div>
                     <div className="flex flex-wrap gap-1">
                       {Array.from(combinedRoles).map((roleName) => (
-                        <Badge key={roleName} variant={roleName.startsWith('portal_') ? 'outline' : 'secondary'} className="capitalize text-xs">
-                          {roleName.replace('portal_', '').replace('iharc_', '').replaceAll('_', ' ')}
+                        <Badge key={roleName} variant={roleName === 'iharc_admin' ? 'secondary' : 'outline'} className="capitalize text-xs">
+                          {roleName.replaceAll('_', ' ')}
                         </Badge>
                       ))}
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <UserPeekSheet user={user} roleOptions={roleOptions} />
+                    <UserPeekSheet user={user} />
                     <Button asChild variant="outline" size="sm">
                       <Link href={`/ops/admin/users/profile/${user.profileId}`}>Open profile</Link>
                     </Button>

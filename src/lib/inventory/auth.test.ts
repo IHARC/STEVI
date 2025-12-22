@@ -58,8 +58,11 @@ const baseAccess: PortalAccess = {
   email: 'casey@example.com',
   profile: mockProfile,
   isProfileApproved: true,
-  iharcRoles: ['iharc_admin', 'iharc_staff'],
-  portalRoles: [],
+  isGlobalAdmin: true,
+  iharcOrganizationId: 1,
+  isIharcMember: true,
+  orgRoles: [{ id: 'role-1', name: 'iharc_staff', displayName: 'IHARC Staff' }],
+  orgPermissions: ['inventory.admin'],
   organizationId: 1,
   organizationName: 'IHARC',
   canAccessOpsAdmin: true,
@@ -69,6 +72,7 @@ const baseAccess: PortalAccess = {
   canManageResources: true,
   canManagePolicies: true,
   canAccessInventoryOps: true,
+  canManageInventoryLocations: true,
   canManageNotifications: true,
   canReviewProfiles: true,
   canViewMetrics: true,
@@ -77,7 +81,6 @@ const baseAccess: PortalAccess = {
   canManageConsents: true,
   canManageOrgUsers: true,
   canManageOrgInvites: true,
-  inventoryAllowedRoles: ['iharc_staff'],
   actingOrgChoices: [],
   actingOrgChoicesCount: null,
   actingOrgAutoSelected: false,
@@ -112,8 +115,9 @@ describe('ensureInventoryActor', () => {
     const supabase = createSupabase({ id: 'user-2' });
     loadPortalAccess.mockResolvedValue({
       ...baseAccess,
-      iharcRoles: ['iharc_volunteer'],
       canAccessInventoryOps: false,
+      canManageInventoryLocations: false,
+      isGlobalAdmin: false,
     });
 
     await expect(ensureInventoryActor(supabase)).rejects.toBeInstanceOf(InventoryAccessError);
@@ -125,8 +129,8 @@ describe('ensureInventoryActor', () => {
 
     const actor = await ensureInventoryActor(supabase);
     expect(actor.profile.id).toBe('profile-1');
-    expect(actor.roles).toContain('iharc_staff');
-    expect(actor.roles).toContain('iharc_admin');
+    expect(actor.canManageLocations).toBe(true);
+    expect(actor.isGlobalAdmin).toBe(true);
   });
 
   it('redirects to login when configured to redirect on failure', async () => {
@@ -139,10 +143,10 @@ describe('ensureInventoryActor', () => {
 
 describe('requireInventoryAdmin', () => {
   it('throws when the caller is not an IHARC admin', () => {
-    expect(() => requireInventoryAdmin(['iharc_staff'])).toThrow(InventoryAccessError);
+    expect(() => requireInventoryAdmin(false)).toThrow(InventoryAccessError);
   });
 
   it('allows IHARC admins', () => {
-    expect(() => requireInventoryAdmin(['iharc_admin'])).not.toThrow();
+    expect(() => requireInventoryAdmin(true)).not.toThrow();
   });
 });

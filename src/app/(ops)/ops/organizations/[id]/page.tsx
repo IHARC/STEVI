@@ -5,7 +5,7 @@ import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { resolveLandingPath } from '@/lib/portal-navigation';
 import { extractOrgFeatureFlags, ORG_FEATURE_OPTIONS } from '@/lib/organizations';
-import { fetchOrgInvites, fetchOrgMembersWithRoles, type OrgInviteRecord } from '@/lib/org/fetchers';
+import { fetchOrgInvites, fetchOrgMembersWithRoles, fetchOrgRoles, type OrgInviteRecord } from '@/lib/org/fetchers';
 import { checkRateLimit, type RateLimitResult } from '@/lib/rate-limit';
 import { ensurePortalProfile } from '@/lib/profile';
 import { PageHeader } from '@shared/layout/page-header';
@@ -135,12 +135,13 @@ export default async function OrganizationDetailPage({ params, searchParams }: P
   const resolvedSearch = searchParams ? await searchParams : undefined;
   const tab = coerceTab(resolvedSearch?.tab);
 
-  const isIharcAdmin = access.iharcRoles.includes('iharc_admin');
-  const isInternalIharc = access.iharcRoles.length > 0;
+  const isIharcAdmin = access.isGlobalAdmin;
+  const isInternalIharc = access.isIharcMember || access.isGlobalAdmin;
   const isAgencyPartner = access.profile.affiliation_type === 'agency_partner';
   const isOwnOrg = access.organizationId !== null && access.organizationId === organizationId;
-  const isOrgAdmin = access.portalRoles.includes('portal_org_admin');
-  const isOrgRep = access.portalRoles.includes('portal_org_rep');
+  const orgRoleNames = access.orgRoles.map((role) => role.name);
+  const isOrgAdmin = orgRoleNames.includes('org_admin');
+  const isOrgRep = orgRoleNames.includes('org_rep');
 
   const canViewThisOrg = isIharcAdmin || isInternalIharc || (access.isProfileApproved && isAgencyPartner && isOwnOrg);
   if (!canViewThisOrg) {
@@ -148,10 +149,10 @@ export default async function OrganizationDetailPage({ params, searchParams }: P
   }
 
   const canEditFullOrgRecord = isIharcAdmin;
-  const canEditOrgSettings = isIharcAdmin || (isOwnOrg && isOrgAdmin);
-  const canManageMembers = isIharcAdmin || (isOwnOrg && isOrgAdmin);
-  const canManageInvites = isIharcAdmin || (isOwnOrg && (isOrgAdmin || isOrgRep));
-  const canManageAppointments = isIharcAdmin || (isOwnOrg && (isOrgAdmin || isOrgRep));
+  const canEditOrgSettings = isIharcAdmin || (isOwnOrg && access.canManageOrgUsers);
+  const canManageMembers = isIharcAdmin || (isOwnOrg && access.canManageOrgUsers);
+  const canManageInvites = isIharcAdmin || (isOwnOrg && access.canManageOrgInvites);
+  const canManageAppointments = isIharcAdmin || (isOwnOrg && (access.canAccessOpsOrg || access.canAccessOpsFrontline));
 
   const tabDefinitions = [
     { id: 'overview', label: 'Overview' },
@@ -181,8 +182,9 @@ export default async function OrganizationDetailPage({ params, searchParams }: P
 
   const selectedFeatures = extractOrgFeatureFlags(orgRow.services_tags);
 
-  const [members, invites, inviteRateLimit, appointments] = await Promise.all([
+  const [members, roles, invites, inviteRateLimit, appointments] = await Promise.all([
     tab === 'members' && canManageMembers ? fetchOrgMembersWithRoles(supabase, organizationId) : Promise.resolve(null),
+    tab === 'members' && canManageMembers ? fetchOrgRoles(supabase, organizationId) : Promise.resolve(null),
     tab === 'invites' && canManageInvites ? fetchOrgInvites(supabase, organizationId, 50) : Promise.resolve(null),
     tab === 'invites' && canManageInvites
       ? checkRateLimit({
@@ -246,6 +248,7 @@ export default async function OrganizationDetailPage({ params, searchParams }: P
       {tab === 'members' ? (
         <MembersTab
           members={members}
+          roles={roles}
           organizationId={organizationId}
           currentProfileId={access.profile.id}
           canEditFullOrgRecord={canEditFullOrgRecord}
@@ -551,16 +554,18 @@ function SettingsTab({
 
 function MembersTab({
   members,
+  roles,
   organizationId,
   currentProfileId,
   canEditFullOrgRecord,
 }: {
   members: Awaited<ReturnType<typeof fetchOrgMembersWithRoles>> | null;
+  roles: Awaited<ReturnType<typeof fetchOrgRoles>> | null;
   organizationId: number;
   currentProfileId: string;
   canEditFullOrgRecord: boolean;
 }) {
-  if (!members) {
+  if (!members || !roles) {
     return (
       <Card className="border-border/60">
         <CardHeader>
@@ -579,7 +584,7 @@ function MembersTab({
           <CardDescription>Membership changes are audit logged and scoped by Supabase row-level security.</CardDescription>
         </CardHeader>
         <CardContent className="overflow-x-auto">
-          <OrgMembersTable members={members} currentProfileId={currentProfileId} organizationId={organizationId} />
+          <OrgMembersTable members={members} roles={roles} currentProfileId={currentProfileId} organizationId={organizationId} />
         </CardContent>
       </Card>
 
@@ -598,14 +603,12 @@ function MembersTab({
                 <p className="text-xs text-muted-foreground">Find profile IDs from the STEVI Admin Users list.</p>
               </div>
               <div className="flex flex-col gap-2 text-sm">
-                <label className="flex items-center gap-2">
-                  <NativeCheckbox name="make_admin" />
-                  <span>Grant org admin</span>
-                </label>
-                <label className="flex items-center gap-2">
-                  <NativeCheckbox name="make_rep" defaultChecked />
-                  <span>Grant org representative</span>
-                </label>
+                {roles.map((role) => (
+                  <label key={role.id} className="flex items-center gap-2">
+                    <NativeCheckbox name="role_ids" value={role.id} defaultChecked={role.name === 'org_rep'} />
+                    <span>{role.display_name ?? role.name.replaceAll('_', ' ')}</span>
+                  </label>
+                ))}
               </div>
               <Button type="submit">Attach member</Button>
               <p className="text-xs text-muted-foreground">Membership changes are audit logged and refresh user claims.</p>

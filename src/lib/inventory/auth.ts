@@ -1,12 +1,12 @@
 import { redirect } from 'next/navigation';
 import type { PortalProfile } from '@/lib/profile';
 import { loadPortalAccess } from '@/lib/portal-access';
-import type { IharcRole } from '@/lib/ihar-auth';
 import type { SupabaseAnyServerClient } from '@/lib/supabase/types';
 
 export type InventoryActorContext = {
   profile: PortalProfile;
-  roles: IharcRole[];
+  canManageLocations: boolean;
+  isGlobalAdmin: boolean;
 };
 
 export class InventoryAccessError extends Error {
@@ -16,8 +16,8 @@ export class InventoryAccessError extends Error {
   }
 }
 
-export function isInventoryAdmin(roles: IharcRole[]): boolean {
-  return roles.includes('iharc_admin');
+export function isInventoryAdmin(canManageLocations: boolean): boolean {
+  return canManageLocations;
 }
 
 export async function ensureInventoryActor(
@@ -51,11 +51,11 @@ export async function ensureInventoryActor(
     throw new InventoryAccessError('IHARC inventory access is restricted to staff accounts.');
   }
 
-  return { profile: access.profile, roles: access.iharcRoles };
+  return { profile: access.profile, canManageLocations: access.canManageInventoryLocations, isGlobalAdmin: access.isGlobalAdmin };
 }
 
-export function requireInventoryAdmin(roles: IharcRole[]): void {
-  if (!isInventoryAdmin(roles)) {
+export function requireInventoryAdmin(canManageLocations: boolean): void {
+  if (!isInventoryAdmin(canManageLocations)) {
     throw new InventoryAccessError('Only IHARC admins can change inventory locations.');
   }
 }
