@@ -12,7 +12,7 @@ export default async function RootRedirectPage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/login');
+    redirect('/auth/start');
   }
 
   const access = await loadPortalAccess(supabase);

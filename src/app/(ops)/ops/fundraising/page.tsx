@@ -64,7 +64,7 @@ export default async function OpsFundraisingHubPage({ searchParams }: PageProps)
   const access = await loadPortalAccess(supabase);
 
   if (!access) {
-    redirect('/login?next=/ops/fundraising');
+    redirect('/auth/start?next=/ops/fundraising');
   }
 
   if (!access.canAccessOpsSteviAdmin) {

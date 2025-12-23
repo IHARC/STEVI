@@ -125,7 +125,7 @@ export default async function OpsFundraisingDonationListingPage({ params }: Page
   const { itemId } = await params;
 
   if (!access) {
-    redirect(`/login?next=${encodeURIComponent(`/ops/fundraising/items/${itemId}`)}`);
+    redirect(`/auth/start?next=${encodeURIComponent(`/ops/fundraising/items/${itemId}`)}`);
   }
 
   if (!access.canAccessOpsSteviAdmin) {

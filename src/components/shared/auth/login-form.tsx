@@ -2,15 +2,12 @@
 
 import { startTransition, useActionState, useEffect, useState } from 'react';
 import { useFormStatus } from 'react-dom';
-import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { Alert, AlertDescription, AlertTitle } from '@shared/ui/alert';
 import { Button } from '@shared/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@shared/ui/form';
 import { Input } from '@shared/ui/input';
-import { Separator } from '@shared/ui/separator';
 import { ToggleGroup, ToggleGroupItem } from '@shared/ui/toggle-group';
-import { GoogleAuthButton } from '@shared/auth/google-auth-button';
 
 type ContactMethod = 'email' | 'phone';
 
@@ -21,23 +18,20 @@ type FormState = {
 
 type LoginFormProps = {
   action: (state: FormState, formData: FormData) => Promise<FormState>;
-  nextPath: string;
   initialState: FormState;
 };
 
 type LoginFormValues = {
-  next: string;
   contact_method: ContactMethod;
   email: string;
   phone: string;
   password: string;
 };
 
-export function LoginForm({ action, nextPath, initialState }: LoginFormProps) {
+export function LoginForm({ action, initialState }: LoginFormProps) {
   const [state, formAction] = useActionState(action, initialState);
   const form = useForm<LoginFormValues>({
     defaultValues: {
-      next: nextPath,
       contact_method: initialState.contactMethod ?? 'email',
       email: '',
       phone: '',
@@ -86,8 +80,6 @@ export function LoginForm({ action, nextPath, initialState }: LoginFormProps) {
   return (
     <Form {...form}>
       <form action={formAction} className="grid gap-6">
-        <input type="hidden" name="next" value={nextPath} />
-
         {formError ? (
           <Alert variant="destructive" className="text-sm" role="status" aria-live="polite">
             <AlertTitle>We could not sign you in</AlertTitle>
@@ -191,38 +183,11 @@ export function LoginForm({ action, nextPath, initialState }: LoginFormProps) {
                 />
               </FormControl>
               <FormMessage />
-              <div className="flex justify-end">
-                <Link
-                  href="/reset-password"
-                  className="text-xs font-medium text-muted-foreground underline-offset-4 hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                >
-                  Forgot password?
-                </Link>
-              </div>
             </FormItem>
           )}
         />
 
         <SubmitButton />
-
-        <p className="text-sm text-muted-foreground">
-          Need an account?{' '}
-          <Link
-            href="/register"
-            className="text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-          >
-            Register here
-          </Link>
-        </p>
-
-        <div className="space-y-3 pt-2">
-          <div className="flex items-center gap-3 text-xs text-muted-foreground">
-            <Separator className="flex-1 bg-border/60" />
-            <span>Or continue with</span>
-            <Separator className="flex-1 bg-border/60" />
-          </div>
-          <GoogleAuthButton intent="login" nextPath={nextPath} />
-        </div>
       </form>
     </Form>
   );

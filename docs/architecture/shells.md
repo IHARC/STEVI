@@ -11,7 +11,7 @@ This document codifies the client/operations shell split for STEVI. It complemen
 - `(client)` route group: `/home`, `/messages`, `/appointments`, `/documents`, `/support`, `/resources`, `/cases`, `/profile`, `/onboarding` (+ supporting client-only routes).
 - `(ops)` route group: `/ops/*` (ops shell) plus shared ops primitives (command palette, inbox, navigation). Org administration now lives under `/ops/organizations/*`.
 - `(app-admin)` route group: `/app-admin/*` (STEVI Admin shell for IHARC super admins).
-- `/login`, `/register/*`, `/reset-password` remain outside shell groups.
+- `/auth/start`, `/auth/callback`, `/auth/error` live outside shell groups; `/oauth/consent` is hosted on `login.iharc.ca`.
 - Each group owns its layout, theme token file, and navigation surface; no shared chrome between shells.
 
 ## Component Boundaries

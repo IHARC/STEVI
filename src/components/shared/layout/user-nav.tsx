@@ -1,10 +1,11 @@
 import type { ReactNode } from 'react';
 import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
-import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { buildUserMenuLinks, loadPortalAccess, type PortalAccess } from '@/lib/portal-access';
 import { AuthLinks } from '@shared/layout/auth-links';
 import { UserMenu } from '@shared/layout/user-menu';
+import { clearOAuthSessionCookies } from '@/lib/supabase/oauth';
 
 export type UserNavigation = {
   desktop: ReactNode;
@@ -60,9 +61,9 @@ export async function UserNav() {
 async function signOut() {
   'use server';
 
-  const supabase = await createSupabaseServerClient();
-  await supabase.auth.signOut();
-  redirect('/');
+  const cookieStore = await cookies();
+  clearOAuthSessionCookies(cookieStore);
+  redirect('/auth/start');
 }
 
 function getInitials(name: string): string {

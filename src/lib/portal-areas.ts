@@ -77,7 +77,7 @@ export function requireArea(
 
   if (!access) {
     const nextParam = encodeURIComponent(currentPath ?? landingPath ?? '/home');
-    return { allowed: false, redirectPath: `/login?next=${nextParam}` };
+    return { allowed: false, redirectPath: `/auth/start?next=${nextParam}` };
   }
 
   const clientHome = LANDING_PATH_BY_AREA.client;

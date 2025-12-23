@@ -26,7 +26,7 @@ export default async function ProgramDetailPage({ params, searchParams }: PagePr
   const access = await loadPortalAccess(supabase);
 
   if (!access) {
-    redirect(`/login?next=${encodeURIComponent(`/ops/programs/${id}?view=overview`)}`);
+    redirect(`/auth/start?next=${encodeURIComponent(`/ops/programs/${id}?view=overview`)}`);
   }
 
   if (!access.canAccessOpsFrontline && !access.canAccessOpsAdmin) {

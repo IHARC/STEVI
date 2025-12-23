@@ -129,7 +129,7 @@ export default async function OrganizationDetailPage({ params, searchParams }: P
   const access = await loadPortalAccess(supabase);
 
   if (!access) {
-    redirect(`/login?next=/ops/organizations/${organizationId}`);
+    redirect(`/auth/start?next=/ops/organizations/${organizationId}`);
   }
 
   const resolvedSearch = searchParams ? await searchParams : undefined;

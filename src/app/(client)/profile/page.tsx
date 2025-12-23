@@ -32,7 +32,7 @@ export default async function PortalProfilePage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/login?next=/profile');
+    redirect('/auth/start?next=/profile');
   }
 
   const {

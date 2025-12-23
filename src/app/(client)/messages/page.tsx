@@ -13,7 +13,7 @@ export default async function MessagesPage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/login?next=/messages');
+    redirect('/auth/start?next=/messages');
   }
 
   await ensurePortalProfile(supabase, user.id);

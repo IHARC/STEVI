@@ -1,38 +1,23 @@
 import { cookies } from 'next/headers';
-import { createServerClient } from '@supabase/ssr';
-import type { CookieMethodsServer } from '@supabase/ssr';
+import { createClient } from '@supabase/supabase-js';
 import { Database } from '@/types/supabase';
 import { getSupabaseEnv } from '@/lib/supabase/config';
+import { readOAuthSessionCookies } from '@/lib/supabase/oauth';
 
-type CookieBatch = Parameters<NonNullable<CookieMethodsServer['setAll']>>[0];
-
-export async function createSupabaseServerClient() {
+export async function createSupabaseServerClient(accessTokenOverride?: string | null) {
   const { url, publishableKey } = getSupabaseEnv();
-
   const cookieStore = await cookies();
+  const { accessToken } = readOAuthSessionCookies(cookieStore);
+  const token = accessTokenOverride ?? accessToken ?? undefined;
 
-  return createServerClient<Database>(url, publishableKey, {
-    cookies: {
-      getAll() {
-        return cookieStore.getAll();
-      },
-      setAll(cookiesToSet: CookieBatch) {
-        cookiesToSet.forEach(({ name, value, options }) => {
-          try {
-            cookieStore.set(name, value, {
-              path: '/',
-              sameSite: 'lax',
-              httpOnly: true,
-              secure: process.env.NODE_ENV === 'production',
-              ...options,
-            });
-          } catch (error) {
-            if (process.env.NODE_ENV !== 'production') {
-              console.warn('Failed to set Supabase cookie', error);
-            }
-          }
-        });
-      },
+  return createClient<Database>(url, publishableKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+    },
+    global: {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
     },
   });
 }

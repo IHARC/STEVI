@@ -15,7 +15,7 @@ export default async function NewVisitPage() {
   const access = await loadPortalAccess(supabase as SupabaseRSCClient);
 
   if (!access) {
-    redirect('/login?next=/ops/visits/new');
+    redirect('/auth/start?next=/ops/visits/new');
   }
 
   if (!access.canAccessOpsAdmin && !access.canAccessOpsFrontline && !access.canAccessOpsOrg) {

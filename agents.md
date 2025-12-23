@@ -27,9 +27,9 @@ Never introduce backwards compatibility, fallbacks (that will hide errors), or k
 ## Snapshot — 2025-12-12
 - **Stack**: Next.js 16 App Router + server actions (React 19), TypeScript, Tailwind + shadcn/ui tokens from `src/styles/theme.css`, Radix primitives, TipTap for rich text.
 - **Hosting/build**: Azure App Service (Linux, Node 24). `npm run build` → `node build.js` (runs `eslint .`, forces webpack via `NEXT_FORCE_WEBPACK=1`, emits `.next/standalone`, copies static into `.next/standalone/.next/static`). GitHub Actions `.github/workflows/main_stevi.yml` deploys via publish profiles. Runtime: `node .next/standalone/server.js`.
-- **Auth/session**: Supabase Auth via `@supabase/ssr` cookies. Use `createSupabaseServerClient` in actions/route handlers (can set cookies). `createSupabaseRSCClient` is read‑only. Proxy (`/proxy.ts` at repo root) refreshes Supabase tokens + applies CSP/HSTS only. Most authed routes export `dynamic = 'force-dynamic'`.
+- **Auth/session**: Supabase OAuth Server (beta). `stevi.iharc.ca` uses OAuth access/refresh tokens stored in httpOnly cookies via `createSupabaseServerClient` + `createSupabaseRSCClient`. `login.iharc.ca` uses `createSupabaseAuthServerClient` to manage Supabase Auth cookies for the consent UI. Proxy (`/proxy.ts`) refreshes OAuth tokens; no legacy cookie fallbacks remain. Most authed routes export `dynamic = 'force-dynamic'`.
 - **Caching**: No custom CDN layer. Use `revalidatePath`/`revalidateTag` from server actions; avoid static rendering for authed content.
-- **Environment**: `.env.example` is current. Required: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_SITE_URL`. Optional: `PORTAL_ALERTS_SECRET`, `NEXT_PUBLIC_GA4_ID`, `NEXT_PUBLIC_ANALYTICS_DISABLED`, `SUPABASE_SERVICE_ROLE_KEY` (local scripts only), `NEXT_PUBLIC_MARKETING_URL` (telemetry allowlist). Never commit secrets.
+- **Environment**: `.env.example` is current. Required: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_LOGIN_URL`, `SUPABASE_OAUTH_CLIENT_ID`, `SUPABASE_OAUTH_SCOPES`. Optional: `SUPABASE_OAUTH_REDIRECT_URI`, `PORTAL_ALERTS_SECRET`, `NEXT_PUBLIC_GA4_ID`, `NEXT_PUBLIC_ANALYTICS_DISABLED`, `SUPABASE_SERVICE_ROLE_KEY` (local scripts only), `NEXT_PUBLIC_MARKETING_URL` (telemetry allowlist). Never commit secrets.
 
 ## Repository layout
 - **Dual shells**:
@@ -113,4 +113,3 @@ Never introduce backwards compatibility, fallbacks (that will hide errors), or k
   - App Service plan `IHARC-Linux` (B1; scale to B2 if needed). Apps: `STEVI` (`stevi.iharc.ca`), `IHARC-Login`.
   - Common commands: `az afd profile/list/route/origin/custom-domain`, `az webapp list/show/config access-restriction`, `az appservice plan show/update`, `az network dns zone/record-set cname`, `az account set --subscription IHARC-main-sub`.
 - Use Context7 for library docs/codegen; use Supabase MCP for live schema/RLS inspection.
-

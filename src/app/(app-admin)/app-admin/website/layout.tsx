@@ -13,7 +13,7 @@ export default async function WebsiteAdminLayout({ children }: { children: React
   const access = await loadPortalAccess(supabase);
 
   if (!access) {
-    redirect('/login?next=/app-admin/website/branding');
+    redirect('/auth/start?next=/app-admin/website/branding');
   }
 
   if (!access.canManageWebsiteContent) {

@@ -16,7 +16,7 @@ export default async function DocumentsPage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/login?next=/documents');
+    redirect('/auth/start?next=/documents');
   }
 
   const profile = await ensurePortalProfile(supabase, user.id);

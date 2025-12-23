@@ -45,7 +45,7 @@ export default async function OpsClientDetailPage({ params, searchParams }: Page
   const access = await loadPortalAccess(supabase);
 
   if (!access) {
-    redirect(`/login?next=${encodeURIComponent(`/ops/clients/${id}?view=directory`)}`);
+    redirect(`/auth/start?next=${encodeURIComponent(`/ops/clients/${id}?view=directory`)}`);
   }
 
   if (!access.canAccessOpsFrontline && !access.canAccessOpsAdmin && !access.canManageConsents) {

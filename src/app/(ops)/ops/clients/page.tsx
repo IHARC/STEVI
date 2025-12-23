@@ -42,7 +42,7 @@ export default async function OpsClientsPage({ searchParams }: PageProps) {
   const access = await loadPortalAccess(supabase);
 
   if (!access) {
-    redirect(`/login?next=${encodeURIComponent('/ops/clients?view=directory')}`);
+    redirect(`/auth/start?next=${encodeURIComponent('/ops/clients?view=directory')}`);
   }
 
   if (!access.canAccessOpsFrontline && !access.canManageConsents && !access.canAccessOpsAdmin) {

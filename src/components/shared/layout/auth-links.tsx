@@ -43,14 +43,7 @@ export function AuthLinks({ layout = 'inline' }: AuthLinksProps = {}) {
         size={isStacked ? 'default' : 'sm'}
         className={cn(isStacked ? 'w-full' : undefined)}
       >
-        <Link href={`/login?next=${encodedNext}`}>Sign in</Link>
-      </Button>
-      <Button
-        asChild
-        size={isStacked ? 'default' : 'sm'}
-        className={cn(isStacked ? 'w-full' : undefined)}
-      >
-        <Link href={`/register?next=${encodedNext}`}>Sign up</Link>
+        <Link href={`/auth/start?next=${encodedNext}`}>Sign in</Link>
       </Button>
     </div>
   );

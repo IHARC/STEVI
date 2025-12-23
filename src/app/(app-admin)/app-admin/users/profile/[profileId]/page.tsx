@@ -21,7 +21,7 @@ export default async function AdminUserProfilePage({ params }: PageProps) {
   const access = await loadPortalAccess(supabase);
 
   if (!access) {
-    redirect(`/login?next=/app-admin/users/profile/${profileId}`);
+    redirect(`/auth/start?next=/app-admin/users/profile/${profileId}`);
   }
 
   if (!access.canAccessOpsAdmin) {

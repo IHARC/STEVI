@@ -1,19 +1,21 @@
-import { createServerClient } from '@supabase/ssr';
-import type { CookieMethodsServer } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
-import type { Database } from '@/types/supabase';
 import { getSupabaseEnvOrNull } from '@/lib/supabase/config';
-
-type CookieBatch = Parameters<NonNullable<CookieMethodsServer['setAll']>>[0];
+import {
+  clearOAuthSessionCookies,
+  readOAuthSessionCookies,
+  refreshAccessToken,
+  setOAuthSessionCookies,
+  shouldRefreshToken,
+} from '@/lib/supabase/oauth';
 
 /**
- * Refresh the Supabase session inside the Next.js Proxy (formerly Middleware).
+ * Refresh the OAuth session inside the Next.js Proxy (formerly Middleware).
  *
- * Supabase SSR requires the Proxy to refresh auth tokens because Server Components
- * cannot set cookies. Keep this focused on token refresh and request headers;
- * authorization decisions must happen in server actions/route handlers.
+ * OAuth access tokens are refreshed here because Server Components cannot set
+ * cookies. Keep this focused on token refresh and request headers; authorization
+ * decisions must happen in server actions/route handlers.
  */
-export async function refreshSupabaseSession(request: NextRequest): Promise<NextResponse> {
+export async function refreshOAuthSession(request: NextRequest): Promise<NextResponse> {
   const env = getSupabaseEnvOrNull();
   const requestHeaders = new Headers(request.headers);
   const requestPath = `${request.nextUrl.pathname}${request.nextUrl.search}`;
@@ -29,32 +31,23 @@ export async function refreshSupabaseSession(request: NextRequest): Promise<Next
     return response;
   }
 
-  const supabase = createServerClient<Database>(env.url, env.publishableKey, {
-    cookies: {
-      getAll() {
-        return request.cookies.getAll();
-      },
-      setAll(cookiesToSet: CookieBatch) {
-        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-        response = NextResponse.next({ request: { headers: requestHeaders } });
-        cookiesToSet.forEach(({ name, value, options }) =>
-          response.cookies.set({
-            name,
-            value,
-            path: '/',
-            sameSite: 'lax',
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            ...options,
-          }),
-        );
-      },
-    },
-  });
+  const { refreshToken, expiresAt } = readOAuthSessionCookies(request.cookies);
+  if (!refreshToken || !shouldRefreshToken(expiresAt)) {
+    return response;
+  }
 
-  const { error } = await supabase.auth.getClaims();
-  if (error && process.env.NODE_ENV !== 'production') {
-    console.warn('Supabase Proxy session refresh failed', error);
+  try {
+    const tokens = await refreshAccessToken(refreshToken);
+    setOAuthSessionCookies(request.cookies, tokens, refreshToken);
+    response = NextResponse.next({ request: { headers: requestHeaders } });
+    setOAuthSessionCookies(response.cookies, tokens, refreshToken);
+  } catch (error) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn('OAuth session refresh failed', error);
+    }
+    clearOAuthSessionCookies(request.cookies);
+    response = NextResponse.next({ request: { headers: requestHeaders } });
+    clearOAuthSessionCookies(response.cookies);
   }
 
   return response;

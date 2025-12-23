@@ -82,7 +82,7 @@ export default async function HomePage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/login?next=/home');
+    redirect('/auth/start?next=/home');
   }
 
   const profile = await ensurePortalProfile(supabase, user.id);

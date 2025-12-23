@@ -33,7 +33,7 @@ export default async function AdminPermissionsPage({ searchParams }: PageProps) 
   const access = await loadPortalAccess(supabase);
 
   if (!access) {
-    redirect('/login?next=/app-admin/permissions');
+    redirect('/auth/start?next=/app-admin/permissions');
   }
 
   if (!access.isGlobalAdmin) {

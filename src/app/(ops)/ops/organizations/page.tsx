@@ -70,7 +70,7 @@ export default async function OpsOrganizationsPage({ searchParams }: PageProps) 
   const access = await loadPortalAccess(supabase);
 
   if (!access) {
-    redirect('/login?next=/ops/organizations');
+    redirect('/auth/start?next=/ops/organizations');
   }
 
   if (!access.canAccessOpsFrontline && !access.canAccessOpsOrg && !access.canAccessOpsAdmin && !access.canAccessOpsSteviAdmin) {

@@ -33,7 +33,7 @@ export default async function OpsInventoryItemDetailPage({ params, searchParams 
   }
 
   if (!access) {
-    redirect(`/login?next=${encodeURIComponent(`/ops/inventory/items/${itemId}?view=items`)}`);
+    redirect(`/auth/start?next=${encodeURIComponent(`/ops/inventory/items/${itemId}?view=items`)}`);
   }
 
   if (!access.canAccessInventoryOps && !access.canAccessOpsAdmin) {

@@ -31,11 +31,11 @@ find src/app -name 'page.tsx' -o -name 'route.ts' -o -name 'layout.tsx' | sed 's
 
 ### Global entry points (no shell)
 - Global layout wrapper: `src/app/layout.tsx`
-- `/` → redirects to `/login` or an area landing (`src/app/page.tsx`)
-- `/login` (supports `?next=...`)
-- `/reset-password` (request reset) and `/reset-password/update` (finish reset)
-- `/auth/callback` (Supabase callback handler)
-- Registration flows (see **Registration** below)
+- `/` → redirects to `/auth/start` or an area landing (`src/app/page.tsx`)
+- `/auth/start` (OAuth entrypoint, supports `?next=...`)
+- `/auth/callback` (OAuth code exchange)
+- `/auth/error` (OAuth error landing)
+- `/oauth/consent` (login.iharc.ca authorization + consent UI)
 
 ### Client shell (client portal)
 Route group: `src/app/(client)`  
@@ -146,17 +146,6 @@ Rule of thumb:
 - Tenant UX should only surface enabled modules for that org (hide or disable otherwise).
 
 ## Site map (high-level)
-
-### Registration
-Entry point: `/register`
-
-Known flows (route group `src/app/register`):
-- `/register/get-help`
-- `/register/access-services`
-- `/register/client`
-- `/register/partner`
-- `/register/volunteer`
-- `/register/report-concern`
 
 ### Client portal (client shell)
 Nav groups per `src/lib/client-navigation.ts`:

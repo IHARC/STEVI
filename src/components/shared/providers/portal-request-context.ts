@@ -51,7 +51,7 @@ export async function getPortalRequestContext(): Promise<PortalRequestContextVal
 
   if (!portalAccess) {
     const nextParam = encodeURIComponent(normalizedPath.path || '/home');
-    redirect(`/login?next=${nextParam}`);
+    redirect(`/auth/start?next=${nextParam}`);
   }
 
   const landingPath = resolveLandingPath(portalAccess);

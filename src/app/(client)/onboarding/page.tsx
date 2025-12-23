@@ -60,12 +60,12 @@ export default async function OnboardingPage({ searchParams }: PageProps) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect(`/login?next=${encodeURIComponent('/onboarding')}`);
+    redirect(`/auth/start?next=${encodeURIComponent('/onboarding')}`);
   }
 
   const access = await loadPortalAccess(supabase);
   if (!access) {
-    redirect(`/login?next=${encodeURIComponent('/onboarding')}`);
+    redirect(`/auth/start?next=${encodeURIComponent('/onboarding')}`);
   }
 
   const actor = resolveOnboardingActor(access);

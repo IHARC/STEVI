@@ -30,7 +30,7 @@ export default async function OpsProgramsPage({ searchParams }: PageProps) {
   const access = await loadPortalAccess(supabase);
 
   if (!access) {
-    redirect(`/login?next=${encodeURIComponent('/ops/programs?view=overview')}`);
+    redirect(`/auth/start?next=${encodeURIComponent('/ops/programs?view=overview')}`);
   }
 
   if (!access.canAccessOpsFrontline && !access.canAccessOpsAdmin) {

@@ -59,7 +59,7 @@ export default async function SupportPage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/login?next=/support');
+    redirect('/auth/start?next=/support');
   }
 
   await ensurePortalProfile(supabase, user.id);

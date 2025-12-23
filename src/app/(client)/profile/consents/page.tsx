@@ -20,7 +20,7 @@ export default async function ConsentsPage() {
   const supabase = await createSupabaseRSCClient();
   const access = await loadPortalAccess(supabase);
 
-  if (!access) redirect('/login?next=/profile/consents');
+  if (!access) redirect('/auth/start?next=/profile/consents');
   if (!access.isProfileApproved) redirect(resolveLandingPath(access));
 
   const consentData = await fetchPersonConsents(supabase, access.userId);

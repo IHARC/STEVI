@@ -7,7 +7,7 @@ This document captures the backend expectations for running the STEVI portal alo
 - **Framework**: Next.js 16 (App Router, React 19). SSR and RSC are enabled; most routes force dynamic rendering to respect Supabase auth context.
 - **Hosting**: Azure App Service (Linux, Node 24 LTS / 24.12.x) at `stevi.iharc.ca`, deployed via GitHub Actions workflow `.github/workflows/main_stevi.yml` using publish profiles.
 - **Data Layer**: Shared Supabase project with the marketing site (`iharc.ca`) and STEVI OPS. Schemas of interest: `portal`, `core`, `case_mgmt`, `inventory`, `donations`.
-- **Authentication**: Supabase Auth session cookies managed via `@supabase/ssr`. The same Supabase URL and publishable key must be used across all IHARC apps.
+- **Authentication**: Supabase OAuth Server (beta) with a dedicated consent UI on `login.iharc.ca`. `stevi.iharc.ca` stores OAuth access/refresh tokens in httpOnly cookies and uses them for RLS-scoped Supabase access.
 - **Caching**: Next.js data cache only. We rely on `revalidatePath`/`revalidateTag` for targeted busting; no Edge CDN custom layer is configured yet.
 
 ## Environment Variables
@@ -23,13 +23,17 @@ Copy `.env.example` to `.env` and fill the required values. All variables prefix
 | `SUPABASE_SERVICE_ROLE_KEY` | ☐ | Optional. Used for CLI scripts or local tooling; never ship to the client. |
 | `PORTAL_ALERTS_SECRET` | ☐ | Bearer token for invoking the `portal-alerts` Edge Function (notifications queue). Leave unset to skip the function call locally. |
 | `NEXT_PUBLIC_APP_URL` | ✅ | Canonical STEVI URL (`https://stevi.iharc.ca` in production). Used in auth redirects and sitemap metadata. |
+| `NEXT_PUBLIC_LOGIN_URL` | ✅ | OAuth login/consent domain (`https://login.iharc.ca` in production). |
 | `NEXT_PUBLIC_SITE_URL` | ✅ | Marketing site root (`https://iharc.ca`). Fallback for shared utilities that need the public hostname. |
+| `SUPABASE_OAUTH_CLIENT_ID` | ✅ | OAuth client ID registered in Supabase Auth → OAuth Server. |
+| `SUPABASE_OAUTH_REDIRECT_URI` | ☐ | Optional override for OAuth redirect URI (defaults to `${NEXT_PUBLIC_APP_URL}/auth/callback`). |
+| `SUPABASE_OAUTH_SCOPES` | ✅ | Space-delimited OAuth scopes (`openid email profile phone`). |
 | `NEXT_PUBLIC_GA4_ID` | ☐ | GA4 measurement ID. Shared property with the marketing site unless outreach requests otherwise. |
 | `NEXT_PUBLIC_ANALYTICS_DISABLED` | ☐ | Set to `true` to disable analytics output (defaults to `false`). Useful for local development or privacy reviews. |
 
 ## Supabase Usage
 
-- **Clients**: `createSupabaseClient`, `createSupabaseRSCClient`, and `createSupabaseServerClient` mirror the marketing app. They rely on the Supabase publishable key and shared cookies for auth continuity.
+- **Clients**: `createSupabaseRSCClient` and `createSupabaseServerClient` read OAuth access tokens from secure cookies. `createSupabaseAuthServerClient` is used only on `login.iharc.ca` to manage Supabase Auth sessions for the consent UI.
 - **Schemas**:
   - `portal`: `profiles`, `profile_invites`, `profile_contacts`, `resource_pages`, `policies`, `notifications`, `public_settings`, `registration_flows`, `audit_log`.
   - `core`: `people`, `people_activities`, `person_access_grants`, `organizations`, org memberships, contact details.
@@ -52,7 +56,7 @@ Copy `.env.example` to `.env` and fill the required values. All variables prefix
 
 ## Authentication Expectations
 
-- Login, registration, and password reset flows exactly mirror `I.H.A.R.C-Public-Website`. Do **not** change the Supabase auth providers or session management without consulting the marketing + OPS maintainers.
+- Login + consent live on `login.iharc.ca` using Supabase OAuth Server. Legacy login/register/reset flows have been removed; do **not** reintroduce back-compat shims.
 - All server actions ensure the caller has a `portal.profiles` row. Use `ensurePortalProfile` before writing to sensitive tables.
 - RLS is enforced on every table. Any new server action must be verified against production policies using Supabase MCP.
 

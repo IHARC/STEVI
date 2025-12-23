@@ -17,7 +17,7 @@ export default async function OpsAdminPage() {
   const access = await loadPortalAccess(supabase);
 
   if (!access) {
-    redirect('/login?next=/app-admin');
+    redirect('/auth/start?next=/app-admin');
   }
 
   if (!access.canAccessOpsSteviAdmin) {

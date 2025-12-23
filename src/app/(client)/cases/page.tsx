@@ -16,7 +16,7 @@ export default async function ClientCasesPage() {
   const access = await loadPortalAccess(supabase);
 
   if (!access) {
-    redirect('/login?next=/cases');
+    redirect('/auth/start?next=/cases');
   }
 
   if (!access.isProfileApproved) {

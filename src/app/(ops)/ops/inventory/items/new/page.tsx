@@ -21,7 +21,7 @@ export default async function OpsInventoryNewItemPage({ searchParams }: { search
   const access = await loadPortalAccess(supabase);
 
   if (!access) {
-    redirect(`/login?next=${encodeURIComponent('/ops/inventory/items/new?view=items')}`);
+    redirect(`/auth/start?next=${encodeURIComponent('/ops/inventory/items/new?view=items')}`);
   }
 
   if (!access.canAccessInventoryOps && !access.canAccessOpsAdmin) {

@@ -25,7 +25,7 @@ export default async function CaseDetailPage({ params }: CasePageProps) {
 
   const supabase = await createSupabaseRSCClient();
   const access = await loadPortalAccess(supabase);
-  if (!access) redirect(`/login?next=/cases/${caseId}`);
+  if (!access) redirect(`/auth/start?next=/cases/${caseId}`);
   if (!access.isProfileApproved) {
     redirect(resolveLandingPath(access));
   }

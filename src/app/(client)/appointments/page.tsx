@@ -84,7 +84,7 @@ export default async function AppointmentsPage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/login?next=/appointments');
+    redirect('/auth/start?next=/appointments');
   }
 
   const profile = await ensurePortalProfile(supabase, user.id);

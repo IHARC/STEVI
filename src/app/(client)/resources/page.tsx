@@ -13,7 +13,7 @@ export default async function ClientResourcesPage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/login?next=/resources');
+    redirect('/auth/start?next=/resources');
   }
 
   await ensurePortalProfile(supabase, user.id);

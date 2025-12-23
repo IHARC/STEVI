@@ -2,7 +2,14 @@
 
 Status: draft (iterative)
 Owner: IHARC / STEVI
-Last updated: 2025-12-22
+Last updated: 2025-12-23
+
+## Progress tracker
+- [ ] Phase 1: Supabase OAuth server configuration (dashboard work pending)
+- [x] Phase 2: `login.iharc.ca` authorization UI + consent
+- [x] Phase 3: `stevi.iharc.ca` OAuth client + callback
+- [x] Phase 4: Session hardening + cookie strategy
+- [~] Phase 5: Rollout plan (staging → production) — infra in progress (Azure/DNS)
 
 ## 1) Decision summary
 - App stays on `https://stevi.iharc.ca`.
@@ -108,6 +115,12 @@ Production:
 - Deploy `stevi.iharc.ca` OAuth client + callback.
 - Canary rollout, monitor error rates, rollback plan.
 
+### Infra status (2025-12-23)
+- Created Azure App Service `STEVI-LOGIN` on the existing `IHARC-Linux` plan.
+- DNS CNAME created: `login.iharc.ca` → `stevi-login.azurewebsites.net`.
+- Hostname binding added for `login.iharc.ca`.
+- HTTPS-only enabled and managed SSL certificate bound (SNI).
+
 ## 10) Decision: use OpenID tokens?
 Recommendation: **Yes** if you anticipate external clients, third-party integrations, or multiple first‑party apps.
 - OIDC provides standardized identity assertions (ID token + discovery endpoints).
@@ -124,4 +137,3 @@ If the system remains a single internal web app only, OIDC is optional.
 - Which additional clients are planned in the next 12–24 months?
 - Which scopes are truly required today?
 - Do we need user-facing consent for first‑party clients, or only third‑party clients?
-

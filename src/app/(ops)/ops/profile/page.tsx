@@ -23,7 +23,7 @@ export default async function OpsProfilePage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/login?next=/ops/profile');
+    redirect('/auth/start?next=/ops/profile');
   }
 
   const {

@@ -13,7 +13,7 @@ export default async function PastAppointmentsPage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/login?next=/appointments/past');
+    redirect('/auth/start?next=/appointments/past');
   }
 
   await ensurePortalProfile(supabase, user.id);

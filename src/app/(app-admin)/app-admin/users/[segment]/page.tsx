@@ -29,7 +29,7 @@ export default async function AdminUsersSegmentPage({ params, searchParams }: Pa
   const access = await loadPortalAccess(supabase);
 
   if (!access) {
-    redirect(`/login?next=/app-admin/users/${segment}`);
+    redirect(`/auth/start?next=/app-admin/users/${segment}`);
   }
 
   if (!access.canAccessOpsAdmin) {

@@ -20,7 +20,7 @@ export default async function OpsInventoryPage({ searchParams }: PageProps) {
   const access = await loadPortalAccess(supabase);
 
   if (!access) {
-    redirect(`/login?next=${encodeURIComponent('/ops/inventory?view=dashboard')}`);
+    redirect(`/auth/start?next=${encodeURIComponent('/ops/inventory?view=dashboard')}`);
   }
 
   if (!access.canAccessInventoryOps) {

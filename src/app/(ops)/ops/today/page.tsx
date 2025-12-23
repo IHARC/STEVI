@@ -18,7 +18,7 @@ export default async function OpsTodayPage() {
   const access = await loadPortalAccess(supabase);
 
   if (!access) {
-    redirect('/login?next=/ops/today');
+    redirect('/auth/start?next=/ops/today');
   }
 
   if (!access.canAccessOpsAdmin && !access.canAccessOpsFrontline && !access.canAccessOpsOrg) {
