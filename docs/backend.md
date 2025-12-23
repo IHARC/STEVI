@@ -12,7 +12,7 @@ This document captures the backend expectations for running the STEVI portal alo
 
 ## Environment Variables
 
-Copy `.env.example` to `.env` and fill the required values. All variables prefixed with `NEXT_PUBLIC_` are exposed to the browser. Do not expose secrets such as the service-role key or the alerts secret.
+Use `.env` (git-ignored) for local values and update the local override block when testing localhost flows. All variables prefixed with `NEXT_PUBLIC_` are exposed to the browser. Do not expose secrets such as the service-role key or the alerts secret.
 
 | Variable | Required | Description |
 | --- | --- | --- |
@@ -79,7 +79,7 @@ Copy `.env.example` to `.env` and fill the required values. All variables prefix
 ## Local Development
 
 1. `npm install`
-2. Copy `.env.example` to `.env.local` (or `.env`) and provide the shared Supabase credentials.
+2. Update `.env` with the shared Supabase credentials (and localhost overrides when testing locally).
 3. `npm run dev` to start Next.js locally (port 3000 by default).
 4. Optional: set `NEXT_PUBLIC_ANALYTICS_DISABLED=true` while developing to silence GA scripts.
 

@@ -8,17 +8,18 @@ read-only; both apps share the same Supabase project.
 ## Getting Started
 
 - **Prerequisites**: Node.js 24.12.0+ (npm 10+). Run `nvm use` if you have it installed.
-- **Configure env**: Copy `.env.example` to `.env.local` and fill the Supabase + app URLs (see below).
+- **Configure env**: Use `.env` (git-ignored) for local values. Update the local override block to point to localhost when needed (see below).
 - **Install dependencies**: `npm install`
 - **Run locally**: `npm run dev` (http://localhost:3000)
+- **Local OAuth**: Ensure Supabase OAuth Server allows `http://localhost:3000/auth/callback` and set `NEXT_PUBLIC_APP_URL`/`NEXT_PUBLIC_LOGIN_URL` to localhost in `.env`.
 - **Type checks**: `npm run typecheck`
 - **Linting**: `npm run lint`
 - **Unit tests**: `npm run test`
 - **E2E tests**: `npm run e2e`
 
 Environment variables (full notes in `docs/backend.md`):
-- Required: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_SITE_URL`
-- Optional: `PORTAL_ALERTS_SECRET` (Edge Function trigger), `NEXT_PUBLIC_GA4_ID`, `NEXT_PUBLIC_ANALYTICS_DISABLED`, `SUPABASE_SERVICE_ROLE_KEY` (local scripts only)
+- Required: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_LOGIN_URL`, `SUPABASE_OAUTH_CLIENT_ID`, `SUPABASE_OAUTH_SCOPES`
+- Optional: `SUPABASE_OAUTH_REDIRECT_URI`, `PORTAL_ALERTS_SECRET` (Edge Function trigger), `NEXT_PUBLIC_GA4_ID`, `NEXT_PUBLIC_ANALYTICS_DISABLED`, `SUPABASE_SERVICE_ROLE_KEY` (local scripts only)
 - E2E credentials (Playwright): `E2E_TEST_EMAIL`, `E2E_TEST_PASSWORD`, `E2E_CLIENT_EMAIL`, `E2E_CLIENT_PASSWORD`
 - E2E CRUD tests use the Supabase URL + publishable key above, create `portal.resource_pages` rows prefixed with `e2e-crud-resource-`, and scrub them during teardown. If teardown fails, delete rows where `slug like 'e2e-crud-resource-%'`.
 
@@ -26,7 +27,7 @@ Environment variables (full notes in `docs/backend.md`):
 
 - Next.js 16 App Router with React Server Components (React 19)
 - TypeScript + Tailwind CSS with shadcn/ui tokens sourced from `src/styles/theme.css`, Radix primitives, and TipTap for rich text
-- Supabase Auth/Database/Edge Functions shared with the marketing portal (schemas: `portal`, `core`, `case_mgmt`, `inventory`, `donations`)
+- Supabase OAuth Server (beta) for auth + Supabase Database/Edge Functions shared with the marketing portal (schemas: `portal`, `core`, `case_mgmt`, `inventory`, `donations`)
 - Vitest + Testing Library for unit coverage; Playwright for end-to-end flows
 - Azure App Service (Linux, Node 24.12.x) deployed via GitHub Actions (`.github/workflows/main_stevi.yml`); build entry `node build.js` runs lint + forces a webpack Next build for standalone output. Runtime uses `.next/standalone/server.js`.
 
