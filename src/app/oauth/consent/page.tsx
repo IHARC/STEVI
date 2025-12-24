@@ -124,6 +124,27 @@ export default async function OAuthConsentPage({ searchParams }: ConsentPageProp
     return <MissingAuthorizationDetails />;
   }
 
+  const clientIdValue = details.client?.client_id ?? details.client_id ?? null;
+  const redirectTo = details.redirect_to ?? details.redirect_uri ?? null;
+  const firstPartyClientId = process.env.SUPABASE_OAUTH_CLIENT_ID ?? null;
+  const shouldAutoApprove =
+    !errorCode && Boolean(firstPartyClientId && clientIdValue && firstPartyClientId === clientIdValue);
+
+  if (!errorCode && redirectTo) {
+    redirect(redirectTo);
+  }
+
+  if (shouldAutoApprove) {
+    const supa = await createSupabaseAuthServerClient();
+    const { data, error } = await supa.auth.oauth.approveAuthorization(authorizationIdValue, {
+      skipBrowserRedirect: true,
+    });
+
+    if (!error && data?.redirect_to) {
+      redirect(data.redirect_to);
+    }
+  }
+
   async function signOut() {
     'use server';
 
@@ -133,7 +154,7 @@ export default async function OAuthConsentPage({ searchParams }: ConsentPageProp
   }
 
   const clientName = details.client?.name ?? details.client?.client_name ?? 'Unknown client';
-  const clientId = details.client?.client_id ?? details.client_id ?? 'Unknown client';
+  const clientId = clientIdValue ?? 'Unknown client';
   const scopeList = normalizeScopes(details.requested_scopes ?? details.scopes);
   const identityLabel = user.email ?? user.phone ?? 'Signed-in account';
 
@@ -273,6 +294,8 @@ type AuthorizationDetails = {
   client_id?: string | null;
   scopes?: string[] | string | null;
   requested_scopes?: string[] | string | null;
+  redirect_uri?: string | null;
+  redirect_to?: string | null;
   client?: {
     client_id?: string | null;
     name?: string | null;

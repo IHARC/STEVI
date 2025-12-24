@@ -16,6 +16,7 @@ Last updated: 2025-12-23
 - New login + consent flow will live at `https://login.iharc.ca`.
 - Use Supabase OAuth 2.1 Server (public beta) as the authorization server.
 - Dedicated consent screen is required, especially for external/partner clients.
+- First-party clients auto-approve consent; the consent UI is reserved for third-party clients or error recovery.
 - OAuth flow: Authorization Code + PKCE.
 
 ## 2) Goals
@@ -136,4 +137,3 @@ If the system remains a single internal web app only, OIDC is optional.
 ## 12) Open questions
 - Which additional clients are planned in the next 12–24 months?
 - Which scopes are truly required today?
-- Do we need user-facing consent for first‑party clients, or only third‑party clients?
