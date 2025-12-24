@@ -19,5 +19,4 @@ export type OnboardingPrefill = {
   safeCall: boolean;
   safeText: boolean;
   safeVoicemail: boolean;
-  dataSharingConsent: boolean | null;
 };

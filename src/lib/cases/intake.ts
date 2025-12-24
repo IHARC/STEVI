@@ -3,6 +3,7 @@ import { ensurePortalProfile } from '@/lib/profile';
 import type { SupabaseServerClient } from '@/lib/supabase/types';
 import type { IntakeSubmission } from '@/lib/cases/types';
 import { createPersonGrant } from '@/lib/cases/grants';
+import { consentAllowsOrg, getIharcOrgId } from '@/lib/consents';
 
 const PEOPLE_TABLE = 'people';
 const CASE_TABLE = 'case_management';
@@ -48,7 +49,6 @@ export async function processClientIntake(
     last_name: null,
     email: intakeRow.contact_email,
     phone: intakeRow.contact_phone,
-    data_sharing_consent: intakeRow.consent_data_sharing ?? null,
     preferred_contact_method: derivePreferredContact(intakeRow),
     created_by: intakeRow.supabase_user_id ?? actorUserId,
     person_category: null,
@@ -120,7 +120,6 @@ export async function processClientIntake(
       metadata: {
         intake_id: intakeRow.id,
         consent_contact: intakeRow.consent_contact,
-        consent_data_sharing: intakeRow.consent_data_sharing,
         client_visible: false,
       },
       created_by: actorUserId,
@@ -174,6 +173,8 @@ async function maybeGrantDefaults({
   actorUserId: string;
   actorOrgId: number | null;
 }) {
+  const iharcOrgId = await getIharcOrgId(supabase);
+
   if (clientUserId) {
     await createPersonGrant(supabase, {
       personId,
@@ -194,21 +195,26 @@ async function maybeGrantDefaults({
   }
 
   if (actorOrgId !== null) {
-    await createPersonGrant(supabase, {
-      personId,
-      scope: 'timeline_full',
-      granteeUserId: null,
-      granteeOrgId: actorOrgId,
-      actorProfileId,
-      actorUserId,
-    });
-    await createPersonGrant(supabase, {
-      personId,
-      scope: 'write_notes',
-      granteeUserId: null,
-      granteeOrgId: actorOrgId,
-      actorProfileId,
-      actorUserId,
-    });
+    const isIharcOrg = iharcOrgId !== null && actorOrgId === iharcOrgId;
+    const orgAllowed = isIharcOrg ? true : await consentAllowsOrg(supabase, personId, actorOrgId);
+
+    if (orgAllowed) {
+      await createPersonGrant(supabase, {
+        personId,
+        scope: 'timeline_full',
+        granteeUserId: null,
+        granteeOrgId: actorOrgId,
+        actorProfileId,
+        actorUserId,
+      });
+      await createPersonGrant(supabase, {
+        personId,
+        scope: 'write_notes',
+        granteeUserId: null,
+        granteeOrgId: actorOrgId,
+        actorProfileId,
+        actorUserId,
+      });
+    }
   }
 }

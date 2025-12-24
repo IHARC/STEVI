@@ -77,6 +77,12 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
             match: ['/ops/clients'],
             query: { view: 'activity' },
           },
+          {
+            id: 'clients-consents',
+            href: '/ops/consents',
+            label: 'Consent requests',
+            match: ['/ops/consents'],
+          },
         ],
       },
       {
@@ -180,6 +186,20 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
             label: 'Organizations',
             icon: 'building',
             match: ['/ops/organizations'],
+          },
+        ],
+      },
+      {
+        id: 'consents',
+        label: 'Consents',
+        icon: 'shield',
+        isHub: true,
+        items: [
+          {
+            id: 'consent-requests',
+            href: '/ops/consents',
+            label: 'Consent requests',
+            match: ['/ops/consents'],
           },
         ],
       },

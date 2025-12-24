@@ -7,6 +7,7 @@ import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 import { getUserEmailForProfile } from '@/lib/profile';
 import { queuePortalNotification } from '@/lib/notifications';
 import { getOnboardingStatus } from '@/lib/onboarding/status';
+import { syncConsentGrants } from '@/lib/consents';
 
 type AdminActionResult = { status: 'success' | 'error'; message: string };
 
@@ -30,14 +31,40 @@ export async function resetOnboardingAction(formData: FormData): Promise<AdminAc
   const core = supabase.schema('core');
   const caseMgmt = supabase.schema('case_mgmt');
 
-  const { error: updateError } = await core
-    .from('people')
-    .update({ data_sharing_consent: null, updated_at: now, updated_by: access.userId })
-    .eq('id', personId);
+  const { data: activeConsents, error: consentFetchError } = await core
+    .from('person_consents')
+    .select('id')
+    .eq('person_id', personId)
+    .eq('status', 'active');
 
-  if (updateError) {
-    return errorResult('Unable to reset sharing preference.');
+  if (consentFetchError) {
+    return errorResult('Unable to reset consent records.');
   }
+
+  if ((activeConsents ?? []).length > 0) {
+    const { error: revokeError } = await core
+      .from('person_consents')
+      .update({
+        status: 'revoked',
+        revoked_at: now,
+        revoked_by: access.profile.id,
+        notes: 'Onboarding reset by admin; consent requires renewal.',
+        updated_at: now,
+      })
+      .eq('person_id', personId)
+      .eq('status', 'active');
+
+    if (revokeError) {
+      return errorResult('Unable to revoke existing consents.');
+    }
+  }
+
+  await syncConsentGrants(supabase, {
+    personId,
+    allowedOrgIds: [],
+    actorProfileId: access.profile.id,
+    actorUserId: access.userId,
+  });
 
   const { error: intakeError } = await caseMgmt.from('client_intakes').insert({
     person_id: personId,
@@ -57,7 +84,7 @@ export async function resetOnboardingAction(formData: FormData): Promise<AdminAc
     action: 'onboarding_reset',
     entityType: 'people',
     entityRef: buildEntityRef({ schema: 'core', table: 'people', id: personId }),
-    meta: { person_id: personId, reset_by: access.profile.id },
+    meta: { person_id: personId, reset_by: access.profile.id, revoked_consent_ids: (activeConsents ?? []).map((row) => row.id) },
   });
 
   revalidatePath(`/app-admin/clients/${personId}`);

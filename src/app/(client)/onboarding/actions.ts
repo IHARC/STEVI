@@ -6,6 +6,13 @@ import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 import { getOnboardingStatus, type OnboardingStatus } from '@/lib/onboarding/status';
 import { resolveOnboardingActor, composeContactContext } from '@/lib/onboarding/utils';
 import { findPersonForUser } from '@/lib/cases/person';
+import {
+  consentAllowsOrg,
+  listConsentOrgs,
+  listParticipatingOrganizations,
+  resolveConsentOrgSelections,
+  saveConsent,
+} from '@/lib/consents';
 import { normalizePhoneNumber } from '@/lib/phone';
 import { normalizeEmail } from '@/lib/email';
 import { normalizePostalCode } from '@/lib/registration';
@@ -35,6 +42,21 @@ function sanitizeShortText(value: FormDataEntryValue | null, max = 160): string 
   const trimmed = value.trim();
   if (!trimmed) return null;
   return trimmed.slice(0, max);
+}
+
+const CONSENT_SCOPE_VALUES = ['all_orgs', 'selected_orgs', 'none'] as const;
+type ConsentScope = (typeof CONSENT_SCOPE_VALUES)[number];
+
+function parseConsentScope(raw: string | null): ConsentScope {
+  if (!raw) return 'all_orgs';
+  return CONSENT_SCOPE_VALUES.includes(raw as ConsentScope) ? (raw as ConsentScope) : 'all_orgs';
+}
+
+function parseOrgIds(formData: FormData, key: string): number[] {
+  return formData
+    .getAll(key)
+    .map((value) => Number.parseInt(String(value ?? ''), 10))
+    .filter((value) => Number.isFinite(value) && value > 0);
 }
 
 async function upsertRegistrationDraft(
@@ -138,7 +160,7 @@ async function upsertRegistrationDraft(
 
 type PersonRow = Pick<
   Database['core']['Tables']['people']['Row'],
-  'id' | 'status' | 'data_sharing_consent'
+  'id' | 'status'
 >;
 
 type RegistrationContext = Pick<
@@ -159,7 +181,7 @@ async function loadPersonById(
   const { data, error } = await supabase
     .schema('core')
     .from('people')
-    .select('id, status, data_sharing_consent')
+    .select('id, status')
     .eq('id', personId)
     .maybeSingle();
 
@@ -287,7 +309,7 @@ export async function saveBasicInfoAction(_prev: OnboardingActionState, formData
         created_by: access.userId,
         updated_by: access.userId,
       })
-      .select('id, status, data_sharing_consent')
+      .select('id, status')
       .single();
 
     if (error) {
@@ -298,8 +320,11 @@ export async function saveBasicInfoAction(_prev: OnboardingActionState, formData
     personId = personRow.id;
     personCreated = true;
   } else {
-    if (actor === 'partner' && personRow.data_sharing_consent !== true) {
-      return errorState('Partner assistance is allowed only when the client has opted to share with partners.');
+    if (actor === 'partner') {
+      const partnerAllowed = await consentAllowsOrg(supabase, personRow.id, access.organizationId);
+      if (!partnerAllowed) {
+        return errorState('Partner assistance is allowed only when the client has explicitly consented to share with your organization.');
+      }
     }
 
     const core = supabase.schema('core');
@@ -457,11 +482,17 @@ export async function saveSharingPreferenceAction(
   }
 
   const personId = getNumber(formData, 'person_id');
-  const sharingChoice = sanitizeShortText(formData.get('data_sharing')) ?? 'iharc_only';
-  const dataSharingConsent = sharingChoice === 'partners';
+  const consentScope = parseConsentScope(sanitizeShortText(formData.get('consent_scope')));
+  const consentConfirmed = getBoolean(formData, 'consent_confirm');
+  const policyVersion = sanitizeShortText(formData.get('policy_version'), 120);
+  const allowedOrgIds = parseOrgIds(formData, 'org_allowed_ids');
 
   if (!personId) {
     return errorState('A client record is required before setting sharing preferences.');
+  }
+
+  if (!consentConfirmed) {
+    return errorState('Confirm your sharing choice before saving.');
   }
 
   const personRow = await loadPersonById(supabase, personId);
@@ -469,27 +500,105 @@ export async function saveSharingPreferenceAction(
     return errorState('That client record is inactive or missing.');
   }
 
-  const core = supabase.schema('core');
-  const { error } = await core
-    .from('people')
-    .update({
-      data_sharing_consent: dataSharingConsent,
-      updated_at: new Date().toISOString(),
-      updated_by: access.userId,
-    })
-    .eq('id', personId);
+  const participatingOrgs = await listParticipatingOrganizations(supabase, {
+    excludeOrgId: access.iharcOrganizationId,
+  });
+  const participatingOrgIds = participatingOrgs.map((org) => org.id);
+  const allowedSet = new Set(allowedOrgIds.filter((id) => participatingOrgIds.includes(id)));
+  let blockedOrgIds: number[] = [];
 
-  if (error) {
-    return errorState('Unable to save the sharing choice right now.');
+  if (consentScope === 'all_orgs') {
+    blockedOrgIds = participatingOrgIds.filter((id) => !allowedSet.has(id));
   }
+
+  if (consentScope === 'selected_orgs') {
+    blockedOrgIds = participatingOrgIds.filter((id) => !allowedSet.has(id));
+  }
+
+  if (consentScope === 'none') {
+    allowedSet.clear();
+    blockedOrgIds = participatingOrgIds;
+  }
+
+  if (consentScope === 'selected_orgs' && allowedSet.size === 0) {
+    return errorState('Select at least one organization to share with.');
+  }
+
+  const { consent, previousConsent } = await saveConsent(supabase, {
+    personId,
+    scope: consentScope,
+    allowedOrgIds: Array.from(allowedSet),
+    blockedOrgIds,
+    actorProfileId: access.profile.id,
+    actorUserId: access.userId,
+    method: actor === 'staff' ? 'staff_assisted' : 'portal',
+    notes: null,
+    policyVersion: policyVersion ?? null,
+  });
 
   await logAuditEvent(supabase, {
     actorProfileId: access.profile.id,
-    action: 'onboarding_sharing_saved',
-    entityType: 'people',
-    entityRef: buildEntityRef({ schema: 'core', table: 'people', id: personId }),
-    meta: { person_id: personId, data_sharing_consent: dataSharingConsent, actor_role: actor },
+    action: previousConsent ? 'consent_updated' : 'consent_created',
+    entityType: 'core.person_consents',
+    entityRef: buildEntityRef({ schema: 'core', table: 'person_consents', id: consent.id }),
+    meta: {
+      person_id: personId,
+      actor_role: actor,
+      scope: consentScope,
+      previous_scope: previousConsent?.scope ?? null,
+      allowed_org_ids: Array.from(allowedSet),
+      blocked_org_ids: blockedOrgIds,
+      method: actor === 'staff' ? 'staff_assisted' : 'portal',
+    },
   });
+
+  if (previousConsent) {
+    const previousOrgRows = await listConsentOrgs(supabase, previousConsent.id);
+    const previousResolution = resolveConsentOrgSelections(previousConsent.scope, participatingOrgs, previousOrgRows);
+    const nextResolution = resolveConsentOrgSelections(consentScope, participatingOrgs, [
+      ...Array.from(allowedSet).map((orgId) => ({
+        id: `allow-${orgId}`,
+        consentId: consent.id,
+        organizationId: orgId,
+        allowed: true,
+        setBy: access.profile.id,
+        setAt: new Date().toISOString(),
+        reason: null,
+      })),
+      ...blockedOrgIds.map((orgId) => ({
+        id: `block-${orgId}`,
+        consentId: consent.id,
+        organizationId: orgId,
+        allowed: false,
+        setBy: access.profile.id,
+        setAt: new Date().toISOString(),
+        reason: null,
+      })),
+    ]);
+    const previousAllowed = new Set(previousResolution.allowedOrgIds);
+    const nextAllowed = new Set(nextResolution.allowedOrgIds);
+    const changed =
+      previousResolution.allowedOrgIds.length !== nextResolution.allowedOrgIds.length ||
+      previousResolution.blockedOrgIds.length !== nextResolution.blockedOrgIds.length ||
+      Array.from(nextAllowed).some((id) => !previousAllowed.has(id));
+
+    if (changed) {
+      await logAuditEvent(supabase, {
+        actorProfileId: access.profile.id,
+        action: 'consent_org_updated',
+        entityType: 'core.person_consents',
+        entityRef: buildEntityRef({ schema: 'core', table: 'person_consents', id: consent.id }),
+        meta: {
+          person_id: personId,
+          previous_allowed_org_ids: previousResolution.allowedOrgIds,
+          previous_blocked_org_ids: previousResolution.blockedOrgIds,
+          allowed_org_ids: nextResolution.allowedOrgIds,
+          blocked_org_ids: nextResolution.blockedOrgIds,
+          actor_role: actor,
+        },
+      });
+    }
+  }
 
   const nextStatus = await getOnboardingStatus({ userId: access.userId, personId }, supabase);
 

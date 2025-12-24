@@ -9,6 +9,7 @@ import { OnboardingWizard, type OnboardingPrefill } from '@client/onboarding/onb
 import { getPolicyBySlug } from '@/lib/policies';
 import { normalizePostalCode } from '@/lib/registration';
 import { resolveLandingPath } from '@/lib/portal-navigation';
+import { consentAllowsOrg, getEffectiveConsent, listConsentOrgs, listParticipatingOrganizations, resolveConsentOrgSelections } from '@/lib/consents';
 import { Button } from '@shared/ui/button';
 import { PageHeader } from '@shared/layout/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
@@ -29,7 +30,6 @@ type PersonDetail = Pick<
   | 'phone'
   | 'preferred_pronouns'
   | 'preferred_contact_method'
-  | 'data_sharing_consent'
 >;
 
 type RegistrationDraft = Pick<
@@ -46,7 +46,6 @@ type RegistrationDraft = Pick<
   | 'contact_phone_safe_call'
   | 'contact_phone_safe_text'
   | 'contact_phone_safe_voicemail'
-  | 'consent_data_sharing'
 >;
 
 export default async function OnboardingPage({ searchParams }: PageProps) {
@@ -89,15 +88,28 @@ export default async function OnboardingPage({ searchParams }: PageProps) {
     personId ? hasAccountLink(supabase, user.id, personId) : Promise.resolve(false),
   ]);
 
+  const policyVersion = privacyPolicy?.updatedAt ?? null;
+  const participatingOrgs = await listParticipatingOrganizations(supabase, { excludeOrgId: access.iharcOrganizationId });
+  const effectiveConsent = personId ? await getEffectiveConsent(supabase, personId) : null;
+  const consentOrgs = effectiveConsent?.consent ? await listConsentOrgs(supabase, effectiveConsent.consent.id) : [];
+  const sharingScope = effectiveConsent?.consent?.scope ?? 'all_orgs';
+  const orgResolution = resolveConsentOrgSelections(sharingScope, participatingOrgs, consentOrgs);
+
+  let partnerBlockedReason: string | null = null;
+  if (actor === 'partner') {
+    if (!personId) {
+      partnerBlockedReason = 'Partner assistance requires an existing client record created by IHARC staff.';
+    } else if (!access.organizationId) {
+      partnerBlockedReason = 'Select your acting organization before assisting a client.';
+    } else {
+      const allowed = await consentAllowsOrg(supabase, personId, access.organizationId);
+      if (!allowed) {
+        partnerBlockedReason = 'This client has not consented to share with your organization. Ask IHARC staff or the client to update sharing.';
+      }
+    }
+  }
+
   const prefill = buildPrefill({ person: personDetail, draft: registrationDraft, fallbackName: access.profile.display_name });
-  const partnerBlockedReason =
-    actor !== 'partner'
-      ? null
-      : !personId
-        ? 'Partner assistance requires an existing client record created by IHARC staff.'
-        : prefill.dataSharingConsent === true
-          ? null
-          : 'This client has not opted into partner sharing. Ask IHARC staff or the client to update sharing before assisting.';
 
   return (
     <div className="flex flex-col gap-6">
@@ -171,6 +183,11 @@ export default async function OnboardingPage({ searchParams }: PageProps) {
               }
             : null,
         }}
+        sharing={{
+          scope: sharingScope,
+          orgSelections: orgResolution.selections,
+          policyVersion,
+        }}
         partnerBlockedReason={partnerBlockedReason}
       />
     </div>
@@ -194,7 +211,7 @@ async function loadPersonDetail(
   const { data } = await supabase
     .schema('core')
     .from('people')
-    .select('id, first_name, last_name, email, phone, preferred_pronouns, preferred_contact_method, data_sharing_consent')
+    .select('id, first_name, last_name, email, phone, preferred_pronouns, preferred_contact_method')
     .eq('id', personId)
     .maybeSingle();
 
@@ -212,7 +229,7 @@ async function loadLatestRegistrationDraft(
   let query = portal
     .from('registration_flows')
     .select(
-      'chosen_name, legal_name, pronouns, contact_email, contact_phone, contact_window, postal_code, date_of_birth_month, date_of_birth_year, contact_phone_safe_call, contact_phone_safe_text, contact_phone_safe_voicemail, consent_data_sharing',
+      'chosen_name, legal_name, pronouns, contact_email, contact_phone, contact_window, postal_code, date_of_birth_month, date_of_birth_year, contact_phone_safe_call, contact_phone_safe_text, contact_phone_safe_voicemail',
     )
     .order('updated_at', { ascending: false })
     .limit(1)
@@ -277,6 +294,5 @@ function buildPrefill({
     safeCall: draft?.contact_phone_safe_call ?? false,
     safeText: draft?.contact_phone_safe_text ?? false,
     safeVoicemail: draft?.contact_phone_safe_voicemail ?? false,
-    dataSharingConsent: person?.data_sharing_consent ?? (draft?.consent_data_sharing ?? null),
   };
 }

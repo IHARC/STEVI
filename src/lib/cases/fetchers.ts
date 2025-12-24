@@ -1,4 +1,5 @@
 import { findPersonForUser } from '@/lib/cases/person';
+import { getEffectiveConsent, listConsentOrgs, listParticipatingOrganizations, resolveConsentOrgSelections } from '@/lib/consents';
 import type {
   CaseActivity,
   CaseSummary,
@@ -15,7 +16,7 @@ const CASE_TABLE = 'case_management';
 const ACTIVITIES_TABLE = 'people_activities';
 const REGISTRATION_TABLE = 'registration_flows';
 const CASE_SELECT = 'id, person_id, case_number, case_type, status, priority, case_manager_name, case_manager_contact, start_date, end_date';
-const INTAKE_SELECT = 'id, chosen_name, contact_email, contact_phone, status, created_at, metadata, supabase_user_id, profile_id, consent_contact, consent_data_sharing';
+const INTAKE_SELECT = 'id, chosen_name, contact_email, contact_phone, status, created_at, metadata, supabase_user_id, profile_id, consent_contact';
 type RegistrationRow = Database['portal']['Tables']['registration_flows']['Row'];
 type ActivityRow = Database['core']['Tables']['people_activities']['Row'];
 
@@ -94,15 +95,34 @@ export async function fetchClientCaseActivities(
 
 export async function fetchPersonConsents(
   supabase: SupabaseAnyServerClient,
-  userId: string,
+  {
+    userId,
+    iharcOrgId,
+  }: { userId: string; iharcOrgId: number | null },
 ): Promise<{ personId: number; snapshot: ConsentSnapshot } | null> {
   const person = await findPersonForUser(supabase, userId);
   if (!person) return null;
 
+  const effective = await getEffectiveConsent(supabase, person.id);
+  const participatingOrgs = await listParticipatingOrganizations(supabase, {
+    excludeOrgId: iharcOrgId,
+  });
+  const consentOrgs = effective.consent ? await listConsentOrgs(supabase, effective.consent.id) : [];
+  const scopeForSelection = effective.consent?.scope ?? 'all_orgs';
+  const orgResolution = resolveConsentOrgSelections(scopeForSelection, participatingOrgs, consentOrgs);
+
   return {
     personId: person.id,
     snapshot: {
-      dataSharing: person.data_sharing_consent,
+      consentId: effective.consent?.id ?? null,
+      scope: effective.consent?.scope ?? null,
+      status: effective.consent?.status ?? null,
+      effectiveStatus: effective.effectiveStatus ?? null,
+      expiresAt: effective.expiresAt ?? null,
+      updatedAt: effective.consent?.updatedAt ?? null,
+      orgSelections: orgResolution.selections,
+      allowedOrgIds: orgResolution.allowedOrgIds,
+      blockedOrgIds: orgResolution.blockedOrgIds,
       preferredContactMethod: person.preferred_contact_method,
       privacyRestrictions: person.privacy_restrictions,
     },
@@ -198,7 +218,6 @@ export async function fetchPendingIntakes(
     supabaseUserId: row.supabase_user_id,
     profileId: row.profile_id,
     consentContact: row.consent_contact,
-    consentDataSharing: row.consent_data_sharing,
   }));
 }
 

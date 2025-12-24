@@ -36,9 +36,20 @@ describe('getOnboardingStatus', () => {
         data: {
           id: 10,
           status: 'active',
-          data_sharing_consent: true,
           updated_at: '2025-01-02T12:00:00Z',
           created_at: '2025-01-01T00:00:00Z',
+        },
+        error: null,
+      },
+      'core.person_consents': {
+        data: {
+          id: 'consent-1',
+          person_id: 10,
+          status: 'active',
+          scope: 'all_orgs',
+          expires_at: '2026-01-02T00:00:00Z',
+          created_at: '2025-01-02T08:00:00Z',
+          updated_at: null,
         },
         error: null,
       },
@@ -75,12 +86,12 @@ describe('getOnboardingStatus', () => {
         data: {
           id: 22,
           status: 'active',
-          data_sharing_consent: null,
           updated_at: '2025-01-02T00:00:00Z',
           created_at: '2024-12-31T00:00:00Z',
         },
         error: null,
       },
+      'core.person_consents': { data: null, error: null },
       'case_mgmt.client_intakes': {
         data: {
           id: 8,
@@ -137,9 +148,20 @@ describe('getOnboardingStatus', () => {
         data: {
           id: 33,
           status: 'inactive',
-          data_sharing_consent: true,
           updated_at: '2025-01-03T00:00:00Z',
           created_at: '2025-01-01T00:00:00Z',
+        },
+        error: null,
+      },
+      'core.person_consents': {
+        data: {
+          id: 'consent-2',
+          person_id: 33,
+          status: 'active',
+          scope: 'all_orgs',
+          expires_at: '2026-01-02T00:00:00Z',
+          created_at: '2025-01-02T08:00:00Z',
+          updated_at: null,
         },
         error: null,
       },

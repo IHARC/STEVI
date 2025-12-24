@@ -25,6 +25,7 @@ const ADMIN_NAV: SettingsNavGroup[] = [
       { label: 'Roles & permissions', href: '/app-admin/permissions', match: ['/app-admin/permissions'] },
       { label: 'Content & comms', href: '/app-admin/content', match: ['/app-admin/content'] },
       { label: 'Integrations', href: '/app-admin/integrations', match: ['/app-admin/integrations'] },
+      { label: 'Consents', href: '/app-admin/consents', match: ['/app-admin/consents'] },
       {
         label: 'Website & marketing',
         href: '/app-admin/website',

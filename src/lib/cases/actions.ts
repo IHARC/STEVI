@@ -9,10 +9,35 @@ import { fetchClientCaseDetail, fetchStaffCaseDetail } from '@/lib/cases/fetcher
 import { processClientIntake } from '@/lib/cases/intake';
 import { createPersonGrant, revokePersonGrant } from '@/lib/cases/grants';
 import { getGrantScopes } from '@/lib/enum-values';
-import { assertOnboardingComplete } from '@/lib/onboarding/guard';
+import { assertOnboardingComplete, assertOnboardingReadyForConsent } from '@/lib/onboarding/guard';
+import {
+  getEffectiveConsent,
+  listConsentOrgs,
+  listParticipatingOrganizations,
+  resolveConsentOrgSelections,
+  renewConsent,
+  revokeConsent,
+  saveConsent,
+  syncConsentGrants,
+} from '@/lib/consents';
 
 const ACTIVITIES_TABLE = 'people_activities';
 const PEOPLE_TABLE = 'people';
+
+const CONSENT_SCOPE_VALUES = ['all_orgs', 'selected_orgs', 'none'] as const;
+type ConsentScope = (typeof CONSENT_SCOPE_VALUES)[number];
+
+function parseConsentScope(raw: string | null): ConsentScope {
+  if (!raw) return 'all_orgs';
+  return CONSENT_SCOPE_VALUES.includes(raw as ConsentScope) ? (raw as ConsentScope) : 'all_orgs';
+}
+
+function parseOrgIds(formData: FormData, key: string): number[] {
+  return formData
+    .getAll(key)
+    .map((value) => Number.parseInt(String(value ?? ''), 10))
+    .filter((value) => Number.isFinite(value) && value > 0);
+}
 
 export async function submitClientCaseUpdateAction(formData: FormData): Promise<void> {
   const caseId = parseInt(String(formData.get('case_id') ?? ''), 10);
@@ -71,23 +96,53 @@ export async function submitClientCaseUpdateAction(formData: FormData): Promise<
 }
 
 export async function updateConsentsAction(formData: FormData): Promise<void> {
-  const dataSharing = formData.get('data_sharing') === 'on';
+  const consentScope = parseConsentScope(String(formData.get('consent_scope') ?? 'all_orgs'));
+  const consentConfirmed = formData.get('consent_confirm') === 'on';
+  const allowedOrgIds = parseOrgIds(formData, 'org_allowed_ids');
   const preferredContact = (formData.get('preferred_contact') as string | null)?.trim() || null;
   const privacyNotes = (formData.get('privacy_restrictions') as string | null)?.trim() || null;
+  const policyVersion = (formData.get('policy_version') as string | null)?.trim() || null;
 
   const supabase = await createSupabaseServerClient();
   const access = await loadPortalAccess(supabase);
   if (!access) throw new Error('Sign in to update consents.');
 
-  await assertOnboardingComplete(supabase, access.userId);
+  await assertOnboardingReadyForConsent(supabase, access.userId);
 
   const person = await requirePersonForUser(supabase, access.userId);
   const core = supabase.schema('core');
 
+  if (!consentConfirmed) {
+    throw new Error('Confirm your sharing choice before saving.');
+  }
+
+  const participatingOrgs = await listParticipatingOrganizations(supabase, {
+    excludeOrgId: access.iharcOrganizationId,
+  });
+  const participatingOrgIds = participatingOrgs.map((org) => org.id);
+  const allowedSet = new Set(allowedOrgIds.filter((id) => participatingOrgIds.includes(id)));
+  let blockedOrgIds: number[] = [];
+
+  if (consentScope === 'all_orgs') {
+    blockedOrgIds = participatingOrgIds.filter((id) => !allowedSet.has(id));
+  }
+
+  if (consentScope === 'selected_orgs') {
+    blockedOrgIds = participatingOrgIds.filter((id) => !allowedSet.has(id));
+  }
+
+  if (consentScope === 'none') {
+    allowedSet.clear();
+    blockedOrgIds = participatingOrgIds;
+  }
+
+  if (consentScope === 'selected_orgs' && allowedSet.size === 0) {
+    throw new Error('Select at least one organization to share with.');
+  }
+
   const { error } = await core
     .from(PEOPLE_TABLE)
     .update({
-      data_sharing_consent: dataSharing,
       preferred_contact_method: preferredContact,
       privacy_restrictions: privacyNotes,
       updated_by: access.userId,
@@ -99,20 +154,92 @@ export async function updateConsentsAction(formData: FormData): Promise<void> {
     throw new Error('Could not save your consent changes.');
   }
 
+  const { consent, previousConsent } = await saveConsent(supabase, {
+    personId: person.id,
+    scope: consentScope,
+    allowedOrgIds: Array.from(allowedSet),
+    blockedOrgIds,
+    actorProfileId: access.profile.id,
+    actorUserId: access.userId,
+    method: 'portal',
+    notes: privacyNotes,
+    policyVersion,
+  });
+
   await logAuditEvent(supabase, {
     actorProfileId: access.profile.id,
-    action: 'consent_updated',
-    entityType: 'people',
-    entityRef: buildEntityRef({ schema: 'core', table: 'people', id: person.id }),
-    meta: { pk_int: person.id, data_sharing_consent: dataSharing, preferred_contact_method: preferredContact },
+    action: previousConsent ? 'consent_updated' : 'consent_created',
+    entityType: 'core.person_consents',
+    entityRef: buildEntityRef({ schema: 'core', table: 'person_consents', id: consent.id }),
+    meta: {
+      person_id: person.id,
+      scope: consentScope,
+      previous_scope: previousConsent?.scope ?? null,
+      allowed_org_ids: Array.from(allowedSet),
+      blocked_org_ids: blockedOrgIds,
+      preferred_contact_method: preferredContact,
+    },
   });
+
+  if (previousConsent) {
+    const previousOrgRows = await listConsentOrgs(supabase, previousConsent.id);
+    const previousResolution = resolveConsentOrgSelections(previousConsent.scope, participatingOrgs, previousOrgRows);
+    const nextResolution = resolveConsentOrgSelections(consentScope, participatingOrgs, [
+      ...Array.from(allowedSet).map((orgId) => ({
+        id: `allow-${orgId}`,
+        consentId: consent.id,
+        organizationId: orgId,
+        allowed: true,
+        setBy: access.profile.id,
+        setAt: new Date().toISOString(),
+        reason: null,
+      })),
+      ...blockedOrgIds.map((orgId) => ({
+        id: `block-${orgId}`,
+        consentId: consent.id,
+        organizationId: orgId,
+        allowed: false,
+        setBy: access.profile.id,
+        setAt: new Date().toISOString(),
+        reason: null,
+      })),
+    ]);
+
+    const previousAllowed = new Set(previousResolution.allowedOrgIds);
+    const nextAllowed = new Set(nextResolution.allowedOrgIds);
+    const changed =
+      previousResolution.allowedOrgIds.length !== nextResolution.allowedOrgIds.length ||
+      previousResolution.blockedOrgIds.length !== nextResolution.blockedOrgIds.length ||
+      Array.from(nextAllowed).some((id) => !previousAllowed.has(id));
+
+    if (changed) {
+      await logAuditEvent(supabase, {
+        actorProfileId: access.profile.id,
+        action: 'consent_org_updated',
+        entityType: 'core.person_consents',
+        entityRef: buildEntityRef({ schema: 'core', table: 'person_consents', id: consent.id }),
+        meta: {
+          person_id: person.id,
+          previous_allowed_org_ids: previousResolution.allowedOrgIds,
+          previous_blocked_org_ids: previousResolution.blockedOrgIds,
+          allowed_org_ids: nextResolution.allowedOrgIds,
+          blocked_org_ids: nextResolution.blockedOrgIds,
+        },
+      });
+    }
+  }
 
   revalidatePath('/profile/consents');
 }
 
 export async function adminOverrideConsentAction(formData: FormData): Promise<void> {
   const personId = Number.parseInt(String(formData.get('person_id') ?? ''), 10);
-  const dataSharing = formData.get('data_sharing') === 'on';
+  const consentScope = parseConsentScope(String(formData.get('consent_scope') ?? 'all_orgs'));
+  const consentConfirmed = formData.get('consent_confirm') === 'on';
+  const allowedOrgIds = parseOrgIds(formData, 'org_allowed_ids');
+  const consentMethod = (formData.get('consent_method') as string | null)?.trim() || 'documented';
+  const consentNotes = (formData.get('consent_notes') as string | null)?.trim() || null;
+  const policyVersion = (formData.get('policy_version') as string | null)?.trim() || null;
   const preferredContact = (formData.get('preferred_contact') as string | null)?.trim() || null;
   const privacyNotes = (formData.get('privacy_restrictions') as string | null)?.trim() || null;
 
@@ -124,11 +251,14 @@ export async function adminOverrideConsentAction(formData: FormData): Promise<vo
     throw new Error('You do not have permission to override consents.');
   }
 
+  if (!consentConfirmed) {
+    throw new Error('Confirm the consent override before saving.');
+  }
+
   const core = supabase.schema('core');
   const { error } = await core
     .from(PEOPLE_TABLE)
     .update({
-      data_sharing_consent: dataSharing,
       preferred_contact_method: preferredContact,
       privacy_restrictions: privacyNotes,
       updated_by: access.userId,
@@ -138,15 +268,200 @@ export async function adminOverrideConsentAction(formData: FormData): Promise<vo
 
   if (error) throw new Error('Unable to update consent.');
 
+  const participatingOrgs = await listParticipatingOrganizations(supabase, {
+    excludeOrgId: access.iharcOrganizationId,
+  });
+  const participatingOrgIds = participatingOrgs.map((org) => org.id);
+  const allowedSet = new Set(allowedOrgIds.filter((id) => participatingOrgIds.includes(id)));
+  let blockedOrgIds: number[] = [];
+
+  if (consentScope === 'all_orgs') {
+    blockedOrgIds = participatingOrgIds.filter((id) => !allowedSet.has(id));
+  }
+
+  if (consentScope === 'selected_orgs') {
+    blockedOrgIds = participatingOrgIds.filter((id) => !allowedSet.has(id));
+  }
+
+  if (consentScope === 'none') {
+    allowedSet.clear();
+    blockedOrgIds = participatingOrgIds;
+  }
+
+  if (consentScope === 'selected_orgs' && allowedSet.size === 0) {
+    throw new Error('Select at least one organization to share with.');
+  }
+
+  const { consent, previousConsent } = await saveConsent(supabase, {
+    personId,
+    scope: consentScope,
+    allowedOrgIds: Array.from(allowedSet),
+    blockedOrgIds,
+    actorProfileId: access.profile.id,
+    actorUserId: access.userId,
+    method: consentMethod as 'portal' | 'staff_assisted' | 'verbal' | 'documented' | 'migration',
+    notes: consentNotes,
+    policyVersion,
+  });
+
   await logAuditEvent(supabase, {
     actorProfileId: access.profile.id,
-    action: 'consent_overridden',
-    entityType: 'people',
-    entityRef: buildEntityRef({ schema: 'core', table: 'people', id: personId }),
-    meta: { pk_int: personId, data_sharing_consent: dataSharing, preferred_contact_method: preferredContact },
+    action: previousConsent ? 'consent_updated' : 'consent_created',
+    entityType: 'core.person_consents',
+    entityRef: buildEntityRef({ schema: 'core', table: 'person_consents', id: consent.id }),
+    meta: {
+      person_id: personId,
+      scope: consentScope,
+      previous_scope: previousConsent?.scope ?? null,
+      allowed_org_ids: Array.from(allowedSet),
+      blocked_org_ids: blockedOrgIds,
+      preferred_contact_method: preferredContact,
+      override: true,
+      method: consentMethod,
+    },
   });
 
   revalidatePath('/ops/clients');
+}
+
+export async function revokeConsentAction(formData: FormData): Promise<void> {
+  const consentId = (formData.get('consent_id') as string | null)?.trim();
+  if (!consentId) throw new Error('Missing consent id.');
+  const confirmed = formData.get('revoke_confirm') === 'on';
+  if (!confirmed) throw new Error('Confirm consent withdrawal before continuing.');
+
+  const supabase = await createSupabaseServerClient();
+  const access = await loadPortalAccess(supabase);
+  if (!access) throw new Error('Sign in to update consents.');
+
+  const person = await requirePersonForUser(supabase, access.userId);
+  const effective = await getEffectiveConsent(supabase, person.id);
+  if (!effective.consent || effective.consent.id !== consentId) {
+    throw new Error('Consent record not found.');
+  }
+
+  await revokeConsent(supabase, {
+    consentId,
+    actorProfileId: access.profile.id,
+    reason: 'Client revoked consent.',
+  });
+
+  await syncConsentGrants(supabase, {
+    personId: person.id,
+    allowedOrgIds: [],
+    actorProfileId: access.profile.id,
+    actorUserId: access.userId,
+  });
+
+  await logAuditEvent(supabase, {
+    actorProfileId: access.profile.id,
+    action: 'consent_revoked',
+    entityType: 'core.person_consents',
+    entityRef: buildEntityRef({ schema: 'core', table: 'person_consents', id: consentId }),
+    meta: { person_id: person.id, revoked_by_client: true },
+  });
+
+  revalidatePath('/profile/consents');
+}
+
+export async function renewConsentAction(formData: FormData): Promise<void> {
+  const consentId = (formData.get('consent_id') as string | null)?.trim();
+  if (!consentId) throw new Error('Missing consent id.');
+
+  const supabase = await createSupabaseServerClient();
+  const access = await loadPortalAccess(supabase);
+  if (!access) throw new Error('Sign in to update consents.');
+
+  const person = await requirePersonForUser(supabase, access.userId);
+  const effective = await getEffectiveConsent(supabase, person.id);
+  if (!effective.consent || effective.consent.id !== consentId) {
+    throw new Error('Consent record not found.');
+  }
+
+  const { consent } = await renewConsent(supabase, {
+    consentId,
+    actorProfileId: access.profile.id,
+    actorUserId: access.userId,
+    method: 'portal',
+    excludeOrgId: access.iharcOrganizationId,
+  });
+
+  await logAuditEvent(supabase, {
+    actorProfileId: access.profile.id,
+    action: 'consent_updated',
+    entityType: 'core.person_consents',
+    entityRef: buildEntityRef({ schema: 'core', table: 'person_consents', id: consent.id }),
+    meta: { person_id: person.id, renewed: true },
+  });
+
+  revalidatePath('/profile/consents');
+}
+
+export async function adminRevokeConsentAction(formData: FormData): Promise<void> {
+  const consentId = (formData.get('consent_id') as string | null)?.trim();
+  const personId = Number.parseInt(String(formData.get('person_id') ?? ''), 10);
+  if (!consentId || !personId || Number.isNaN(personId)) throw new Error('Missing consent id.');
+
+  const supabase = await createSupabaseServerClient();
+  const access = await loadPortalAccess(supabase);
+  if (!access || !access.canManageConsents) {
+    throw new Error('You do not have permission to revoke consents.');
+  }
+
+  await revokeConsent(supabase, {
+    consentId,
+    actorProfileId: access.profile.id,
+    reason: (formData.get('consent_notes') as string | null)?.trim() || null,
+  });
+
+  await syncConsentGrants(supabase, {
+    personId,
+    allowedOrgIds: [],
+    actorProfileId: access.profile.id,
+    actorUserId: access.userId,
+  });
+
+  await logAuditEvent(supabase, {
+    actorProfileId: access.profile.id,
+    action: 'consent_revoked',
+    entityType: 'core.person_consents',
+    entityRef: buildEntityRef({ schema: 'core', table: 'person_consents', id: consentId }),
+    meta: { person_id: personId, revoked_by_admin: true },
+  });
+
+  revalidatePath('/app-admin/consents');
+}
+
+export async function adminRenewConsentAction(formData: FormData): Promise<void> {
+  const consentId = (formData.get('consent_id') as string | null)?.trim();
+  const personId = Number.parseInt(String(formData.get('person_id') ?? ''), 10);
+  if (!consentId || !personId || Number.isNaN(personId)) throw new Error('Missing consent id.');
+
+  const consentMethod = (formData.get('consent_method') as string | null)?.trim() || 'documented';
+
+  const supabase = await createSupabaseServerClient();
+  const access = await loadPortalAccess(supabase);
+  if (!access || !access.canManageConsents) {
+    throw new Error('You do not have permission to renew consents.');
+  }
+
+  const { consent } = await renewConsent(supabase, {
+    consentId,
+    actorProfileId: access.profile.id,
+    actorUserId: access.userId,
+    method: consentMethod as 'portal' | 'staff_assisted' | 'verbal' | 'documented' | 'migration',
+    excludeOrgId: access.iharcOrganizationId,
+  });
+
+  await logAuditEvent(supabase, {
+    actorProfileId: access.profile.id,
+    action: 'consent_updated',
+    entityType: 'core.person_consents',
+    entityRef: buildEntityRef({ schema: 'core', table: 'person_consents', id: consent.id }),
+    meta: { person_id: personId, renewed: true, method: consentMethod },
+  });
+
+  revalidatePath('/app-admin/consents');
 }
 
 export async function adminCreateGrantAction(formData: FormData): Promise<void> {

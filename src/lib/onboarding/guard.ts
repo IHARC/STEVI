@@ -11,3 +11,14 @@ export async function assertOnboardingComplete(
   }
   return status;
 }
+
+export async function assertOnboardingReadyForConsent(
+  supabase: SupabaseAnyServerClient,
+  userId: string,
+) {
+  const status = await getOnboardingStatusForUser(userId, supabase);
+  if (!status.hasPerson || !status.hasServiceAgreementConsent || !status.hasPrivacyAcknowledgement) {
+    throw new Error('Finish onboarding before updating consents.');
+  }
+  return status;
+}

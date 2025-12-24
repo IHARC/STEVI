@@ -33,7 +33,17 @@ export const consentSchema = z.object({
 
 export const sharingSchema = z.object({
   person_id: z.string().trim().min(1, 'Person is required'),
-  data_sharing: z.enum(['iharc_only', 'partners']),
+  consent_scope: z.enum(['all_orgs', 'selected_orgs', 'none']),
+  org_allowed_ids: z.array(z.string()).optional(),
+  consent_confirm: z.boolean().optional(),
+}).superRefine((data, ctx) => {
+  if (data.consent_scope === 'selected_orgs' && (!data.org_allowed_ids || data.org_allowed_ids.length === 0)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Select at least one organization.',
+      path: ['org_allowed_ids'],
+    });
+  }
 });
 
 export const linkSchema = z.object({

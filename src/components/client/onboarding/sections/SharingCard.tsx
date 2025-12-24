@@ -1,43 +1,107 @@
 'use client';
 
-import { useEffect, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { Alert, AlertDescription, AlertTitle } from '@shared/ui/alert';
 import { Badge } from '@shared/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@shared/ui/form';
+import { Form } from '@shared/ui/form';
 import { RadioGroup, RadioGroupItem } from '@shared/ui/radio-group';
+import { Checkbox } from '@shared/ui/checkbox';
+import { choiceCardVariants } from '@shared/ui/choice-card';
 import { FormSubmit } from './FormSubmit';
 import type { OnboardingActionState } from '@/app/(client)/onboarding/actions';
 import type { OnboardingActor } from '@/lib/onboarding/utils';
+import type { ConsentOrgSelection, ConsentScope } from '@/lib/consents';
 import { sharingSchema, type SharingFormValues } from '../schemas';
 
 export type SharingCardProps = {
   onSubmit: (formData: FormData) => void;
   state: OnboardingActionState;
   personId: number | null;
-  dataSharingConsent: boolean | null;
+  consentScope: ConsentScope;
+  orgSelections: ConsentOrgSelection[];
+  policyVersion: string | null;
   actor: OnboardingActor;
   disabled?: boolean;
 };
 
-export function SharingCard({ onSubmit, state, personId, dataSharingConsent, actor, disabled }: SharingCardProps) {
+export function SharingCard({
+  onSubmit,
+  state,
+  personId,
+  consentScope,
+  orgSelections,
+  policyVersion,
+  actor,
+  disabled,
+}: SharingCardProps) {
   const partnerBlocked = actor === 'partner';
+  const [selectedScope, setSelectedScope] = useState<ConsentScope>(consentScope);
+  const [allowedOrgIds, setAllowedOrgIds] = useState<Set<number>>(
+    new Set(orgSelections.filter((org) => org.allowed).map((org) => org.id)),
+  );
+  const [confirmChecked, setConfirmChecked] = useState(false);
+
   const form = useForm<SharingFormValues>({
     resolver: zodResolver(sharingSchema),
     defaultValues: {
       person_id: personId ? String(personId) : '',
-      data_sharing: dataSharingConsent === true ? 'partners' : 'iharc_only',
+      consent_scope: consentScope,
+      org_allowed_ids: orgSelections.filter((org) => org.allowed).map((org) => String(org.id)),
+      consent_confirm: false,
     },
   });
 
   useEffect(() => {
+    const allowed = orgSelections.filter((org) => org.allowed).map((org) => org.id);
+    setSelectedScope(consentScope);
+    setAllowedOrgIds(new Set(allowed));
+    setConfirmChecked(false);
     form.reset({
       person_id: personId ? String(personId) : '',
-      data_sharing: dataSharingConsent === true ? 'partners' : 'iharc_only',
+      consent_scope: consentScope,
+      org_allowed_ids: allowed.map((id) => String(id)),
+      consent_confirm: false,
     });
-  }, [dataSharingConsent, form, personId]);
+  }, [consentScope, form, orgSelections, personId]);
+
+  useEffect(() => {
+    form.setValue('consent_scope', selectedScope);
+  }, [form, selectedScope]);
+
+  useEffect(() => {
+    form.setValue('org_allowed_ids', Array.from(allowedOrgIds).map((id) => String(id)));
+  }, [allowedOrgIds, form]);
+
+  useEffect(() => {
+    form.setValue('consent_confirm', confirmChecked);
+  }, [confirmChecked, form]);
+
+  const orgCount = orgSelections.length;
+  const allOrgIds = useMemo(() => orgSelections.map((org) => org.id), [orgSelections]);
+  const orgSelectionError = form.formState.errors.org_allowed_ids?.message;
+  const requiresSelection = selectedScope === 'selected_orgs' && allowedOrgIds.size === 0;
+
+  const handleScopeChange = (value: ConsentScope) => {
+    setSelectedScope(value);
+    if (value === 'all_orgs') {
+      setAllowedOrgIds(new Set(allOrgIds));
+    }
+    if (value === 'none') {
+      setAllowedOrgIds(new Set());
+    }
+  };
+
+  const toggleOrg = (orgId: number, next: boolean) => {
+    setAllowedOrgIds((prev) => {
+      const copy = new Set(prev);
+      if (next) copy.add(orgId);
+      else copy.delete(orgId);
+      return copy;
+    });
+  };
 
   const handleValidation = async (event: FormEvent<HTMLFormElement>) => {
     const valid = await form.trigger();
@@ -56,7 +120,14 @@ export function SharingCard({ onSubmit, state, personId, dataSharingConsent, act
       <CardContent>
         <Form {...form}>
           <form action={onSubmit} className="space-y-4" onSubmit={handleValidation}>
-            <input type="hidden" name="person_id" value={form.watch('person_id')} />
+            <input type="hidden" name="person_id" value={personId ? String(personId) : ''} />
+            <input type="hidden" name="consent_scope" value={selectedScope} />
+            <input type="hidden" name="consent_confirm" value={confirmChecked ? 'on' : ''} />
+            {policyVersion ? <input type="hidden" name="policy_version" value={policyVersion} /> : null}
+            {Array.from(allowedOrgIds).map((orgId) => (
+              <input key={`org-${orgId}`} type="hidden" name="org_allowed_ids" value={orgId} />
+            ))}
+
             <fieldset disabled={disabled || partnerBlocked} className="space-y-4">
               {partnerBlocked ? (
                 <Alert variant="destructive">
@@ -67,42 +138,82 @@ export function SharingCard({ onSubmit, state, personId, dataSharingConsent, act
                 </Alert>
               ) : null}
 
-              <FormField
-                control={form.control}
-                name="data_sharing"
-                render={({ field }) => (
-                  <FormItem className="space-y-3">
-                    <FormControl>
-                      <RadioGroup value={field.value} onValueChange={field.onChange}>
-                        <div className="flex flex-col gap-2">
-                          <label className="flex items-start gap-3 rounded-2xl border border-border/50 bg-muted/40 p-3">
-                            <RadioGroupItem value="iharc_only" id="share_iharc_only" className="mt-1" />
-                            <div className="space-y-0.5">
-                              <FormLabel htmlFor="share_iharc_only">Share only with IHARC team</FormLabel>
-                              <p className="text-sm text-muted-foreground">
-                                Only IHARC staff assigned to your case can view your record.
-                              </p>
-                            </div>
-                          </label>
-                          <label className="flex items-start gap-3 rounded-2xl border border-border/50 bg-muted/40 p-3">
-                            <RadioGroupItem value="partners" id="share_partners" className="mt-1" />
-                            <div className="space-y-0.5">
-                              <div className="flex items-center gap-2">
-                                <FormLabel htmlFor="share_partners">Share with IHARC partners</FormLabel>
-                                <Badge variant="outline">Faster referrals</Badge>
-                              </div>
-                              <p className="text-sm text-muted-foreground">
-                                IHARC partner agencies involved in your care can view your record to speed up coordination.
-                              </p>
-                            </div>
-                          </label>
+              <section className="space-y-3">
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold text-foreground">Sharing scope</p>
+                  <p className="text-sm text-muted-foreground">Default is to share with all participating organizations.</p>
+                </div>
+                <RadioGroup value={selectedScope} onValueChange={(value) => handleScopeChange(value as ConsentScope)}>
+                  <label className={choiceCardVariants({ surface: 'background', padding: 'compact' })}>
+                    <RadioGroupItem value="all_orgs" />
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="text-base font-medium">All participating orgs</p>
+                        <Badge variant="outline">Recommended</Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground">Fastest referrals and coordinated care.</p>
+                    </div>
+                  </label>
+                  <label className={choiceCardVariants({ surface: 'background', padding: 'compact' })}>
+                    <RadioGroupItem value="selected_orgs" />
+                    <div>
+                      <p className="text-base font-medium">Only selected orgs</p>
+                      <p className="text-sm text-muted-foreground">Pick specific partners that can access your record.</p>
+                    </div>
+                  </label>
+                  <label className={choiceCardVariants({ surface: 'background', padding: 'compact' })}>
+                    <RadioGroupItem value="none" />
+                    <div>
+                      <p className="text-base font-medium">IHARC only</p>
+                      <p className="text-sm text-muted-foreground">Partners must request consent before access.</p>
+                    </div>
+                  </label>
+                </RadioGroup>
+              </section>
+
+              <section className="space-y-3">
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold text-foreground">Participating organizations</p>
+                  <p className="text-sm text-muted-foreground">
+                    {orgCount ? 'Toggle access for each partner.' : 'No partner organizations configured.'}
+                  </p>
+                </div>
+                <div className="grid gap-2">
+                  {orgSelections.map((org) => {
+                    const checked = allowedOrgIds.has(org.id);
+                    return (
+                      <label key={org.id} className="flex items-start gap-3 rounded-2xl border border-border/50 bg-muted/30 p-3">
+                        <Checkbox
+                          checked={checked}
+                          onCheckedChange={(value) => toggleOrg(org.id, Boolean(value))}
+                          disabled={selectedScope === 'none'}
+                          className="mt-1"
+                        />
+                        <div className="space-y-0.5">
+                          <p className="text-sm font-medium text-foreground">{org.name ?? `Organization ${org.id}`}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {selectedScope === 'all_orgs'
+                              ? checked
+                                ? 'Allowed'
+                                : 'Excluded'
+                              : selectedScope === 'selected_orgs'
+                                ? checked
+                                  ? 'Selected'
+                                  : 'Not selected'
+                                : 'Sharing disabled'}
+                          </p>
                         </div>
-                      </RadioGroup>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      </label>
+                    );
+                  })}
+                </div>
+                {orgSelectionError ? <p className="text-sm text-destructive">{orgSelectionError}</p> : null}
+              </section>
+
+              <label className="flex items-start gap-3 rounded-2xl border border-border/30 bg-muted p-4 text-sm text-foreground">
+                <Checkbox checked={confirmChecked} onCheckedChange={(value) => setConfirmChecked(Boolean(value))} className="mt-1" />
+                <span>I understand and confirm this data-sharing choice. IHARC will update partner access immediately.</span>
+              </label>
             </fieldset>
 
             {state.status === 'error' ? (
@@ -118,7 +229,7 @@ export function SharingCard({ onSubmit, state, personId, dataSharingConsent, act
               </Alert>
             ) : null}
 
-            <FormSubmit disabled={disabled || partnerBlocked} pendingLabel="Saving…">
+            <FormSubmit disabled={disabled || partnerBlocked || !confirmChecked || requiresSelection} pendingLabel="Saving…">
               Save preference
             </FormSubmit>
           </form>

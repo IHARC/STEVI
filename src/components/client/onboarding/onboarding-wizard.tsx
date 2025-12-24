@@ -16,6 +16,7 @@ import {
 } from '@/app/(client)/onboarding/actions';
 import type { OnboardingStatus } from '@/lib/onboarding/status';
 import type { OnboardingActor } from '@/lib/onboarding/utils';
+import type { ConsentOrgSelection, ConsentScope } from '@/lib/consents';
 import { BasicInfoCard } from './sections/BasicInfoCard';
 import { ConsentCard } from './sections/ConsentCard';
 import { SharingCard } from './sections/SharingCard';
@@ -35,6 +36,11 @@ type OnboardingWizardProps = {
     service: PolicyContent | null;
     privacy: PolicyContent | null;
   };
+  sharing: {
+    scope: ConsentScope;
+    orgSelections: ConsentOrgSelection[];
+    policyVersion: string | null;
+  };
   partnerBlockedReason?: string | null;
 };
 
@@ -50,6 +56,7 @@ export function OnboardingWizard({
   nextPath,
   hasAccountLink: initialHasAccountLink = false,
   policies,
+  sharing,
   partnerBlockedReason,
 }: OnboardingWizardProps) {
   const router = useRouter();
@@ -189,7 +196,9 @@ export function OnboardingWizard({
             onSubmit={sharingAction}
             state={sharingState}
             personId={personId}
-            dataSharingConsent={prefill.dataSharingConsent}
+            consentScope={sharing.scope}
+            orgSelections={sharing.orgSelections}
+            policyVersion={sharing.policyVersion}
             actor={actor}
             disabled={!personId || blocked}
           />

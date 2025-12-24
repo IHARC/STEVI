@@ -20,7 +20,7 @@ Sources: `docs/onboarding-consent-plan.md`, `docs/onboarding-contract.md`, code 
 ### What exists
 - Onboarding collects:
   - Service agreement + privacy acknowledgement -> `case_mgmt.client_intakes`.
-  - Data sharing preference (boolean) -> `core.people.data_sharing_consent`.
+  - Legacy data sharing preference (boolean) -> `core.people.data_sharing_consent` (no longer used after org-level consent rollout).
   - Wizard lives at `/onboarding` and is enforced server-side by `assertOnboardingComplete`.
 - Client profile consents page allows:
   - Global data sharing checkbox.
@@ -48,15 +48,15 @@ Sources: `docs/onboarding-consent-plan.md`, `docs/onboarding-contract.md`, code 
 - Admin tooling stubs:
   - `src/components/workspace/admin/consents/consent-override-form.tsx`
   - `src/components/workspace/admin/clients/person-grant-form.tsx`
-  - `src/app/(app-admin)/app-admin/consents/` (empty)
+  - `src/app/(app-admin)/app-admin/consents/` (now implemented)
   - `src/app/(app-admin)/app-admin/clients/[personId]/` (empty)
 
 ### Gaps vs requirement
-- Only a global boolean (`core.people.data_sharing_consent`) exists; no per-org consent.
-- Default onboarding choice is IHARC-only (per current contract), but requirement is "prompt to consent to all orgs".
-- No consent history or explicit consent scope stored (who, which orgs, what data, when, how).
-- No UI for org-level consent management.
-- Access grants are not conditioned on consent changes.
+- Legacy global boolean (`core.people.data_sharing_consent`) remains for historical data; org-level consent now lives in `core.person_consents`.
+- Default onboarding choice now prompts to consent to all participating orgs (opt-out per org).
+- Consent history + explicit scope stored in `core.person_consents` and `core.person_consent_orgs`.
+- UI for org-level consent management is now in onboarding, client profile, ops requests, and admin consents.
+- Access grants are synchronized from consent changes.
 
 ## HIFIS reference behavior (local docs)
 Sources:
@@ -105,13 +105,12 @@ Recommended internal reference links:
 7) Consent expires automatically after 90 days (configurable), requiring renewal.
 
 ## Supabase schema check (2025-12-24)
-Performed via Supabase MCP:
-- No existing tables with `consent` or `request` in `core`, `portal`, or `case_mgmt`.
-- No existing views with `person`/`people` in `core`, `portal`, or `case_mgmt`.
-- `core.people` contains `data_sharing_consent` (boolean, default false) and `privacy_restrictions`.
-- `core.person_access_grants` exists with `expires_at` (can align expiry behavior).
-- `core.people_activities` exists with `provider_org_id` and `metadata` (could be used for minimal activity logging).
-- `portal.public_settings` exists and can store configurable consent expiry days.
+Post-implementation notes:
+- `core.person_consents`, `core.person_consent_orgs`, `core.person_consent_requests` added with RLS and supporting views/functions.
+- `core.people` still contains legacy `data_sharing_consent` plus `privacy_restrictions`; app logic no longer reads/writes the legacy flag.
+- `core.person_access_grants` continues to exist with `expires_at` aligned to consent expiry.
+- `core.people_activities` used for minimal consent contact logging.
+- `portal.public_settings` stores configurable consent expiry days.
 
 ## Proposed data model (v1)
 Note: Schema is shared across STEVI/OPS/marketing. Coordinate changes via Supabase MCP before migrations.

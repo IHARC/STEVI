@@ -16,10 +16,10 @@ Guide implementation of a unified onboarding/consent experience that honours IHA
   - Active person record exists in `core.people` (person_status != inactive).
   - IHARC service agreement accepted (source of truth: latest `case_mgmt.client_intakes.consent_confirmed = true` linked to person, or equivalent intake record agreed in registration flow metadata).
   - Privacy statement acknowledged (`case_mgmt.client_intakes.privacy_acknowledged = true`).
-  - Data sharing preference recorded on the person (`core.people.data_sharing_consent`: false = IHARC only, true = IHARC + partner orgs).
+  - Data sharing consent recorded in `core.person_consents` (scope + status) with per-org allow list in `core.person_consent_orgs`.
 - **Not onboarded** means UI access is limited to the wizard; staff actions that depend on consent must be blocked server-side.
 - Actor capabilities (matrix to produce in Phase 1 deliverable): client self-serve (invite/token), staff-assisted onboarding for a client, and partner-org-assisted onboarding for a client (no non-client onboarding). Actions: create person, onboard existing, update sharing preference, resend self-link, link account↔person.
-- Wizard step spine (shared by all actors): basic info → service agreement (summary + full text from admin-managed policy) → data sharing choice → account link/confirmation (if applicable).
+- Wizard step spine (shared by all actors): basic info → service agreement (summary + full text from admin-managed policy) → data sharing scope (per-org opt-out) → account link/confirmation (if applicable).
 
 ## Phase tracker
 | Phase | Goal | Status | Notes |
@@ -46,13 +46,13 @@ Guide implementation of a unified onboarding/consent experience that honours IHA
 - Inputs: auth user id or person id. Reads `core.user_people`, `core.people`, latest `case_mgmt.client_intakes` for the person; may reference historical `portal.registration_flows` for prefill context only, not for completion.
 - Output shape: `{ status: NOT_STARTED|NEEDS_CONSENTS|COMPLETED, hasPerson, hasIntake, hasServiceAgreementConsent, hasPrivacyAcknowledgement, hasDataSharingPreference, personId?, profileId?, lastUpdatedAt }`.
 - No writes. Must return determinate results even when multiple records exist (prefer most recent by timestamp).
-- Unit tests to cover edge cases: missing person, intake present but data sharing missing, revoked/changed preferences.
+- Unit tests to cover edge cases: missing person, intake present but consent missing/expired, revoked/changed preferences.
 
 ### Phase 3 – Onboarding write actions
 - Implement server actions (or route handlers) that wrap all onboarding writes:
   - Upsert basic person info (using existing columns only) and create `user_people` link when applicable.
   - Record service agreement + privacy acknowledgement by inserting/updating `case_mgmt.client_intakes` for the person; ensure audit logging (`portal_log_audit_event`) and client-visible metadata when appropriate.
-  - Record data sharing preference by updating `core.people.data_sharing_consent`; respect `manage_consents` scope and RLS.
+  - Record data sharing consent by writing `core.person_consents` + `core.person_consent_orgs`; respect `manage_consents` scope and RLS.
   - Optional: update relevant `portal.registration_flows` row metadata for traceability without changing schema.
 - Each action returns the fresh onboarding status (Phase 2) so callers know “what’s next”.
 - Rate-limit public/token flows (`portal_check_rate_limit`), and ensure TipTap/HTML fields are sanitized when saved.
@@ -60,7 +60,7 @@ Guide implementation of a unified onboarding/consent experience that honours IHA
 ### Phase 4 – Unified onboarding wizard
 - Single wizard component (e.g., `@/components/onboarding/wizard`) consuming status + actions; actor-type config controls prefilled/locked fields.
 - Service agreement & privacy steps render admin-managed policies (fetched via policy slug) with short summary + expandable full text; no hardcoded prose.
-- Accessibility: keyboard order, focus management per step, descriptive buttons, and safe defaults (no auto-opt-in to sharing). Language kept plain and low-literacy friendly for social services clients.
+- Accessibility: keyboard order, focus management per step, descriptive buttons, and clear defaults (share with all participating orgs with opt-out controls). Language kept plain and low-literacy friendly for social services clients.
 - Staff- or partner-assisted entry routes still onboard the client (not the staff/partner); permissions enforced server-side via `PortalAccess` and write actions.
 
 ### Phase 5 – Routing & enforcement
@@ -70,7 +70,7 @@ Guide implementation of a unified onboarding/consent experience that honours IHA
 
 ### Phase 6 – Admin tools & future-proofing
 - Admin detail view per person shows onboarding status, consent flags, timestamps, and intake source references; read-only history where schema allows.
-- Admin actions: resend onboarding link, mark as needing onboarding (via write action that resets status fields), update data sharing preference through same Phase 3 APIs.
+- Admin actions: resend onboarding link, mark as needing onboarding (revokes active consent + new intake record), update data sharing consent through the consent actions.
 - Content management: policies module remains the source for service agreement/privacy copy; ensure cache revalidation/webhook triggers keep marketing site in sync.
 
 ## Progress log

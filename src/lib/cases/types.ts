@@ -1,4 +1,5 @@
 import type { Database } from '@/types/supabase';
+import type { ConsentOrgSelection, ConsentScope, ConsentStatus } from '@/lib/consents';
 
 // Narrow case record shape to fields used in the UI. Keeps typecheck light while aligning to Supabase schema.
 export type CaseRecord = {
@@ -29,7 +30,15 @@ export type CaseSummary = {
 };
 
 export type ConsentSnapshot = {
-  dataSharing: boolean | null;
+  consentId: string | null;
+  scope: ConsentScope | null;
+  status: ConsentStatus | null;
+  effectiveStatus: ConsentStatus | null;
+  expiresAt: string | null;
+  updatedAt: string | null;
+  orgSelections: ConsentOrgSelection[];
+  allowedOrgIds: number[];
+  blockedOrgIds: number[];
   preferredContactMethod: string | null;
   privacyRestrictions: string | null;
 };
@@ -61,5 +70,4 @@ export type IntakeSubmission = {
   supabaseUserId: string | null;
   profileId: string | null;
   consentContact: boolean | null;
-  consentDataSharing: boolean | null;
 };

@@ -5,6 +5,7 @@ import { loadPortalAccess } from '@/lib/portal-access';
 import { resolveLandingPath } from '@/lib/portal-navigation';
 import { fetchStaffCaseActivities } from '@/lib/cases/fetchers';
 import { normalizeEnumParam, toSearchParams } from '@/lib/search-params';
+import { getEffectiveConsent } from '@/lib/consents';
 import { PageHeader } from '@shared/layout/page-header';
 import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
@@ -19,7 +20,7 @@ export const dynamic = 'force-dynamic';
 
 type PersonRow = Pick<
   Database['core']['Tables']['people']['Row'],
-  'id' | 'first_name' | 'last_name' | 'email' | 'phone' | 'data_sharing_consent' | 'created_at' | 'created_by'
+  'id' | 'first_name' | 'last_name' | 'email' | 'phone' | 'created_at' | 'created_by'
 >;
 
 const FILTERS = ['all', 'visits', 'tasks', 'referrals', 'supplies', 'appointments'] as const;
@@ -52,9 +53,10 @@ export default async function OpsClientDetailPage({ params, searchParams }: Page
     redirect(resolveLandingPath(access));
   }
 
-  const [person, activities] = await Promise.all([
+  const [person, activities, consentSummary] = await Promise.all([
     loadPerson(supabase, personId),
     fetchStaffCaseActivities(supabase, personId, 120),
+    getEffectiveConsent(supabase, personId),
   ]);
 
   if (!person) notFound();
@@ -64,6 +66,7 @@ export default async function OpsClientDetailPage({ params, searchParams }: Page
   const newVisitHref = `/ops/visits/new?personId=${person.id}`;
 
   const filteredActivities = activities.filter((activity) => filterActivity(activity.activityType, activeFilter));
+  const consentMeta = buildConsentMeta(consentSummary);
 
   return (
     <div className="space-y-6">
@@ -74,7 +77,7 @@ export default async function OpsClientDetailPage({ params, searchParams }: Page
         primaryAction={{ label: orgMissing ? 'Select acting org to start Visit' : 'New Visit', href: newVisitHref }}
         secondaryAction={{ label: 'Find another client', href: '/ops/clients?view=directory' }}
         breadcrumbs={[{ label: 'Clients', href: '/ops/clients?view=directory' }, { label: 'Profile' }]}
-        meta={[{ label: `Created by ${orgLabel}`, tone: 'neutral' }, { label: person.data_sharing_consent ? 'Sharing: org/partners' : 'Sharing: restricted', tone: person.data_sharing_consent ? 'info' : 'warning' }]}
+        meta={[{ label: `Created by ${orgLabel}`, tone: 'neutral' }, consentMeta]}
       />
 
       <section className="grid gap-4 md:grid-cols-[2fr,1fr]">
@@ -163,9 +166,7 @@ export default async function OpsClientDetailPage({ params, searchParams }: Page
               <Separator />
               <div className="space-y-1">
                 <p className="font-semibold text-foreground">Sharing</p>
-                <p className="text-muted-foreground">
-                  {person.data_sharing_consent ? 'Sharing with org/partners' : 'Restricted sharing; get consent inside Visit.'}
-                </p>
+                <p className="text-muted-foreground">{consentMeta.label}</p>
               </div>
             </CardContent>
           </Card>
@@ -182,7 +183,7 @@ async function loadPerson(
   const { data, error } = await supabase
     .schema('core')
     .from('people')
-    .select('id, first_name, last_name, email, phone, data_sharing_consent, created_at, created_by')
+    .select('id, first_name, last_name, email, phone, created_at, created_by')
     .eq('id', personId)
     .maybeSingle();
 
@@ -209,4 +210,28 @@ function formatDate(value: string | null) {
   } catch {
     return value;
   }
+}
+
+function buildConsentMeta(consent: Awaited<ReturnType<typeof getEffectiveConsent>>) {
+  if (!consent.consent || !consent.effectiveStatus) {
+    return { label: 'Consent not recorded', tone: 'warning' as const };
+  }
+
+  if (consent.effectiveStatus === 'expired') {
+    return { label: 'Consent expired', tone: 'warning' as const };
+  }
+
+  if (consent.effectiveStatus === 'revoked') {
+    return { label: 'Consent revoked', tone: 'warning' as const };
+  }
+
+  if (consent.scope === 'all_orgs') {
+    return { label: 'Sharing: all partner orgs', tone: 'info' as const };
+  }
+
+  if (consent.scope === 'selected_orgs') {
+    return { label: 'Sharing: selected orgs', tone: 'info' as const };
+  }
+
+  return { label: 'Sharing: IHARC only', tone: 'neutral' as const };
 }

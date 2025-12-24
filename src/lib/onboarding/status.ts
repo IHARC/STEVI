@@ -23,13 +23,23 @@ type ResolverInput = {
 
 type PersonSnapshot = Pick<
   Database['core']['Tables']['people']['Row'],
-  'id' | 'status' | 'data_sharing_consent' | 'updated_at' | 'created_at'
+  'id' | 'status' | 'updated_at' | 'created_at'
 >;
 
 type IntakeSnapshot = Pick<
   Database['case_mgmt']['Tables']['client_intakes']['Row'],
   'id' | 'consent_confirmed' | 'privacy_acknowledged' | 'created_at'
 >;
+
+type ConsentSnapshot = {
+  id: string;
+  person_id: number;
+  status: 'active' | 'revoked' | 'expired';
+  scope: 'all_orgs' | 'selected_orgs' | 'none';
+  expires_at: string | null;
+  created_at: string;
+  updated_at: string | null;
+};
 
 type RegistrationFlowSnapshot = Pick<
   Database['portal']['Tables']['registration_flows']['Row'],
@@ -136,7 +146,7 @@ async function loadPersonSnapshot(
   const core = supabase.schema(CORE_SCHEMA);
   const { data, error } = await core
     .from(PEOPLE_TABLE)
-    .select('id, status, data_sharing_consent, updated_at, created_at')
+    .select('id, status, updated_at, created_at')
     .eq('id', personId)
     .maybeSingle();
 
@@ -169,6 +179,31 @@ async function loadLatestIntake(
   }
 
   return data ?? null;
+}
+
+async function loadLatestConsent(
+  supabase: SupabaseAnyServerClient,
+  personId: number | null,
+): Promise<ConsentSnapshot | null> {
+  if (!personId) {
+    return null;
+  }
+
+  const core = supabase.schema(CORE_SCHEMA);
+  const { data, error } = await core
+    .from('person_consents')
+    .select('id, person_id, status, scope, expires_at, created_at, updated_at')
+    .eq('person_id', personId)
+    .eq('consent_type', 'data_sharing')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error('Unable to resolve onboarding status right now.');
+  }
+
+  return (data as ConsentSnapshot | null) ?? null;
 }
 
 async function loadLatestRegistrationFlowTimestamp(
@@ -230,9 +265,10 @@ export async function getOnboardingStatus(
 
   const identifiers = await resolveIdentifiers(supabase, { userId, personId });
 
-  const [person, intake, registrationFlowUpdatedAt] = await Promise.all([
+  const [person, intake, consent, registrationFlowUpdatedAt] = await Promise.all([
     loadPersonSnapshot(supabase, identifiers.personId),
     loadLatestIntake(supabase, identifiers.personId),
+    loadLatestConsent(supabase, identifiers.personId),
     loadLatestRegistrationFlowTimestamp(supabase, { userId, profileId: identifiers.profileId }),
   ]);
 
@@ -240,7 +276,9 @@ export async function getOnboardingStatus(
   const hasIntake = Boolean(intake);
   const hasServiceAgreementConsent = intake?.consent_confirmed === true;
   const hasPrivacyAcknowledgement = intake?.privacy_acknowledged === true;
-  const hasDataSharingPreference = typeof person?.data_sharing_consent === 'boolean';
+  const consentExpiresAt = consent?.expires_at ?? null;
+  const consentExpired = !consentExpiresAt || Date.parse(consentExpiresAt) <= Date.now();
+  const hasDataSharingPreference = Boolean(consent && consent.status === 'active' && !consentExpired);
 
   const status: OnboardingStatusState = !hasPerson
     ? 'NOT_STARTED'
@@ -252,6 +290,7 @@ export async function getOnboardingStatus(
     person?.updated_at,
     person?.created_at,
     intake?.created_at,
+    consent?.updated_at ?? consent?.created_at ?? null,
     identifiers.linkedAt,
     registrationFlowUpdatedAt,
   );
@@ -300,10 +339,10 @@ export async function getOnboardingStatusForPeople(
   const core = supabase.schema(CORE_SCHEMA);
   const caseMgmt = supabase.schema(CASE_MGMT_SCHEMA);
 
-  const [peopleResult, intakeResult, linkResult] = await Promise.all([
+  const [peopleResult, intakeResult, linkResult, consentResult] = await Promise.all([
     core
       .from(PEOPLE_TABLE)
-      .select('id, status, data_sharing_consent, updated_at, created_at')
+      .select('id, status, updated_at, created_at')
       .in('id', personIds),
     caseMgmt
       .from(CLIENT_INTAKES_TABLE)
@@ -315,15 +354,23 @@ export async function getOnboardingStatusForPeople(
       .select('person_id, profile_id, linked_at')
       .in('person_id', personIds)
       .order('linked_at', { ascending: false }),
+    core
+      .from('person_consents')
+      .select('id, person_id, status, scope, expires_at, created_at, updated_at')
+      .in('person_id', personIds)
+      .eq('consent_type', 'data_sharing')
+      .order('created_at', { ascending: false }),
   ]);
 
   if (peopleResult.error) throw peopleResult.error;
   if (intakeResult.error) throw intakeResult.error;
   if (linkResult.error) throw linkResult.error;
+  if (consentResult.error) throw consentResult.error;
 
   const people = (peopleResult.data ?? []) as PersonSnapshot[];
   const intakes = (intakeResult.data ?? []) as Array<IntakeSnapshot & { person_id: number }>;
   const links = (linkResult.data ?? []) as UserPersonLinkSnapshot[];
+  const consents = (consentResult.data ?? []) as ConsentSnapshot[];
 
   const personMap = new Map<number, PersonSnapshot>(people.map((row) => [row.id, row]));
 
@@ -354,6 +401,13 @@ export async function getOnboardingStatusForPeople(
       if (row.profile_id) {
         profileIds.push(row.profile_id);
       }
+    }
+  }
+
+  const latestConsentByPerson = new Map<number, ConsentSnapshot>();
+  for (const row of consents) {
+    if (!latestConsentByPerson.has(row.person_id)) {
+      latestConsentByPerson.set(row.person_id, row);
     }
   }
 
@@ -388,6 +442,7 @@ export async function getOnboardingStatusForPeople(
     const person = personMap.get(personId) ?? null;
     const intake = latestIntakeByPerson.get(personId) ?? null;
     const link = latestLinkByPerson.get(personId) ?? null;
+    const consent = latestConsentByPerson.get(personId) ?? null;
     const registrationUpdatedAt =
       link?.profileId && latestRegistrationByProfile.has(link.profileId)
         ? latestRegistrationByProfile.get(link.profileId) ?? null
@@ -396,7 +451,9 @@ export async function getOnboardingStatusForPeople(
     const hasPerson = person ? person.status !== PERSON_STATUS_INACTIVE : false;
     const hasServiceAgreementConsent = intake?.consent_confirmed === true;
     const hasPrivacyAcknowledgement = intake?.privacy_acknowledged === true;
-    const hasDataSharingPreference = typeof person?.data_sharing_consent === 'boolean';
+    const consentExpiresAt = consent?.expires_at ?? null;
+    const consentExpired = !consentExpiresAt || Date.parse(consentExpiresAt) <= Date.now();
+    const hasDataSharingPreference = Boolean(consent && consent.status === 'active' && !consentExpired);
 
     const status: OnboardingStatusState = !hasPerson
       ? 'NOT_STARTED'
@@ -408,6 +465,7 @@ export async function getOnboardingStatusForPeople(
       person?.updated_at,
       person?.created_at,
       intake?.created_at,
+      consent?.updated_at ?? consent?.created_at ?? null,
       link?.linkedAt ?? null,
       registrationUpdatedAt,
     );

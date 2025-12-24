@@ -34,7 +34,6 @@ type DirectoryItem = {
   person_type: PersonType;
   person_category: PersonCategory;
   status: PersonStatus;
-  data_sharing_consent: boolean;
   last_service_date: string | null;
   created_at: string;
   updated_at: string;
@@ -94,6 +93,20 @@ function describeOnboarding(status?: OnboardingStatus | null) {
   if (!status) return 'Status unavailable';
   if (status.status === 'COMPLETED') return 'Completed';
   if (status.status === 'NEEDS_CONSENTS') return 'Needs consents';
+  return 'Not started';
+}
+
+function resolveConsentVariant(status?: OnboardingStatus | null) {
+  if (!status) return 'secondary';
+  if (status.hasDataSharingPreference) return 'outline';
+  if (status.hasPerson) return 'secondary';
+  return 'secondary';
+}
+
+function describeConsent(status?: OnboardingStatus | null) {
+  if (!status) return 'Consent unknown';
+  if (status.hasDataSharingPreference) return 'Consent active';
+  if (status.hasPerson && status.hasServiceAgreementConsent && status.hasPrivacyAcknowledgement) return 'Consent needed';
   return 'Not started';
 }
 
@@ -376,7 +389,7 @@ export function ClientsDirectoryTable({ items, totalCount, query, loadError, onb
               />
               <TableHead className="hidden md:table-cell">Status</TableHead>
               <TableHead className="hidden xl:table-cell">Onboarding</TableHead>
-              <TableHead className="hidden lg:table-cell">Sharing</TableHead>
+              <TableHead className="hidden lg:table-cell">Consent</TableHead>
               <SortableTableHead
                 label="Last service"
                 active={sortBy === 'last_service_date'}
@@ -418,9 +431,7 @@ export function ClientsDirectoryTable({ items, totalCount, query, loadError, onb
                   <Badge variant={resolveOnboardingVariant(item.onboarding)}>{describeOnboarding(item.onboarding)}</Badge>
                 </TableCell>
                 <TableCell className="hidden lg:table-cell">
-                  <Badge variant={item.data_sharing_consent ? 'outline' : 'secondary'}>
-                    {item.data_sharing_consent ? 'Org/partners' : 'Restricted'}
-                  </Badge>
+                  <Badge variant={resolveConsentVariant(item.onboarding)}>{describeConsent(item.onboarding)}</Badge>
                 </TableCell>
                 <TableCell className="hidden lg:table-cell">{item.last_service_date ?? '—'}</TableCell>
                 <TableCell className="hidden md:table-cell">{formatTimestamp(item.updated_at)}</TableCell>

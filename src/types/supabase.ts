@@ -4026,6 +4026,214 @@ export type Database = {
           },
         ]
       }
+      person_consents: {
+        Row: {
+          id: string
+          person_id: number
+          consent_type: string
+          scope: string
+          status: string
+          captured_by: string | null
+          captured_method: string
+          policy_version: string | null
+          notes: string | null
+          created_at: string
+          updated_at: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+          expires_at: string | null
+          restrictions: Json | null
+        }
+        Insert: {
+          id?: string
+          person_id: number
+          consent_type: string
+          scope: string
+          status: string
+          captured_by?: string | null
+          captured_method: string
+          policy_version?: string | null
+          notes?: string | null
+          created_at?: string
+          updated_at?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          expires_at?: string | null
+          restrictions?: Json | null
+        }
+        Update: {
+          id?: string
+          person_id?: number
+          consent_type?: string
+          scope?: string
+          status?: string
+          captured_by?: string | null
+          captured_method?: string
+          policy_version?: string | null
+          notes?: string | null
+          created_at?: string
+          updated_at?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          expires_at?: string | null
+          restrictions?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "person_consents_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "person_consents_captured_by_fkey"
+            columns: ["captured_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "person_consents_revoked_by_fkey"
+            columns: ["revoked_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      person_consent_orgs: {
+        Row: {
+          id: string
+          consent_id: string
+          organization_id: number
+          allowed: boolean
+          set_by: string | null
+          set_at: string
+          reason: string | null
+        }
+        Insert: {
+          id?: string
+          consent_id: string
+          organization_id: number
+          allowed: boolean
+          set_by?: string | null
+          set_at?: string
+          reason?: string | null
+        }
+        Update: {
+          id?: string
+          consent_id?: string
+          organization_id?: number
+          allowed?: boolean
+          set_by?: string | null
+          set_at?: string
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "person_consent_orgs_consent_id_fkey"
+            columns: ["consent_id"]
+            isOneToOne: false
+            referencedRelation: "person_consents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "person_consent_orgs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "person_consent_orgs_set_by_fkey"
+            columns: ["set_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      person_consent_requests: {
+        Row: {
+          id: string
+          person_id: number
+          requesting_org_id: number
+          requested_by_user_id: string
+          requested_by_profile_id: string | null
+          requested_at: string
+          purpose: string
+          requested_scopes: string[]
+          status: string
+          decision_at: string | null
+          decision_by: string | null
+          decision_reason: string | null
+          expires_at: string | null
+          metadata: Json | null
+        }
+        Insert: {
+          id?: string
+          person_id: number
+          requesting_org_id: number
+          requested_by_user_id: string
+          requested_by_profile_id?: string | null
+          requested_at?: string
+          purpose: string
+          requested_scopes?: string[]
+          status: string
+          decision_at?: string | null
+          decision_by?: string | null
+          decision_reason?: string | null
+          expires_at?: string | null
+          metadata?: Json | null
+        }
+        Update: {
+          id?: string
+          person_id?: number
+          requesting_org_id?: number
+          requested_by_user_id?: string
+          requested_by_profile_id?: string | null
+          requested_at?: string
+          purpose?: string
+          requested_scopes?: string[]
+          status?: string
+          decision_at?: string | null
+          decision_by?: string | null
+          decision_reason?: string | null
+          expires_at?: string | null
+          metadata?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "person_consent_requests_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "person_consent_requests_requesting_org_id_fkey"
+            columns: ["requesting_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "person_consent_requests_requested_by_profile_id_fkey"
+            columns: ["requested_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "person_consent_requests_decision_by_fkey"
+            columns: ["decision_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_people: {
         Row: {
           id: string
@@ -5698,6 +5906,61 @@ export type Database = {
       }
     }
     Views: {
+      people_name_only: {
+        Row: {
+          id: number | null
+          first_name: string | null
+          last_name: string | null
+          person_type: Database["core"]["Enums"]["person_type"] | null
+          last_service_month: string | null
+        }
+        Relationships: []
+      }
+      participating_organizations: {
+        Row: {
+          id: number | null
+          name: string | null
+          organization_type: string | null
+          partnership_type: string | null
+          is_active: boolean | null
+        }
+        Relationships: []
+      }
+      person_consent_requests_status: {
+        Row: {
+          id: string | null
+          person_id: number | null
+          requesting_org_id: number | null
+          requested_by_user_id: string | null
+          requested_at: string | null
+          status: string | null
+          decision_at: string | null
+          expires_at: string | null
+        }
+        Relationships: []
+      }
+      v_person_consent_effective: {
+        Row: {
+          id: string | null
+          person_id: number | null
+          consent_type: string | null
+          scope: string | null
+          status: string | null
+          captured_by: string | null
+          captured_method: string | null
+          policy_version: string | null
+          notes: string | null
+          created_at: string | null
+          updated_at: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+          expires_at: string | null
+          restrictions: Json | null
+          effective_status: string | null
+          is_expired: boolean | null
+        }
+        Relationships: []
+      }
       medical_episodes_full: {
         Row: {
           body_region: string | null
@@ -5984,6 +6247,24 @@ export type Database = {
           total_count: number
           updated_at: string
         }[]
+      }
+      fn_person_consent_allows_org: {
+        Args: { p_person_id: number; p_org_id: number }
+        Returns: boolean
+      }
+      request_person_consent: {
+        Args: {
+          p_person_id: number
+          p_org_id: number
+          p_purpose: string
+          p_requested_scopes?: string[]
+          p_note?: string
+        }
+        Returns: string
+      }
+      log_consent_contact: {
+        Args: { p_person_id: number; p_org_id: number; p_summary: string }
+        Returns: void
       }
       get_person_field_visibility: {
         Args: {
