@@ -3,6 +3,7 @@ import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { resolveLandingPath } from '@/lib/portal-navigation';
 import { consentAllowsOrg } from '@/lib/consents';
+import { logAuditEvent } from '@/lib/audit';
 import { PageHeader } from '@shared/layout/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Input } from '@shared/ui/input';
@@ -43,9 +44,12 @@ type RequestStatusRow = {
 export default async function OpsConsentRequestsPage({ searchParams }: PageProps) {
   const params = searchParams ? await searchParams : {};
   const qRaw = params.q;
+  const reasonRaw = params.reason;
   const q = Array.isArray(qRaw) ? qRaw[0] : qRaw ?? '';
+  const reasonValue = Array.isArray(reasonRaw) ? reasonRaw[0] : reasonRaw ?? '';
   const searchTerm = q.trim();
   const numericId = /^\d+$/.test(searchTerm) ? Number.parseInt(searchTerm, 10) : null;
+  const reason = reasonValue === 'consent_request' || reasonValue === 'service_contact' ? reasonValue : null;
 
   const supabase = await createSupabaseRSCClient();
   const access = await loadPortalAccess(supabase);
@@ -92,7 +96,9 @@ export default async function OpsConsentRequestsPage({ searchParams }: PageProps
   let people: PersonNameRow[] = [];
 
   if (searchTerm) {
-    if (!numericId && searchTerm.length < 2) {
+    if (!reason) {
+      searchError = 'Select a reason for searching before continuing.';
+    } else if (!numericId && searchTerm.length < 2) {
       searchError = 'Search term must be at least 2 characters for privacy.';
     } else {
       let query = core
@@ -114,6 +120,22 @@ export default async function OpsConsentRequestsPage({ searchParams }: PageProps
         people = (data ?? []) as PersonNameRow[];
       }
     }
+  }
+
+  if (searchTerm && reason && !searchError) {
+    await logAuditEvent(supabase, {
+      actorProfileId: access.profile.id,
+      action: 'consent_search',
+      entityType: 'core.people_name_only',
+      entityRef: null,
+      meta: {
+        reason,
+        search_type: numericId ? 'id' : 'name',
+        search_term_length: searchTerm.length,
+        result_count: people.length,
+        organization_id: access.organizationId,
+      },
+    });
   }
 
   const consentAllowed = new Map<number, boolean>();
@@ -153,7 +175,32 @@ export default async function OpsConsentRequestsPage({ searchParams }: PageProps
           </CardHeader>
           <CardContent className="space-y-4">
             <form className="flex flex-wrap gap-2" method="get">
-              <Input name="q" defaultValue={searchTerm} placeholder="Search by name or ID" className="min-w-[220px] flex-1" />
+              <Label htmlFor="consent-search-term" className="sr-only">
+                Search term
+              </Label>
+              <Input
+                id="consent-search-term"
+                name="q"
+                defaultValue={searchTerm}
+                placeholder="Search by name or ID"
+                className="min-w-[220px] flex-1"
+              />
+              <Label htmlFor="consent-search-reason" className="sr-only">
+                Reason for search
+              </Label>
+              <select
+                id="consent-search-reason"
+                name="reason"
+                defaultValue={reason ?? ''}
+                required
+                className="h-9 min-w-[200px] rounded-md border border-input bg-transparent px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              >
+                <option value="" disabled>
+                  Select reason
+                </option>
+                <option value="consent_request">Consent request</option>
+                <option value="service_contact">Service contact</option>
+              </select>
               <Button type="submit" variant="secondary">
                 Search
               </Button>

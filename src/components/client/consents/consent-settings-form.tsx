@@ -2,8 +2,9 @@
 
 import { useMemo, useState } from 'react';
 import { updateConsentsAction, renewConsentAction, revokeConsentAction } from '@/lib/cases/actions';
-import type { ConsentSnapshot } from '@/lib/cases/types';
-import type { ConsentScope, ConsentStatus } from '@/lib/consents';
+import type { ConsentHistoryEntry, ConsentSnapshot } from '@/lib/cases/types';
+import type { ConsentMethod, ConsentScope, ConsentStatus } from '@/lib/consents';
+import { Alert, AlertDescription, AlertTitle } from '@shared/ui/alert';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Button } from '@shared/ui/button';
 import { Label } from '@shared/ui/label';
@@ -17,9 +18,16 @@ export type ConsentSettingsProps = {
   personId: number;
   snapshot: ConsentSnapshot;
   policyVersion: string | null;
+  history: ConsentHistoryEntry[];
 };
 
-export function ConsentSettings({ personId, snapshot, policyVersion }: ConsentSettingsProps) {
+export function ConsentSettings({ personId, snapshot, policyVersion, history }: ConsentSettingsProps) {
+  const allowedOrgs = snapshot.orgSelections.filter((org) => org.allowed);
+  const blockedOrgs = snapshot.orgSelections.filter((org) => !org.allowed);
+  const isExpired = snapshot.effectiveStatus === 'expired';
+  const isRevoked = snapshot.effectiveStatus === 'revoked';
+  const isIharcOnly = snapshot.scope === 'none' && snapshot.effectiveStatus === 'active';
+
   return (
     <div className="space-y-6">
       <Card>
@@ -33,7 +41,34 @@ export function ConsentSettings({ personId, snapshot, policyVersion }: ConsentSe
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <ConsentSummary scope={snapshot.scope} expiresAt={snapshot.expiresAt} status={snapshot.effectiveStatus} />
+          {isExpired ? (
+            <Alert variant="destructive">
+              <AlertTitle>Consent expired</AlertTitle>
+              <AlertDescription>Partner access is paused until you renew your consent.</AlertDescription>
+            </Alert>
+          ) : null}
+          {isRevoked ? (
+            <Alert variant="destructive">
+              <AlertTitle>Consent revoked</AlertTitle>
+              <AlertDescription>Partner organizations no longer have access to your record.</AlertDescription>
+            </Alert>
+          ) : null}
+          {isIharcOnly ? (
+            <Alert>
+              <AlertTitle>IHARC-only sharing</AlertTitle>
+              <AlertDescription>
+                Partner organizations cannot view your record until you approve a new request. This can slow referrals.
+              </AlertDescription>
+            </Alert>
+          ) : null}
+          <ConsentSummary
+            scope={snapshot.scope}
+            expiresAt={snapshot.expiresAt}
+            status={snapshot.effectiveStatus}
+            createdAt={snapshot.createdAt}
+            updatedAt={snapshot.updatedAt}
+          />
+          <ConsentOrgSummary allowedOrgs={allowedOrgs} blockedOrgs={blockedOrgs} totalOrgs={snapshot.orgSelections.length} />
           <ConsentForm
             personId={personId}
             consentId={snapshot.consentId}
@@ -56,6 +91,8 @@ export function ConsentSettings({ personId, snapshot, policyVersion }: ConsentSe
           <RevokeConsentForm consentId={snapshot.consentId} />
         </CardContent>
       </Card>
+
+      <ConsentHistory history={history} />
     </div>
   );
 }
@@ -77,35 +114,97 @@ function ConsentSummary({
   scope,
   expiresAt,
   status,
+  createdAt,
+  updatedAt,
 }: {
   scope: ConsentScope | null;
   expiresAt: string | null;
   status: ConsentStatus | null;
+  createdAt: string | null;
+  updatedAt: string | null;
 }) {
-  const expiryLabel = expiresAt
-    ? new Intl.DateTimeFormat('en-CA', { dateStyle: 'medium' }).format(new Date(expiresAt))
-    : 'Not set';
-  const scopeLabel =
-    scope === 'all_orgs'
-      ? 'All partner orgs'
-      : scope === 'selected_orgs'
-        ? 'Selected orgs'
-        : scope === 'none'
-          ? 'IHARC only'
-          : 'Not set';
+  const lastUpdated = updatedAt ?? createdAt;
+  const scopeLabel = formatScope(scope);
+  const statusLabel = formatStatus(status);
+  const expiryLabel = expiresAt ? formatDate(expiresAt) : 'Not scheduled';
+  const updatedLabel = lastUpdated ? formatDate(lastUpdated) : 'Not recorded';
 
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-border/40 bg-muted/30 p-3 text-sm text-foreground/80">
+    <dl className="grid gap-4 rounded-2xl border border-border/30 bg-muted p-4 text-sm sm:grid-cols-2 lg:grid-cols-4">
       <div>
-        <span className="font-semibold text-foreground">Scope:</span> {scopeLabel}
+        <dt className="text-xs font-semibold uppercase text-muted-foreground">Scope</dt>
+        <dd className="mt-1 text-sm font-medium text-foreground">{scopeLabel}</dd>
       </div>
       <div>
-        <span className="font-semibold text-foreground">Expiry:</span> {expiryLabel}
+        <dt className="text-xs font-semibold uppercase text-muted-foreground">Status</dt>
+        <dd className="mt-1 text-sm font-medium text-foreground">{statusLabel}</dd>
       </div>
       <div>
-        <span className="font-semibold text-foreground">Status:</span> {status ?? 'Not recorded'}
+        <dt className="text-xs font-semibold uppercase text-muted-foreground">Last updated</dt>
+        <dd className="mt-1 text-sm font-medium text-foreground">{updatedLabel}</dd>
       </div>
-    </div>
+      <div>
+        <dt className="text-xs font-semibold uppercase text-muted-foreground">Expires</dt>
+        <dd className="mt-1 text-sm font-medium text-foreground">{expiryLabel}</dd>
+      </div>
+    </dl>
+  );
+}
+
+function ConsentOrgSummary({
+  allowedOrgs,
+  blockedOrgs,
+  totalOrgs,
+}: {
+  allowedOrgs: Array<{ id: number; name: string | null }>;
+  blockedOrgs: Array<{ id: number; name: string | null }>;
+  totalOrgs: number;
+}) {
+  const hasPartners = totalOrgs > 0;
+
+  return (
+    <section className="grid gap-4 rounded-2xl border border-border/30 bg-muted p-4 md:grid-cols-2">
+      <div className="space-y-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="text-sm font-semibold text-foreground">Organizations with access</p>
+          <Badge variant="secondary">{allowedOrgs.length}</Badge>
+          <span className="text-xs text-muted-foreground">of {totalOrgs}</span>
+        </div>
+        {!hasPartners ? (
+          <p className="text-sm text-muted-foreground">No partner organizations are configured yet.</p>
+        ) : allowedOrgs.length ? (
+          <ul className="flex flex-wrap gap-2">
+            {allowedOrgs.map((org) => (
+              <li key={org.id}>
+                <Badge variant="secondary">{org.name ?? `Organization ${org.id}`}</Badge>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-muted-foreground">No partner organizations are enabled.</p>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="text-sm font-semibold text-foreground">Organizations without access</p>
+          <Badge variant="outline">{blockedOrgs.length}</Badge>
+        </div>
+        {!hasPartners ? (
+          <p className="text-sm text-muted-foreground">No partner organizations are configured yet.</p>
+        ) : blockedOrgs.length ? (
+          <ul className="flex flex-wrap gap-2">
+            {blockedOrgs.map((org) => (
+              <li key={org.id}>
+                <Badge variant="outline">{org.name ?? `Organization ${org.id}`}</Badge>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-muted-foreground">All participating partners are allowed.</p>
+        )}
+      </div>
+    </section>
   );
 }
 
@@ -234,6 +333,15 @@ function ConsentFormInner({
         </RadioGroup>
       </section>
 
+      {selectedScope === 'none' ? (
+        <Alert>
+          <AlertTitle>Partner access disabled</AlertTitle>
+          <AlertDescription>
+            Partner organizations will need to request consent before they can view your record. This may slow referrals.
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
       <section className="space-y-3 rounded-2xl border border-border/30 bg-muted p-4">
         <div className="space-y-1">
           <p className="text-base font-semibold text-foreground">Participating organizations</p>
@@ -354,4 +462,86 @@ function RevokeConsentForm({ consentId }: { consentId: string | null }) {
       </Button>
     </form>
   );
+}
+
+function ConsentHistory({ history }: { history: ConsentHistoryEntry[] }) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg">Consent history</CardTitle>
+        <CardDescription>Recent consent updates tied to your record.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {history.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No consent history recorded yet.</p>
+        ) : (
+          <ol className="space-y-3">
+            {history.map((entry) => {
+              const effectiveStatus = resolveEffectiveStatus(entry);
+              const showUpdated = entry.updatedAt && entry.updatedAt !== entry.createdAt;
+              return (
+                <li key={entry.id} className="rounded-2xl border border-border/40 bg-background p-3 text-sm">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <ConsentStatusBadge status={effectiveStatus} />
+                    <Badge variant="outline">Scope: {formatScope(entry.scope)}</Badge>
+                    <Badge variant="outline">Method: {formatMethod(entry.capturedMethod)}</Badge>
+                  </div>
+                  <div className="mt-2 grid gap-1 text-xs text-muted-foreground">
+                    <p>Captured {formatDate(entry.createdAt)}</p>
+                    {showUpdated ? <p>Updated {formatDate(entry.updatedAt!)}</p> : null}
+                    {entry.expiresAt ? <p>Expires {formatDate(entry.expiresAt)}</p> : null}
+                    {entry.revokedAt ? <p>Revoked {formatDate(entry.revokedAt)}</p> : null}
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+const METHOD_LABELS: Record<ConsentMethod, string> = {
+  portal: 'Client portal',
+  staff_assisted: 'Staff assisted',
+  verbal: 'Verbal',
+  documented: 'Documented',
+  migration: 'Migration',
+};
+
+const DATE_FORMATTER = new Intl.DateTimeFormat('en-CA', { dateStyle: 'medium' });
+
+function resolveEffectiveStatus(entry: ConsentHistoryEntry): ConsentStatus {
+  if (entry.status !== 'active') return entry.status;
+  if (entry.expiresAt && new Date(entry.expiresAt).getTime() <= Date.now()) {
+    return 'expired';
+  }
+  return entry.status;
+}
+
+function formatScope(scope: ConsentScope | null) {
+  if (scope === 'all_orgs') return 'All partner orgs';
+  if (scope === 'selected_orgs') return 'Selected orgs';
+  if (scope === 'none') return 'IHARC only';
+  return 'Not recorded';
+}
+
+function formatStatus(status: ConsentStatus | null) {
+  if (status === 'active') return 'Active';
+  if (status === 'expired') return 'Expired';
+  if (status === 'revoked') return 'Revoked';
+  return 'Not recorded';
+}
+
+function formatMethod(method: ConsentMethod) {
+  return METHOD_LABELS[method] ?? method;
+}
+
+function formatDate(value: string) {
+  try {
+    return DATE_FORMATTER.format(new Date(value));
+  } catch {
+    return value;
+  }
 }

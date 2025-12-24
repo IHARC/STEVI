@@ -1,5 +1,5 @@
 import type { Database } from '@/types/supabase';
-import type { ConsentOrgSelection, ConsentScope, ConsentStatus } from '@/lib/consents';
+import type { ConsentMethod, ConsentOrgSelection, ConsentScope, ConsentStatus } from '@/lib/consents';
 
 // Narrow case record shape to fields used in the UI. Keeps typecheck light while aligning to Supabase schema.
 export type CaseRecord = {
@@ -34,6 +34,7 @@ export type ConsentSnapshot = {
   scope: ConsentScope | null;
   status: ConsentStatus | null;
   effectiveStatus: ConsentStatus | null;
+  createdAt: string | null;
   expiresAt: string | null;
   updatedAt: string | null;
   orgSelections: ConsentOrgSelection[];
@@ -41,6 +42,17 @@ export type ConsentSnapshot = {
   blockedOrgIds: number[];
   preferredContactMethod: string | null;
   privacyRestrictions: string | null;
+};
+
+export type ConsentHistoryEntry = {
+  id: string;
+  scope: ConsentScope;
+  status: ConsentStatus;
+  capturedMethod: ConsentMethod;
+  createdAt: string;
+  updatedAt: string | null;
+  revokedAt: string | null;
+  expiresAt: string | null;
 };
 
 export type ClientCaseDetail = CaseSummary & {

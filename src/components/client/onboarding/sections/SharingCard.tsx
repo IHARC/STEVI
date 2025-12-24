@@ -187,6 +187,25 @@ function SharingCardInner({
               </section>
 
               <section className="space-y-3">
+                <Alert className="border-border/40 bg-muted/30">
+                  <AlertTitle>Why this matters</AlertTitle>
+                  <AlertDescription>
+                    Sharing lets IHARC coordinate care with partner organizations you already work with. You stay in control
+                    and can update these choices later.
+                  </AlertDescription>
+                </Alert>
+                {selectedScope === 'none' ? (
+                  <Alert variant="destructive">
+                    <AlertTitle>IHARC-only access</AlertTitle>
+                    <AlertDescription>
+                      Partner organizations cannot view your record without a new consent request, which can slow referrals
+                      and coordinated care.
+                    </AlertDescription>
+                  </Alert>
+                ) : null}
+              </section>
+
+              <section className="space-y-3">
                 <div className="space-y-1">
                   <p className="text-sm font-semibold text-foreground">Participating organizations</p>
                   <p className="text-sm text-muted-foreground">

@@ -1,9 +1,11 @@
 import { findPersonForUser } from '@/lib/cases/person';
 import { getEffectiveConsent, listConsentOrgs, listParticipatingOrganizations, resolveConsentOrgSelections } from '@/lib/consents';
+import type { ConsentMethod, ConsentScope, ConsentStatus } from '@/lib/consents';
 import type {
   CaseActivity,
   CaseSummary,
   ClientCaseDetail,
+  ConsentHistoryEntry,
   ConsentSnapshot,
   IntakeSubmission,
   CaseRecord,
@@ -19,6 +21,16 @@ const CASE_SELECT = 'id, person_id, case_number, case_type, status, priority, ca
 const INTAKE_SELECT = 'id, chosen_name, contact_email, contact_phone, status, created_at, metadata, supabase_user_id, profile_id, consent_contact';
 type RegistrationRow = Database['portal']['Tables']['registration_flows']['Row'];
 type ActivityRow = Database['core']['Tables']['people_activities']['Row'];
+type ConsentHistoryRow = {
+  id: string;
+  scope: ConsentScope;
+  status: ConsentStatus;
+  captured_method: ConsentMethod;
+  created_at: string;
+  updated_at: string | null;
+  revoked_at: string | null;
+  expires_at: string | null;
+};
 
 export async function fetchClientCases(
   supabase: SupabaseAnyServerClient,
@@ -99,7 +111,7 @@ export async function fetchPersonConsents(
     userId,
     iharcOrgId,
   }: { userId: string; iharcOrgId: number | null },
-): Promise<{ personId: number; snapshot: ConsentSnapshot } | null> {
+): Promise<{ personId: number; snapshot: ConsentSnapshot; history: ConsentHistoryEntry[] } | null> {
   const person = await findPersonForUser(supabase, userId);
   if (!person) return null;
 
@@ -111,6 +123,29 @@ export async function fetchPersonConsents(
   const scopeForSelection = effective.consent?.scope ?? 'all_orgs';
   const orgResolution = resolveConsentOrgSelections(scopeForSelection, participatingOrgs, consentOrgs);
 
+  const core = supabase.schema('core');
+  const { data: historyRows, error: historyError } = await core
+    .from('person_consents')
+    .select('id, scope, status, captured_method, created_at, updated_at, revoked_at, expires_at')
+    .eq('person_id', person.id)
+    .order('created_at', { ascending: false })
+    .limit(12);
+
+  if (historyError) {
+    throw historyError;
+  }
+
+  const history = (historyRows ?? []).map((row: ConsentHistoryRow) => ({
+    id: row.id,
+    scope: row.scope,
+    status: row.status,
+    capturedMethod: row.captured_method,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at ?? null,
+    revokedAt: row.revoked_at ?? null,
+    expiresAt: row.expires_at ?? null,
+  })) as ConsentHistoryEntry[];
+
   return {
     personId: person.id,
     snapshot: {
@@ -118,6 +153,7 @@ export async function fetchPersonConsents(
       scope: effective.consent?.scope ?? null,
       status: effective.consent?.status ?? null,
       effectiveStatus: effective.effectiveStatus ?? null,
+      createdAt: effective.consent?.createdAt ?? null,
       expiresAt: effective.expiresAt ?? null,
       updatedAt: effective.consent?.updatedAt ?? null,
       orgSelections: orgResolution.selections,
@@ -126,6 +162,7 @@ export async function fetchPersonConsents(
       preferredContactMethod: person.preferred_contact_method,
       privacyRestrictions: person.privacy_restrictions,
     },
+    history,
   };
 }
 

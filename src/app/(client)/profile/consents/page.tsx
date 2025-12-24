@@ -49,7 +49,12 @@ export default async function ConsentsPage() {
           </CardHeader>
         </Card>
       ) : (
-        <ConsentSettings personId={consentData.personId} snapshot={consentData.snapshot} policyVersion={policyVersion} />
+        <ConsentSettings
+          personId={consentData.personId}
+          snapshot={consentData.snapshot}
+          history={consentData.history}
+          policyVersion={policyVersion}
+        />
       )}
     </div>
   );

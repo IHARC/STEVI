@@ -110,6 +110,6 @@ describe('buildOpsHubNav', () => {
     const sections = buildPortalNav(access);
     const hubs = buildOpsHubNav(sections);
 
-    expect(hubs.map((hub) => hub.label)).toEqual(['Organizations']);
+    expect(hubs.map((hub) => hub.label)).toEqual(['Organizations', 'Consents']);
   });
 });
