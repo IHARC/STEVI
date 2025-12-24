@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Button } from '@shared/ui/button';
 import { Checkbox } from '@shared/ui/checkbox';
 import { Label } from '@shared/ui/label';
@@ -47,20 +47,43 @@ export function ConsentOverrideForm({
   submitLabel = 'Save override',
   className,
 }: ConsentOverrideFormProps) {
+  const orgKey = orgSelections.map((org) => `${org.id}:${org.allowed ? '1' : '0'}`).join('|');
+  const formKey = `${personId}:${consentScope}:${preferredContactMethod ?? 'none'}:${privacyRestrictions ?? ''}:${orgKey}`;
+
+  return (
+    <ConsentOverrideFormInner
+      key={formKey}
+      personId={personId}
+      consentScope={consentScope}
+      orgSelections={orgSelections}
+      preferredContactMethod={preferredContactMethod}
+      privacyRestrictions={privacyRestrictions}
+      policyVersion={policyVersion}
+      action={action}
+      submitLabel={submitLabel}
+      className={className}
+    />
+  );
+}
+
+function ConsentOverrideFormInner({
+  personId,
+  consentScope,
+  orgSelections,
+  preferredContactMethod,
+  privacyRestrictions,
+  policyVersion,
+  action,
+  submitLabel = 'Save override',
+  className,
+}: ConsentOverrideFormProps) {
   const [selectedScope, setSelectedScope] = useState<ConsentScope>(consentScope);
   const [allowedOrgIds, setAllowedOrgIds] = useState<Set<number>>(
-    new Set(orgSelections.filter((org) => org.allowed).map((org) => org.id)),
+    () => new Set(orgSelections.filter((org) => org.allowed).map((org) => org.id)),
   );
   const [preferredContact, setPreferredContact] = useState<string>(preferredContactMethod ?? 'email');
   const [consentMethod, setConsentMethod] = useState<string>('documented');
   const [confirmChecked, setConfirmChecked] = useState(false);
-
-  useEffect(() => {
-    setSelectedScope(consentScope);
-    setAllowedOrgIds(new Set(orgSelections.filter((org) => org.allowed).map((org) => org.id)));
-    setPreferredContact(preferredContactMethod ?? 'email');
-    setConfirmChecked(false);
-  }, [consentScope, orgSelections, preferredContactMethod]);
 
   const orgCount = orgSelections.length;
   const allOrgIds = useMemo(() => orgSelections.map((org) => org.id), [orgSelections]);

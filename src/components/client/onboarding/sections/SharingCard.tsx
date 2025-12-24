@@ -37,10 +37,38 @@ export function SharingCard({
   actor,
   disabled,
 }: SharingCardProps) {
+  const orgKey = orgSelections.map((org) => `${org.id}:${org.allowed ? '1' : '0'}`).join('|');
+  const formKey = `${personId ?? 'new'}:${consentScope}:${policyVersion ?? 'none'}:${orgKey}`;
+
+  return (
+    <SharingCardInner
+      key={formKey}
+      onSubmit={onSubmit}
+      state={state}
+      personId={personId}
+      consentScope={consentScope}
+      orgSelections={orgSelections}
+      policyVersion={policyVersion}
+      actor={actor}
+      disabled={disabled}
+    />
+  );
+}
+
+function SharingCardInner({
+  onSubmit,
+  state,
+  personId,
+  consentScope,
+  orgSelections,
+  policyVersion,
+  actor,
+  disabled,
+}: SharingCardProps) {
   const partnerBlocked = actor === 'partner';
   const [selectedScope, setSelectedScope] = useState<ConsentScope>(consentScope);
   const [allowedOrgIds, setAllowedOrgIds] = useState<Set<number>>(
-    new Set(orgSelections.filter((org) => org.allowed).map((org) => org.id)),
+    () => new Set(orgSelections.filter((org) => org.allowed).map((org) => org.id)),
   );
   const [confirmChecked, setConfirmChecked] = useState(false);
 
@@ -53,19 +81,6 @@ export function SharingCard({
       consent_confirm: false,
     },
   });
-
-  useEffect(() => {
-    const allowed = orgSelections.filter((org) => org.allowed).map((org) => org.id);
-    setSelectedScope(consentScope);
-    setAllowedOrgIds(new Set(allowed));
-    setConfirmChecked(false);
-    form.reset({
-      person_id: personId ? String(personId) : '',
-      consent_scope: consentScope,
-      org_allowed_ids: allowed.map((id) => String(id)),
-      consent_confirm: false,
-    });
-  }, [consentScope, form, orgSelections, personId]);
 
   useEffect(() => {
     form.setValue('consent_scope', selectedScope);

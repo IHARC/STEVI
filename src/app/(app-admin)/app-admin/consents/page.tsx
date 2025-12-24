@@ -89,7 +89,7 @@ export default async function AdminConsentsPage({ searchParams }: PageProps) {
 
   let person: PersonRow | null = null;
   let consentHistory: ConsentRow[] = [];
-  let consentSummary = null as ReturnType<typeof getEffectiveConsent> | null;
+  let consentSummary: Awaited<ReturnType<typeof getEffectiveConsent>> | null = null;
   let orgSelections = [] as ReturnType<typeof resolveConsentOrgSelections>['selections'];
   let consentScope: 'all_orgs' | 'selected_orgs' | 'none' = 'all_orgs';
 

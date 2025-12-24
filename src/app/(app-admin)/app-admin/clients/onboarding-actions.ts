@@ -10,6 +10,7 @@ import { getOnboardingStatus } from '@/lib/onboarding/status';
 import { syncConsentGrants } from '@/lib/consents';
 
 type AdminActionResult = { status: 'success' | 'error'; message: string };
+type ActiveConsentRow = { id: string };
 
 function errorResult(message: string): AdminActionResult {
   return { status: 'error', message };
@@ -41,7 +42,9 @@ export async function resetOnboardingAction(formData: FormData): Promise<AdminAc
     return errorResult('Unable to reset consent records.');
   }
 
-  if ((activeConsents ?? []).length > 0) {
+  const consentRows = (activeConsents ?? []) as ActiveConsentRow[];
+
+  if (consentRows.length > 0) {
     const { error: revokeError } = await core
       .from('person_consents')
       .update({
@@ -84,7 +87,7 @@ export async function resetOnboardingAction(formData: FormData): Promise<AdminAc
     action: 'onboarding_reset',
     entityType: 'people',
     entityRef: buildEntityRef({ schema: 'core', table: 'people', id: personId }),
-    meta: { person_id: personId, reset_by: access.profile.id, revoked_consent_ids: (activeConsents ?? []).map((row) => row.id) },
+    meta: { person_id: personId, reset_by: access.profile.id, revoked_consent_ids: consentRows.map((row) => row.id) },
   });
 
   revalidatePath(`/app-admin/clients/${personId}`);

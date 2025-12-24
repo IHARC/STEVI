@@ -238,19 +238,16 @@ export async function resetClientOnboarding(env: OnboardingResetEnv, supabase?: 
       throw new Error(`Unable to remove client intake records: ${intakeError.message}`);
     }
 
-    const { data: adminUser, error: adminUserError } = await client.auth.getUser();
-    if (adminUserError) {
-      throw new Error(`Unable to resolve admin user for onboarding reset: ${adminUserError.message}`);
-    }
-
+    const now = new Date().toISOString();
     const { error: consentResetError } = await core
-      .from('people')
+      .from('person_consents')
       .update({
-        data_sharing_consent: null,
-        updated_at: new Date().toISOString(),
-        updated_by: adminUser.user?.id ?? null,
+        status: 'revoked',
+        revoked_at: now,
+        updated_at: now,
       })
-      .eq('id', personId);
+      .eq('person_id', personId)
+      .eq('status', 'active');
 
     if (consentResetError) {
       throw new Error(`Unable to reset client sharing consent: ${consentResetError.message}`);

@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { fetchPersonConsents } from '@/lib/cases/fetchers';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
+import { Card, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Button } from '@shared/ui/button';
 import { resolveLandingPath } from '@/lib/portal-navigation';
 import { PageHeader } from '@shared/layout/page-header';

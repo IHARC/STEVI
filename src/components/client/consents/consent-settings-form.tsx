@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { updateConsentsAction, renewConsentAction, revokeConsentAction } from '@/lib/cases/actions';
 import type { ConsentSnapshot } from '@/lib/cases/types';
 import type { ConsentScope, ConsentStatus } from '@/lib/consents';
@@ -126,19 +126,48 @@ function ConsentForm({
   privacyRestrictions: string;
   policyVersion: string | null;
 }) {
+  const formKey = useMemo(() => {
+    const orgKey = orgSelections.map((org) => `${org.id}:${org.allowed ? '1' : '0'}`).join('|');
+    return `${personId}:${consentId ?? 'none'}:${scope}:${preferredContact}:${privacyRestrictions}:${orgKey}`;
+  }, [consentId, orgSelections, personId, preferredContact, privacyRestrictions, scope]);
+
+  return (
+    <ConsentFormInner
+      key={formKey}
+      personId={personId}
+      consentId={consentId}
+      scope={scope}
+      orgSelections={orgSelections}
+      preferredContact={preferredContact}
+      privacyRestrictions={privacyRestrictions}
+      policyVersion={policyVersion}
+    />
+  );
+}
+
+function ConsentFormInner({
+  personId,
+  consentId,
+  scope,
+  orgSelections,
+  preferredContact,
+  privacyRestrictions,
+  policyVersion,
+}: {
+  personId: number;
+  consentId: string | null;
+  scope: ConsentScope;
+  orgSelections: Array<{ id: number; name: string | null; allowed: boolean }>;
+  preferredContact: string;
+  privacyRestrictions: string;
+  policyVersion: string | null;
+}) {
   const [selectedScope, setSelectedScope] = useState<ConsentScope>(scope);
   const [allowedOrgIds, setAllowedOrgIds] = useState<Set<number>>(
-    new Set(orgSelections.filter((org) => org.allowed).map((org) => org.id)),
+    () => new Set(orgSelections.filter((org) => org.allowed).map((org) => org.id)),
   );
   const [contactMethod, setContactMethod] = useState<string>(preferredContact || 'email');
   const [confirmChecked, setConfirmChecked] = useState(false);
-
-  useEffect(() => {
-    setSelectedScope(scope);
-    setAllowedOrgIds(new Set(orgSelections.filter((org) => org.allowed).map((org) => org.id)));
-    setContactMethod(preferredContact || 'email');
-    setConfirmChecked(false);
-  }, [scope, orgSelections]);
 
   const orgCount = orgSelections.length;
   const allOrgIds = useMemo(() => orgSelections.map((org) => org.id), [orgSelections]);

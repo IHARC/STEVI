@@ -20,7 +20,7 @@ Sources: `docs/onboarding-consent-plan.md`, `docs/onboarding-contract.md`, code 
 ### What exists
 - Onboarding collects:
   - Service agreement + privacy acknowledgement -> `case_mgmt.client_intakes`.
-  - Legacy data sharing preference (boolean) -> `core.people.data_sharing_consent` (no longer used after org-level consent rollout).
+  - Org-level consent choices -> `core.person_consents` (scope + org allow list).
   - Wizard lives at `/onboarding` and is enforced server-side by `assertOnboardingComplete`.
 - Client profile consents page allows:
   - Global data sharing checkbox.
@@ -51,12 +51,17 @@ Sources: `docs/onboarding-consent-plan.md`, `docs/onboarding-contract.md`, code 
   - `src/app/(app-admin)/app-admin/consents/` (now implemented)
   - `src/app/(app-admin)/app-admin/clients/[personId]/` (empty)
 
-### Gaps vs requirement
-- Legacy global boolean (`core.people.data_sharing_consent`) remains for historical data; org-level consent now lives in `core.person_consents`.
-- Default onboarding choice now prompts to consent to all participating orgs (opt-out per org).
-- Consent history + explicit scope stored in `core.person_consents` and `core.person_consent_orgs`.
-- UI for org-level consent management is now in onboarding, client profile, ops requests, and admin consents.
-- Access grants are synchronized from consent changes.
+### Gaps vs requirement (updated 2025-12-24)
+- Core UI/UX flows implemented: onboarding capture, client profile edits, ops requests, admin consents.
+- Consent scope + per-org allow list stored in `core.person_consents` + `core.person_consent_orgs`.
+- Access grants are synchronized from consent changes (with expiry alignment in code).
+- Remaining: audit logging for consent search activity, client-visible consent history, and automated test coverage.
+
+### Audit findings (2025-12-24)
+- UI/UX coverage: onboarding, client profile, ops requests, and admin management are wired.
+- Audit events: consent create/update/renew/revoke and request approve/deny are logged; consent search activity is not.
+- Grant expiry: consent sync now sets `person_access_grants.expires_at` to match consent expiry in code; existing grants need backfill if already created.
+- Case access: `core.people` and `core.people_activities` enforce consent in RLS; `case_mgmt.case_management` access via direct user grants does not currently gate on consent (decision needed).
 
 ## HIFIS reference behavior (local docs)
 Sources:
@@ -107,8 +112,8 @@ Recommended internal reference links:
 ## Supabase schema check (2025-12-24)
 Post-implementation notes:
 - `core.person_consents`, `core.person_consent_orgs`, `core.person_consent_requests` added with RLS and supporting views/functions.
-- `core.people` still contains legacy `data_sharing_consent` plus `privacy_restrictions`; app logic no longer reads/writes the legacy flag.
-- `core.person_access_grants` continues to exist with `expires_at` aligned to consent expiry.
+- `core.people` no longer includes `data_sharing_consent`; `privacy_restrictions` remains.
+- `core.person_access_grants` continues to exist with `expires_at` aligned to consent expiry (code alignment; backfill recommended).
 - `core.people_activities` used for minimal consent contact logging.
 - `portal.public_settings` stores configurable consent expiry days.
 
@@ -116,9 +121,8 @@ Post-implementation notes:
 Note: Schema is shared across STEVI/OPS/marketing. Coordinate changes via Supabase MCP before migrations.
 
 ### Legacy fields
-- `core.people.data_sharing_consent` should be treated as legacy after migration.
-  - Do not continue to read/write it in app logic once new consent tables are live.
-  - Keep the column only until all apps stop relying on it, then remove in a coordinated migration.
+- `core.people.data_sharing_consent` was removed on 2025-12-24.
+  - Do not reintroduce legacy consent flags; use `core.person_consents` exclusively.
 
 ### New tables (core schema)
 1) `core.person_consents`
@@ -189,10 +193,11 @@ Note: Schema is shared across STEVI/OPS/marketing. Coordinate changes via Supaba
 - Status resolver treats consent as invalid when `expires_at < now()`.
 
 ### Migration/backfill
-- Convert existing `core.people.data_sharing_consent`:
+- Backfill completed in `20251224_consent_system.sql` using the legacy column before removal:
   - `true` -> new consent record scope = `all_orgs`.
   - `false` -> scope = `none`.
   - `null` -> no consent record; onboarding remains incomplete.
+- Legacy column removed in `20251224_drop_people_data_sharing_consent.sql`.
 - Initial org allow list:
   - If scope = `all_orgs`, insert allowed=true for all participating orgs (or evaluate on read).
   - If scope = `selected_orgs`, insert only those selected.
@@ -305,12 +310,14 @@ Tasks:
 ### Phase 4 - Data migration and rollout
 Deliverables:
 - Backfill existing records.
+- Remove legacy column.
 - Feature flag or staged rollout.
 
 Tasks:
-1) Backfill from `core.people.data_sharing_consent`.
-2) Verify RLS with Supabase MCP (`pg_policies`, access checks).
-3) Add migration tests or SQL validation steps.
+1) Backfill from legacy column (completed in `20251224_consent_system.sql`).
+2) Drop legacy column (completed in `20251224_drop_people_data_sharing_consent.sql`).
+3) Verify RLS with Supabase MCP (`pg_policies`, access checks).
+4) Add migration tests or SQL validation steps.
 
 ### Phase 5 - Testing and validation
 Deliverables:
@@ -320,6 +327,13 @@ Tests:
 - Unit: consent evaluation for each scope.
 - Integration: RLS denies access when org is not consented.
 - E2E: onboarding flow, consent changes, admin overrides.
+
+## Remaining work (as of 2025-12-24)
+1) Add audit logging for consent searches (ops consent request search activity).
+2) Add client-visible consent history (optional but recommended for transparency).
+3) Backfill `person_access_grants.expires_at` for existing grants to match latest consent expiry.
+4) Decide whether `case_mgmt.case_management` RLS should gate user-grant access by consent; update policies if required.
+5) Implement test coverage outlined in Phase 5.
 
 ## Acceptance criteria (v1)
 - Client can consent to all orgs by default, then opt out specific orgs.

@@ -3882,7 +3882,6 @@ export type Database = {
           age: number | null
           created_at: string
           created_by: string | null
-          data_sharing_consent: boolean | null
           date_of_birth: string | null
           email: string | null
           emergency_contact: string | null
@@ -3928,7 +3927,6 @@ export type Database = {
           age?: number | null
           created_at?: string
           created_by?: string | null
-          data_sharing_consent?: boolean | null
           date_of_birth?: string | null
           email?: string | null
           emergency_contact?: string | null
@@ -3974,7 +3972,6 @@ export type Database = {
           age?: number | null
           created_at?: string
           created_by?: string | null
-          data_sharing_consent?: boolean | null
           date_of_birth?: string | null
           email?: string | null
           emergency_contact?: string | null
@@ -6229,7 +6226,6 @@ export type Database = {
         }
         Returns: {
           created_at: string
-          data_sharing_consent: boolean
           email: string
           first_name: string
           housing_status: string

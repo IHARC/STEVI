@@ -25,6 +25,12 @@ type PersonNameRow = {
   last_service_month: string | null;
 };
 
+type PersonNameLookupRow = {
+  id: number;
+  first_name: string | null;
+  last_name: string | null;
+};
+
 type RequestStatusRow = {
   id: string;
   person_id: number;
@@ -75,7 +81,8 @@ export default async function OpsConsentRequestsPage({ searchParams }: PageProps
       throw nameError;
     }
 
-    (nameRows ?? []).forEach((row: any) => {
+    const safeNameRows = (nameRows ?? []) as PersonNameLookupRow[];
+    safeNameRows.forEach((row) => {
       const name = `${row.first_name ?? ''} ${row.last_name ?? ''}`.trim();
       requestNames.set(Number(row.id), name || `Person ${row.id}`);
     });

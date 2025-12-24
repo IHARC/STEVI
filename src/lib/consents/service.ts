@@ -1,6 +1,6 @@
 import { getConsentExpiryDays } from '@/lib/consents/settings';
 import type { SupabaseAnyServerClient, SupabaseServerClient } from '@/lib/supabase/types';
-import { createPersonGrant, revokePersonGrant } from '@/lib/cases/grants';
+import { createPersonGrant, revokePersonGrant, updatePersonGrantExpiry } from '@/lib/cases/grants';
 import type {
   ConsentMethod,
   ConsentOrgResolution,
@@ -32,6 +32,17 @@ type ConsentRow = {
   revoked_by: string | null;
   expires_at: string | null;
   restrictions: Record<string, unknown> | null;
+};
+
+type ConsentOrgRowDb = {
+  id: string;
+  consent_id: string;
+  organization_id: number;
+  allowed: boolean;
+  set_by: string | null;
+  set_at: string;
+  reason: string | null;
+  organizations?: { name?: string | null } | null;
 };
 
 function mapConsentRow(row: ConsentRow): ConsentRecord {
@@ -134,7 +145,7 @@ export async function listConsentOrgs(
     throw error;
   }
 
-  return (data ?? []).map((row: ConsentOrgRow & { organizations?: { name?: string | null } | null }) => ({
+  return (data ?? []).map((row: ConsentOrgRowDb) => ({
     id: row.id,
     consentId: row.consent_id,
     organizationId: row.organization_id,
@@ -351,9 +362,10 @@ export async function saveConsent(
 
   await syncConsentGrants(supabase, {
     personId,
-    allowedOrgIds: scope === 'selected_orgs' ? Array.from(allowedSet) : Array.from(allowedSet),
+    allowedOrgIds: Array.from(allowedSet),
     actorProfileId,
     actorUserId,
+    expiresAt: consent.expiresAt,
   });
 
   return { consent, previousConsent };
@@ -483,6 +495,7 @@ export async function syncConsentGrants(
     actorUserId,
     managedScopes = DEFAULT_ORG_GRANT_SCOPES,
     excludeOrgIds = [],
+    expiresAt = null,
   }: {
     personId: number;
     allowedOrgIds: number[];
@@ -490,6 +503,7 @@ export async function syncConsentGrants(
     actorUserId: string;
     managedScopes?: readonly string[];
     excludeOrgIds?: number[];
+    expiresAt?: string | null;
   },
 ): Promise<void> {
   const core = supabase.schema('core');
@@ -500,7 +514,7 @@ export async function syncConsentGrants(
 
   const { data, error } = await core
     .from('person_access_grants')
-    .select('id, grantee_org_id, scope')
+    .select('id, grantee_org_id, scope, expires_at')
     .eq('person_id', personId)
     .in('scope', managedScopes as string[])
     .not('grantee_org_id', 'is', null);
@@ -509,7 +523,12 @@ export async function syncConsentGrants(
     throw error;
   }
 
-  const existing = (data ?? []) as Array<{ id: string; grantee_org_id: number | null; scope: string }>;
+  const existing = (data ?? []) as Array<{
+    id: string;
+    grantee_org_id: number | null;
+    scope: string;
+    expires_at: string | null;
+  }>;
   const existingKey = new Set<string>();
 
   for (const row of existing) {
@@ -520,6 +539,12 @@ export async function syncConsentGrants(
 
     if (!allowedSet.has(orgId)) {
       await revokePersonGrant(supabase, { grantId: row.id, actorProfileId });
+    } else if (expiresAt && row.expires_at !== expiresAt) {
+      await updatePersonGrantExpiry(supabase, {
+        grantId: row.id,
+        expiresAt,
+        actorProfileId,
+      });
     }
   }
 
@@ -534,6 +559,7 @@ export async function syncConsentGrants(
         granteeOrgId: orgId,
         actorProfileId,
         actorUserId,
+        expiresAt,
       });
     }
   }
