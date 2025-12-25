@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { resolveLandingPath } from '@/lib/portal-navigation';
@@ -240,6 +241,9 @@ export default async function OpsConsentRequestsPage({ searchParams }: PageProps
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="grid gap-4 lg:grid-cols-2">
+                      <Button asChild variant="outline" className="lg:col-span-2">
+                        <Link href={`/ops/consents/record?person=${person.id}`}>Record consent with client present</Link>
+                      </Button>
                       <form action={requestConsentAction} className="space-y-2">
                         <input type="hidden" name="person_id" value={person.id} />
                         <div className="space-y-1">

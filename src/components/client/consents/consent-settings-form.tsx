@@ -421,7 +421,7 @@ function ConsentFormInner({
 
       <label className="flex items-start gap-3 rounded-2xl border border-border/30 bg-muted p-4 text-sm text-foreground">
         <Checkbox checked={confirmChecked} onCheckedChange={(value) => setConfirmChecked(Boolean(value))} className="mt-1" />
-        <span>I understand and confirm this data-sharing choice. IHARC will update partner access immediately.</span>
+        <span>I am the client (or authorized representative) and confirm this data-sharing choice. IHARC will update partner access immediately.</span>
       </label>
 
       <Button type="submit" className="w-fit px-6" disabled={!confirmChecked || requiresSelection}>

@@ -83,6 +83,13 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
             label: 'Consent requests',
             match: ['/ops/consents'],
           },
+          {
+            id: 'clients-consents-record',
+            href: '/ops/consents/record',
+            label: 'Record consent',
+            match: ['/ops/consents/record'],
+            requires: (access) => access.canManageConsents,
+          },
         ],
       },
       {
@@ -200,6 +207,13 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
             href: '/ops/consents',
             label: 'Consent requests',
             match: ['/ops/consents'],
+          },
+          {
+            id: 'consent-record',
+            href: '/ops/consents/record',
+            label: 'Record consent',
+            match: ['/ops/consents/record'],
+            requires: (access) => access.canManageConsents,
           },
         ],
       },

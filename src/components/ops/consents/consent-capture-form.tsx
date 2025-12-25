@@ -4,59 +4,47 @@ import { useMemo, useState } from 'react';
 import { Button } from '@shared/ui/button';
 import { Checkbox } from '@shared/ui/checkbox';
 import { Label } from '@shared/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/ui/select';
 import { Textarea } from '@shared/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@shared/ui/radio-group';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/ui/select';
+import { Alert, AlertDescription, AlertTitle } from '@shared/ui/alert';
 import { choiceCardVariants } from '@shared/ui/choice-card';
 import type { ConsentOrgSelection, ConsentScope } from '@/lib/consents';
 
-type ConsentOverrideFormProps = {
+type ConsentCaptureFormProps = {
   personId: number;
   consentScope: ConsentScope;
   orgSelections: ConsentOrgSelection[];
-  preferredContactMethod: string | null;
-  privacyRestrictions: string | null;
   policyVersion: string | null;
   action: (formData: FormData) => Promise<void>;
   submitLabel?: string;
   className?: string;
 };
 
-const CONTACT_OPTIONS = [
-  { value: 'email', label: 'Email' },
-  { value: 'phone', label: 'Phone' },
-  { value: 'both', label: 'Both' },
-  { value: 'none', label: 'None' },
-];
-
 const METHOD_OPTIONS = [
-  { value: 'documented', label: 'Documented' },
-  { value: 'verbal', label: 'Verbal' },
   { value: 'staff_assisted', label: 'Staff assisted' },
+  { value: 'verbal', label: 'Verbal' },
+  { value: 'documented', label: 'Documented' },
 ];
 
-export function ConsentOverrideForm({
+export function ConsentCaptureForm({
   personId,
   consentScope,
   orgSelections,
-  preferredContactMethod,
-  privacyRestrictions,
   policyVersion,
   action,
-  submitLabel = 'Save override',
+  submitLabel = 'Record consent',
   className,
-}: ConsentOverrideFormProps) {
+}: ConsentCaptureFormProps) {
   const orgKey = orgSelections.map((org) => `${org.id}:${org.allowed ? '1' : '0'}`).join('|');
-  const formKey = `${personId}:${consentScope}:${preferredContactMethod ?? 'none'}:${privacyRestrictions ?? ''}:${orgKey}`;
+  const formKey = `${personId}:${consentScope}:${policyVersion ?? 'none'}:${orgKey}`;
 
   return (
-    <ConsentOverrideFormInner
+    <ConsentCaptureFormInner
       key={formKey}
       personId={personId}
       consentScope={consentScope}
       orgSelections={orgSelections}
-      preferredContactMethod={preferredContactMethod}
-      privacyRestrictions={privacyRestrictions}
       policyVersion={policyVersion}
       action={action}
       submitLabel={submitLabel}
@@ -65,23 +53,20 @@ export function ConsentOverrideForm({
   );
 }
 
-function ConsentOverrideFormInner({
+function ConsentCaptureFormInner({
   personId,
   consentScope,
   orgSelections,
-  preferredContactMethod,
-  privacyRestrictions,
   policyVersion,
   action,
-  submitLabel = 'Save override',
+  submitLabel,
   className,
-}: ConsentOverrideFormProps) {
+}: ConsentCaptureFormProps) {
   const [selectedScope, setSelectedScope] = useState<ConsentScope>(consentScope);
   const [allowedOrgIds, setAllowedOrgIds] = useState<Set<number>>(
     () => new Set(orgSelections.filter((org) => org.allowed).map((org) => org.id)),
   );
-  const [preferredContact, setPreferredContact] = useState<string>(preferredContactMethod ?? 'email');
-  const [consentMethod, setConsentMethod] = useState<string>('documented');
+  const [consentMethod, setConsentMethod] = useState<string>('staff_assisted');
   const [staffAttested, setStaffAttested] = useState(false);
   const [clientAttested, setClientAttested] = useState(false);
 
@@ -108,13 +93,13 @@ function ConsentOverrideFormInner({
     });
   };
 
+  const canSubmit = staffAttested && clientAttested && !requiresSelection;
+
   return (
     <form action={action} className={className ?? 'space-y-4'}>
       <input type="hidden" name="person_id" value={personId} />
       <input type="hidden" name="consent_scope" value={selectedScope} />
-      <input type="hidden" name="preferred_contact" value={preferredContact} />
       <input type="hidden" name="consent_method" value={consentMethod} />
-      <input type="hidden" name="consent_confirm" value={staffAttested && clientAttested ? 'on' : ''} />
       <input type="hidden" name="attested_by_staff" value={staffAttested ? 'on' : ''} />
       <input type="hidden" name="attested_by_client" value={clientAttested ? 'on' : ''} />
       {policyVersion ? <input type="hidden" name="policy_version" value={policyVersion} /> : null}
@@ -138,7 +123,7 @@ function ConsentOverrideFormInner({
           <label className={choiceCardVariants({ surface: 'background', padding: 'compact' })}>
             <RadioGroupItem value="selected_orgs" />
             <div>
-              <p className="text-sm font-medium">Selected orgs</p>
+              <p className="text-sm font-medium">Selected orgs only</p>
               <p className="text-xs text-muted-foreground">Only specific partners can access.</p>
             </div>
           </label>
@@ -151,6 +136,15 @@ function ConsentOverrideFormInner({
           </label>
         </RadioGroup>
       </section>
+
+      {selectedScope === 'none' ? (
+        <Alert>
+          <AlertTitle>Partner access disabled</AlertTitle>
+          <AlertDescription>
+            Partner organizations will need to request consent before they can view this record. This may slow referrals.
+          </AlertDescription>
+        </Alert>
+      ) : null}
 
       <section className="space-y-3">
         <div className="space-y-1">
@@ -208,35 +202,6 @@ function ConsentOverrideFormInner({
       </div>
 
       <div className="space-y-1">
-        <Label className="text-xs">Preferred contact</Label>
-        <Select value={preferredContact} onValueChange={setPreferredContact}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select contact method" />
-          </SelectTrigger>
-          <SelectContent>
-            {CONTACT_OPTIONS.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-1">
-        <Label htmlFor={`privacy_${personId}`} className="text-xs">
-          Privacy notes
-        </Label>
-        <Textarea
-          id={`privacy_${personId}`}
-          name="privacy_restrictions"
-          defaultValue={privacyRestrictions ?? ''}
-          rows={3}
-          placeholder="Safety constraints or contact restrictions."
-        />
-      </div>
-
-      <div className="space-y-1">
         <Label htmlFor={`consent_notes_${personId}`} className="text-xs">
           Consent notes
         </Label>
@@ -244,7 +209,7 @@ function ConsentOverrideFormInner({
           id={`consent_notes_${personId}`}
           name="consent_notes"
           rows={3}
-          placeholder="Document the consent conversation or evidence."
+          placeholder="Document the consent conversation in plain language."
         />
       </div>
 
@@ -252,7 +217,7 @@ function ConsentOverrideFormInner({
         <p className="font-semibold">Required attestations</p>
         <label className="flex items-start gap-3">
           <Checkbox checked={staffAttested} onCheckedChange={(value) => setStaffAttested(Boolean(value))} className="mt-1" />
-          <span>I confirm the client was present and consent was explained in plain language.</span>
+          <span>I confirm the client is present and I explained consent in plain language.</span>
         </label>
         <label className="flex items-start gap-3">
           <Checkbox checked={clientAttested} onCheckedChange={(value) => setClientAttested(Boolean(value))} className="mt-1" />
@@ -260,7 +225,7 @@ function ConsentOverrideFormInner({
         </label>
       </section>
 
-      <Button type="submit" className="w-full" disabled={!staffAttested || !clientAttested || requiresSelection}>
+      <Button type="submit" className="w-full" disabled={!canSubmit}>
         {submitLabel}
       </Button>
     </form>

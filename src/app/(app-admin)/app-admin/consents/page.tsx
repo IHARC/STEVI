@@ -64,7 +64,7 @@ export default async function AdminConsentsPage({ searchParams }: PageProps) {
   const supabase = await createSupabaseRSCClient();
   const access = await loadPortalAccess(supabase);
 
-  if (!access || !access.canManageConsents) {
+  if (!access || !access.canAccessOpsSteviAdmin) {
     redirect(resolveLandingPath(access));
   }
 
@@ -129,7 +129,7 @@ export default async function AdminConsentsPage({ searchParams }: PageProps) {
       <PageHeader
         eyebrow="STEVI Admin"
         title="Consent management"
-        description="Review partner consent requests and manage client sharing preferences."
+        description="IHARC-only: review partner consent requests and manage client sharing preferences."
         breadcrumbs={[{ label: 'STEVI Admin', href: '/app-admin' }, { label: 'Consents' }]}
       />
 
@@ -200,6 +200,17 @@ export default async function AdminConsentsPage({ searchParams }: PageProps) {
                             rows={2}
                             placeholder="Document the consent conversation."
                           />
+                        </div>
+                        <div className="space-y-2 rounded-2xl border border-border/40 bg-muted/30 p-3 text-xs text-foreground">
+                          <p className="font-semibold">Required attestations</p>
+                          <label className="flex items-start gap-2">
+                            <input type="checkbox" name="attested_by_staff" required className="mt-1 h-4 w-4" />
+                            <span>I confirm the client was present and consent was explained in plain language.</span>
+                          </label>
+                          <label className="flex items-start gap-2">
+                            <input type="checkbox" name="attested_by_client" required className="mt-1 h-4 w-4" />
+                            <span>The client confirms they understand and agree to these sharing selections.</span>
+                          </label>
                         </div>
                         <Button type="submit" className="w-full">
                           Approve request
@@ -272,7 +283,32 @@ export default async function AdminConsentsPage({ searchParams }: PageProps) {
                     <form action={adminRenewConsentAction} className="space-y-2">
                       <input type="hidden" name="person_id" value={person.id} />
                       <input type="hidden" name="consent_id" value={consentSummary.consent.id} />
-                      <input type="hidden" name="consent_method" value="verbal" />
+                      <div className="space-y-1">
+                        <Label htmlFor={`renew_method_${person.id}`} className="text-xs">
+                          Consent method
+                        </Label>
+                        <select
+                          id={`renew_method_${person.id}`}
+                          name="consent_method"
+                          defaultValue="verbal"
+                          className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                        >
+                          <option value="verbal">Verbal</option>
+                          <option value="documented">Documented</option>
+                          <option value="staff_assisted">Staff assisted</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2 rounded-2xl border border-border/40 bg-muted/30 p-3 text-xs text-foreground">
+                        <p className="font-semibold">Required attestations</p>
+                        <label className="flex items-start gap-2">
+                          <input type="checkbox" name="attested_by_staff" required className="mt-1 h-4 w-4" />
+                          <span>I confirm the client was present and consent was explained in plain language.</span>
+                        </label>
+                        <label className="flex items-start gap-2">
+                          <input type="checkbox" name="attested_by_client" required className="mt-1 h-4 w-4" />
+                          <span>The client confirms they understand and agree to these sharing selections.</span>
+                        </label>
+                      </div>
                       <Button type="submit" variant="outline" className="w-full">
                         Renew consent
                       </Button>

@@ -24,6 +24,10 @@ type ConsentRow = {
   status: ConsentStatus;
   captured_by: string | null;
   captured_method: ConsentMethod;
+  captured_org_id: number | null;
+  attested_by_staff: boolean | null;
+  attested_by_client: boolean | null;
+  attested_at: string | null;
   policy_version: string | null;
   notes: string | null;
   created_at: string;
@@ -54,6 +58,10 @@ function mapConsentRow(row: ConsentRow): ConsentRecord {
     status: row.status,
     capturedBy: row.captured_by ?? null,
     capturedMethod: row.captured_method,
+    capturedOrgId: row.captured_org_id ?? null,
+    attestedByStaff: Boolean(row.attested_by_staff),
+    attestedByClient: Boolean(row.attested_by_client),
+    attestedAt: row.attested_at ?? null,
     policyVersion: row.policy_version ?? null,
     notes: row.notes ?? null,
     createdAt: row.created_at,
@@ -92,7 +100,7 @@ export async function getEffectiveConsent(
   const { data, error } = await core
     .from('person_consents')
     .select(
-      'id, person_id, consent_type, scope, status, captured_by, captured_method, policy_version, notes, created_at, updated_at, revoked_at, revoked_by, expires_at, restrictions',
+      'id, person_id, consent_type, scope, status, captured_by, captured_method, captured_org_id, attested_by_staff, attested_by_client, attested_at, policy_version, notes, created_at, updated_at, revoked_at, revoked_by, expires_at, restrictions',
     )
     .eq('person_id', personId)
     .eq('consent_type', CONSENT_TYPE)
@@ -236,6 +244,10 @@ export async function saveConsent(
     actorProfileId,
     actorUserId,
     method,
+    capturedOrgId,
+    attestedByStaff,
+    attestedByClient,
+    attestedAt,
     notes,
     policyVersion,
     restrictions,
@@ -247,6 +259,10 @@ export async function saveConsent(
     actorProfileId: string;
     actorUserId: string;
     method: ConsentMethod;
+    capturedOrgId?: number | null;
+    attestedByStaff?: boolean;
+    attestedByClient?: boolean;
+    attestedAt?: string | null;
     notes?: string | null;
     policyVersion?: string | null;
     restrictions?: Record<string, unknown> | null;
@@ -258,7 +274,7 @@ export async function saveConsent(
   const { data: previous, error: previousError } = await core
     .from('person_consents')
     .select(
-      'id, person_id, consent_type, scope, status, captured_by, captured_method, policy_version, notes, created_at, updated_at, revoked_at, revoked_by, expires_at, restrictions',
+      'id, person_id, consent_type, scope, status, captured_by, captured_method, captured_org_id, attested_by_staff, attested_by_client, attested_at, policy_version, notes, created_at, updated_at, revoked_at, revoked_by, expires_at, restrictions',
     )
     .eq('person_id', personId)
     .eq('consent_type', CONSENT_TYPE)
@@ -288,6 +304,28 @@ export async function saveConsent(
     }
   }
 
+  const requiresAttestation = method === 'staff_assisted' || method === 'verbal' || method === 'documented';
+  let resolvedCapturedOrgId = capturedOrgId ?? null;
+  let resolvedAttestedByStaff = Boolean(attestedByStaff);
+  let resolvedAttestedByClient = Boolean(attestedByClient);
+
+  if (method === 'portal') {
+    resolvedAttestedByClient = true;
+    resolvedAttestedByStaff = false;
+  }
+
+  if (requiresAttestation) {
+    if (!resolvedCapturedOrgId) {
+      throw new Error('Captured organization is required for staff-assisted consent.');
+    }
+    if (!resolvedAttestedByStaff || !resolvedAttestedByClient) {
+      throw new Error('Both staff and client attestations are required.');
+    }
+  }
+
+  const resolvedAttestedAt =
+    resolvedAttestedByStaff && resolvedAttestedByClient ? attestedAt ?? now : null;
+
   const expiryDays = await getConsentExpiryDays(supabase);
   const expiresAt = new Date(Date.now() + expiryDays * 24 * 60 * 60 * 1000).toISOString();
 
@@ -300,6 +338,10 @@ export async function saveConsent(
       status: 'active',
       captured_by: actorProfileId,
       captured_method: method,
+      captured_org_id: resolvedCapturedOrgId,
+      attested_by_staff: resolvedAttestedByStaff,
+      attested_by_client: resolvedAttestedByClient,
+      attested_at: resolvedAttestedAt,
       policy_version: policyVersion ?? null,
       notes: notes ?? null,
       created_at: now,
@@ -308,7 +350,7 @@ export async function saveConsent(
       restrictions: restrictions ?? null,
     })
     .select(
-      'id, person_id, consent_type, scope, status, captured_by, captured_method, policy_version, notes, created_at, updated_at, revoked_at, revoked_by, expires_at, restrictions',
+      'id, person_id, consent_type, scope, status, captured_by, captured_method, captured_org_id, attested_by_staff, attested_by_client, attested_at, policy_version, notes, created_at, updated_at, revoked_at, revoked_by, expires_at, restrictions',
     )
     .single();
 
@@ -443,6 +485,10 @@ export async function renewConsent(
     actorProfileId,
     actorUserId,
     method,
+    capturedOrgId,
+    attestedByStaff,
+    attestedByClient,
+    attestedAt,
     policyVersion,
     excludeOrgId,
   }: {
@@ -450,6 +496,10 @@ export async function renewConsent(
     actorProfileId: string;
     actorUserId: string;
     method: ConsentMethod;
+    capturedOrgId?: number | null;
+    attestedByStaff?: boolean;
+    attestedByClient?: boolean;
+    attestedAt?: string | null;
     policyVersion?: string | null;
     excludeOrgId?: number | null;
   },
@@ -458,7 +508,7 @@ export async function renewConsent(
   const { data, error } = await core
     .from('person_consents')
     .select(
-      'id, person_id, consent_type, scope, status, captured_by, captured_method, policy_version, notes, created_at, updated_at, revoked_at, revoked_by, expires_at, restrictions',
+      'id, person_id, consent_type, scope, status, captured_by, captured_method, captured_org_id, attested_by_staff, attested_by_client, attested_at, policy_version, notes, created_at, updated_at, revoked_at, revoked_by, expires_at, restrictions',
     )
     .eq('id', consentId)
     .maybeSingle();
@@ -480,6 +530,10 @@ export async function renewConsent(
     actorProfileId,
     actorUserId,
     method,
+    capturedOrgId,
+    attestedByStaff,
+    attestedByClient,
+    attestedAt,
     notes: existing.notes ?? null,
     policyVersion: policyVersion ?? existing.policyVersion ?? null,
     restrictions: existing.restrictions ?? null,

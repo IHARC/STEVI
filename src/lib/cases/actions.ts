@@ -162,6 +162,8 @@ export async function updateConsentsAction(formData: FormData): Promise<void> {
     actorProfileId: access.profile.id,
     actorUserId: access.userId,
     method: 'portal',
+    attestedByClient: true,
+    attestedByStaff: false,
     notes: privacyNotes,
     policyVersion,
   });
@@ -178,6 +180,11 @@ export async function updateConsentsAction(formData: FormData): Promise<void> {
       allowed_org_ids: Array.from(allowedSet),
       blocked_org_ids: blockedOrgIds,
       preferred_contact_method: preferredContact,
+      captured_method: 'portal',
+      attested_by_client: true,
+      attested_by_staff: false,
+      captured_org_id: null,
+      actor_role: 'client',
     },
   });
 
@@ -224,6 +231,7 @@ export async function updateConsentsAction(formData: FormData): Promise<void> {
           previous_blocked_org_ids: previousResolution.blockedOrgIds,
           allowed_org_ids: nextResolution.allowedOrgIds,
           blocked_org_ids: nextResolution.blockedOrgIds,
+          actor_role: 'client',
         },
       });
     }
@@ -242,12 +250,14 @@ export async function adminOverrideConsentAction(formData: FormData): Promise<vo
   const policyVersion = (formData.get('policy_version') as string | null)?.trim() || null;
   const preferredContact = (formData.get('preferred_contact') as string | null)?.trim() || null;
   const privacyNotes = (formData.get('privacy_restrictions') as string | null)?.trim() || null;
+  const attestedByStaff = formData.get('attested_by_staff') === 'on';
+  const attestedByClient = formData.get('attested_by_client') === 'on';
 
   if (!personId || Number.isNaN(personId)) throw new Error('Invalid person id.');
 
   const supabase = await createSupabaseServerClient();
   const access = await loadPortalAccess(supabase);
-  if (!access || !access.canManageConsents) {
+  if (!access || !access.canAccessOpsSteviAdmin) {
     throw new Error('You do not have permission to override consents.');
   }
 
@@ -292,6 +302,8 @@ export async function adminOverrideConsentAction(formData: FormData): Promise<vo
     throw new Error('Select at least one organization to share with.');
   }
 
+  const capturedOrgId = access.organizationId ?? access.iharcOrganizationId ?? null;
+
   const { consent, previousConsent } = await saveConsent(supabase, {
     personId,
     scope: consentScope,
@@ -300,6 +312,9 @@ export async function adminOverrideConsentAction(formData: FormData): Promise<vo
     actorProfileId: access.profile.id,
     actorUserId: access.userId,
     method: consentMethod as 'portal' | 'staff_assisted' | 'verbal' | 'documented' | 'migration',
+    capturedOrgId,
+    attestedByStaff,
+    attestedByClient,
     notes: consentNotes,
     policyVersion,
   });
@@ -318,6 +333,10 @@ export async function adminOverrideConsentAction(formData: FormData): Promise<vo
       preferred_contact_method: preferredContact,
       override: true,
       method: consentMethod,
+      captured_org_id: capturedOrgId,
+      attested_by_staff: attestedByStaff,
+      attested_by_client: attestedByClient,
+      actor_role: 'iharc',
     },
   });
 
@@ -358,7 +377,7 @@ export async function revokeConsentAction(formData: FormData): Promise<void> {
     action: 'consent_revoked',
     entityType: 'core.person_consents',
     entityRef: buildEntityRef({ schema: 'core', table: 'person_consents', id: consentId }),
-    meta: { person_id: person.id, revoked_by_client: true },
+    meta: { person_id: person.id, revoked_by_client: true, actor_role: 'client' },
   });
 
   revalidatePath('/profile/consents');
@@ -391,7 +410,7 @@ export async function renewConsentAction(formData: FormData): Promise<void> {
     action: 'consent_updated',
     entityType: 'core.person_consents',
     entityRef: buildEntityRef({ schema: 'core', table: 'person_consents', id: consent.id }),
-    meta: { person_id: person.id, renewed: true },
+    meta: { person_id: person.id, renewed: true, actor_role: 'client' },
   });
 
   revalidatePath('/profile/consents');
@@ -404,7 +423,7 @@ export async function adminRevokeConsentAction(formData: FormData): Promise<void
 
   const supabase = await createSupabaseServerClient();
   const access = await loadPortalAccess(supabase);
-  if (!access || !access.canManageConsents) {
+  if (!access || !access.canAccessOpsSteviAdmin) {
     throw new Error('You do not have permission to revoke consents.');
   }
 
@@ -426,7 +445,7 @@ export async function adminRevokeConsentAction(formData: FormData): Promise<void
     action: 'consent_revoked',
     entityType: 'core.person_consents',
     entityRef: buildEntityRef({ schema: 'core', table: 'person_consents', id: consentId }),
-    meta: { person_id: personId, revoked_by_admin: true },
+    meta: { person_id: personId, revoked_by_admin: true, actor_role: 'iharc' },
   });
 
   revalidatePath('/app-admin/consents');
@@ -438,18 +457,25 @@ export async function adminRenewConsentAction(formData: FormData): Promise<void>
   if (!consentId || !personId || Number.isNaN(personId)) throw new Error('Missing consent id.');
 
   const consentMethod = (formData.get('consent_method') as string | null)?.trim() || 'documented';
+  const attestedByStaff = formData.get('attested_by_staff') === 'on';
+  const attestedByClient = formData.get('attested_by_client') === 'on';
 
   const supabase = await createSupabaseServerClient();
   const access = await loadPortalAccess(supabase);
-  if (!access || !access.canManageConsents) {
+  if (!access || !access.canAccessOpsSteviAdmin) {
     throw new Error('You do not have permission to renew consents.');
   }
+
+  const capturedOrgId = access.organizationId ?? access.iharcOrganizationId ?? null;
 
   const { consent } = await renewConsent(supabase, {
     consentId,
     actorProfileId: access.profile.id,
     actorUserId: access.userId,
     method: consentMethod as 'portal' | 'staff_assisted' | 'verbal' | 'documented' | 'migration',
+    capturedOrgId,
+    attestedByStaff,
+    attestedByClient,
     excludeOrgId: access.iharcOrganizationId,
   });
 
@@ -458,7 +484,15 @@ export async function adminRenewConsentAction(formData: FormData): Promise<void>
     action: 'consent_updated',
     entityType: 'core.person_consents',
     entityRef: buildEntityRef({ schema: 'core', table: 'person_consents', id: consent.id }),
-    meta: { person_id: personId, renewed: true, method: consentMethod },
+    meta: {
+      person_id: personId,
+      renewed: true,
+      method: consentMethod,
+      captured_org_id: capturedOrgId,
+      attested_by_staff: attestedByStaff,
+      attested_by_client: attestedByClient,
+      actor_role: 'iharc',
+    },
   });
 
   revalidatePath('/app-admin/consents');

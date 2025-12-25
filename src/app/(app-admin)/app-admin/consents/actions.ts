@@ -37,10 +37,12 @@ export async function approveConsentRequestAction(formData: FormData): Promise<v
   const consentNotes = parseShortText(formData, 'consent_notes', 500);
   const decisionReason = parseShortText(formData, 'decision_reason', 240);
   const policyVersion = parseShortText(formData, 'policy_version', 120);
+  const attestedByStaff = formData.get('attested_by_staff') === 'on';
+  const attestedByClient = formData.get('attested_by_client') === 'on';
 
   const supabase = await createSupabaseServerClient();
   const access = await loadPortalAccess(supabase);
-  if (!access || !access.canManageConsents) {
+  if (!access || !access.canAccessOpsSteviAdmin) {
     throw new Error('You do not have permission to approve consents.');
   }
 
@@ -84,6 +86,8 @@ export async function approveConsentRequestAction(formData: FormData): Promise<v
     throw new Error('Select at least one organization to approve.');
   }
 
+  const capturedOrgId = access.organizationId ?? access.iharcOrganizationId ?? null;
+
   const { consent, previousConsent } = await saveConsent(supabase, {
     personId: requestRow.person_id,
     scope: consentScope,
@@ -92,6 +96,9 @@ export async function approveConsentRequestAction(formData: FormData): Promise<v
     actorProfileId: access.profile.id,
     actorUserId: access.userId,
     method: consentMethod as 'portal' | 'staff_assisted' | 'verbal' | 'documented' | 'migration',
+    capturedOrgId,
+    attestedByStaff,
+    attestedByClient,
     notes: consentNotes ?? null,
     policyVersion: policyVersion ?? null,
   });
@@ -123,6 +130,10 @@ export async function approveConsentRequestAction(formData: FormData): Promise<v
       blocked_org_ids: blockedOrgIds,
       method: consentMethod,
       approved_from_request: requestRow.id,
+      captured_org_id: capturedOrgId,
+      attested_by_staff: attestedByStaff,
+      attested_by_client: attestedByClient,
+      actor_role: 'iharc',
     },
   });
 
@@ -134,6 +145,7 @@ export async function approveConsentRequestAction(formData: FormData): Promise<v
     meta: {
       person_id: requestRow.person_id,
       requesting_org_id: requestRow.requesting_org_id,
+      actor_role: 'iharc',
     },
   });
 
@@ -148,7 +160,7 @@ export async function denyConsentRequestAction(formData: FormData): Promise<void
 
   const supabase = await createSupabaseServerClient();
   const access = await loadPortalAccess(supabase);
-  if (!access || !access.canManageConsents) {
+  if (!access || !access.canAccessOpsSteviAdmin) {
     throw new Error('You do not have permission to deny consent requests.');
   }
 
@@ -190,6 +202,7 @@ export async function denyConsentRequestAction(formData: FormData): Promise<void
     meta: {
       person_id: requestRow.person_id,
       requesting_org_id: requestRow.requesting_org_id,
+      actor_role: 'iharc',
     },
   });
 

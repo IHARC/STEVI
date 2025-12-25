@@ -486,6 +486,7 @@ export async function saveSharingPreferenceAction(
   const consentConfirmed = getBoolean(formData, 'consent_confirm');
   const policyVersion = sanitizeShortText(formData.get('policy_version'), 120);
   const allowedOrgIds = parseOrgIds(formData, 'org_allowed_ids');
+  const attestedByStaff = getBoolean(formData, 'attested_by_staff');
 
   if (!personId) {
     return errorState('A client record is required before setting sharing preferences.');
@@ -493,6 +494,10 @@ export async function saveSharingPreferenceAction(
 
   if (!consentConfirmed) {
     return errorState('Confirm your sharing choice before saving.');
+  }
+
+  if (actor === 'staff' && !attestedByStaff) {
+    return errorState('Staff attestation is required to record consent.');
   }
 
   const personRow = await loadPersonById(supabase, personId);
@@ -524,6 +529,11 @@ export async function saveSharingPreferenceAction(
     return errorState('Select at least one organization to share with.');
   }
 
+  const capturedOrgId = actor === 'staff' ? access.organizationId ?? null : null;
+  if (actor === 'staff' && !capturedOrgId) {
+    return errorState('Select an acting organization before recording consent.');
+  }
+
   const { consent, previousConsent } = await saveConsent(supabase, {
     personId,
     scope: consentScope,
@@ -532,6 +542,9 @@ export async function saveSharingPreferenceAction(
     actorProfileId: access.profile.id,
     actorUserId: access.userId,
     method: actor === 'staff' ? 'staff_assisted' : 'portal',
+    capturedOrgId,
+    attestedByStaff: actor === 'staff' ? attestedByStaff : false,
+    attestedByClient: consentConfirmed,
     notes: null,
     policyVersion: policyVersion ?? null,
   });
@@ -549,6 +562,9 @@ export async function saveSharingPreferenceAction(
       allowed_org_ids: Array.from(allowedSet),
       blocked_org_ids: blockedOrgIds,
       method: actor === 'staff' ? 'staff_assisted' : 'portal',
+      captured_org_id: capturedOrgId,
+      attested_by_staff: actor === 'staff' ? attestedByStaff : false,
+      attested_by_client: consentConfirmed,
     },
   });
 

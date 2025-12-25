@@ -71,6 +71,7 @@ function SharingCardInner({
     () => new Set(orgSelections.filter((org) => org.allowed).map((org) => org.id)),
   );
   const [confirmChecked, setConfirmChecked] = useState(false);
+  const [staffAttested, setStaffAttested] = useState(false);
 
   const form = useForm<SharingFormValues>({
     resolver: zodResolver(sharingSchema),
@@ -138,6 +139,9 @@ function SharingCardInner({
             <input type="hidden" name="person_id" value={personId ? String(personId) : ''} />
             <input type="hidden" name="consent_scope" value={selectedScope} />
             <input type="hidden" name="consent_confirm" value={confirmChecked ? 'on' : ''} />
+            {actor === 'staff' ? (
+              <input type="hidden" name="attested_by_staff" value={staffAttested ? 'on' : ''} />
+            ) : null}
             {policyVersion ? <input type="hidden" name="policy_version" value={policyVersion} /> : null}
             {Array.from(allowedOrgIds).map((orgId) => (
               <input key={`org-${orgId}`} type="hidden" name="org_allowed_ids" value={orgId} />
@@ -246,8 +250,14 @@ function SharingCardInner({
 
               <label className="flex items-start gap-3 rounded-2xl border border-border/30 bg-muted p-4 text-sm text-foreground">
                 <Checkbox checked={confirmChecked} onCheckedChange={(value) => setConfirmChecked(Boolean(value))} className="mt-1" />
-                <span>I understand and confirm this data-sharing choice. IHARC will update partner access immediately.</span>
+                <span>I am the client (or authorized representative) and confirm this data-sharing choice.</span>
               </label>
+              {actor === 'staff' ? (
+                <label className="flex items-start gap-3 rounded-2xl border border-border/30 bg-muted p-4 text-sm text-foreground">
+                  <Checkbox checked={staffAttested} onCheckedChange={(value) => setStaffAttested(Boolean(value))} className="mt-1" />
+                  <span>I confirm the client is present and I explained consent in plain language.</span>
+                </label>
+              ) : null}
             </fieldset>
 
             {state.status === 'error' ? (
@@ -263,7 +273,16 @@ function SharingCardInner({
               </Alert>
             ) : null}
 
-            <FormSubmit disabled={disabled || partnerBlocked || !confirmChecked || requiresSelection} pendingLabel="Saving…">
+            <FormSubmit
+              disabled={
+                disabled ||
+                partnerBlocked ||
+                !confirmChecked ||
+                requiresSelection ||
+                (actor === 'staff' && !staffAttested)
+              }
+              pendingLabel="Saving…"
+            >
               Save preference
             </FormSubmit>
           </form>

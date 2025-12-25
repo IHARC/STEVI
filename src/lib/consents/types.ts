@@ -18,6 +18,10 @@ export type ConsentRecord = {
   status: ConsentStatus;
   capturedBy: string | null;
   capturedMethod: ConsentMethod;
+  capturedOrgId: number | null;
+  attestedByStaff: boolean;
+  attestedByClient: boolean;
+  attestedAt: string | null;
   policyVersion: string | null;
   notes: string | null;
   createdAt: string;

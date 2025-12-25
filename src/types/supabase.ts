@@ -4032,6 +4032,10 @@ export type Database = {
           status: string
           captured_by: string | null
           captured_method: string
+          captured_org_id: number | null
+          attested_by_staff: boolean
+          attested_by_client: boolean
+          attested_at: string | null
           policy_version: string | null
           notes: string | null
           created_at: string
@@ -4049,6 +4053,10 @@ export type Database = {
           status: string
           captured_by?: string | null
           captured_method: string
+          captured_org_id?: number | null
+          attested_by_staff?: boolean
+          attested_by_client?: boolean
+          attested_at?: string | null
           policy_version?: string | null
           notes?: string | null
           created_at?: string
@@ -4066,6 +4074,10 @@ export type Database = {
           status?: string
           captured_by?: string | null
           captured_method?: string
+          captured_org_id?: number | null
+          attested_by_staff?: boolean
+          attested_by_client?: boolean
+          attested_at?: string | null
           policy_version?: string | null
           notes?: string | null
           created_at?: string
@@ -4088,6 +4100,13 @@ export type Database = {
             columns: ["captured_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "person_consents_captured_org_id_fkey"
+            columns: ["captured_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
           {
@@ -5945,6 +5964,10 @@ export type Database = {
           status: string | null
           captured_by: string | null
           captured_method: string | null
+          captured_org_id: number | null
+          attested_by_staff: boolean | null
+          attested_by_client: boolean | null
+          attested_at: string | null
           policy_version: string | null
           notes: string | null
           created_at: string | null
