@@ -5,7 +5,6 @@ import { cn } from '@/lib/utils';
 import '@/styles/theme.css';
 import { ThemeProvider } from '@shared/providers/theme-provider';
 import { AnalyticsProvider } from '@shared/providers/analytics-provider';
-import { Toaster } from '@shared/ui/sonner';
 import { getBrandingAssets } from '@/lib/marketing/branding';
 
 export const dynamic = 'force-dynamic';
@@ -81,7 +80,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <Suspense fallback={null}>
             <AnalyticsProvider measurementId={GA_MEASUREMENT_ID} enabled={ANALYTICS_ENABLED} nonce={nonce} />
           </Suspense>
-          <Toaster position="top-right" richColors closeButton />
           {children}
         </ThemeProvider>
       </body>

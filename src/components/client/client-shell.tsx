@@ -10,6 +10,7 @@ import type { ResolvedBrandingAssets } from '@/lib/marketing/branding';
 import type { UserNavigation } from '@shared/layout/user-nav';
 import { cn } from '@/lib/utils';
 import { LayoutDebugOverlay } from '@shared/layout/layout-debug-overlay';
+import { Toaster } from '@shared/ui/toaster';
 
 type ClientShellProps = {
   children: ReactNode;
@@ -33,6 +34,7 @@ export function ClientShell({
   return (
     <div className="client-shell min-h-screen bg-background text-foreground">
       <LayoutDebugOverlay />
+      <Toaster position="top-right" />
       <TopNav
         navSections={navSections}
         commands={commandPaletteItems}

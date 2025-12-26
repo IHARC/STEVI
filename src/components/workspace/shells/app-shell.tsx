@@ -11,6 +11,7 @@ import { OpsHubRail } from '@workspace/layout/ops-hub-rail';
 import { LayoutDebugOverlay } from '@shared/layout/layout-debug-overlay';
 import { OpsMainGrid } from '@workspace/shells/ops-main-grid';
 import type { CommandPaletteItem } from '@/lib/portal-access';
+import { Toaster } from '@shared/ui/toaster';
 
 type AppShellProps = {
   children: ReactNode;
@@ -37,6 +38,7 @@ export function AppShell({
   return (
     <div className={cn('ops-shell min-h-screen bg-background text-foreground')}>
       <LayoutDebugOverlay />
+      <Toaster position="top-right" />
       <TopNav
         branding={branding}
         navigation={navigation}
