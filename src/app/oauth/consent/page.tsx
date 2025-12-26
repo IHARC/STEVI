@@ -125,7 +125,7 @@ export default async function OAuthConsentPage({ searchParams }: ConsentPageProp
   }
 
   const clientIdValue = details.client?.client_id ?? details.client_id ?? null;
-  const redirectTo = details.redirect_to ?? details.redirect_uri ?? null;
+  const redirectTo = details.redirect_to ?? null;
   const firstPartyClientId = process.env.SUPABASE_OAUTH_CLIENT_ID ?? null;
   const shouldAutoApprove =
     !errorCode && Boolean(firstPartyClientId && clientIdValue && firstPartyClientId === clientIdValue);
