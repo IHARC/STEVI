@@ -11,7 +11,7 @@ read-only; both apps share the same Supabase project.
 - **Configure env**: Use `.env` (git-ignored) for local values. Update the local override block to point to localhost when needed (see below).
 - **Install dependencies**: `npm install`
 - **Run locally**: `npm run dev` (http://localhost:3000)
-- **Local OAuth**: Ensure Supabase OAuth Server allows `http://localhost:3000/auth/callback` and set `NEXT_PUBLIC_APP_URL`/`NEXT_PUBLIC_LOGIN_URL` to localhost in `.env`.
+- **Local OAuth**: Configure Supabase Auth redirect URLs to allow `http://localhost:3000/auth/callback`. If you use the hosted OAuth Server, the consent UI host is controlled by the Supabase Auth `Site URL` setting—use a dev Supabase project or temporarily point `Site URL` to localhost while testing locally.
 - **Type checks**: `npm run typecheck`
 - **Linting**: `npm run lint`
 - **Unit tests**: `npm run test`

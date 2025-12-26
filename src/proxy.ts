@@ -42,6 +42,7 @@ function buildCspHeader(nonce: string): string {
     ...GA_HOSTS,
     SUPABASE_HOST,
     isDev ? "'unsafe-eval'" : null,
+    isDev ? "'unsafe-inline'" : null,
   ]
     .filter(Boolean)
     .join(' ');
@@ -58,6 +59,7 @@ function buildCspHeader(nonce: string): string {
     "object-src 'none'",
     `script-src ${scriptSrc}`,
     `style-src ${styleSrc}`,
+    "style-src-attr 'unsafe-inline'",
     `img-src 'self' data: ${SUPABASE_HOST} ${GA_HOSTS.join(' ')}`,
     "font-src 'self' data:",
     connectSrc,
@@ -83,19 +85,21 @@ export async function proxy(request: NextRequest) {
   const responseHeaders = new Headers();
   responseHeaders.set('Content-Security-Policy', cspHeader);
 
+  const appHost = getAppHost();
+  const loginHost = getLoginHost();
   const hostHeader = request.headers.get('x-forwarded-host') ?? request.headers.get('host');
-  if (hostHeader) {
+  if (hostHeader && appHost !== loginHost) {
     const host = hostHeader.split(',')[0]?.trim().toLowerCase() ?? '';
     const hostname = host.split(':')[0] ?? host;
     const pathname = request.nextUrl.pathname;
 
-    if (hostname === getLoginHost()) {
+    if (hostname === loginHost) {
       if (!LOGIN_ALLOWED_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))) {
         return NextResponse.redirect(new URL(`${pathname}${request.nextUrl.search}`, getAppUrl()));
       }
     }
 
-    if (hostname === getAppHost()) {
+    if (hostname === appHost) {
       if (pathname === '/oauth/consent' || pathname.startsWith('/oauth/consent/')) {
         return NextResponse.redirect(new URL(`${pathname}${request.nextUrl.search}`, getLoginUrl()));
       }

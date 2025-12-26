@@ -12,7 +12,11 @@ This document captures the backend expectations for running the STEVI portal alo
 
 ## Environment Variables
 
-Use `.env` (git-ignored) for local values and update the local override block when testing localhost flows. All variables prefixed with `NEXT_PUBLIC_` are exposed to the browser. Do not expose secrets such as the service-role key or the alerts secret.
+Use `.env` (git-ignored) for local values and update the local override block when testing localhost flows. Default to `http://localhost:3000` for local dev; you can optionally use a split-host setup (`http://stevi.localhost:3000` + `http://login.localhost:3000`) to mirror production routing. All variables prefixed with `NEXT_PUBLIC_` are exposed to the browser. Do not expose secrets such as the service-role key or the alerts secret.
+
+Supabase Auth best practices for local dev:
+- Keep the production `Site URL` on the hosted project, and add localhost callback URLs to the Auth redirect allowlist.
+- If you need the OAuth consent UI to run locally, use a dedicated dev Supabase project (recommended) or temporarily point the Auth `Site URL` to your local login host while testing.
 
 | Variable | Required | Description |
 | --- | --- | --- |
