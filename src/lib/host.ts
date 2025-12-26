@@ -1,5 +1,6 @@
-const DEFAULT_APP_URL = 'https://stevi.iharc.ca';
-const DEFAULT_LOGIN_URL = 'https://login.iharc.ca';
+const IS_PROD = process.env.NODE_ENV === 'production';
+const DEFAULT_APP_URL = IS_PROD ? 'https://stevi.iharc.ca' : 'http://localhost:3000';
+const DEFAULT_LOGIN_URL = IS_PROD ? 'https://login.iharc.ca' : DEFAULT_APP_URL;
 
 export function getAppUrl(): string {
   return process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? DEFAULT_APP_URL;

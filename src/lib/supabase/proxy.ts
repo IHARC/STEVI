@@ -15,9 +15,17 @@ import {
  * cookies. Keep this focused on token refresh and request headers; authorization
  * decisions must happen in server actions/route handlers.
  */
-export async function refreshOAuthSession(request: NextRequest): Promise<NextResponse> {
+type ProxyHeaderOptions = {
+  requestHeaders?: Headers;
+  responseHeaders?: Headers;
+};
+
+export async function refreshOAuthSession(
+  request: NextRequest,
+  options: ProxyHeaderOptions = {},
+): Promise<NextResponse> {
   const env = getSupabaseEnvOrNull();
-  const requestHeaders = new Headers(request.headers);
+  const requestHeaders = options.requestHeaders ? new Headers(options.requestHeaders) : new Headers(request.headers);
   const requestPath = `${request.nextUrl.pathname}${request.nextUrl.search}`;
   requestHeaders.set('x-stevi-path', requestPath);
   requestHeaders.set('x-forwarded-uri', requestPath);
@@ -26,6 +34,15 @@ export async function refreshOAuthSession(request: NextRequest): Promise<NextRes
   requestHeaders.set('x-url', request.url);
   requestHeaders.set('x-pathname', request.nextUrl.pathname);
   let response = NextResponse.next({ request: { headers: requestHeaders } });
+
+  const applyResponseHeaders = (target: NextResponse) => {
+    if (!options.responseHeaders) return;
+    for (const [key, value] of options.responseHeaders.entries()) {
+      target.headers.set(key, value);
+    }
+  };
+
+  applyResponseHeaders(response);
 
   if (!env) {
     return response;
@@ -40,6 +57,7 @@ export async function refreshOAuthSession(request: NextRequest): Promise<NextRes
     const tokens = await refreshAccessToken(refreshToken);
     setOAuthSessionCookies(request.cookies, tokens, refreshToken);
     response = NextResponse.next({ request: { headers: requestHeaders } });
+    applyResponseHeaders(response);
     setOAuthSessionCookies(response.cookies, tokens, refreshToken);
   } catch (error) {
     if (process.env.NODE_ENV !== 'production') {
@@ -47,6 +65,7 @@ export async function refreshOAuthSession(request: NextRequest): Promise<NextRes
     }
     clearOAuthSessionCookies(request.cookies);
     response = NextResponse.next({ request: { headers: requestHeaders } });
+    applyResponseHeaders(response);
     clearOAuthSessionCookies(response.cookies);
   }
 

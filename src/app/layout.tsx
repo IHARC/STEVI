@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
+import { headers } from 'next/headers';
 import { cn } from '@/lib/utils';
 import '@/styles/theme.css';
 import { ThemeProvider } from '@shared/providers/theme-provider';
@@ -61,7 +62,8 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const nonce = (await headers()).get('x-nonce');
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -77,7 +79,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             Skip to main content
           </a>
           <Suspense fallback={null}>
-            <AnalyticsProvider measurementId={GA_MEASUREMENT_ID} enabled={ANALYTICS_ENABLED} />
+            <AnalyticsProvider measurementId={GA_MEASUREMENT_ID} enabled={ANALYTICS_ENABLED} nonce={nonce} />
           </Suspense>
           <Toaster position="top-right" richColors closeButton />
           {children}

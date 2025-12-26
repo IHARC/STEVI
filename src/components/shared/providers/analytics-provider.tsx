@@ -8,6 +8,7 @@ import { trackClientEvent } from '@/lib/telemetry';
 type AnalyticsProviderProps = {
   measurementId?: string | null;
   enabled?: boolean;
+  nonce?: string | null;
 };
 
 type AnalyticsWindow = Window & {
@@ -15,7 +16,7 @@ type AnalyticsWindow = Window & {
   gtag?: (...args: unknown[]) => void;
 };
 
-export function AnalyticsProvider({ measurementId, enabled = true }: AnalyticsProviderProps) {
+export function AnalyticsProvider({ measurementId, enabled = true, nonce }: AnalyticsProviderProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const search = useMemo(() => searchParams?.toString() ?? '', [searchParams]);
@@ -75,10 +76,12 @@ export function AnalyticsProvider({ measurementId, enabled = true }: AnalyticsPr
         id="ga4-script"
         src={`https://www.googletagmanager.com/gtag/js?id=${measurementId}`}
         strategy="afterInteractive"
+        nonce={nonce ?? undefined}
       />
       <Script
         id="ga4-inline"
         strategy="afterInteractive"
+        nonce={nonce ?? undefined}
         dangerouslySetInnerHTML={{
           __html: `
             (function () {
