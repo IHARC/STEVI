@@ -12,6 +12,7 @@ import {
 import { Avatar, AvatarFallback } from '@shared/ui/avatar';
 import { Button } from '@shared/ui/button';
 import { Badge } from '@shared/ui/badge';
+import { ActingOrgSwitcher } from '@shared/layout/acting-org-switcher';
 
 type MenuItem = {
   href: string;
@@ -25,6 +26,8 @@ type UserMenuProps = {
   affiliationRevoked: boolean;
   initials: string;
   menuItems: MenuItem[];
+  actingOrgChoices?: Array<{ id: number; name: string | null }>;
+  currentOrganizationId?: number | null;
   signOutAction: () => Promise<void>;
 };
 
@@ -35,9 +38,12 @@ export function UserMenu({
   affiliationRevoked,
   initials,
   menuItems,
+  actingOrgChoices = [],
+  currentOrganizationId = null,
   signOutAction,
 }: UserMenuProps) {
   const [pending, startTransition] = useTransition();
+  const showOrgSwitcher = actingOrgChoices.length > 1;
 
   return (
     <DropdownMenu>
@@ -74,6 +80,22 @@ export function UserMenu({
           ) : null}
         </div>
         <DropdownMenuSeparator />
+        {showOrgSwitcher ? (
+          <>
+            <div className="px-2 py-2">
+              <p className="text-2xs font-semibold uppercase tracking-wide text-muted-foreground">Switch organizations</p>
+              <ActingOrgSwitcher
+                choices={actingOrgChoices}
+                currentOrganizationId={currentOrganizationId}
+                variant="compact"
+                ariaLabel="Switch organizations"
+                className="mt-2 w-full"
+                triggerClassName="w-full"
+              />
+            </div>
+            <DropdownMenuSeparator />
+          </>
+        ) : null}
         {menuItems.map((item) => (
           <DropdownMenuItem key={item.href} asChild>
             <Link href={item.href} className="flex w-full items-center justify-between text-sm">

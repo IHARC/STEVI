@@ -90,6 +90,13 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
             match: ['/ops/consents/record'],
             requires: (access) => access.canManageConsents,
           },
+          {
+            id: 'clients-portal-preview',
+            href: '/home?preview=1',
+            label: 'Preview client portal',
+            match: ['/home'],
+            requires: (access) => access.canAccessOpsFrontline || access.canAccessOpsAdmin || access.canAccessOpsOrg,
+          },
         ],
       },
       {

@@ -9,12 +9,8 @@ import { ThemeToggle } from '@shared/layout/theme-toggle';
 import { AppNavigationMobile } from '@shared/layout/app-navigation';
 import { APP_ICON_MAP, type AppIconName } from '@/lib/app-icons';
 import { cn } from '@/lib/utils';
-import { Eye } from 'lucide-react';
-import { Button } from '@shared/ui/button';
-import { Badge } from '@shared/ui/badge';
 import { useOptionalPortalLayout } from '@shared/providers/portal-layout-provider';
 import { usePortalAccess } from '@shared/providers/portal-access-provider';
-import { ActingOrgSwitcher } from '@shared/layout/acting-org-switcher';
 import type { CommandPaletteItem } from '@/lib/portal-access';
 import type { ResolvedBrandingAssets } from '@/lib/marketing/branding';
 import type { UserNavigation } from '@shared/layout/user-nav';
@@ -39,15 +35,10 @@ export function TopNav({
   const layout = useOptionalPortalLayout();
   const portalAccess = usePortalAccess();
   const activeArea = layout?.activeArea ?? 'client';
-  const showClientPreviewCta = activeArea !== 'client';
   const showMegaMenu = hasNav && activeArea === 'client';
-  const showActingOrg = activeArea === 'ops_frontline' || activeArea === 'app_admin';
   const showAdminSwitcher = Boolean(portalAccess?.canAccessOpsSteviAdmin) && (activeArea === 'ops_frontline' || activeArea === 'app_admin');
   const adminSwitchHref = activeArea === 'app_admin' ? '/ops/today' : '/app-admin';
   const adminSwitchLabel = activeArea === 'app_admin' ? 'Operations' : 'STEVI Admin';
-  const actingOrgName = portalAccess?.organizationName ?? (portalAccess?.organizationId ? 'Organization' : 'Not set');
-  const actingOrgChoices = portalAccess?.actingOrgChoices ?? [];
-  const showActingOrgSwitcher = showActingOrg && actingOrgChoices.length > 1;
   const hamburgerBreakpointClass = 'lg:hidden';
   const subtitle =
     activeArea === 'ops_frontline'
@@ -77,7 +68,7 @@ export function TopNav({
             ) : null}
             <Link
               href="/"
-              className="inline-flex items-center gap-3 rounded-lg border border-transparent px-3 py-1.5 transition-colors hover:border-border/50 hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              className="inline-flex min-w-0 items-center gap-3 rounded-lg border border-transparent px-3 py-1.5 transition-colors hover:border-border/50 hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               aria-label="STEVI home"
             >
               <Image
@@ -96,9 +87,9 @@ export function TopNav({
                 priority
                 className="hidden h-8 w-auto dark:block"
               />
-              <span className="text-left leading-tight">
-                <span className="block text-base font-semibold text-foreground">STEVI</span>
-                <span className="block text-xs text-muted-foreground">{subtitle}</span>
+              <span className="min-w-0 text-left leading-snug">
+                <span className="block truncate text-base font-semibold text-foreground">STEVI</span>
+                <span className="hidden truncate text-xs text-muted-foreground lg:block">{subtitle}</span>
               </span>
             </Link>
           </div>
@@ -119,60 +110,10 @@ export function TopNav({
                 {adminSwitchLabel}
               </Link>
             ) : null}
-            {showActingOrgSwitcher ? (
-              <ActingOrgSwitcher
-                choices={actingOrgChoices}
-                currentOrganizationId={portalAccess?.organizationId ?? null}
-                className="hidden md:flex"
-              />
-            ) : showActingOrg ? (
-              <Badge variant="outline" className="hidden md:inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                <span className="text-3xs font-semibold text-muted-foreground">Acting org</span>
-                <span className="text-foreground normal-case text-xs font-semibold">{actingOrgName}</span>
-              </Badge>
-            ) : null}
-
-            {showActingOrgSwitcher ? (
-              <ActingOrgSwitcher
-                choices={actingOrgChoices}
-                currentOrganizationId={portalAccess?.organizationId ?? null}
-                className="md:hidden"
-              />
-            ) : showActingOrg ? (
-              <Badge variant="secondary" className="md:hidden px-2 py-1 text-2xs font-semibold uppercase tracking-wide">
-                Org: {actingOrgName}
-              </Badge>
-            ) : null}
-            {showClientPreviewCta ? (
-              <Button
-                asChild
-                size="sm"
-                variant="secondary"
-                className="hidden sm:inline-flex"
-              >
-                <Link href="/home?preview=1" aria-label="Preview client portal">
-                  <Eye className="h-4 w-4" aria-hidden />
-                  <span className="text-sm font-semibold">Preview client portal</span>
-                </Link>
-              </Button>
-            ) : null}
             <CommandPalette items={commands} compactTrigger className="hidden sm:flex" />
             <ThemeToggle />
             <div className="hidden md:flex items-center gap-2">{desktop}</div>
             <div className="flex items-center gap-2 md:hidden">{mobile}</div>
-            {showClientPreviewCta ? (
-              <Button
-                asChild
-                size="sm"
-                variant="secondary"
-                className="sm:hidden"
-              >
-                <Link href="/home?preview=1" aria-label="Preview client portal">
-                  <Eye className="h-4 w-4" aria-hidden />
-                  <span className="text-sm font-semibold">Preview portal</span>
-                </Link>
-              </Button>
-            ) : null}
           </div>
         </div>
       </div>

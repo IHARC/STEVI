@@ -32,6 +32,7 @@ export async function getUserNavigation(accessOverride?: PortalAccess | null): P
   const positionTitle = profile.position_title;
   const awaitingVerification = profile.affiliation_status === 'pending';
   const affiliationRevoked = profile.affiliation_status === 'revoked';
+  const actingOrgChoices = access.actingOrgChoices ?? [];
 
   const menuItems = buildUserMenuLinks(access);
 
@@ -42,6 +43,8 @@ export async function getUserNavigation(accessOverride?: PortalAccess | null): P
       awaitingVerification={awaitingVerification}
       affiliationRevoked={affiliationRevoked}
       menuItems={menuItems}
+      actingOrgChoices={actingOrgChoices}
+      currentOrganizationId={access.organizationId ?? null}
       initials={getInitials(displayName)}
       signOutAction={signOut}
     />
