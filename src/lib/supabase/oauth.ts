@@ -2,7 +2,6 @@ import { createHash, randomBytes } from 'crypto';
 import { getSupabaseEnv } from '@/lib/supabase/config';
 import { getAppUrl } from '@/lib/host';
 
-const DEFAULT_SCOPE = 'openid email profile phone';
 const STATE_COOKIE = 'stevi_oauth_state';
 const VERIFIER_COOKIE = 'stevi_oauth_code_verifier';
 const NEXT_COOKIE = 'stevi_oauth_next';
@@ -55,7 +54,10 @@ export function getOAuthConfig(): OAuthConfig {
   }
 
   const redirectUri = process.env.SUPABASE_OAUTH_REDIRECT_URI ?? `${getAppUrl()}/auth/callback`;
-  const scopes = process.env.SUPABASE_OAUTH_SCOPES ?? DEFAULT_SCOPE;
+  const scopes = process.env.SUPABASE_OAUTH_SCOPES;
+  if (!scopes) {
+    throw new Error('Missing SUPABASE_OAUTH_SCOPES.');
+  }
   const baseUrl = url.replace(/\/$/, '');
 
   return {

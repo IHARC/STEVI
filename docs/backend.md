@@ -35,6 +35,10 @@ Supabase Auth best practices for local dev:
 | `NEXT_PUBLIC_GA4_ID` | ☐ | GA4 measurement ID. Shared property with the marketing site unless outreach requests otherwise. |
 | `NEXT_PUBLIC_ANALYTICS_DISABLED` | ☐ | Set to `true` to disable analytics output (defaults to `false`). Useful for local development or privacy reviews. |
 
+OAuth server key requirements:
+- `openid` scope requires Supabase Auth to use asymmetric JWT signing keys (ES256 preferred, RS256 acceptable).
+- After key rotation, verify access/ID tokens via the JWKS endpoint (do not keep using the legacy JWT secret).
+
 ## Supabase Usage
 
 - **Clients**: `createSupabaseRSCClient` and `createSupabaseServerClient` read OAuth access tokens from secure cookies. `createSupabaseAuthServerClient` is used only on `login.iharc.ca` to manage Supabase Auth sessions for the consent UI.
