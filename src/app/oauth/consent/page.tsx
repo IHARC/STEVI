@@ -124,8 +124,8 @@ export default async function OAuthConsentPage({ searchParams }: ConsentPageProp
     return <MissingAuthorizationDetails />;
   }
 
-  const clientIdValue = details.client?.client_id ?? details.client_id ?? null;
-  const redirectTo = details.redirect_to ?? null;
+  const clientIdValue = details.client?.id ?? null;
+  const redirectTo = details.redirect_url ?? null;
   const firstPartyClientId = process.env.SUPABASE_OAUTH_CLIENT_ID ?? null;
   const shouldAutoApprove =
     !errorCode && Boolean(firstPartyClientId && clientIdValue && firstPartyClientId === clientIdValue);
@@ -140,8 +140,8 @@ export default async function OAuthConsentPage({ searchParams }: ConsentPageProp
       skipBrowserRedirect: true,
     });
 
-    if (!error && data?.redirect_to) {
-      redirect(data.redirect_to);
+    if (!error && data?.redirect_url) {
+      redirect(data.redirect_url);
     }
   }
 
@@ -153,9 +153,9 @@ export default async function OAuthConsentPage({ searchParams }: ConsentPageProp
     redirect(`/oauth/consent?authorization_id=${encodeURIComponent(authorizationIdValue)}`);
   }
 
-  const clientName = details.client?.name ?? details.client?.client_name ?? 'Unknown client';
+  const clientName = details.client?.name ?? 'Unknown client';
   const clientId = clientIdValue ?? 'Unknown client';
-  const scopeList = normalizeScopes(details.requested_scopes ?? details.scopes);
+  const scopeList = normalizeScopes(details.scope);
   const identityLabel = user.email ?? user.phone ?? 'Signed-in account';
 
   async function approveAuthorization(formData: FormData) {
@@ -172,11 +172,11 @@ export default async function OAuthConsentPage({ searchParams }: ConsentPageProp
       skipBrowserRedirect: true,
     });
 
-    if (error || !data?.redirect_to) {
+    if (error || !data?.redirect_url) {
       redirect(`/oauth/consent?authorization_id=${encodeURIComponent(id)}&error=consent_failed`);
     }
 
-    redirect(data.redirect_to);
+    redirect(data.redirect_url);
   }
 
   async function denyAuthorization(formData: FormData) {
@@ -193,11 +193,11 @@ export default async function OAuthConsentPage({ searchParams }: ConsentPageProp
       skipBrowserRedirect: true,
     });
 
-    if (error || !data?.redirect_to) {
+    if (error || !data?.redirect_url) {
       redirect(`/oauth/consent?authorization_id=${encodeURIComponent(id)}&error=deny_failed`);
     }
 
-    redirect(data.redirect_to);
+    redirect(data.redirect_url);
   }
 
   return (
@@ -291,15 +291,13 @@ function normalizeScopes(rawScopes: unknown): string[] {
 }
 
 type AuthorizationDetails = {
-  client_id?: string | null;
-  scopes?: string[] | string | null;
-  requested_scopes?: string[] | string | null;
-  redirect_uri?: string | null;
-  redirect_to?: string | null;
+  redirect_url?: string | null;
+  scope?: string | null;
   client?: {
-    client_id?: string | null;
+    id?: string | null;
     name?: string | null;
-    client_name?: string | null;
+    uri?: string | null;
+    logo_uri?: string | null;
   } | null;
 };
 
