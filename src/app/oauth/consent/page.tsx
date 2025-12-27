@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import { redirect } from 'next/navigation';
 import { createSupabaseAuthRSCClient } from '@/lib/supabase/auth-rsc';
 import { createSupabaseAuthServerClient } from '@/lib/supabase/auth-server';
@@ -8,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shar
 import { LoginForm } from '@shared/auth/login-form';
 import { Button } from '@shared/ui/button';
 import { Separator } from '@shared/ui/separator';
+import { BrandLogo } from '@shared/branding/brand-logo';
 
 export const dynamic = 'force-dynamic';
 
@@ -96,7 +96,12 @@ export default async function OAuthConsentPage({ searchParams }: ConsentPageProp
         <Card className="w-full max-w-lg">
           <CardHeader className="space-y-4">
             <div className="flex items-center gap-3">
-              <Image src={branding.logoLightUrl} alt="STEVI" width={42} height={42} className="rounded-full" />
+              <BrandLogo
+                branding={branding}
+                alt="STEVI"
+                sizes="160px"
+                className="h-8 w-auto"
+              />
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">STEVI</p>
                 <p className="text-sm font-semibold text-foreground">Secure sign-in</p>

@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from '@shared/ui/navigation-menu';
@@ -11,6 +10,7 @@ import { APP_ICON_MAP, type AppIconName } from '@/lib/app-icons';
 import { cn } from '@/lib/utils';
 import { useOptionalPortalLayout } from '@shared/providers/portal-layout-provider';
 import { usePortalAccess } from '@shared/providers/portal-access-provider';
+import { BrandLogo } from '@shared/branding/brand-logo';
 import type { CommandPaletteItem } from '@/lib/portal-access';
 import type { ResolvedBrandingAssets } from '@/lib/marketing/branding';
 import type { UserNavigation } from '@shared/layout/user-nav';
@@ -38,7 +38,8 @@ export function TopNav({
   const showMegaMenu = hasNav && activeArea === 'client';
   const showAdminSwitcher = Boolean(portalAccess?.canAccessOpsSteviAdmin) && (activeArea === 'ops_frontline' || activeArea === 'app_admin');
   const adminSwitchHref = activeArea === 'app_admin' ? '/ops/today' : '/app-admin';
-  const adminSwitchLabel = activeArea === 'app_admin' ? 'Operations' : 'STEVI Admin';
+  const adminSwitchLabel = activeArea === 'app_admin' ? 'Switch to Operations' : 'Switch to Admin';
+  const adminSwitchAria = activeArea === 'app_admin' ? 'Switch to Operations workspace' : 'Switch to Admin workspace';
   const hamburgerBreakpointClass = 'lg:hidden';
   const subtitle =
     activeArea === 'ops_frontline'
@@ -71,22 +72,8 @@ export function TopNav({
               className="inline-flex min-w-0 items-center gap-3 rounded-lg border border-transparent px-3 py-1.5 transition-colors hover:border-border/50 hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               aria-label="STEVI home"
             >
-              <Image
-                src={branding.logoLightUrl}
-                alt="IHARC"
-                width={56}
-                height={56}
-                priority
-                className="h-9 w-auto dark:hidden"
-              />
-              <Image
-                src={branding.logoDarkUrl}
-                alt="IHARC"
-                width={56}
-                height={56}
-                priority
-                className="hidden h-8 w-auto dark:block"
-              />
+              <BrandLogo branding={branding} priority />
+              <BrandLogo branding={branding} variant="dark" priority />
               <span className="min-w-0 text-left leading-snug">
                 <span className="block truncate text-base font-semibold text-foreground">STEVI</span>
                 <span className="hidden truncate text-xs text-muted-foreground lg:block">{subtitle}</span>
@@ -105,7 +92,7 @@ export function TopNav({
               <Link
                 href={adminSwitchHref}
                 className="hidden md:inline-flex items-center rounded-full border border-border/50 bg-muted/30 px-2.5 py-1 text-2xs font-semibold uppercase tracking-wide text-muted-foreground transition-colors hover:border-border/80 hover:text-foreground"
-                aria-label={`Switch to ${adminSwitchLabel}`}
+                aria-label={adminSwitchAria}
               >
                 {adminSwitchLabel}
               </Link>

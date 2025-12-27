@@ -5,7 +5,6 @@ import { cn } from '@/lib/utils';
 import '@/styles/theme.css';
 import { ThemeProvider } from '@shared/providers/theme-provider';
 import { AnalyticsProvider } from '@shared/providers/analytics-provider';
-import { getBrandingAssets } from '@/lib/marketing/branding';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,15 +27,15 @@ const OG_IMAGE_PATH = '/logo.png';
 const OG_IMAGE_ALT = 'STEVI — IHARC Client Portal';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const branding = await getBrandingAssets();
-
   return {
     metadataBase,
     title: 'STEVI — Supportive Technology to Enable Vulnerable Individuals | IHARC Client Portal',
     description:
       'STEVI connects IHARC clients with outreach teams to request appointments, track progress, and access compassionate resources in Northumberland County.',
     icons: {
-      icon: branding.faviconUrl,
+      icon: [{ url: '/favicon.ico' }],
+      shortcut: ['/favicon.ico'],
+      apple: ['/favicon.ico'],
     },
     openGraph: {
       type: 'website',
