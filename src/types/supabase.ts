@@ -5920,6 +5920,251 @@ export type Database = {
         }
         Relationships: []
       }
+      cost_categories: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          name: string
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      cost_dimensions: {
+        Row: {
+          created_at: string
+          description: string | null
+          dimension_type: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          dimension_type: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          dimension_type?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      cost_event_dimensions: {
+        Row: {
+          cost_event_id: string
+          dimension_id: string
+        }
+        Insert: {
+          cost_event_id: string
+          dimension_id: string
+        }
+        Update: {
+          cost_event_id?: string
+          dimension_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cost_event_dimensions_cost_event_id_fkey"
+            columns: ["cost_event_id"]
+            isOneToOne: false
+            referencedRelation: "cost_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cost_event_dimensions_dimension_id_fkey"
+            columns: ["dimension_id"]
+            isOneToOne: false
+            referencedRelation: "cost_dimensions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cost_events: {
+        Row: {
+          cost_amount: number
+          cost_category_id: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          entry_type: Database["core"]["Enums"]["cost_entry_type_enum"]
+          id: string
+          metadata: Json | null
+          occurred_at: string
+          organization_id: number
+          person_id: number | null
+          quantity: number | null
+          source_id: string | null
+          source_type: Database["core"]["Enums"]["cost_source_type_enum"]
+          unit_cost: number | null
+          uom: string | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          cost_amount: number
+          cost_category_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          entry_type?: Database["core"]["Enums"]["cost_entry_type_enum"]
+          id?: string
+          metadata?: Json | null
+          occurred_at: string
+          organization_id: number
+          person_id?: number | null
+          quantity?: number | null
+          source_id?: string | null
+          source_type: Database["core"]["Enums"]["cost_source_type_enum"]
+          unit_cost?: number | null
+          uom?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          cost_amount?: number
+          cost_category_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          entry_type?: Database["core"]["Enums"]["cost_entry_type_enum"]
+          id?: string
+          metadata?: Json | null
+          occurred_at?: string
+          organization_id?: number
+          person_id?: number | null
+          quantity?: number | null
+          source_id?: string | null
+          source_type?: Database["core"]["Enums"]["cost_source_type_enum"]
+          unit_cost?: number | null
+          uom?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cost_events_cost_category_id_fkey"
+            columns: ["cost_category_id"]
+            isOneToOne: false
+            referencedRelation: "cost_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cost_events_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cost_events_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_catalog: {
+        Row: {
+          created_at: string
+          default_category_id: string | null
+          id: string
+          label: string
+          service_code: string
+          unit_cost: number
+          unit_type: string
+        }
+        Insert: {
+          created_at?: string
+          default_category_id?: string | null
+          id?: string
+          label: string
+          service_code: string
+          unit_cost: number
+          unit_type: string
+        }
+        Update: {
+          created_at?: string
+          default_category_id?: string | null
+          id?: string
+          label?: string
+          service_code?: string
+          unit_cost?: number
+          unit_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_catalog_default_category_id_fkey"
+            columns: ["default_category_id"]
+            isOneToOne: false
+            referencedRelation: "cost_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff_rates: {
+        Row: {
+          created_at: string
+          effective_from: string
+          effective_to: string | null
+          hourly_rate: number
+          id: string
+          org_id: number
+          role_name: string
+        }
+        Insert: {
+          created_at?: string
+          effective_from?: string
+          effective_to?: string | null
+          hourly_rate: number
+          id?: string
+          org_id: number
+          role_name: string
+        }
+        Update: {
+          created_at?: string
+          effective_from?: string
+          effective_to?: string | null
+          hourly_rate?: number
+          id?: string
+          org_id?: number
+          role_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_rates_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       people_name_only: {
@@ -6374,6 +6619,14 @@ export type Database = {
         | "follow_up"
         | "supply_provision"
         | "other"
+      cost_entry_type_enum: "direct" | "replacement_value" | "overhead"
+      cost_source_type_enum:
+        | "activity"
+        | "distribution"
+        | "inventory_tx"
+        | "appointment"
+        | "manual"
+        | "external"
       address_category:
         | "residential"
         | "commercial"
@@ -7054,6 +7307,89 @@ export type Database = {
         | "large"
         | "very_large"
         | "extensive"
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+  analytics: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      cost_event_daily: {
+        Row: {
+          cost_category_id: string | null
+          day: string | null
+          event_count: number | null
+          organization_id: number | null
+          person_id: number | null
+          total_cost: number | null
+        }
+        Relationships: []
+      }
+      cost_event_daily_secure: {
+        Row: {
+          cost_category_id: string | null
+          day: string | null
+          event_count: number | null
+          organization_id: number | null
+          person_id: number | null
+          total_cost: number | null
+        }
+        Relationships: []
+      }
+      org_cost_rollups: {
+        Row: {
+          cost_30d: number | null
+          cost_365d: number | null
+          cost_category_id: string | null
+          organization_id: number | null
+          total_cost: number | null
+        }
+        Relationships: []
+      }
+      org_cost_rollups_secure: {
+        Row: {
+          cost_30d: number | null
+          cost_365d: number | null
+          cost_category_id: string | null
+          organization_id: number | null
+          total_cost: number | null
+        }
+        Relationships: []
+      }
+      person_cost_rollups: {
+        Row: {
+          cost_30d: number | null
+          cost_365d: number | null
+          cost_90d: number | null
+          organization_id: number | null
+          person_id: number | null
+          total_cost: number | null
+        }
+        Relationships: []
+      }
+      person_cost_rollups_secure: {
+        Row: {
+          cost_30d: number | null
+          cost_365d: number | null
+          cost_90d: number | null
+          organization_id: number | null
+          person_id: number | null
+          total_cost: number | null
+        }
+        Relationships: []
+      }
+    }
+    Functions: {
+      refresh_cost_rollups: {
+        Args: never
+        Returns: undefined
+      }
+    }
+    Enums: {
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
@@ -8396,6 +8732,7 @@ export type Database = {
           notes: string | null
           performed_by: string | null
           person_id: number | null
+          provider_org_id: number | null
           updated_at: string | null
           updated_by: string | null
         }
@@ -8412,6 +8749,7 @@ export type Database = {
           notes?: string | null
           performed_by?: string | null
           person_id?: number | null
+          provider_org_id?: number | null
           updated_at?: string | null
           updated_by?: string | null
         }
@@ -8428,6 +8766,7 @@ export type Database = {
           notes?: string | null
           performed_by?: string | null
           person_id?: number | null
+          provider_org_id?: number | null
           updated_at?: string | null
           updated_by?: string | null
         }
@@ -8437,6 +8776,13 @@ export type Database = {
             columns: ["location_id"]
             isOneToOne: false
             referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "distributions_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -12671,6 +13017,15 @@ export const Constants = {
         "follow_up",
         "supply_provision",
         "other",
+      ],
+      cost_entry_type_enum: ["direct", "replacement_value", "overhead"],
+      cost_source_type_enum: [
+        "activity",
+        "distribution",
+        "inventory_tx",
+        "appointment",
+        "manual",
+        "external",
       ],
       address_category: [
         "residential",

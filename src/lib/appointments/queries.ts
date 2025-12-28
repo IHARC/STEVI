@@ -4,7 +4,7 @@ import type { AppointmentWithRelations } from './types';
 
 const APPOINTMENT_SELECT = `
   id, title, description, status, requested_window, occurs_at, duration_minutes, location, location_type, meeting_url,
-  client_profile_id, requester_profile_id, staff_profile_id, organization_id, confirmed_at, confirmed_by_profile_id,
+  client_profile_id, requester_profile_id, staff_profile_id, staff_role, organization_id, confirmed_at, confirmed_by_profile_id,
   canceled_at, cancellation_reason, reschedule_note, outcome_notes, created_at, updated_at,
   client:client_profile_id ( id, display_name, organization_id ),
   requester:requester_profile_id ( id, display_name ),

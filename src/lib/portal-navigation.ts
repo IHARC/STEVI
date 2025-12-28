@@ -28,6 +28,7 @@ const canSeeClients = (access: PortalAccess) => access.canAccessOpsFrontline || 
 const canSeePrograms = (access: PortalAccess) => access.canAccessOpsFrontline || access.canAccessOpsAdmin;
 const canSeeInventory = (access: PortalAccess) => access.canAccessInventoryOps;
 const canSeeFundraising = (access: PortalAccess) => access.canAccessOpsSteviAdmin;
+const canSeeReports = (access: PortalAccess) => access.canReportCosts || access.canViewMetrics;
 const canSeeOrganizations = (access: PortalAccess) =>
   access.canAccessOpsFrontline || access.canAccessOpsOrg || access.canAccessOpsAdmin || access.canAccessOpsSteviAdmin;
 const canSeeOrgScopedOrganizations = (access: PortalAccess) =>
@@ -119,6 +120,23 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
             label: 'Schedule',
             match: ['/ops/programs'],
             query: { view: 'schedule' },
+          },
+        ],
+      },
+      {
+        id: 'reports',
+        label: 'Reports',
+        icon: 'chart',
+        requires: canSeeReports,
+        isHub: true,
+        items: [
+          {
+            id: 'reports-costs',
+            href: '/ops/reports/costs',
+            label: 'Costs',
+            icon: 'chart',
+            match: ['/ops/reports/costs'],
+            requires: (access) => access.canReportCosts,
           },
         ],
       },

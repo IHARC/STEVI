@@ -478,3 +478,38 @@ select ... from inventory.distribution_items join inventory.distributions ...;
 - Permissions: `supabase/migrations/20251220_org_permissions_rebuild.sql`
 - Consent: `supabase/migrations/20251224_consent_system.sql`
 
+---
+
+## 14) Implementation Status (Updated)
+
+### ✅ Database & Backend
+- **Core cost schema + enums** implemented: `core.cost_categories`, `core.cost_events`, `core.cost_dimensions`, `core.cost_event_dimensions`, `core.staff_rates`, `core.service_catalog`.  
+  Migration: `/supabase/migrations/20251227_costing_ledger.sql`
+- **Permissions + RLS** for cost tables applied: `cost.view`, `cost.manage`, `cost.report`, `cost.admin` with org role bindings.
+- **Inventory distribution trigger** creates cost events with unit cost fallback (`distribution_items.unit_cost` → `core.items.cost_per_unit` → `donations.catalog_items.unit_cost_cents`) and **hard errors** if org/unit cost missing.
+- **Inventory distribution RPCs** updated to require `provider_org_id` and accept `unit_cost` on distribution items.
+- **Appointments staff role** added: `/supabase/migrations/20251227_appointments_staff_role.sql`.
+- **Outreach logging** now creates cost events for duration/service/override.
+- **Appointments completion** creates cost events using staff rates + required staff role/duration.
+- **Reporting rollups** materialized views + secure views implemented in `analytics`, with nightly `pg_cron` refresh and admin refresh RPC.
+
+### ✅ Frontend
+- **Org Costs tab** implemented at `/ops/organizations/[id]?tab=costs` with:
+  - Staff rates manager
+  - Service catalog manager
+  - Cost dimension manager  
+  Component: `/src/components/workspace/costs/cost-settings-tab.tsx`
+- **Reports dashboard** implemented at `/ops/reports/costs`.
+  - `OrgCostSummary` chart
+  - `CostBreakdownByCategory` table
+- **Client costs view** implemented at `/ops/clients/[id]?view=costs`.
+  - `CostSnapshotCard`
+  - `CostTimelineTable`
+- **Navigation gating** added for Costs under Reports group (requires `cost.report`).
+
+### ✅ Types / Infra
+- Supabase types updated to include `analytics` views, cost enums, and cost tables in `/src/types/supabase.ts`.
+
+### ⏳ Remaining (Not Implemented Yet)
+- **Backfill jobs** for historical distributions/activities (Section 9).
+- **Automated test coverage** for RLS verification + UI workflows (Section 10).

@@ -4,14 +4,18 @@ import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { resolveLandingPath } from '@/lib/portal-navigation';
 import { fetchStaffCaseActivities } from '@/lib/cases/fetchers';
+import { fetchPersonCostEvents, fetchPersonCostRollups } from '@/lib/costs/queries';
 import { normalizeEnumParam, toSearchParams } from '@/lib/search-params';
 import { getEffectiveConsent } from '@/lib/consents';
 import { PageHeader } from '@shared/layout/page-header';
+import { PageTabNav, type PageTab } from '@shared/layout/page-tab-nav';
 import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Separator } from '@shared/ui/separator';
 import { Tabs, TabsList, TabsTrigger } from '@shared/ui/tabs';
+import { CostSnapshotCard } from '@workspace/costs/cost-snapshot-card';
+import { CostTimelineTable } from '@workspace/costs/cost-timeline-table';
 import type { Database } from '@/types/supabase';
 
 type PageProps = { params: Promise<{ id: string }>; searchParams?: Promise<Record<string, string | string[] | undefined>> };
@@ -25,6 +29,7 @@ type PersonRow = Pick<
 
 const FILTERS = ['all', 'visits', 'tasks', 'referrals', 'supplies', 'appointments'] as const;
 type FilterId = (typeof FILTERS)[number];
+const VIEWS = ['directory', 'costs'] as const;
 
 export default async function OpsClientDetailPage({ params, searchParams }: PageProps) {
   const { id } = await params;
@@ -34,7 +39,7 @@ export default async function OpsClientDetailPage({ params, searchParams }: Page
     ? ((Array.isArray(filterValue) ? filterValue[0] : filterValue) as FilterId)
     : 'all';
   const canonicalParams = toSearchParams(filterParam);
-  const { redirected } = normalizeEnumParam(canonicalParams, 'view', ['directory'] as const, 'directory');
+  const { value: activeView, redirected } = normalizeEnumParam(canonicalParams, 'view', VIEWS, 'directory');
   if (redirected) {
     redirect(`/ops/clients/${id}?${canonicalParams.toString()}`);
   }
@@ -53,10 +58,13 @@ export default async function OpsClientDetailPage({ params, searchParams }: Page
     redirect(resolveLandingPath(access));
   }
 
-  const [person, activities, consentSummary] = await Promise.all([
+  const shouldLoadCosts = activeView === 'costs';
+  const [person, activities, consentSummary, costRollups, costEvents] = await Promise.all([
     loadPerson(supabase, personId),
-    fetchStaffCaseActivities(supabase, personId, 120),
+    activeView === 'costs' ? Promise.resolve([]) : fetchStaffCaseActivities(supabase, personId, 120),
     getEffectiveConsent(supabase, personId),
+    shouldLoadCosts ? fetchPersonCostRollups(supabase, personId) : Promise.resolve(null),
+    shouldLoadCosts ? fetchPersonCostEvents(supabase, personId, 120) : Promise.resolve(null),
   ]);
 
   if (!person) notFound();
@@ -65,72 +73,119 @@ export default async function OpsClientDetailPage({ params, searchParams }: Page
   const orgMissing = !access.organizationId && (access.canAccessOpsFrontline || access.canAccessOpsAdmin);
   const newVisitHref = `/ops/visits/new?personId=${person.id}`;
 
-  const filteredActivities = activities.filter((activity) => filterActivity(activity.activityType, activeFilter));
+  const filteredActivities =
+    activeView === 'costs'
+      ? []
+      : activities.filter((activity) => filterActivity(activity.activityType, activeFilter));
   const consentMeta = buildConsentMeta(consentSummary);
+  const costTotals = (costRollups ?? []).reduce(
+    (acc, row) => {
+      acc.total += Number(row.total_cost ?? 0);
+      acc.cost30 += Number(row.cost_30d ?? 0);
+      acc.cost90 += Number(row.cost_90d ?? 0);
+      acc.cost365 += Number(row.cost_365d ?? 0);
+      return acc;
+    },
+    { total: 0, cost30: 0, cost90: 0, cost365: 0 },
+  );
+  const journeyParams = new URLSearchParams(canonicalParams);
+  journeyParams.set('view', 'directory');
+  journeyParams.set('filter', activeFilter);
+  const costParams = new URLSearchParams(canonicalParams);
+  costParams.set('view', 'costs');
+  costParams.delete('filter');
+
+  const viewTabs: PageTab[] = [
+    {
+      label: 'Journey',
+      href: `/ops/clients/${person.id}?${journeyParams.toString()}`,
+    },
+    {
+      label: 'Costs',
+      href: `/ops/clients/${person.id}?${costParams.toString()}`,
+    },
+  ];
+  const activeViewHref =
+    activeView === 'costs'
+      ? `/ops/clients/${person.id}?${costParams.toString()}`
+      : `/ops/clients/${person.id}?${journeyParams.toString()}`;
 
   return (
     <div className="space-y-6">
       <PageHeader
         eyebrow="Client"
         title={`${person.first_name ?? 'Person'} ${person.last_name ?? ''}`.trim() || 'Client profile'}
-        description="Journey timeline shows everything that happened with this person. Start a Visit to add notes, supplies, tasks, or referrals in one place."
+        description={
+          activeView === 'costs'
+            ? 'Cost summary reflects consented costs across organizations.'
+            : 'Journey timeline shows everything that happened with this person. Start a Visit to add notes, supplies, tasks, or referrals in one place.'
+        }
         primaryAction={{ label: orgMissing ? 'Select acting org to start Visit' : 'New Visit', href: newVisitHref }}
         secondaryAction={{ label: 'Find another client', href: '/ops/clients?view=directory' }}
         breadcrumbs={[{ label: 'Clients', href: '/ops/clients?view=directory' }, { label: 'Profile' }]}
         meta={[{ label: `Created by ${orgLabel}`, tone: 'neutral' }, consentMeta]}
       />
 
+      <PageTabNav tabs={viewTabs} activeHref={activeViewHref} variant="secondary" />
+
       <section className="grid gap-4 md:grid-cols-[2fr,1fr]">
-        <Card>
-          <CardHeader className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-            <div>
-              <CardTitle className="text-xl">Journey timeline</CardTitle>
-              <CardDescription>All Visits, tasks, referrals, supplies, and appointments tied to this person.</CardDescription>
-            </div>
-            <Tabs value={activeFilter} className="w-full">
-              <TabsList className="h-auto w-full flex-wrap justify-end gap-1 bg-transparent p-0">
-                {FILTERS.map((filter) => (
-                  <TabsTrigger key={filter} value={filter} className="rounded-full border px-3 py-1 text-xs capitalize">
-                    <Link href={`/ops/clients/${person.id}?filter=${filter}&view=directory`}>{filter}</Link>
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {filteredActivities.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No activity yet. Start a Visit to log the next step.</p>
-            ) : (
-              filteredActivities.map((activity) => (
-                <article key={activity.id} className="rounded-2xl border border-border/40 bg-card p-4 shadow-sm">
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                    <div className="space-y-1">
-                      <p className="text-base font-semibold text-foreground">{activity.title}</p>
-                      <p className="text-sm text-muted-foreground capitalize">{activity.activityType ?? 'activity'}</p>
-                      {activity.description ? (
-                        <p className="text-sm text-foreground/80">{activity.description}</p>
+        {activeView === 'costs' ? (
+          <div className="space-y-4">
+            <CostSnapshotCard totals={costTotals} />
+            <CostTimelineTable events={costEvents ?? []} />
+          </div>
+        ) : (
+          <Card>
+            <CardHeader className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+              <div>
+                <CardTitle className="text-xl">Journey timeline</CardTitle>
+                <CardDescription>All Visits, tasks, referrals, supplies, and appointments tied to this person.</CardDescription>
+              </div>
+              <Tabs value={activeFilter} className="w-full">
+                <TabsList className="h-auto w-full flex-wrap justify-end gap-1 bg-transparent p-0">
+                  {FILTERS.map((filter) => (
+                    <TabsTrigger key={filter} value={filter} className="rounded-full border px-3 py-1 text-xs capitalize">
+                      <Link href={`/ops/clients/${person.id}?filter=${filter}&view=directory`}>{filter}</Link>
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {filteredActivities.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No activity yet. Start a Visit to log the next step.</p>
+              ) : (
+                filteredActivities.map((activity) => (
+                  <article key={activity.id} className="rounded-2xl border border-border/40 bg-card p-4 shadow-sm">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="space-y-1">
+                        <p className="text-base font-semibold text-foreground">{activity.title}</p>
+                        <p className="text-sm text-muted-foreground capitalize">{activity.activityType ?? 'activity'}</p>
+                        {activity.description ? (
+                          <p className="text-sm text-foreground/80">{activity.description}</p>
+                        ) : null}
+                      </div>
+                      <div className="text-right text-xs text-muted-foreground">
+                        <p>{formatDate(activity.activityDate)}</p>
+                        {activity.activityTime ? <p>{activity.activityTime}</p> : null}
+                      </div>
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
+                      {activity.createdByOrg ? (
+                        <Badge variant="outline" className="border-border/70">
+                          Created by {activity.createdByOrg}
+                        </Badge>
                       ) : null}
-                    </div>
-                    <div className="text-right text-xs text-muted-foreground">
-                      <p>{formatDate(activity.activityDate)}</p>
-                      {activity.activityTime ? <p>{activity.activityTime}</p> : null}
-                    </div>
-                  </div>
-                  <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
-                    {activity.createdByOrg ? (
-                      <Badge variant="outline" className="border-border/70">
-                        Created by {activity.createdByOrg}
+                      <Badge variant={activity.visibility === 'client' ? 'secondary' : 'outline'} className="border-border/70">
+                        Visibility: {activity.visibility === 'client' ? 'Shared with client' : 'Internal'}
                       </Badge>
-                    ) : null}
-                    <Badge variant={activity.visibility === 'client' ? 'secondary' : 'outline'} className="border-border/70">
-                      Visibility: {activity.visibility === 'client' ? 'Shared with client' : 'Internal'}
-                    </Badge>
-                  </div>
-                </article>
-              ))
-            )}
-          </CardContent>
-        </Card>
+                    </div>
+                  </article>
+                ))
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         <div className="space-y-4">
           <Card>

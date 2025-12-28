@@ -34,6 +34,10 @@ export type PortalAccess = {
   canManageNotifications: boolean;
   canReviewProfiles: boolean;
   canViewMetrics: boolean;
+  canViewCosts: boolean;
+  canManageCosts: boolean;
+  canReportCosts: boolean;
+  canAdminCosts: boolean;
   canManageWebsiteContent: boolean;
   canManageSiteFooter: boolean;
   canManageConsents: boolean;
@@ -162,6 +166,16 @@ export async function loadPortalAccess(
   const canManageConsents = isProfileApproved && hasPermission('portal.manage_consents');
   const canReviewProfiles = isProfileApproved && hasPermission('portal.review_profiles');
   const canViewMetrics = isProfileApproved && hasPermission('portal.view_metrics');
+  const canViewCosts =
+    isProfileApproved &&
+    (isGlobalAdmin ||
+      hasPermission('cost.view') ||
+      hasPermission('cost.report') ||
+      hasPermission('cost.manage') ||
+      hasPermission('cost.admin'));
+  const canManageCosts = isProfileApproved && (isGlobalAdmin || hasPermission('cost.manage') || hasPermission('cost.admin'));
+  const canReportCosts = isProfileApproved && (isGlobalAdmin || hasPermission('cost.report') || hasPermission('cost.admin'));
+  const canAdminCosts = isProfileApproved && (isGlobalAdmin || hasPermission('cost.admin'));
   const canManageOrgUsers = isProfileApproved && hasPermission('portal.manage_org_users');
   const canManageOrgInvites = isProfileApproved && (hasPermission('portal.manage_org_invites') || hasPermission('portal.manage_org_users'));
 
@@ -189,6 +203,10 @@ export async function loadPortalAccess(
     canManageWebsiteContent,
     canReviewProfiles,
     canViewMetrics,
+    canViewCosts,
+    canManageCosts,
+    canReportCosts,
+    canAdminCosts,
     canManageSiteFooter,
     canManageConsents,
     canManageOrgUsers,

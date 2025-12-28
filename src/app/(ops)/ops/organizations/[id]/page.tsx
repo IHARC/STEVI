@@ -8,6 +8,7 @@ import { extractOrgFeatureFlags, ORG_FEATURE_OPTIONS } from '@/lib/organizations
 import { fetchOrgInvites, fetchOrgMembersWithRoles, fetchOrgRoles, type OrgInviteRecord } from '@/lib/org/fetchers';
 import { checkRateLimit, type RateLimitResult } from '@/lib/rate-limit';
 import { ensurePortalProfile } from '@/lib/profile';
+import { fetchCostCategories, fetchCostDimensions, fetchServiceCatalog, fetchStaffRates } from '@/lib/costs/queries';
 import { PageHeader } from '@shared/layout/page-header';
 import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
@@ -33,6 +34,7 @@ import { generateAvailabilitySlots } from '@/lib/appointments/slots';
 import { ProfileSearch } from '@workspace/appointments/profile-search';
 import { CancelAppointmentForm } from '@shared/appointments/cancel-appointment-form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/ui/select';
+import { CostSettingsTab } from '@workspace/costs/cost-settings-tab';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,7 +45,7 @@ type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
-type OrgTab = 'overview' | 'settings' | 'members' | 'invites' | 'appointments';
+type OrgTab = 'overview' | 'settings' | 'members' | 'invites' | 'appointments' | 'costs';
 
 const STATUS_OPTIONS: Array<OrganizationRow['status']> = ['active', 'inactive', 'pending', 'under_review'];
 const ORG_TYPE_OPTIONS: Array<NonNullable<OrganizationRow['organization_type']>> = [
@@ -88,6 +90,7 @@ function coerceTab(value: string | string[] | undefined): OrgTab {
     case 'members':
     case 'invites':
     case 'appointments':
+    case 'costs':
       return tab;
     case 'overview':
     default:
@@ -153,6 +156,7 @@ export default async function OrganizationDetailPage({ params, searchParams }: P
   const canManageMembers = isIharcAdmin || (isOwnOrg && access.canManageOrgUsers);
   const canManageInvites = isIharcAdmin || (isOwnOrg && access.canManageOrgInvites);
   const canManageAppointments = isIharcAdmin || (isOwnOrg && (access.canAccessOpsOrg || access.canAccessOpsFrontline));
+  const canManageCosts = isIharcAdmin || (isOwnOrg && (access.canManageCosts || access.canAdminCosts));
 
   const tabDefinitions = [
     { id: 'overview', label: 'Overview' },
@@ -160,6 +164,7 @@ export default async function OrganizationDetailPage({ params, searchParams }: P
     { id: 'members', label: 'Members', requires: canManageMembers },
     { id: 'invites', label: 'Invites', requires: canManageInvites },
     { id: 'appointments', label: 'Appointments', requires: canManageAppointments },
+    { id: 'costs', label: 'Costs', requires: canManageCosts },
   ] satisfies Array<{ id: OrgTab; label: string; requires?: boolean }>;
 
   const availableTabs = tabDefinitions.filter((entry) => entry.requires !== false);
@@ -181,8 +186,11 @@ export default async function OrganizationDetailPage({ params, searchParams }: P
   }
 
   const selectedFeatures = extractOrgFeatureFlags(orgRow.services_tags);
+  const shouldLoadAppointments = tab === 'appointments' && canManageAppointments;
+  const shouldLoadCosts = tab === 'costs' && canManageCosts;
+  const shouldLoadStaffRates = (shouldLoadCosts || shouldLoadAppointments) && access.canViewCosts;
 
-  const [members, roles, invites, inviteRateLimit, appointments] = await Promise.all([
+  const [members, roles, invites, inviteRateLimit, appointments, staffRates, costCategories, serviceCatalog, costDimensions] = await Promise.all([
     tab === 'members' && canManageMembers ? fetchOrgMembersWithRoles(supabase, organizationId) : Promise.resolve(null),
     tab === 'members' && canManageMembers ? fetchOrgRoles(supabase, organizationId) : Promise.resolve(null),
     tab === 'invites' && canManageInvites ? fetchOrgInvites(supabase, organizationId, 50) : Promise.resolve(null),
@@ -194,15 +202,22 @@ export default async function OrganizationDetailPage({ params, searchParams }: P
           cooldownMs: ORG_INVITE_RATE_LIMIT.cooldownMs,
         })
       : Promise.resolve(null),
-    tab === 'appointments' && canManageAppointments
+    shouldLoadAppointments
       ? (async () => {
           await ensurePortalProfile(supabase, access.userId);
           return fetchScopedAppointments(supabase, access, { includeCompleted: true, targetOrgId: organizationId });
         })()
       : Promise.resolve(null),
+    shouldLoadStaffRates ? fetchStaffRates(supabase, organizationId) : Promise.resolve(null),
+    shouldLoadCosts ? fetchCostCategories(supabase) : Promise.resolve(null),
+    shouldLoadCosts ? fetchServiceCatalog(supabase) : Promise.resolve(null),
+    shouldLoadCosts ? fetchCostDimensions(supabase) : Promise.resolve(null),
   ]);
 
   const orgName = orgRow.name ?? 'Organization';
+  const staffRoles = staffRates
+    ? Array.from(new Set(staffRates.map((rate) => rate.role_name))).sort((a, b) => a.localeCompare(b))
+    : [];
 
   return (
     <div className="flex flex-col gap-6">
@@ -265,6 +280,17 @@ export default async function OrganizationDetailPage({ params, searchParams }: P
         <AppointmentsTab
           appointments={appointments}
           organizationId={organizationId}
+          staffRoles={staffRoles}
+        />
+      ) : null}
+      {tab === 'costs' ? (
+        <CostSettingsTab
+          staffRates={staffRates}
+          serviceCatalog={serviceCatalog}
+          costCategories={costCategories}
+          costDimensions={costDimensions}
+          canManageCosts={access.canManageCosts}
+          canAdminCosts={access.canAdminCosts}
         />
       ) : null}
     </div>
@@ -706,11 +732,14 @@ function InvitesTab({
 function ConfirmForm({
   appointment,
   onConfirm,
+  staffRoles,
 }: {
   appointment: AppointmentWithRelations;
   onConfirm: (formData: FormData) => Promise<void>;
+  staffRoles: string[];
 }) {
   const quickSlots = generateAvailabilitySlots();
+  const disableConfirm = staffRoles.length === 0;
 
   return (
     <form action={onConfirm} className="space-y-2 rounded-lg border border-border/40 p-3">
@@ -725,6 +754,41 @@ function ConfirmForm({
           className="sm:w-full"
         />
         <Input name="location" placeholder="Meeting room or link" defaultValue={appointment.location ?? ''} className="sm:w-full" />
+      </div>
+      <div className="grid gap-2 sm:grid-cols-2">
+        <div className="space-y-1">
+          <Label htmlFor={`duration-${appointment.id}`} className="text-xs text-muted-foreground">
+            Duration (minutes)
+          </Label>
+          <Input
+            id={`duration-${appointment.id}`}
+            name="duration_minutes"
+            type="number"
+            min="1"
+            step="1"
+            required
+            defaultValue={appointment.duration_minutes ?? ''}
+          />
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor={`staff-role-${appointment.id}`} className="text-xs text-muted-foreground">
+            Staff role
+          </Label>
+          <NativeSelect
+            id={`staff-role-${appointment.id}`}
+            name="staff_role"
+            required
+            defaultValue={appointment.staff_role ?? ''}
+            disabled={disableConfirm}
+          >
+            <option value="">Select role</option>
+            {staffRoles.map((role) => (
+              <option key={role} value={role}>
+                {role}
+              </option>
+            ))}
+          </NativeSelect>
+        </div>
       </div>
       <div className="grid gap-2 sm:grid-cols-2">
         <Select name="location_type" defaultValue={appointment.location_type ?? 'in_person'}>
@@ -751,8 +815,11 @@ function ConfirmForm({
         helperText="Leave blank to stay unassigned."
       />
       <Textarea name="notes" placeholder="Include prep notes or access info" defaultValue={appointment.reschedule_note ?? ''} rows={2} />
+      {disableConfirm ? (
+        <p className="text-xs text-destructive">Add a staff rate before confirming appointments.</p>
+      ) : null}
       <div className="flex flex-wrap gap-3">
-        <Button type="submit" size="sm">
+        <Button type="submit" size="sm" disabled={disableConfirm}>
           Confirm
         </Button>
         <CancelAppointmentForm action={cancelAppointmentAsStaff} appointmentId={appointment.id} />
@@ -764,9 +831,11 @@ function ConfirmForm({
 function AppointmentsTab({
   appointments,
   organizationId,
+  staffRoles,
 }: {
   appointments: Awaited<ReturnType<typeof fetchScopedAppointments>> | null;
   organizationId: number;
+  staffRoles: string[];
 }) {
   if (!appointments) {
     return (
@@ -824,7 +893,7 @@ function AppointmentsTab({
                   </p>
                 ) : null}
                 <div className="mt-4 space-y-3">
-                  <ConfirmForm appointment={appointment} onConfirm={handleConfirm} />
+                  <ConfirmForm appointment={appointment} onConfirm={handleConfirm} staffRoles={staffRoles} />
                 </div>
               </article>
             ))

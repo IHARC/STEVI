@@ -5,6 +5,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ensurePortalProfile } from '@/lib/profile';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { logAuditEvent, buildEntityRef } from '@/lib/audit';
+import { resolveCostCategoryIdByName, resolveStaffRate } from '@/lib/costs/queries';
 import type { AppointmentRequestState } from '@/app/(client)/appointments/types';
 import type { AppointmentChannel, AppointmentStatus } from './types';
 import { assertOnboardingComplete } from '@/lib/onboarding/guard';
@@ -27,10 +28,14 @@ function parseDateTime(value: string | null): string | null {
   return parsed.toISOString();
 }
 
-function parseInteger(value: string | null, fallback: number): number {
-  if (!value) return fallback;
+function readRequiredPositiveInteger(value: string | null, message: string): number {
+  if (!value) {
+    throw new Error(message);
+  }
   const parsed = Number.parseInt(value, 10);
-  if (Number.isNaN(parsed) || parsed <= 0) return fallback;
+  if (Number.isNaN(parsed) || parsed <= 0) {
+    throw new Error(message);
+  }
   return parsed;
 }
 
@@ -60,6 +65,9 @@ type AppointmentScopeRow = {
   client_profile_id: string;
   organization_id: number | null;
   staff_profile_id: string | null;
+  staff_role?: string | null;
+  duration_minutes?: number | null;
+  occurs_at?: string | null;
 };
 
 function isIharcAdmin(access: Awaited<ReturnType<typeof loadPortalAccess>>): boolean {
@@ -73,7 +81,7 @@ async function fetchAppointmentScope(
   const { data, error } = await supabase
     .schema('portal')
     .from('appointments')
-    .select('id, client_profile_id, organization_id, staff_profile_id')
+    .select('id, client_profile_id, organization_id, staff_profile_id, staff_role, duration_minutes, occurs_at')
     .eq('id', appointmentId)
     .maybeSingle();
 
@@ -321,13 +329,15 @@ export async function confirmAppointment(formData: FormData): Promise<ActionResu
     const meetingUrl = sanitizeMeetingUrl(readString(formData, 'meeting_url'));
     const notes = readString(formData, 'notes');
     const staffProfileId = readString(formData, 'staff_profile_id');
+    const staffRole = readString(formData, 'staff_role');
 
     if (!appointmentId) throw new Error('Missing appointment id.');
 
     const occursAt = parseDateTime(occursAtInput);
     if (!occursAt) throw new Error('Add a date and time before confirming.');
 
-    const durationMinutes = parseInteger(durationInput, 60);
+    const durationMinutes = readRequiredPositiveInteger(durationInput, 'Provide the appointment duration in minutes.');
+    if (!staffRole) throw new Error('Select the staff role used for this appointment.');
 
     const supabase = await createSupabaseServerClient();
     const access = await loadPortalAccess(supabase);
@@ -350,6 +360,7 @@ export async function confirmAppointment(formData: FormData): Promise<ActionResu
         location_type: locationType,
         meeting_url: meetingUrl,
         staff_profile_id: staffProfileId ?? actorProfile.id,
+        staff_role: staffRole,
         confirmed_at: new Date().toISOString(),
         confirmed_by_profile_id: actorProfile.id,
         reschedule_note: notes,
@@ -386,11 +397,18 @@ export async function createOfflineAppointment(formData: FormData): Promise<Acti
     const location = readString(formData, 'location');
     const locationType = parseLocationType(readString(formData, 'location_type'));
     const meetingUrl = sanitizeMeetingUrl(readString(formData, 'meeting_url'));
-    const durationMinutes = parseInteger(readString(formData, 'duration_minutes'), 60);
+    const durationMinutes = readRequiredPositiveInteger(
+      readString(formData, 'duration_minutes'),
+      'Provide the appointment duration in minutes.',
+    );
     const staffProfileId = readString(formData, 'staff_profile_id');
+    const staffRole = readString(formData, 'staff_role');
 
     if (!clientProfileId || !title) {
       throw new Error('Client and title are required.');
+    }
+    if (!staffRole) {
+      throw new Error('Select the staff role used for this appointment.');
     }
 
     const supabase = await createSupabaseServerClient();
@@ -416,6 +434,7 @@ export async function createOfflineAppointment(formData: FormData): Promise<Acti
         client_profile_id: clientProfileId,
         requester_profile_id: actorProfile.id,
         staff_profile_id: staffProfileId ?? actorProfile.id,
+        staff_role: staffRole,
         organization_id: access.organizationId ?? null,
       })
       .select('id')
@@ -461,6 +480,22 @@ export async function completeAppointment(formData: FormData): Promise<ActionRes
     const appointment = await fetchAppointmentScope(supabase, appointmentId);
     assertCanActOnAppointment(appointment, { ...access, profile: actorProfile }, 'staff');
 
+    if (!appointment.organization_id) {
+      throw new Error('Appointments must be tied to an organization to record costs.');
+    }
+
+    if (!appointment.staff_role) {
+      throw new Error('Appointments must include a staff role to record costs.');
+    }
+
+    if (!appointment.duration_minutes || appointment.duration_minutes <= 0) {
+      throw new Error('Appointments must include a duration to record costs.');
+    }
+
+    if (!appointment.occurs_at) {
+      throw new Error('Appointments must have a scheduled time to record costs.');
+    }
+
     const { error } = await supabase
       .schema('portal')
       .from('appointments')
@@ -479,6 +514,71 @@ export async function completeAppointment(formData: FormData): Promise<ActionRes
       entityType: 'appointment',
       entityRef: buildEntityRef({ schema: 'portal', table: 'appointments', id: appointmentId }),
       meta: { outcome_notes: outcomeNotes },
+    });
+
+    const { data: personLink, error: personError } = await supabase
+      .schema('core')
+      .from('user_people')
+      .select('person_id')
+      .eq('profile_id', appointment.client_profile_id)
+      .maybeSingle();
+
+    if (personError || !personLink?.person_id) {
+      throw new Error('Unable to resolve the client record for cost tracking.');
+    }
+
+    const staffRate = await resolveStaffRate(
+      supabase,
+      appointment.organization_id,
+      appointment.staff_role,
+      appointment.occurs_at,
+    );
+    const hours = appointment.duration_minutes / 60;
+    const costAmount = Number((hours * Number(staffRate.hourly_rate)).toFixed(2));
+    const costCategoryId = await resolveCostCategoryIdByName(supabase, 'appointments');
+
+    const { data: costRow, error: costError } = await supabase
+      .schema('core')
+      .from('cost_events')
+      .insert({
+        person_id: personLink.person_id,
+        organization_id: appointment.organization_id,
+        source_type: 'appointment',
+        source_id: appointmentId,
+        occurred_at: appointment.occurs_at,
+        cost_amount: costAmount,
+        currency: 'CAD',
+        quantity: Number(hours.toFixed(3)),
+        unit_cost: Number(staffRate.hourly_rate),
+        uom: 'hour',
+        cost_category_id: costCategoryId,
+        metadata: {
+          appointment_id: appointmentId,
+          staff_role: appointment.staff_role,
+          duration_minutes: appointment.duration_minutes,
+          staff_profile_id: appointment.staff_profile_id,
+        },
+        created_by: access.userId,
+      })
+      .select('id')
+      .single();
+
+    if (costError || !costRow) {
+      throw costError ?? new Error('Unable to create appointment cost event.');
+    }
+
+    await logAuditEvent(supabase, {
+      actorProfileId: actorProfile.id,
+      action: 'cost_event_created',
+      entityType: 'core.cost_events',
+      entityRef: buildEntityRef({ schema: 'core', table: 'cost_events', id: costRow.id }),
+      meta: {
+        source_type: 'appointment',
+        source_id: appointmentId,
+        person_id: personLink.person_id,
+        organization_id: appointment.organization_id,
+        cost_amount: costAmount,
+      },
     });
 
     await touchAppointmentListings();

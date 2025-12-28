@@ -24,6 +24,7 @@ export type AppointmentRecord = {
   client_profile_id: string;
   requester_profile_id: string;
   staff_profile_id: string | null;
+  staff_role: string | null;
   organization_id: number | null;
   confirmed_at: string | null;
   confirmed_by_profile_id: string | null;
