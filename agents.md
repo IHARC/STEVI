@@ -21,7 +21,7 @@ Never introduce backwards compatibility, fallbacks (that will hide errors), or k
 - Assume Codex sessions run in workspace‑write. Use Azure CLI for all infra/state checks (Front Door, App Service, DNS). Subscription is **IHARC-main-sub** (`cc2de7f0-1207-4c5a-ab0e-df2cd0a57ab7`) and is the only scope to touch.
 - Treat this repo + generated Supabase types as source of truth. If older docs (marketing repo, Notion, etc.) disagree, defer to the code/schema and call out the mismatch.
 - Never add backward‑compatibility shims, hidden fallbacks, or keep dead/legacy code. Ship clean, explicit fixes aligned with IHARC privacy/audit expectations and WCAG commitments (see the marketing architecture doc in the marketing repo for WCAG guidance).
-- Supabase schema is shared across STEVI, STEVI OPS, and marketing—do not alter it without coordination. Verify RLS/policies via Supabase MCP, not migrations alone.
+- Supabase schema is shared across STEVI, STEVI OPS, and marketing—do not alter it without coordination. All schema changes must use Supabase MCP; never infer live state from migrations alone.
 - Keep audit, privacy, and rate limits intact. Every mutation must log to the audit trail and respect RLS + consent flags.
 
 ## Snapshot — 2025-12-12
@@ -43,22 +43,42 @@ Never introduce backwards compatibility, fallbacks (that will hide errors), or k
   - `src/lib/portal-areas.ts` (`requireArea`, landing resolution, preview parsing).
   - Client preview requires `?preview=1`; ops shell rejects preview mode.
 
-## Supabase: schemas, tables, RPCs
-- Schemas in active use: `portal`, `core`, `case_mgmt`, `inventory`, `donations`.
-- Key tables:
-  - `portal`: `profiles`, `profile_invites`, `profile_contacts`, `resource_pages`, `policies`, `notifications`, `public_settings`, `registration_flows`, `appointments`, `audit_log`.
-  - `core`: `people`, `people_activities`, `person_access_grants`, `organizations`, org memberships, contact details.
-  - `case_mgmt`: `case_management`.
-  - `inventory`: `v_items_with_balances`, `locations`, stock transactions.
-  - `donations`: `catalog_items`, `catalog_item_metrics`.
-- Storage: bucket `portal-attachments` (document locker). Signed URLs default to 30‑minute TTL.
-- Edge Functions (outside this repo): `portal-alerts` (optional, gated by `PORTAL_ALERTS_SECRET`) and `portal-admin-invite`.
-- RPCs/functions used today: `get_user_roles`, `portal_log_audit_event`, `portal_queue_notification` (+ Edge alerts), `portal_check_rate_limit`, `portal_get_user_email`, `refresh_user_permissions`, `set_profile_role`, `claim_registration_flow`, `get_people_list_with_types`, `core.staff_caseload`, `core.staff_shifts_today`, `core.staff_outreach_logs`, inventory RPCs (`receive_stock`, `receive_stock_with_source`, `transfer_stock`, `adjust_stock`, `update_transaction_source`).
-- **Authorization model**: `PortalAccess` (`src/lib/portal-access.ts`) derives capability flags only from `get_user_roles` + `ensurePortalProfile`. Never rely on JWT/app_metadata fallbacks or UI hiding alone.
-- **Audit/rate limits**:
-  - Route every mutation through `logAuditEvent`.
-  - Public/registration flows must call `portal_check_rate_limit`.
-- **Content safety**: sanitize TipTap/HTML with `sanitize-resource-html` and `sanitize-embed` before persisting.
+## Supabase (MCP‑only standard)
+Use Supabase MCP tools exclusively for database work. CLI guidance does not apply here.
+
+### New Codex session checklist (if DB work is involved)
+- Run live checks with MCP:
+  - `list_migrations` (what the DB has applied)
+  - `list_tables` (what exists in target schemas)
+  - `execute_sql` for precise inspection (RLS in `pg_policies`, functions in `pg_proc`, views in `pg_views`)
+- Never infer DB state from repo migrations alone.
+
+### Making DB changes
+- **DDL only**: use `apply_migration` (tables, RLS, views, functions).
+- **Data/inspection only**: use `execute_sql`.
+- After schema changes, run `generate_typescript_types`.
+- Run `get_advisors` after significant DDL for security/perf notices.
+
+### Schema drift handling
+- If the database was changed outside Codex, manually author a migration that matches the live DB, then apply it with `apply_migration` so repo and DB stay in sync.
+
+### RLS standard
+- Always verify policies in `pg_policies` after changes.
+- Ensure views do not bypass RLS (use `security_barrier` or `security_invoker` as appropriate).
+
+### Migration hygiene
+- Do **not** delete migrations.
+- If clutter becomes an issue, archive old migrations in-repo (e.g., `supabase/migrations/archive/`), but keep them in git.
+
+### Authorization model
+- `PortalAccess` (`src/lib/portal-access.ts`) derives capability flags only from `get_user_roles` + `ensurePortalProfile`. Never rely on JWT/app_metadata fallbacks or UI hiding alone.
+
+### Audit/rate limits
+- Route every mutation through `logAuditEvent`.
+- Public/registration flows must call `portal_check_rate_limit`.
+
+### Content safety
+- Sanitize TipTap/HTML with `sanitize-resource-html` and `sanitize-embed` before persisting.
 
 ## Current surfaces
 - **Client portal**: Home/support/profile/consents/cases are wired to Supabase (`core.people`, `case_mgmt.case_management`, grants, activities). Appointments use `portal.appointments` with audited request/reschedule/cancel. Documents read from `portal-attachments`. Support composer queues `portal_queue_notification` + audit. Messages page is still a placeholder; Home “focus areas” are static.

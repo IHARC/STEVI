@@ -1,3 +1,5 @@
+'use client';
+
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@shared/ui/chart';
