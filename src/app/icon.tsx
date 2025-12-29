@@ -2,7 +2,7 @@ import { getBrandingAssets } from '@/lib/marketing/branding';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export default async function Icon() {
   const branding = await getBrandingAssets();
   const response = await fetch(branding.faviconUrl, {
     next: { revalidate: 3600 },

@@ -18,7 +18,6 @@ const metadataBase = (() => {
     return new URL(DEFAULT_APP_URL);
   }
 })();
-const faviconUrl = new URL('/favicon.ico', metadataBase);
 
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA4_ID ?? process.env.PUBLIC_GA4_ID ?? null;
 const ANALYTICS_DISABLED =
@@ -33,11 +32,6 @@ export async function generateMetadata(): Promise<Metadata> {
     title: 'STEVI — Supportive Technology to Enable Vulnerable Individuals | IHARC Client Portal',
     description:
       'STEVI connects IHARC clients with outreach teams to request appointments, track progress, and access compassionate resources in Northumberland County.',
-    icons: {
-      icon: [{ url: faviconUrl }],
-      shortcut: [faviconUrl],
-      apple: [faviconUrl],
-    },
     openGraph: {
       type: 'website',
       siteName: 'STEVI',
