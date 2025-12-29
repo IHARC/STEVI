@@ -947,10 +947,7 @@ export async function uploadCfsAttachmentAction(
   }
 }
 
-export async function deleteCfsAttachmentAction(
-  _prevState: CfsAttachmentActionState,
-  formData: FormData,
-): Promise<CfsAttachmentActionState> {
+export async function deleteCfsAttachmentAction(formData: FormData): Promise<void> {
   try {
     const cfsId = getNumber(formData, 'cfs_id', { required: true }) as number;
     const attachmentId = getString(formData, 'attachment_id', { required: true });
@@ -959,7 +956,7 @@ export async function deleteCfsAttachmentAction(
     const access = await loadPortalAccess(supabase);
 
     if (!access || !access.canDeleteCfs) {
-      return { status: 'error', message: 'You do not have permission to delete attachments.' };
+      return;
     }
 
     const { data: attachment, error } = await supabase
@@ -971,7 +968,7 @@ export async function deleteCfsAttachmentAction(
       .maybeSingle();
 
     if (error || !attachment) {
-      return { status: 'error', message: 'Attachment not found.' };
+      return;
     }
 
     const { error: storageError } = await supabase.storage.from(attachment.storage_bucket).remove([attachment.storage_path]);
@@ -999,9 +996,9 @@ export async function deleteCfsAttachmentAction(
     });
 
     revalidatePath(cfsDetailPath(cfsId));
-    return { status: 'success', message: 'Attachment deleted.' };
+    return;
   } catch (error) {
     console.error('deleteCfsAttachmentAction error', error);
-    return { status: 'error', message: error instanceof Error ? error.message : 'Unable to delete attachment.' };
+    return;
   }
 }

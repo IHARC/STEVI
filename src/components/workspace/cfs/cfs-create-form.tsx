@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useFormState } from 'react-dom';
 import { Alert, AlertDescription, AlertTitle } from '@shared/ui/alert';
 import { Button } from '@shared/ui/button';
@@ -71,11 +71,12 @@ export function CfsCreateForm({ organizations, canPublicTrack }: CfsCreateFormPr
   const [notifyChannel, setNotifyChannel] = useState<'email' | 'sms'>('email');
   const [formResetKey, setFormResetKey] = useState(0);
 
-  useEffect(() => {
-    if (!notifyEnabled) {
+  const handleNotifyToggle = (value: boolean) => {
+    setNotifyEnabled(value);
+    if (!value) {
       setNotifyChannel('email');
     }
-  }, [notifyEnabled]);
+  };
 
   const orgOptions = useMemo(() => organizations.filter((org) => org.id > 0), [organizations]);
   const orgSelectOptions = useMemo<ComboboxOption[]>(
@@ -319,7 +320,7 @@ export function CfsCreateForm({ organizations, canPublicTrack }: CfsCreateFormPr
               <p className="text-sm font-medium">Send status updates</p>
               <p className="text-xs text-muted-foreground">Send updates by email or SMS with consent.</p>
             </div>
-            <Switch checked={notifyEnabled} onCheckedChange={setNotifyEnabled} />
+            <Switch checked={notifyEnabled} onCheckedChange={handleNotifyToggle} />
             <input type="hidden" name="notify_opt_in" value={notifyEnabled ? 'true' : 'false'} />
           </div>
 
@@ -408,6 +409,7 @@ export function CfsCreateForm({ organizations, canPublicTrack }: CfsCreateFormPr
             setAnonymousReporter(false);
             setNotifyEnabled(false);
             setPublicTrackingEnabled(false);
+            setNotifyChannel('email');
             setFormResetKey((value) => value + 1);
           }}
         >

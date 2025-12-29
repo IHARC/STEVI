@@ -12,6 +12,54 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
   }
+  analytics: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      cost_event_daily_secure: {
+        Row: {
+          cost_category_id: string | null
+          day: string | null
+          event_count: number | null
+          organization_id: number | null
+          person_id: number | null
+          total_cost: number | null
+        }
+        Relationships: []
+      }
+      org_cost_rollups_secure: {
+        Row: {
+          cost_30d: number | null
+          cost_365d: number | null
+          cost_category_id: string | null
+          organization_id: number | null
+          total_cost: number | null
+        }
+        Relationships: []
+      }
+      person_cost_rollups_secure: {
+        Row: {
+          cost_30d: number | null
+          cost_365d: number | null
+          cost_90d: number | null
+          organization_id: number | null
+          person_id: number | null
+          total_cost: number | null
+        }
+        Relationships: []
+      }
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   case_mgmt: {
     Tables: {
       case_management: {
@@ -2509,6 +2557,175 @@ export type Database = {
           },
         ]
       }
+      cost_categories: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          name: string
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      cost_dimensions: {
+        Row: {
+          created_at: string
+          description: string | null
+          dimension_type: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          dimension_type: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          dimension_type?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      cost_event_dimensions: {
+        Row: {
+          cost_event_id: string
+          dimension_id: string
+        }
+        Insert: {
+          cost_event_id: string
+          dimension_id: string
+        }
+        Update: {
+          cost_event_id?: string
+          dimension_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cost_event_dimensions_cost_event_id_fkey"
+            columns: ["cost_event_id"]
+            isOneToOne: false
+            referencedRelation: "cost_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cost_event_dimensions_dimension_id_fkey"
+            columns: ["dimension_id"]
+            isOneToOne: false
+            referencedRelation: "cost_dimensions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cost_events: {
+        Row: {
+          cost_amount: number
+          cost_category_id: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          entry_type: Database["core"]["Enums"]["cost_entry_type_enum"]
+          id: string
+          metadata: Json | null
+          occurred_at: string
+          organization_id: number
+          person_id: number | null
+          quantity: number | null
+          source_id: string | null
+          source_type: Database["core"]["Enums"]["cost_source_type_enum"]
+          unit_cost: number | null
+          uom: string | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          cost_amount: number
+          cost_category_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          entry_type?: Database["core"]["Enums"]["cost_entry_type_enum"]
+          id?: string
+          metadata?: Json | null
+          occurred_at: string
+          organization_id: number
+          person_id?: number | null
+          quantity?: number | null
+          source_id?: string | null
+          source_type: Database["core"]["Enums"]["cost_source_type_enum"]
+          unit_cost?: number | null
+          uom?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          cost_amount?: number
+          cost_category_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          entry_type?: Database["core"]["Enums"]["cost_entry_type_enum"]
+          id?: string
+          metadata?: Json | null
+          occurred_at?: string
+          organization_id?: number
+          person_id?: number | null
+          quantity?: number | null
+          source_id?: string | null
+          source_type?: Database["core"]["Enums"]["cost_source_type_enum"]
+          unit_cost?: number | null
+          uom?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cost_events_cost_category_id_fkey"
+            columns: ["cost_category_id"]
+            isOneToOne: false
+            referencedRelation: "cost_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cost_events_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cost_events_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       disabilities: {
         Row: {
           accommodation_needs: string | null
@@ -4285,6 +4502,114 @@ export type Database = {
         }
         Relationships: []
       }
+      org_role_permissions: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          granted_at: string | null
+          granted_by: string | null
+          id: string
+          org_role_id: string
+          permission_id: string
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          org_role_id: string
+          permission_id: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          org_role_id?: string
+          permission_id?: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_role_permissions_org_role_id_fkey"
+            columns: ["org_role_id"]
+            isOneToOne: false
+            referencedRelation: "org_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_role_permissions_permission_id_fkey"
+            columns: ["permission_id"]
+            isOneToOne: false
+            referencedRelation: "permissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      org_roles: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          display_name: string
+          id: string
+          name: string
+          organization_id: number
+          role_kind: Database["core"]["Enums"]["org_role_kind"]
+          template_id: string | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          display_name: string
+          id?: string
+          name: string
+          organization_id: number
+          role_kind?: Database["core"]["Enums"]["org_role_kind"]
+          template_id?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          display_name?: string
+          id?: string
+          name?: string
+          organization_id?: number
+          role_kind?: Database["core"]["Enums"]["org_role_kind"]
+          template_id?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_roles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "org_roles_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "role_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       people: {
         Row: {
           age: number | null
@@ -5290,6 +5615,93 @@ export type Database = {
           },
         ]
       }
+      role_template_permissions: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          granted_at: string | null
+          granted_by: string | null
+          id: string
+          permission_id: string
+          template_id: string
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          permission_id: string
+          template_id: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          permission_id?: string
+          template_id?: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_template_permissions_permission_id_fkey"
+            columns: ["permission_id"]
+            isOneToOne: false
+            referencedRelation: "permissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_template_permissions_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "role_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      role_templates: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          display_name: string
+          id: string
+          name: string
+          role_kind: Database["core"]["Enums"]["org_role_kind"]
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          display_name: string
+          id?: string
+          name: string
+          role_kind?: Database["core"]["Enums"]["org_role_kind"]
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          display_name?: string
+          id?: string
+          name?: string
+          role_kind?: Database["core"]["Enums"]["org_role_kind"]
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       roles: {
         Row: {
           created_at: string | null
@@ -5421,6 +5833,44 @@ export type Database = {
           },
         ]
       }
+      service_catalog: {
+        Row: {
+          created_at: string
+          default_category_id: string | null
+          id: string
+          label: string
+          service_code: string
+          unit_cost: number
+          unit_type: string
+        }
+        Insert: {
+          created_at?: string
+          default_category_id?: string | null
+          id?: string
+          label: string
+          service_code: string
+          unit_cost: number
+          unit_type: string
+        }
+        Update: {
+          created_at?: string
+          default_category_id?: string | null
+          id?: string
+          label?: string
+          service_code?: string
+          unit_cost?: number
+          unit_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_catalog_default_category_id_fkey"
+            columns: ["default_category_id"]
+            isOneToOne: false
+            referencedRelation: "cost_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       staff_break_entries: {
         Row: {
           created_at: string
@@ -5462,56 +5912,145 @@ export type Database = {
           },
         ]
       }
-      staff_time_entries: {
+      staff_rates: {
         Row: {
           created_at: string
+          effective_from: string
+          effective_to: string | null
+          hourly_rate: number
+          id: string
+          org_id: number
+          role_name: string
+        }
+        Insert: {
+          created_at?: string
+          effective_from?: string
+          effective_to?: string | null
+          hourly_rate: number
+          id?: string
+          org_id: number
+          role_name: string
+        }
+        Update: {
+          created_at?: string
+          effective_from?: string
+          effective_to?: string | null
+          hourly_rate?: number
+          id?: string
+          org_id?: number
+          role_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_rates_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff_time_entries: {
+        Row: {
+          break_minutes: number
+          cost_amount_snapshot: number | null
+          cost_event_id: string | null
+          created_at: string
           created_by: string
+          currency: string
           end_lat: number | null
           end_lng: number | null
+          hourly_rate_snapshot: number | null
           id: string
+          metadata: Json | null
           notes: string | null
+          organization_id: number
+          role_kind: Database["core"]["Enums"]["org_role_kind"]
+          role_name: string
           shift_end: string | null
           shift_start: string
+          source_id: string | null
+          source_type: string | null
           start_lat: number | null
           start_lng: number | null
           status: string
+          total_minutes: number
           updated_at: string | null
           updated_by: string | null
           user_id: string
         }
         Insert: {
+          break_minutes?: number
+          cost_amount_snapshot?: number | null
+          cost_event_id?: string | null
           created_at?: string
           created_by?: string
+          currency?: string
           end_lat?: number | null
           end_lng?: number | null
+          hourly_rate_snapshot?: number | null
           id?: string
+          metadata?: Json | null
           notes?: string | null
+          organization_id: number
+          role_kind?: Database["core"]["Enums"]["org_role_kind"]
+          role_name: string
           shift_end?: string | null
           shift_start?: string
+          source_id?: string | null
+          source_type?: string | null
           start_lat?: number | null
           start_lng?: number | null
           status?: string
+          total_minutes?: number
           updated_at?: string | null
           updated_by?: string | null
           user_id?: string
         }
         Update: {
+          break_minutes?: number
+          cost_amount_snapshot?: number | null
+          cost_event_id?: string | null
           created_at?: string
           created_by?: string
+          currency?: string
           end_lat?: number | null
           end_lng?: number | null
+          hourly_rate_snapshot?: number | null
           id?: string
+          metadata?: Json | null
           notes?: string | null
+          organization_id?: number
+          role_kind?: Database["core"]["Enums"]["org_role_kind"]
+          role_name?: string
           shift_end?: string | null
           shift_start?: string
+          source_id?: string | null
+          source_type?: string | null
           start_lat?: number | null
           start_lng?: number | null
           status?: string
+          total_minutes?: number
           updated_at?: string | null
           updated_by?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "staff_time_entries_cost_event_id_fkey"
+            columns: ["cost_event_id"]
+            isOneToOne: false
+            referencedRelation: "cost_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_time_entries_org_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       supply_provisions: {
         Row: {
@@ -5693,6 +6232,67 @@ export type Database = {
             columns: ["person_id"]
             isOneToOne: true
             referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_org_roles: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          granted_at: string | null
+          granted_by: string | null
+          id: string
+          org_role_id: string
+          organization_id: number
+          updated_at: string | null
+          updated_by: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          org_role_id: string
+          organization_id: number
+          updated_at?: string | null
+          updated_by?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          org_role_id?: string
+          organization_id?: number
+          updated_at?: string | null
+          updated_by?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_org_roles_org_role_id_fkey"
+            columns: ["org_role_id"]
+            isOneToOne: false
+            referencedRelation: "org_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_org_roles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_org_roles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -6398,6 +6998,15 @@ export type Database = {
         | "somewhat_cooperative"
         | "uncooperative"
         | "hostile"
+      cost_entry_type_enum: "direct" | "replacement_value" | "overhead"
+      cost_source_type_enum:
+        | "activity"
+        | "distribution"
+        | "inventory_tx"
+        | "appointment"
+        | "manual"
+        | "external"
+        | "staff_time"
       court_compliance_enum:
         | "compliant"
         | "mostly_compliant"
@@ -6637,6 +7246,7 @@ export type Database = {
         | "inactive"
         | "pending"
         | "under_review"
+      org_role_kind: "staff" | "volunteer"
       organization_type:
         | "addiction"
         | "crisis_support"
@@ -12605,6 +13215,16 @@ export const Constants = {
         "uncooperative",
         "hostile",
       ],
+      cost_entry_type_enum: ["direct", "replacement_value", "overhead"],
+      cost_source_type_enum: [
+        "activity",
+        "distribution",
+        "inventory_tx",
+        "appointment",
+        "manual",
+        "external",
+        "staff_time",
+      ],
       court_compliance_enum: [
         "compliant",
         "mostly_compliant",
@@ -12869,6 +13489,7 @@ export const Constants = {
         "pending",
         "under_review",
       ],
+      org_role_kind: ["staff", "volunteer"],
       organization_type: [
         "addiction",
         "crisis_support",

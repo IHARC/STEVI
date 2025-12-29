@@ -406,7 +406,7 @@ export function resolveQuickActions(
         label: 'New call for service',
         href: '/ops/cfs/new',
         description: orgMissing ? 'Select an acting org to log a call' : 'Log a new call or public request',
-        icon: 'workflow',
+        icon: 'file',
         disabled: previewDisabled,
         disabledReason: previewDisabled ? 'Not available in preview' : undefined,
       });
