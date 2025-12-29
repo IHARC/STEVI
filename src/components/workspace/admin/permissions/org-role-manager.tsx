@@ -26,6 +26,7 @@ type OrgRole = {
   display_name: string;
   description: string | null;
   template_id: string | null;
+  role_kind: 'staff' | 'volunteer';
 };
 type Permission = {
   id: string;
@@ -255,6 +256,18 @@ export function OrgRoleManager({
                 </SelectContent>
               </Select>
             </div>
+            <div className="space-y-1">
+              <Label htmlFor="org-role-kind">Role kind</Label>
+              <select
+                id="org-role-kind"
+                name="role_kind"
+                defaultValue="staff"
+                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground"
+              >
+                <option value="staff">Staff</option>
+                <option value="volunteer">Volunteer</option>
+              </select>
+            </div>
             <div className="space-y-1 md:col-span-2">
               <Label htmlFor="org-role-desc">Description</Label>
               <Textarea id="org-role-desc" name="description" placeholder="Optional description" rows={2} />
@@ -292,7 +305,12 @@ export function OrgRoleManager({
                       <CardTitle className="text-base">{role.display_name}</CardTitle>
                       <p className="text-xs text-muted-foreground">{role.description ?? role.name}</p>
                     </div>
-                    <Badge variant="outline">{role.name}</Badge>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge variant="outline">{role.name}</Badge>
+                      <Badge variant="secondary" className="text-xs uppercase">
+                        {role.role_kind}
+                      </Badge>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">

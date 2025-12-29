@@ -210,6 +210,8 @@ export async function createOrgRoleAction(formData: FormData) {
     const displayName = (formData.get('display_name') as string | null)?.trim();
     const description = (formData.get('description') as string | null)?.trim() || null;
     const templateId = (formData.get('template_id') as string | null)?.trim() || null;
+    const roleKindValue = (formData.get('role_kind') as string | null)?.trim();
+    let roleKind: 'staff' | 'volunteer' = roleKindValue === 'volunteer' ? 'volunteer' : 'staff';
 
     if (!organizationIdValue || !name || !displayName) {
       throw new Error('Organization, name, and display name are required.');
@@ -222,6 +224,21 @@ export async function createOrgRoleAction(formData: FormData) {
 
     const { supabase, actorProfile, access } = await requireElevatedAdmin();
 
+    if (templateId) {
+      const { data: template, error: templateError } = await supabase
+        .schema('core')
+        .from('role_templates')
+        .select('role_kind')
+        .eq('id', templateId)
+        .maybeSingle();
+      if (templateError) throw templateError;
+      if (template?.role_kind === 'volunteer') {
+        roleKind = 'volunteer';
+      } else if (template?.role_kind === 'staff') {
+        roleKind = 'staff';
+      }
+    }
+
     const { data: orgRole, error } = await supabase
       .schema('core')
       .from('org_roles')
@@ -231,6 +248,7 @@ export async function createOrgRoleAction(formData: FormData) {
         display_name: displayName,
         description,
         template_id: templateId || null,
+        role_kind: roleKind,
         created_by: access.userId,
         updated_by: access.userId,
       })
@@ -269,7 +287,7 @@ export async function createOrgRoleAction(formData: FormData) {
       action: 'admin_org_role_created',
       entityType: 'org_role',
       entityRef: buildEntityRef({ schema: 'core', table: 'org_roles', id: orgRole?.id ?? name }),
-      meta: { name, organizationId, templateId },
+      meta: { name, organizationId, templateId, role_kind: roleKind },
     });
 
     revalidatePath(PATH);
@@ -291,10 +309,18 @@ export async function applyTemplateToOrgRoleAction(formData: FormData) {
 
     const { supabase, actorProfile, access } = await requireElevatedAdmin();
 
+    const { data: template, error: templateError } = await supabase
+      .schema('core')
+      .from('role_templates')
+      .select('role_kind')
+      .eq('id', templateId)
+      .maybeSingle();
+    if (templateError) throw templateError;
+
     const { error: updateError } = await supabase
       .schema('core')
       .from('org_roles')
-      .update({ template_id: templateId })
+      .update({ template_id: templateId, role_kind: template?.role_kind ?? 'staff' })
       .eq('id', orgRoleId);
     if (updateError) throw updateError;
 
@@ -305,12 +331,12 @@ export async function applyTemplateToOrgRoleAction(formData: FormData) {
       .eq('org_role_id', orgRoleId);
     if (clearError) throw clearError;
 
-    const { data: templatePerms, error: templateError } = await supabase
+    const { data: templatePerms, error: permsError } = await supabase
       .schema('core')
       .from('role_template_permissions')
       .select('permission_id')
       .eq('template_id', templateId);
-    if (templateError) throw templateError;
+    if (permsError) throw permsError;
 
     if (templatePerms && templatePerms.length > 0) {
       const inserts = templatePerms.map((row: { permission_id: string }) => ({

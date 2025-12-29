@@ -15,7 +15,7 @@ type PageProps = {
 
 type OrgRoleSummary = Pick<
   Database['core']['Tables']['org_roles']['Row'],
-  'id' | 'name' | 'display_name' | 'description' | 'template_id'
+  'id' | 'name' | 'display_name' | 'description' | 'template_id' | 'role_kind'
 >;
 
 function readOrgId(params: Record<string, string | string[] | undefined> | undefined): number | null {
@@ -64,7 +64,7 @@ export default async function AdminPermissionsPage({ searchParams }: PageProps) 
     ? await supabase
         .schema('core')
         .from('org_roles')
-        .select('id, name, display_name, description, template_id')
+        .select('id, name, display_name, description, template_id, role_kind')
         .eq('organization_id', selectedOrgId)
         .order('display_name')
     : { data: [], error: null };

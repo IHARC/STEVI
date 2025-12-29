@@ -367,7 +367,22 @@ export type Database = {
           risk_level?: Database["core"]["Enums"]["risk_level_enum"] | null
           situation_notes?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "staff_time_entries_cost_event_id_fkey"
+            columns: ["cost_event_id"]
+            isOneToOne: false
+            referencedRelation: "cost_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_time_entries_org_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       incident_links: {
         Row: {
@@ -5160,6 +5175,7 @@ export type Database = {
           id: string
           name: string
           organization_id: number
+          role_kind: Database["core"]["Enums"]["org_role_kind"]
           template_id: string | null
           updated_at: string | null
           updated_by: string | null
@@ -5172,6 +5188,7 @@ export type Database = {
           id?: string
           name: string
           organization_id: number
+          role_kind?: Database["core"]["Enums"]["org_role_kind"]
           template_id?: string | null
           updated_at?: string | null
           updated_by?: string | null
@@ -5184,6 +5201,7 @@ export type Database = {
           id?: string
           name?: string
           organization_id?: number
+          role_kind?: Database["core"]["Enums"]["org_role_kind"]
           template_id?: string | null
           updated_at?: string | null
           updated_by?: string | null
@@ -5264,6 +5282,7 @@ export type Database = {
           display_name: string
           id: string
           name: string
+          role_kind: Database["core"]["Enums"]["org_role_kind"]
           updated_at: string | null
           updated_by: string | null
         }
@@ -5274,6 +5293,7 @@ export type Database = {
           display_name: string
           id?: string
           name: string
+          role_kind?: Database["core"]["Enums"]["org_role_kind"]
           updated_at?: string | null
           updated_by?: string | null
         }
@@ -5284,6 +5304,7 @@ export type Database = {
           display_name?: string
           id?: string
           name?: string
+          role_kind?: Database["core"]["Enums"]["org_role_kind"]
           updated_at?: string | null
           updated_by?: string | null
         }
@@ -5536,54 +5557,138 @@ export type Database = {
       }
       staff_time_entries: {
         Row: {
+          break_minutes: number
+          cost_amount_snapshot: number | null
+          cost_event_id: string | null
           created_at: string
           created_by: string
+          currency: string
           end_lat: number | null
           end_lng: number | null
+          hourly_rate_snapshot: number | null
           id: string
+          metadata: Json | null
           notes: string | null
+          organization_id: number
+          role_kind: Database["core"]["Enums"]["org_role_kind"]
+          role_name: string
           shift_end: string | null
           shift_start: string
+          source_id: string | null
+          source_type: string | null
           start_lat: number | null
           start_lng: number | null
           status: string
+          total_minutes: number
           updated_at: string | null
           updated_by: string | null
           user_id: string
         }
         Insert: {
+          break_minutes?: number
+          cost_amount_snapshot?: number | null
+          cost_event_id?: string | null
           created_at?: string
           created_by?: string
+          currency?: string
           end_lat?: number | null
           end_lng?: number | null
+          hourly_rate_snapshot?: number | null
           id?: string
+          metadata?: Json | null
           notes?: string | null
+          organization_id: number
+          role_kind?: Database["core"]["Enums"]["org_role_kind"]
+          role_name: string
           shift_end?: string | null
           shift_start?: string
+          source_id?: string | null
+          source_type?: string | null
           start_lat?: number | null
           start_lng?: number | null
           status?: string
+          total_minutes?: number
           updated_at?: string | null
           updated_by?: string | null
           user_id?: string
         }
         Update: {
+          break_minutes?: number
+          cost_amount_snapshot?: number | null
+          cost_event_id?: string | null
           created_at?: string
           created_by?: string
+          currency?: string
           end_lat?: number | null
           end_lng?: number | null
+          hourly_rate_snapshot?: number | null
           id?: string
+          metadata?: Json | null
           notes?: string | null
+          organization_id?: number
+          role_kind?: Database["core"]["Enums"]["org_role_kind"]
+          role_name?: string
           shift_end?: string | null
           shift_start?: string
+          source_id?: string | null
+          source_type?: string | null
           start_lat?: number | null
           start_lng?: number | null
           status?: string
+          total_minutes?: number
           updated_at?: string | null
           updated_by?: string | null
           user_id?: string
         }
         Relationships: []
+      }
+      staff_time_attributions: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          organization_id: number
+          source_id: string
+          source_type: string
+          time_entry_id: string
+          weight: number | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          organization_id: number
+          source_id: string
+          source_type: string
+          time_entry_id: string
+          weight?: number | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          organization_id?: number
+          source_id?: string
+          source_type?: string
+          time_entry_id?: string
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_time_attributions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_time_attributions_time_entry_id_fkey"
+            columns: ["time_entry_id"]
+            isOneToOne: false
+            referencedRelation: "staff_time_entries"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       supply_provisions: {
         Row: {
@@ -6559,6 +6664,7 @@ export type Database = {
         Args: { p_org_id?: number | null }
         Returns: {
           role_display_name: string | null
+          role_kind: Database["core"]["Enums"]["org_role_kind"]
           role_id: string
           role_name: string
         }[]
@@ -6626,7 +6732,9 @@ export type Database = {
         | "inventory_tx"
         | "appointment"
         | "manual"
+        | "staff_time"
         | "external"
+      org_role_kind: "staff" | "volunteer"
       address_category:
         | "residential"
         | "commercial"

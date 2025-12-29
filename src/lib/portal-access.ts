@@ -2,6 +2,7 @@ import type { AppIconName } from '@/lib/app-icons';
 import { ensurePortalProfile, type PortalProfile } from '@/lib/profile';
 import type { SupabaseAnyServerClient } from '@/lib/supabase/types';
 import { buildPortalNav, flattenNavItemsForCommands, type NavSection } from '@/lib/portal-navigation';
+import { extractOrgFeatureFlags, type OrgFeatureKey } from '@/lib/organizations';
 
 export type PortalLink = {
   href: string;
@@ -19,10 +20,11 @@ export type PortalAccess = {
   isGlobalAdmin: boolean;
   iharcOrganizationId: number | null;
   isIharcMember: boolean;
-  orgRoles: Array<{ id: string; name: string; displayName: string | null }>;
+  orgRoles: Array<{ id: string; name: string; displayName: string | null; roleKind: 'staff' | 'volunteer' }>;
   orgPermissions: string[];
   organizationId: number | null;
   organizationName: string | null;
+  organizationFeatures: OrgFeatureKey[];
   canAccessOpsAdmin: boolean;
   canAccessOpsSteviAdmin: boolean;
   canAccessOpsOrg: boolean;
@@ -38,6 +40,10 @@ export type PortalAccess = {
   canManageCosts: boolean;
   canReportCosts: boolean;
   canAdminCosts: boolean;
+  canTrackTime: boolean;
+  canViewOwnTime: boolean;
+  canViewAllTime: boolean;
+  canManageTime: boolean;
   canManageWebsiteContent: boolean;
   canManageSiteFooter: boolean;
   canManageConsents: boolean;
@@ -71,7 +77,8 @@ export async function loadPortalAccess(
   const isGlobalAdmin = globalRoles.includes('iharc_admin');
 
   let organizationId = profile.organization_id ?? null;
-  let organizationName = organizationId ? await fetchOrganizationName(supabase, organizationId) : null;
+  let organizationName: string | null = null;
+  let organizationFeatures: OrgFeatureKey[] = [];
   const isProfileApproved = profile.affiliation_status === 'approved';
 
   let actingOrgChoicesCount: number | null = null;
@@ -139,10 +146,14 @@ export async function loadPortalAccess(
       } else if (process.env.NODE_ENV !== 'production') {
         console.warn('Unable to auto-select acting org', error);
       }
-    } else if (organizationId && !organizationName) {
-      organizationName = await fetchOrganizationName(supabase, organizationId);
-      profile = { ...profile, organization_id: organizationId };
     }
+  }
+
+  if (organizationId) {
+    const summary = await fetchOrganizationSummary(supabase, organizationId);
+    organizationName = summary.name ?? organizationName;
+    organizationFeatures = summary.features;
+    profile = { ...profile, organization_id: organizationId };
   }
 
   const orgRoles = organizationId ? await fetchOrgRoles(supabase, organizationId) : [];
@@ -176,6 +187,11 @@ export async function loadPortalAccess(
   const canManageCosts = isProfileApproved && (isGlobalAdmin || hasPermission('cost.manage') || hasPermission('cost.admin'));
   const canReportCosts = isProfileApproved && (isGlobalAdmin || hasPermission('cost.report') || hasPermission('cost.admin'));
   const canAdminCosts = isProfileApproved && (isGlobalAdmin || hasPermission('cost.admin'));
+  const canTrackTime = isProfileApproved && hasPermission('staff_time.track');
+  const canViewOwnTime = isProfileApproved && (hasPermission('staff_time.view_self') || canTrackTime);
+  const canViewAllTime =
+    isProfileApproved && (hasPermission('staff_time.view_all') || hasPermission('staff_time.manage'));
+  const canManageTime = isProfileApproved && hasPermission('staff_time.manage');
   const canManageOrgUsers = isProfileApproved && hasPermission('portal.manage_org_users');
   const canManageOrgInvites = isProfileApproved && (hasPermission('portal.manage_org_invites') || hasPermission('portal.manage_org_users'));
 
@@ -191,6 +207,7 @@ export async function loadPortalAccess(
     orgPermissions,
     organizationId,
     organizationName,
+    organizationFeatures,
     canAccessOpsAdmin,
     canAccessOpsSteviAdmin,
     canAccessOpsOrg,
@@ -207,6 +224,10 @@ export async function loadPortalAccess(
     canManageCosts,
     canReportCosts,
     canAdminCosts,
+    canTrackTime,
+    canViewOwnTime,
+    canViewAllTime,
+    canManageTime,
     canManageSiteFooter,
     canManageConsents,
     canManageOrgUsers,
@@ -245,7 +266,7 @@ async function fetchGlobalRoles(
 async function fetchOrgRoles(
   supabase: SupabaseAnyServerClient,
   organizationId: number,
-): Promise<Array<{ id: string; name: string; displayName: string | null }>> {
+): Promise<Array<{ id: string; name: string; displayName: string | null; roleKind: 'staff' | 'volunteer' }>> {
   const { data, error } = await supabase.schema('core').rpc('get_actor_org_roles', { p_org_id: organizationId });
 
   if (error) {
@@ -264,11 +285,12 @@ async function fetchOrgRoles(
           id: String(entry.role_id),
           name: String(entry.role_name),
           displayName: typeof entry.role_display_name === 'string' ? entry.role_display_name : null,
+          roleKind: entry.role_kind === 'volunteer' ? 'volunteer' : 'staff',
         };
       }
       return null;
     })
-    .filter((entry): entry is { id: string; name: string; displayName: string | null } => Boolean(entry));
+    .filter((entry): entry is { id: string; name: string; displayName: string | null; roleKind: 'staff' | 'volunteer' } => Boolean(entry));
 }
 
 async function fetchOrgPermissions(
@@ -321,20 +343,25 @@ async function fetchPermissionSummary(
     .filter((permission): permission is string => Boolean(permission));
 }
 
-async function fetchOrganizationName(supabase: SupabaseAnyServerClient, organizationId: number): Promise<string | null> {
+async function fetchOrganizationSummary(
+  supabase: SupabaseAnyServerClient,
+  organizationId: number,
+): Promise<{ name: string | null; features: OrgFeatureKey[] }> {
   const { data, error } = await supabase
     .schema('core')
     .from('organizations')
-    .select('name')
+    .select('name, services_tags')
     .eq('id', organizationId)
     .maybeSingle();
 
   if (error) {
-    console.warn('Unable to load organization name', error);
-    return null;
+    console.warn('Unable to load organization summary', error);
+    return { name: null, features: [] };
   }
 
-  return data?.name ?? null;
+  const name = data?.name ?? null;
+  const features = extractOrgFeatureFlags((data as { services_tags?: unknown } | null)?.services_tags ?? null);
+  return { name, features };
 }
 
 async function fetchIharcOrganization(
@@ -480,6 +507,7 @@ const HUB_TAB_COMMANDS: { href: string; label: string; group: string; requires: 
   { href: '/ops/clients?view=directory', label: 'Client directory', group: 'Clients', requires: (access) => access.canAccessOpsFrontline || access.canManageConsents },
   { href: '/ops/clients?view=caseload', label: 'My caseload', group: 'Clients', requires: (access) => access.canAccessOpsFrontline },
   { href: '/ops/programs?view=overview', label: 'Programs', group: 'Programs', requires: (access) => access.canAccessOpsFrontline || access.canAccessOpsAdmin },
+  { href: '/ops/time', label: 'Time tracking', group: 'Time', requires: (access) => access.organizationFeatures.includes('time_tracking') && (access.canTrackTime || access.canViewAllTime || access.canManageTime) },
   { href: '/ops/inventory?view=dashboard', label: 'Inventory', group: 'Inventory', requires: (access) => access.canAccessInventoryOps },
   { href: '/ops/organizations', label: 'Organizations', group: 'Organizations', requires: (access) => access.canAccessOpsFrontline || access.canAccessOpsOrg || access.canAccessOpsAdmin || access.canAccessOpsSteviAdmin },
 ];

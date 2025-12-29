@@ -29,6 +29,9 @@ const canSeePrograms = (access: PortalAccess) => access.canAccessOpsFrontline ||
 const canSeeInventory = (access: PortalAccess) => access.canAccessInventoryOps;
 const canSeeFundraising = (access: PortalAccess) => access.canAccessOpsSteviAdmin;
 const canSeeReports = (access: PortalAccess) => access.canReportCosts || access.canViewMetrics;
+const canSeeTimeTracking = (access: PortalAccess) =>
+  access.organizationFeatures.includes('time_tracking') &&
+  (access.canTrackTime || access.canViewAllTime || access.canManageTime);
 const canSeeOrganizations = (access: PortalAccess) =>
   access.canAccessOpsFrontline || access.canAccessOpsOrg || access.canAccessOpsAdmin || access.canAccessOpsSteviAdmin;
 const canSeeOrgScopedOrganizations = (access: PortalAccess) =>
@@ -120,6 +123,22 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
             label: 'Schedule',
             match: ['/ops/programs'],
             query: { view: 'schedule' },
+          },
+        ],
+      },
+      {
+        id: 'time',
+        label: 'Time tracking',
+        icon: 'clock',
+        requires: canSeeTimeTracking,
+        isHub: true,
+        items: [
+          {
+            id: 'timecards',
+            href: '/ops/time',
+            label: 'Timecards',
+            icon: 'clock',
+            match: ['/ops/time'],
           },
         ],
       },

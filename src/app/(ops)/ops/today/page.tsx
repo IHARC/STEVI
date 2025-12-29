@@ -25,7 +25,9 @@ export default async function OpsTodayPage() {
     redirect(resolveLandingPath(access));
   }
 
-  const isVolunteerOnly = access.orgRoles.some((role) => role.name === 'iharc_volunteer') && !access.canAccessOpsAdmin && !access.canManageConsents;
+  const hasVolunteerRole = access.orgRoles.some((role) => role.roleKind === 'volunteer' || role.name === 'iharc_volunteer');
+  const hasStaffRole = access.orgRoles.some((role) => role.roleKind === 'staff');
+  const isVolunteerOnly = hasVolunteerRole && !hasStaffRole && !access.canAccessOpsAdmin && !access.canManageConsents;
   const showStaffWidgets = access.canAccessOpsFrontline && !isVolunteerOnly;
   const showVolunteerOnly = access.canAccessOpsFrontline && !showStaffWidgets;
   const [caseload, shifts, intakes] = showStaffWidgets
