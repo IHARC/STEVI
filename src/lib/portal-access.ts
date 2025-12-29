@@ -3,6 +3,7 @@ import { ensurePortalProfile, type PortalProfile } from '@/lib/profile';
 import type { SupabaseAnyServerClient } from '@/lib/supabase/types';
 import { buildPortalNav, flattenNavItemsForCommands, type NavSection } from '@/lib/portal-navigation';
 import { extractOrgFeatureFlags, type OrgFeatureKey } from '@/lib/organizations';
+import type { Json } from '@/types/supabase';
 
 export type PortalLink = {
   href: string;
@@ -360,7 +361,7 @@ async function fetchOrganizationSummary(
   }
 
   const name = data?.name ?? null;
-  const features = extractOrgFeatureFlags((data as { services_tags?: unknown } | null)?.services_tags ?? null);
+  const features = extractOrgFeatureFlags((data as { services_tags?: Json | null } | null)?.services_tags ?? null);
   return { name, features };
 }
 

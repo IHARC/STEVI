@@ -163,7 +163,13 @@ async function fetchProfilesForUsers(
   }
 
   const map = new Map<string, { id: string; display_name: string | null; position_title: string | null }>();
-  (data ?? []).forEach((entry) => {
+  const rows = (data ?? []) as Array<{
+    id: string | number;
+    user_id: string | null;
+    display_name: string | null;
+    position_title: string | null;
+  }>;
+  rows.forEach((entry) => {
     if (!entry?.user_id) return;
     map.set(String(entry.user_id), {
       id: String(entry.id),

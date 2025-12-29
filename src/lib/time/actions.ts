@@ -211,7 +211,8 @@ export async function endShiftAction(
       return { status: 'error', message: 'Unable to calculate break time.' };
     }
 
-    const breakMinutes = (breaks ?? []).reduce((total, entry) => {
+    const breakRows = (breaks ?? []) as Array<{ started_at: string | null; ended_at: string | null }>;
+    const breakMinutes = breakRows.reduce((total, entry) => {
       if (!entry?.started_at || !entry?.ended_at) return total;
       const started = new Date(entry.started_at);
       const ended = new Date(entry.ended_at);
