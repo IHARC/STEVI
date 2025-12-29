@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { APP_ICON_MAP } from '@/lib/app-icons';
@@ -8,6 +8,7 @@ import type { NavSection } from '@/lib/portal-navigation';
 import { buildOpsHubNav, type OpsHubNavItem } from '@/lib/ops-hubs';
 import { cn } from '@/lib/utils';
 import { isNavItemActive } from '@/lib/nav-active';
+import { ChevronDown } from 'lucide-react';
 
 type OpsHubRailProps = {
   navSections: NavSection[];
@@ -17,6 +18,7 @@ export function OpsHubRail({ navSections }: OpsHubRailProps) {
   const pathname = usePathname() ?? '/';
   const searchParams = useSearchParams();
   const hubs = useMemo(() => buildOpsHubNav(navSections), [navSections]);
+  const [expandedHubs, setExpandedHubs] = useState<Set<string>>(() => new Set());
 
   if (!hubs.length) return null;
 
@@ -29,11 +31,32 @@ export function OpsHubRail({ navSections }: OpsHubRailProps) {
         <div className="space-y-2">
           {hubs.map((hub) => {
             const active = isHubActive(hub, pathname, searchParams);
+            const hasSubmenu = hub.items.length > 1;
+            const isExpanded = hasSubmenu && (active || expandedHubs.has(hub.id));
             return (
               <div key={hub.id} className="space-y-1">
-                <HubLinkRow hub={hub} pathname={pathname} searchParams={searchParams} />
-                {active && hub.items.length > 1 ? (
-                  <div className="space-y-1 pl-7">
+                {hasSubmenu ? (
+                  <HubToggleRow
+                    hub={hub}
+                    expanded={isExpanded}
+                    active={active}
+                    onToggle={() => {
+                      setExpandedHubs((prev) => {
+                        const next = new Set(prev);
+                        if (next.has(hub.id)) {
+                          next.delete(hub.id);
+                        } else {
+                          next.add(hub.id);
+                        }
+                        return next;
+                      });
+                    }}
+                  />
+                ) : (
+                  <HubLinkRow hub={hub} pathname={pathname} searchParams={searchParams} />
+                )}
+                {hasSubmenu && isExpanded ? (
+                  <div id={`hub-${hub.id}`} className="space-y-1 pl-7">
                     {hub.items.map((item) => (
                       <HubSubLinkRow key={item.id} item={item} pathname={pathname} searchParams={searchParams} />
                     ))}
@@ -100,6 +123,38 @@ function HubSubLinkRow({
     >
       <span className="truncate">{item.label}</span>
     </Link>
+  );
+}
+
+function HubToggleRow({
+  hub,
+  expanded,
+  active,
+  onToggle,
+}: {
+  hub: OpsHubNavItem;
+  expanded: boolean;
+  active: boolean;
+  onToggle: () => void;
+}) {
+  const Icon = hub.icon ? APP_ICON_MAP[hub.icon] : null;
+
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-expanded={expanded}
+      aria-controls={`hub-${hub.id}`}
+      className={cn(
+        'flex min-h-[44px] w-full items-center gap-2 rounded-xl border border-transparent px-3 py-2.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+        'text-foreground/80 hover:bg-muted/70 hover:text-foreground',
+        active ? 'bg-secondary/70 text-foreground border-primary/30' : undefined,
+      )}
+    >
+      {Icon ? <Icon className="h-4 w-4" aria-hidden /> : null}
+      <span className="flex-1 truncate text-left">{hub.label}</span>
+      <ChevronDown className={cn('h-4 w-4 transition-transform', expanded ? 'rotate-180' : undefined)} aria-hidden />
+    </button>
   );
 }
 

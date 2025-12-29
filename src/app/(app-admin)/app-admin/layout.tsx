@@ -5,7 +5,7 @@ import { PortalAccessProvider } from '@shared/providers/portal-access-provider';
 import { PortalLayoutProvider } from '@shared/providers/portal-layout-provider';
 import { getPortalRequestContext } from '@shared/providers/portal-request-context';
 import { requireArea } from '@/lib/portal-areas';
-import { navAreaLabel, type NavSection } from '@/lib/portal-navigation';
+import { navAreaLabel, type NavItem, type NavSection } from '@/lib/portal-navigation';
 import { fetchPortalInbox } from '@/lib/inbox';
 import { getBrandingAssetsWithClient } from '@/lib/marketing/branding';
 import { getUserNavigation } from '@shared/layout/user-nav';
@@ -45,6 +45,8 @@ const ADMIN_NAV: SettingsNavGroup[] = [
   },
 ];
 
+const ADMIN_NAV_SECTIONS = buildAdminNavSections(ADMIN_NAV);
+
 function buildAdminCommands(nav: SettingsNavGroup[]): CommandPaletteItem[] {
   const commands: CommandPaletteItem[] = [];
   const seen = new Set<string>();
@@ -65,6 +67,60 @@ function buildAdminCommands(nav: SettingsNavGroup[]): CommandPaletteItem[] {
   return commands;
 }
 
+function buildAdminNavSections(nav: SettingsNavGroup[]): NavSection[] {
+  const sections: NavSection[] = [];
+
+  nav.forEach((group, groupIndex) => {
+    group.items.forEach((item, itemIndex) => {
+      const sectionId = slugifyNavId(`${groupIndex}-${itemIndex}-${item.label}-${item.href}`);
+      const groupId = slugifyNavId(`${sectionId}-group`);
+      const nestedItems = flattenSettingsItems(item.items);
+      const hasChildren = nestedItems.length > 0;
+      const items = [
+        toNavItem(item, `${sectionId}-primary`, hasChildren ? 'Overview' : item.label),
+        ...nestedItems.map((child, childIndex) => toNavItem(child, `${sectionId}-${childIndex}`)),
+      ];
+
+      sections.push({
+        id: sectionId || `admin-${groupIndex}-${itemIndex}`,
+        label: item.label,
+        area: 'app_admin',
+        groups: [
+          {
+            id: groupId || `admin-${groupIndex}-${itemIndex}-group`,
+            label: item.label,
+            isHub: true,
+            items,
+          },
+        ],
+      });
+    });
+  });
+
+  return sections;
+}
+
+function toNavItem(item: SettingsNavItem, fallbackId: string, labelOverride?: string): NavItem {
+  return {
+    id: slugifyNavId(`${item.label}-${item.href}`) || fallbackId,
+    href: item.href,
+    label: labelOverride ?? item.label,
+    match: item.match,
+  };
+}
+
+function flattenSettingsItems(items: SettingsNavItem[] = []): SettingsNavItem[] {
+  return items.flatMap((item) => [item, ...flattenSettingsItems(item.items ?? [])]);
+}
+
+function slugifyNavId(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80);
+}
+
 export default async function AppAdminLayout({ children }: { children: ReactNode }) {
   const { portalAccess, landingPath, currentPath, supabase, isPreviewRequest } = await getPortalRequestContext();
   const accessCheck = requireArea(portalAccess, 'app_admin', {
@@ -77,7 +133,7 @@ export default async function AppAdminLayout({ children }: { children: ReactNode
     redirect(accessCheck.redirectPath);
   }
 
-  const navSections: NavSection[] = [];
+  const navSections = ADMIN_NAV_SECTIONS;
   const commandPaletteItems = buildAdminCommands(ADMIN_NAV);
   const [branding, navigation, inboxItems] = await Promise.all([
     getBrandingAssetsWithClient(supabase),
@@ -104,7 +160,7 @@ export default async function AppAdminLayout({ children }: { children: ReactNode
           branding={branding}
           commandPaletteItems={commandPaletteItems}
         >
-          <SettingsShell nav={ADMIN_NAV}>{children}</SettingsShell>
+          <SettingsShell showNav={false}>{children}</SettingsShell>
         </AppShell>
       </PortalLayoutProvider>
     </PortalAccessProvider>

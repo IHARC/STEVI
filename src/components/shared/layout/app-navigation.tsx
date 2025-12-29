@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { Menu } from 'lucide-react';
+import { ChevronDown, Menu } from 'lucide-react';
 import { Button } from '@shared/ui/button';
 import { ScrollArea } from '@shared/ui/scroll-area';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@shared/ui/sheet';
@@ -187,21 +187,44 @@ function HubContent({
   searchParams: ReturnType<typeof useSearchParams>;
   onNavigate?: () => void;
 }) {
+  const [expandedHubs, setExpandedHubs] = useState<Set<string>>(() => new Set());
+
   return (
     <div className="space-y-3">
       {hubs.map((hub) => {
         const isActive = isNavItemActive(hub, pathname, searchParams) || hub.items.some((item) => isNavItemActive(item, pathname, searchParams));
+        const hasSubmenu = hub.items.length > 1;
+        const isExpanded = hasSubmenu && (isActive || expandedHubs.has(hub.id));
         return (
           <div key={hub.id} className="space-y-1">
-            <NavLink
-              link={hub}
-              pathname={pathname}
-              searchParams={searchParams}
-              onNavigate={onNavigate}
-              activeOverride={isActive}
-            />
-            {hub.items.length > 1 ? (
-              <div className="space-y-1 pl-4">
+            {hasSubmenu ? (
+              <NavToggleButton
+                hub={hub}
+                expanded={isExpanded}
+                active={isActive}
+                onToggle={() => {
+                  setExpandedHubs((prev) => {
+                    const next = new Set(prev);
+                    if (next.has(hub.id)) {
+                      next.delete(hub.id);
+                    } else {
+                      next.add(hub.id);
+                    }
+                    return next;
+                  });
+                }}
+              />
+            ) : (
+              <NavLink
+                link={hub}
+                pathname={pathname}
+                searchParams={searchParams}
+                onNavigate={onNavigate}
+                activeOverride={isActive}
+              />
+            )}
+            {hasSubmenu && isExpanded ? (
+              <div id={`hub-mobile-${hub.id}`} className="space-y-1 pl-4">
                 {hub.items.map((item) => (
                   <NavLink
                     key={item.id}
@@ -218,6 +241,40 @@ function HubContent({
         );
       })}
     </div>
+  );
+}
+
+function NavToggleButton({
+  hub,
+  expanded,
+  active,
+  onToggle,
+}: {
+  hub: OpsHubNavItem;
+  expanded: boolean;
+  active: boolean;
+  onToggle: () => void;
+}) {
+  const IconComponent = hub.icon ? APP_ICON_MAP[hub.icon] : null;
+
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-expanded={expanded}
+      aria-controls={`hub-mobile-${hub.id}`}
+      className={cn(
+        'flex w-full items-center gap-2 rounded-lg border border-transparent px-3 py-2 text-sm font-medium transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+        'min-h-[44px]',
+        active
+          ? 'bg-secondary/70 text-foreground border-primary/30'
+          : 'text-muted-foreground hover:text-foreground',
+      )}
+    >
+      {IconComponent ? <IconComponent className="h-4 w-4" aria-hidden /> : null}
+      <span className="flex-1 truncate text-left">{hub.label}</span>
+      <ChevronDown className={cn('h-4 w-4 transition-transform', expanded ? 'rotate-180' : undefined)} aria-hidden />
+    </button>
   );
 }
 

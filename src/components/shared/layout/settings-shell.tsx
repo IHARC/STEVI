@@ -7,8 +7,19 @@ import { ScrollArea } from '@shared/ui/scroll-area';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@shared/ui/sheet';
 import { Menu } from 'lucide-react';
 
-export function SettingsShell({ nav, children }: { nav: SettingsNavGroup[]; children: ReactNode }) {
+type SettingsShellProps = {
+  nav?: SettingsNavGroup[];
+  showNav?: boolean;
+  children: ReactNode;
+};
+
+export function SettingsShell({ nav = [], showNav = true, children }: SettingsShellProps) {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const hasNav = showNav && nav.length > 0;
+
+  if (!hasNav) {
+    return <div className="w-full space-y-6">{children}</div>;
+  }
 
   return (
     <div className="w-full space-y-4">
