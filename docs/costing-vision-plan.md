@@ -486,10 +486,10 @@ select ... from inventory.distribution_items join inventory.distributions ...;
 - **Core cost schema + enums** implemented: `core.cost_categories`, `core.cost_events`, `core.cost_dimensions`, `core.cost_event_dimensions`, `core.staff_rates`, `core.service_catalog`.  
   Migration: `/supabase/migrations/20251227_costing_ledger.sql`
 - **Permissions + RLS** for cost tables applied: `cost.view`, `cost.manage`, `cost.report`, `cost.admin` with org role bindings.
-- **Inventory distribution trigger** creates cost events with unit cost fallback (`distribution_items.unit_cost` → `core.items.cost_per_unit` → `donations.catalog_items.unit_cost_cents`) and **hard errors** if org/unit cost missing.
+- **Inventory distribution trigger** creates cost events with unit cost fallback (`distribution_items.unit_cost` → `inventory.items.cost_per_unit` → `donations.catalog_items.unit_cost_cents`) and **hard errors** if org/unit cost missing.
 - **Inventory distribution RPCs** updated to require `provider_org_id` and accept `unit_cost` on distribution items.
 - **Appointments staff role** added: `/supabase/migrations/20251227_appointments_staff_role.sql`.
-- **Outreach logging** now creates cost events for duration/service/override.
+- **Outreach logging** now creates cost events for duration/service/override, with a UI quick-log card in `/ops/clients/[id]`.
 - **Appointments completion** creates cost events using staff rates + required staff role/duration.
 - **Reporting rollups** materialized views + secure views implemented in `analytics`, with nightly `pg_cron` refresh and admin refresh RPC.
 
@@ -509,6 +509,24 @@ select ... from inventory.distribution_items join inventory.distributions ...;
 
 ### ✅ Types / Infra
 - Supabase types updated to include `analytics` views, cost enums, and cost tables in `/src/types/supabase.ts`.
+
+### ✅ Resolved Gaps (2025-12-28)
+1) **RLS consistency for cost reads**
+   - `cost_events_select_policy` now requires cost permissions for person-grant access.
+   - Secure rollup views (`analytics.cost_event_daily_secure`, `analytics.person_cost_rollups_secure`) now enforce the same cost permission requirement.
+
+2) **Client costs tab gating**
+   - `/ops/clients/[id]` only shows “Costs” when `access.canViewCosts` is true.
+   - Cost queries are only executed when the viewer can see costs.
+
+3) **Outreach cost capture wired in UI**
+   - Added a “Log outreach” card on `/ops/clients/[id]` that posts to `staffLogOutreachAction`.
+   - Cost metadata fields are included (duration, service, units, override, category, uom, staff role).
+
+4) **Typecheck + lint regressions cleared**
+   - Added missing `PortalAccess` flags in tests.
+   - Fixed implicit `any` usage in client + report pages.
+   - Removed unused `readOptionalNumber` helper in `/src/lib/costs/actions.ts`.
 
 ### ⏳ Remaining (Not Implemented Yet)
 - **Backfill jobs** for historical distributions/activities (Section 9).

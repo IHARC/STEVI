@@ -10,8 +10,13 @@ import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { CostBreakdownByCategory } from '@workspace/costs/cost-breakdown-by-category';
 import { OrgCostSummary } from '@workspace/costs/org-cost-summary';
+import type { Database } from '@/types/supabase';
 
 export const dynamic = 'force-dynamic';
+
+type OrgCostRollupRow = Database['analytics']['Views']['org_cost_rollups_secure']['Row'];
+type CostEventDailyRow = Database['analytics']['Views']['cost_event_daily_secure']['Row'];
+type CostCategoryRow = Database['core']['Tables']['cost_categories']['Row'];
 
 export default async function CostReportsPage() {
   const supabase = await createSupabaseRSCClient();
@@ -49,11 +54,11 @@ export default async function CostReportsPage() {
     );
   }
 
-  const [rollups, dailyRows, categories] = await Promise.all([
+  const [rollups, dailyRows, categories] = (await Promise.all([
     fetchOrgCostRollups(supabase, access.organizationId),
     fetchOrgCostDaily(supabase, access.organizationId, 90),
     fetchCostCategories(supabase),
-  ]);
+  ])) as [OrgCostRollupRow[], CostEventDailyRow[], CostCategoryRow[]];
 
   const categoryLookup = new Map(categories.map((category) => [category.id, category.name]));
   const breakdownRows = rollups

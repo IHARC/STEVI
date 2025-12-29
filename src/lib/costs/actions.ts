@@ -30,16 +30,6 @@ function readRequiredNumber(formData: FormData, key: string, message: string): n
   return parsed;
 }
 
-function readOptionalNumber(formData: FormData, key: string): number | null {
-  const raw = readOptionalString(formData, key);
-  if (!raw) return null;
-  const parsed = Number.parseFloat(raw);
-  if (!Number.isFinite(parsed)) {
-    throw new Error(`Invalid value for ${key}.`);
-  }
-  return parsed;
-}
-
 function readDate(value: string, message: string): string {
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) {

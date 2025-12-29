@@ -4,7 +4,14 @@ import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { resolveLandingPath } from '@/lib/portal-navigation';
 import { fetchStaffCaseActivities } from '@/lib/cases/fetchers';
-import { fetchPersonCostEvents, fetchPersonCostRollups } from '@/lib/costs/queries';
+import {
+  fetchCostCategories,
+  fetchPersonCostEvents,
+  fetchPersonCostRollups,
+  fetchServiceCatalog,
+  fetchStaffRates,
+  type CostEventWithCategory,
+} from '@/lib/costs/queries';
 import { normalizeEnumParam, toSearchParams } from '@/lib/search-params';
 import { getEffectiveConsent } from '@/lib/consents';
 import { PageHeader } from '@shared/layout/page-header';
@@ -16,6 +23,7 @@ import { Separator } from '@shared/ui/separator';
 import { Tabs, TabsList, TabsTrigger } from '@shared/ui/tabs';
 import { CostSnapshotCard } from '@workspace/costs/cost-snapshot-card';
 import { CostTimelineTable } from '@workspace/costs/cost-timeline-table';
+import { OutreachQuickLogCard } from '@workspace/staff/outreach-quick-log-card';
 import type { Database } from '@/types/supabase';
 
 type PageProps = { params: Promise<{ id: string }>; searchParams?: Promise<Record<string, string | string[] | undefined>> };
@@ -26,6 +34,10 @@ type PersonRow = Pick<
   Database['core']['Tables']['people']['Row'],
   'id' | 'first_name' | 'last_name' | 'email' | 'phone' | 'created_at' | 'created_by'
 >;
+type PersonCostRollupRow = Database['analytics']['Views']['person_cost_rollups_secure']['Row'];
+type CostCategoryRow = Database['core']['Tables']['cost_categories']['Row'];
+type ServiceCatalogRow = Database['core']['Tables']['service_catalog']['Row'];
+type StaffRateRow = Database['core']['Tables']['staff_rates']['Row'];
 
 const FILTERS = ['all', 'visits', 'tasks', 'referrals', 'supplies', 'appointments'] as const;
 type FilterId = (typeof FILTERS)[number];
@@ -58,13 +70,23 @@ export default async function OpsClientDetailPage({ params, searchParams }: Page
     redirect(resolveLandingPath(access));
   }
 
-  const shouldLoadCosts = activeView === 'costs';
-  const [person, activities, consentSummary, costRollups, costEvents] = await Promise.all([
+  if (activeView === 'costs' && !access.canViewCosts) {
+    redirect(`/ops/clients/${personId}?view=directory`);
+  }
+
+  const canLogOutreach = access.canAccessOpsFrontline;
+  const showCostInputs = access.canManageCosts && Boolean(access.organizationId);
+  const shouldLoadCosts = activeView === 'costs' && access.canViewCosts;
+
+  const [person, activities, consentSummary, costRollups, costEvents, costCategories, serviceCatalog, staffRates] = await Promise.all([
     loadPerson(supabase, personId),
     activeView === 'costs' ? Promise.resolve([]) : fetchStaffCaseActivities(supabase, personId, 120),
     getEffectiveConsent(supabase, personId),
     shouldLoadCosts ? fetchPersonCostRollups(supabase, personId) : Promise.resolve(null),
     shouldLoadCosts ? fetchPersonCostEvents(supabase, personId, 120) : Promise.resolve(null),
+    showCostInputs ? fetchCostCategories(supabase) : Promise.resolve([]),
+    showCostInputs ? fetchServiceCatalog(supabase) : Promise.resolve([]),
+    showCostInputs && access.organizationId ? fetchStaffRates(supabase, access.organizationId) : Promise.resolve([]),
   ]);
 
   if (!person) notFound();
@@ -72,13 +94,18 @@ export default async function OpsClientDetailPage({ params, searchParams }: Page
   const orgLabel = access.organizationName ?? 'Unassigned org';
   const orgMissing = !access.organizationId && (access.canAccessOpsFrontline || access.canAccessOpsAdmin);
   const newVisitHref = `/ops/visits/new?personId=${person.id}`;
+  const costRollupRows = (costRollups ?? []) as PersonCostRollupRow[];
+  const costEventRows = (costEvents ?? []) as CostEventWithCategory[];
+  const staffRoleOptions = Array.from(
+    new Set((staffRates as StaffRateRow[]).map((rate) => rate.role_name).filter(Boolean)),
+  );
 
   const filteredActivities =
     activeView === 'costs'
       ? []
       : activities.filter((activity) => filterActivity(activity.activityType, activeFilter));
   const consentMeta = buildConsentMeta(consentSummary);
-  const costTotals = (costRollups ?? []).reduce(
+  const costTotals = costRollupRows.reduce(
     (acc, row) => {
       acc.total += Number(row.total_cost ?? 0);
       acc.cost30 += Number(row.cost_30d ?? 0);
@@ -100,13 +127,15 @@ export default async function OpsClientDetailPage({ params, searchParams }: Page
       label: 'Journey',
       href: `/ops/clients/${person.id}?${journeyParams.toString()}`,
     },
-    {
+  ];
+  if (access.canViewCosts) {
+    viewTabs.push({
       label: 'Costs',
       href: `/ops/clients/${person.id}?${costParams.toString()}`,
-    },
-  ];
+    });
+  }
   const activeViewHref =
-    activeView === 'costs'
+    activeView === 'costs' && access.canViewCosts
       ? `/ops/clients/${person.id}?${costParams.toString()}`
       : `/ops/clients/${person.id}?${journeyParams.toString()}`;
 
@@ -132,7 +161,7 @@ export default async function OpsClientDetailPage({ params, searchParams }: Page
         {activeView === 'costs' ? (
           <div className="space-y-4">
             <CostSnapshotCard totals={costTotals} />
-            <CostTimelineTable events={costEvents ?? []} />
+            <CostTimelineTable events={costEventRows} />
           </div>
         ) : (
           <Card>
@@ -206,6 +235,17 @@ export default async function OpsClientDetailPage({ params, searchParams }: Page
               <p className="text-xs text-muted-foreground">Supplies and referrals must be logged from a Visit.</p>
             </CardContent>
           </Card>
+
+          {canLogOutreach ? (
+            <OutreachQuickLogCard
+              personId={person.id}
+              orgMissing={orgMissing}
+              showCostFields={showCostInputs}
+              staffRoles={staffRoleOptions}
+              costCategories={costCategories as CostCategoryRow[]}
+              serviceCatalog={serviceCatalog as ServiceCatalogRow[]}
+            />
+          ) : null}
 
           <Card>
             <CardHeader>
