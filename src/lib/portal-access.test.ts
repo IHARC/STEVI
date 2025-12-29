@@ -215,6 +215,7 @@ describe('loadPortalAccess', () => {
         get_actor_org_roles: { data: [], error: null },
         get_actor_org_permissions: { data: [], error: null },
       },
+      orgResult: { data: { name: 'IHARC' }, error: null },
       userPeopleResult: { data: [], error: null },
     }) as SupabaseAnyServerClient & { __profileUpdate: ReturnType<typeof vi.fn> };
 
