@@ -45,6 +45,15 @@ export type PortalAccess = {
   canViewOwnTime: boolean;
   canViewAllTime: boolean;
   canManageTime: boolean;
+  canReadCfs: boolean;
+  canCreateCfs: boolean;
+  canUpdateCfs: boolean;
+  canTriageCfs: boolean;
+  canDispatchCfs: boolean;
+  canShareCfs: boolean;
+  canPublicTrackCfs: boolean;
+  canDeleteCfs: boolean;
+  canAccessCfs: boolean;
   canManageWebsiteContent: boolean;
   canManageSiteFooter: boolean;
   canManageConsents: boolean;
@@ -193,6 +202,17 @@ export async function loadPortalAccess(
   const canViewAllTime =
     isProfileApproved && (hasPermission('staff_time.view_all') || hasPermission('staff_time.manage'));
   const canManageTime = isProfileApproved && hasPermission('staff_time.manage');
+  const canReadCfs = isProfileApproved && hasPermission('cfs.read');
+  const canCreateCfs = isProfileApproved && hasPermission('cfs.create');
+  const canUpdateCfs = isProfileApproved && hasPermission('cfs.update');
+  const canTriageCfs = isProfileApproved && hasPermission('cfs.triage');
+  const canDispatchCfs = isProfileApproved && hasPermission('cfs.dispatch');
+  const canShareCfs = isProfileApproved && hasPermission('cfs.share');
+  const canPublicTrackCfs = isProfileApproved && hasPermission('cfs.public_track');
+  const canDeleteCfs = isProfileApproved && hasPermission('cfs.delete');
+  const canAccessCfs =
+    isProfileApproved &&
+    (canReadCfs || canCreateCfs || canUpdateCfs || canTriageCfs || canDispatchCfs);
   const canManageOrgUsers = isProfileApproved && hasPermission('portal.manage_org_users');
   const canManageOrgInvites = isProfileApproved && (hasPermission('portal.manage_org_invites') || hasPermission('portal.manage_org_users'));
 
@@ -229,6 +249,15 @@ export async function loadPortalAccess(
     canViewOwnTime,
     canViewAllTime,
     canManageTime,
+    canReadCfs,
+    canCreateCfs,
+    canUpdateCfs,
+    canTriageCfs,
+    canDispatchCfs,
+    canShareCfs,
+    canPublicTrackCfs,
+    canDeleteCfs,
+    canAccessCfs,
     canManageSiteFooter,
     canManageConsents,
     canManageOrgUsers,

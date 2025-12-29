@@ -8,6 +8,7 @@ export const ORG_FEATURE_OPTIONS = [
   { value: 'donations', label: 'Donations' },
   { value: 'metrics', label: 'Metrics' },
   { value: 'time_tracking', label: 'Time tracking' },
+  { value: 'calls_for_service', label: 'Calls for service' },
   { value: 'org_workspace', label: 'Organization portal' },
 ] as const;
 

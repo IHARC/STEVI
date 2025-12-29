@@ -75,7 +75,7 @@ export function RecentNotifications({ notifications }: RecentNotificationsProps)
                         <span className="text-muted-foreground">External</span>
                       )}
                       <span className="text-xs text-muted-foreground">
-                        {notification.recipientEmail}
+                        {notification.recipientEmail ?? notification.recipientPhone ?? '—'}
                       </span>
                     </div>
                   </TableCell>

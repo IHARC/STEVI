@@ -28,10 +28,15 @@ const canSeeClients = (access: PortalAccess) => access.canAccessOpsFrontline || 
 const canSeePrograms = (access: PortalAccess) => access.canAccessOpsFrontline || access.canAccessOpsAdmin;
 const canSeeInventory = (access: PortalAccess) => access.canAccessInventoryOps;
 const canSeeFundraising = (access: PortalAccess) => access.canAccessOpsSteviAdmin;
-const canSeeReports = (access: PortalAccess) => access.canReportCosts || access.canViewMetrics;
+const canSeeReports = (access: PortalAccess) =>
+  access.canReportCosts ||
+  access.canViewMetrics ||
+  (access.organizationFeatures.includes('calls_for_service') && access.canAccessCfs);
 const canSeeTimeTracking = (access: PortalAccess) =>
   access.organizationFeatures.includes('time_tracking') &&
   (access.canTrackTime || access.canViewAllTime || access.canManageTime);
+const canSeeCfs = (access: PortalAccess) =>
+  access.organizationFeatures.includes('calls_for_service') && access.canAccessCfs;
 const canSeeOrganizations = (access: PortalAccess) =>
   access.canAccessOpsFrontline || access.canAccessOpsOrg || access.canAccessOpsAdmin || access.canAccessOpsSteviAdmin;
 const canSeeOrgScopedOrganizations = (access: PortalAccess) =>
@@ -51,6 +56,34 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
         isHub: true,
         items: [
           { id: 'today', href: '/ops/today', label: 'Today', icon: 'dashboard', match: ['/ops/today'], exact: true },
+        ],
+      },
+      {
+        id: 'cfs',
+        label: 'Calls for service',
+        icon: 'workflow',
+        requires: canSeeCfs,
+        isHub: true,
+        items: [
+          {
+            id: 'cfs-queue',
+            href: '/ops/cfs',
+            label: 'Queue',
+            icon: 'workflow',
+            match: ['/ops/cfs'],
+          },
+          {
+            id: 'cfs-incidents',
+            href: '/ops/incidents',
+            label: 'Incidents',
+            match: ['/ops/incidents'],
+          },
+          {
+            id: 'cfs-new',
+            href: '/ops/cfs/new',
+            label: 'New call',
+            match: ['/ops/cfs/new'],
+          },
         ],
       },
       {
@@ -156,6 +189,14 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
             icon: 'chart',
             match: ['/ops/reports/costs'],
             requires: (access) => access.canReportCosts,
+          },
+          {
+            id: 'reports-cfs',
+            href: '/ops/reports/cfs',
+            label: 'CFS',
+            icon: 'chart',
+            match: ['/ops/reports/cfs'],
+            requires: (access) => access.canAccessCfs,
           },
         ],
       },
@@ -356,6 +397,18 @@ export function resolveQuickActions(
           : requiresOrgSelection
             ? 'Select an acting org to start a Visit'
             : 'Set an acting org to start a Visit',
+      });
+    }
+
+    if (access.organizationFeatures.includes('calls_for_service') && access.canAccessCfs) {
+      actions.push({
+        id: 'ops-new-cfs',
+        label: 'New call for service',
+        href: '/ops/cfs/new',
+        description: orgMissing ? 'Select an acting org to log a call' : 'Log a new call or public request',
+        icon: 'workflow',
+        disabled: previewDisabled,
+        disabledReason: previewDisabled ? 'Not available in preview' : undefined,
       });
     }
 

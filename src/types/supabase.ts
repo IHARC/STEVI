@@ -14,6 +14,71 @@ export type Database = {
   }
   case_mgmt: {
     Tables: {
+      case_management: {
+        Row: {
+          id: number
+          person_id: number
+          case_manager_name: string
+          case_manager_contact: string | null
+          agency: string | null
+          case_number: string | null
+          start_date: string | null
+          end_date: string | null
+          status: string | null
+          case_type: string | null
+          priority: string | null
+          notes: string | null
+          created_at: string | null
+          updated_at: string | null
+          created_by: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          id?: number
+          person_id: number
+          case_manager_name: string
+          case_manager_contact?: string | null
+          agency?: string | null
+          case_number?: string | null
+          start_date?: string | null
+          end_date?: string | null
+          status?: string | null
+          case_type?: string | null
+          priority?: string | null
+          notes?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+          created_by?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          id?: number
+          person_id?: number
+          case_manager_name?: string
+          case_manager_contact?: string | null
+          agency?: string | null
+          case_number?: string | null
+          start_date?: string | null
+          end_date?: string | null
+          status?: string | null
+          case_type?: string | null
+          priority?: string | null
+          notes?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+          created_by?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "case_management_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       calls_for_service: {
         Row: {
           anonymous_reporter: boolean | null
@@ -38,10 +103,12 @@ export type Database = {
             | null
           notify_opt_in: boolean | null
           notify_target: string | null
+          owning_organization_id: number
           origin: Database["core"]["Enums"]["cfs_origin_enum"] | null
           priority_hint:
             | Database["core"]["Enums"]["incident_priority_enum"]
             | null
+          public_tracking_enabled: boolean
           public_tracking_id: string | null
           received_at: string | null
           referring_agency_name: string | null
@@ -99,10 +166,12 @@ export type Database = {
             | null
           notify_opt_in?: boolean | null
           notify_target?: string | null
+          owning_organization_id: number
           origin?: Database["core"]["Enums"]["cfs_origin_enum"] | null
           priority_hint?:
             | Database["core"]["Enums"]["incident_priority_enum"]
             | null
+          public_tracking_enabled?: boolean
           public_tracking_id?: string | null
           received_at?: string | null
           referring_agency_name?: string | null
@@ -160,10 +229,12 @@ export type Database = {
             | null
           notify_opt_in?: boolean | null
           notify_target?: string | null
+          owning_organization_id?: number
           origin?: Database["core"]["Enums"]["cfs_origin_enum"] | null
           priority_hint?:
             | Database["core"]["Enums"]["incident_priority_enum"]
             | null
+          public_tracking_enabled?: boolean
           public_tracking_id?: string | null
           received_at?: string | null
           referring_agency_name?: string | null
@@ -207,6 +278,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "calls_for_service_owning_org_fkey"
+            columns: ["owning_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "fk_escalated_incident"
             columns: ["escalated_to_incident_id"]
             isOneToOne: false
@@ -222,6 +300,188 @@ export type Database = {
           },
         ]
       }
+      cfs_attachments: {
+        Row: {
+          cfs_id: number
+          created_at: string
+          file_name: string
+          file_size: number | null
+          file_type: string | null
+          id: string
+          metadata: Json | null
+          organization_id: number
+          storage_bucket: string
+          storage_path: string
+          uploaded_by: string
+        }
+        Insert: {
+          cfs_id: number
+          created_at?: string
+          file_name: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id: number
+          storage_bucket: string
+          storage_path: string
+          uploaded_by?: string
+        }
+        Update: {
+          cfs_id?: number
+          created_at?: string
+          file_name?: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id?: number
+          storage_bucket?: string
+          storage_path?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cfs_attachments_cfs_id_fkey"
+            columns: ["cfs_id"]
+            isOneToOne: false
+            referencedRelation: "calls_for_service"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cfs_attachments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cfs_attachments_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cfs_org_access: {
+        Row: {
+          access_level: Database["core"]["Enums"]["cfs_access_level_enum"]
+          cfs_id: number
+          granted_at: string
+          granted_by: string
+          id: string
+          is_active: boolean
+          organization_id: number
+          reason: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_level?: Database["core"]["Enums"]["cfs_access_level_enum"]
+          cfs_id: number
+          granted_at?: string
+          granted_by?: string
+          id?: string
+          is_active?: boolean
+          organization_id: number
+          reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_level?: Database["core"]["Enums"]["cfs_access_level_enum"]
+          cfs_id?: number
+          granted_at?: string
+          granted_by?: string
+          id?: string
+          is_active?: boolean
+          organization_id?: number
+          reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cfs_org_access_cfs_id_fkey"
+            columns: ["cfs_id"]
+            isOneToOne: false
+            referencedRelation: "calls_for_service"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cfs_org_access_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cfs_org_access_granted_by_fkey"
+            columns: ["granted_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cfs_org_access_revoked_by_fkey"
+            columns: ["revoked_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cfs_public_tracking: {
+        Row: {
+          category: Database["core"]["Enums"]["cfs_public_category_enum"]
+          cfs_id: number
+          created_at: string
+          id: string
+          last_updated_at: string
+          public_location_area: string
+          public_summary: string | null
+          public_tracking_id: string
+          status_bucket: Database["core"]["Enums"]["cfs_public_status_enum"]
+          updated_at: string
+        }
+        Insert: {
+          category: Database["core"]["Enums"]["cfs_public_category_enum"]
+          cfs_id: number
+          created_at?: string
+          id?: string
+          last_updated_at?: string
+          public_location_area: string
+          public_summary?: string | null
+          public_tracking_id: string
+          status_bucket: Database["core"]["Enums"]["cfs_public_status_enum"]
+          updated_at?: string
+        }
+        Update: {
+          category?: Database["core"]["Enums"]["cfs_public_category_enum"]
+          cfs_id?: number
+          created_at?: string
+          id?: string
+          last_updated_at?: string
+          public_location_area?: string
+          public_summary?: string | null
+          public_tracking_id?: string
+          status_bucket?: Database["core"]["Enums"]["cfs_public_status_enum"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cfs_public_tracking_cfs_id_fkey"
+            columns: ["cfs_id"]
+            isOneToOne: true
+            referencedRelation: "calls_for_service"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cfs_timeline: {
         Row: {
           created_at: string | null
@@ -230,6 +490,7 @@ export type Database = {
           id: number
           incident_id: number | null
           incident_report_id: number
+          organization_id: number
           performed_by: string | null
           phase: string
           phase_completed_at: string | null
@@ -248,6 +509,7 @@ export type Database = {
           id?: number
           incident_id?: number | null
           incident_report_id: number
+          organization_id: number
           performed_by?: string | null
           phase: string
           phase_completed_at?: string | null
@@ -266,6 +528,7 @@ export type Database = {
           id?: number
           incident_id?: number | null
           incident_report_id?: number
+          organization_id?: number
           performed_by?: string | null
           phase?: string
           phase_completed_at?: string | null
@@ -290,6 +553,13 @@ export type Database = {
             columns: ["incident_report_id"]
             isOneToOne: false
             referencedRelation: "calls_for_service"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cfs_timeline_org_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -367,22 +637,7 @@ export type Database = {
           risk_level?: Database["core"]["Enums"]["risk_level_enum"] | null
           situation_notes?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "staff_time_entries_cost_event_id_fkey"
-            columns: ["cost_event_id"]
-            isOneToOne: false
-            referencedRelation: "cost_events"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "staff_time_entries_org_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       incident_links: {
         Row: {
@@ -654,6 +909,7 @@ export type Database = {
           mental_health_component: boolean | null
           multi_agency_response: boolean | null
           officers_attending: string | null
+          owning_organization_id: number
           outcome: string | null
           paramedics_called: boolean | null
           people_involved: string | null
@@ -772,6 +1028,7 @@ export type Database = {
           mental_health_component?: boolean | null
           multi_agency_response?: boolean | null
           officers_attending?: string | null
+          owning_organization_id: number
           outcome?: string | null
           paramedics_called?: boolean | null
           people_involved?: string | null
@@ -890,6 +1147,7 @@ export type Database = {
           mental_health_component?: boolean | null
           multi_agency_response?: boolean | null
           officers_attending?: string | null
+          owning_organization_id?: number
           outcome?: string | null
           paramedics_called?: boolean | null
           people_involved?: string | null
@@ -946,6 +1204,13 @@ export type Database = {
             columns: ["incident_report_id"]
             isOneToOne: false
             referencedRelation: "calls_for_service"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incidents_owning_org_fkey"
+            columns: ["owning_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -1193,10 +1458,138 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      cfs_queue_view: {
+        Row: {
+          converted_incident_id: number | null
+          created_at: string | null
+          duplicate_of_report_id: number | null
+          escalated_to_incident_id: number | null
+          id: number
+          location_confidence: string | null
+          location_text: string | null
+          notify_channel:
+            | Database["core"]["Enums"]["notify_channel_enum"]
+            | null
+          notify_opt_in: boolean | null
+          notify_target: string | null
+          origin: Database["core"]["Enums"]["cfs_origin_enum"] | null
+          owning_organization_id: number
+          owning_organization_name: string | null
+          priority_hint:
+            | Database["core"]["Enums"]["incident_priority_enum"]
+            | null
+          public_tracking_enabled: boolean
+          public_tracking_id: string | null
+          received_at: string | null
+          report_method: string
+          report_number: string
+          report_priority_assessment: string
+          report_received_at: string
+          report_status: string | null
+          reported_coordinates: string | null
+          reported_location: string | null
+          reporting_organization_id: number | null
+          reporting_organization_name: string | null
+          source: Database["core"]["Enums"]["cfs_source_enum"] | null
+          status: Database["core"]["Enums"]["cfs_status_enum"] | null
+          type_hint: Database["core"]["Enums"]["incident_type_enum"] | null
+          updated_at: string | null
+        }
+        Relationships: []
+      }
+      cfs_sla_view: {
+        Row: {
+          cfs_id: number
+          created_at: string | null
+          dispatch_at: string | null
+          dispatch_met: boolean | null
+          dispatch_minutes: number | null
+          dispatch_target_minutes: number | null
+          owning_organization_id: number
+          received_base_at: string | null
+          report_number: string
+          report_priority_assessment: string | null
+          report_received_at: string | null
+          report_status: string | null
+          resolution_at: string | null
+          resolution_met: boolean | null
+          resolution_minutes: number | null
+          resolution_target_minutes: number | null
+          status: Database["core"]["Enums"]["cfs_status_enum"] | null
+          triage_at: string | null
+          triage_met: boolean | null
+          triage_minutes: number | null
+          triage_target_minutes: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      cfs_convert_to_incident: {
+        Args: { p_cfs_id: number; p_payload?: Json }
+        Returns: number
+      }
+      cfs_create_call: {
+        Args: { p_payload: Json }
+        Returns: number
+      }
+      cfs_dismiss: {
+        Args: { p_cfs_id: number; p_notes?: string; p_report_status: string }
+        Returns: undefined
+      }
+      cfs_grant_org_access: {
+        Args: {
+          p_access_level: Database["core"]["Enums"]["cfs_access_level_enum"]
+          p_cfs_id: number
+          p_org_id: number
+          p_reason?: string
+        }
+        Returns: undefined
+      }
+      cfs_mark_duplicate: {
+        Args: { p_cfs_id: number; p_duplicate_of: number; p_notes?: string }
+        Returns: undefined
+      }
+      cfs_public_tracking_disable: {
+        Args: { p_cfs_id: number }
+        Returns: undefined
+      }
+      cfs_public_tracking_get: {
+        Args: { p_tracking_id: string }
+        Returns: {
+          category: Database["core"]["Enums"]["cfs_public_category_enum"]
+          last_updated_at: string
+          public_location_area: string
+          public_summary: string | null
+          public_tracking_id: string
+          status_bucket: Database["core"]["Enums"]["cfs_public_status_enum"]
+        }[]
+      }
+      cfs_public_tracking_upsert: {
+        Args: {
+          p_category: Database["core"]["Enums"]["cfs_public_category_enum"]
+          p_cfs_id: number
+          p_public_location_area: string
+          p_public_summary?: string
+        }
+        Returns: string
+      }
+      cfs_revoke_org_access: {
+        Args: { p_cfs_id: number; p_org_id: number; p_reason?: string }
+        Returns: undefined
+      }
+      cfs_transfer_ownership: {
+        Args: { p_cfs_id: number; p_new_org_id: number; p_reason?: string }
+        Returns: undefined
+      }
+      cfs_triage: {
+        Args: { p_cfs_id: number; p_payload: Json }
+        Returns: undefined
+      }
+      cfs_verify: {
+        Args: { p_cfs_id: number; p_method: string; p_notes: string; p_status: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
@@ -4038,279 +4431,6 @@ export type Database = {
           },
         ]
       }
-      person_consents: {
-        Row: {
-          id: string
-          person_id: number
-          consent_type: string
-          scope: string
-          status: string
-          captured_by: string | null
-          captured_method: string
-          captured_org_id: number | null
-          attested_by_staff: boolean
-          attested_by_client: boolean
-          attested_at: string | null
-          policy_version: string | null
-          notes: string | null
-          created_at: string
-          updated_at: string | null
-          revoked_at: string | null
-          revoked_by: string | null
-          expires_at: string | null
-          restrictions: Json | null
-        }
-        Insert: {
-          id?: string
-          person_id: number
-          consent_type: string
-          scope: string
-          status: string
-          captured_by?: string | null
-          captured_method: string
-          captured_org_id?: number | null
-          attested_by_staff?: boolean
-          attested_by_client?: boolean
-          attested_at?: string | null
-          policy_version?: string | null
-          notes?: string | null
-          created_at?: string
-          updated_at?: string | null
-          revoked_at?: string | null
-          revoked_by?: string | null
-          expires_at?: string | null
-          restrictions?: Json | null
-        }
-        Update: {
-          id?: string
-          person_id?: number
-          consent_type?: string
-          scope?: string
-          status?: string
-          captured_by?: string | null
-          captured_method?: string
-          captured_org_id?: number | null
-          attested_by_staff?: boolean
-          attested_by_client?: boolean
-          attested_at?: string | null
-          policy_version?: string | null
-          notes?: string | null
-          created_at?: string
-          updated_at?: string | null
-          revoked_at?: string | null
-          revoked_by?: string | null
-          expires_at?: string | null
-          restrictions?: Json | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "person_consents_person_id_fkey"
-            columns: ["person_id"]
-            isOneToOne: false
-            referencedRelation: "people"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "person_consents_captured_by_fkey"
-            columns: ["captured_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "person_consents_captured_org_id_fkey"
-            columns: ["captured_org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "person_consents_revoked_by_fkey"
-            columns: ["revoked_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      person_consent_orgs: {
-        Row: {
-          id: string
-          consent_id: string
-          organization_id: number
-          allowed: boolean
-          set_by: string | null
-          set_at: string
-          reason: string | null
-        }
-        Insert: {
-          id?: string
-          consent_id: string
-          organization_id: number
-          allowed: boolean
-          set_by?: string | null
-          set_at?: string
-          reason?: string | null
-        }
-        Update: {
-          id?: string
-          consent_id?: string
-          organization_id?: number
-          allowed?: boolean
-          set_by?: string | null
-          set_at?: string
-          reason?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "person_consent_orgs_consent_id_fkey"
-            columns: ["consent_id"]
-            isOneToOne: false
-            referencedRelation: "person_consents"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "person_consent_orgs_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "person_consent_orgs_set_by_fkey"
-            columns: ["set_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      person_consent_requests: {
-        Row: {
-          id: string
-          person_id: number
-          requesting_org_id: number
-          requested_by_user_id: string
-          requested_by_profile_id: string | null
-          requested_at: string
-          purpose: string
-          requested_scopes: string[]
-          status: string
-          decision_at: string | null
-          decision_by: string | null
-          decision_reason: string | null
-          expires_at: string | null
-          metadata: Json | null
-        }
-        Insert: {
-          id?: string
-          person_id: number
-          requesting_org_id: number
-          requested_by_user_id: string
-          requested_by_profile_id?: string | null
-          requested_at?: string
-          purpose: string
-          requested_scopes?: string[]
-          status: string
-          decision_at?: string | null
-          decision_by?: string | null
-          decision_reason?: string | null
-          expires_at?: string | null
-          metadata?: Json | null
-        }
-        Update: {
-          id?: string
-          person_id?: number
-          requesting_org_id?: number
-          requested_by_user_id?: string
-          requested_by_profile_id?: string | null
-          requested_at?: string
-          purpose?: string
-          requested_scopes?: string[]
-          status?: string
-          decision_at?: string | null
-          decision_by?: string | null
-          decision_reason?: string | null
-          expires_at?: string | null
-          metadata?: Json | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "person_consent_requests_person_id_fkey"
-            columns: ["person_id"]
-            isOneToOne: false
-            referencedRelation: "people"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "person_consent_requests_requesting_org_id_fkey"
-            columns: ["requesting_org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "person_consent_requests_requested_by_profile_id_fkey"
-            columns: ["requested_by_profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "person_consent_requests_decision_by_fkey"
-            columns: ["decision_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      user_people: {
-        Row: {
-          id: string
-          user_id: string
-          profile_id: string | null
-          person_id: number
-          linked_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          profile_id?: string | null
-          person_id: number
-          linked_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          profile_id?: string | null
-          person_id?: number
-          linked_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_people_person_fk"
-            columns: ["person_id"]
-            isOneToOne: false
-            referencedRelation: "people"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_people_profile_fk"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_people_user_fk"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       people_activities: {
         Row: {
           activity_date: string
@@ -4415,13 +4535,6 @@ export type Database = {
             columns: ["provider_org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "people_activities_provider_profile_fk"
-            columns: ["provider_profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -4574,6 +4687,54 @@ export type Database = {
           updated_by?: string | null
         }
         Relationships: []
+      }
+      person_access_grants: {
+        Row: {
+          expires_at: string | null
+          granted_at: string
+          granted_by: string
+          grantee_org_id: number | null
+          grantee_user_id: string | null
+          id: string
+          person_id: number
+          scope: string
+        }
+        Insert: {
+          expires_at?: string | null
+          granted_at?: string
+          granted_by: string
+          grantee_org_id?: number | null
+          grantee_user_id?: string | null
+          id?: string
+          person_id: number
+          scope: string
+        }
+        Update: {
+          expires_at?: string | null
+          granted_at?: string
+          granted_by?: string
+          grantee_org_id?: number | null
+          grantee_user_id?: string | null
+          id?: string
+          person_id?: number
+          scope?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "person_access_grants_org_fkey"
+            columns: ["grantee_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "person_access_grants_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       person_conditions: {
         Row: {
@@ -5078,13 +5239,64 @@ export type Database = {
         }
         Relationships: []
       }
-
-      global_roles: {
+      role_permissions: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          granted_at: string | null
+          granted_by: string | null
+          id: string
+          permission_id: string | null
+          role_id: string | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          permission_id?: string | null
+          role_id?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          permission_id?: string | null
+          role_id?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_permissions_permission_id_fkey"
+            columns: ["permission_id"]
+            isOneToOne: false
+            referencedRelation: "permissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_permissions_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      roles: {
         Row: {
           created_at: string | null
           created_by: string | null
           description: string | null
           display_name: string
+          domain: string
           id: string
           is_system_role: boolean | null
           name: string
@@ -5096,6 +5308,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           display_name: string
+          domain?: string
           id?: string
           is_system_role?: boolean | null
           name: string
@@ -5107,6 +5320,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           display_name?: string
+          domain?: string
           id?: string
           is_system_role?: boolean | null
           name?: string
@@ -5114,313 +5328,6 @@ export type Database = {
           updated_by?: string | null
         }
         Relationships: []
-      }
-      org_role_permissions: {
-        Row: {
-          created_at: string | null
-          created_by: string | null
-          granted_at: string | null
-          granted_by: string | null
-          id: string
-          org_role_id: string
-          permission_id: string
-          updated_at: string | null
-          updated_by: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          created_by?: string | null
-          granted_at?: string | null
-          granted_by?: string | null
-          id?: string
-          org_role_id: string
-          permission_id: string
-          updated_at?: string | null
-          updated_by?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          created_by?: string | null
-          granted_at?: string | null
-          granted_by?: string | null
-          id?: string
-          org_role_id?: string
-          permission_id?: string
-          updated_at?: string | null
-          updated_by?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "org_role_permissions_org_role_id_fkey"
-            columns: ["org_role_id"]
-            isOneToOne: false
-            referencedRelation: "org_roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "org_role_permissions_permission_id_fkey"
-            columns: ["permission_id"]
-            isOneToOne: false
-            referencedRelation: "permissions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      org_roles: {
-        Row: {
-          created_at: string | null
-          created_by: string | null
-          description: string | null
-          display_name: string
-          id: string
-          name: string
-          organization_id: number
-          role_kind: Database["core"]["Enums"]["org_role_kind"]
-          template_id: string | null
-          updated_at: string | null
-          updated_by: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          created_by?: string | null
-          description?: string | null
-          display_name: string
-          id?: string
-          name: string
-          organization_id: number
-          role_kind?: Database["core"]["Enums"]["org_role_kind"]
-          template_id?: string | null
-          updated_at?: string | null
-          updated_by?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          created_by?: string | null
-          description?: string | null
-          display_name?: string
-          id?: string
-          name?: string
-          organization_id?: number
-          role_kind?: Database["core"]["Enums"]["org_role_kind"]
-          template_id?: string | null
-          updated_at?: string | null
-          updated_by?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "org_roles_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "org_roles_template_id_fkey"
-            columns: ["template_id"]
-            isOneToOne: false
-            referencedRelation: "role_templates"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      role_template_permissions: {
-        Row: {
-          created_at: string | null
-          created_by: string | null
-          granted_at: string | null
-          granted_by: string | null
-          id: string
-          permission_id: string
-          template_id: string
-          updated_at: string | null
-          updated_by: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          created_by?: string | null
-          granted_at?: string | null
-          granted_by?: string | null
-          id?: string
-          permission_id: string
-          template_id: string
-          updated_at?: string | null
-          updated_by?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          created_by?: string | null
-          granted_at?: string | null
-          granted_by?: string | null
-          id?: string
-          permission_id?: string
-          template_id?: string
-          updated_at?: string | null
-          updated_by?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "role_template_permissions_permission_id_fkey"
-            columns: ["permission_id"]
-            isOneToOne: false
-            referencedRelation: "permissions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "role_template_permissions_template_id_fkey"
-            columns: ["template_id"]
-            isOneToOne: false
-            referencedRelation: "role_templates"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      role_templates: {
-        Row: {
-          created_at: string | null
-          created_by: string | null
-          description: string | null
-          display_name: string
-          id: string
-          name: string
-          role_kind: Database["core"]["Enums"]["org_role_kind"]
-          updated_at: string | null
-          updated_by: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          created_by?: string | null
-          description?: string | null
-          display_name: string
-          id?: string
-          name: string
-          role_kind?: Database["core"]["Enums"]["org_role_kind"]
-          updated_at?: string | null
-          updated_by?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          created_by?: string | null
-          description?: string | null
-          display_name?: string
-          id?: string
-          name?: string
-          role_kind?: Database["core"]["Enums"]["org_role_kind"]
-          updated_at?: string | null
-          updated_by?: string | null
-        }
-        Relationships: []
-      }
-      user_global_roles: {
-        Row: {
-          created_at: string | null
-          created_by: string | null
-          granted_at: string | null
-          granted_by: string | null
-          id: string
-          role_id: string
-          updated_at: string | null
-          updated_by: string | null
-          user_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          created_by?: string | null
-          granted_at?: string | null
-          granted_by?: string | null
-          id?: string
-          role_id: string
-          updated_at?: string | null
-          updated_by?: string | null
-          user_id: string
-        }
-        Update: {
-          created_at?: string | null
-          created_by?: string | null
-          granted_at?: string | null
-          granted_by?: string | null
-          id?: string
-          role_id?: string
-          updated_at?: string | null
-          updated_by?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_global_roles_role_id_fkey"
-            columns: ["role_id"]
-            isOneToOne: false
-            referencedRelation: "global_roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_global_roles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      user_org_roles: {
-        Row: {
-          created_at: string | null
-          created_by: string | null
-          granted_at: string | null
-          granted_by: string | null
-          id: string
-          org_role_id: string
-          organization_id: number
-          updated_at: string | null
-          updated_by: string | null
-          user_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          created_by?: string | null
-          granted_at?: string | null
-          granted_by?: string | null
-          id?: string
-          org_role_id: string
-          organization_id: number
-          updated_at?: string | null
-          updated_by?: string | null
-          user_id: string
-        }
-        Update: {
-          created_at?: string | null
-          created_by?: string | null
-          granted_at?: string | null
-          granted_by?: string | null
-          id?: string
-          org_role_id?: string
-          organization_id?: number
-          updated_at?: string | null
-          updated_by?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_org_roles_org_role_id_fkey"
-            columns: ["org_role_id"]
-            isOneToOne: false
-            referencedRelation: "org_roles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_org_roles_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_org_roles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       schema_versions: {
         Row: {
@@ -5557,138 +5464,54 @@ export type Database = {
       }
       staff_time_entries: {
         Row: {
-          break_minutes: number
-          cost_amount_snapshot: number | null
-          cost_event_id: string | null
           created_at: string
           created_by: string
-          currency: string
           end_lat: number | null
           end_lng: number | null
-          hourly_rate_snapshot: number | null
           id: string
-          metadata: Json | null
           notes: string | null
-          organization_id: number
-          role_kind: Database["core"]["Enums"]["org_role_kind"]
-          role_name: string
           shift_end: string | null
           shift_start: string
-          source_id: string | null
-          source_type: string | null
           start_lat: number | null
           start_lng: number | null
           status: string
-          total_minutes: number
           updated_at: string | null
           updated_by: string | null
           user_id: string
         }
         Insert: {
-          break_minutes?: number
-          cost_amount_snapshot?: number | null
-          cost_event_id?: string | null
           created_at?: string
           created_by?: string
-          currency?: string
           end_lat?: number | null
           end_lng?: number | null
-          hourly_rate_snapshot?: number | null
           id?: string
-          metadata?: Json | null
           notes?: string | null
-          organization_id: number
-          role_kind?: Database["core"]["Enums"]["org_role_kind"]
-          role_name: string
           shift_end?: string | null
           shift_start?: string
-          source_id?: string | null
-          source_type?: string | null
           start_lat?: number | null
           start_lng?: number | null
           status?: string
-          total_minutes?: number
           updated_at?: string | null
           updated_by?: string | null
           user_id?: string
         }
         Update: {
-          break_minutes?: number
-          cost_amount_snapshot?: number | null
-          cost_event_id?: string | null
           created_at?: string
           created_by?: string
-          currency?: string
           end_lat?: number | null
           end_lng?: number | null
-          hourly_rate_snapshot?: number | null
           id?: string
-          metadata?: Json | null
           notes?: string | null
-          organization_id?: number
-          role_kind?: Database["core"]["Enums"]["org_role_kind"]
-          role_name?: string
           shift_end?: string | null
           shift_start?: string
-          source_id?: string | null
-          source_type?: string | null
           start_lat?: number | null
           start_lng?: number | null
           status?: string
-          total_minutes?: number
           updated_at?: string | null
           updated_by?: string | null
           user_id?: string
         }
         Relationships: []
-      }
-      staff_time_attributions: {
-        Row: {
-          created_at: string
-          created_by: string
-          id: string
-          organization_id: number
-          source_id: string
-          source_type: string
-          time_entry_id: string
-          weight: number | null
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string
-          id?: string
-          organization_id: number
-          source_id: string
-          source_type: string
-          time_entry_id: string
-          weight?: number | null
-        }
-        Update: {
-          created_at?: string
-          created_by?: string
-          id?: string
-          organization_id?: number
-          source_id?: string
-          source_type?: string
-          time_entry_id?: string
-          weight?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "staff_time_attributions_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "staff_time_attributions_time_entry_id_fkey"
-            columns: ["time_entry_id"]
-            isOneToOne: false
-            referencedRelation: "staff_time_entries"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       supply_provisions: {
         Row: {
@@ -5841,6 +5664,82 @@ export type Database = {
           updated_by?: string | null
         }
         Relationships: []
+      }
+      user_people: {
+        Row: {
+          id: string
+          linked_at: string
+          person_id: number
+          profile_id: string | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          linked_at?: string
+          person_id: number
+          profile_id?: string | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          linked_at?: string
+          person_id?: number
+          profile_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_people_person_fk"
+            columns: ["person_id"]
+            isOneToOne: true
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          granted_at: string | null
+          granted_by: string | null
+          id: string
+          role_id: string | null
+          updated_at: string | null
+          updated_by: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          role_id?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          role_id?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       vehicle_activities: {
         Row: {
@@ -6025,312 +5924,8 @@ export type Database = {
         }
         Relationships: []
       }
-      cost_categories: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          description: string | null
-          id: string
-          name: string
-          updated_at: string | null
-          updated_by: string | null
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          id?: string
-          name: string
-          updated_at?: string | null
-          updated_by?: string | null
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          description?: string | null
-          id?: string
-          name?: string
-          updated_at?: string | null
-          updated_by?: string | null
-        }
-        Relationships: []
-      }
-      cost_dimensions: {
-        Row: {
-          created_at: string
-          description: string | null
-          dimension_type: string
-          id: string
-          name: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          dimension_type: string
-          id?: string
-          name: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          dimension_type?: string
-          id?: string
-          name?: string
-        }
-        Relationships: []
-      }
-      cost_event_dimensions: {
-        Row: {
-          cost_event_id: string
-          dimension_id: string
-        }
-        Insert: {
-          cost_event_id: string
-          dimension_id: string
-        }
-        Update: {
-          cost_event_id?: string
-          dimension_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "cost_event_dimensions_cost_event_id_fkey"
-            columns: ["cost_event_id"]
-            isOneToOne: false
-            referencedRelation: "cost_events"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cost_event_dimensions_dimension_id_fkey"
-            columns: ["dimension_id"]
-            isOneToOne: false
-            referencedRelation: "cost_dimensions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      cost_events: {
-        Row: {
-          cost_amount: number
-          cost_category_id: string | null
-          created_at: string
-          created_by: string | null
-          currency: string
-          entry_type: Database["core"]["Enums"]["cost_entry_type_enum"]
-          id: string
-          metadata: Json | null
-          occurred_at: string
-          organization_id: number
-          person_id: number | null
-          quantity: number | null
-          source_id: string | null
-          source_type: Database["core"]["Enums"]["cost_source_type_enum"]
-          unit_cost: number | null
-          uom: string | null
-          updated_at: string | null
-          updated_by: string | null
-        }
-        Insert: {
-          cost_amount: number
-          cost_category_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          currency?: string
-          entry_type?: Database["core"]["Enums"]["cost_entry_type_enum"]
-          id?: string
-          metadata?: Json | null
-          occurred_at: string
-          organization_id: number
-          person_id?: number | null
-          quantity?: number | null
-          source_id?: string | null
-          source_type: Database["core"]["Enums"]["cost_source_type_enum"]
-          unit_cost?: number | null
-          uom?: string | null
-          updated_at?: string | null
-          updated_by?: string | null
-        }
-        Update: {
-          cost_amount?: number
-          cost_category_id?: string | null
-          created_at?: string
-          created_by?: string | null
-          currency?: string
-          entry_type?: Database["core"]["Enums"]["cost_entry_type_enum"]
-          id?: string
-          metadata?: Json | null
-          occurred_at?: string
-          organization_id?: number
-          person_id?: number | null
-          quantity?: number | null
-          source_id?: string | null
-          source_type?: Database["core"]["Enums"]["cost_source_type_enum"]
-          unit_cost?: number | null
-          uom?: string | null
-          updated_at?: string | null
-          updated_by?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "cost_events_cost_category_id_fkey"
-            columns: ["cost_category_id"]
-            isOneToOne: false
-            referencedRelation: "cost_categories"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cost_events_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cost_events_person_id_fkey"
-            columns: ["person_id"]
-            isOneToOne: false
-            referencedRelation: "people"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      service_catalog: {
-        Row: {
-          created_at: string
-          default_category_id: string | null
-          id: string
-          label: string
-          service_code: string
-          unit_cost: number
-          unit_type: string
-        }
-        Insert: {
-          created_at?: string
-          default_category_id?: string | null
-          id?: string
-          label: string
-          service_code: string
-          unit_cost: number
-          unit_type: string
-        }
-        Update: {
-          created_at?: string
-          default_category_id?: string | null
-          id?: string
-          label?: string
-          service_code?: string
-          unit_cost?: number
-          unit_type?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "service_catalog_default_category_id_fkey"
-            columns: ["default_category_id"]
-            isOneToOne: false
-            referencedRelation: "cost_categories"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      staff_rates: {
-        Row: {
-          created_at: string
-          effective_from: string
-          effective_to: string | null
-          hourly_rate: number
-          id: string
-          org_id: number
-          role_name: string
-        }
-        Insert: {
-          created_at?: string
-          effective_from?: string
-          effective_to?: string | null
-          hourly_rate: number
-          id?: string
-          org_id: number
-          role_name: string
-        }
-        Update: {
-          created_at?: string
-          effective_from?: string
-          effective_to?: string | null
-          hourly_rate?: number
-          id?: string
-          org_id?: number
-          role_name?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "staff_rates_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
     }
     Views: {
-      people_name_only: {
-        Row: {
-          id: number | null
-          first_name: string | null
-          last_name: string | null
-          person_type: Database["core"]["Enums"]["person_type"] | null
-          last_service_month: string | null
-        }
-        Relationships: []
-      }
-      participating_organizations: {
-        Row: {
-          id: number | null
-          name: string | null
-          organization_type: string | null
-          partnership_type: string | null
-          is_active: boolean | null
-        }
-        Relationships: []
-      }
-      person_consent_requests_status: {
-        Row: {
-          id: string | null
-          person_id: number | null
-          requesting_org_id: number | null
-          requested_by_user_id: string | null
-          requested_at: string | null
-          status: string | null
-          decision_at: string | null
-          expires_at: string | null
-        }
-        Relationships: []
-      }
-      v_person_consent_effective: {
-        Row: {
-          id: string | null
-          person_id: number | null
-          consent_type: string | null
-          scope: string | null
-          status: string | null
-          captured_by: string | null
-          captured_method: string | null
-          captured_org_id: number | null
-          attested_by_staff: boolean | null
-          attested_by_client: boolean | null
-          attested_at: string | null
-          policy_version: string | null
-          notes: string | null
-          created_at: string | null
-          updated_at: string | null
-          revoked_at: string | null
-          revoked_by: string | null
-          expires_at: string | null
-          restrictions: Json | null
-          effective_status: string | null
-          is_expired: boolean | null
-        }
-        Relationships: []
-      }
       medical_episodes_full: {
         Row: {
           body_region: string | null
@@ -6617,24 +6212,6 @@ export type Database = {
           updated_at: string
         }[]
       }
-      fn_person_consent_allows_org: {
-        Args: { p_person_id: number; p_org_id: number }
-        Returns: boolean
-      }
-      request_person_consent: {
-        Args: {
-          p_person_id: number
-          p_org_id: number
-          p_purpose: string
-          p_requested_scopes?: string[]
-          p_note?: string
-        }
-        Returns: string
-      }
-      log_consent_contact: {
-        Args: { p_person_id: number; p_org_id: number; p_summary: string }
-        Returns: void
-      }
       get_person_field_visibility: {
         Args: {
           p_field_name?: string
@@ -6648,40 +6225,28 @@ export type Database = {
           privacy_level: string
         }[]
       }
-      get_actor_global_roles: {
-        Args: { p_user?: string }
-        Returns: {
-          role_name: string
-        }[]
-      }
-      get_actor_org_permissions: {
-        Args: { p_org_id?: number | null }
+      get_user_permissions: {
+        Args: { user_uuid?: string }
         Returns: {
           permission_name: string
         }[]
       }
-      get_actor_org_roles: {
-        Args: { p_org_id?: number | null }
+      get_user_roles: {
+        Args: { user_uuid?: string }
         Returns: {
-          role_display_name: string | null
-          role_kind: Database["core"]["Enums"]["org_role_kind"]
-          role_id: string
           role_name: string
         }[]
       }
-      get_actor_permissions_summary: {
-        Args: { p_user?: string }
-        Returns: {
-          permission_name: string
-        }[]
-      }
-      get_iharc_org_id: { Args: never; Returns: number }
-      has_org_permission: {
-        Args: { p_org_id: number; permission_name: string; p_user?: string }
+      has_permission: { Args: { permission_name: string }; Returns: boolean }
+      is_user_in_roles: {
+        Args: { p_roles: string[]; p_user?: string }
         Returns: boolean
       }
-      is_global_admin: { Args: { p_user?: string }; Returns: boolean }
-      is_org_member: { Args: { p_org_id: number; p_user?: string }; Returns: boolean }
+      refresh_user_permissions: { Args: { user_uuid?: string }; Returns: Json }
+      remove_user_role: {
+        Args: { role_name: string; target_user_id: string }
+        Returns: boolean
+      }
       staff_caseload: {
         Args: { staff_uuid: string }
         Returns: {
@@ -6725,16 +6290,6 @@ export type Database = {
         | "follow_up"
         | "supply_provision"
         | "other"
-      cost_entry_type_enum: "direct" | "replacement_value" | "overhead"
-      cost_source_type_enum:
-        | "activity"
-        | "distribution"
-        | "inventory_tx"
-        | "appointment"
-        | "manual"
-        | "staff_time"
-        | "external"
-      org_role_kind: "staff" | "volunteer"
       address_category:
         | "residential"
         | "commercial"
@@ -6791,6 +6346,19 @@ export type Database = {
         | "api"
         | "staff_observed"
       cfs_status_enum: "received" | "triaged" | "dismissed" | "converted"
+      cfs_access_level_enum: "view" | "collaborate" | "dispatch"
+      cfs_public_category_enum:
+        | "cleanup"
+        | "outreach"
+        | "welfare_check"
+        | "supply_distribution"
+        | "other"
+      cfs_public_status_enum:
+        | "received"
+        | "triaged"
+        | "dispatched"
+        | "in_progress"
+        | "resolved"
       citizenship_status_enum:
         | "canadian_citizen"
         | "permanent_resident"
@@ -7420,89 +6988,6 @@ export type Database = {
       [_ in never]: never
     }
   }
-  analytics: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      cost_event_daily: {
-        Row: {
-          cost_category_id: string | null
-          day: string | null
-          event_count: number | null
-          organization_id: number | null
-          person_id: number | null
-          total_cost: number | null
-        }
-        Relationships: []
-      }
-      cost_event_daily_secure: {
-        Row: {
-          cost_category_id: string | null
-          day: string | null
-          event_count: number | null
-          organization_id: number | null
-          person_id: number | null
-          total_cost: number | null
-        }
-        Relationships: []
-      }
-      org_cost_rollups: {
-        Row: {
-          cost_30d: number | null
-          cost_365d: number | null
-          cost_category_id: string | null
-          organization_id: number | null
-          total_cost: number | null
-        }
-        Relationships: []
-      }
-      org_cost_rollups_secure: {
-        Row: {
-          cost_30d: number | null
-          cost_365d: number | null
-          cost_category_id: string | null
-          organization_id: number | null
-          total_cost: number | null
-        }
-        Relationships: []
-      }
-      person_cost_rollups: {
-        Row: {
-          cost_30d: number | null
-          cost_365d: number | null
-          cost_90d: number | null
-          organization_id: number | null
-          person_id: number | null
-          total_cost: number | null
-        }
-        Relationships: []
-      }
-      person_cost_rollups_secure: {
-        Row: {
-          cost_30d: number | null
-          cost_365d: number | null
-          cost_90d: number | null
-          organization_id: number | null
-          person_id: number | null
-          total_cost: number | null
-        }
-        Relationships: []
-      }
-    }
-    Functions: {
-      refresh_cost_rollups: {
-        Args: never
-        Returns: undefined
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   donations: {
     Tables: {
       catalog_items: {
@@ -7520,7 +7005,6 @@ export type Database = {
           short_description: string | null
           slug: string
           stripe_price_id: string | null
-          stripe_product_id: string | null
           target_buffer: number | null
           title: string
           unit_cost_cents: number | null
@@ -7540,7 +7024,6 @@ export type Database = {
           short_description?: string | null
           slug: string
           stripe_price_id?: string | null
-          stripe_product_id?: string | null
           target_buffer?: number | null
           title: string
           unit_cost_cents?: number | null
@@ -7560,7 +7043,6 @@ export type Database = {
           short_description?: string | null
           slug?: string
           stripe_price_id?: string | null
-          stripe_product_id?: string | null
           target_buffer?: number | null
           title?: string
           unit_cost_cents?: number | null
@@ -7568,59 +7050,14 @@ export type Database = {
         }
         Relationships: []
       }
-      donation_intent_items: {
-        Row: {
-          catalog_item_id: string
-          created_at: string
-          donation_intent_id: string
-          id: string
-          line_amount_cents: number
-          quantity: number
-          unit_amount_cents: number
-        }
-        Insert: {
-          catalog_item_id: string
-          created_at?: string
-          donation_intent_id: string
-          id?: string
-          line_amount_cents: number
-          quantity: number
-          unit_amount_cents: number
-        }
-        Update: {
-          catalog_item_id?: string
-          created_at?: string
-          donation_intent_id?: string
-          id?: string
-          line_amount_cents?: number
-          quantity?: number
-          unit_amount_cents?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "donation_intent_items_catalog_item_id_fkey"
-            columns: ["catalog_item_id"]
-            isOneToOne: false
-            referencedRelation: "catalog_items"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "donation_intent_items_donation_intent_id_fkey"
-            columns: ["donation_intent_id"]
-            isOneToOne: false
-            referencedRelation: "donation_intents"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       donation_intents: {
         Row: {
           completed_at: string | null
           created_at: string
           currency: string
-          custom_amount_cents: number
-          donor_id: string | null
+          donor_email: string | null
           id: string
+          items: Json
           metadata: Json | null
           status: Database["donations"]["Enums"]["donation_intent_status"]
           stripe_session_id: string | null
@@ -7630,9 +7067,9 @@ export type Database = {
           completed_at?: string | null
           created_at?: string
           currency?: string
-          custom_amount_cents?: number
-          donor_id?: string | null
+          donor_email?: string | null
           id?: string
+          items?: Json
           metadata?: Json | null
           status?: Database["donations"]["Enums"]["donation_intent_status"]
           stripe_session_id?: string | null
@@ -7642,36 +7079,25 @@ export type Database = {
           completed_at?: string | null
           created_at?: string
           currency?: string
-          custom_amount_cents?: number
-          donor_id?: string | null
+          donor_email?: string | null
           id?: string
+          items?: Json
           metadata?: Json | null
           status?: Database["donations"]["Enums"]["donation_intent_status"]
           stripe_session_id?: string | null
           total_amount_cents?: number
         }
-        Relationships: [
-          {
-            foreignKeyName: "donation_intents_donor_id_fkey"
-            columns: ["donor_id"]
-            isOneToOne: false
-            referencedRelation: "donors"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       donation_payments: {
         Row: {
           amount_cents: number
           created_at: string
           currency: string
-          donation_intent_id: string | null
-          donation_subscription_id: string | null
+          donation_intent_id: string
           id: string
           processed_at: string
           provider: string
-          provider_charge_id: string | null
-          provider_invoice_id: string | null
           provider_payment_id: string | null
           raw_payload: Json | null
           status: Database["donations"]["Enums"]["donation_payment_status"]
@@ -7680,13 +7106,10 @@ export type Database = {
           amount_cents: number
           created_at?: string
           currency?: string
-          donation_intent_id?: string | null
-          donation_subscription_id?: string | null
+          donation_intent_id: string
           id?: string
           processed_at?: string
           provider?: string
-          provider_charge_id?: string | null
-          provider_invoice_id?: string | null
           provider_payment_id?: string | null
           raw_payload?: Json | null
           status?: Database["donations"]["Enums"]["donation_payment_status"]
@@ -7695,13 +7118,10 @@ export type Database = {
           amount_cents?: number
           created_at?: string
           currency?: string
-          donation_intent_id?: string | null
-          donation_subscription_id?: string | null
+          donation_intent_id?: string
           id?: string
           processed_at?: string
           provider?: string
-          provider_charge_id?: string | null
-          provider_invoice_id?: string | null
           provider_payment_id?: string | null
           raw_payload?: Json | null
           status?: Database["donations"]["Enums"]["donation_payment_status"]
@@ -7714,231 +7134,7 @@ export type Database = {
             referencedRelation: "donation_intents"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "donation_payments_donation_subscription_id_fkey"
-            columns: ["donation_subscription_id"]
-            isOneToOne: false
-            referencedRelation: "donation_subscriptions"
-            referencedColumns: ["id"]
-          },
         ]
-      }
-      donation_subscriptions: {
-        Row: {
-          amount_cents: number
-          canceled_at: string | null
-          created_at: string
-          currency: string
-          donor_id: string
-          id: string
-          last_invoice_status: string | null
-          last_payment_at: string | null
-          started_at: string | null
-          status: Database["donations"]["Enums"]["donation_subscription_status"]
-          stripe_price_id: string
-          stripe_subscription_id: string
-          updated_at: string
-        }
-        Insert: {
-          amount_cents: number
-          canceled_at?: string | null
-          created_at?: string
-          currency?: string
-          donor_id: string
-          id?: string
-          last_invoice_status?: string | null
-          last_payment_at?: string | null
-          started_at?: string | null
-          status?: Database["donations"]["Enums"]["donation_subscription_status"]
-          stripe_price_id: string
-          stripe_subscription_id: string
-          updated_at?: string
-        }
-        Update: {
-          amount_cents?: number
-          canceled_at?: string | null
-          created_at?: string
-          currency?: string
-          donor_id?: string
-          id?: string
-          last_invoice_status?: string | null
-          last_payment_at?: string | null
-          started_at?: string | null
-          status?: Database["donations"]["Enums"]["donation_subscription_status"]
-          stripe_price_id?: string
-          stripe_subscription_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "donation_subscriptions_donor_id_fkey"
-            columns: ["donor_id"]
-            isOneToOne: false
-            referencedRelation: "donors"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      donor_manage_tokens: {
-        Row: {
-          consumed_at: string | null
-          created_at: string
-          donor_id: string
-          expires_at: string
-          id: string
-          token_hash: string
-        }
-        Insert: {
-          consumed_at?: string | null
-          created_at?: string
-          donor_id: string
-          expires_at: string
-          id?: string
-          token_hash: string
-        }
-        Update: {
-          consumed_at?: string | null
-          created_at?: string
-          donor_id?: string
-          expires_at?: string
-          id?: string
-          token_hash?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "donor_manage_tokens_donor_id_fkey"
-            columns: ["donor_id"]
-            isOneToOne: false
-            referencedRelation: "donors"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      donors: {
-        Row: {
-          address: Json | null
-          created_at: string
-          email: string
-          id: string
-          name: string | null
-          stripe_customer_id: string | null
-          updated_at: string
-        }
-        Insert: {
-          address?: Json | null
-          created_at?: string
-          email: string
-          id?: string
-          name?: string | null
-          stripe_customer_id?: string | null
-          updated_at?: string
-        }
-        Update: {
-          address?: Json | null
-          created_at?: string
-          email?: string
-          id?: string
-          name?: string | null
-          stripe_customer_id?: string | null
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      rate_limit_logs: {
-        Row: {
-          created_at: string
-          event: string
-          id: string
-          identifier: string
-        }
-        Insert: {
-          created_at?: string
-          event: string
-          id?: string
-          identifier: string
-        }
-        Update: {
-          created_at?: string
-          event?: string
-          id?: string
-          identifier?: string
-        }
-        Relationships: []
-      }
-      stripe_amount_prices: {
-        Row: {
-          amount_cents: number
-          created_at: string
-          currency: string
-          interval: string
-          stripe_price_id: string
-          updated_at: string
-        }
-        Insert: {
-          amount_cents: number
-          created_at?: string
-          currency: string
-          interval: string
-          stripe_price_id: string
-          updated_at?: string
-        }
-        Update: {
-          amount_cents?: number
-          created_at?: string
-          currency?: string
-          interval?: string
-          stripe_price_id?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      stripe_products: {
-        Row: {
-          created_at: string
-          key: string
-          stripe_product_id: string
-        }
-        Insert: {
-          created_at?: string
-          key: string
-          stripe_product_id: string
-        }
-        Update: {
-          created_at?: string
-          key?: string
-          stripe_product_id?: string
-        }
-        Relationships: []
-      }
-      stripe_webhook_events: {
-        Row: {
-          error: string | null
-          id: string
-          processed_at: string | null
-          received_at: string
-          status: Database["donations"]["Enums"]["stripe_webhook_event_status"] | null
-          stripe_event_id: string
-          type: string
-        }
-        Insert: {
-          error?: string | null
-          id?: string
-          processed_at?: string | null
-          received_at?: string
-          status?: Database["donations"]["Enums"]["stripe_webhook_event_status"] | null
-          stripe_event_id: string
-          type: string
-        }
-        Update: {
-          error?: string | null
-          id?: string
-          processed_at?: string | null
-          received_at?: string
-          status?: Database["donations"]["Enums"]["stripe_webhook_event_status"] | null
-          stripe_event_id?: string
-          type?: string
-        }
-        Relationships: []
       }
     }
     Views: {
@@ -7972,19 +7168,7 @@ export type Database = {
       }
     }
     Functions: {
-      donations_check_rate_limit: {
-        Args: {
-          p_cooldown_ms?: number
-          p_event: string
-          p_identifier: string
-          p_limit: number
-          p_window_ms?: number
-        }
-        Returns: {
-          allowed: boolean
-          retry_in_ms: number
-        }[]
-      }
+      [_ in never]: never
     }
     Enums: {
       donation_intent_status:
@@ -7998,17 +7182,6 @@ export type Database = {
         | "requires_action"
         | "failed"
         | "refunded"
-      donation_subscription_status:
-        | "active"
-        | "canceled"
-        | "past_due"
-        | "unpaid"
-        | "incomplete"
-        | "incomplete_expired"
-        | "trialing"
-      stripe_webhook_event_status:
-        | "succeeded"
-        | "failed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -8840,7 +8013,6 @@ export type Database = {
           notes: string | null
           performed_by: string | null
           person_id: number | null
-          provider_org_id: number | null
           updated_at: string | null
           updated_by: string | null
         }
@@ -8857,7 +8029,6 @@ export type Database = {
           notes?: string | null
           performed_by?: string | null
           person_id?: number | null
-          provider_org_id?: number | null
           updated_at?: string | null
           updated_by?: string | null
         }
@@ -8874,7 +8045,6 @@ export type Database = {
           notes?: string | null
           performed_by?: string | null
           person_id?: number | null
-          provider_org_id?: number | null
           updated_at?: string | null
           updated_by?: string | null
         }
@@ -8884,13 +8054,6 @@ export type Database = {
             columns: ["location_id"]
             isOneToOne: false
             referencedRelation: "locations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "distributions_provider_org_id_fkey"
-            columns: ["provider_org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -10605,6 +9768,110 @@ export type Database = {
   }
   portal: {
     Tables: {
+      appointments: {
+        Row: {
+          canceled_at: string | null
+          cancellation_reason: string | null
+          client_profile_id: string
+          confirmed_at: string | null
+          confirmed_by_profile_id: string | null
+          created_at: string
+          description: string | null
+          duration_minutes: number
+          id: string
+          location: string | null
+          location_type: Database["portal"]["Enums"]["appointment_channel"]
+          meeting_url: string | null
+          occurs_at: string | null
+          organization_id: number | null
+          outcome_notes: string | null
+          requested_window: string | null
+          requester_profile_id: string
+          reschedule_note: string | null
+          staff_profile_id: string | null
+          status: Database["portal"]["Enums"]["appointment_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          canceled_at?: string | null
+          cancellation_reason?: string | null
+          client_profile_id: string
+          confirmed_at?: string | null
+          confirmed_by_profile_id?: string | null
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number
+          id?: string
+          location?: string | null
+          location_type?: Database["portal"]["Enums"]["appointment_channel"]
+          meeting_url?: string | null
+          occurs_at?: string | null
+          organization_id?: number | null
+          outcome_notes?: string | null
+          requested_window?: string | null
+          requester_profile_id: string
+          reschedule_note?: string | null
+          staff_profile_id?: string | null
+          status?: Database["portal"]["Enums"]["appointment_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          canceled_at?: string | null
+          cancellation_reason?: string | null
+          client_profile_id?: string
+          confirmed_at?: string | null
+          confirmed_by_profile_id?: string | null
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number
+          id?: string
+          location?: string | null
+          location_type?: Database["portal"]["Enums"]["appointment_channel"]
+          meeting_url?: string | null
+          occurs_at?: string | null
+          organization_id?: number | null
+          outcome_notes?: string | null
+          requested_window?: string | null
+          requester_profile_id?: string
+          reschedule_note?: string | null
+          staff_profile_id?: string | null
+          status?: Database["portal"]["Enums"]["appointment_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_client_profile_id_fkey"
+            columns: ["client_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_confirmed_by_profile_id_fkey"
+            columns: ["confirmed_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_requester_profile_id_fkey"
+            columns: ["requester_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_staff_profile_id_fkey"
+            columns: ["staff_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_log: {
         Row: {
           action: string
@@ -10780,6 +10047,56 @@ export type Database = {
           },
         ]
       }
+      notification_relays: {
+        Row: {
+          api_key: string | null
+          api_url: string | null
+          channel: Database["portal"]["Enums"]["notification_channel"]
+          created_at: string
+          created_by_profile_id: string | null
+          from_email: string | null
+          from_phone: string | null
+          id: string
+          is_active: boolean
+          provider: string
+          updated_at: string
+        }
+        Insert: {
+          api_key?: string | null
+          api_url?: string | null
+          channel: Database["portal"]["Enums"]["notification_channel"]
+          created_at?: string
+          created_by_profile_id?: string | null
+          from_email?: string | null
+          from_phone?: string | null
+          id?: string
+          is_active?: boolean
+          provider: string
+          updated_at?: string
+        }
+        Update: {
+          api_key?: string | null
+          api_url?: string | null
+          channel?: Database["portal"]["Enums"]["notification_channel"]
+          created_at?: string
+          created_by_profile_id?: string | null
+          from_email?: string | null
+          from_phone?: string | null
+          id?: string
+          is_active?: boolean
+          provider?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_relays_created_by_profile_id_fkey"
+            columns: ["created_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           acknowledged_at: string | null
@@ -10791,7 +10108,8 @@ export type Database = {
           notification_type: string
           payload: Json
           profile_id: string | null
-          recipient_email: string
+          recipient_email: string | null
+          recipient_phone: string | null
           sent_at: string | null
           status: string
           subject: string
@@ -10806,7 +10124,8 @@ export type Database = {
           notification_type: string
           payload?: Json
           profile_id?: string | null
-          recipient_email: string
+          recipient_email?: string | null
+          recipient_phone?: string | null
           sent_at?: string | null
           status?: string
           subject: string
@@ -10821,7 +10140,8 @@ export type Database = {
           notification_type?: string
           payload?: Json
           profile_id?: string | null
-          recipient_email?: string
+          recipient_email?: string | null
+          recipient_phone?: string | null
           sent_at?: string | null
           status?: string
           subject?: string
@@ -12036,6 +11356,8 @@ export type Database = {
       }
     }
     Functions: {
+      actor_is_approved: { Args: never; Returns: boolean }
+      actor_org_id: { Args: never; Returns: number }
       add_guest_petition_signature: {
         Args: {
           p_display_preference?: Database["portal"]["Enums"]["petition_display_preference"]
@@ -12094,6 +11416,16 @@ export type Database = {
         | "client"
         | "agency_partner"
         | "government_partner"
+      appointment_channel: "in_person" | "phone" | "video" | "field" | "other"
+      appointment_status:
+        | "requested"
+        | "pending_confirmation"
+        | "scheduled"
+        | "reschedule_requested"
+        | "cancelled_by_client"
+        | "cancelled_by_staff"
+        | "completed"
+        | "no_show"
       comment_type: "question" | "suggestion" | "response" | "official_note"
       contact_method: "email" | "phone"
       flag_entity_type: "idea" | "comment"
@@ -12128,6 +11460,7 @@ export type Database = {
         | "former"
         | "prefer_not_to_share"
       metric_value_status: "reported" | "pending"
+      notification_channel: "email" | "sms"
       organization_category: "community" | "government"
       petition_display_preference:
         | "full_name"
@@ -12787,8 +12120,10 @@ export type Database = {
           p_payload?: Json
           p_profile_id?: string
           p_recipient_email?: string
+          p_recipient_phone?: string
           p_subject?: string
           p_type?: string
+          p_channels?: string[]
         }
         Returns: string
       }
@@ -13110,6 +12445,29 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  audit: {
+    Enums: {},
+  },
+  auth: {
+    Enums: {
+      aal_level: ["aal1", "aal2", "aal3"],
+      code_challenge_method: ["s256", "plain"],
+      factor_status: ["unverified", "verified"],
+      factor_type: ["totp", "webauthn", "phone"],
+      oauth_authorization_status: ["pending", "approved", "denied", "expired"],
+      oauth_client_type: ["public", "confidential"],
+      oauth_registration_type: ["dynamic", "manual"],
+      oauth_response_type: ["code"],
+      one_time_token_type: [
+        "confirmation_token",
+        "reauthentication_token",
+        "recovery_token",
+        "email_change_token_new",
+        "email_change_token_current",
+        "phone_change_token",
+      ],
+    },
+  },
   case_mgmt: {
     Enums: {},
   },
@@ -13125,15 +12483,6 @@ export const Constants = {
         "follow_up",
         "supply_provision",
         "other",
-      ],
-      cost_entry_type_enum: ["direct", "replacement_value", "overhead"],
-      cost_source_type_enum: [
-        "activity",
-        "distribution",
-        "inventory_tx",
-        "appointment",
-        "manual",
-        "external",
       ],
       address_category: [
         "residential",
@@ -13197,6 +12546,21 @@ export const Constants = {
         "staff_observed",
       ],
       cfs_status_enum: ["received", "triaged", "dismissed", "converted"],
+      cfs_access_level_enum: ["view", "collaborate", "dispatch"],
+      cfs_public_category_enum: [
+        "cleanup",
+        "outreach",
+        "welfare_check",
+        "supply_distribution",
+        "other",
+      ],
+      cfs_public_status_enum: [
+        "received",
+        "triaged",
+        "dispatched",
+        "in_progress",
+        "resolved",
+      ],
       citizenship_status_enum: [
         "canadian_citizen",
         "permanent_resident",
@@ -13903,19 +13267,6 @@ export const Constants = {
         "failed",
         "refunded",
       ],
-      donation_subscription_status: [
-        "active",
-        "canceled",
-        "past_due",
-        "unpaid",
-        "incomplete",
-        "incomplete_expired",
-        "trialing",
-      ],
-      stripe_webhook_event_status: [
-        "succeeded",
-        "failed",
-      ],
     },
   },
   hazmat: {
@@ -14009,6 +13360,17 @@ export const Constants = {
         "agency_partner",
         "government_partner",
       ],
+      appointment_channel: ["in_person", "phone", "video", "field", "other"],
+      appointment_status: [
+        "requested",
+        "pending_confirmation",
+        "scheduled",
+        "reschedule_requested",
+        "cancelled_by_client",
+        "cancelled_by_staff",
+        "completed",
+        "no_show",
+      ],
       comment_type: ["question", "suggestion", "response", "official_note"],
       contact_method: ["email", "phone"],
       flag_entity_type: ["idea", "comment"],
@@ -14047,6 +13409,7 @@ export const Constants = {
         "prefer_not_to_share",
       ],
       metric_value_status: ["reported", "pending"],
+      notification_channel: ["email", "sms"],
       organization_category: ["community", "government"],
       petition_display_preference: [
         "full_name",
@@ -14271,6 +13634,11 @@ export const Constants = {
         "unverified",
         "unable_to_verify",
       ],
+    },
+  },
+  storage: {
+    Enums: {
+      buckettype: ["STANDARD", "ANALYTICS", "VECTOR"],
     },
   },
 } as const

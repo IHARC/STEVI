@@ -196,10 +196,112 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      cfs_queue_view: {
+        Row: {
+          converted_incident_id: number | null
+          created_at: string | null
+          duplicate_of_report_id: number | null
+          escalated_to_incident_id: number | null
+          id: number
+          location_confidence: string | null
+          location_text: string | null
+          notify_channel:
+            | Database["core"]["Enums"]["notify_channel_enum"]
+            | null
+          notify_opt_in: boolean | null
+          notify_target: string | null
+          origin: Database["core"]["Enums"]["cfs_origin_enum"] | null
+          owning_organization_id: number
+          owning_organization_name: string | null
+          priority_hint:
+            | Database["core"]["Enums"]["incident_priority_enum"]
+            | null
+          public_tracking_enabled: boolean
+          public_tracking_id: string | null
+          received_at: string | null
+          report_method: string
+          report_number: string
+          report_priority_assessment: string
+          report_received_at: string
+          report_status: string | null
+          reported_coordinates: string | null
+          reported_location: string | null
+          reporting_organization_id: number | null
+          reporting_organization_name: string | null
+          source: Database["core"]["Enums"]["cfs_source_enum"] | null
+          status: Database["core"]["Enums"]["cfs_status_enum"] | null
+          type_hint: Database["core"]["Enums"]["incident_type_enum"] | null
+          updated_at: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      cfs_convert_to_incident: {
+        Args: { p_cfs_id: number; p_payload?: Json }
+        Returns: number
+      }
+      cfs_create_call: {
+        Args: { p_payload: Json }
+        Returns: number
+      }
+      cfs_dismiss: {
+        Args: { p_cfs_id: number; p_notes?: string; p_report_status: string }
+        Returns: undefined
+      }
+      cfs_grant_org_access: {
+        Args: {
+          p_access_level: Database["core"]["Enums"]["cfs_access_level_enum"]
+          p_cfs_id: number
+          p_org_id: number
+          p_reason?: string
+        }
+        Returns: undefined
+      }
+      cfs_mark_duplicate: {
+        Args: { p_cfs_id: number; p_duplicate_of: number; p_notes?: string }
+        Returns: undefined
+      }
+      cfs_public_tracking_disable: {
+        Args: { p_cfs_id: number }
+        Returns: undefined
+      }
+      cfs_public_tracking_get: {
+        Args: { p_tracking_id: string }
+        Returns: {
+          category: Database["core"]["Enums"]["cfs_public_category_enum"]
+          last_updated_at: string
+          public_location_area: string
+          public_summary: string | null
+          public_tracking_id: string
+          status_bucket: Database["core"]["Enums"]["cfs_public_status_enum"]
+        }[]
+      }
+      cfs_public_tracking_upsert: {
+        Args: {
+          p_category: Database["core"]["Enums"]["cfs_public_category_enum"]
+          p_cfs_id: number
+          p_public_location_area: string
+          p_public_summary?: string
+        }
+        Returns: string
+      }
+      cfs_revoke_org_access: {
+        Args: { p_cfs_id: number; p_org_id: number; p_reason?: string }
+        Returns: undefined
+      }
+      cfs_transfer_ownership: {
+        Args: { p_cfs_id: number; p_new_org_id: number; p_reason?: string }
+        Returns: undefined
+      }
+      cfs_triage: {
+        Args: { p_cfs_id: number; p_payload: Json }
+        Returns: undefined
+      }
+      cfs_verify: {
+        Args: { p_cfs_id: number; p_method: string; p_notes: string; p_status: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
@@ -1188,10 +1290,12 @@ export type Database = {
             | null
           notify_opt_in: boolean | null
           notify_target: string | null
+          owning_organization_id: number
           origin: Database["core"]["Enums"]["cfs_origin_enum"] | null
           priority_hint:
             | Database["core"]["Enums"]["incident_priority_enum"]
             | null
+          public_tracking_enabled: boolean
           public_tracking_id: string | null
           received_at: string | null
           referring_agency_name: string | null
@@ -1249,10 +1353,12 @@ export type Database = {
             | null
           notify_opt_in?: boolean | null
           notify_target?: string | null
+          owning_organization_id: number
           origin?: Database["core"]["Enums"]["cfs_origin_enum"] | null
           priority_hint?:
             | Database["core"]["Enums"]["incident_priority_enum"]
             | null
+          public_tracking_enabled?: boolean
           public_tracking_id?: string | null
           received_at?: string | null
           referring_agency_name?: string | null
@@ -1310,10 +1416,12 @@ export type Database = {
             | null
           notify_opt_in?: boolean | null
           notify_target?: string | null
+          owning_organization_id?: number
           origin?: Database["core"]["Enums"]["cfs_origin_enum"] | null
           priority_hint?:
             | Database["core"]["Enums"]["incident_priority_enum"]
             | null
+          public_tracking_enabled?: boolean
           public_tracking_id?: string | null
           received_at?: string | null
           referring_agency_name?: string | null
@@ -1357,6 +1465,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "calls_for_service_owning_org_fkey"
+            columns: ["owning_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "fk_escalated_incident"
             columns: ["escalated_to_incident_id"]
             isOneToOne: false
@@ -1372,6 +1487,188 @@ export type Database = {
           },
         ]
       }
+      cfs_attachments: {
+        Row: {
+          cfs_id: number
+          created_at: string
+          file_name: string
+          file_size: number | null
+          file_type: string | null
+          id: string
+          metadata: Json | null
+          organization_id: number
+          storage_bucket: string
+          storage_path: string
+          uploaded_by: string
+        }
+        Insert: {
+          cfs_id: number
+          created_at?: string
+          file_name: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id: number
+          storage_bucket: string
+          storage_path: string
+          uploaded_by?: string
+        }
+        Update: {
+          cfs_id?: number
+          created_at?: string
+          file_name?: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id?: number
+          storage_bucket?: string
+          storage_path?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cfs_attachments_cfs_id_fkey"
+            columns: ["cfs_id"]
+            isOneToOne: false
+            referencedRelation: "calls_for_service"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cfs_attachments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cfs_attachments_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cfs_org_access: {
+        Row: {
+          access_level: Database["core"]["Enums"]["cfs_access_level_enum"]
+          cfs_id: number
+          granted_at: string
+          granted_by: string
+          id: string
+          is_active: boolean
+          organization_id: number
+          reason: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_level?: Database["core"]["Enums"]["cfs_access_level_enum"]
+          cfs_id: number
+          granted_at?: string
+          granted_by?: string
+          id?: string
+          is_active?: boolean
+          organization_id: number
+          reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_level?: Database["core"]["Enums"]["cfs_access_level_enum"]
+          cfs_id?: number
+          granted_at?: string
+          granted_by?: string
+          id?: string
+          is_active?: boolean
+          organization_id?: number
+          reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cfs_org_access_cfs_id_fkey"
+            columns: ["cfs_id"]
+            isOneToOne: false
+            referencedRelation: "calls_for_service"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cfs_org_access_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cfs_org_access_granted_by_fkey"
+            columns: ["granted_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cfs_org_access_revoked_by_fkey"
+            columns: ["revoked_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cfs_public_tracking: {
+        Row: {
+          category: Database["core"]["Enums"]["cfs_public_category_enum"]
+          cfs_id: number
+          created_at: string
+          id: string
+          last_updated_at: string
+          public_location_area: string
+          public_summary: string | null
+          public_tracking_id: string
+          status_bucket: Database["core"]["Enums"]["cfs_public_status_enum"]
+          updated_at: string
+        }
+        Insert: {
+          category: Database["core"]["Enums"]["cfs_public_category_enum"]
+          cfs_id: number
+          created_at?: string
+          id?: string
+          last_updated_at?: string
+          public_location_area: string
+          public_summary?: string | null
+          public_tracking_id: string
+          status_bucket: Database["core"]["Enums"]["cfs_public_status_enum"]
+          updated_at?: string
+        }
+        Update: {
+          category?: Database["core"]["Enums"]["cfs_public_category_enum"]
+          cfs_id?: number
+          created_at?: string
+          id?: string
+          last_updated_at?: string
+          public_location_area?: string
+          public_summary?: string | null
+          public_tracking_id?: string
+          status_bucket?: Database["core"]["Enums"]["cfs_public_status_enum"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cfs_public_tracking_cfs_id_fkey"
+            columns: ["cfs_id"]
+            isOneToOne: true
+            referencedRelation: "calls_for_service"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cfs_timeline: {
         Row: {
           created_at: string | null
@@ -1380,6 +1677,7 @@ export type Database = {
           id: number
           incident_id: number | null
           incident_report_id: number
+          organization_id: number
           performed_by: string | null
           phase: string
           phase_completed_at: string | null
@@ -1398,6 +1696,7 @@ export type Database = {
           id?: number
           incident_id?: number | null
           incident_report_id: number
+          organization_id: number
           performed_by?: string | null
           phase: string
           phase_completed_at?: string | null
@@ -1416,6 +1715,7 @@ export type Database = {
           id?: number
           incident_id?: number | null
           incident_report_id?: number
+          organization_id?: number
           performed_by?: string | null
           phase?: string
           phase_completed_at?: string | null
@@ -1440,6 +1740,13 @@ export type Database = {
             columns: ["incident_report_id"]
             isOneToOne: false
             referencedRelation: "calls_for_service"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cfs_timeline_org_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -1789,6 +2096,7 @@ export type Database = {
           mental_health_component: boolean | null
           multi_agency_response: boolean | null
           officers_attending: string | null
+          owning_organization_id: number
           outcome: string | null
           paramedics_called: boolean | null
           people_involved: string | null
@@ -1907,6 +2215,7 @@ export type Database = {
           mental_health_component?: boolean | null
           multi_agency_response?: boolean | null
           officers_attending?: string | null
+          owning_organization_id: number
           outcome?: string | null
           paramedics_called?: boolean | null
           people_involved?: string | null
@@ -2025,6 +2334,7 @@ export type Database = {
           mental_health_component?: boolean | null
           multi_agency_response?: boolean | null
           officers_attending?: string | null
+          owning_organization_id?: number
           outcome?: string | null
           paramedics_called?: boolean | null
           people_involved?: string | null
@@ -2081,6 +2391,13 @@ export type Database = {
             columns: ["incident_report_id"]
             isOneToOne: false
             referencedRelation: "calls_for_service"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incidents_owning_org_fkey"
+            columns: ["owning_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -7088,6 +7405,19 @@ export type Database = {
         | "api"
         | "staff_observed"
       cfs_status_enum: "received" | "triaged" | "dismissed" | "converted"
+      cfs_access_level_enum: "view" | "collaborate" | "dispatch"
+      cfs_public_category_enum:
+        | "cleanup"
+        | "outreach"
+        | "welfare_check"
+        | "supply_distribution"
+        | "other"
+      cfs_public_status_enum:
+        | "received"
+        | "triaged"
+        | "dispatched"
+        | "in_progress"
+        | "resolved"
       citizenship_status_enum:
         | "canadian_citizen"
         | "permanent_resident"
@@ -13775,6 +14105,21 @@ export const Constants = {
         "staff_observed",
       ],
       cfs_status_enum: ["received", "triaged", "dismissed", "converted"],
+      cfs_access_level_enum: ["view", "collaborate", "dispatch"],
+      cfs_public_category_enum: [
+        "cleanup",
+        "outreach",
+        "welfare_check",
+        "supply_distribution",
+        "other",
+      ],
+      cfs_public_status_enum: [
+        "received",
+        "triaged",
+        "dispatched",
+        "in_progress",
+        "resolved",
+      ],
       citizenship_status_enum: [
         "canadian_citizen",
         "permanent_resident",

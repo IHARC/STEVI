@@ -1,9 +1,13 @@
 import type { Json } from '@/types/supabase';
 import type { SupabaseServerClient } from '@/lib/supabase/types';
 
+export type NotificationChannel = 'email' | 'sms';
+
 export type QueueNotificationArgs = {
   profileId?: string | null;
   email?: string | null;
+  phone?: string | null;
+  channels?: NotificationChannel[];
   subject: string;
   bodyText: string;
   bodyHtml?: string;
@@ -12,7 +16,22 @@ export type QueueNotificationArgs = {
 };
 
 export async function queuePortalNotification(supabase: SupabaseServerClient, args: QueueNotificationArgs) {
-  const { profileId = null, email = null, subject, bodyText, bodyHtml, type, payload } = args;
+  const { profileId = null, email = null, phone = null, channels, subject, bodyText, bodyHtml, type, payload } = args;
+
+  const normalizedEmail = email ? email.trim().toLowerCase() : null;
+  const normalizedPhone = phone ? phone.trim() : null;
+
+  const resolvedChannels =
+    channels && channels.length
+      ? channels
+      : ([
+          normalizedEmail || profileId ? 'email' : null,
+          normalizedPhone ? 'sms' : null,
+        ].filter(Boolean) as NotificationChannel[]);
+
+  if (!normalizedEmail && !normalizedPhone && !profileId) {
+    throw new Error('Recipient email or phone is required.');
+  }
 
   const payloadJson = (payload ?? {}) as Json;
 
@@ -23,7 +42,9 @@ export async function queuePortalNotification(supabase: SupabaseServerClient, ar
     p_body_html: bodyHtml ?? null,
     p_type: type,
     p_payload: payloadJson,
-    p_recipient_email: email,
+    p_recipient_email: normalizedEmail,
+    p_recipient_phone: normalizedPhone,
+    p_channels: resolvedChannels,
   });
 
   if (error) {

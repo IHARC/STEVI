@@ -4,7 +4,8 @@ export type NotificationRecord = {
   id: string;
   profileId: string | null;
   profileName: string | null;
-  recipientEmail: string;
+  recipientEmail: string | null;
+  recipientPhone?: string | null;
   subject: string;
   bodyText: string;
   bodyHtml: string | null;
