@@ -45,7 +45,7 @@ const NAV_SECTIONS: NavSectionDefinition[] = [
   {
     id: 'ops_frontline',
     label: 'Operations',
-    description: 'Frontline rails for staff, volunteers, and admins',
+    description: 'Frontline tools for staff, volunteers, and admins',
     area: 'ops_frontline',
     requires: canSeeFrontline,
     groups: [

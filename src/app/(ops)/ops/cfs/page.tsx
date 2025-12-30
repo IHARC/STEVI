@@ -13,7 +13,6 @@ import {
   formatCfsLabel,
 } from '@/lib/cfs/constants';
 import { PageHeader } from '@shared/layout/page-header';
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Card, CardContent } from '@shared/ui/card';
 import { EmptyState } from '@shared/ui/empty-state';
@@ -179,9 +178,9 @@ export default async function CfsQueuePage({ searchParams }: PageProps) {
                       <div className="text-xs text-muted-foreground">{item.report_status ? formatCfsLabel(item.report_status) : 'Active'}</div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className={`text-xs uppercase ${CFS_STATUS_TONES[item.status ?? 'received'] === 'success' ? 'border-success/40 text-success' : CFS_STATUS_TONES[item.status ?? 'received'] === 'warning' ? 'border-warning/40 text-warning' : CFS_STATUS_TONES[item.status ?? 'received'] === 'info' ? 'border-info/40 text-info' : 'border-border text-muted-foreground'}`}>
+                      <span className={`text-xs uppercase ${CFS_STATUS_TONES[item.status ?? 'received'] === 'success' ? 'border-success/40 text-success' : CFS_STATUS_TONES[item.status ?? 'received'] === 'warning' ? 'border-warning/40 text-warning' : CFS_STATUS_TONES[item.status ?? 'received'] === 'info' ? 'border-info/40 text-info' : 'border-border text-muted-foreground'}`}>
                         {formatCfsLabel(item.status ?? 'received')}
-                      </Badge>
+                      </span>
                     </TableCell>
                     <TableCell>{formatCfsLabel(item.report_priority_assessment)}</TableCell>
                     <TableCell>{item.type_hint ? formatCfsLabel(item.type_hint) : '—'}</TableCell>

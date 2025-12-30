@@ -1,6 +1,5 @@
 import type { CostEventWithCategory } from '@/lib/costs/queries';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
-import { Badge } from '@shared/ui/badge';
 
 const formatter = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' });
 const dateFormatter = new Intl.DateTimeFormat('en-CA', { dateStyle: 'medium' });
@@ -50,9 +49,9 @@ export function CostTimelineTable({ events }: { events: CostEventWithCategory[] 
                   <td className="py-3 pr-4 text-foreground">{formatDate(event.occurred_at)}</td>
                   <td className="py-3 pr-4">
                     {event.cost_categories?.name ? (
-                      <Badge variant="secondary" className="capitalize">
+                      <span className="capitalize">
                         {event.cost_categories.name.replaceAll('_', ' ')}
-                      </Badge>
+                      </span>
                     ) : (
                       <span className="text-muted-foreground">Uncategorized</span>
                     )}

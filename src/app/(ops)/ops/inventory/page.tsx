@@ -43,7 +43,6 @@ export default async function OpsInventoryPage({ searchParams }: PageProps) {
         eyebrow="Operations"
         title="Inventory"
         description="Stock summary, receipts, and inventory tools."
-        meta={[{ label: 'Inventory', tone: 'info' }, { label: 'Visit-first', tone: 'neutral' }]}
       />
 
       <InventoryHub

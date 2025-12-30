@@ -7,7 +7,6 @@ import { Button } from '@shared/ui/button';
 import { Input } from '@shared/ui/input';
 import { NativeSelect } from '@shared/ui/native-select';
 import { Textarea } from '@shared/ui/textarea';
-import { Badge } from '@shared/ui/badge';
 import { useToast } from '@shared/ui/use-toast';
 import { NO_ORGANIZATION_VALUE } from '@/lib/constants';
 import { sendPartnerInviteAction } from '@/app/(app-admin)/app-admin/profiles/actions';
@@ -80,9 +79,9 @@ export function InvitePartnerCard({ organizations, recentInvites }: InvitePartne
             Send a secure invitation to agency teams or government partners without leaving STEVI.
           </CardDescription>
         </div>
-        <Badge variant="secondary" className="self-start">
+        <span className="self-start">
           {pendingInvites.length} pending
-        </Badge>
+        </span>
       </CardHeader>
       <CardContent className="space-y-4">
         <form ref={formRef} onSubmit={handleSubmit} className="grid gap-4">
@@ -189,12 +188,12 @@ export function InvitePartnerCard({ organizations, recentInvites }: InvitePartne
                     ) : null}
                   </div>
                   <div className="flex flex-col items-start gap-1 text-xs text-muted-foreground sm:items-end">
-                    <Badge
-                      variant={invite.status === 'pending' ? 'secondary' : 'outline'}
+                    <span
+                     
                       className="uppercase"
                     >
                       {STATUS_LABELS[invite.status]}
-                    </Badge>
+                    </span>
                     <span className="text-xs">
                       {new Date(invite.createdAt).toLocaleDateString('en-CA')}
                     </span>

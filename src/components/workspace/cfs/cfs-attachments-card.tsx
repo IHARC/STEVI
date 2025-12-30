@@ -2,7 +2,6 @@
 
 import { useFormState } from 'react-dom';
 import { Alert, AlertDescription, AlertTitle } from '@shared/ui/alert';
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Input } from '@shared/ui/input';
@@ -84,7 +83,7 @@ export function CfsAttachmentsCard({ cfsId, attachments, canUpload, canDelete }:
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
-                    {item.file_type ? <Badge variant="outline">{item.file_type}</Badge> : null}
+                    {item.file_type ? <span>{item.file_type}</span> : null}
                     {item.signedUrl ? (
                       <Button asChild size="sm" variant="outline">
                         <a href={item.signedUrl} target="_blank" rel="noreferrer">

@@ -1,7 +1,6 @@
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { PageHeader } from '@shared/layout/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Input } from '@shared/ui/input';
 import { Label } from '@shared/ui/label';
@@ -223,7 +222,7 @@ export default async function OpsAdminIntegrationsPage({ searchParams }: PagePro
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="text-sm text-muted-foreground">Status</div>
-                  <Badge variant={openAiConfigured ? 'secondary' : 'destructive'}>{openAiConfigured ? 'Configured' : 'Missing'}</Badge>
+                  <span>{openAiConfigured ? 'Configured' : 'Missing'}</span>
                 </div>
 
                 <form action={upsertOpenAiApiKeyAction} className="space-y-3">

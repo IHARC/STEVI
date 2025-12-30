@@ -1,6 +1,5 @@
 import { createCostDimensionAction, createServiceCatalogAction, createStaffRateAction, deleteCostDimensionAction, endStaffRateAction, updateServiceCatalogAction } from '@/lib/costs/actions';
 import type { CostCategory, CostDimension, ServiceCatalogEntry, StaffRate } from '@/lib/costs/queries';
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Input } from '@shared/ui/input';
@@ -105,9 +104,9 @@ export function CostSettingsTab({
                         {formatDate(rate.effective_from)} – {formatDate(rate.effective_to)}
                       </td>
                       <td className="py-3 pr-4">
-                        <Badge variant={rate.effective_to ? 'outline' : 'secondary'}>
+                        <span>
                           {rate.effective_to ? 'Ended' : 'Active'}
-                        </Badge>
+                        </span>
                       </td>
                       <td className="py-3 pr-4">
                         {!rate.effective_to ? (

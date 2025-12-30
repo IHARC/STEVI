@@ -2,7 +2,6 @@ import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
 import { Card, CardContent, CardHeader, CardTitle } from '@shared/ui/card';
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { RequestAppointmentForm } from './request-appointment-form';
 import { ClientPreviewGuard } from '@shared/layout/client-preview-guard';
@@ -68,13 +67,6 @@ function formatStatusLabel(status: AppointmentWithRelations['status']): string {
     default:
       return String(status).replaceAll('_', ' ');
   }
-}
-
-function statusBadgeVariant(status: AppointmentWithRelations['status']): 'default' | 'secondary' | 'outline' | 'destructive' {
-  if (status === 'completed') return 'secondary';
-  if (status === 'cancelled_by_client' || status === 'cancelled_by_staff') return 'outline';
-  if (status === 'no_show') return 'destructive';
-  return 'default';
 }
 
 export default async function AppointmentsPage() {
@@ -145,7 +137,6 @@ export default async function AppointmentsPage() {
                 {timeline.map((appointment) => {
                   const formattedWhen = formatOccursAt(appointment.occurs_at);
                   const status = formatStatusLabel(appointment.status);
-                  const badgeVariant = statusBadgeVariant(appointment.status);
                   const isActionable = appointment.status !== 'completed' &&
                     appointment.status !== 'cancelled_by_client' &&
                     appointment.status !== 'cancelled_by_staff' &&
@@ -188,9 +179,9 @@ export default async function AppointmentsPage() {
                             <p className="text-sm text-foreground/80">Outcome: {appointment.outcome_notes}</p>
                           ) : null}
                         </div>
-                        <Badge variant={badgeVariant} className="capitalize">
+                        <span className="capitalize">
                           {status}
-                        </Badge>
+                        </span>
                       </div>
 
                       {isActionable ? (

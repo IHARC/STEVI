@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Button } from "@shared/ui/button";
-import { Badge } from "@shared/ui/badge";
 import { cn } from "@/lib/utils";
 
 export type AttentionQueueItem = {
@@ -74,8 +73,8 @@ export function AttentionQueue({ items }: AttentionQueueProps) {
                 ) : null}
               </div>
               <div className="flex items-center gap-3">
-                <Badge
-                  variant={item.tone === "warning" ? "secondary" : "outline"}
+                <span
+                 
                   className={cn(
                     item.tone === "warning"
                       ? "border-primary/20 bg-primary/10 text-primary"
@@ -83,7 +82,7 @@ export function AttentionQueue({ items }: AttentionQueueProps) {
                   )}
                 >
                   {item.count.toLocaleString("en-CA")}
-                </Badge>
+                </span>
                 <Button asChild variant="ghost" size="sm" className="text-xs">
                   <Link href={item.href}>Review all</Link>
                 </Button>

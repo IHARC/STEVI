@@ -6,7 +6,6 @@ import type { InventoryItem } from '@/lib/inventory/types';
 import type { DonationCatalogCategory, DonationCatalogItem } from '@/lib/donations/types';
 import { computeDonationNeedMetrics } from '@/lib/donations/need-math';
 import { cn } from '@/lib/utils';
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Checkbox } from '@shared/ui/checkbox';
@@ -123,9 +122,9 @@ export function DonationListingCard({
               <CardDescription>Controls what appears on iharc.ca and how it syncs to Stripe.</CardDescription>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant={listing?.id ? 'secondary' : 'outline'}>{listing?.id ? 'Listed' : 'Not listed'}</Badge>
-              <Badge variant={isActive ? 'default' : 'outline'}>{isActive ? 'Active' : 'Hidden'}</Badge>
-              <Badge variant="outline">{(listing?.metrics.currentStock ?? inventoryItem.onHandQuantity).toLocaleString()} stock</Badge>
+              <span>{listing?.id ? 'Listed' : 'Not listed'}</span>
+              <span>{isActive ? 'Active' : 'Hidden'}</span>
+              <span>{(listing?.metrics.currentStock ?? inventoryItem.onHandQuantity).toLocaleString()} stock</span>
             </div>
           </div>
         </CardHeader>
@@ -146,9 +145,11 @@ export function DonationListingCard({
                       Target <span className="font-semibold text-foreground">{marketingPreview.targetBuffer.toLocaleString()}</span>
                     </span>
                     {marketingPreview.shortBy !== null ? (
-                      <Badge variant={marketingPreview.shortBy > 0 ? 'destructive' : 'outline'}>
+                      <span
+                        className={marketingPreview.shortBy > 0 ? 'text-destructive' : 'text-muted-foreground'}
+                      >
                         Short by {marketingPreview.shortBy.toLocaleString()}
-                      </Badge>
+                      </span>
                     ) : null}
                   </div>
                   <Progress
@@ -354,4 +355,3 @@ export function DonationListingCard({
     </div>
   );
 }
-

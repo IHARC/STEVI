@@ -6,7 +6,6 @@ import { getPolicyBySlug } from '@/lib/policies';
 import { getEffectiveConsent, listConsentOrgs, listParticipatingOrganizations, resolveConsentOrgSelections } from '@/lib/consents';
 import { PageHeader } from '@shared/layout/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Input } from '@shared/ui/input';
 import { Textarea } from '@shared/ui/textarea';
@@ -150,8 +149,8 @@ export default async function AdminConsentsPage({ searchParams }: PageProps) {
                     <CardHeader className="space-y-1">
                       <div className="flex flex-wrap items-center gap-2">
                         <CardTitle className="text-base">{personName || `Person ${request.person_id}`}</CardTitle>
-                        <Badge variant="outline">ID {request.person_id}</Badge>
-                        <Badge variant="secondary">{request.organizations?.name ?? 'Requesting org'}</Badge>
+                        <span>ID {request.person_id}</span>
+                        <span>{request.organizations?.name ?? 'Requesting org'}</span>
                       </div>
                       <CardDescription>{request.purpose}</CardDescription>
                       <p className="text-xs text-muted-foreground">Requested {formatDate(request.requested_at)}</p>
@@ -341,11 +340,11 @@ export default async function AdminConsentsPage({ searchParams }: PageProps) {
           {consentHistory.map((row) => (
             <div key={row.id} className="rounded-2xl border border-border/40 bg-background p-3 text-sm">
               <div className="flex flex-wrap items-center gap-2">
-                <Badge variant={row.status === 'active' ? 'default' : row.status === 'expired' ? 'destructive' : 'secondary'}>
+                <span>
                   {row.status}
-                </Badge>
-                <Badge variant="outline">Scope: {formatScope(row.scope)}</Badge>
-                <Badge variant="outline">Method: {row.captured_method ?? '—'}</Badge>
+                </span>
+                <span>Scope: {formatScope(row.scope)}</span>
+                <span>Method: {row.captured_method ?? '—'}</span>
               </div>
               <p className="text-xs text-muted-foreground">Created {formatDate(row.created_at)}</p>
               {row.expires_at ? <p className="text-xs text-muted-foreground">Expires {formatDate(row.expires_at)}</p> : null}

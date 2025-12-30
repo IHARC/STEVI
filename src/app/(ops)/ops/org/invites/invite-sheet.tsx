@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { useFormState, useFormStatus } from 'react-dom';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@shared/ui/form';
 import { Input } from '@shared/ui/input';
@@ -76,9 +75,9 @@ export function InviteSheet({ rateLimit, organizationId }: InviteSheetProps) {
 
         <div className="mt-4 space-y-4">
           <div className="flex items-start justify-between gap-3 rounded-lg border border-border/40 bg-muted p-3">
-            <Badge variant={rateLimit.allowed ? 'secondary' : 'destructive'} className="capitalize">
+            <span className="capitalize">
               {rateLimit.allowed ? 'Limit clear' : 'Rate limited'}
-            </Badge>
+            </span>
             <p className="text-xs text-right text-muted-foreground">{limitMessage}</p>
           </div>
 

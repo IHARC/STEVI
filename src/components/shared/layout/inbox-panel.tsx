@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Panel } from '@shared/ui/panel';
 import { ScrollArea } from '@shared/ui/scroll-area';
@@ -47,9 +46,7 @@ export function InboxPanel({ items }: InboxPanelProps) {
             <p className="flex items-center gap-1 text-base font-semibold text-foreground">
               <Bell className="h-4 w-4" aria-hidden /> Inbox
             </p>
-            <Badge variant="outline" className="rounded-full bg-primary/12 text-xs font-semibold text-primary">
-              Live
-            </Badge>
+            <span className="text-xs font-semibold text-primary">Live</span>
           </div>
           <p className="text-sm text-muted-foreground">
             Time-sensitive approvals, notifications, and expiring documents.
@@ -115,7 +112,7 @@ function InboxList({ items, onDismiss }: { items: InboxItem[]; onDismiss: (id: s
                 ) : null}
               </div>
               <div className="flex flex-col items-end gap-1">
-                {item.badge ? <Badge variant="outline">{item.badge}</Badge> : null}
+                {item.badge ? <span>{item.badge}</span> : null}
                 <Button
                   type="button"
                   variant="ghost"

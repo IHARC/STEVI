@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from 'react';
 import type { StripeWebhookEventAdminRow } from '@/lib/donations/service';
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Input } from '@shared/ui/input';
@@ -54,7 +53,7 @@ export function DonationsWebhookEventsCard({ events }: Props) {
             Latest Stripe webhook events processed by Supabase. Last successful processing: {formatWhen(lastWebhookSuccess)}.
           </CardDescription>
         </div>
-        <Badge variant={lastWebhookSuccess ? 'secondary' : 'destructive'}>{lastWebhookSuccess ? 'Healthy' : 'No successes yet'}</Badge>
+        <span>{lastWebhookSuccess ? 'Healthy' : 'No successes yet'}</span>
       </CardHeader>
       <CardContent className="space-y-4 overflow-x-auto">
         <div className="max-w-sm space-y-2">
@@ -83,12 +82,12 @@ export function DonationsWebhookEventsCard({ events }: Props) {
                 <TableCell className="whitespace-nowrap">{formatWhen(event.receivedAt)}</TableCell>
                 <TableCell className="text-xs text-muted-foreground">{event.type}</TableCell>
                 <TableCell>
-                  <Badge
-                    variant={event.status === 'succeeded' ? 'secondary' : event.status === 'failed' ? 'destructive' : 'outline'}
+                  <span
+                   
                     className="capitalize"
                   >
                     {event.status ?? 'pending'}
-                  </Badge>
+                  </span>
                 </TableCell>
                 <TableCell className="max-w-[520px] truncate text-xs text-muted-foreground">{event.error ?? '—'}</TableCell>
                 <TableCell className="text-right">

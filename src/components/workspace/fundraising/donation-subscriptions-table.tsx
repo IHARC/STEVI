@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from 'react';
 import type { DonationSubscriptionAdminRow } from '@/lib/donations/service';
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Input } from '@shared/ui/input';
@@ -52,7 +51,7 @@ export function DonationSubscriptionsTable({ subscriptions }: { subscriptions: D
           <CardTitle className="text-xl">Monthly subscriptions</CardTitle>
           <CardDescription>Active and canceled donor subscriptions tracked via Stripe.</CardDescription>
         </div>
-        <Badge variant="secondary">{filtered.length} shown</Badge>
+        <span>{filtered.length} shown</span>
       </CardHeader>
       <CardContent className="space-y-4 overflow-x-auto">
         <div className="max-w-sm space-y-2">
@@ -81,9 +80,9 @@ export function DonationSubscriptionsTable({ subscriptions }: { subscriptions: D
               <TableRow key={sub.id}>
                 <TableCell className="whitespace-nowrap">{formatWhen(sub.startedAt)}</TableCell>
                 <TableCell>
-                  <Badge variant={sub.status === 'active' ? 'secondary' : 'outline'} className="capitalize">
+                  <span className="capitalize">
                     {sub.status ?? 'unknown'}
-                  </Badge>
+                  </span>
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground">{sub.donorEmail ?? '—'}</TableCell>
                 <TableCell className="whitespace-nowrap font-medium text-foreground">{formatMoney(sub.amountCents, sub.currency)}</TableCell>

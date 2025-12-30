@@ -8,7 +8,6 @@ import { getEffectiveConsent, listConsentOrgs, listParticipatingOrganizations, r
 import { logAuditEvent } from '@/lib/audit';
 import { PageHeader } from '@shared/layout/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Input } from '@shared/ui/input';
 import { Label } from '@shared/ui/label';
@@ -212,7 +211,7 @@ export default async function OpsConsentRecordPage({ searchParams }: PageProps) 
                     <CardHeader className="space-y-1">
                       <div className="flex flex-wrap items-center gap-2">
                         <CardTitle className="text-base">{name}</CardTitle>
-                        <Badge variant="outline">ID {person.id}</Badge>
+                        <span>ID {person.id}</span>
                       </div>
                       <CardDescription>
                         {person.person_type ? `Type: ${person.person_type.replace(/_/g, ' ')}` : 'Client record'}
@@ -261,9 +260,9 @@ export default async function OpsConsentRecordPage({ searchParams }: PageProps) 
 
                 {consentStatus ? (
                   <div className="flex flex-wrap items-center gap-2">
-                    <Badge variant={consentStatus === 'active' ? 'default' : consentStatus === 'expired' ? 'destructive' : 'secondary'}>
+                    <span>
                       {consentStatus}
-                    </Badge>
+                    </span>
                     {consentExpiresAt ? <span className="text-xs text-muted-foreground">Expires {formatDate(consentExpiresAt)}</span> : null}
                   </div>
                 ) : null}

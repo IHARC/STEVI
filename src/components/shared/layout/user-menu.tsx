@@ -11,7 +11,6 @@ import {
 } from '@shared/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@shared/ui/avatar';
 import { Button } from '@shared/ui/button';
-import { Badge } from '@shared/ui/badge';
 import { ActingOrgSwitcher } from '@shared/layout/acting-org-switcher';
 
 type MenuItem = {
@@ -69,14 +68,14 @@ export function UserMenu({
             <p className="text-xs text-foreground/70">{positionTitle}</p>
           ) : null}
           {awaitingVerification ? (
-            <Badge variant="outline" className="mt-1 border-primary/40 text-primary">
+            <span className="mt-1 border-primary/40 text-primary">
               Awaiting verification
-            </Badge>
+            </span>
           ) : null}
           {affiliationRevoked ? (
-            <Badge variant="destructive" className="mt-1">
+            <span className="mt-1">
               Verification declined
-            </Badge>
+            </span>
           ) : null}
         </div>
         <DropdownMenuSeparator />

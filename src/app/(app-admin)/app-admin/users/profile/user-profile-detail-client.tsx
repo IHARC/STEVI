@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Checkbox } from '@shared/ui/checkbox';
 import { Separator } from '@shared/ui/separator';
@@ -184,14 +183,14 @@ export function UserProfileDetailClient({
           </div>
           <div className="flex flex-wrap gap-1">
             {Array.from(globalRoleState).map((role) => (
-              <Badge key={role} variant="secondary" className="capitalize text-xs">
+              <span key={role} className="capitalize text-xs">
                 {role.replaceAll('_', ' ')}
-              </Badge>
+              </span>
             ))}
             {Array.from(orgRoleState).map((role) => (
-              <Badge key={role} variant="outline" className="capitalize text-xs">
+              <span key={role} className="capitalize text-xs">
                 {role.replaceAll('_', ' ')}
-              </Badge>
+              </span>
             ))}
           </div>
         </div>
@@ -225,9 +224,9 @@ export function UserProfileDetailClient({
           ) : (
             <div className="mt-2 flex flex-wrap gap-1">
               {effectivePermissions.map((permission) => (
-                <Badge key={permission} variant="outline" className="text-xs">
+                <span key={permission} className="text-xs">
                   {formatEnumLabel(permission)}
-                </Badge>
+                </span>
               ))}
             </div>
           )}

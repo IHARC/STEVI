@@ -16,7 +16,6 @@ import {
 } from '@/lib/cfs/queries';
 import { formatCfsLabel, formatReportStatus, CFS_STATUS_TONES } from '@/lib/cfs/constants';
 import { PageHeader } from '@shared/layout/page-header';
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { EmptyState } from '@shared/ui/empty-state';
@@ -206,8 +205,8 @@ export default async function CfsDetailPage({ params }: PageProps) {
                     <div key={entry.id} className="rounded-lg border border-border/60 p-3 text-sm">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="text-xs uppercase">{formatCfsLabel(entry.phase)}</Badge>
-                          <Badge variant="secondary" className="text-xs uppercase">{formatCfsLabel(entry.phase_status ?? 'completed')}</Badge>
+                          <span className="text-xs uppercase">{formatCfsLabel(entry.phase)}</span>
+                          <span className="text-xs uppercase">{formatCfsLabel(entry.phase_status ?? 'completed')}</span>
                         </div>
                         <span className="text-xs text-muted-foreground">{formatTimestamp(entry.phase_started_at)}</span>
                       </div>

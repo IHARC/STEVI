@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@shared/ui/alert';
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Input } from '@shared/ui/input';
@@ -60,9 +59,9 @@ export function DonationsStripeSettingsCard({ stripeSettings }: Props) {
             <CardTitle className="text-xl">Stripe (donations)</CardTitle>
             <CardDescription>Mode + credentials stored in Supabase Vault.</CardDescription>
           </div>
-          <Badge variant={isModeValid ? 'secondary' : 'destructive'} className="capitalize">
+          <span className="capitalize">
             {stripeMode ?? 'unset'}
-          </Badge>
+          </span>
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -108,11 +107,11 @@ export function DonationsStripeSettingsCard({ stripeSettings }: Props) {
             <div className="grid gap-2 pt-2 text-xs text-muted-foreground">
               <div className="flex items-center justify-between">
                 <span>Test credentials</span>
-                <Badge variant={hasTestKeys ? 'outline' : 'secondary'}>{hasTestKeys ? 'Configured' : 'Missing'}</Badge>
+                <span>{hasTestKeys ? 'Configured' : 'Missing'}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span>Live credentials</span>
-                <Badge variant={hasLiveKeys ? 'outline' : 'secondary'}>{hasLiveKeys ? 'Configured' : 'Missing'}</Badge>
+                <span>{hasLiveKeys ? 'Configured' : 'Missing'}</span>
               </div>
             </div>
           </div>
@@ -128,7 +127,6 @@ export function DonationsStripeSettingsCard({ stripeSettings }: Props) {
                   <input type="hidden" name="mode" value={entry.mode} />
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-sm font-semibold capitalize text-foreground">{entry.mode} credentials</p>
-                    <Badge variant="outline">Vault-managed</Badge>
                   </div>
 
                   <div className="space-y-2">
@@ -169,4 +167,3 @@ export function DonationsStripeSettingsCard({ stripeSettings }: Props) {
     </Card>
   );
 }
-

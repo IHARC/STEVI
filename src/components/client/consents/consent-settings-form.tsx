@@ -12,7 +12,6 @@ import { Textarea } from '@shared/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@shared/ui/radio-group';
 import { Checkbox } from '@shared/ui/checkbox';
 import { choiceCardVariants } from '@shared/ui/choice-card';
-import { Badge } from '@shared/ui/badge';
 
 export type ConsentSettingsProps = {
   personId: number;
@@ -99,15 +98,15 @@ export function ConsentSettings({ personId, snapshot, policyVersion, history }: 
 
 function ConsentStatusBadge({ status }: { status: ConsentStatus | null }) {
   if (!status) {
-    return <Badge variant="secondary">Not recorded</Badge>;
+    return <span>Not recorded</span>;
   }
   if (status === 'active') {
-    return <Badge variant="default">Active</Badge>;
+    return <span>Active</span>;
   }
   if (status === 'expired') {
-    return <Badge variant="destructive">Expired</Badge>;
+    return <span>Expired</span>;
   }
-  return <Badge variant="secondary">Revoked</Badge>;
+  return <span>Revoked</span>;
 }
 
 function ConsentSummary({
@@ -167,7 +166,7 @@ function ConsentOrgSummary({
       <div className="space-y-2">
         <div className="flex flex-wrap items-center gap-2">
           <p className="text-sm font-semibold text-foreground">Organizations with access</p>
-          <Badge variant="secondary">{allowedOrgs.length}</Badge>
+          <span>{allowedOrgs.length}</span>
           <span className="text-xs text-muted-foreground">of {totalOrgs}</span>
         </div>
         {!hasPartners ? (
@@ -176,7 +175,7 @@ function ConsentOrgSummary({
           <ul className="flex flex-wrap gap-2">
             {allowedOrgs.map((org) => (
               <li key={org.id}>
-                <Badge variant="secondary">{org.name ?? `Organization ${org.id}`}</Badge>
+                <span>{org.name ?? `Organization ${org.id}`}</span>
               </li>
             ))}
           </ul>
@@ -188,7 +187,7 @@ function ConsentOrgSummary({
       <div className="space-y-2">
         <div className="flex flex-wrap items-center gap-2">
           <p className="text-sm font-semibold text-foreground">Organizations without access</p>
-          <Badge variant="outline">{blockedOrgs.length}</Badge>
+          <span>{blockedOrgs.length}</span>
         </div>
         {!hasPartners ? (
           <p className="text-sm text-muted-foreground">No partner organizations are configured yet.</p>
@@ -196,7 +195,7 @@ function ConsentOrgSummary({
           <ul className="flex flex-wrap gap-2">
             {blockedOrgs.map((org) => (
               <li key={org.id}>
-                <Badge variant="outline">{org.name ?? `Organization ${org.id}`}</Badge>
+                <span>{org.name ?? `Organization ${org.id}`}</span>
               </li>
             ))}
           </ul>
@@ -483,8 +482,8 @@ function ConsentHistory({ history }: { history: ConsentHistoryEntry[] }) {
                 <li key={entry.id} className="rounded-2xl border border-border/40 bg-background p-3 text-sm">
                   <div className="flex flex-wrap items-center gap-2">
                     <ConsentStatusBadge status={effectiveStatus} />
-                    <Badge variant="outline">Scope: {formatScope(entry.scope)}</Badge>
-                    <Badge variant="outline">Method: {formatMethod(entry.capturedMethod)}</Badge>
+                    <span>Scope: {formatScope(entry.scope)}</span>
+                    <span>Method: {formatMethod(entry.capturedMethod)}</span>
                   </div>
                   <div className="mt-2 grid gap-1 text-xs text-muted-foreground">
                     <p>Captured {formatDate(entry.createdAt)}</p>

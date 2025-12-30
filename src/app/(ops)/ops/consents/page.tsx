@@ -10,7 +10,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shar
 import { Input } from '@shared/ui/input';
 import { Textarea } from '@shared/ui/textarea';
 import { Button } from '@shared/ui/button';
-import { Badge } from '@shared/ui/badge';
 import { Label } from '@shared/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '@shared/ui/alert';
 import { requestConsentAction, logConsentContactAction } from './actions';
@@ -232,9 +231,9 @@ export default async function OpsConsentRequestsPage({ searchParams }: PageProps
                     <CardHeader className="space-y-1">
                       <div className="flex flex-wrap items-center gap-2">
                         <CardTitle className="text-base">{name}</CardTitle>
-                        <Badge variant="outline">ID {person.id}</Badge>
-                        {allowed ? <Badge variant="default">Consent active</Badge> : null}
-                        {pending ? <Badge variant="secondary">Request pending</Badge> : null}
+                        <span>ID {person.id}</span>
+                        {allowed ? <span>Consent active</span> : null}
+                        {pending ? <span>Request pending</span> : null}
                       </div>
                       <CardDescription>
                         {person.person_type ? `Type: ${person.person_type.replace(/_/g, ' ')}` : 'Client record'}
@@ -313,9 +312,9 @@ export default async function OpsConsentRequestsPage({ searchParams }: PageProps
                 <div key={row.id} className="rounded-2xl border border-border/40 bg-background p-3 text-sm">
                   <div className="flex items-center justify-between gap-2">
                     <p className="font-medium">{requestNames.get(row.person_id) ?? `Person ${row.person_id}`}</p>
-                    <Badge variant={row.status === 'approved' ? 'default' : row.status === 'denied' ? 'destructive' : 'secondary'}>
+                    <span>
                       {row.status}
-                    </Badge>
+                    </span>
                   </div>
                   <p className="text-xs text-muted-foreground">Requested {formatDate(row.requested_at)}</p>
                   {row.decision_at ? (

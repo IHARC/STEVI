@@ -6,7 +6,6 @@ import { resolveLandingPath } from '@/lib/portal-navigation';
 import { fetchCfsSlaRows, type CfsSlaRow } from '@/lib/cfs/queries';
 import { formatCfsLabel } from '@/lib/cfs/constants';
 import { PageHeader } from '@shared/layout/page-header';
-import { Badge } from '@shared/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@shared/ui/table';
 
@@ -148,9 +147,9 @@ export default async function CfsReportsPage() {
                     <TableCell className="font-medium">{row.report_number}</TableCell>
                     <TableCell>{formatCfsLabel(row.report_priority_assessment)}</TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="uppercase">
+                      <span className="uppercase">
                         {formatCfsLabel(row.status ?? 'received')}
-                      </Badge>
+                      </span>
                     </TableCell>
                     <TableCell>
                       <div className="text-sm">{formatMinutes(row.triage_minutes)}</div>

@@ -10,7 +10,6 @@ import {
   BreadcrumbSeparator,
 } from '@shared/ui/breadcrumb';
 import { Button } from '@shared/ui/button';
-import { Badge } from '@shared/ui/badge';
 import { cn } from '@/lib/utils';
 
 type HeaderAction = {
@@ -78,13 +77,13 @@ export function PageHeader({
           {meta.length ? (
             <div className="flex flex-wrap items-center gap-2" aria-label="Page metadata">
               {meta.map((item) => (
-                <Badge
+                <span
                   key={item.label}
-                  variant="outline"
+                 
                   className={cn('text-xs font-semibold uppercase', metaToneClasses[item.tone ?? 'neutral'])}
                 >
                   {item.label}
-                </Badge>
+                </span>
               ))}
             </div>
           ) : null}

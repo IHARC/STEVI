@@ -2,7 +2,6 @@
 
 import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Combobox, type ComboboxOption } from '@shared/ui/combobox';
@@ -197,9 +196,9 @@ function PendingAffiliationsContent({
           <CardDescription>Approve agency and government representatives so they can collaborate on STEVI right away.</CardDescription>
         </div>
         <div className="flex w-full flex-col gap-2 sm:w-auto sm:items-end">
-          <Badge variant="outline" className="self-start text-xs uppercase sm:self-end">
+          <span className="self-start text-xs uppercase sm:self-end">
             {pendingCountLabel}
-          </Badge>
+          </span>
           <Input
             className="w-full sm:w-72"
             placeholder="Search requests…"
@@ -220,7 +219,7 @@ function PendingAffiliationsContent({
               <Panel asChild surface="background" borderTone="subtle" padding="none">
                 <section>
                   <div className="flex items-center justify-between gap-2 border-b border-border/15 px-4 py-3">
-                    <Badge variant="secondary">{filteredPending.length} shown</Badge>
+                    <span>{filteredPending.length} shown</span>
                     <span className="text-xs text-muted-foreground">Select a request to review</span>
                   </div>
 
@@ -246,7 +245,7 @@ function PendingAffiliationsContent({
                                       {entry.positionTitle ?? entry.organizationName ?? '—'}
                                     </p>
                                   </div>
-                                  <Badge variant="outline">{AFFILIATION_LABELS[entry.affiliationType]}</Badge>
+                                  <span>{AFFILIATION_LABELS[entry.affiliationType]}</span>
                                 </div>
                                 {requestedDate ? (
                                   <p className="mt-2 text-xs text-muted-foreground">Requested {requestedDate}</p>
@@ -347,7 +346,7 @@ function PendingAffiliationEditor({
       <header className="space-y-1">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h3 className="text-lg font-semibold text-foreground">{entry.displayName}</h3>
-          <Badge variant="secondary">{AFFILIATION_LABELS[entry.affiliationType]}</Badge>
+          <span>{AFFILIATION_LABELS[entry.affiliationType]}</span>
         </div>
         {entry.positionTitle ? <p className="text-sm text-muted-foreground">{entry.positionTitle}</p> : null}
         {entry.organizationName ? <p className="text-xs text-muted-foreground">Linked to {entry.organizationName}</p> : null}

@@ -10,7 +10,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@shared/ui/input';
 import { Textarea } from '@shared/ui/textarea';
 import { Checkbox } from '@shared/ui/checkbox';
-import { Badge } from '@shared/ui/badge';
 import { cn } from '@/lib/utils';
 import type { InventoryItem, InventoryLocation, InventoryOrganization, InventoryReceipt } from '@/lib/inventory/types';
 import { InventoryReceiptsSection } from '@workspace/admin/inventory/inventory-receipts';
@@ -147,8 +146,8 @@ function InventoryDetailsCard({
             <CardDescription>Core item fields used by stock tracking.</CardDescription>
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant={item.active ? 'secondary' : 'outline'}>{item.active ? 'Active' : 'Inactive'}</Badge>
-            <Badge variant="outline">{item.onHandQuantity.toLocaleString()} on hand</Badge>
+            <span>{item.active ? 'Active' : 'Inactive'}</span>
+            <span>{item.onHandQuantity.toLocaleString()} on hand</span>
           </div>
         </div>
       </CardHeader>

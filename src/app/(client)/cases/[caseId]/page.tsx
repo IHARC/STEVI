@@ -4,7 +4,6 @@ import { loadPortalAccess } from '@/lib/portal-access';
 import { fetchClientCaseActivities, fetchClientCaseDetail } from '@/lib/cases/fetchers';
 import { submitClientCaseUpdateAction } from '@/lib/cases/actions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Textarea } from '@shared/ui/textarea';
 import { Label } from '@shared/ui/label';
@@ -43,9 +42,9 @@ export default async function CaseDetailPage({ params }: CasePageProps) {
           <h1 className="text-3xl text-foreground sm:text-4xl">{detail.caseType ?? 'Support case'}</h1>
           <p className="text-sm text-muted-foreground">Managed by {detail.caseManagerName}</p>
         </div>
-        <Badge variant={detail.status === 'active' ? 'default' : 'secondary'} className="capitalize">
+        <span className="capitalize">
           {detail.status ?? 'active'}
-        </Badge>
+        </span>
       </header>
 
       <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
@@ -72,13 +71,13 @@ export default async function CaseDetailPage({ params }: CasePageProps) {
                     </div>
                     <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                       {item.createdByOrg ? (
-                        <Badge variant="outline" className="border-border/70">
+                        <span className="border-border/70">
                           Created by {item.createdByOrg}
-                        </Badge>
+                        </span>
                       ) : null}
-                      <Badge variant="secondary" className="border-border/70">
+                      <span className="border-border/70">
                         Shared with you
-                      </Badge>
+                      </span>
                     </div>
                     {item.description ? (
                       <p className="mt-1 text-sm text-foreground/80">{item.description}</p>

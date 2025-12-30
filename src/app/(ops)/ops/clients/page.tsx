@@ -11,7 +11,6 @@ import type { PersonCategory, PersonStatus, PersonType } from '@/lib/clients/dir
 import type { Database } from '@/types/supabase';
 import { PageHeader } from '@shared/layout/page-header';
 import { PageTabNav, type PageTab } from '@shared/layout/page-tab-nav';
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@shared/ui/table';
 import { ClientsDirectoryTable } from '@workspace/clients/clients-directory-table';
@@ -89,7 +88,6 @@ export default async function OpsClientsPage({ searchParams }: PageProps) {
         title="Clients"
         description="Directory, caseload, and recent activity in one hub. Start Visits and keep referrals or supplies within the Visit context."
         density="compact"
-        meta={[{ label: 'Visit-first', tone: 'info' }, { label: 'Journey timeline', tone: 'neutral' }]}
       />
 
       <PageTabNav
@@ -231,9 +229,9 @@ function CaseloadView({ caseload }: { caseload: Awaited<ReturnType<typeof fetchS
               <TableRow key={item.id}>
                 <TableCell className="font-medium">{item.clientName}</TableCell>
                 <TableCell className="hidden md:table-cell">
-                  <Badge variant={item.status === 'active' ? 'default' : 'secondary'} className="capitalize">
+                  <span className="capitalize">
                     {item.status}
-                  </Badge>
+                  </span>
                 </TableCell>
                 <TableCell className="hidden lg:table-cell text-sm text-muted-foreground">
                   {item.nextStep ?? '—'}
@@ -285,9 +283,9 @@ function ActivityView({ cases }: { cases: Awaited<ReturnType<typeof fetchStaffCa
                 <TableCell className="hidden lg:table-cell">{item.caseManagerName}</TableCell>
                 <TableCell className="hidden lg:table-cell">{item.priority ?? '—'}</TableCell>
                 <TableCell className="hidden md:table-cell">
-                  <Badge variant={item.status === 'active' ? 'default' : 'secondary'} className="capitalize">
+                  <span className="capitalize">
                     {item.status ?? 'active'}
-                  </Badge>
+                  </span>
                 </TableCell>
                 <TableCell className="text-right">
                   <Button asChild size="sm" variant="outline">

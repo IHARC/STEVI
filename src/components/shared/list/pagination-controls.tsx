@@ -3,7 +3,6 @@
 import { Label } from '@shared/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/ui/select';
 import { Button } from '@shared/ui/button';
-import { Badge } from '@shared/ui/badge';
 import { cn } from '@/lib/utils';
 
 export type ListPageSize = 10 | 25 | 50 | 100;
@@ -64,9 +63,7 @@ export function ListPaginationControls({
 
       <div className="flex items-center gap-2">
         <div className="hidden items-center gap-2 text-xs text-muted-foreground sm:flex">
-          <Badge variant="outline" className="px-2 py-0.5">
-            {totalCount.toLocaleString()} results
-          </Badge>
+          <span>{totalCount.toLocaleString()} results</span>
           <span className="tabular-nums">
             Showing {showingStart.toLocaleString()}–{showingEnd.toLocaleString()} of {totalCount.toLocaleString()}
           </span>
@@ -84,4 +81,3 @@ export function ListPaginationControls({
     </div>
   );
 }
-

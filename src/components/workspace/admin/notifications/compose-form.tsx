@@ -4,7 +4,6 @@ import { FormEvent, useMemo, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Button } from '@shared/ui/button';
-import { Badge } from '@shared/ui/badge';
 import { Input } from '@shared/ui/input';
 import { Textarea } from '@shared/ui/textarea';
 import { Label } from '@shared/ui/label';
@@ -136,10 +135,9 @@ export function ComposeNotificationForm({ recipients, hasAlertsSecret }: Compose
     <CardContent>
       <form ref={formRef} onSubmit={handleSubmit} className="grid gap-4">
           <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border/15 bg-muted px-3 py-1 text-xs text-muted-foreground">
-            <Badge variant={hasAlertsSecret ? 'secondary' : 'destructive'}>
+            <span>
               {hasAlertsSecret ? 'Edge function ready' : 'Configure PORTAL_ALERTS_SECRET for sends'}
-            </Badge>
-            <Badge variant="outline">Consent enforced server-side</Badge>
+            </span>
           </div>
           <div className="grid gap-3 md:grid-cols-2">
             <Label className="grid gap-1 text-sm text-foreground">

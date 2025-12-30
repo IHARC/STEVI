@@ -1,4 +1,3 @@
-import { Badge } from '@shared/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@shared/ui/table';
 import type { TimeEntryWithProfile } from '@/lib/time/queries';
 
@@ -81,9 +80,9 @@ export function TimecardsTable({ rows, showProfile = false }: TimecardsTableProp
               <TableCell>{formatDuration(row.total_minutes)}</TableCell>
               <TableCell>{formatMoney(row.cost_amount_snapshot ?? 0, row.currency)}</TableCell>
               <TableCell className="text-right">
-                <Badge variant={row.shift_end ? 'secondary' : 'outline'} className="capitalize">
+                <span className="capitalize">
                   {row.status}
-                </Badge>
+                </span>
               </TableCell>
             </TableRow>
           ))

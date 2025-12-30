@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from '@shared/ui/alert';
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import {
   DropdownMenu,
@@ -82,25 +81,11 @@ function formatTimestamp(value: string | null) {
   return date.toLocaleString(undefined, { year: 'numeric', month: 'short', day: '2-digit' });
 }
 
-function resolveOnboardingVariant(status?: OnboardingStatus | null) {
-  if (!status) return 'secondary';
-  if (status.status === 'COMPLETED') return 'default';
-  if (status.status === 'NEEDS_CONSENTS') return 'secondary';
-  return 'outline';
-}
-
 function describeOnboarding(status?: OnboardingStatus | null) {
   if (!status) return 'Status unavailable';
   if (status.status === 'COMPLETED') return 'Completed';
   if (status.status === 'NEEDS_CONSENTS') return 'Needs consents';
   return 'Not started';
-}
-
-function resolveConsentVariant(status?: OnboardingStatus | null) {
-  if (!status) return 'secondary';
-  if (status.hasDataSharingPreference) return 'outline';
-  if (status.hasPerson) return 'secondary';
-  return 'secondary';
 }
 
 function describeConsent(status?: OnboardingStatus | null) {
@@ -423,15 +408,15 @@ export function ClientsDirectoryTable({ items, totalCount, query, loadError, onb
                 </TableCell>
                 <TableCell className="hidden lg:table-cell">{formatEnumLabel(item.person_type)}</TableCell>
                 <TableCell className="hidden md:table-cell">
-                  <Badge variant={item.status === 'active' ? 'default' : 'secondary'} className="capitalize">
+                  <span className="capitalize">
                     {formatEnumLabel(item.status)}
-                  </Badge>
+                  </span>
                 </TableCell>
                 <TableCell className="hidden xl:table-cell">
-                  <Badge variant={resolveOnboardingVariant(item.onboarding)}>{describeOnboarding(item.onboarding)}</Badge>
+                  <span>{describeOnboarding(item.onboarding)}</span>
                 </TableCell>
                 <TableCell className="hidden lg:table-cell">
-                  <Badge variant={resolveConsentVariant(item.onboarding)}>{describeConsent(item.onboarding)}</Badge>
+                  <span>{describeConsent(item.onboarding)}</span>
                 </TableCell>
                 <TableCell className="hidden lg:table-cell">{item.last_service_date ?? '—'}</TableCell>
                 <TableCell className="hidden md:table-cell">{formatTimestamp(item.updated_at)}</TableCell>

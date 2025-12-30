@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Switch } from '@shared/ui/switch';
 import {
@@ -156,16 +155,16 @@ export function OrgMembersTable({ members, currentProfileId, organizationId, rol
               <TableCell>
                 <div className="flex flex-wrap items-center gap-1">
                   {assignedRoles.size === 0 ? (
-                    <Badge variant="outline" className="capitalize">member</Badge>
+                    <span className="capitalize">member</span>
                   ) : null}
                   {member.org_roles.map((role) => (
-                    <Badge key={role.id} variant="secondary" className="capitalize">
+                    <span key={role.id} className="capitalize">
                       {(role.displayName ?? role.name).replaceAll('_', ' ')}
-                    </Badge>
+                    </span>
                   ))}
-                  <Badge variant="outline" className="capitalize text-xs">
+                  <span className="capitalize text-xs">
                     {member.affiliation_status}
-                  </Badge>
+                  </span>
                 </div>
               </TableCell>
               <TableCell>{formatDate(member.last_seen_at)}</TableCell>

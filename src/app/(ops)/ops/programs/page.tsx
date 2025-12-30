@@ -6,7 +6,6 @@ import { resolveLandingPath } from '@/lib/portal-navigation';
 import { fetchStaffShifts } from '@/lib/staff/fetchers';
 import { PageHeader } from '@shared/layout/page-header';
 import { PageTabNav, type PageTab } from '@shared/layout/page-tab-nav';
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { cn } from '@/lib/utils';
@@ -53,7 +52,6 @@ export default async function OpsProgramsPage({ searchParams }: PageProps) {
         title="Programs"
         description="Program cards, schedules, and rosters in one place. Start Visits from a program to keep context."
         secondaryAction={{ label: 'Open organizations', href: '/ops/organizations' }}
-        meta={[{ label: 'Outreach lives here', tone: 'info' }]}
       />
 
       <PageTabNav tabs={tabs} activeHref={activeHref} />
@@ -133,7 +131,7 @@ function ProgramCard({ program, highlight }: { program: { id: string; title: str
       <CardHeader className="space-y-1">
         <div className="flex items-center justify-between gap-2">
           <CardTitle className="text-lg truncate">{program.title}</CardTitle>
-          <Badge variant="secondary">Today</Badge>
+          <span>Today</span>
         </div>
         <CardDescription>{program.location}</CardDescription>
       </CardHeader>
@@ -141,11 +139,6 @@ function ProgramCard({ program, highlight }: { program: { id: string; title: str
         <p>
           {program.startsAt} – {program.endsAt}
         </p>
-        <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-          <Badge variant="outline">Roster</Badge>
-          <Badge variant="outline">Attendance</Badge>
-          <Badge variant="outline">Shift log</Badge>
-        </div>
         <Button asChild className="w-full">
           <Link href={`/ops/programs/${program.id}?view=overview`}>Open program</Link>
         </Button>

@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { Alert, AlertDescription, AlertTitle } from '@shared/ui/alert';
-import { Badge } from '@shared/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Form } from '@shared/ui/form';
 import { RadioGroup, RadioGroupItem } from '@shared/ui/radio-group';
@@ -168,7 +167,7 @@ function SharingCardInner({
                     <div>
                       <div className="flex items-center gap-2">
                         <p className="text-base font-medium">All participating orgs</p>
-                        <Badge variant="outline">Recommended</Badge>
+                        <span>Recommended</span>
                       </div>
                       <p className="text-sm text-muted-foreground">Fastest referrals and coordinated care.</p>
                     </div>

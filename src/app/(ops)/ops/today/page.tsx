@@ -8,7 +8,6 @@ import { fetchPendingIntakes } from '@/lib/cases/fetchers';
 import { PageHeader } from '@shared/layout/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Button } from '@shared/ui/button';
-import { Badge } from '@shared/ui/badge';
 import { resolveLandingPath } from '@/lib/portal-navigation';
 
 export const dynamic = 'force-dynamic';
@@ -47,8 +46,7 @@ export default async function OpsTodayPage() {
       <PageHeader
         eyebrow="Operations"
         title="Today"
-        description="Stay visit-first: start a Visit, find or create a person, and work the queues that matter for your role."
-        meta={[{ label: 'Visit-first', tone: 'info' }, { label: 'Single rail', tone: 'neutral' }]}
+        description="Start a Visit, find or create a person, and work the queues that matter for your role."
         primaryAction={visitAction}
         secondaryAction={{ label: 'Find or create person', href: findPersonHref }}
         helperLink={{ label: 'View help', href: '/support' }}
@@ -58,13 +56,9 @@ export default async function OpsTodayPage() {
         <Card className="border-border/70">
           <CardHeader className="space-y-1">
             <CardTitle className="text-lg">Find or create person</CardTitle>
-            <CardDescription>Jump to search or intake without leaving the Visit-first rail.</CardDescription>
+            <CardDescription>Jump to search or intake without losing your place.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-              <Badge variant="secondary">Visit copy</Badge>
-              <Badge variant="outline">No mega menu</Badge>
-            </div>
             <div className="flex flex-col gap-2 sm:flex-row">
               <Button asChild className="flex-1">
                 <Link href={newVisitHref}>New Visit</Link>
@@ -84,7 +78,7 @@ export default async function OpsTodayPage() {
             <CardHeader className="space-y-1">
               <div className="flex items-center justify-between gap-2">
                 <CardTitle className="text-lg">Active caseload</CardTitle>
-                <Badge variant="secondary">{caseload.length} open</Badge>
+                <span>{caseload.length} open</span>
               </div>
               <CardDescription>Visit and task from people assigned to you.</CardDescription>
             </CardHeader>
@@ -93,7 +87,7 @@ export default async function OpsTodayPage() {
                 <div key={item.id} className="rounded-lg border border-border/60 px-3 py-2">
                   <div className="flex items-center justify-between gap-2">
                     <p className="font-medium text-foreground">{item.clientName}</p>
-                    <Badge variant={item.status === 'active' ? 'default' : 'outline'} className="capitalize">{item.status}</Badge>
+                    <span className="capitalize">{item.status}</span>
                   </div>
                   <p className="text-xs text-muted-foreground">Next: {item.nextStep ?? 'Add next step from Visit'}</p>
                 </div>
@@ -111,7 +105,7 @@ export default async function OpsTodayPage() {
             <CardHeader className="space-y-1">
               <div className="flex items-center justify-between gap-2">
                 <CardTitle className="text-lg">Today’s shifts</CardTitle>
-                <Badge variant="secondary">{shifts.length}</Badge>
+                <span>{shifts.length}</span>
               </div>
               <CardDescription>Program and outreach context for Visit creation.</CardDescription>
             </CardHeader>
@@ -136,9 +130,9 @@ export default async function OpsTodayPage() {
             <CardHeader className="space-y-1">
               <div className="flex items-center justify-between gap-2">
                 <CardTitle className="text-lg">Intake queue</CardTitle>
-                <Badge variant="secondary">{intakes.length}</Badge>
+                <span>{intakes.length}</span>
               </div>
-              <CardDescription>Convert submissions into Visits without leaving the rail.</CardDescription>
+              <CardDescription>Convert submissions into Visits from here.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2 text-sm text-foreground/80">
               {intakes.slice(0, 3).map((intake) => (
@@ -177,7 +171,7 @@ export default async function OpsTodayPage() {
           <Card className="border-border/70">
             <CardHeader className="space-y-1">
               <CardTitle className="text-lg">Ops orientation</CardTitle>
-              <CardDescription>Use the Ops rail to reach Organization, Organizations, and Inventory.</CardDescription>
+              <CardDescription>Use Ops navigation to reach Organization, Organizations, and Inventory.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2 text-sm text-muted-foreground">
               <p>Admins can manage access under Organization → Access & roles.</p>

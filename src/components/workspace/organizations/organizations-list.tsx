@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Input } from '@shared/ui/input';
 import { Label } from '@shared/ui/label';
@@ -69,12 +68,6 @@ function formatDate(value: string | null) {
   }
 }
 
-function resolveStatusVariant(status: OrganizationRow['status'], isActive: boolean | null) {
-  if (isActive === false || status === 'inactive') return 'secondary';
-  if (status === 'pending' || status === 'under_review') return 'outline';
-  return 'default';
-}
-
 function ServiceTags({ services }: { services: unknown }) {
   const list = Array.isArray(services) ? services : [];
   if (!list.length) return <span className="text-muted-foreground">—</span>;
@@ -82,9 +75,9 @@ function ServiceTags({ services }: { services: unknown }) {
   return (
     <div className="flex flex-wrap gap-2">
       {list.map((item, idx) => (
-        <Badge key={`${item}-${idx}`} variant="outline" className="text-xs capitalize">
+        <span key={`${item}-${idx}`} className="text-xs capitalize">
           {String(item).replaceAll('_', ' ')}
-        </Badge>
+        </span>
       ))}
     </div>
   );
@@ -298,9 +291,9 @@ export function OrganizationsList({
                     )}
                   </TableCell>
                   <TableCell>
-                    <Badge variant={resolveStatusVariant(org.status, org.is_active)} className="capitalize">
+                    <span className="capitalize">
                       {org.status ?? (org.is_active === false ? 'inactive' : 'active')}
-                    </Badge>
+                    </span>
                   </TableCell>
                 </TableRow>
               ))}

@@ -3,7 +3,6 @@
 import { useMemo, useState, useTransition } from 'react';
 import Link from 'next/link';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@shared/ui/sheet';
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { useToast } from '@shared/ui/use-toast';
 import { updateProfileAction } from './actions';
@@ -45,14 +44,14 @@ export function UserPeekSheet({ user }: UserPeekSheetProps) {
         </SheetHeader>
         <div className="mt-4 space-y-4 text-sm">
           <div className="flex flex-wrap gap-1">
-            <Badge variant="secondary" className="capitalize">{user.affiliationType.replace('_', ' ')}</Badge>
-            <Badge variant={user.affiliationStatus === 'approved' ? 'default' : user.affiliationStatus === 'pending' ? 'outline' : 'secondary'}>
+            <span className="capitalize">{user.affiliationType.replace('_', ' ')}</span>
+            <span>
               {user.affiliationStatus}
-            </Badge>
+            </span>
             {user.organizationName ? (
-              <Badge variant="outline">{user.organizationName}</Badge>
+              <span>{user.organizationName}</span>
             ) : (
-              <Badge variant="outline">No org</Badge>
+              <span>No org</span>
             )}
           </div>
 
@@ -60,9 +59,9 @@ export function UserPeekSheet({ user }: UserPeekSheetProps) {
             <p className="text-xs text-muted-foreground">Roles</p>
             <div className="flex flex-wrap gap-1">
               {Array.from(roles).map((role) => (
-                <Badge key={role} variant={role.startsWith('portal_') ? 'outline' : 'secondary'} className="capitalize">
+                <span key={role} className="capitalize">
                   {role.replace('portal_', '').replace('iharc_', '')}
-                </Badge>
+                </span>
               ))}
             </div>
           </div>

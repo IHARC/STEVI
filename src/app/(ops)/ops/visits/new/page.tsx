@@ -100,7 +100,7 @@ export default async function NewVisitPage() {
       <Card className="border-border/70">
         <CardHeader>
           <CardTitle className="text-xl">Visit actions available now</CardTitle>
-          <CardDescription>Stay on the visit-first rail using the Ops tools that are live today.</CardDescription>
+          <CardDescription>Use the Ops tools that are live today.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3 text-sm text-foreground/80">
           <ul className="space-y-2 text-muted-foreground">

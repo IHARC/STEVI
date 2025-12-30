@@ -10,7 +10,6 @@ import { checkRateLimit, type RateLimitResult } from '@/lib/rate-limit';
 import { ensurePortalProfile } from '@/lib/profile';
 import { fetchCostCategories, fetchCostDimensions, fetchServiceCatalog, fetchStaffRates } from '@/lib/costs/queries';
 import { PageHeader } from '@shared/layout/page-header';
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Input } from '@shared/ui/input';
@@ -72,13 +71,6 @@ const PARTNERSHIP_OPTIONS: Array<NonNullable<OrganizationRow['partnership_type']
   'resource_partner',
   'other',
 ];
-
-const STATUS_BADGE: Record<string, 'default' | 'secondary' | 'outline'> = {
-  active: 'default',
-  pending: 'outline',
-  under_review: 'outline',
-  inactive: 'secondary',
-};
 
 const INVITE_DATE_FORMATTER = new Intl.DateTimeFormat('en-CA', { dateStyle: 'medium', timeStyle: 'short' });
 const APPOINTMENT_FORMATTER = new Intl.DateTimeFormat('en-CA', { dateStyle: 'medium', timeStyle: 'short' });
@@ -232,13 +224,13 @@ export default async function OrganizationDetailPage({ params, searchParams }: P
         ]}
       >
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant={STATUS_BADGE[orgRow.status ?? 'active'] ?? 'outline'} className="capitalize">
+          <span className="capitalize">
             {(orgRow.status ?? 'active').replaceAll('_', ' ')}
-          </Badge>
-          <Badge variant={orgRow.is_active ? 'secondary' : 'outline'}>{orgRow.is_active ? 'Active' : 'Inactive'}</Badge>
-          {isIharcAdmin ? <Badge variant="outline">IHARC admin</Badge> : null}
-          {!isIharcAdmin && isOrgAdmin ? <Badge variant="outline">Org admin</Badge> : null}
-          {!isIharcAdmin && !isOrgAdmin && isOrgRep ? <Badge variant="outline">Org rep</Badge> : null}
+          </span>
+          <span>{orgRow.is_active ? 'Active' : 'Inactive'}</span>
+          {isIharcAdmin ? <span>IHARC admin</span> : null}
+          {!isIharcAdmin && isOrgAdmin ? <span>Org admin</span> : null}
+          {!isIharcAdmin && !isOrgAdmin && isOrgRep ? <span>Org rep</span> : null}
         </div>
       </PageHeader>
 
@@ -692,9 +684,9 @@ function InvitesTab({
             <CardTitle>Recent invites</CardTitle>
             <CardDescription>Showing the last 50 invitations tied to this organization.</CardDescription>
           </div>
-          <Badge variant={rateLimit.allowed ? 'secondary' : 'destructive'} className="capitalize">
+          <span className="capitalize">
             {rateLimit.allowed ? 'Limit clear' : 'Rate limited'}
-          </Badge>
+          </span>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -714,9 +706,9 @@ function InvitesTab({
                   <td className="py-3 pr-4">{invite.display_name ?? '—'}</td>
                   <td className="py-3 pr-4 text-muted-foreground">{invite.position_title ?? '—'}</td>
                   <td className="py-3 pr-4">
-                    <Badge variant={invite.status === 'pending' ? 'secondary' : 'default'} className="capitalize">
+                    <span className="capitalize">
                       {invite.status}
-                    </Badge>
+                    </span>
                   </td>
                   <td className="py-3 pr-4 text-muted-foreground">{formatInviteDate(invite.created_at)}</td>
                 </tr>
@@ -882,7 +874,7 @@ function AppointmentsTab({
                       {appointment.client?.display_name ?? 'Client'} · {appointment.requested_window ?? 'no window provided'}
                     </p>
                   </div>
-                  <Badge className="capitalize">{appointment.status.replaceAll('_', ' ')}</Badge>
+                  <span className="capitalize">{appointment.status.replaceAll('_', ' ')}</span>
                 </div>
                 <p className="text-sm text-foreground/80">Preferred time: {appointment.requested_window ?? 'unspecified'}</p>
                 {appointment.meeting_url ? (
@@ -918,9 +910,9 @@ function AppointmentsTab({
                       {appointment.client?.display_name ?? 'Client'} · {formatAppointmentDate(appointment.occurs_at)}
                     </p>
                   </div>
-                  <Badge variant="secondary" className="capitalize">
+                  <span className="capitalize">
                     {appointment.status.replaceAll('_', ' ')}
-                  </Badge>
+                  </span>
                 </li>
               ))}
             </ul>

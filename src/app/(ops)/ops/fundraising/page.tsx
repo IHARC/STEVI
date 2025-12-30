@@ -7,7 +7,6 @@ import { PageHeader } from '@shared/layout/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@shared/ui/tabs';
 import Link from 'next/link';
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { fetchInventoryBootstrap } from '@/lib/inventory/service';
 import {
@@ -174,7 +173,7 @@ export default async function OpsFundraisingHubPage({ searchParams }: PageProps)
               </CardHeader>
               <CardContent className="flex items-center justify-between">
                 <div className="text-sm text-muted-foreground">Items</div>
-                <Badge variant="outline">{catalogStats.total}</Badge>
+                <span>{catalogStats.total}</span>
               </CardContent>
             </Card>
 
@@ -185,7 +184,7 @@ export default async function OpsFundraisingHubPage({ searchParams }: PageProps)
               </CardHeader>
               <CardContent className="flex items-center justify-between">
                 <div className="text-sm text-muted-foreground">Loaded</div>
-                <Badge variant="outline">{payments.length}</Badge>
+                <span>{payments.length}</span>
               </CardContent>
             </Card>
 
@@ -196,7 +195,7 @@ export default async function OpsFundraisingHubPage({ searchParams }: PageProps)
               </CardHeader>
               <CardContent className="flex items-center justify-between">
                 <div className="text-sm text-muted-foreground">Loaded</div>
-                <Badge variant="outline">{subscriptions.length}</Badge>
+                <span>{subscriptions.length}</span>
               </CardContent>
             </Card>
           </div>

@@ -4,7 +4,6 @@ import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { fetchClientCases } from '@/lib/cases/fetchers';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { EmptyState } from '@shared/ui/empty-state';
 import { resolveLandingPath } from '@/lib/portal-navigation';
@@ -61,9 +60,9 @@ export default async function ClientCasesPage() {
                   <CardDescription>Case #{item.caseNumber ?? item.id}</CardDescription>
                   <p className="text-sm text-muted-foreground">Case manager: {item.caseManagerName}</p>
                 </div>
-                <Badge variant={item.status === 'active' ? 'default' : 'secondary'} className="capitalize">
+                <span className="capitalize">
                   {item.status ?? 'active'}
-                </Badge>
+                </span>
               </CardHeader>
               <CardContent className="space-y-3 text-sm text-foreground/80">
                 <p>Priority: {item.priority ?? 'standard'}</p>

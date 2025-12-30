@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from 'react';
 import type { DonationPaymentAdminRow } from '@/lib/donations/service';
-import { Badge } from '@shared/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Input } from '@shared/ui/input';
 import { Label } from '@shared/ui/label';
@@ -61,7 +60,7 @@ export function DonationPaymentsTable({ payments }: { payments: DonationPaymentA
           <CardTitle className="text-xl">Donations inbox</CardTitle>
           <CardDescription>Most recent Stripe-backed payments recorded via webhooks.</CardDescription>
         </div>
-        <Badge variant="secondary">{filtered.length} shown</Badge>
+        <span>{filtered.length} shown</span>
       </CardHeader>
       <CardContent className="space-y-4 overflow-x-auto">
         <div className="max-w-sm space-y-2">
@@ -83,12 +82,12 @@ export function DonationPaymentsTable({ payments }: { payments: DonationPaymentA
               <TableRow key={payment.id}>
                 <TableCell className="whitespace-nowrap">{formatWhen(payment.processedAt)}</TableCell>
                 <TableCell>
-                  <Badge
-                    variant={payment.status === 'succeeded' ? 'secondary' : payment.status ? 'destructive' : 'outline'}
+                  <span
+                   
                     className="capitalize"
                   >
                     {payment.status ?? 'unknown'}
-                  </Badge>
+                  </span>
                 </TableCell>
                 <TableCell className="whitespace-nowrap font-medium text-foreground">
                   {formatMoney(payment.amountCents, payment.currency)}

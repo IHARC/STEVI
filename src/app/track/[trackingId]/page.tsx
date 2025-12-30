@@ -2,7 +2,6 @@ import { notFound } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { fetchPublicTracking } from '@/lib/cfs/queries';
 import { formatCfsLabel, PUBLIC_STATUS_TONES } from '@/lib/cfs/constants';
-import { Badge } from '@shared/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 
 export const dynamic = 'force-dynamic';
@@ -45,9 +44,9 @@ export default async function PublicTrackingPage({ params }: PageProps) {
               <CardTitle>Request status</CardTitle>
               <CardDescription>Public tracking for outreach requests.</CardDescription>
             </div>
-            <Badge variant="outline" className={`text-xs uppercase ${toneClass}`}>
+            <span className={`text-xs uppercase ${toneClass}`}>
               {formatCfsLabel(tracking.status_bucket)}
-            </Badge>
+            </span>
           </div>
         </CardHeader>
         <CardContent className="space-y-4 text-sm">

@@ -6,7 +6,6 @@ import { resolveLandingPath } from '@/lib/portal-navigation';
 import { fetchStaffShifts } from '@/lib/staff/fetchers';
 import { normalizeEnumParam, toSearchParams } from '@/lib/search-params';
 import { PageHeader } from '@shared/layout/page-header';
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 
@@ -64,11 +63,6 @@ export default async function ProgramDetailPage({ params, searchParams }: PagePr
             <CardDescription>Assign staff and volunteers; attendance rolls stay within the Visit record.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 text-sm text-foreground/80">
-            <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-              <Badge variant="outline">Shift log</Badge>
-              <Badge variant="outline">Attendance</Badge>
-              <Badge variant="outline">Schedule</Badge>
-            </div>
             <p className="text-muted-foreground">Wire roster to staffing data when available. Keep shift notes inside Visits to preserve provenance.</p>
             <Button asChild variant="outline" className="w-full">
               <Link href="/ops/programs?view=schedule">Manage schedule</Link>

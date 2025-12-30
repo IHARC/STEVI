@@ -7,7 +7,6 @@ import { coerceSegment, fetchAdminUsers, fetchAdminUserSummary, parsePageParam, 
 import { getAffiliationStatuses, getGlobalRoles, getOrgRoleNames, toOptions, formatEnumLabel } from '@/lib/enum-values';
 import { PageHeader } from '@shared/layout/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { UserFilterBar } from '@workspace/admin/users/user-filter-bar';
 import { UserSavedSearches } from '../user-saved-searches';
@@ -103,12 +102,12 @@ export default async function AdminUsersSegmentPage({ params, searchParams }: Pa
         actions={<UserSegmentSwitcher segment={coercedSegment} queryString={currentParamsString} />}
       >
         <div className="flex flex-wrap gap-2 text-xs">
-          <Badge variant="secondary">Total {summary.total}</Badge>
-          <Badge variant="outline">Pending {summary.pending}</Badge>
-          <Badge variant="outline">Revoked {summary.revoked}</Badge>
-          <Badge variant="outline">Clients {summary.clients}</Badge>
-          <Badge variant="outline">Partners {summary.partners}</Badge>
-          <Badge variant="outline">Staff {summary.staff}</Badge>
+          <span>Total {summary.total}</span>
+          <span>Pending {summary.pending}</span>
+          <span>Revoked {summary.revoked}</span>
+          <span>Clients {summary.clients}</span>
+          <span>Partners {summary.partners}</span>
+          <span>Staff {summary.staff}</span>
         </div>
       </PageHeader>
 
@@ -146,17 +145,17 @@ export default async function AdminUsersSegmentPage({ params, searchParams }: Pa
                     <CardTitle className="text-lg">{user.displayName}</CardTitle>
                     <CardDescription>{user.email ?? 'No email on file'}</CardDescription>
                     <div className="flex flex-wrap gap-1 text-xs">
-                      <Badge variant="secondary" className="capitalize">{formatEnumLabel(user.affiliationType)}</Badge>
-                      <Badge variant={user.affiliationStatus === 'approved' ? 'default' : user.affiliationStatus === 'pending' ? 'outline' : 'secondary'}>
+                      <span className="capitalize">{formatEnumLabel(user.affiliationType)}</span>
+                      <span>
                         {user.affiliationStatus}
-                      </Badge>
-                      {user.organizationName ? <Badge variant="outline">{user.organizationName}</Badge> : <Badge variant="outline">No org</Badge>}
+                      </span>
+                      {user.organizationName ? <span>{user.organizationName}</span> : <span>No org</span>}
                     </div>
                     <div className="flex flex-wrap gap-1">
                       {Array.from(combinedRoles).map((roleName) => (
-                        <Badge key={roleName} variant={roleName === 'iharc_admin' ? 'secondary' : 'outline'} className="capitalize text-xs">
+                        <span key={roleName} className="capitalize text-xs">
                           {roleName.replaceAll('_', ' ')}
-                        </Badge>
+                        </span>
                       ))}
                     </div>
                   </div>

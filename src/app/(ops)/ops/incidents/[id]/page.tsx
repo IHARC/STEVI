@@ -7,7 +7,6 @@ import { resolveLandingPath } from '@/lib/portal-navigation';
 import { fetchIncidentById, fetchCfsCallById } from '@/lib/cfs/queries';
 import { formatCfsLabel } from '@/lib/cfs/constants';
 import { PageHeader } from '@shared/layout/page-header';
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { IncidentDetailForm } from '@/components/workspace/incidents/incident-detail-form';
@@ -90,7 +89,7 @@ export default async function IncidentDetailPage({ params }: PageProps) {
           </div>
           {call ? (
             <div className="md:col-span-2">
-              <Badge variant="outline" className="text-xs uppercase">Linked call</Badge>
+              <span className="text-xs uppercase">Linked call</span>
               <div className="mt-2 flex items-center justify-between rounded-lg border border-border/60 p-3 text-sm">
                 <div>
                   <p className="font-medium">{call.report_number}</p>

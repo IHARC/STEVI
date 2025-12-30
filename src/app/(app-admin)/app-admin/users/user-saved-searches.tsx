@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 
 type SavedSearch = {
@@ -64,7 +63,7 @@ export function UserSavedSearches({ segment, currentParams }: Props) {
   return (
     <div className="flex flex-col gap-1 rounded-2xl border border-border/15 bg-muted px-3 py-3">
       <div className="flex flex-wrap items-center gap-3">
-        <Badge variant="secondary">Saved searches</Badge>
+        <span>Saved searches</span>
         <Button type="button" size="sm" variant="outline" onClick={handleSaveCurrent}>
           Save current filters
         </Button>
@@ -90,8 +89,8 @@ export function UserSavedSearches({ segment, currentParams }: Props) {
             onClick={() => navigateWithParams(entry.params)}
           >
             <span>{entry.label}</span>
-            <Badge
-              variant="secondary"
+            <span
+             
               className="cursor-pointer"
               onClick={(event) => {
                 event.stopPropagation();
@@ -99,7 +98,7 @@ export function UserSavedSearches({ segment, currentParams }: Props) {
               }}
             >
               Remove
-            </Badge>
+            </span>
           </Button>
         ))}
       </div>

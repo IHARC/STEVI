@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@shared/ui/button';
-import { Badge } from '@shared/ui/badge';
 import { Combobox } from '@shared/ui/combobox';
 import { Input } from '@shared/ui/input';
 import { Label } from '@shared/ui/label';
@@ -92,9 +91,9 @@ export function DonationCatalogAdmin({ inventoryItems, catalogInventoryItemIds, 
       <div className="flex flex-col gap-3 rounded-2xl border border-border/15 bg-background p-4 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="outline">Total {stats.total.toLocaleString()}</Badge>
-            <Badge variant="secondary">Active {stats.active.toLocaleString()}</Badge>
-            <Badge variant="outline">Hidden {stats.hidden.toLocaleString()}</Badge>
+            <span>Total {stats.total.toLocaleString()}</span>
+            <span>Active {stats.active.toLocaleString()}</span>
+            <span>Hidden {stats.hidden.toLocaleString()}</span>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -273,12 +272,12 @@ export function DonationCatalogAdmin({ inventoryItems, catalogInventoryItemIds, 
                 <TableCell className="text-right">{need.needPct === null ? '—' : `${Math.round(need.needPct * 100)}%`}</TableCell>
                 <TableCell className="text-right">{item.priority.toLocaleString()}</TableCell>
                 <TableCell className="text-right">
-                  <Badge variant={item.isActive ? 'secondary' : 'outline'}>{item.isActive ? 'Active' : 'Hidden'}</Badge>
+                  <span>{item.isActive ? 'Active' : 'Hidden'}</span>
                 </TableCell>
                 <TableCell className="text-right">
-                  <Badge variant={item.stripePriceId ? 'secondary' : 'outline'}>
+                  <span>
                     {item.stripePriceId ? 'Synced' : 'Missing'}
-                  </Badge>
+                  </span>
                 </TableCell>
                 <TableCell className="text-right">
                   <Button asChild size="sm" variant="outline">

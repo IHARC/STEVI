@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useFormState } from 'react-dom';
 import { useToast } from '@shared/ui/use-toast';
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Textarea } from '@shared/ui/textarea';
@@ -118,16 +117,16 @@ export function TimeClockCard({ openShift, roles, orgMissing }: TimeClockCardPro
         {openShift ? (
           <div className="space-y-3 rounded-lg border border-border/60 p-4">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="outline" className="text-xs uppercase">
+              <span className="text-xs uppercase">
                 Shift open
-              </Badge>
-              <Badge variant="secondary" className="text-xs uppercase">
+              </span>
+              <span className="text-xs uppercase">
                 {openShift.role_kind === 'volunteer' ? 'Volunteer' : 'Staff'}
-              </Badge>
+              </span>
               {openBreak ? (
-                <Badge variant="outline" className="text-xs uppercase">
+                <span className="text-xs uppercase">
                   Break running
-                </Badge>
+                </span>
               ) : null}
             </div>
             <div className="grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">

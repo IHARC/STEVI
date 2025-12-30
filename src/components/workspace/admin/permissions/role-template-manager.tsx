@@ -3,7 +3,6 @@
 import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@shared/ui/use-toast';
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@shared/ui/card';
 import { Checkbox } from '@shared/ui/checkbox';
@@ -152,7 +151,7 @@ export function RoleTemplateManager({ templates, permissions, templatePermission
           <h2 className="text-lg font-semibold text-foreground">Role templates</h2>
           <p className="text-xs text-muted-foreground">Define reusable permission bundles for organizations.</p>
         </div>
-        <Badge variant="secondary">{templates.length} templates</Badge>
+        <span>{templates.length} templates</span>
       </div>
 
       <Card className="border-border/60">
@@ -206,7 +205,7 @@ export function RoleTemplateManager({ templates, permissions, templatePermission
                     <CardTitle className="text-base">{template.display_name}</CardTitle>
                     <p className="text-xs text-muted-foreground">{template.description ?? template.name}</p>
                   </div>
-                  <Badge variant="outline">{template.name}</Badge>
+                  <span>{template.name}</span>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">

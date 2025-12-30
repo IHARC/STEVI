@@ -3,7 +3,6 @@
 import { useMemo, useState, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useToast } from '@shared/ui/use-toast';
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@shared/ui/card';
 import { Checkbox } from '@shared/ui/checkbox';
@@ -306,10 +305,10 @@ export function OrgRoleManager({
                       <p className="text-xs text-muted-foreground">{role.description ?? role.name}</p>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <Badge variant="outline">{role.name}</Badge>
-                      <Badge variant="secondary" className="text-xs uppercase">
+                      <span>{role.name}</span>
+                      <span className="text-xs uppercase">
                         {role.role_kind}
-                      </Badge>
+                      </span>
                     </div>
                   </div>
                 </CardHeader>

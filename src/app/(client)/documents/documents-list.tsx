@@ -3,7 +3,6 @@
 import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useFormState } from 'react-dom';
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Form } from '@shared/ui/form';
 import { Input } from '@shared/ui/input';
@@ -87,7 +86,7 @@ export function DocumentsList({ documents, onRequestLink, onExtendAccess }: Docu
               <div className="space-y-2">
                 <div className="flex items-center justify-between gap-2">
                   <h2 className="text-lg font-medium text-foreground">{doc.name}</h2>
-                  {doc.category ? <Badge variant="secondary">{doc.category}</Badge> : null}
+                  {doc.category ? <span>{doc.category}</span> : null}
                 </div>
                 <p className="text-sm text-muted-foreground">
                   {doc.lastModified ? `Updated ${new Date(doc.lastModified).toLocaleDateString()}` : 'Updated recently'}

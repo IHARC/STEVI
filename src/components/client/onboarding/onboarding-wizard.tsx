@@ -3,7 +3,6 @@
 import { useEffect, useMemo } from 'react';
 import { useFormState } from 'react-dom';
 import { useRouter } from 'next/navigation';
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Progress } from '@shared/ui/progress';
@@ -128,7 +127,7 @@ export function OnboardingWizard({
       <header className="rounded-3xl border border-border/30 bg-background p-6 shadow-md">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <span className="inline-flex items-center gap-1 rounded-full border border-primary/25 bg-primary/10 px-3 py-0.5 text-xs font-semibold uppercase tracking-wide text-primary">
+            <span className="inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-primary">
               Onboarding
             </span>
             <h1 className="mt-2 text-3xl font-semibold text-foreground sm:text-4xl">Finish onboarding to use STEVI</h1>
@@ -137,9 +136,9 @@ export function OnboardingWizard({
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <Badge variant={status.status === 'COMPLETED' ? 'default' : 'secondary'}>
+            <span>
               {status.status === 'COMPLETED' ? 'Completed' : 'In progress'}
-            </Badge>
+            </span>
           </div>
         </div>
         <div className="mt-4 space-y-1">
@@ -151,14 +150,14 @@ export function OnboardingWizard({
         </div>
         <div className="mt-4 flex flex-wrap gap-3">
           {steps.map((step) => (
-            <Badge
+            <span
               key={step.id}
-              variant={step.state === 'done' ? 'default' : step.state === 'ready' ? 'outline' : 'secondary'}
+             
               className="flex items-center gap-1"
             >
               {step.label}
               <span className="text-muted-foreground">· {step.state === 'done' ? 'Done' : step.state === 'ready' ? 'Ready' : 'Pending'}</span>
-            </Badge>
+            </span>
           ))}
         </div>
         {actor === 'client' && !personId ? (

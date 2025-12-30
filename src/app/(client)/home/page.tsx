@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { ensurePortalProfile } from '@/lib/profile';
 import { Card, CardContent, CardHeader, CardTitle } from '@shared/ui/card';
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { ClientPreviewGuard } from '@shared/layout/client-preview-guard';
 import { fetchClientAppointments } from '@/lib/appointments/queries';
@@ -163,12 +162,12 @@ export default async function HomePage() {
                     <h3 id={`appointment-${appointment.id}`} className="text-lg font-semibold text-foreground">
                       {appointment.title}
                     </h3>
-                    <Badge
-                      variant={appointment.status === 'completed' ? 'secondary' : 'default'}
+                    <span
+                     
                       className="capitalize"
                     >
                       {appointment.status}
-                    </Badge>
+                    </span>
                   </div>
                   <dl className="mt-2 space-y-[0.35rem] text-sm text-foreground/80">
                     <div className="flex flex-wrap gap-1">
@@ -271,9 +270,7 @@ export default async function HomePage() {
                       <p className="text-base font-semibold text-foreground">{contact.name}</p>
                       <p className="text-sm text-muted-foreground">{contact.role}</p>
                     </div>
-                    <Badge variant="secondary" className="bg-card text-foreground">
-                      {contact.available}
-                    </Badge>
+                    <span className="text-xs text-muted-foreground">{contact.available}</span>
                   </header>
                   <dl className="mt-3 space-y-[0.35rem] text-sm">
                     <div className="flex flex-wrap gap-1">
@@ -309,7 +306,7 @@ export default async function HomePage() {
               <article className="rounded-2xl border border-border/60 bg-card p-4 shadow-sm hover:bg-muted transition duration-150 ease-out">
                 <div className="flex items-center justify-between">
                   <p className="text-base font-medium text-foreground">Housing application</p>
-                  <Badge variant="secondary">In review</Badge>
+                  <span>In review</span>
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">
                   Ontario Works packet submitted last week. Awaiting confirmation from housing help centre.
@@ -318,7 +315,7 @@ export default async function HomePage() {
               <article className="rounded-2xl border border-border/60 bg-card p-4 shadow-sm hover:bg-muted transition duration-150 ease-out">
                 <div className="flex items-center justify-between">
                   <p className="text-base font-medium text-foreground">Health supports</p>
-                  <Badge variant="outline">Active</Badge>
+                  <span>Active</span>
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">
                   Harm reduction supplies packaged for pickup at the outreach hub. Check in with Morgan if plans change.
@@ -327,7 +324,7 @@ export default async function HomePage() {
               <article className="rounded-2xl border border-border/60 bg-card p-4 shadow-sm hover:bg-muted transition duration-150 ease-out">
                 <div className="flex items-center justify-between">
                   <p className="text-base font-medium text-foreground">Income stabilization</p>
-                  <Badge>New</Badge>
+                  <span>New</span>
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">
                   Let the team know if you want help with part-time gig matching or training stipends.

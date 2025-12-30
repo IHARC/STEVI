@@ -16,7 +16,6 @@ import { normalizeEnumParam, toSearchParams } from '@/lib/search-params';
 import { getEffectiveConsent } from '@/lib/consents';
 import { PageHeader } from '@shared/layout/page-header';
 import { PageTabNav, type PageTab } from '@shared/layout/page-tab-nav';
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Separator } from '@shared/ui/separator';
@@ -201,13 +200,13 @@ export default async function OpsClientDetailPage({ params, searchParams }: Page
                     </div>
                     <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
                       {activity.createdByOrg ? (
-                        <Badge variant="outline" className="border-border/70">
+                        <span className="border-border/70">
                           Created by {activity.createdByOrg}
-                        </Badge>
+                        </span>
                       ) : null}
-                      <Badge variant={activity.visibility === 'client' ? 'secondary' : 'outline'} className="border-border/70">
+                      <span className="border-border/70">
                         Visibility: {activity.visibility === 'client' ? 'Shared with client' : 'Internal'}
-                      </Badge>
+                      </span>
                     </div>
                   </article>
                 ))

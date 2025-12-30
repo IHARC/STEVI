@@ -1,6 +1,5 @@
 'use client';
 
-import { Badge } from '@shared/ui/badge';
 import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Input } from '@shared/ui/input';
@@ -24,7 +23,7 @@ export function DonationsEmailSettingsCard({ emailSettings }: Props) {
             <CardTitle className="text-xl">Email (donations)</CardTitle>
             <CardDescription>Sender for donation receipts and manage-link emails.</CardDescription>
           </div>
-          <Badge variant={configured ? 'secondary' : 'destructive'}>{configured ? 'Configured' : 'Missing'}</Badge>
+          <span>{configured ? 'Configured' : 'Missing'}</span>
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
