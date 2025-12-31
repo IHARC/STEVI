@@ -57,23 +57,28 @@ describe('task queries', () => {
   });
 
   it('returns assignee tasks with display names', async () => {
-    const rows = [
+    const rows: TaskRow[] = [
       {
         ...baseTaskRow,
         id: 'task-1',
         person_id: 101,
-        people: { first_name: 'Pat', last_name: 'Lee' },
       },
       {
         ...baseTaskRow,
         id: 'task-2',
         person_id: 202,
-        people: { first_name: null, last_name: null },
       },
-    ] as Array<TaskRow & { people?: { first_name?: string | null; last_name?: string | null } }>;
+    ];
 
     const supabase = createSupabaseMock({
       'case_mgmt.tasks': { data: rows, error: null },
+      'core.people': {
+        data: [
+          { id: 101, first_name: 'Pat', last_name: 'Lee' },
+          { id: 202, first_name: null, last_name: null },
+        ],
+        error: null,
+      },
     });
 
     const result = await fetchTasksForAssignee(supabase, 'profile-1', 200);

@@ -3,6 +3,14 @@ import type { TaskRow, TaskSummary } from '@/lib/tasks/types';
 
 const CASE_SCHEMA = 'case_mgmt';
 const TASKS_TABLE = 'tasks';
+const CORE_SCHEMA = 'core';
+const PEOPLE_TABLE = 'people';
+
+type PersonNameRow = {
+  id: number;
+  first_name: string | null;
+  last_name: string | null;
+};
 
 function toTaskSummary(row: TaskRow): TaskSummary {
   return {
@@ -20,6 +28,37 @@ function toTaskSummary(row: TaskRow): TaskSummary {
     visibilityScope: row.visibility_scope,
     sensitivityLevel: row.sensitivity_level,
   };
+}
+
+async function fetchPeopleForTasks(
+  supabase: SupabaseAnyServerClient,
+  personIds: number[],
+): Promise<Map<number, PersonNameRow>> {
+  if (personIds.length === 0) return new Map();
+
+  const { data, error } = await supabase
+    .schema(CORE_SCHEMA)
+    .from(PEOPLE_TABLE)
+    .select('id, first_name, last_name')
+    .in('id', personIds)
+    .limit(personIds.length);
+
+  if (error) {
+    console.error('Failed to load people for tasks', { personIds, error });
+    throw new Error('Unable to load tasks right now.');
+  }
+
+  const byId = new Map<number, PersonNameRow>();
+  (data ?? []).forEach((person) => {
+    byId.set(person.id, person);
+  });
+
+  return byId;
+}
+
+function resolveClientName(person: PersonNameRow | undefined, personId: number): string {
+  const nameParts = [person?.first_name ?? '', person?.last_name ?? ''].filter(Boolean);
+  return nameParts.join(' ').trim() || `Person ${personId}`;
 }
 
 export async function fetchTasksForPerson(
@@ -52,7 +91,7 @@ export async function fetchTasksForAssignee(
   const { data, error } = await supabase
     .schema(CASE_SCHEMA)
     .from(TASKS_TABLE)
-    .select('*, people:people (first_name, last_name)')
+    .select('*')
     .eq('assigned_to_profile_id', profileId)
     .in('status', ['open', 'in_progress', 'blocked'])
     .order('due_at', { ascending: true, nullsFirst: false })
@@ -64,10 +103,13 @@ export async function fetchTasksForAssignee(
     throw new Error('Unable to load tasks right now.');
   }
 
-  return (data ?? []).map((row: TaskRow & { people?: { first_name?: string | null; last_name?: string | null } }) => {
-    const task = toTaskSummary(row as TaskRow);
-    const nameParts = [row.people?.first_name ?? '', row.people?.last_name ?? ''].filter(Boolean);
-    const clientName = nameParts.join(' ').trim() || `Person ${task.personId}`;
+  const rows = (data ?? []) as TaskRow[];
+  const personIds = Array.from(new Set(rows.map((row) => row.person_id)));
+  const peopleById = await fetchPeopleForTasks(supabase, personIds);
+
+  return rows.map((row) => {
+    const task = toTaskSummary(row);
+    const clientName = resolveClientName(peopleById.get(row.person_id), row.person_id);
     return { ...task, clientName };
   });
 }
@@ -80,7 +122,7 @@ export async function fetchTasksForOrg(
   const { data, error } = await supabase
     .schema(CASE_SCHEMA)
     .from(TASKS_TABLE)
-    .select('*, people:people (first_name, last_name)')
+    .select('*')
     .eq('owning_org_id', owningOrgId)
     .in('status', ['open', 'in_progress', 'blocked'])
     .order('due_at', { ascending: true, nullsFirst: false })
@@ -92,10 +134,13 @@ export async function fetchTasksForOrg(
     throw new Error('Unable to load tasks right now.');
   }
 
-  return (data ?? []).map((row: TaskRow & { people?: { first_name?: string | null; last_name?: string | null } }) => {
-    const task = toTaskSummary(row as TaskRow);
-    const nameParts = [row.people?.first_name ?? '', row.people?.last_name ?? ''].filter(Boolean);
-    const clientName = nameParts.join(' ').trim() || `Person ${task.personId}`;
+  const rows = (data ?? []) as TaskRow[];
+  const personIds = Array.from(new Set(rows.map((row) => row.person_id)));
+  const peopleById = await fetchPeopleForTasks(supabase, personIds);
+
+  return rows.map((row) => {
+    const task = toTaskSummary(row);
+    const clientName = resolveClientName(peopleById.get(row.person_id), row.person_id);
     return { ...task, clientName };
   });
 }
