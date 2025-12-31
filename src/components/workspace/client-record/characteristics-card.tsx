@@ -3,7 +3,12 @@
 import { useEffect, useActionState } from 'react';
 
 import type { CharacteristicSummary } from '@/lib/characteristics/types';
-import { createCharacteristicAction, type CharacteristicFormState } from '@/lib/characteristics/actions';
+import {
+  createCharacteristicAction,
+  updateCharacteristicAction,
+  type CharacteristicFormState,
+  type CharacteristicUpdateState,
+} from '@/lib/characteristics/actions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Input } from '@shared/ui/input';
 import { Textarea } from '@shared/ui/textarea';
@@ -13,8 +18,10 @@ import { NativeSelect } from '@shared/ui/native-select';
 import { Badge } from '@shared/ui/badge';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@shared/ui/sheet';
 import { useToast } from '@shared/ui/use-toast';
+import { toLocalDateTimeInput } from '@/lib/datetime';
 
 const initialState: CharacteristicFormState = { status: 'idle' };
+const updateInitialState: CharacteristicUpdateState = { status: 'idle' };
 
 const SOURCE_OPTIONS = [
   { value: 'staff_observed', label: 'Staff observed' },
@@ -49,11 +56,20 @@ type CharacteristicsCardProps = {
   encounterId?: string | null;
   characteristics: CharacteristicSummary[];
   formVariant?: 'inline' | 'sheet';
+  canEdit?: boolean;
 };
 
-export function CharacteristicsCard({ personId, caseId, encounterId, characteristics, formVariant = 'inline' }: CharacteristicsCardProps) {
+export function CharacteristicsCard({
+  personId,
+  caseId,
+  encounterId,
+  characteristics,
+  formVariant = 'inline',
+  canEdit = false,
+}: CharacteristicsCardProps) {
   const { toast } = useToast();
   const [state, formAction] = useActionState(createCharacteristicAction, initialState);
+  const [updateState, updateAction] = useActionState(updateCharacteristicAction, updateInitialState);
 
   useEffect(() => {
     if (state.status === 'success') {
@@ -63,6 +79,15 @@ export function CharacteristicsCard({ personId, caseId, encounterId, characteris
       toast({ title: 'Characteristic failed', description: state.message ?? 'Check the form and try again.', variant: 'destructive' });
     }
   }, [state, toast]);
+
+  useEffect(() => {
+    if (updateState.status === 'success') {
+      toast({ title: 'Characteristic updated', description: updateState.message ?? 'Characteristic updated.' });
+    }
+    if (updateState.status === 'error') {
+      toast({ title: 'Characteristic update failed', description: updateState.message ?? 'Check the form and try again.', variant: 'destructive' });
+    }
+  }, [updateState, toast]);
 
   const form = (
     <form action={formAction} className="space-y-3">
@@ -177,12 +202,123 @@ export function CharacteristicsCard({ personId, caseId, encounterId, characteris
           <div className="space-y-3">
             {characteristics.map((item) => (
               <div key={item.id} className="rounded-xl border border-border/40 bg-card p-3 text-sm">
-                <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex flex-wrap items-start justify-between gap-2">
                   <div>
                     <p className="font-semibold text-foreground">{item.characteristicType}</p>
                     {item.valueText ? <p className="text-xs text-muted-foreground">{item.valueText}</p> : null}
                   </div>
-                  <div className="text-xs text-muted-foreground">{new Date(item.observedAt).toLocaleDateString()}</div>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span>{new Date(item.observedAt).toLocaleDateString()}</span>
+                    {canEdit ? (
+                      <Sheet>
+                        <SheetTrigger asChild>
+                          <Button variant="ghost" size="sm">Edit</Button>
+                        </SheetTrigger>
+                        <SheetContent className="overflow-y-auto sm:max-w-xl">
+                          <SheetHeader className="text-left">
+                            <SheetTitle>Edit characteristic</SheetTitle>
+                            <SheetDescription>Correct or refine observable traits or measurements.</SheetDescription>
+                          </SheetHeader>
+                          <div className="mt-4">
+                            <form action={updateAction} className="space-y-3">
+                              <input type="hidden" name="characteristic_id" value={item.id} />
+                              <input type="hidden" name="person_id" value={personId} />
+                              {caseId ? <input type="hidden" name="case_id" value={caseId} /> : null}
+                              {encounterId ? <input type="hidden" name="encounter_id" value={encounterId} /> : null}
+
+                              <div className="grid gap-3 md:grid-cols-2">
+                                <div className="space-y-1">
+                                  <Label htmlFor={`characteristic_type_${item.id}`}>Characteristic type</Label>
+                                  <Input id={`characteristic_type_${item.id}`} name="characteristic_type" defaultValue={item.characteristicType} required />
+                                </div>
+                                <div className="space-y-1">
+                                  <Label htmlFor={`observed_at_${item.id}`}>Observed at</Label>
+                                  <Input id={`observed_at_${item.id}`} name="observed_at" type="datetime-local" defaultValue={toLocalDateTimeInput(item.observedAt)} />
+                                </div>
+                              </div>
+
+                              <div className="grid gap-3 md:grid-cols-2">
+                                <div className="space-y-1">
+                                  <Label htmlFor={`observed_by_${item.id}`}>Observed by</Label>
+                                  <Input id={`observed_by_${item.id}`} name="observed_by" defaultValue={item.observedBy ?? ''} />
+                                </div>
+                                <div className="space-y-1">
+                                  <Label htmlFor={`body_location_${item.id}`}>Body location</Label>
+                                  <Input id={`body_location_${item.id}`} name="body_location" defaultValue={item.bodyLocation ?? ''} />
+                                </div>
+                              </div>
+
+                              <div className="grid gap-3 md:grid-cols-2">
+                                <div className="space-y-1">
+                                  <Label htmlFor={`value_text_${item.id}`}>Value (text)</Label>
+                                  <Input id={`value_text_${item.id}`} name="value_text" defaultValue={item.valueText ?? ''} />
+                                </div>
+                                <div className="space-y-1">
+                                  <Label htmlFor={`value_number_${item.id}`}>Value (number)</Label>
+                                  <Input id={`value_number_${item.id}`} name="value_number" type="number" defaultValue={item.valueNumber ?? ''} />
+                                </div>
+                              </div>
+
+                              <div className="space-y-1">
+                                <Label htmlFor={`value_unit_${item.id}`}>Value unit</Label>
+                                <Input id={`value_unit_${item.id}`} name="value_unit" defaultValue={item.valueUnit ?? ''} />
+                              </div>
+
+                              <div className="space-y-1">
+                                <Label htmlFor={`characteristic_notes_${item.id}`}>Notes</Label>
+                                <Textarea id={`characteristic_notes_${item.id}`} name="notes" rows={3} defaultValue={item.notes ?? ''} />
+                              </div>
+
+                              <div className="grid gap-3 md:grid-cols-2">
+                                <div className="space-y-1">
+                                  <Label htmlFor={`characteristic_source_${item.id}`}>Source</Label>
+                                  <NativeSelect id={`characteristic_source_${item.id}`} name="source" defaultValue={item.source}>
+                                    {SOURCE_OPTIONS.map((option) => (
+                                      <option key={option.value} value={option.value}>{option.label}</option>
+                                    ))}
+                                  </NativeSelect>
+                                </div>
+                                <div className="space-y-1">
+                                  <Label htmlFor={`characteristic_verification_${item.id}`}>Verification</Label>
+                                  <NativeSelect id={`characteristic_verification_${item.id}`} name="verification_status" defaultValue={item.verificationStatus}>
+                                    {VERIFICATION_OPTIONS.map((option) => (
+                                      <option key={option.value} value={option.value}>{option.label}</option>
+                                    ))}
+                                  </NativeSelect>
+                                </div>
+                              </div>
+
+                              <div className="grid gap-3 md:grid-cols-2">
+                                <div className="space-y-1">
+                                  <Label htmlFor={`characteristic_visibility_${item.id}`}>Visibility</Label>
+                                  <NativeSelect id={`characteristic_visibility_${item.id}`} name="visibility_scope" defaultValue={item.visibilityScope}>
+                                    {VISIBILITY_OPTIONS.map((option) => (
+                                      <option key={option.value} value={option.value}>{option.label}</option>
+                                    ))}
+                                  </NativeSelect>
+                                </div>
+                                <div className="space-y-1">
+                                  <Label htmlFor={`characteristic_sensitivity_${item.id}`}>Sensitivity</Label>
+                                  <NativeSelect id={`characteristic_sensitivity_${item.id}`} name="sensitivity_level" defaultValue={item.sensitivityLevel}>
+                                    {SENSITIVITY_OPTIONS.map((option) => (
+                                      <option key={option.value} value={option.value}>{option.label}</option>
+                                    ))}
+                                  </NativeSelect>
+                                </div>
+                              </div>
+
+                              <div className="space-y-1">
+                                <Label htmlFor={`characteristic_reason_${item.id}`}>Change reason (optional)</Label>
+                                <Textarea id={`characteristic_reason_${item.id}`} name="change_reason" rows={2} placeholder="Correction, new info" />
+                              </div>
+
+                              <Button type="submit" size="sm">Save changes</Button>
+                            </form>
+                          </div>
+                        </SheetContent>
+                      </Sheet>
+                    ) : null}
+                  </div>
                 </div>
                 {item.notes ? <p className="mt-2 text-sm text-foreground/80">{item.notes}</p> : null}
                 <div className="mt-2 flex flex-wrap gap-2">

@@ -21,6 +21,7 @@ function toCharacteristicSummary(
     sensitivityLevel: row.sensitivity_level,
     verificationStatus: row.verification_status,
     source: row.source,
+    updatedAt: row.updated_at ?? null,
     createdByOrg: row.organizations?.name ?? null,
   };
 }
@@ -34,7 +35,7 @@ export async function fetchCharacteristicsForPerson(
     .schema(CORE_SCHEMA)
     .from(CHARACTERISTICS_TABLE)
     .select(
-      'id, characteristic_type, observed_at, observed_by, value_text, value_number, value_unit, body_location, notes, visibility_scope, sensitivity_level, verification_status, source, organizations(name)',
+      'id, characteristic_type, observed_at, observed_by, value_text, value_number, value_unit, body_location, notes, visibility_scope, sensitivity_level, verification_status, source, updated_at, organizations(name)',
     )
     .eq('person_id', personId)
     .order('observed_at', { ascending: false })

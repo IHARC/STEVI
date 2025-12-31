@@ -5589,7 +5589,10 @@ export type Database = {
           alias_name: string
           created_at: string
           created_by: string | null
+          deactivated_at: string | null
+          deactivated_by: string | null
           id: number
+          is_active: boolean
           person_id: number
           updated_at: string | null
           updated_by: string | null
@@ -5598,7 +5601,10 @@ export type Database = {
           alias_name: string
           created_at?: string
           created_by?: string | null
+          deactivated_at?: string | null
+          deactivated_by?: string | null
           id?: number
+          is_active?: boolean
           person_id: number
           updated_at?: string | null
           updated_by?: string | null
@@ -5607,7 +5613,10 @@ export type Database = {
           alias_name?: string
           created_at?: string
           created_by?: string | null
+          deactivated_at?: string | null
+          deactivated_by?: string | null
           id?: number
+          is_active?: boolean
           person_id?: number
           updated_at?: string | null
           updated_by?: string | null

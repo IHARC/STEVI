@@ -11,6 +11,8 @@ export type RelationshipSummary = {
   relationshipType: string;
   relationshipSubtype: string | null;
   relationshipStatus: string | null;
+  startDate: string | null;
+  endDate: string | null;
   relatedPersonId: number | null;
   relatedPersonName: string | null;
   contactName: string | null;
@@ -27,5 +29,6 @@ export type RelationshipSummary = {
   verificationStatus: VerificationStatus;
   source: RecordSource;
   recordedAt: string;
+  updatedAt: string | null;
   createdByOrg: string | null;
 };

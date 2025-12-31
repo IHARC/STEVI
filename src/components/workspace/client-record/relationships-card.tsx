@@ -3,7 +3,12 @@
 import { useEffect, useActionState } from 'react';
 
 import type { RelationshipSummary } from '@/lib/relationships/types';
-import { createRelationshipAction, type RelationshipFormState } from '@/lib/relationships/actions';
+import {
+  createRelationshipAction,
+  updateRelationshipAction,
+  type RelationshipFormState,
+  type RelationshipUpdateState,
+} from '@/lib/relationships/actions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Input } from '@shared/ui/input';
 import { Textarea } from '@shared/ui/textarea';
@@ -15,6 +20,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { useToast } from '@shared/ui/use-toast';
 
 const initialState: RelationshipFormState = { status: 'idle' };
+const updateInitialState: RelationshipUpdateState = { status: 'idle' };
 
 const SOURCE_OPTIONS = [
   { value: 'staff_observed', label: 'Staff observed' },
@@ -49,11 +55,20 @@ type RelationshipsCardProps = {
   encounterId?: string | null;
   relationships: RelationshipSummary[];
   formVariant?: 'inline' | 'sheet';
+  canEdit?: boolean;
 };
 
-export function RelationshipsCard({ personId, caseId, encounterId, relationships, formVariant = 'inline' }: RelationshipsCardProps) {
+export function RelationshipsCard({
+  personId,
+  caseId,
+  encounterId,
+  relationships,
+  formVariant = 'inline',
+  canEdit = false,
+}: RelationshipsCardProps) {
   const { toast } = useToast();
   const [state, formAction] = useActionState(createRelationshipAction, initialState);
+  const [updateState, updateAction] = useActionState(updateRelationshipAction, updateInitialState);
 
   useEffect(() => {
     if (state.status === 'success') {
@@ -63,6 +78,15 @@ export function RelationshipsCard({ personId, caseId, encounterId, relationships
       toast({ title: 'Relationship failed', description: state.message ?? 'Check the form and try again.', variant: 'destructive' });
     }
   }, [state, toast]);
+
+  useEffect(() => {
+    if (updateState.status === 'success') {
+      toast({ title: 'Relationship updated', description: updateState.message ?? 'Relationship updated.' });
+    }
+    if (updateState.status === 'error') {
+      toast({ title: 'Relationship update failed', description: updateState.message ?? 'Check the form and try again.', variant: 'destructive' });
+    }
+  }, [updateState, toast]);
 
   const form = (
     <form action={formAction} className="space-y-3">
@@ -221,15 +245,162 @@ export function RelationshipsCard({ personId, caseId, encounterId, relationships
           <div className="space-y-3">
             {relationships.map((relationship) => (
               <div key={relationship.id} className="rounded-xl border border-border/40 bg-card p-3 text-sm">
-                <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex flex-wrap items-start justify-between gap-2">
                   <div>
                     <p className="font-semibold text-foreground">
                       {relationship.contactName ?? relationship.relatedPersonName ?? 'Contact'}
                     </p>
                     <p className="text-xs text-muted-foreground">{relationship.relationshipType}</p>
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    {new Date(relationship.recordedAt).toLocaleDateString()}
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span>{new Date(relationship.recordedAt).toLocaleDateString()}</span>
+                    {canEdit ? (
+                      <Sheet>
+                        <SheetTrigger asChild>
+                          <Button variant="ghost" size="sm">Edit</Button>
+                        </SheetTrigger>
+                        <SheetContent className="overflow-y-auto sm:max-w-xl">
+                          <SheetHeader className="text-left">
+                            <SheetTitle>Edit relationship</SheetTitle>
+                            <SheetDescription>Correct or update relationship details.</SheetDescription>
+                          </SheetHeader>
+                          <div className="mt-4">
+                            <form action={updateAction} className="space-y-3">
+                              <input type="hidden" name="relationship_id" value={relationship.id} />
+                              <input type="hidden" name="person_id" value={personId} />
+                              {caseId ? <input type="hidden" name="case_id" value={caseId} /> : null}
+                              {encounterId ? <input type="hidden" name="encounter_id" value={encounterId} /> : null}
+
+                              <div className="grid gap-3 md:grid-cols-2">
+                                <div className="space-y-1">
+                                  <Label htmlFor={`relationship_type_${relationship.id}`}>Relationship type</Label>
+                                  <Input id={`relationship_type_${relationship.id}`} name="relationship_type" defaultValue={relationship.relationshipType} required />
+                                </div>
+                                <div className="space-y-1">
+                                  <Label htmlFor={`relationship_subtype_${relationship.id}`}>Subtype</Label>
+                                  <Input id={`relationship_subtype_${relationship.id}`} name="relationship_subtype" defaultValue={relationship.relationshipSubtype ?? ''} />
+                                </div>
+                              </div>
+
+                              <div className="grid gap-3 md:grid-cols-2">
+                                <div className="space-y-1">
+                                  <Label htmlFor={`relationship_status_${relationship.id}`}>Status</Label>
+                                  <Input id={`relationship_status_${relationship.id}`} name="relationship_status" defaultValue={relationship.relationshipStatus ?? ''} />
+                                </div>
+                                <div className="space-y-1">
+                                  <Label htmlFor={`relationship_related_${relationship.id}`}>Related person ID</Label>
+                                  <Input id={`relationship_related_${relationship.id}`} name="related_person_id" type="number" defaultValue={relationship.relatedPersonId ?? ''} />
+                                </div>
+                              </div>
+
+                              <div className="grid gap-3 md:grid-cols-2">
+                                <div className="space-y-1">
+                                  <Label htmlFor={`relationship_contact_name_${relationship.id}`}>Contact name</Label>
+                                  <Input id={`relationship_contact_name_${relationship.id}`} name="contact_name" defaultValue={relationship.contactName ?? ''} />
+                                </div>
+                                <div className="space-y-1">
+                                  <Label htmlFor={`relationship_contact_phone_${relationship.id}`}>Contact phone</Label>
+                                  <Input id={`relationship_contact_phone_${relationship.id}`} name="contact_phone" defaultValue={relationship.contactPhone ?? ''} />
+                                </div>
+                              </div>
+
+                              <div className="grid gap-3 md:grid-cols-2">
+                                <div className="space-y-1">
+                                  <Label htmlFor={`relationship_contact_email_${relationship.id}`}>Contact email</Label>
+                                  <Input id={`relationship_contact_email_${relationship.id}`} name="contact_email" defaultValue={relationship.contactEmail ?? ''} />
+                                </div>
+                                <div className="space-y-1">
+                                  <Label htmlFor={`relationship_contact_address_${relationship.id}`}>Contact address</Label>
+                                  <Input id={`relationship_contact_address_${relationship.id}`} name="contact_address" defaultValue={relationship.contactAddress ?? ''} />
+                                </div>
+                              </div>
+
+                              <div className="grid gap-3 md:grid-cols-2">
+                                <div className="space-y-1">
+                                  <Label htmlFor={`relationship_start_${relationship.id}`}>Start date</Label>
+                                  <Input id={`relationship_start_${relationship.id}`} name="start_date" type="date" defaultValue={relationship.startDate ?? ''} />
+                                </div>
+                                <div className="space-y-1">
+                                  <Label htmlFor={`relationship_end_${relationship.id}`}>End date</Label>
+                                  <Input id={`relationship_end_${relationship.id}`} name="end_date" type="date" defaultValue={relationship.endDate ?? ''} />
+                                </div>
+                              </div>
+
+                              <div className="grid gap-3 md:grid-cols-2">
+                                <div className="space-y-1">
+                                  <Label htmlFor={`relationship_safe_notes_${relationship.id}`}>Safe contact notes</Label>
+                                  <Textarea id={`relationship_safe_notes_${relationship.id}`} name="safe_contact_notes" rows={2} defaultValue={relationship.safeContactNotes ?? ''} />
+                                </div>
+                                <div className="space-y-1">
+                                  <Label htmlFor={`relationship_notes_${relationship.id}`}>Notes</Label>
+                                  <Textarea id={`relationship_notes_${relationship.id}`} name="notes" rows={2} defaultValue={relationship.notes ?? ''} />
+                                </div>
+                              </div>
+
+                              <div className="grid gap-3 md:grid-cols-3">
+                                <label className="flex items-center gap-2 text-sm">
+                                  <input name="is_primary" type="checkbox" defaultChecked={relationship.isPrimary} />
+                                  Primary contact
+                                </label>
+                                <label className="flex items-center gap-2 text-sm">
+                                  <input name="is_emergency" type="checkbox" defaultChecked={relationship.isEmergency} />
+                                  Emergency contact
+                                </label>
+                                <label className="flex items-center gap-2 text-sm">
+                                  <input name="safe_to_contact" type="checkbox" defaultChecked={relationship.safeToContact} />
+                                  Safe to contact
+                                </label>
+                              </div>
+
+                              <div className="grid gap-3 md:grid-cols-2">
+                                <div className="space-y-1">
+                                  <Label htmlFor={`relationship_source_${relationship.id}`}>Source</Label>
+                                  <NativeSelect id={`relationship_source_${relationship.id}`} name="source" defaultValue={relationship.source}>
+                                    {SOURCE_OPTIONS.map((option) => (
+                                      <option key={option.value} value={option.value}>{option.label}</option>
+                                    ))}
+                                  </NativeSelect>
+                                </div>
+                                <div className="space-y-1">
+                                  <Label htmlFor={`relationship_verification_${relationship.id}`}>Verification</Label>
+                                  <NativeSelect id={`relationship_verification_${relationship.id}`} name="verification_status" defaultValue={relationship.verificationStatus}>
+                                    {VERIFICATION_OPTIONS.map((option) => (
+                                      <option key={option.value} value={option.value}>{option.label}</option>
+                                    ))}
+                                  </NativeSelect>
+                                </div>
+                              </div>
+
+                              <div className="grid gap-3 md:grid-cols-2">
+                                <div className="space-y-1">
+                                  <Label htmlFor={`relationship_visibility_${relationship.id}`}>Visibility</Label>
+                                  <NativeSelect id={`relationship_visibility_${relationship.id}`} name="visibility_scope" defaultValue={relationship.visibilityScope}>
+                                    {VISIBILITY_OPTIONS.map((option) => (
+                                      <option key={option.value} value={option.value}>{option.label}</option>
+                                    ))}
+                                  </NativeSelect>
+                                </div>
+                                <div className="space-y-1">
+                                  <Label htmlFor={`relationship_sensitivity_${relationship.id}`}>Sensitivity</Label>
+                                  <NativeSelect id={`relationship_sensitivity_${relationship.id}`} name="sensitivity_level" defaultValue={relationship.sensitivityLevel}>
+                                    {SENSITIVITY_OPTIONS.map((option) => (
+                                      <option key={option.value} value={option.value}>{option.label}</option>
+                                    ))}
+                                  </NativeSelect>
+                                </div>
+                              </div>
+
+                              <div className="space-y-1">
+                                <Label htmlFor={`relationship_reason_${relationship.id}`}>Change reason (optional)</Label>
+                                <Textarea id={`relationship_reason_${relationship.id}`} name="change_reason" rows={2} placeholder="Correction, new info" />
+                              </div>
+
+                              <Button type="submit" size="sm">Save changes</Button>
+                            </form>
+                          </div>
+                        </SheetContent>
+                      </Sheet>
+                    ) : null}
                   </div>
                 </div>
                 {relationship.notes ? <p className="mt-2 text-sm text-foreground/80">{relationship.notes}</p> : null}

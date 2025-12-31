@@ -312,6 +312,20 @@ Deliverables:
 Why now:
 - It immediately fixes trust-breaking UX without requiring a full data model rewrite.
 
+### Phase 0.5 — Client record corrections + inline editing MVP (pre-prod)
+
+Goal: allow staff to correct inaccurate intake and domain data without adding heavy audit noise in pre-production.
+
+Deliverables:
+- Inline editing on Ops client profile for identity, contact, and situation fields.
+- Editable domain records (medical, justice, relationships, characteristics) with update actions.
+- Alias management with soft-delete semantics (aliases can be deactivated but never hard-removed).
+- Audit logging for every save (one audit event per edit) with optional change reason and environment tagging for filtering.
+
+Notes:
+- MVP permissions: any Ops frontline/admin can edit; later integrate fine-grained roles/field-level gates.
+- Intake corrections update the latest intake row in place for MVP; future upgrade can introduce formal amendment/versioning.
+
 ### Phase 1 — Encounters + Tasks (turn feeds into workflows)
 
 Goal: deliver the Encounter-first UX described in `docs/Scenarios/Scenarios-1.md`, and make Inbox/Caseload task-driven.
@@ -391,13 +405,16 @@ Examples:
    Metadata is for optional context, not core fields like `case_id`, verification, or sensitivity.
 
 3) **Every mutation is auditable**  
-   All writes go through server actions, respect RLS, and write an audit log entry.
+   All writes go through server actions, respect RLS, and write one audit log entry per save (diff-based; no per-keystroke spam).
 
 4) **Design for multi-org even in IHARC-only alpha**  
    Always record `organization_id`/`owning_org_id` and show provenance badges in UI.
 
 5) **Queues must remain actionable**  
    Inbox and caseload should always be explainable as “tasks + due dates + assignments”.
+
+6) **Pre-prod audit noise stays controlled**  
+   Audit events should be tagged with environment and only recorded when data actually changes.
 
 ## Open questions (to resolve before Phase 1+)
 
@@ -406,4 +423,4 @@ Examples:
 - Who can mark a domain record “verified” (role-based)?
 - What is the initial `sensitivity_level` taxonomy we want to adopt (even if gating is later)?
 - What is the standard for conflict resolution when orgs record contradictory information?
-
+- How should future amendment/versioning workflows be presented once formal clinical-grade auditing is required?

@@ -18,11 +18,14 @@ export type MedicalEpisodeSummary = {
   planSummary: string | null;
   followUpNeeded: boolean | null;
   followUpTimeline: FollowUpTimeline | null;
+  followUpNotes: string | null;
   outcome: string | null;
+  locationOccurred: string | null;
   visibilityScope: VisibilityScope;
   sensitivityLevel: SensitivityLevel;
   verificationStatus: VerificationStatus;
   source: RecordSource;
   recordedAt: string;
+  updatedAt: string | null;
   createdByOrg: string | null;
 };

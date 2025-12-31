@@ -13,11 +13,16 @@ export type JusticeEpisodeSummary = {
   eventDate: string;
   eventTime: string | null;
   agency: string | null;
+  caseNumber: string | null;
   charges: string | null;
   disposition: string | null;
   location: string | null;
+  bailAmount: number | null;
+  bookingNumber: string | null;
   courtDate: string | null;
   releaseDate: string | null;
+  releaseType: string | null;
+  checkInDate: string | null;
   supervisionAgency: string | null;
   notes: string | null;
   visibilityScope: VisibilityScope;
@@ -25,5 +30,6 @@ export type JusticeEpisodeSummary = {
   verificationStatus: VerificationStatus;
   source: RecordSource;
   recordedAt: string;
+  updatedAt: string | null;
   createdByOrg: string | null;
 };

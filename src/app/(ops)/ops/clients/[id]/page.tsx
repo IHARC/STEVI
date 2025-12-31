@@ -33,7 +33,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@shared/ui/dropdown-menu';
-import { Separator } from '@shared/ui/separator';
 import { Tabs, TabsList, TabsTrigger } from '@shared/ui/tabs';
 import { CostSnapshotCard } from '@workspace/costs/cost-snapshot-card';
 import { CostTimelineTable } from '@workspace/costs/cost-timeline-table';
@@ -42,6 +41,10 @@ import { MedicalEpisodesCard } from '@workspace/client-record/medical-episodes-c
 import { JusticeEpisodesCard } from '@workspace/client-record/justice-episodes-card';
 import { RelationshipsCard } from '@workspace/client-record/relationships-card';
 import { CharacteristicsCard } from '@workspace/client-record/characteristics-card';
+import { IdentityCard } from '@workspace/client-record/identity-card';
+import { SituationCard } from '@workspace/client-record/situation-card';
+import { ProfileCard } from '@workspace/client-record/profile-card';
+import type { ClientAliasSummary, ClientIntakeSummary, ClientPersonSummary } from '@/lib/client-record/types';
 import type { Database } from '@/types/supabase';
 import { ChevronDown } from 'lucide-react';
 
@@ -49,37 +52,13 @@ type PageProps = { params: Promise<{ id: string }>; searchParams?: Promise<Recor
 
 export const dynamic = 'force-dynamic';
 
-type PersonRow = Pick<
-  Database['core']['Tables']['people']['Row'],
-  | 'id'
-  | 'first_name'
-  | 'last_name'
-  | 'email'
-  | 'phone'
-  | 'created_at'
-  | 'created_by'
-  | 'date_of_birth'
-  | 'age'
-  | 'gender'
-  | 'preferred_pronouns'
-  | 'housing_status'
-  | 'risk_level'
->;
+type PersonRow = ClientPersonSummary;
 type PersonCostRollupRow = Database['analytics']['Views']['person_cost_rollups_secure']['Row'];
 type CostCategoryRow = Database['core']['Tables']['cost_categories']['Row'];
 type ServiceCatalogRow = Database['core']['Tables']['service_catalog']['Row'];
 type StaffRateRow = Database['core']['Tables']['staff_rates']['Row'];
-type PersonAliasRow = Pick<Database['core']['Tables']['people_aliases']['Row'], 'alias_name'>;
-type IntakeRow = Pick<
-  Database['case_mgmt']['Tables']['client_intakes']['Row'],
-  | 'housing_status'
-  | 'risk_level'
-  | 'health_concerns'
-  | 'immediate_needs'
-  | 'risk_factors'
-  | 'intake_date'
-  | 'created_at'
->;
+type PersonAliasRow = ClientAliasSummary;
+type IntakeRow = ClientIntakeSummary;
 
 const TAB_IDS = ['overview', 'timeline', 'medical', 'justice', 'relationships', 'characteristics', 'consents', 'costs'] as const;
 const CORE_TAB_IDS = ['overview', 'timeline', 'medical', 'justice', 'relationships', 'characteristics', 'consents'] as const;
@@ -131,6 +110,7 @@ export default async function OpsClientDetailPage({ params, searchParams }: Page
 
   const canLogOutreach = access.canAccessOpsFrontline;
   const showCostInputs = access.canManageCosts && Boolean(access.organizationId);
+  const canEditRecord = (access.canAccessOpsFrontline || access.canAccessOpsAdmin) && Boolean(access.organizationId);
   const isOverview = activeTab === 'overview';
   const isTimeline = activeTab === 'timeline';
   const isMedical = activeTab === 'medical';
@@ -306,9 +286,9 @@ export default async function OpsClientDetailPage({ params, searchParams }: Page
       {isOverview ? (
         <section className="space-y-6">
           <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
-            <IdentityCard person={person} aliases={aliases} />
-            <SituationCard person={person} intake={latestIntake} />
-            <ProfileCard person={person} consentLabel={consentMeta.label} orgLabel={orgLabel} />
+            <IdentityCard person={person} aliases={aliases} canEdit={canEditRecord} />
+            <SituationCard person={person} intake={latestIntake} canEdit={canEditRecord} />
+            <ProfileCard person={person} consentLabel={consentMeta.label} orgLabel={orgLabel} canEdit={canEditRecord} />
           </div>
 
           <Card>
@@ -371,29 +351,29 @@ export default async function OpsClientDetailPage({ params, searchParams }: Page
 
       {isMedical ? (
         <section className="grid gap-6 lg:grid-cols-[2fr,1fr]">
-          <MedicalEpisodesCard personId={person.id} caseId={caseIdFromQuery} episodes={medicalEpisodes} formVariant="sheet" />
-          <ProfileCard person={person} consentLabel={consentMeta.label} orgLabel={orgLabel} />
+          <MedicalEpisodesCard personId={person.id} caseId={caseIdFromQuery} episodes={medicalEpisodes} formVariant="sheet" canEdit={canEditRecord} />
+          <ProfileCard person={person} consentLabel={consentMeta.label} orgLabel={orgLabel} canEdit={canEditRecord} />
         </section>
       ) : null}
 
       {isJustice ? (
         <section className="grid gap-6 lg:grid-cols-[2fr,1fr]">
-          <JusticeEpisodesCard personId={person.id} caseId={caseIdFromQuery} episodes={justiceEpisodes} formVariant="sheet" />
-          <ProfileCard person={person} consentLabel={consentMeta.label} orgLabel={orgLabel} />
+          <JusticeEpisodesCard personId={person.id} caseId={caseIdFromQuery} episodes={justiceEpisodes} formVariant="sheet" canEdit={canEditRecord} />
+          <ProfileCard person={person} consentLabel={consentMeta.label} orgLabel={orgLabel} canEdit={canEditRecord} />
         </section>
       ) : null}
 
       {isRelationships ? (
         <section className="grid gap-6 lg:grid-cols-[2fr,1fr]">
-          <RelationshipsCard personId={person.id} caseId={caseIdFromQuery} relationships={relationships} formVariant="sheet" />
-          <ProfileCard person={person} consentLabel={consentMeta.label} orgLabel={orgLabel} />
+          <RelationshipsCard personId={person.id} caseId={caseIdFromQuery} relationships={relationships} formVariant="sheet" canEdit={canEditRecord} />
+          <ProfileCard person={person} consentLabel={consentMeta.label} orgLabel={orgLabel} canEdit={canEditRecord} />
         </section>
       ) : null}
 
       {isCharacteristics ? (
         <section className="grid gap-6 lg:grid-cols-[2fr,1fr]">
-          <CharacteristicsCard personId={person.id} caseId={caseIdFromQuery} characteristics={characteristics} formVariant="sheet" />
-          <ProfileCard person={person} consentLabel={consentMeta.label} orgLabel={orgLabel} />
+          <CharacteristicsCard personId={person.id} caseId={caseIdFromQuery} characteristics={characteristics} formVariant="sheet" canEdit={canEditRecord} />
+          <ProfileCard person={person} consentLabel={consentMeta.label} orgLabel={orgLabel} canEdit={canEditRecord} />
         </section>
       ) : null}
 
@@ -474,7 +454,7 @@ export default async function OpsClientDetailPage({ params, searchParams }: Page
           </div>
 
           <div className="space-y-4">
-            <ProfileCard person={person} consentLabel={consentMeta.label} orgLabel={orgLabel} />
+            <ProfileCard person={person} consentLabel={consentMeta.label} orgLabel={orgLabel} canEdit={canEditRecord} />
             {access.canManageConsents ? (
               <Card className="border-dashed border-border/70">
                 <CardHeader>
@@ -510,174 +490,10 @@ export default async function OpsClientDetailPage({ params, searchParams }: Page
             <CostSnapshotCard totals={costTotals} />
             <CostTimelineTable events={costEventRows} />
           </div>
-          <ProfileCard person={person} consentLabel={consentMeta.label} orgLabel={orgLabel} />
+          <ProfileCard person={person} consentLabel={consentMeta.label} orgLabel={orgLabel} canEdit={canEditRecord} />
         </section>
       ) : null}
     </div>
-  );
-}
-
-function IdentityCard({ person, aliases }: { person: PersonRow; aliases: PersonAliasRow[] }) {
-  const aliasList = aliases.map((alias) => alias.alias_name).filter(Boolean);
-  const ageValue = resolveAge(person.age, person.date_of_birth);
-  const dobValue = person.date_of_birth ? formatDate(person.date_of_birth) : '—';
-  const genderValue = person.gender ? formatEnum(person.gender) : '—';
-  const pronounsValue = person.preferred_pronouns?.trim() ? person.preferred_pronouns : '—';
-
-  return (
-    <Card className="border-border/70 shadow-sm">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg">Identity</CardTitle>
-        <CardDescription>Key demographics for the record.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <dl className="grid gap-3 text-sm sm:grid-cols-2">
-          <div>
-            <dt className="text-xs uppercase text-muted-foreground">Age</dt>
-            <dd className="font-medium text-foreground">{ageValue ?? '—'}</dd>
-          </div>
-          <div>
-            <dt className="text-xs uppercase text-muted-foreground">DOB</dt>
-            <dd className="font-medium text-foreground">{dobValue}</dd>
-          </div>
-          <div>
-            <dt className="text-xs uppercase text-muted-foreground">Gender</dt>
-            <dd className="font-medium text-foreground">{genderValue}</dd>
-          </div>
-          <div>
-            <dt className="text-xs uppercase text-muted-foreground">Pronouns</dt>
-            <dd className="font-medium text-foreground">{pronounsValue}</dd>
-          </div>
-          <div className="sm:col-span-2">
-            <dt className="text-xs uppercase text-muted-foreground">Aliases</dt>
-            <dd className="font-medium text-foreground">{aliasList.length ? aliasList.join(', ') : '—'}</dd>
-          </div>
-        </dl>
-      </CardContent>
-    </Card>
-  );
-}
-
-function SituationCard({ person, intake }: { person: PersonRow; intake: IntakeRow | null }) {
-  const housingStatus = intake?.housing_status ?? person.housing_status;
-  const riskLevel = intake?.risk_level ?? person.risk_level;
-  const immediateNeeds = intake?.immediate_needs ?? null;
-  const healthConcernsRaw = intake?.health_concerns ?? [];
-  const healthConcerns = normalizeEnums(healthConcernsRaw, ['none']);
-  const riskFactors = normalizeEnums(intake?.risk_factors ?? [], []);
-  const intakeDate = intake?.intake_date ?? intake?.created_at ?? null;
-
-  return (
-    <Card className="border-border/70 shadow-sm">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg">Situation & risk</CardTitle>
-        <CardDescription>Housing, urgency, and health considerations from the latest intake.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <dl className="grid gap-3 text-sm sm:grid-cols-2">
-          <div>
-            <dt className="text-xs uppercase text-muted-foreground">Housing status</dt>
-            <dd className="mt-1">
-              {housingStatus ? (
-                <Badge variant="outline">{formatEnum(housingStatus)}</Badge>
-              ) : (
-                <span className="text-sm text-muted-foreground">—</span>
-              )}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-xs uppercase text-muted-foreground">Risk level</dt>
-            <dd className="mt-1">
-              {riskLevel ? (
-                <Badge variant={riskBadgeVariant(riskLevel)}>{formatEnum(riskLevel)}</Badge>
-              ) : (
-                <span className="text-sm text-muted-foreground">—</span>
-              )}
-            </dd>
-          </div>
-          <div className="sm:col-span-2">
-            <dt className="text-xs uppercase text-muted-foreground">Immediate needs</dt>
-            <dd className="mt-1">
-              {immediateNeeds ? (
-                <Badge variant={urgencyBadgeVariant(immediateNeeds)}>{formatEnum(immediateNeeds)}</Badge>
-              ) : (
-                <span className="text-sm text-muted-foreground">—</span>
-              )}
-            </dd>
-          </div>
-        </dl>
-
-        <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase text-muted-foreground">Health concerns</p>
-          {renderBadgeList(
-            healthConcerns,
-            healthConcernsRaw.includes('none') ? 'None noted' : 'None recorded',
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase text-muted-foreground">Risk factors</p>
-          {renderBadgeList(riskFactors, 'None recorded')}
-        </div>
-
-        <p className="text-xs text-muted-foreground">
-          Last intake: {intakeDate ? formatDate(intakeDate) : 'Not recorded'}
-        </p>
-      </CardContent>
-    </Card>
-  );
-}
-
-function ProfileCard({
-  person,
-  consentLabel,
-  orgLabel,
-}: {
-  person: PersonRow;
-  consentLabel: string;
-  orgLabel: string;
-}) {
-  return (
-    <Card className="border-border/70 shadow-sm">
-      <CardHeader>
-        <CardTitle className="text-lg">Record details</CardTitle>
-        <CardDescription>Contact, sharing, and record provenance.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-3 text-sm text-foreground/80">
-        <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase text-muted-foreground">Contact</p>
-          <dl className="grid gap-2 sm:grid-cols-2">
-            <div>
-              <dt className="text-xs text-muted-foreground">Email</dt>
-              <dd className="font-medium text-foreground">{person.email ?? '—'}</dd>
-            </div>
-            <div>
-              <dt className="text-xs text-muted-foreground">Phone</dt>
-              <dd className="font-medium text-foreground">{person.phone ?? '—'}</dd>
-            </div>
-          </dl>
-        </div>
-        <Separator />
-        <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase text-muted-foreground">Sharing</p>
-          <p className="text-sm font-medium text-foreground">{consentLabel}</p>
-        </div>
-        <Separator />
-        <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase text-muted-foreground">Provenance</p>
-          <dl className="grid gap-2 sm:grid-cols-2">
-            <div>
-              <dt className="text-xs text-muted-foreground">Created by</dt>
-              <dd className="font-medium text-foreground">{orgLabel}</dd>
-            </div>
-            <div>
-              <dt className="text-xs text-muted-foreground">Created</dt>
-              <dd className="font-medium text-foreground">{formatDate(person.created_at)}</dd>
-            </div>
-          </dl>
-        </div>
-      </CardContent>
-    </Card>
   );
 }
 
@@ -715,7 +531,7 @@ async function loadPerson(
     .schema('core')
     .from('people')
     .select(
-      'id, first_name, last_name, email, phone, created_at, created_by, date_of_birth, age, gender, preferred_pronouns, housing_status, risk_level',
+      'id, first_name, last_name, email, phone, created_at, created_by, date_of_birth, age, gender, preferred_pronouns, preferred_contact_method, housing_status, risk_level, updated_at, updated_by',
     )
     .eq('id', personId)
     .maybeSingle();
@@ -731,7 +547,7 @@ async function loadLatestIntake(
   const { data, error } = await supabase
     .schema('case_mgmt')
     .from('client_intakes')
-    .select('housing_status, risk_level, health_concerns, immediate_needs, risk_factors, intake_date, created_at')
+    .select('id, housing_status, risk_level, health_concerns, immediate_needs, risk_factors, intake_date, created_at, situation_notes, general_notes')
     .eq('person_id', personId)
     .order('intake_date', { ascending: false })
     .order('created_at', { ascending: false })
@@ -749,7 +565,7 @@ async function loadAliases(
   const { data, error } = await supabase
     .schema('core')
     .from('people_aliases')
-    .select('alias_name')
+    .select('id, alias_name, is_active, created_at, updated_at, deactivated_at')
     .eq('person_id', personId)
     .order('created_at', { ascending: true });
 
@@ -784,68 +600,9 @@ function formatDate(value: string | null | undefined) {
   }
 }
 
-function resolveAge(age: number | null, dateOfBirth: string | null | undefined) {
-  if (typeof age === 'number' && Number.isFinite(age)) {
-    return age;
-  }
-  if (!dateOfBirth) return null;
-  const dob = new Date(dateOfBirth);
-  if (Number.isNaN(dob.getTime())) return null;
-  const today = new Date();
-  let years = today.getFullYear() - dob.getFullYear();
-  const hasHadBirthday =
-    today.getMonth() > dob.getMonth() ||
-    (today.getMonth() === dob.getMonth() && today.getDate() >= dob.getDate());
-  if (!hasHadBirthday) years -= 1;
-  return years >= 0 ? years : null;
-}
-
 function formatEnum(value: string) {
   const normalized = value.replaceAll('_', ' ');
   return normalized.replace(/\b\w/g, (char) => char.toUpperCase());
-}
-
-function normalizeEnums(values: string[] | null | undefined, removeValues: string[]) {
-  return (values ?? []).filter((value) => value && !removeValues.includes(value));
-}
-
-function renderBadgeList(values: string[], emptyLabel: string) {
-  if (!values.length) {
-    return <p className="text-sm text-muted-foreground">{emptyLabel}</p>;
-  }
-  return (
-    <div className="flex flex-wrap gap-2">
-      {values.map((value) => (
-        <Badge key={value} variant="outline">
-          {formatEnum(value)}
-        </Badge>
-      ))}
-    </div>
-  );
-}
-
-function riskBadgeVariant(value: string) {
-  switch (value) {
-    case 'critical':
-    case 'high':
-      return 'destructive';
-    case 'medium':
-      return 'secondary';
-    default:
-      return 'outline';
-  }
-}
-
-function urgencyBadgeVariant(value: string) {
-  switch (value) {
-    case 'emergency':
-    case 'urgent':
-      return 'destructive';
-    case 'concern':
-      return 'secondary';
-    default:
-      return 'outline';
-  }
 }
 
 function labelForFilter(filter: TimelineFilterId) {

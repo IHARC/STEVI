@@ -45,6 +45,8 @@ export default async function EncounterDetailPage({ params }: PageProps) {
     redirect(resolveLandingPath(access));
   }
 
+  const canEditRecord = (access.canAccessOpsFrontline || access.canAccessOpsAdmin) && Boolean(access.organizationId);
+
   const encounter = await fetchEncounterById(supabase, id);
   if (!encounter) notFound();
 
@@ -176,8 +178,8 @@ export default async function EncounterDetailPage({ params }: PageProps) {
             </CardContent>
           </Card>
 
-          <MedicalEpisodesCard personId={person.id} caseId={encounter.caseId} encounterId={encounter.id} episodes={medicalEpisodes} />
-          <JusticeEpisodesCard personId={person.id} caseId={encounter.caseId} encounterId={encounter.id} episodes={justiceEpisodes} />
+          <MedicalEpisodesCard personId={person.id} caseId={encounter.caseId} encounterId={encounter.id} episodes={medicalEpisodes} canEdit={canEditRecord} />
+          <JusticeEpisodesCard personId={person.id} caseId={encounter.caseId} encounterId={encounter.id} episodes={justiceEpisodes} canEdit={canEditRecord} />
         </div>
 
         <div className="space-y-4">
@@ -189,8 +191,8 @@ export default async function EncounterDetailPage({ params }: PageProps) {
             items={items}
             disabled={!access.canAccessInventoryOps}
           />
-          <RelationshipsCard personId={person.id} caseId={encounter.caseId} encounterId={encounter.id} relationships={relationships} />
-          <CharacteristicsCard personId={person.id} caseId={encounter.caseId} encounterId={encounter.id} characteristics={characteristics} />
+          <RelationshipsCard personId={person.id} caseId={encounter.caseId} encounterId={encounter.id} relationships={relationships} canEdit={canEditRecord} />
+          <CharacteristicsCard personId={person.id} caseId={encounter.caseId} encounterId={encounter.id} characteristics={characteristics} canEdit={canEditRecord} />
         </div>
       </section>
     </div>

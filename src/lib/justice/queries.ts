@@ -13,11 +13,16 @@ function toJusticeEpisodeSummary(
     eventDate: row.event_date,
     eventTime: row.event_time ?? null,
     agency: row.agency ?? null,
+    caseNumber: row.case_number ?? null,
     charges: row.charges ?? null,
     disposition: row.disposition ?? null,
     location: row.location ?? null,
+    bailAmount: row.bail_amount ?? null,
+    bookingNumber: row.booking_number ?? null,
     courtDate: row.court_date ?? null,
     releaseDate: row.release_date ?? null,
+    releaseType: row.release_type ?? null,
+    checkInDate: typeof row.metadata === 'object' && row.metadata !== null ? (row.metadata as { check_in_date?: string | null }).check_in_date ?? null : null,
     supervisionAgency: row.supervision_agency ?? null,
     notes: row.notes ?? null,
     visibilityScope: row.visibility_scope,
@@ -25,6 +30,7 @@ function toJusticeEpisodeSummary(
     verificationStatus: row.verification_status,
     source: row.source,
     recordedAt: row.recorded_at,
+    updatedAt: row.updated_at ?? null,
     createdByOrg: row.organizations?.name ?? null,
   };
 }
@@ -38,7 +44,7 @@ export async function fetchJusticeEpisodesForPerson(
     .schema(CORE_SCHEMA)
     .from(JUSTICE_TABLE)
     .select(
-      'id, episode_type, event_date, event_time, agency, charges, disposition, location, court_date, release_date, supervision_agency, notes, visibility_scope, sensitivity_level, verification_status, source, recorded_at, organizations(name)',
+      'id, episode_type, event_date, event_time, agency, case_number, charges, disposition, location, bail_amount, booking_number, court_date, release_date, release_type, supervision_agency, notes, metadata, visibility_scope, sensitivity_level, verification_status, source, recorded_at, updated_at, organizations(name)',
     )
     .eq('person_id', personId)
     .order('event_date', { ascending: false })

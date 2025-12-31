@@ -54,3 +54,15 @@ export function parseEnum<T extends string>(value: string | null, allowed: reado
   if (required) throw new Error('Invalid option.');
   return null;
 }
+
+export function getStringArray(form: FormData, key: string): string[] {
+  return form
+    .getAll(key)
+    .map((entry) => (typeof entry === 'string' ? entry.trim() : null))
+    .filter((value): value is string => Boolean(value));
+}
+
+export function getEnumArray<T extends string>(form: FormData, key: string, allowed: readonly T[]): T[] {
+  const values = getStringArray(form, key);
+  return values.filter((value): value is T => allowed.includes(value as T));
+}

@@ -18,12 +18,15 @@ function toMedicalEpisodeSummary(
     planSummary: row.plan_summary ?? null,
     followUpNeeded: row.follow_up_needed ?? null,
     followUpTimeline: (row.follow_up_timeline as MedicalEpisodeSummary['followUpTimeline']) ?? null,
+    followUpNotes: row.follow_up_notes ?? null,
     outcome: row.outcome ?? null,
+    locationOccurred: row.location_occurred ?? null,
     visibilityScope: row.visibility_scope,
     sensitivityLevel: row.sensitivity_level,
     verificationStatus: row.verification_status,
     source: row.source,
     recordedAt: row.recorded_at,
+    updatedAt: row.updated_at ?? null,
     createdByOrg: row.organizations?.name ?? null,
   };
 }
@@ -37,7 +40,7 @@ export async function fetchMedicalEpisodesForPerson(
     .schema(CORE_SCHEMA)
     .from(MEDICAL_TABLE)
     .select(
-      'id, episode_type, primary_condition, episode_date, episode_end_date, severity_level, assessment_summary, plan_summary, follow_up_needed, follow_up_timeline, outcome, visibility_scope, sensitivity_level, verification_status, source, recorded_at, organizations(name)',
+      'id, episode_type, primary_condition, episode_date, episode_end_date, severity_level, assessment_summary, plan_summary, follow_up_needed, follow_up_timeline, follow_up_notes, outcome, location_occurred, visibility_scope, sensitivity_level, verification_status, source, recorded_at, updated_at, organizations(name)',
     )
     .eq('person_id', personId)
     .order('episode_date', { ascending: false })

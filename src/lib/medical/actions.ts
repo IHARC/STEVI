@@ -4,11 +4,19 @@ import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { assertOrganizationSelected, loadPortalAccess } from '@/lib/portal-access';
 import { buildEntityRef, logAuditEvent } from '@/lib/audit';
+import { withClientRecordAuditMeta } from '@/lib/client-record/audit';
+import { diffFields } from '@/lib/client-record/diff';
+import { assertCanEditClientRecord } from '@/lib/permissions/client-record';
 import { createTask } from '@/lib/tasks/actions';
 import type { TaskPriority } from '@/lib/tasks/types';
 import type { FollowUpTimeline, RecordSource, SensitivityLevel, VerificationStatus, VisibilityScope } from '@/lib/medical/types';
 
 export type MedicalEpisodeFormState = {
+  status: 'idle' | 'success' | 'error';
+  message?: string;
+};
+
+export type MedicalEpisodeUpdateState = {
   status: 'idle' | 'success' | 'error';
   message?: string;
 };
@@ -222,5 +230,121 @@ export async function createMedicalEpisodeAction(
     return { status: 'success', message: 'Medical update saved.' };
   } catch (error) {
     return { status: 'error', message: error instanceof Error ? error.message : 'Unable to save medical update.' };
+  }
+}
+
+export async function updateMedicalEpisodeAction(
+  _prev: MedicalEpisodeUpdateState,
+  formData: FormData,
+): Promise<MedicalEpisodeUpdateState> {
+  try {
+    const episodeId = parseOptionalString(formData.get('episode_id'));
+    if (!episodeId) return { status: 'error', message: 'Missing medical update.' };
+
+    const personId = parseOptionalNumber(formData.get('person_id'));
+    const caseId = parseOptionalNumber(formData.get('case_id'));
+    const encounterId = parseOptionalString(formData.get('encounter_id'));
+    const changeReason = parseOptionalString(formData.get('change_reason'));
+
+    const episodeType = parseRequiredString(formData.get('episode_type'), 'Episode type');
+    const primaryCondition = parseRequiredString(formData.get('primary_condition'), 'Primary condition');
+    const episodeDate = parseRequiredDate(formData.get('episode_date'), 'Episode date');
+    const episodeEndDate = parseOptionalDate(formData.get('episode_end_date'), 'Episode end date');
+    const severityLevel = parseOptionalString(formData.get('severity_level'));
+    const assessmentSummary = parseOptionalString(formData.get('assessment_summary'));
+    const planSummary = parseOptionalString(formData.get('plan_summary'));
+    const followUpNeeded = formData.get('follow_up_needed') === 'on';
+    const followUpTimelineRaw = parseOptionalString(formData.get('follow_up_timeline'));
+    const followUpTimeline =
+      followUpTimelineRaw && FOLLOW_UP_TIMELINES.includes(followUpTimelineRaw as FollowUpTimeline)
+        ? (followUpTimelineRaw as FollowUpTimeline)
+        : null;
+    const followUpNotes = parseOptionalString(formData.get('follow_up_notes'));
+    const outcome = parseOptionalString(formData.get('outcome'));
+    const locationOccurred = parseOptionalString(formData.get('location_occurred'));
+
+    const source = parseEnum(parseOptionalString(formData.get('source')), SOURCES, 'staff_observed');
+    const verificationStatus = parseEnum(parseOptionalString(formData.get('verification_status')), VERIFICATIONS, 'unverified');
+    const visibilityScope = parseEnum(parseOptionalString(formData.get('visibility_scope')), VISIBILITIES, 'internal_to_org');
+    const sensitivityLevel = parseEnum(parseOptionalString(formData.get('sensitivity_level')), SENSITIVITIES, 'standard');
+
+    const supabase = await createSupabaseServerClient();
+    const access = await loadPortalAccess(supabase);
+
+    assertCanEditClientRecord(access);
+    assertOrganizationSelected(access, 'Select an acting organization before updating medical updates.');
+
+    const { data: existing, error } = await supabase
+      .schema('core')
+      .from('medical_episodes')
+      .select(
+        'id, person_id, case_id, encounter_id, episode_type, primary_condition, episode_date, episode_end_date, severity_level, assessment_summary, plan_summary, follow_up_needed, follow_up_timeline, follow_up_notes, outcome, source, verification_status, visibility_scope, sensitivity_level, location_occurred',
+      )
+      .eq('id', episodeId)
+      .maybeSingle();
+
+    if (error || !existing) {
+      return { status: 'error', message: 'Unable to load that medical update.' };
+    }
+
+    const updatePayload = {
+      episode_type: episodeType,
+      primary_condition: primaryCondition,
+      episode_date: episodeDate,
+      episode_end_date: episodeEndDate ?? null,
+      severity_level: severityLevel ?? null,
+      assessment_summary: assessmentSummary ?? null,
+      plan_summary: planSummary ?? null,
+      follow_up_needed: followUpNeeded,
+      follow_up_timeline: followUpTimeline ?? null,
+      follow_up_notes: followUpNotes ?? null,
+      outcome: outcome ?? null,
+      source,
+      verification_status: verificationStatus,
+      visibility_scope: visibilityScope,
+      sensitivity_level: sensitivityLevel,
+      location_occurred: locationOccurred ?? null,
+    };
+
+    const changedFields = diffFields(existing, updatePayload);
+    if (changedFields.length === 0) {
+      return { status: 'success', message: 'No changes to save.' };
+    }
+
+    const now = new Date().toISOString();
+    const { error: updateError } = await supabase
+      .schema('core')
+      .from('medical_episodes')
+      .update({ ...updatePayload, updated_at: now, updated_by: access.userId })
+      .eq('id', episodeId);
+
+    if (updateError) {
+      return { status: 'error', message: updateError.message ?? 'Unable to update medical update.' };
+    }
+
+    await logAuditEvent(supabase, {
+      actorProfileId: access.profile.id,
+      action: 'medical_episode_updated',
+      entityType: 'core.medical_episodes',
+      entityRef: buildEntityRef({ schema: 'core', table: 'medical_episodes', id: episodeId }),
+      meta: withClientRecordAuditMeta({
+        person_id: personId ?? existing.person_id,
+        case_id: caseId ?? existing.case_id,
+        encounter_id: encounterId ?? existing.encounter_id,
+        changed_fields: changedFields,
+        change_reason: changeReason,
+      }),
+    });
+
+    const resolvedPersonId = personId ?? existing.person_id;
+    revalidatePath(`/ops/clients/${resolvedPersonId}`);
+    const resolvedEncounterId = encounterId ?? existing.encounter_id;
+    if (resolvedEncounterId) {
+      revalidatePath(`/ops/encounters/${resolvedEncounterId}`);
+    }
+
+    return { status: 'success', message: 'Medical update revised.' };
+  } catch (error) {
+    return { status: 'error', message: error instanceof Error ? error.message : 'Unable to update medical update.' };
   }
 }

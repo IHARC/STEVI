@@ -20,5 +20,6 @@ export type CharacteristicSummary = {
   sensitivityLevel: SensitivityLevel;
   verificationStatus: VerificationStatus;
   source: RecordSource;
+  updatedAt: string | null;
   createdByOrg: string | null;
 };
