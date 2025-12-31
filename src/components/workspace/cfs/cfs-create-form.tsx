@@ -1,7 +1,7 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { useFormState } from 'react-dom';
+import { useMemo, useState, useActionState } from 'react';
+
 import { Alert, AlertDescription, AlertTitle } from '@shared/ui/alert';
 import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
@@ -64,7 +64,7 @@ function OrganizationCombobox({ name, label, options, disabled, helperText }: Or
 }
 
 export function CfsCreateForm({ organizations, canPublicTrack }: CfsCreateFormProps) {
-  const [state, formAction] = useFormState(createCfsCallAction, initialCfsActionState);
+  const [state, formAction] = useActionState(createCfsCallAction, initialCfsActionState);
   const [anonymousReporter, setAnonymousReporter] = useState(false);
   const [notifyEnabled, setNotifyEnabled] = useState(false);
   const [publicTrackingEnabled, setPublicTrackingEnabled] = useState(false);

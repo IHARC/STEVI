@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useFormState } from 'react-dom';
+import { useEffect, useActionState } from 'react';
+
 import { useForm } from 'react-hook-form';
 import { Button } from '@shared/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@shared/ui/form';
@@ -26,7 +26,7 @@ async function submitFooter(prevState: FooterFormState, formData: FormData): Pro
 }
 
 export function WebsiteFooterForm({ primaryText, secondaryText, lastUpdatedLabel }: FooterFormProps) {
-  const [state, formAction] = useFormState(submitFooter, initialState);
+  const [state, formAction] = useActionState(submitFooter, initialState);
   const { toast } = useToast();
   const form = useForm({
     defaultValues: {

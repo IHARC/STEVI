@@ -130,7 +130,7 @@ export async function createCharacteristicAction(
       },
     });
 
-    revalidatePath(`/ops/clients/${personId}?view=directory`);
+    revalidatePath(`/ops/clients/${personId}?tab=overview`);
     if (encounterId) {
       revalidatePath(`/ops/encounters/${encounterId}`);
     }

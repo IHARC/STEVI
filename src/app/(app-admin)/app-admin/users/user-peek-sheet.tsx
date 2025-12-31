@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from 'react';
 import Link from 'next/link';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@shared/ui/sheet';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@shared/ui/sheet';
 import { Button } from '@shared/ui/button';
 import { useToast } from '@shared/ui/use-toast';
 import { updateProfileAction } from './actions';
@@ -40,7 +40,7 @@ export function UserPeekSheet({ user }: UserPeekSheetProps) {
       <SheetContent side="right" className="w-full max-w-[520px] overflow-y-auto">
         <SheetHeader className="text-left">
           <SheetTitle className="text-xl">{user.displayName}</SheetTitle>
-          <p className="text-xs text-muted-foreground">{user.email ?? 'No email on file'}</p>
+          <SheetDescription className="text-xs">{user.email ?? 'No email on file'}</SheetDescription>
         </SheetHeader>
         <div className="mt-4 space-y-4 text-sm">
           <div className="flex flex-wrap gap-1">

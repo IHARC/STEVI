@@ -6,6 +6,7 @@ import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMe
 import { CommandPalette } from '@shared/layout/command-palette';
 import { ThemeToggle } from '@shared/layout/theme-toggle';
 import { AppNavigationMobile } from '@shared/layout/app-navigation';
+import { ClientOnly } from '@shared/layout/client-only';
 import { APP_ICON_MAP, type AppIconName } from '@/lib/app-icons';
 import { cn } from '@/lib/utils';
 import { useOptionalPortalLayout } from '@shared/providers/portal-layout-provider';
@@ -61,10 +62,12 @@ export function TopNav({
           <div className="flex min-w-0 items-center gap-3">
             {hasNav ? (
               <div className={hamburgerBreakpointClass}>
-                <AppNavigationMobile
-                  navSections={navSections}
-                  mode={activeArea === 'client' ? 'full' : 'hubs'}
-                />
+                <ClientOnly fallback={<div className="h-11 w-11" aria-hidden />}>
+                  <AppNavigationMobile
+                    navSections={navSections}
+                    mode={activeArea === 'client' ? 'full' : 'hubs'}
+                  />
+                </ClientOnly>
               </div>
             ) : null}
             <Link
@@ -83,7 +86,9 @@ export function TopNav({
 
           {showMegaMenu ? (
             <nav aria-label="Primary navigation" className="hidden min-w-0 lg:flex xl:hidden">
-              <TopNavMenu navSections={navSections} pathname={pathname} />
+              <ClientOnly>
+                <TopNavMenu navSections={navSections} pathname={pathname} />
+              </ClientOnly>
             </nav>
           ) : null}
 
@@ -97,10 +102,18 @@ export function TopNav({
                 {adminSwitchLabel}
               </Link>
             ) : null}
-            <CommandPalette items={commands} compactTrigger className="hidden sm:flex" />
-            <ThemeToggle />
-            <div className="hidden md:flex items-center gap-2">{desktop}</div>
-            <div className="flex items-center gap-2 md:hidden">{mobile}</div>
+            <ClientOnly fallback={<div className="hidden sm:flex h-9 w-9" aria-hidden />}>
+              <CommandPalette items={commands} compactTrigger className="hidden sm:flex" />
+            </ClientOnly>
+            <ClientOnly fallback={<div className="h-10 w-10" aria-hidden />}>
+              <ThemeToggle />
+            </ClientOnly>
+            <div className="hidden md:flex items-center gap-2">
+              <ClientOnly>{desktop}</ClientOnly>
+            </div>
+            <div className="flex items-center gap-2 md:hidden">
+              <ClientOnly>{mobile}</ClientOnly>
+            </div>
           </div>
         </div>
       </div>

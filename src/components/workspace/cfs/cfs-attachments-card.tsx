@@ -1,6 +1,7 @@
 'use client';
 
-import { useFormState } from 'react-dom';
+import { useActionState } from 'react';
+
 import { Alert, AlertDescription, AlertTitle } from '@shared/ui/alert';
 import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
@@ -46,7 +47,7 @@ function formatTimestamp(value: string) {
 }
 
 export function CfsAttachmentsCard({ cfsId, attachments, canUpload, canDelete }: CfsAttachmentsCardProps) {
-  const [state, formAction] = useFormState(uploadCfsAttachmentAction, initialCfsAttachmentActionState);
+  const [state, formAction] = useActionState(uploadCfsAttachmentAction, initialCfsAttachmentActionState);
 
   return (
     <Card className="border-border/70">

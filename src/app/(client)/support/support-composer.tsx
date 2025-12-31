@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { useFormState } from 'react-dom';
+import { useEffect, useMemo, useState, useActionState } from 'react';
+
 import { useForm } from 'react-hook-form';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@shared/ui/sheet';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@shared/ui/sheet';
 import { Button } from '@shared/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@shared/ui/form';
 import { Textarea } from '@shared/ui/textarea';
@@ -18,7 +18,7 @@ const initialState = { success: false } as const;
 
 export function SupportComposer() {
   const [open, setOpen] = useState(false);
-  const [state, formAction] = useFormState(submitSupportMessage, initialState);
+  const [state, formAction] = useActionState(submitSupportMessage, initialState);
   const form = useForm<{ message: string; preferredContact: string }>({
     defaultValues: {
       message: '',
@@ -68,9 +68,9 @@ export function SupportComposer() {
       <SheetContent side="bottom" className="max-h-[70vh] overflow-y-auto rounded-t-3xl border-t border-border/30 bg-background">
         <SheetHeader>
           <SheetTitle className="text-left">Message the team</SheetTitle>
-          <p className="text-sm text-muted-foreground text-left">
+          <SheetDescription className="text-left">
             Share what you need. We respond within one business day using your preferred contact method.
-          </p>
+          </SheetDescription>
         </SheetHeader>
 
         <ClientPreviewGuard message="Exit preview to send messages as the client.">

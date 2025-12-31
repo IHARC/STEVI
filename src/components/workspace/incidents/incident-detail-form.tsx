@@ -1,6 +1,7 @@
 'use client';
 
-import { useFormState } from 'react-dom';
+import { useActionState } from 'react';
+
 import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Input } from '@shared/ui/input';
@@ -27,7 +28,7 @@ function toLocalDateTime(value?: string | null): string {
 }
 
 export function IncidentDetailForm({ incident }: IncidentDetailFormProps) {
-  const [state, formAction] = useFormState(updateIncidentAction, initialIncidentActionState);
+  const [state, formAction] = useActionState(updateIncidentAction, initialIncidentActionState);
 
   return (
     <Card className="border-border/70">

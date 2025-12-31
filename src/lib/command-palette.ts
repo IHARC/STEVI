@@ -22,7 +22,7 @@ export async function buildEntityCommandPaletteItems(
       const cases = await fetchStaffCases(supabase, 10);
       cases.forEach((item) => {
         commands.push({
-          href: `/ops/clients/${item.personId ?? item.id}?case=${item.id}&view=directory`,
+          href: `/ops/clients/${item.personId ?? item.id}?case=${item.id}&tab=overview`,
           label: item.caseType ?? `Case #${item.id}`,
           group: 'Clients · Cases',
         });
@@ -45,7 +45,7 @@ export async function buildEntityCommandPaletteItems(
       if (!error) {
         (data ?? []).forEach((person: PeopleListItem) => {
           commands.push({
-            href: `/ops/clients/${person.id}?view=directory`,
+            href: `/ops/clients/${person.id}?tab=overview`,
             label: `${person.first_name ?? 'Client'} ${person.last_name ?? ''}`.trim(),
             group: 'Clients',
           });

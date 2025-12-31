@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useFormState } from 'react-dom';
+import { useEffect, useActionState } from 'react';
+
 import type { RelationshipSummary } from '@/lib/relationships/types';
 import { createRelationshipAction, type RelationshipFormState } from '@/lib/relationships/actions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
@@ -11,6 +11,7 @@ import { Button } from '@shared/ui/button';
 import { Label } from '@shared/ui/label';
 import { NativeSelect } from '@shared/ui/native-select';
 import { Badge } from '@shared/ui/badge';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@shared/ui/sheet';
 import { useToast } from '@shared/ui/use-toast';
 
 const initialState: RelationshipFormState = { status: 'idle' };
@@ -47,11 +48,12 @@ type RelationshipsCardProps = {
   caseId?: number | null;
   encounterId?: string | null;
   relationships: RelationshipSummary[];
+  formVariant?: 'inline' | 'sheet';
 };
 
-export function RelationshipsCard({ personId, caseId, encounterId, relationships }: RelationshipsCardProps) {
+export function RelationshipsCard({ personId, caseId, encounterId, relationships, formVariant = 'inline' }: RelationshipsCardProps) {
   const { toast } = useToast();
-  const [state, formAction] = useFormState(createRelationshipAction, initialState);
+  const [state, formAction] = useActionState(createRelationshipAction, initialState);
 
   useEffect(() => {
     if (state.status === 'success') {
@@ -62,11 +64,155 @@ export function RelationshipsCard({ personId, caseId, encounterId, relationships
     }
   }, [state, toast]);
 
+  const form = (
+    <form action={formAction} className="space-y-3">
+      <input type="hidden" name="person_id" value={personId} />
+      {caseId ? <input type="hidden" name="case_id" value={caseId} /> : null}
+      {encounterId ? <input type="hidden" name="encounter_id" value={encounterId} /> : null}
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <div className="space-y-1">
+          <Label htmlFor="relationship_type">Relationship type</Label>
+          <Input id="relationship_type" name="relationship_type" placeholder="Family, shelter, outreach" required />
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="relationship_subtype">Subtype</Label>
+          <Input id="relationship_subtype" name="relationship_subtype" placeholder="Sibling, shelter staff" />
+        </div>
+      </div>
+
+      <div className="space-y-1">
+        <Label htmlFor="relationship_status">Status</Label>
+        <Input id="relationship_status" name="relationship_status" placeholder="Active, estranged, supportive" />
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <div className="space-y-1">
+          <Label htmlFor="related_person_id">Related person ID</Label>
+          <Input id="related_person_id" name="related_person_id" type="number" placeholder="Optional" />
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="contact_name">Contact name</Label>
+          <Input id="contact_name" name="contact_name" placeholder="Contact name" />
+        </div>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <div className="space-y-1">
+          <Label htmlFor="contact_phone">Phone</Label>
+          <Input id="contact_phone" name="contact_phone" placeholder="Phone number" />
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="contact_email">Email</Label>
+          <Input id="contact_email" name="contact_email" type="email" placeholder="Email" />
+        </div>
+      </div>
+
+      <div className="space-y-1">
+        <Label htmlFor="contact_address">Address</Label>
+        <Input id="contact_address" name="contact_address" placeholder="Address" />
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <div className="space-y-1">
+          <Label htmlFor="relationship_start_date">Start date</Label>
+          <Input id="relationship_start_date" name="start_date" type="date" />
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="relationship_end_date">End date</Label>
+          <Input id="relationship_end_date" name="end_date" type="date" />
+        </div>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <div className="flex items-center gap-2">
+          <input id="is_primary" name="is_primary" type="checkbox" />
+          <Label htmlFor="is_primary">Primary contact</Label>
+        </div>
+        <div className="flex items-center gap-2">
+          <input id="is_emergency" name="is_emergency" type="checkbox" />
+          <Label htmlFor="is_emergency">Emergency contact</Label>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <input id="safe_to_contact" name="safe_to_contact" type="checkbox" defaultChecked />
+        <Label htmlFor="safe_to_contact">Safe to contact</Label>
+      </div>
+
+      <div className="space-y-1">
+        <Label htmlFor="safe_contact_notes">Safe contact notes</Label>
+        <Textarea id="safe_contact_notes" name="safe_contact_notes" rows={2} />
+      </div>
+
+      <div className="space-y-1">
+        <Label htmlFor="relationship_notes">Notes</Label>
+        <Textarea id="relationship_notes" name="notes" rows={2} />
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <div className="space-y-1">
+          <Label htmlFor="relationship_source">Source</Label>
+          <NativeSelect id="relationship_source" name="source" defaultValue="staff_observed">
+            {SOURCE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </NativeSelect>
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="relationship_verification">Verification</Label>
+          <NativeSelect id="relationship_verification" name="verification_status" defaultValue="unverified">
+            {VERIFICATION_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </NativeSelect>
+        </div>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <div className="space-y-1">
+          <Label htmlFor="relationship_visibility">Visibility</Label>
+          <NativeSelect id="relationship_visibility" name="visibility_scope" defaultValue="internal_to_org">
+            {VISIBILITY_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </NativeSelect>
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="relationship_sensitivity">Sensitivity</Label>
+          <NativeSelect id="relationship_sensitivity" name="sensitivity_level" defaultValue="standard">
+            {SENSITIVITY_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </NativeSelect>
+        </div>
+      </div>
+
+      <Button type="submit" size="sm">Save relationship</Button>
+    </form>
+  );
+
   return (
     <Card className="border-border/70">
-      <CardHeader>
-        <CardTitle className="text-lg">Relationships</CardTitle>
-        <CardDescription>Track supports, contacts, and safe-to-contact notes.</CardDescription>
+      <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <CardTitle className="text-lg">Relationships</CardTitle>
+          <CardDescription>Track supports, contacts, and safe-to-contact notes.</CardDescription>
+        </div>
+        {formVariant === 'sheet' ? (
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="outline" size="sm">Add relationship</Button>
+            </SheetTrigger>
+            <SheetContent className="overflow-y-auto sm:max-w-xl">
+              <SheetHeader className="text-left">
+                <SheetTitle>Add relationship</SheetTitle>
+                <SheetDescription>Capture contacts and safe-to-contact notes.</SheetDescription>
+              </SheetHeader>
+              <div className="mt-4">{form}</div>
+            </SheetContent>
+          </Sheet>
+        ) : null}
       </CardHeader>
       <CardContent className="space-y-4">
         {relationships.length === 0 ? (
@@ -97,134 +243,12 @@ export function RelationshipsCard({ personId, caseId, encounterId, relationships
           </div>
         )}
 
-        <details className="rounded-xl border border-dashed border-border/60 p-3">
-          <summary className="cursor-pointer text-sm font-medium text-foreground">Add relationship</summary>
-          <form action={formAction} className="mt-3 space-y-3">
-            <input type="hidden" name="person_id" value={personId} />
-            {caseId ? <input type="hidden" name="case_id" value={caseId} /> : null}
-            {encounterId ? <input type="hidden" name="encounter_id" value={encounterId} /> : null}
-
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="space-y-1">
-                <Label htmlFor="relationship_type">Relationship type</Label>
-                <Input id="relationship_type" name="relationship_type" placeholder="Family, shelter, outreach" required />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="relationship_subtype">Subtype</Label>
-                <Input id="relationship_subtype" name="relationship_subtype" placeholder="Sibling, shelter staff" />
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <Label htmlFor="relationship_status">Status</Label>
-              <Input id="relationship_status" name="relationship_status" placeholder="Active, estranged, supportive" />
-            </div>
-
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="space-y-1">
-                <Label htmlFor="related_person_id">Related person ID</Label>
-                <Input id="related_person_id" name="related_person_id" type="number" placeholder="Optional" />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="contact_name">Contact name</Label>
-                <Input id="contact_name" name="contact_name" placeholder="Contact name" />
-              </div>
-            </div>
-
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="space-y-1">
-                <Label htmlFor="contact_phone">Phone</Label>
-                <Input id="contact_phone" name="contact_phone" placeholder="Phone number" />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="contact_email">Email</Label>
-                <Input id="contact_email" name="contact_email" type="email" placeholder="Email" />
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <Label htmlFor="contact_address">Address</Label>
-              <Input id="contact_address" name="contact_address" placeholder="Address" />
-            </div>
-
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="space-y-1">
-                <Label htmlFor="relationship_start_date">Start date</Label>
-                <Input id="relationship_start_date" name="start_date" type="date" />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="relationship_end_date">End date</Label>
-                <Input id="relationship_end_date" name="end_date" type="date" />
-              </div>
-            </div>
-
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="flex items-center gap-2">
-                <input id="is_primary" name="is_primary" type="checkbox" />
-                <Label htmlFor="is_primary">Primary contact</Label>
-              </div>
-              <div className="flex items-center gap-2">
-                <input id="is_emergency" name="is_emergency" type="checkbox" />
-                <Label htmlFor="is_emergency">Emergency contact</Label>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <input id="safe_to_contact" name="safe_to_contact" type="checkbox" defaultChecked />
-              <Label htmlFor="safe_to_contact">Safe to contact</Label>
-            </div>
-
-            <div className="space-y-1">
-              <Label htmlFor="safe_contact_notes">Safe contact notes</Label>
-              <Textarea id="safe_contact_notes" name="safe_contact_notes" rows={2} />
-            </div>
-
-            <div className="space-y-1">
-              <Label htmlFor="relationship_notes">Notes</Label>
-              <Textarea id="relationship_notes" name="notes" rows={2} />
-            </div>
-
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="space-y-1">
-                <Label htmlFor="relationship_source">Source</Label>
-                <NativeSelect id="relationship_source" name="source" defaultValue="staff_observed">
-                  {SOURCE_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </NativeSelect>
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="relationship_verification">Verification</Label>
-                <NativeSelect id="relationship_verification" name="verification_status" defaultValue="unverified">
-                  {VERIFICATION_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </NativeSelect>
-              </div>
-            </div>
-
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="space-y-1">
-                <Label htmlFor="relationship_visibility">Visibility</Label>
-                <NativeSelect id="relationship_visibility" name="visibility_scope" defaultValue="internal_to_org">
-                  {VISIBILITY_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </NativeSelect>
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="relationship_sensitivity">Sensitivity</Label>
-                <NativeSelect id="relationship_sensitivity" name="sensitivity_level" defaultValue="standard">
-                  {SENSITIVITY_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </NativeSelect>
-              </div>
-            </div>
-
-            <Button type="submit" size="sm">Save relationship</Button>
-          </form>
-        </details>
+        {formVariant === 'inline' ? (
+          <details className="rounded-xl border border-dashed border-border/60 p-3">
+            <summary className="cursor-pointer text-sm font-medium text-foreground">Add relationship</summary>
+            <div className="mt-3">{form}</div>
+          </details>
+        ) : null}
       </CardContent>
     </Card>
   );

@@ -172,7 +172,7 @@ export async function createTaskAction(_prev: TaskFormState, formData: FormData)
       sensitivityLevel,
     });
 
-    revalidatePath(`/ops/clients/${personId}?view=directory`);
+    revalidatePath(`/ops/clients/${personId}?tab=overview`);
     revalidatePath('/ops/clients?view=activity');
     if (encounterId) {
       revalidatePath(`/ops/encounters/${encounterId}`);
@@ -224,6 +224,6 @@ export async function updateTaskStatusAction(taskId: string, status: TaskStatus)
     },
   });
 
-  revalidatePath(`/ops/clients/${data.person_id}?view=directory`);
+  revalidatePath(`/ops/clients/${data.person_id}?tab=overview`);
   revalidatePath('/ops/clients?view=activity');
 }

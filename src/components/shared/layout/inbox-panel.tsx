@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { Button } from '@shared/ui/button';
 import { Panel } from '@shared/ui/panel';
 import { ScrollArea } from '@shared/ui/scroll-area';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@shared/ui/sheet';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@shared/ui/sheet';
 import { AlertCircle, Bell, CheckCircle2, Clock3, X } from 'lucide-react';
 import type { InboxItem } from '@/lib/inbox';
 import { cn } from '@/lib/utils';
@@ -74,9 +74,9 @@ export function InboxPanel({ items }: InboxPanelProps) {
             <SheetTitle className="flex items-center gap-2">
               <Bell className="h-4 w-4" aria-hidden /> Inbox
             </SheetTitle>
-            <p className="text-sm text-muted-foreground">
+            <SheetDescription>
               Time-sensitive approvals, notifications, and expiring documents.
-            </p>
+            </SheetDescription>
           </SheetHeader>
           <div className="mt-3 max-h-[70vh] overflow-y-auto">
             <InboxList items={visibleItems} onDismiss={handleDismiss} />

@@ -7,7 +7,7 @@ import { Combobox } from '@shared/ui/combobox';
 import { Input } from '@shared/ui/input';
 import { Label } from '@shared/ui/label';
 import { NativeCheckbox } from '@shared/ui/native-checkbox';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@shared/ui/sheet';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@shared/ui/sheet';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@shared/ui/table';
 import type { DonationCatalogCategory, DonationCatalogItem } from '@/lib/donations/types';
@@ -313,6 +313,9 @@ export function DonationCatalogAdmin({ inventoryItems, catalogInventoryItemIds, 
         <SheetContent side="right" className="w-full max-w-3xl">
           <SheetHeader className="text-left">
             <SheetTitle>Donation categories</SheetTitle>
+            <SheetDescription className="sr-only">
+              Manage donation categories for the catalogue.
+            </SheetDescription>
           </SheetHeader>
           <div className="mt-4 space-y-6 overflow-y-auto pr-1">
             <form action={createCatalogCategory} className="space-y-3 rounded-2xl border border-border/15 bg-background p-4 shadow-sm">

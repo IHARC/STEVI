@@ -9,7 +9,7 @@ import { Input } from '@shared/ui/input';
 import { NativeSelect } from '@shared/ui/native-select';
 import { Panel } from '@shared/ui/panel';
 import { ScrollArea } from '@shared/ui/scroll-area';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@shared/ui/sheet';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@shared/ui/sheet';
 import { useToast } from '@shared/ui/use-toast';
 import { approveAffiliationAction, declineAffiliationAction } from '@/app/(app-admin)/app-admin/profiles/actions';
 import { useMediaQuery } from '@/hooks/use-media-query';
@@ -284,6 +284,9 @@ function PendingAffiliationsContent({
               <SheetContent side="right" className="w-full max-w-[560px] lg:hidden">
                 <SheetHeader className="text-left">
                   <SheetTitle>Review request</SheetTitle>
+                  <SheetDescription className="sr-only">
+                    Review the selected affiliation request and take action.
+                  </SheetDescription>
                 </SheetHeader>
                 <div className="mt-4 max-h-[80vh] overflow-y-auto pr-1">
                   {selectedEntry ? (

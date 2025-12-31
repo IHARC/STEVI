@@ -86,7 +86,7 @@ export default async function EncounterDetailPage({ params }: PageProps) {
             </form>
           )
         }
-        secondaryAction={{ label: 'Back to client profile', href: `/ops/clients/${person.id}?view=directory` }}
+        secondaryAction={{ label: 'Back to client profile', href: `/ops/clients/${person.id}?tab=overview` }}
         breadcrumbs={[{ label: 'Clients', href: '/ops/clients?view=directory' }, { label: 'Encounter' }]}
         meta={encounterMeta}
       />

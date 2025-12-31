@@ -1,6 +1,7 @@
 'use client';
 
-import { useFormState } from 'react-dom';
+import { useActionState } from 'react';
+
 import { useForm } from 'react-hook-form';
 import { Alert, AlertDescription, AlertTitle } from '@shared/ui/alert';
 import { Button } from '@shared/ui/button';
@@ -35,7 +36,7 @@ type RequestAppointmentValues = {
 const initialState: AppointmentRequestState = { status: 'idle' };
 
 export function RequestAppointmentForm({ action, profileDisplayName }: RequestAppointmentFormProps) {
-  const [state, formAction] = useFormState(action, initialState);
+  const [state, formAction] = useActionState(action, initialState);
   const form = useForm<RequestAppointmentValues>({
     defaultValues: {
       reason: '',

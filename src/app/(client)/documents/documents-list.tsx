@@ -1,8 +1,8 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useActionState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useFormState } from 'react-dom';
+
 import { Button } from '@shared/ui/button';
 import { Form } from '@shared/ui/form';
 import { Input } from '@shared/ui/input';
@@ -24,8 +24,8 @@ const emptyState: ActionState = { success: false };
 export function DocumentsList({ documents, onRequestLink, onExtendAccess }: DocumentsListProps) {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<string>('all');
-  const [requestState, requestAction] = useFormState(onRequestLink, emptyState);
-  const [extendState, extendAction] = useFormState(onExtendAccess, emptyState);
+  const [requestState, requestAction] = useActionState(onRequestLink, emptyState);
+  const [extendState, extendAction] = useActionState(onExtendAccess, emptyState);
 
   const categories = useMemo(() => {
     const set = new Set<string>();

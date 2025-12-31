@@ -173,7 +173,7 @@ export async function createEncounterAction(
     });
 
     revalidatePath(`/ops/encounters/${encounter.id}`);
-    revalidatePath(`/ops/clients/${personId}?view=directory`);
+    revalidatePath(`/ops/clients/${personId}?tab=overview`);
     revalidatePath('/ops/clients?view=activity');
 
     return { status: 'success', encounterId: encounter.id };
@@ -216,5 +216,5 @@ export async function closeEncounterAction(encounterId: string): Promise<void> {
   });
 
   revalidatePath(`/ops/encounters/${encounterId}`);
-  revalidatePath(`/ops/clients/${data.person_id}?view=directory`);
+  revalidatePath(`/ops/clients/${data.person_id}?tab=overview`);
 }

@@ -252,6 +252,89 @@ export type Database = {
           },
         ]
       }
+      client_intakes: {
+        Row: {
+          id: number
+          created_at: string
+          person_id: number
+          intake_date: string
+          intake_worker: string | null
+          consent_confirmed: boolean
+          privacy_acknowledged: boolean
+          place_of_origin:
+            | Database["core"]["Enums"]["place_of_origin_enum"]
+            | null
+          risk_factors: Database["core"]["Enums"]["risk_factor_enum"][]
+          immediate_needs:
+            | Database["core"]["Enums"]["assessment_urgency"]
+            | null
+          housing_status:
+            | Database["core"]["Enums"]["housing_status_enum"]
+            | null
+          risk_level: Database["core"]["Enums"]["risk_level_enum"] | null
+          situation_notes: string | null
+          ethnicity: Database["core"]["Enums"]["ethnicity_enum"][]
+          health_concerns: Database["core"]["Enums"]["health_concern_enum"][]
+          general_notes: string | null
+        }
+        Insert: {
+          id?: number
+          created_at?: string
+          person_id: number
+          intake_date?: string
+          intake_worker?: string | null
+          consent_confirmed: boolean
+          privacy_acknowledged: boolean
+          place_of_origin?:
+            | Database["core"]["Enums"]["place_of_origin_enum"]
+            | null
+          risk_factors?: Database["core"]["Enums"]["risk_factor_enum"][]
+          immediate_needs?:
+            | Database["core"]["Enums"]["assessment_urgency"]
+            | null
+          housing_status?:
+            | Database["core"]["Enums"]["housing_status_enum"]
+            | null
+          risk_level?: Database["core"]["Enums"]["risk_level_enum"] | null
+          situation_notes?: string | null
+          ethnicity?: Database["core"]["Enums"]["ethnicity_enum"][]
+          health_concerns?: Database["core"]["Enums"]["health_concern_enum"][]
+          general_notes?: string | null
+        }
+        Update: {
+          id?: number
+          created_at?: string
+          person_id?: number
+          intake_date?: string
+          intake_worker?: string | null
+          consent_confirmed?: boolean
+          privacy_acknowledged?: boolean
+          place_of_origin?:
+            | Database["core"]["Enums"]["place_of_origin_enum"]
+            | null
+          risk_factors?: Database["core"]["Enums"]["risk_factor_enum"][]
+          immediate_needs?:
+            | Database["core"]["Enums"]["assessment_urgency"]
+            | null
+          housing_status?:
+            | Database["core"]["Enums"]["housing_status_enum"]
+            | null
+          risk_level?: Database["core"]["Enums"]["risk_level_enum"] | null
+          situation_notes?: string | null
+          ethnicity?: Database["core"]["Enums"]["ethnicity_enum"][]
+          health_concerns?: Database["core"]["Enums"]["health_concern_enum"][]
+          general_notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_intakes_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tasks: {
         Row: {
           id: string
@@ -874,81 +957,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      client_intakes: {
-        Row: {
-          consent_confirmed: boolean
-          created_at: string
-          ethnicity: Database["core"]["Enums"]["ethnicity_enum"][]
-          general_notes: string | null
-          health_concerns: Database["core"]["Enums"]["health_concern_enum"][]
-          housing_status:
-            | Database["core"]["Enums"]["housing_status_enum"]
-            | null
-          id: number
-          immediate_needs:
-            | Database["core"]["Enums"]["assessment_urgency"]
-            | null
-          intake_date: string
-          intake_worker: string | null
-          person_id: number
-          place_of_origin:
-            | Database["core"]["Enums"]["place_of_origin_enum"]
-            | null
-          privacy_acknowledged: boolean
-          risk_factors: Database["core"]["Enums"]["risk_factor_enum"][]
-          risk_level: Database["core"]["Enums"]["risk_level_enum"] | null
-          situation_notes: string | null
-        }
-        Insert: {
-          consent_confirmed: boolean
-          created_at?: string
-          ethnicity?: Database["core"]["Enums"]["ethnicity_enum"][]
-          general_notes?: string | null
-          health_concerns?: Database["core"]["Enums"]["health_concern_enum"][]
-          housing_status?:
-            | Database["core"]["Enums"]["housing_status_enum"]
-            | null
-          id?: number
-          immediate_needs?:
-            | Database["core"]["Enums"]["assessment_urgency"]
-            | null
-          intake_date?: string
-          intake_worker?: string | null
-          person_id: number
-          place_of_origin?:
-            | Database["core"]["Enums"]["place_of_origin_enum"]
-            | null
-          privacy_acknowledged: boolean
-          risk_factors?: Database["core"]["Enums"]["risk_factor_enum"][]
-          risk_level?: Database["core"]["Enums"]["risk_level_enum"] | null
-          situation_notes?: string | null
-        }
-        Update: {
-          consent_confirmed?: boolean
-          created_at?: string
-          ethnicity?: Database["core"]["Enums"]["ethnicity_enum"][]
-          general_notes?: string | null
-          health_concerns?: Database["core"]["Enums"]["health_concern_enum"][]
-          housing_status?:
-            | Database["core"]["Enums"]["housing_status_enum"]
-            | null
-          id?: number
-          immediate_needs?:
-            | Database["core"]["Enums"]["assessment_urgency"]
-            | null
-          intake_date?: string
-          intake_worker?: string | null
-          person_id?: number
-          place_of_origin?:
-            | Database["core"]["Enums"]["place_of_origin_enum"]
-            | null
-          privacy_acknowledged?: boolean
-          risk_factors?: Database["core"]["Enums"]["risk_factor_enum"][]
-          risk_level?: Database["core"]["Enums"]["risk_level_enum"] | null
-          situation_notes?: string | null
-        }
-        Relationships: []
       }
       incident_links: {
         Row: {

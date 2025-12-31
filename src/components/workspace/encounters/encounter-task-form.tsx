@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useFormState } from 'react-dom';
+import { useEffect, useActionState } from 'react';
+
 import { createTaskAction, type TaskFormState } from '@/lib/tasks/actions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Input } from '@shared/ui/input';
@@ -40,7 +40,7 @@ type EncounterTaskFormProps = {
 
 export function EncounterTaskForm({ personId, caseId, encounterId }: EncounterTaskFormProps) {
   const { toast } = useToast();
-  const [state, formAction] = useFormState(createTaskAction, initialState);
+  const [state, formAction] = useActionState(createTaskAction, initialState);
 
   useEffect(() => {
     if (state.status === 'success') {

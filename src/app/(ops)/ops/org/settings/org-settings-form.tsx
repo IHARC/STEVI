@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useEffect, useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
@@ -31,7 +31,7 @@ type NotesValues = {
 export function OrgContactSettingsForm({ initialValues, organizationId }: { initialValues: ContactValues; organizationId: number }) {
   const { toast } = useToast();
   const router = useRouter();
-  const [state, formAction] = useFormState(updateOrgSettingsAction, initialState);
+  const [state, formAction] = useActionState(updateOrgSettingsAction, initialState);
   const form = useForm<ContactValues>({
     defaultValues: {
       contact_person: initialValues.contact_person ?? '',
@@ -153,7 +153,7 @@ export function OrgContactSettingsForm({ initialValues, organizationId }: { init
 export function OrgNotesSettingsForm({ initialValues, organizationId }: { initialValues: NotesValues; organizationId: number }) {
   const { toast } = useToast();
   const router = useRouter();
-  const [state, formAction] = useFormState(updateOrgSettingsAction, initialState);
+  const [state, formAction] = useActionState(updateOrgSettingsAction, initialState);
   const form = useForm<NotesValues>({
     defaultValues: {
       referral_process: initialValues.referral_process ?? '',

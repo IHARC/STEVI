@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useFormState } from 'react-dom';
+import { useEffect, useState, useActionState } from 'react';
+
 import { distributeInventoryAction, type DistributionFormState } from '@/lib/inventory/distributions';
 import type { InventoryItem, InventoryLocation } from '@/lib/inventory/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
@@ -25,7 +25,7 @@ type EncounterSuppliesFormProps = {
 export function EncounterSuppliesForm({ personId, encounterId, locations, items, disabled }: EncounterSuppliesFormProps) {
   const { toast } = useToast();
   const [rows, setRows] = useState(1);
-  const [state, formAction] = useFormState(distributeInventoryAction, initialState);
+  const [state, formAction] = useActionState(distributeInventoryAction, initialState);
 
   useEffect(() => {
     if (state.status === 'success') {

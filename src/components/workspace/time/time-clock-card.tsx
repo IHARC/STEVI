@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { useFormState } from 'react-dom';
+import { useEffect, useMemo, useState, useActionState } from 'react';
+
 import { useToast } from '@shared/ui/use-toast';
 import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
@@ -45,10 +45,10 @@ function formatDuration(minutes: number) {
 }
 
 export function TimeClockCard({ openShift, roles, orgMissing }: TimeClockCardProps) {
-  const [startState, startAction] = useFormState(startShiftAction, initialState);
-  const [endState, endAction] = useFormState(endShiftAction, initialState);
-  const [breakStartState, breakStartAction] = useFormState(startBreakAction, initialState);
-  const [breakEndState, breakEndAction] = useFormState(endBreakAction, initialState);
+  const [startState, startAction] = useActionState(startShiftAction, initialState);
+  const [endState, endAction] = useActionState(endShiftAction, initialState);
+  const [breakStartState, breakStartAction] = useActionState(startBreakAction, initialState);
+  const [breakEndState, breakEndAction] = useActionState(endBreakAction, initialState);
   const { toast } = useToast();
 
   const openBreak = useMemo(() => {

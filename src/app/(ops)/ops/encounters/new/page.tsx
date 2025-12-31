@@ -121,7 +121,7 @@ export default async function NewEncounterPage({ searchParams }: PageProps) {
         eyebrow="Encounter"
         title={`Start encounter for ${person.first_name ?? 'Person'} ${person.last_name ?? ''}`.trim()}
         description="Capture encounter context before logging tasks, supplies, referrals, or care updates."
-        secondaryAction={{ label: 'Back to client profile', href: `/ops/clients/${person.id}?view=directory` }}
+        secondaryAction={{ label: 'Back to client profile', href: `/ops/clients/${person.id}?tab=overview` }}
         breadcrumbs={[{ label: 'Clients', href: '/ops/clients?view=directory' }, { label: 'New Encounter' }]}
         meta={[{ label: access.organizationName ?? 'Acting org selected', tone: 'neutral' }]}
       />

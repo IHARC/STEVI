@@ -27,6 +27,7 @@ type PageHeaderProps = {
   eyebrow?: string;
   title: string;
   description?: ReactNode;
+  titleAddon?: ReactNode;
   primaryAction?: HeaderAction;
   secondaryAction?: HeaderAction;
   helperLink?: HeaderAction;
@@ -49,6 +50,7 @@ export function PageHeader({
   eyebrow,
   title,
   description,
+  titleAddon,
   primaryAction,
   secondaryAction,
   helperLink,
@@ -87,6 +89,7 @@ export function PageHeader({
               ))}
             </div>
           ) : null}
+          {titleAddon ? <div className="flex items-center">{titleAddon}</div> : null}
         </div>
         {description ? <div className="text-base text-muted-foreground">{description}</div> : null}
         {actions ? <div className="pt-1">{actions}</div> : null}

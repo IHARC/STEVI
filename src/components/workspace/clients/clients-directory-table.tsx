@@ -120,7 +120,7 @@ export function ClientsDirectoryTable({ items, totalCount, query, loadError, onb
     : null;
 
   const openPerson = (personId: number) => {
-    router.push(`/ops/clients/${personId}?view=directory`);
+    router.push(`/ops/clients/${personId}?tab=overview`);
   };
 
   const apply = (next: Partial<Props['query']> & { page?: number }) => {

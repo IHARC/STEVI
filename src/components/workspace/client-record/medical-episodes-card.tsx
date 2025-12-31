@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useFormState } from 'react-dom';
+import { useEffect, useActionState } from 'react';
+
 import type { MedicalEpisodeSummary } from '@/lib/medical/types';
 import { createMedicalEpisodeAction, type MedicalEpisodeFormState } from '@/lib/medical/actions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
@@ -11,6 +11,7 @@ import { Button } from '@shared/ui/button';
 import { Label } from '@shared/ui/label';
 import { NativeSelect } from '@shared/ui/native-select';
 import { Badge } from '@shared/ui/badge';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@shared/ui/sheet';
 import { useToast } from '@shared/ui/use-toast';
 
 const initialState: MedicalEpisodeFormState = { status: 'idle' };
@@ -56,11 +57,12 @@ type MedicalEpisodesCardProps = {
   caseId?: number | null;
   encounterId?: string | null;
   episodes: MedicalEpisodeSummary[];
+  formVariant?: 'inline' | 'sheet';
 };
 
-export function MedicalEpisodesCard({ personId, caseId, encounterId, episodes }: MedicalEpisodesCardProps) {
+export function MedicalEpisodesCard({ personId, caseId, encounterId, episodes, formVariant = 'inline' }: MedicalEpisodesCardProps) {
   const { toast } = useToast();
-  const [state, formAction] = useFormState(createMedicalEpisodeAction, initialState);
+  const [state, formAction] = useActionState(createMedicalEpisodeAction, initialState);
 
   useEffect(() => {
     if (state.status === 'success') {
@@ -71,11 +73,125 @@ export function MedicalEpisodesCard({ personId, caseId, encounterId, episodes }:
     }
   }, [state, toast]);
 
+  const form = (
+    <form action={formAction} className="space-y-3">
+      <input type="hidden" name="person_id" value={personId} />
+      {caseId ? <input type="hidden" name="case_id" value={caseId} /> : null}
+      {encounterId ? <input type="hidden" name="encounter_id" value={encounterId} /> : null}
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <div className="space-y-1">
+          <Label htmlFor="medical_episode_type">Episode type</Label>
+          <Input id="medical_episode_type" name="episode_type" placeholder="Overdose, wound care" required />
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="medical_primary_condition">Primary condition</Label>
+          <Input id="medical_primary_condition" name="primary_condition" placeholder="Opioid overdose" required />
+        </div>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <div className="space-y-1">
+          <Label htmlFor="medical_episode_date">Episode date</Label>
+          <Input id="medical_episode_date" name="episode_date" type="date" required />
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="medical_episode_end_date">Episode end date</Label>
+          <Input id="medical_episode_end_date" name="episode_end_date" type="date" />
+        </div>
+      </div>
+
+      <div className="space-y-1">
+        <Label htmlFor="medical_assessment_summary">Assessment summary</Label>
+        <Textarea id="medical_assessment_summary" name="assessment_summary" rows={3} />
+      </div>
+
+      <div className="space-y-1">
+        <Label htmlFor="medical_follow_up_notes">Follow-up notes</Label>
+        <Textarea id="medical_follow_up_notes" name="follow_up_notes" rows={2} />
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <div className="space-y-1">
+          <Label htmlFor="medical_follow_up_timeline">Follow-up timeline</Label>
+          <NativeSelect id="medical_follow_up_timeline" name="follow_up_timeline" defaultValue="">
+            {FOLLOW_UP_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </NativeSelect>
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="medical_follow_up_needed">Follow-up needed</Label>
+          <div className="flex items-center gap-2">
+            <input id="medical_follow_up_needed" name="follow_up_needed" type="checkbox" />
+            <span className="text-xs text-muted-foreground">Create a follow-up task if needed.</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <div className="space-y-1">
+          <Label htmlFor="medical_source">Source</Label>
+          <NativeSelect id="medical_source" name="source" defaultValue="staff_observed">
+            {SOURCE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </NativeSelect>
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="medical_verification">Verification</Label>
+          <NativeSelect id="medical_verification" name="verification_status" defaultValue="unverified">
+            {VERIFICATION_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </NativeSelect>
+        </div>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <div className="space-y-1">
+          <Label htmlFor="medical_visibility">Visibility</Label>
+          <NativeSelect id="medical_visibility" name="visibility_scope" defaultValue="internal_to_org">
+            {VISIBILITY_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </NativeSelect>
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="medical_sensitivity">Sensitivity</Label>
+          <NativeSelect id="medical_sensitivity" name="sensitivity_level" defaultValue="standard">
+            {SENSITIVITY_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </NativeSelect>
+        </div>
+      </div>
+
+      <Button type="submit" size="sm">Save medical update</Button>
+    </form>
+  );
+
   return (
     <Card className="border-border/70">
-      <CardHeader>
-        <CardTitle className="text-lg">Medical history</CardTitle>
-        <CardDescription>Document clinical observations and follow-ups.</CardDescription>
+      <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <CardTitle className="text-lg">Medical history</CardTitle>
+          <CardDescription>Document clinical observations and follow-ups.</CardDescription>
+        </div>
+        {formVariant === 'sheet' ? (
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="outline" size="sm">Add medical update</Button>
+            </SheetTrigger>
+            <SheetContent className="overflow-y-auto sm:max-w-xl">
+              <SheetHeader className="text-left">
+                <SheetTitle>Add medical update</SheetTitle>
+                <SheetDescription>Capture clinical observations and follow-ups.</SheetDescription>
+              </SheetHeader>
+              <div className="mt-4">{form}</div>
+            </SheetContent>
+          </Sheet>
+        ) : null}
       </CardHeader>
       <CardContent className="space-y-4">
         {episodes.length === 0 ? (
@@ -104,104 +220,12 @@ export function MedicalEpisodesCard({ personId, caseId, encounterId, episodes }:
           </div>
         )}
 
-        <details className="rounded-xl border border-dashed border-border/60 p-3">
-          <summary className="cursor-pointer text-sm font-medium text-foreground">Add medical update</summary>
-          <form action={formAction} className="mt-3 space-y-3">
-            <input type="hidden" name="person_id" value={personId} />
-            {caseId ? <input type="hidden" name="case_id" value={caseId} /> : null}
-            {encounterId ? <input type="hidden" name="encounter_id" value={encounterId} /> : null}
-
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="space-y-1">
-                <Label htmlFor="medical_episode_type">Episode type</Label>
-                <Input id="medical_episode_type" name="episode_type" placeholder="Overdose, wound care" required />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="medical_primary_condition">Primary condition</Label>
-                <Input id="medical_primary_condition" name="primary_condition" placeholder="Opioid overdose" required />
-              </div>
-            </div>
-
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="space-y-1">
-                <Label htmlFor="medical_episode_date">Episode date</Label>
-                <Input id="medical_episode_date" name="episode_date" type="date" required />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="medical_episode_end_date">Episode end date</Label>
-                <Input id="medical_episode_end_date" name="episode_end_date" type="date" />
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <Label htmlFor="medical_assessment_summary">Assessment summary</Label>
-              <Textarea id="medical_assessment_summary" name="assessment_summary" rows={3} />
-            </div>
-
-            <div className="space-y-1">
-              <Label htmlFor="medical_follow_up_notes">Follow-up notes</Label>
-              <Textarea id="medical_follow_up_notes" name="follow_up_notes" rows={2} />
-            </div>
-
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="space-y-1">
-                <Label htmlFor="medical_follow_up_timeline">Follow-up timeline</Label>
-                <NativeSelect id="medical_follow_up_timeline" name="follow_up_timeline" defaultValue="">
-                  {FOLLOW_UP_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </NativeSelect>
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="medical_follow_up_needed">Follow-up needed</Label>
-                <div className="flex items-center gap-2">
-                  <input id="medical_follow_up_needed" name="follow_up_needed" type="checkbox" />
-                  <span className="text-xs text-muted-foreground">Create a follow-up task if needed.</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="space-y-1">
-                <Label htmlFor="medical_source">Source</Label>
-                <NativeSelect id="medical_source" name="source" defaultValue="staff_observed">
-                  {SOURCE_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </NativeSelect>
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="medical_verification">Verification</Label>
-                <NativeSelect id="medical_verification" name="verification_status" defaultValue="unverified">
-                  {VERIFICATION_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </NativeSelect>
-              </div>
-            </div>
-
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="space-y-1">
-                <Label htmlFor="medical_visibility">Visibility</Label>
-                <NativeSelect id="medical_visibility" name="visibility_scope" defaultValue="internal_to_org">
-                  {VISIBILITY_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </NativeSelect>
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="medical_sensitivity">Sensitivity</Label>
-                <NativeSelect id="medical_sensitivity" name="sensitivity_level" defaultValue="standard">
-                  {SENSITIVITY_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </NativeSelect>
-              </div>
-            </div>
-
-            <Button type="submit" size="sm">Save medical update</Button>
-          </form>
-        </details>
+        {formVariant === 'inline' ? (
+          <details className="rounded-xl border border-dashed border-border/60 p-3">
+            <summary className="cursor-pointer text-sm font-medium text-foreground">Add medical update</summary>
+            <div className="mt-3">{form}</div>
+          </details>
+        ) : null}
       </CardContent>
     </Card>
   );

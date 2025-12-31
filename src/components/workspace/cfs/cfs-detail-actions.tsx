@@ -1,7 +1,7 @@
 'use client';
 
-import { useMemo } from 'react';
-import { useFormState } from 'react-dom';
+import { useMemo, useActionState } from 'react';
+
 import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Input } from '@shared/ui/input';
@@ -91,18 +91,18 @@ export function CfsDetailActions({
   organizations,
   sharedAccess,
 }: CfsDetailActionsProps) {
-  const [triageState, triageAction] = useFormState(triageCfsAction, initialCfsActionState);
-  const [verifyState, verifyAction] = useFormState(verifyCfsAction, initialCfsActionState);
-  const [dismissState, dismissAction] = useFormState(dismissCfsAction, initialCfsActionState);
-  const [duplicateState, duplicateAction] = useFormState(markDuplicateCfsAction, initialCfsActionState);
-  const [convertState, convertAction] = useFormState(convertCfsToIncidentAction, initialCfsActionState);
-  const [shareState, shareAction] = useFormState(shareCfsWithOrgAction, initialCfsActionState);
-  const [revokeState, revokeAction] = useFormState(revokeCfsOrgAccessAction, initialCfsActionState);
-  const [transferState, transferAction] = useFormState(transferCfsOwnershipAction, initialCfsActionState);
-  const [publicEnableState, publicEnableAction] = useFormState(enablePublicTrackingAction, initialCfsActionState);
-  const [publicDisableState, publicDisableAction] = useFormState(disablePublicTrackingAction, initialCfsActionState);
-  const [noteState, noteAction] = useFormState(addCfsNoteAction, initialCfsActionState);
-  const [statusState, statusAction] = useFormState(updateCfsStatusAction, initialCfsActionState);
+  const [triageState, triageAction] = useActionState(triageCfsAction, initialCfsActionState);
+  const [verifyState, verifyAction] = useActionState(verifyCfsAction, initialCfsActionState);
+  const [dismissState, dismissAction] = useActionState(dismissCfsAction, initialCfsActionState);
+  const [duplicateState, duplicateAction] = useActionState(markDuplicateCfsAction, initialCfsActionState);
+  const [convertState, convertAction] = useActionState(convertCfsToIncidentAction, initialCfsActionState);
+  const [shareState, shareAction] = useActionState(shareCfsWithOrgAction, initialCfsActionState);
+  const [revokeState, revokeAction] = useActionState(revokeCfsOrgAccessAction, initialCfsActionState);
+  const [transferState, transferAction] = useActionState(transferCfsOwnershipAction, initialCfsActionState);
+  const [publicEnableState, publicEnableAction] = useActionState(enablePublicTrackingAction, initialCfsActionState);
+  const [publicDisableState, publicDisableAction] = useActionState(disablePublicTrackingAction, initialCfsActionState);
+  const [noteState, noteAction] = useActionState(addCfsNoteAction, initialCfsActionState);
+  const [statusState, statusAction] = useActionState(updateCfsStatusAction, initialCfsActionState);
 
   const orgMap = useMemo(() => new Map(organizations.map((org) => [org.id, org.name ?? `Organization ${org.id}`])), [organizations]);
 

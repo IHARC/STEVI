@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useEffect, useMemo, useState, useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import { Button } from '@shared/ui/button';
@@ -32,7 +32,7 @@ export function InviteSheet({ rateLimit, organizationId }: InviteSheetProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
-  const [state, formAction] = useFormState(createOrgInviteAction, initialState);
+  const [state, formAction] = useActionState(createOrgInviteAction, initialState);
   const form = useForm<InviteFormValues>({
     defaultValues: {
       email: '',

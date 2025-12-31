@@ -6,7 +6,7 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { ChevronDown, Menu } from 'lucide-react';
 import { Button } from '@shared/ui/button';
 import { ScrollArea } from '@shared/ui/scroll-area';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@shared/ui/sheet';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@shared/ui/sheet';
 import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from '@shared/ui/navigation-menu';
 import { APP_ICON_MAP } from '@/lib/app-icons';
 import { cn } from '@/lib/utils';
@@ -79,7 +79,7 @@ export function AppNavigationMobile({ navSections, globalNavItems = [], mode = '
       <SheetContent side="left" className="w-[340px] max-w-[88vw] px-0 py-0">
         <SheetHeader className="px-5 pt-5 pb-2 text-left">
           <SheetTitle className="text-base font-semibold">Navigation</SheetTitle>
-          <p className="text-sm text-muted-foreground">Browse sections and tools.</p>
+          <SheetDescription>Browse sections and tools.</SheetDescription>
         </SheetHeader>
         <ScrollArea scrollbar={false} className="h-full">
           <div className="px-4 pb-6">

@@ -4,7 +4,7 @@ import { useState, type ReactNode } from 'react';
 import { SettingsNav, type SettingsNavGroup } from '@shared/layout/settings-nav';
 import { Button } from '@shared/ui/button';
 import { ScrollArea } from '@shared/ui/scroll-area';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@shared/ui/sheet';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@shared/ui/sheet';
 import { Menu } from 'lucide-react';
 
 type SettingsShellProps = {
@@ -34,7 +34,7 @@ export function SettingsShell({ nav = [], showNav = true, children }: SettingsSh
           <SheetContent side="left" className="w-[min(340px,88vw)] px-0 py-0">
             <SheetHeader className="px-5 pt-5 pb-2 text-left">
               <SheetTitle className="text-base font-semibold">Sections</SheetTitle>
-              <p className="text-sm text-muted-foreground">Browse settings and tools.</p>
+              <SheetDescription>Browse settings and tools.</SheetDescription>
             </SheetHeader>
             <ScrollArea scrollbar={false} className="h-full">
               <div className="px-4 pb-6">

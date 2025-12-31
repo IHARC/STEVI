@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useFormState } from 'react-dom';
+import { useEffect, useActionState } from 'react';
+
 import { useRouter } from 'next/navigation';
 import { createEncounterAction, type EncounterFormState } from '@/lib/encounters/actions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
@@ -51,7 +51,7 @@ export function EncounterCreateForm({
 }: EncounterCreateFormProps) {
   const router = useRouter();
   const { toast } = useToast();
-  const [state, formAction] = useFormState(createEncounterAction, initialState);
+  const [state, formAction] = useActionState(createEncounterAction, initialState);
 
   useEffect(() => {
     if (state.status === 'success' && state.encounterId) {

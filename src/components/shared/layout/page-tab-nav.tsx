@@ -68,7 +68,7 @@ export function PageTabNav({
                     : 'relative inline-flex items-center gap-1 rounded-md px-2 py-2 text-sm font-semibold text-muted-foreground transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background',
                   variant === 'primary'
                     ? active
-                      ? 'bg-card text-foreground ring-1 ring-border/60'
+                      ? 'bg-card text-foreground shadow-sm ring-1 ring-primary/30'
                       : 'text-muted-foreground hover:bg-card'
                     : active
                       ? 'text-foreground after:absolute after:inset-x-2 after:-bottom-[9px] after:h-0.5 after:rounded-full after:bg-primary'

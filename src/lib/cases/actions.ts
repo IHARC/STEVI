@@ -605,7 +605,7 @@ export async function staffAddCaseNoteAction(formData: FormData): Promise<void> 
     meta: { case_id: caseId, person_id: detail.personId },
   });
 
-  revalidatePath(`/ops/clients/${detail.personId}?case=${caseId}`);
+  revalidatePath(`/ops/clients/${detail.personId}?case=${caseId}&tab=overview`);
 }
 
 export async function processIntakeAction(formData: FormData): Promise<void> {

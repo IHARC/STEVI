@@ -50,7 +50,7 @@ export function ClientsCaseloadTable({ caseload }: CaseloadTableProps) {
           </TableHeader>
           <TableBody>
             {caseload.map((item) => {
-              const href = `/ops/clients/${item.id}?view=directory`;
+              const href = `/ops/clients/${item.id}?tab=overview`;
               return (
                 <TableRow
                   key={item.id}
@@ -106,7 +106,7 @@ export function ClientsActivityTable({ cases }: ActivityTableProps) {
           <TableBody>
             {cases.map((item) => {
               const href = item.personId
-                ? `/ops/clients/${item.personId}?case=${item.id}&view=directory`
+                ? `/ops/clients/${item.personId}?case=${item.id}&tab=overview`
                 : null;
               return (
                 <TableRow

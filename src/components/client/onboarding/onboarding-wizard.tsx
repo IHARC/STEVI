@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
-import { useFormState } from 'react-dom';
+import { useEffect, useMemo, useActionState } from 'react';
+
 import { useRouter } from 'next/navigation';
 import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
@@ -59,10 +59,10 @@ export function OnboardingWizard({
   partnerBlockedReason,
 }: OnboardingWizardProps) {
   const router = useRouter();
-  const [basicState, basicAction] = useFormState(saveBasicInfoAction, INITIAL_ONBOARDING_ACTION_STATE);
-  const [consentState, consentAction] = useFormState(recordConsentsAction, INITIAL_ONBOARDING_ACTION_STATE);
-  const [sharingState, sharingAction] = useFormState(saveSharingPreferenceAction, INITIAL_ONBOARDING_ACTION_STATE);
-  const [linkState, linkAction] = useFormState(linkAccountToPersonAction, INITIAL_ONBOARDING_ACTION_STATE);
+  const [basicState, basicAction] = useActionState(saveBasicInfoAction, INITIAL_ONBOARDING_ACTION_STATE);
+  const [consentState, consentAction] = useActionState(recordConsentsAction, INITIAL_ONBOARDING_ACTION_STATE);
+  const [sharingState, sharingAction] = useActionState(saveSharingPreferenceAction, INITIAL_ONBOARDING_ACTION_STATE);
+  const [linkState, linkAction] = useActionState(linkAccountToPersonAction, INITIAL_ONBOARDING_ACTION_STATE);
 
   const status = linkState.nextStatus
     ? linkState.nextStatus

@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useFormState } from 'react-dom';
+import { useEffect, useActionState } from 'react';
+
 import type { JusticeEpisodeSummary } from '@/lib/justice/types';
 import { createJusticeEpisodeAction, type JusticeEpisodeFormState } from '@/lib/justice/actions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
@@ -11,6 +11,7 @@ import { Button } from '@shared/ui/button';
 import { Label } from '@shared/ui/label';
 import { NativeSelect } from '@shared/ui/native-select';
 import { Badge } from '@shared/ui/badge';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@shared/ui/sheet';
 import { useToast } from '@shared/ui/use-toast';
 
 const initialState: JusticeEpisodeFormState = { status: 'idle' };
@@ -57,11 +58,12 @@ type JusticeEpisodesCardProps = {
   caseId?: number | null;
   encounterId?: string | null;
   episodes: JusticeEpisodeSummary[];
+  formVariant?: 'inline' | 'sheet';
 };
 
-export function JusticeEpisodesCard({ personId, caseId, encounterId, episodes }: JusticeEpisodesCardProps) {
+export function JusticeEpisodesCard({ personId, caseId, encounterId, episodes, formVariant = 'inline' }: JusticeEpisodesCardProps) {
   const { toast } = useToast();
-  const [state, formAction] = useFormState(createJusticeEpisodeAction, initialState);
+  const [state, formAction] = useActionState(createJusticeEpisodeAction, initialState);
 
   useEffect(() => {
     if (state.status === 'success') {
@@ -72,11 +74,122 @@ export function JusticeEpisodesCard({ personId, caseId, encounterId, episodes }:
     }
   }, [state, toast]);
 
+  const form = (
+    <form action={formAction} className="space-y-3">
+      <input type="hidden" name="person_id" value={personId} />
+      {caseId ? <input type="hidden" name="case_id" value={caseId} /> : null}
+      {encounterId ? <input type="hidden" name="encounter_id" value={encounterId} /> : null}
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <div className="space-y-1">
+          <Label htmlFor="justice_episode_type">Episode type</Label>
+          <NativeSelect id="justice_episode_type" name="episode_type" defaultValue="other">
+            {EPISODE_TYPES.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </NativeSelect>
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="justice_event_date">Event date</Label>
+          <Input id="justice_event_date" name="event_date" type="date" required />
+        </div>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <div className="space-y-1">
+          <Label htmlFor="justice_event_time">Event time</Label>
+          <Input id="justice_event_time" name="event_time" type="time" />
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="justice_agency">Agency</Label>
+          <Input id="justice_agency" name="agency" placeholder="OPP, RCMP" />
+        </div>
+      </div>
+
+      <div className="space-y-1">
+        <Label htmlFor="justice_charges">Charges</Label>
+        <Input id="justice_charges" name="charges" placeholder="Charge details" />
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <div className="space-y-1">
+          <Label htmlFor="justice_court_date">Court date</Label>
+          <Input id="justice_court_date" name="court_date" type="date" />
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="justice_check_in_date">Check-in date</Label>
+          <Input id="justice_check_in_date" name="check_in_date" type="date" />
+        </div>
+      </div>
+
+      <div className="space-y-1">
+        <Label htmlFor="justice_notes">Notes</Label>
+        <Textarea id="justice_notes" name="notes" rows={3} />
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <div className="space-y-1">
+          <Label htmlFor="justice_source">Source</Label>
+          <NativeSelect id="justice_source" name="source" defaultValue="staff_observed">
+            {SOURCE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </NativeSelect>
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="justice_verification">Verification</Label>
+          <NativeSelect id="justice_verification" name="verification_status" defaultValue="unverified">
+            {VERIFICATION_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </NativeSelect>
+        </div>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <div className="space-y-1">
+          <Label htmlFor="justice_visibility">Visibility</Label>
+          <NativeSelect id="justice_visibility" name="visibility_scope" defaultValue="internal_to_org">
+            {VISIBILITY_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </NativeSelect>
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="justice_sensitivity">Sensitivity</Label>
+          <NativeSelect id="justice_sensitivity" name="sensitivity_level" defaultValue="standard">
+            {SENSITIVITY_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </NativeSelect>
+        </div>
+      </div>
+
+      <Button type="submit" size="sm">Save justice update</Button>
+    </form>
+  );
+
   return (
     <Card className="border-border/70">
-      <CardHeader>
-        <CardTitle className="text-lg">Justice history</CardTitle>
-        <CardDescription>Track court dates, supervision, and outcomes.</CardDescription>
+      <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <CardTitle className="text-lg">Justice history</CardTitle>
+          <CardDescription>Track court dates, supervision, and outcomes.</CardDescription>
+        </div>
+        {formVariant === 'sheet' ? (
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="outline" size="sm">Add justice update</Button>
+            </SheetTrigger>
+            <SheetContent className="overflow-y-auto sm:max-w-xl">
+              <SheetHeader className="text-left">
+                <SheetTitle>Add justice update</SheetTitle>
+                <SheetDescription>Capture court, supervision, and case outcomes.</SheetDescription>
+              </SheetHeader>
+              <div className="mt-4">{form}</div>
+            </SheetContent>
+          </Sheet>
+        ) : null}
       </CardHeader>
       <CardContent className="space-y-4">
         {episodes.length === 0 ? (
@@ -103,101 +216,12 @@ export function JusticeEpisodesCard({ personId, caseId, encounterId, episodes }:
           </div>
         )}
 
-        <details className="rounded-xl border border-dashed border-border/60 p-3">
-          <summary className="cursor-pointer text-sm font-medium text-foreground">Add justice update</summary>
-          <form action={formAction} className="mt-3 space-y-3">
-            <input type="hidden" name="person_id" value={personId} />
-            {caseId ? <input type="hidden" name="case_id" value={caseId} /> : null}
-            {encounterId ? <input type="hidden" name="encounter_id" value={encounterId} /> : null}
-
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="space-y-1">
-                <Label htmlFor="justice_episode_type">Episode type</Label>
-                <NativeSelect id="justice_episode_type" name="episode_type" defaultValue="other">
-                  {EPISODE_TYPES.map((option) => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </NativeSelect>
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="justice_event_date">Event date</Label>
-                <Input id="justice_event_date" name="event_date" type="date" required />
-              </div>
-            </div>
-
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="space-y-1">
-                <Label htmlFor="justice_event_time">Event time</Label>
-                <Input id="justice_event_time" name="event_time" type="time" />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="justice_agency">Agency</Label>
-                <Input id="justice_agency" name="agency" placeholder="OPP, RCMP" />
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <Label htmlFor="justice_charges">Charges</Label>
-              <Input id="justice_charges" name="charges" placeholder="Charge details" />
-            </div>
-
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="space-y-1">
-                <Label htmlFor="justice_court_date">Court date</Label>
-                <Input id="justice_court_date" name="court_date" type="date" />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="justice_check_in_date">Check-in date</Label>
-                <Input id="justice_check_in_date" name="check_in_date" type="date" />
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <Label htmlFor="justice_notes">Notes</Label>
-              <Textarea id="justice_notes" name="notes" rows={3} />
-            </div>
-
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="space-y-1">
-                <Label htmlFor="justice_source">Source</Label>
-                <NativeSelect id="justice_source" name="source" defaultValue="staff_observed">
-                  {SOURCE_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </NativeSelect>
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="justice_verification">Verification</Label>
-                <NativeSelect id="justice_verification" name="verification_status" defaultValue="unverified">
-                  {VERIFICATION_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </NativeSelect>
-              </div>
-            </div>
-
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="space-y-1">
-                <Label htmlFor="justice_visibility">Visibility</Label>
-                <NativeSelect id="justice_visibility" name="visibility_scope" defaultValue="internal_to_org">
-                  {VISIBILITY_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </NativeSelect>
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="justice_sensitivity">Sensitivity</Label>
-                <NativeSelect id="justice_sensitivity" name="sensitivity_level" defaultValue="standard">
-                  {SENSITIVITY_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </NativeSelect>
-              </div>
-            </div>
-
-            <Button type="submit" size="sm">Save justice update</Button>
-          </form>
-        </details>
+        {formVariant === 'inline' ? (
+          <details className="rounded-xl border border-dashed border-border/60 p-3">
+            <summary className="cursor-pointer text-sm font-medium text-foreground">Add justice update</summary>
+            <div className="mt-3">{form}</div>
+          </details>
+        ) : null}
       </CardContent>
     </Card>
   );

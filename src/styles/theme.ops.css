@@ -1,5 +1,5 @@
 .ops-shell {
-  --background: 0 0% 98%;
+  --background: 0 0% 97%;
   --foreground: 0 0% 8%;
 
   --card: 0 0% 100%;
@@ -14,8 +14,8 @@
   --secondary: 0 0% 96%;
   --secondary-foreground: 0 0% 12%;
 
-  --muted: 0 0% 93%;
-  --muted-foreground: 0 0% 38%;
+  --muted: 0 0% 90%;
+  --muted-foreground: 0 0% 34%;
 
   --accent: 0 0% 94%;
   --accent-foreground: 0 0% 12%;
@@ -23,16 +23,16 @@
   --destructive: 0 72% 48%;
   --destructive-foreground: 0 0% 98%;
 
-  --border: 0 0% 86%;
-  --input: 0 0% 86%;
+  --border: 0 0% 82%;
+  --input: 0 0% 82%;
   --ring: 350 82% 46%;
 }
 
 .dark .ops-shell {
-  --background: 0 0% 8%;
+  --background: 0 0% 6%;
   --foreground: 0 0% 96%;
 
-  --card: 0 0% 10%;
+  --card: 0 0% 12%;
   --card-foreground: 0 0% 96%;
 
   --popover: 0 0% 10%;
@@ -44,16 +44,16 @@
   --secondary: 0 0% 16%;
   --secondary-foreground: 0 0% 96%;
 
-  --muted: 0 0% 20%;
-  --muted-foreground: 0 0% 72%;
+  --muted: 0 0% 18%;
+  --muted-foreground: 0 0% 78%;
 
-  --accent: 0 0% 18%;
+  --accent: 0 0% 20%;
   --accent-foreground: 0 0% 96%;
 
   --destructive: 0 72% 52%;
   --destructive-foreground: 0 0% 98%;
 
-  --border: 0 0% 22%;
-  --input: 0 0% 22%;
+  --border: 0 0% 28%;
+  --input: 0 0% 28%;
   --ring: 350 82% 58%;
 }
