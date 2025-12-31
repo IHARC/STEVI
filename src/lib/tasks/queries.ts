@@ -49,7 +49,8 @@ async function fetchPeopleForTasks(
   }
 
   const byId = new Map<number, PersonNameRow>();
-  (data ?? []).forEach((person) => {
+  const rows = (data ?? []) as PersonNameRow[];
+  rows.forEach((person) => {
     byId.set(person.id, person);
   });
 
