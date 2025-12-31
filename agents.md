@@ -116,7 +116,7 @@ Use Supabase MCP tools exclusively for database work. CLI guidance does not appl
 - Docs and tests adjusted for split.
 
 ## Active plans and priorities
-- **Ops navigation overhaul**: see `plan.md` for hub‑cap IA decisions, file pointers, and open questions.
+- **Client record & continuum-of-care foundation**: `docs/client-record-vision-roadmap.md` (source of truth for Encounter-first, task-driven inbox/caseload, timeline/events, and domain records like medical/justice).
 - Outstanding work (prioritised):
   1. Wire the Messages page and staff Tasks view to real data (respect consent/RLS) and add audit trails.
   2. Add cache revalidation/webhook strategy so marketing and STEVI stay in sync after admin content updates.
