@@ -30,15 +30,15 @@ export default async function OpsTodayPage() {
   const showStaffWidgets = access.canAccessOpsFrontline && !isVolunteerOnly;
   const showVolunteerOnly = access.canAccessOpsFrontline && !showStaffWidgets;
   const [caseload, shifts, intakes] = showStaffWidgets
-    ? await loadStaffWidgets(supabase, access.userId)
+    ? await loadStaffWidgets(supabase, access.profile.id, access.userId)
     : [[], [], []];
 
   const findPersonHref = '/ops/clients?view=directory';
-  const canStartVisit = access.canAccessOpsFrontline || access.canAccessOpsAdmin;
-  const orgMissing = canStartVisit && !access.organizationId;
-  const newVisitHref = canStartVisit ? '/ops/visits/new' : findPersonHref;
-  const visitAction = canStartVisit
-    ? { label: orgMissing ? 'Select acting org to start Visit' : 'New Visit', href: newVisitHref }
+  const canStartEncounter = access.canAccessOpsFrontline || access.canAccessOpsAdmin;
+  const orgMissing = canStartEncounter && !access.organizationId;
+  const newEncounterHref = canStartEncounter ? '/ops/encounters/new' : findPersonHref;
+  const encounterAction = canStartEncounter
+    ? { label: orgMissing ? 'Select acting org to start Encounter' : 'New Encounter', href: newEncounterHref }
     : { label: 'Find or create person', href: findPersonHref };
 
   return (
@@ -46,8 +46,8 @@ export default async function OpsTodayPage() {
       <PageHeader
         eyebrow="Operations"
         title="Today"
-        description="Start a Visit, find or create a person, and work the queues that matter for your role."
-        primaryAction={visitAction}
+        description="Start an encounter, find or create a person, and work the queues that matter for your role."
+        primaryAction={encounterAction}
         secondaryAction={{ label: 'Find or create person', href: findPersonHref }}
         helperLink={{ label: 'View help', href: '/support' }}
       />
@@ -61,14 +61,14 @@ export default async function OpsTodayPage() {
           <CardContent className="space-y-3">
             <div className="flex flex-col gap-2 sm:flex-row">
               <Button asChild className="flex-1">
-                <Link href={newVisitHref}>New Visit</Link>
+                <Link href={newEncounterHref}>New Encounter</Link>
               </Button>
               <Button asChild variant="outline" className="flex-1">
                 <Link href={findPersonHref}>Find or create person</Link>
               </Button>
             </div>
             <p className="text-sm text-muted-foreground">
-              All frontline actions happen inside a Visit. Starting here pre-fills your context and keeps supplies, referrals, and notes together.
+              All frontline actions happen inside an encounter. Starting here pre-fills your context and keeps supplies, referrals, and notes together.
             </p>
           </CardContent>
         </Card>
@@ -80,7 +80,7 @@ export default async function OpsTodayPage() {
                 <CardTitle className="text-lg">Active caseload</CardTitle>
                 <span>{caseload.length} open</span>
               </div>
-              <CardDescription>Visit and task from people assigned to you.</CardDescription>
+              <CardDescription>Encounter and task work assigned to you.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2 text-sm text-foreground/80">
               {caseload.slice(0, 4).map((item) => (
@@ -89,7 +89,7 @@ export default async function OpsTodayPage() {
                     <p className="font-medium text-foreground">{item.clientName}</p>
                     <span className="capitalize">{item.status}</span>
                   </div>
-                  <p className="text-xs text-muted-foreground">Next: {item.nextStep ?? 'Add next step from Visit'}</p>
+                  <p className="text-xs text-muted-foreground">Next: {item.nextStep ?? 'Add next step from encounter'}</p>
                 </div>
               ))}
               {caseload.length === 0 ? <p className="text-muted-foreground">No assigned people yet.</p> : null}
@@ -107,7 +107,7 @@ export default async function OpsTodayPage() {
                 <CardTitle className="text-lg">Today’s shifts</CardTitle>
                 <span>{shifts.length}</span>
               </div>
-              <CardDescription>Program and outreach context for Visit creation.</CardDescription>
+              <CardDescription>Program and outreach context for encounter creation.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2 text-sm text-foreground/80">
               {shifts.slice(0, 4).map((shift) => (
@@ -132,7 +132,7 @@ export default async function OpsTodayPage() {
                 <CardTitle className="text-lg">Intake queue</CardTitle>
                 <span>{intakes.length}</span>
               </div>
-              <CardDescription>Convert submissions into Visits from here.</CardDescription>
+              <CardDescription>Convert submissions into encounters from here.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2 text-sm text-foreground/80">
               {intakes.slice(0, 3).map((intake) => (
@@ -151,11 +151,11 @@ export default async function OpsTodayPage() {
           <Card className="border-border/70">
             <CardHeader className="space-y-1">
               <CardTitle className="text-lg">Volunteer tools</CardTitle>
-              <CardDescription>Stay focused on intake, Visits, and referrals. Admin hubs stay hidden.</CardDescription>
+              <CardDescription>Stay focused on intake, encounters, and referrals. Admin hubs stay hidden.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2 text-sm text-foreground/80">
               <Button asChild className="w-full">
-                <Link href={newVisitHref}>Start Visit</Link>
+                <Link href={newEncounterHref}>Start Encounter</Link>
               </Button>
               <Button asChild variant="outline" className="w-full">
                 <Link href={findPersonHref}>Find or create person</Link>
@@ -164,7 +164,7 @@ export default async function OpsTodayPage() {
                 <span className="font-semibold text-foreground/80">Organizations</span>
                 <span>Ask your admin for access to organizations and referrals.</span>
               </div>
-              <p className="text-xs text-muted-foreground">Referrals and supplies must be logged inside the Visit.</p>
+              <p className="text-xs text-muted-foreground">Referrals and supplies must be logged inside the encounter.</p>
             </CardContent>
           </Card>
         ) : (
@@ -175,7 +175,7 @@ export default async function OpsTodayPage() {
             </CardHeader>
             <CardContent className="space-y-2 text-sm text-muted-foreground">
               <p>Admins can manage access under Organization → Access & roles.</p>
-              <p>Referrals start from a Visit or client record; Organizations stores partner contacts and services.</p>
+              <p>Referrals start from an encounter or client record; Organizations stores partner contacts and services.</p>
               <Button asChild variant="outline" className="w-full">
                 <Link href="/ops/organizations">Go to Organizations</Link>
               </Button>
@@ -187,10 +187,10 @@ export default async function OpsTodayPage() {
   );
 }
 
-async function loadStaffWidgets(supabase: SupabaseRSCClient, userId: string) {
+async function loadStaffWidgets(supabase: SupabaseRSCClient, profileId: string, userId: string) {
   try {
     const [caseload, shifts, intakes] = await Promise.all([
-      fetchStaffCaseload(supabase, userId),
+      fetchStaffCaseload(supabase, profileId),
       fetchStaffShifts(supabase, userId),
       fetchPendingIntakes(supabase),
     ]);

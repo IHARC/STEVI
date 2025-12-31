@@ -342,7 +342,7 @@ function ItemStockCard({
       <Card className="border-border/60">
         <CardHeader className="space-y-1">
           <CardTitle className="text-xl">Stock actions</CardTitle>
-          <CardDescription>Receive, transfer, or adjust stock. Visit distributions should be logged from the Visit flow.</CardDescription>
+          <CardDescription>Receive, transfer, or adjust stock. Encounter distributions should be logged from the encounter flow.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-2">
           <Button variant="outline" onClick={() => setItemToReceive(item)}>

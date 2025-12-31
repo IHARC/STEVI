@@ -1,8 +1,9 @@
 import { notFound, redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
-import { fetchClientCaseActivities, fetchClientCaseDetail } from '@/lib/cases/fetchers';
+import { fetchClientCaseDetail, fetchClientTimelineEvents } from '@/lib/cases/fetchers';
 import { submitClientCaseUpdateAction } from '@/lib/cases/actions';
+import type { TimelineEvent } from '@/lib/timeline/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Button } from '@shared/ui/button';
 import { Textarea } from '@shared/ui/textarea';
@@ -32,7 +33,7 @@ export default async function CaseDetailPage({ params }: CasePageProps) {
   const detail = await fetchClientCaseDetail(supabase, access.userId, parsedId);
   if (!detail) notFound();
 
-  const activities = await fetchClientCaseActivities(supabase, detail.personId, 25);
+  const events = await fetchClientTimelineEvents(supabase, detail.personId, 25);
 
   return (
     <div className="flex flex-col gap-6">
@@ -54,33 +55,33 @@ export default async function CaseDetailPage({ params }: CasePageProps) {
             <CardDescription>Updates that your case manager marked as shareable with you.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {activities.length === 0 ? (
+            {events.length === 0 ? (
               <p className="text-sm text-muted-foreground">No client-visible updates yet.</p>
             ) : (
               <ul className="space-y-3">
-                {activities.map((item) => (
-                  <li key={item.id} className="rounded-xl border border-border/30 bg-card p-4">
+                {events.map((event) => (
+                  <li key={event.id} className="rounded-xl border border-border/30 bg-card p-4">
                     <div className="flex items-center justify-between gap-3">
                       <div>
-                        <p className="text-base text-foreground">{item.title}</p>
-                        <p className="text-sm text-muted-foreground">{item.activityType}</p>
+                        <p className="text-base text-foreground">{event.summary ?? 'Timeline update'}</p>
+                        <p className="text-sm text-muted-foreground">{formatCategory(event.eventCategory)}</p>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        {new Date(item.activityDate).toLocaleDateString()}
+                        {new Date(event.eventAt).toLocaleDateString()}
                       </p>
                     </div>
                     <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                      {item.createdByOrg ? (
+                      {event.createdByOrg ? (
                         <span className="border-border/70">
-                          Created by {item.createdByOrg}
+                          Created by {event.createdByOrg}
                         </span>
                       ) : null}
                       <span className="border-border/70">
                         Shared with you
                       </span>
                     </div>
-                    {item.description ? (
-                      <p className="mt-1 text-sm text-foreground/80">{item.description}</p>
+                    {resolveEventDetail(event) ? (
+                      <p className="mt-1 text-sm text-foreground/80">{resolveEventDetail(event)}</p>
                     ) : null}
                   </li>
                 ))}
@@ -118,4 +119,17 @@ function ClientUpdateForm({ caseId }: { caseId: number }) {
       <Button type="submit" className="w-full">Send update</Button>
     </form>
   );
+}
+
+function resolveEventDetail(event: TimelineEvent): string | null {
+  const meta = event.metadata ?? {};
+  const candidates = [meta.description, meta.notes, meta.message, meta.summary];
+  for (const entry of candidates) {
+    if (typeof entry === 'string' && entry.trim().length > 0) return entry;
+  }
+  return null;
+}
+
+function formatCategory(category: string) {
+  return category.replaceAll('_', ' ');
 }

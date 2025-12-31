@@ -48,13 +48,13 @@ export default async function OpsClientsPage({ searchParams }: PageProps) {
     redirect(resolveLandingPath(access));
   }
 
-  const canStartVisit = access.canAccessOpsFrontline || access.canAccessOpsAdmin;
-  const orgMissing = canStartVisit && !access.organizationId;
-  const visitAction = canStartVisit
-    ? { label: orgMissing ? 'Select acting org to start Visit' : 'New Visit', href: '/ops/visits/new' }
+  const canStartEncounter = access.canAccessOpsFrontline || access.canAccessOpsAdmin;
+  const orgMissing = canStartEncounter && !access.organizationId;
+  const encounterAction = canStartEncounter
+    ? { label: orgMissing ? 'Select acting org to start Encounter' : 'New Encounter', href: '/ops/encounters/new' }
     : { label: 'Find or create person', href: '/ops/clients?view=directory' };
 
-  const caseloadPromise = access.canAccessOpsFrontline ? fetchStaffCaseload(supabase, access.userId) : Promise.resolve([]);
+  const caseloadPromise = access.canAccessOpsFrontline ? fetchStaffCaseload(supabase, access.profile.id) : Promise.resolve([]);
   const casesPromise = access.canAccessOpsFrontline ? fetchStaffCases(supabase, 60) : Promise.resolve([]);
   const directoryResult = await loadDirectory(supabase, directoryQuery);
 
@@ -86,7 +86,7 @@ export default async function OpsClientsPage({ searchParams }: PageProps) {
     <div className="space-y-4">
       <PageHeader
         title="Clients"
-        description="Directory, caseload, and recent activity in one hub. Start Visits and keep referrals or supplies within the Visit context."
+        description="Directory, caseload, and recent activity in one hub. Start encounters and keep referrals or supplies within the encounter context."
         density="compact"
       />
 
@@ -102,7 +102,7 @@ export default async function OpsClientsPage({ searchParams }: PageProps) {
               <Link href="/ops/profile">Manage acting org</Link>
             </Button>
             <Button asChild size="sm" className="h-8">
-              <Link href={visitAction.href}>{visitAction.label}</Link>
+              <Link href={encounterAction.href}>{encounterAction.label}</Link>
             </Button>
           </>
         }
@@ -246,7 +246,7 @@ function CaseloadView({ caseload }: { caseload: Awaited<ReturnType<typeof fetchS
             {caseload.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={4} className="py-10 text-center text-sm text-muted-foreground">
-                  No assigned caseload yet. Assign clients to yourself from a Visit to build your caseload.
+                  No assigned caseload yet. Assign clients to yourself from an encounter to build your caseload.
                 </TableCell>
               </TableRow>
             ) : null}
@@ -297,7 +297,7 @@ function ActivityView({ cases }: { cases: Awaited<ReturnType<typeof fetchStaffCa
             {cases.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="py-10 text-center text-sm text-muted-foreground">
-                  No recent activity. Log outreach, tasks, or Visits to populate the feed.
+                  No recent activity. Log outreach, tasks, or encounters to populate the feed.
                 </TableCell>
               </TableRow>
             ) : null}

@@ -386,17 +386,17 @@ export function resolveQuickActions(
 
     if (access.canAccessOpsFrontline || access.canAccessOpsAdmin) {
       actions.push({
-        id: 'ops-new-visit',
-        label: 'New Visit',
-        href: '/ops/visits/new',
-        description: orgMissing ? 'Select an acting org to start a Visit' : 'Start a Visit from your current context',
+        id: 'ops-new-encounter',
+        label: 'New Encounter',
+        href: '/ops/encounters/new',
+        description: orgMissing ? 'Select an acting org to start an encounter' : 'Start an encounter from your current context',
         icon: 'calendar',
         disabled: previewDisabled,
         disabledReason: previewDisabled
           ? 'Not available in preview'
           : requiresOrgSelection
-            ? 'Select an acting org to start a Visit'
-            : 'Set an acting org to start a Visit',
+            ? 'Select an acting org to start an encounter'
+            : 'Set an acting org to start an encounter',
       });
     }
 

@@ -193,7 +193,7 @@ export function InventoryItemCreate({ actorProfileId, categories, locations }: P
             <div className="rounded-2xl border border-border/15 bg-background p-4 shadow-sm">
               <p className="text-sm font-semibold text-foreground">Initial stock (optional)</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Record an initial receipt so on-hand counts are accurate before the first Visit.
+                Record an initial receipt so on-hand counts are accurate before the first encounter.
               </p>
 
               <div className="mt-4 grid gap-4 sm:grid-cols-2">

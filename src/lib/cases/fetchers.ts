@@ -2,8 +2,8 @@ import { findPersonForUser } from '@/lib/cases/person';
 import { getEffectiveConsent, listConsentOrgs, listParticipatingOrganizations, resolveConsentOrgSelections } from '@/lib/consents';
 import type { ConsentMethod, ConsentScope, ConsentStatus } from '@/lib/consents';
 import type {
-  CaseActivity,
   CaseSummary,
+  CaseTimelineEvent,
   ClientCaseDetail,
   ConsentHistoryEntry,
   ConsentSnapshot,
@@ -12,15 +12,15 @@ import type {
 } from '@/lib/cases/types';
 import type { Database } from '@/types/supabase';
 import type { SupabaseAnyServerClient } from '@/lib/supabase/types';
+import { fetchTimelineEventsForPerson } from '@/lib/timeline/queries';
 
 const CASE_SCHEMA = 'case_mgmt';
 const CASE_TABLE = 'case_management';
-const ACTIVITIES_TABLE = 'people_activities';
 const REGISTRATION_TABLE = 'registration_flows';
-const CASE_SELECT = 'id, person_id, case_number, case_type, status, priority, case_manager_name, case_manager_contact, start_date, end_date';
+const CASE_SELECT =
+  'id, person_id, owning_org_id, case_number, case_type, status, priority, case_manager_name, case_manager_contact, start_date, end_date';
 const INTAKE_SELECT = 'id, chosen_name, contact_email, contact_phone, status, created_at, metadata, supabase_user_id, profile_id, consent_contact';
 type RegistrationRow = Database['portal']['Tables']['registration_flows']['Row'];
-type ActivityRow = Database['core']['Tables']['people_activities']['Row'];
 type ConsentHistoryRow = {
   id: string;
   scope: ConsentScope;
@@ -83,26 +83,15 @@ export async function fetchClientCaseDetail(
   };
 }
 
-export async function fetchClientCaseActivities(
+export async function fetchClientTimelineEvents(
   supabase: SupabaseAnyServerClient,
   personId: number,
   limit = 20,
-): Promise<CaseActivity[]> {
-  const core = supabase.schema('core');
-  const { data, error } = await core
-    .from(ACTIVITIES_TABLE)
-    .select('id, title, description, activity_date, activity_time, activity_type, metadata, provider_org_id, organizations(name)')
-    .eq('person_id', personId)
-    .contains('metadata', { client_visible: true })
-    .order('activity_date', { ascending: false })
-    .order('activity_time', { ascending: false })
-    .limit(limit);
-
-  if (error) {
-    throw new Error('Unable to load case activity right now.');
-  }
-
-  return (data ?? []).map((row: ActivityRow & { organizations?: { name?: string | null } }) => toActivity(row, true));
+): Promise<CaseTimelineEvent[]> {
+  return fetchTimelineEventsForPerson(supabase, personId, {
+    limit,
+    visibilityScope: 'shared_via_consent',
+  });
 }
 
 export async function fetchPersonConsents(
@@ -206,26 +195,12 @@ export async function fetchStaffCaseDetail(
   return { ...toCaseSummary(data), personId: data.person_id };
 }
 
-export async function fetchStaffCaseActivities(
+export async function fetchStaffTimelineEvents(
   supabase: SupabaseAnyServerClient,
   personId: number,
   limit = 50,
-): Promise<CaseActivity[]> {
-  const core = supabase.schema('core');
-  const { data, error } = await core
-    .from(ACTIVITIES_TABLE)
-    .select('id, title, description, activity_date, activity_time, activity_type, metadata, provider_org_id, organizations(name)')
-    .eq('person_id', personId)
-    .order('activity_date', { ascending: false })
-    .order('activity_time', { ascending: false })
-    .limit(limit);
-
-  if (error) {
-    console.error('Failed to load staff case activities', { personId, error });
-    throw new Error('Unable to load activity.');
-  }
-
-  return (data ?? []).map((row: ActivityRow & { organizations?: { name?: string | null } }) => toActivity(row));
+): Promise<CaseTimelineEvent[]> {
+  return fetchTimelineEventsForPerson(supabase, personId, { limit });
 }
 
 export async function fetchPendingIntakes(
@@ -261,6 +236,7 @@ export async function fetchPendingIntakes(
 function toCaseSummary(row: CaseRecord): CaseSummary {
   return {
     id: Number(row.id),
+    owningOrgId: row.owning_org_id,
     caseNumber: row.case_number ?? null,
     caseType: row.case_type ?? null,
     status: row.status ?? null,
@@ -269,34 +245,5 @@ function toCaseSummary(row: CaseRecord): CaseSummary {
     caseManagerContact: row.case_manager_contact ?? null,
     startDate: row.start_date ?? null,
     endDate: row.end_date ?? null,
-  };
-}
-
-function toActivity(row: ActivityRow & { organizations?: { name?: string | null } }, clientVisibleFilter = false): CaseActivity {
-  const { sharedWithClient, visibility } = resolveActivityVisibility(row.metadata, clientVisibleFilter);
-
-  return {
-    id: row.id,
-    title: row.title,
-    description: row.description,
-    activityDate: row.activity_date,
-    activityTime: row.activity_time,
-    activityType: row.activity_type,
-    createdByOrg: row.organizations?.name ?? 'Not recorded',
-    sharedWithClient,
-    visibility,
-  };
-}
-
-function resolveActivityVisibility(
-  metadata: ActivityRow['metadata'],
-  forceClientVisible: boolean,
-): { sharedWithClient: boolean; visibility: 'client' | 'internal' } {
-  const meta = (metadata ?? {}) as Record<string, unknown>;
-  const sharedWithClient = forceClientVisible || Boolean(meta.client_visible);
-
-  return {
-    sharedWithClient,
-    visibility: sharedWithClient ? 'client' : 'internal',
   };
 }

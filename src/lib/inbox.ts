@@ -106,7 +106,7 @@ async function fetchStaffInboxItems(
   const items: InboxItem[] = [];
 
   try {
-    const caseload = await fetchStaffCaseload(supabase, access.userId);
+    const caseload = await fetchStaffCaseload(supabase, access.profile.id);
     caseload
       .filter((entry) => entry.nextStep || entry.nextAt)
       .slice(0, 3)

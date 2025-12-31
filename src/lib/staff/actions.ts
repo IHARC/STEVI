@@ -77,9 +77,6 @@ export async function staffLogOutreachAction(
     return { status: 'error', message: 'Add a valid time for this outreach contact.' };
   }
 
-  const activityDate = timestamp.toISOString().slice(0, 10);
-  const activityTime = timestamp.toISOString().slice(11, 19);
-
   const supabase = await createSupabaseServerClient();
   const access = await loadPortalAccess(supabase);
 
@@ -112,33 +109,28 @@ export async function staffLogOutreachAction(
     staff_role: staffRole ?? undefined,
   };
 
-  const core = supabase.schema('core');
-  const { data: activityRow, error } = await core
-    .from('people_activities')
+  const caseMgmt = supabase.schema('case_mgmt');
+  const { data: encounterRow, error } = await caseMgmt
+    .from('encounters')
     .insert({
       person_id: personId,
-      activity_type: 'contact',
-      activity_date: activityDate,
-      activity_time: activityTime,
-      title,
-      description: summary || null,
-      location: location || null,
-      staff_member: access.profile.display_name,
-      metadata: {
-        case_id: caseId,
-        client_visible: false,
-        quick_entry: true,
-        source: 'staff_tools',
-        ...costMetadata,
-      },
+      case_id: caseId,
+      owning_org_id: access.organizationId,
+      encounter_type: 'outreach',
+      started_at: timestamp.toISOString(),
+      location_context: location || null,
+      summary: title,
+      notes: summary || null,
+      recorded_by_profile_id: access.profile.id,
+      recorded_at: new Date().toISOString(),
+      visibility_scope: 'internal_to_org',
+      sensitivity_level: 'standard',
       created_by: access.userId,
-      provider_profile_id: access.profile.id,
-      provider_org_id: access.organizationId,
     })
     .select('id')
     .single();
 
-  if (error || !activityRow) {
+  if (error || !encounterRow) {
     return { status: 'error', message: 'Unable to save outreach right now.' };
   }
 
@@ -186,13 +178,13 @@ export async function staffLogOutreachAction(
         throw new Error('Cost amount must be greater than zero.');
       }
 
-      const { data: costRow, error: costError } = await core
+      const { data: costRow, error: costError } = await supabase.schema('core')
         .from('cost_events')
         .insert({
           person_id: personId,
           organization_id: access.organizationId,
-          source_type: 'activity',
-          source_id: String(activityRow.id),
+          source_type: 'encounter',
+          source_id: String(encounterRow.id),
           occurred_at: occurredAt,
           cost_amount: costAmount,
           currency: 'CAD',
@@ -216,8 +208,8 @@ export async function staffLogOutreachAction(
         entityType: 'core.cost_events',
         entityRef: buildEntityRef({ schema: 'core', table: 'cost_events', id: costRow.id }),
         meta: {
-          source_type: 'activity',
-          source_id: activityRow.id,
+          source_type: 'encounter',
+          source_id: encounterRow.id,
           person_id: personId,
           organization_id: access.organizationId,
           cost_amount: costAmount,
@@ -231,10 +223,10 @@ export async function staffLogOutreachAction(
 
   await logAuditEvent(supabase, {
     actorProfileId: access.profile.id,
-    action: 'outreach_contact_logged',
-    entityType: 'people_activities',
-    entityRef: buildEntityRef({ schema: 'core', table: 'people', id: personId }),
-    meta: { person_id: personId, case_id: caseId, via: 'staff_fast_entry' },
+    action: 'encounter_created',
+    entityType: 'case_mgmt.encounters',
+    entityRef: buildEntityRef({ schema: 'case_mgmt', table: 'encounters', id: encounterRow.id }),
+    meta: { person_id: personId, case_id: caseId, encounter_type: 'outreach', via: 'staff_fast_entry' },
   });
 
   revalidatePath('/ops/clients?view=activity');

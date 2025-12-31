@@ -8,7 +8,6 @@ import { consentAllowsOrg, getIharcOrgId } from '@/lib/consents';
 const PEOPLE_TABLE = 'people';
 const CASE_TABLE = 'case_management';
 const REGISTRATION_TABLE = 'registration_flows';
-const ACTIVITIES_TABLE = 'people_activities';
 
 type ProcessResult = {
   personId: number;
@@ -42,6 +41,9 @@ export async function processClientIntake(
   }
 
   const actorProfile = await ensurePortalProfile(supabase, actorUserId);
+  if (!actorProfile.organization_id) {
+    throw new Error('Select an acting organization before processing intake.');
+  }
 
   // Create a fresh person record; do not attempt to link to any existing person automatically.
   const personInsert = {
@@ -83,6 +85,7 @@ export async function processClientIntake(
 
   const caseInsert = {
     person_id: person.id,
+    owning_org_id: actorProfile.organization_id,
     case_manager_name: actorProfile.display_name,
     case_manager_contact: intakeRow.contact_email,
     case_number: null,
@@ -106,27 +109,27 @@ export async function processClientIntake(
     actorOrgId: actorProfile.organization_id,
   });
 
-  // Optional activity log noting consent + intake capture.
-  await core
-    .from(ACTIVITIES_TABLE)
-    .insert({
-      person_id: person.id,
-      activity_type: 'intake',
-      activity_date: new Date().toISOString().slice(0, 10),
-      activity_time: new Date().toISOString().slice(11, 19),
-      title: 'Intake processed',
-      description: 'Client intake converted to case. Consents captured.',
-      staff_member: actorProfile.display_name,
-      metadata: {
-        intake_id: intakeRow.id,
-        consent_contact: intakeRow.consent_contact,
-        client_visible: false,
-      },
-      created_by: actorUserId,
-      provider_profile_id: actorProfile.id,
-      provider_org_id: actorProfile.organization_id,
-    })
-    .throwOnError();
+  const encounterInsert = {
+    person_id: person.id,
+    case_id: caseRow.id,
+    owning_org_id: actorProfile.organization_id,
+    encounter_type: 'intake',
+    started_at: new Date().toISOString(),
+    summary: 'Intake processed',
+    notes: 'Client intake converted to case. Consents captured.',
+    recorded_by_profile_id: actorProfile.id,
+    recorded_at: new Date().toISOString(),
+    source: 'staff_observed',
+    verification_status: 'verified',
+    sensitivity_level: 'standard',
+    visibility_scope: 'internal_to_org',
+    created_by: actorUserId,
+  } as const;
+
+  const { error: encounterError } = await caseMgmt.from('encounters').insert(encounterInsert);
+  if (encounterError) {
+    throw new Error('Case created, but intake encounter could not be logged.');
+  }
 
   const { error: updateError } = await portal
     .from(REGISTRATION_TABLE)

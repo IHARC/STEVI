@@ -132,7 +132,7 @@ export async function logConsentContactAction(formData: FormData): Promise<void>
   await logAuditEvent(supabase, {
     actorProfileId: access.profile.id,
     action: 'consent_contact_logged',
-    entityType: 'core.people_activities',
+    entityType: 'core.timeline_events',
     entityRef: null,
     meta: {
       person_id: personId,

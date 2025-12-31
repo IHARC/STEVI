@@ -50,7 +50,7 @@ export default async function OpsProgramsPage({ searchParams }: PageProps) {
       <PageHeader
         eyebrow="Operations"
         title="Programs"
-        description="Program cards, schedules, and rosters in one place. Start Visits from a program to keep context."
+        description="Program cards, schedules, and rosters in one place. Start encounters from a program to keep context."
         secondaryAction={{ label: 'Open organizations', href: '/ops/organizations' }}
       />
 
@@ -92,7 +92,7 @@ export default async function OpsProgramsPage({ searchParams }: PageProps) {
                 <Card className="border-dashed border-border/60">
                   <CardHeader>
                     <CardTitle className="text-lg">No programs yet</CardTitle>
-                    <CardDescription>Set up programs and shifts to staff coverage and start Visits from context.</CardDescription>
+                    <CardDescription>Set up programs and shifts to staff coverage and start encounters from context.</CardDescription>
                   </CardHeader>
                 </Card>
               ) : null}

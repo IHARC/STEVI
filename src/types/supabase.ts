@@ -80,6 +80,7 @@ export type Database = {
           updated_at: string | null
           created_by: string | null
           updated_by: string | null
+          owning_org_id: number
         }
         Insert: {
           id?: number
@@ -98,6 +99,7 @@ export type Database = {
           updated_at?: string | null
           created_by?: string | null
           updated_by?: string | null
+          owning_org_id: number
         }
         Update: {
           id?: number
@@ -116,6 +118,7 @@ export type Database = {
           updated_at?: string | null
           created_by?: string | null
           updated_by?: string | null
+          owning_org_id?: number
         }
         Relationships: [
           {
@@ -124,7 +127,267 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
-          }
+          },
+          {
+            foreignKeyName: "case_management_owning_org_fkey"
+            columns: ["owning_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      encounters: {
+        Row: {
+          id: string
+          person_id: number
+          case_id: number | null
+          owning_org_id: number
+          encounter_type: Database["case_mgmt"]["Enums"]["encounter_type_enum"]
+          started_at: string
+          ended_at: string | null
+          location_context: string | null
+          program_context: string | null
+          summary: string | null
+          notes: string | null
+          recorded_by_profile_id: string | null
+          recorded_at: string
+          source: Database["core"]["Enums"]["record_source_enum"]
+          verification_status: Database["core"]["Enums"]["verification_status_enum"]
+          sensitivity_level: Database["core"]["Enums"]["sensitivity_level_enum"]
+          visibility_scope: Database["core"]["Enums"]["visibility_scope_enum"]
+          created_at: string
+          created_by: string | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          id?: string
+          person_id: number
+          case_id?: number | null
+          owning_org_id: number
+          encounter_type: Database["case_mgmt"]["Enums"]["encounter_type_enum"]
+          started_at?: string
+          ended_at?: string | null
+          location_context?: string | null
+          program_context?: string | null
+          summary?: string | null
+          notes?: string | null
+          recorded_by_profile_id?: string | null
+          recorded_at?: string
+          source?: Database["core"]["Enums"]["record_source_enum"]
+          verification_status?: Database["core"]["Enums"]["verification_status_enum"]
+          sensitivity_level?: Database["core"]["Enums"]["sensitivity_level_enum"]
+          visibility_scope?: Database["core"]["Enums"]["visibility_scope_enum"]
+          created_at?: string
+          created_by?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          id?: string
+          person_id?: number
+          case_id?: number | null
+          owning_org_id?: number
+          encounter_type?: Database["case_mgmt"]["Enums"]["encounter_type_enum"]
+          started_at?: string
+          ended_at?: string | null
+          location_context?: string | null
+          program_context?: string | null
+          summary?: string | null
+          notes?: string | null
+          recorded_by_profile_id?: string | null
+          recorded_at?: string
+          source?: Database["core"]["Enums"]["record_source_enum"]
+          verification_status?: Database["core"]["Enums"]["verification_status_enum"]
+          sensitivity_level?: Database["core"]["Enums"]["sensitivity_level_enum"]
+          visibility_scope?: Database["core"]["Enums"]["visibility_scope_enum"]
+          created_at?: string
+          created_by?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "encounters_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "case_management"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "encounters_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "encounters_owning_org_id_fkey"
+            columns: ["owning_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "encounters_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "encounters_recorded_by_profile_id_fkey"
+            columns: ["recorded_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "encounters_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tasks: {
+        Row: {
+          id: string
+          person_id: number
+          case_id: number | null
+          encounter_id: string | null
+          owning_org_id: number
+          assigned_to_profile_id: string | null
+          status: Database["case_mgmt"]["Enums"]["task_status_enum"]
+          priority: Database["case_mgmt"]["Enums"]["task_priority_enum"]
+          due_at: string | null
+          title: string
+          description: string | null
+          source_type: string | null
+          source_id: string | null
+          recorded_by_profile_id: string | null
+          recorded_at: string
+          source: Database["core"]["Enums"]["record_source_enum"]
+          verification_status: Database["core"]["Enums"]["verification_status_enum"]
+          sensitivity_level: Database["core"]["Enums"]["sensitivity_level_enum"]
+          visibility_scope: Database["core"]["Enums"]["visibility_scope_enum"]
+          created_at: string
+          created_by: string | null
+          updated_at: string | null
+          updated_by: string | null
+          completed_at: string | null
+        }
+        Insert: {
+          id?: string
+          person_id: number
+          case_id?: number | null
+          encounter_id?: string | null
+          owning_org_id: number
+          assigned_to_profile_id?: string | null
+          status?: Database["case_mgmt"]["Enums"]["task_status_enum"]
+          priority?: Database["case_mgmt"]["Enums"]["task_priority_enum"]
+          due_at?: string | null
+          title: string
+          description?: string | null
+          source_type?: string | null
+          source_id?: string | null
+          recorded_by_profile_id?: string | null
+          recorded_at?: string
+          source?: Database["core"]["Enums"]["record_source_enum"]
+          verification_status?: Database["core"]["Enums"]["verification_status_enum"]
+          sensitivity_level?: Database["core"]["Enums"]["sensitivity_level_enum"]
+          visibility_scope?: Database["core"]["Enums"]["visibility_scope_enum"]
+          created_at?: string
+          created_by?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          completed_at?: string | null
+        }
+        Update: {
+          id?: string
+          person_id?: number
+          case_id?: number | null
+          encounter_id?: string | null
+          owning_org_id?: number
+          assigned_to_profile_id?: string | null
+          status?: Database["case_mgmt"]["Enums"]["task_status_enum"]
+          priority?: Database["case_mgmt"]["Enums"]["task_priority_enum"]
+          due_at?: string | null
+          title?: string
+          description?: string | null
+          source_type?: string | null
+          source_id?: string | null
+          recorded_by_profile_id?: string | null
+          recorded_at?: string
+          source?: Database["core"]["Enums"]["record_source_enum"]
+          verification_status?: Database["core"]["Enums"]["verification_status_enum"]
+          sensitivity_level?: Database["core"]["Enums"]["sensitivity_level_enum"]
+          visibility_scope?: Database["core"]["Enums"]["visibility_scope_enum"]
+          created_at?: string
+          created_by?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+          completed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_assigned_to_profile_id_fkey"
+            columns: ["assigned_to_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "case_management"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_encounter_id_fkey"
+            columns: ["encounter_id"]
+            isOneToOne: false
+            referencedRelation: "encounters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_owning_org_id_fkey"
+            columns: ["owning_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_recorded_by_profile_id_fkey"
+            columns: ["recorded_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
         ]
       }
       calls_for_service: {
@@ -1640,7 +1903,19 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      encounter_type_enum:
+        | "outreach"
+        | "intake"
+        | "program"
+        | "appointment"
+        | "other"
+      task_status_enum:
+        | "open"
+        | "in_progress"
+        | "blocked"
+        | "done"
+        | "canceled"
+      task_priority_enum: "low" | "normal" | "high" | "urgent"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2095,77 +2370,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "ai_risk_assessments_person_id_fkey"
-            columns: ["person_id"]
-            isOneToOne: false
-            referencedRelation: "people"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      arrest_history: {
-        Row: {
-          arrest_date: string
-          arrest_time: string | null
-          arresting_agency: string | null
-          bail_amount: number | null
-          booking_number: string | null
-          case_number: string | null
-          charges: string
-          created_at: string | null
-          created_by: string | null
-          disposition: string | null
-          id: number
-          location: string | null
-          notes: string | null
-          person_id: number
-          release_date: string | null
-          release_type: string | null
-          updated_at: string | null
-          updated_by: string | null
-        }
-        Insert: {
-          arrest_date: string
-          arrest_time?: string | null
-          arresting_agency?: string | null
-          bail_amount?: number | null
-          booking_number?: string | null
-          case_number?: string | null
-          charges: string
-          created_at?: string | null
-          created_by?: string | null
-          disposition?: string | null
-          id?: number
-          location?: string | null
-          notes?: string | null
-          person_id: number
-          release_date?: string | null
-          release_type?: string | null
-          updated_at?: string | null
-          updated_by?: string | null
-        }
-        Update: {
-          arrest_date?: string
-          arrest_time?: string | null
-          arresting_agency?: string | null
-          bail_amount?: number | null
-          booking_number?: string | null
-          case_number?: string | null
-          charges?: string
-          created_at?: string | null
-          created_by?: string | null
-          disposition?: string | null
-          id?: number
-          location?: string | null
-          notes?: string | null
-          person_id?: number
-          release_date?: string | null
-          release_type?: string | null
-          updated_at?: string | null
-          updated_by?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "arrest_history_person_id_fkey"
             columns: ["person_id"]
             isOneToOne: false
             referencedRelation: "people"
@@ -3362,6 +3566,15 @@ export type Database = {
           warning_signs: string[] | null
           wound_details: Json | null
           wound_location_id: string | null
+          case_id: number | null
+          encounter_id: string | null
+          owning_org_id: number
+          recorded_by_profile_id: string | null
+          recorded_at: string
+          source: Database["core"]["Enums"]["record_source_enum"]
+          verification_status: Database["core"]["Enums"]["verification_status_enum"]
+          sensitivity_level: Database["core"]["Enums"]["sensitivity_level_enum"]
+          visibility_scope: Database["core"]["Enums"]["visibility_scope_enum"]
         }
         Insert: {
           assessment_data?: Json | null
@@ -3452,6 +3665,15 @@ export type Database = {
           warning_signs?: string[] | null
           wound_details?: Json | null
           wound_location_id?: string | null
+          case_id?: number | null
+          encounter_id?: string | null
+          owning_org_id: number
+          recorded_by_profile_id?: string | null
+          recorded_at?: string
+          source?: Database["core"]["Enums"]["record_source_enum"]
+          verification_status?: Database["core"]["Enums"]["verification_status_enum"]
+          sensitivity_level?: Database["core"]["Enums"]["sensitivity_level_enum"]
+          visibility_scope?: Database["core"]["Enums"]["visibility_scope_enum"]
         }
         Update: {
           assessment_data?: Json | null
@@ -3542,6 +3764,15 @@ export type Database = {
           warning_signs?: string[] | null
           wound_details?: Json | null
           wound_location_id?: string | null
+          case_id?: number | null
+          encounter_id?: string | null
+          owning_org_id?: number
+          recorded_by_profile_id?: string | null
+          recorded_at?: string
+          source?: Database["core"]["Enums"]["record_source_enum"]
+          verification_status?: Database["core"]["Enums"]["verification_status_enum"]
+          sensitivity_level?: Database["core"]["Enums"]["sensitivity_level_enum"]
+          visibility_scope?: Database["core"]["Enums"]["visibility_scope_enum"]
         }
         Relationships: [
           {
@@ -3577,6 +3808,293 @@ export type Database = {
             columns: ["wound_location_id"]
             isOneToOne: false
             referencedRelation: "medical_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medical_episodes_case_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "case_management"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medical_episodes_encounter_fkey"
+            columns: ["encounter_id"]
+            isOneToOne: false
+            referencedRelation: "encounters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medical_episodes_owning_org_fkey"
+            columns: ["owning_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medical_episodes_recorded_by_profile_fkey"
+            columns: ["recorded_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medical_episodes_related_incident_id_fkey"
+            columns: ["related_incident_id"]
+            isOneToOne: false
+            referencedRelation: "incidents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      justice_episodes: {
+        Row: {
+          id: string
+          person_id: number
+          case_id: number | null
+          encounter_id: string | null
+          owning_org_id: number
+          recorded_by_profile_id: string | null
+          recorded_at: string
+          source: Database["core"]["Enums"]["record_source_enum"]
+          verification_status: Database["core"]["Enums"]["verification_status_enum"]
+          sensitivity_level: Database["core"]["Enums"]["sensitivity_level_enum"]
+          visibility_scope: Database["core"]["Enums"]["visibility_scope_enum"]
+          episode_type: Database["core"]["Enums"]["justice_episode_type_enum"]
+          event_date: string
+          event_time: string | null
+          agency: string | null
+          case_number: string | null
+          charges: string | null
+          disposition: string | null
+          location: string | null
+          bail_amount: number | null
+          booking_number: string | null
+          release_date: string | null
+          release_type: string | null
+          court_date: string | null
+          supervision_agency: string | null
+          notes: string | null
+          metadata: Json | null
+          created_at: string
+          created_by: string | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          id?: string
+          person_id: number
+          case_id?: number | null
+          encounter_id?: string | null
+          owning_org_id: number
+          recorded_by_profile_id?: string | null
+          recorded_at?: string
+          source?: Database["core"]["Enums"]["record_source_enum"]
+          verification_status?: Database["core"]["Enums"]["verification_status_enum"]
+          sensitivity_level?: Database["core"]["Enums"]["sensitivity_level_enum"]
+          visibility_scope?: Database["core"]["Enums"]["visibility_scope_enum"]
+          episode_type: Database["core"]["Enums"]["justice_episode_type_enum"]
+          event_date?: string
+          event_time?: string | null
+          agency?: string | null
+          case_number?: string | null
+          charges?: string | null
+          disposition?: string | null
+          location?: string | null
+          bail_amount?: number | null
+          booking_number?: string | null
+          release_date?: string | null
+          release_type?: string | null
+          court_date?: string | null
+          supervision_agency?: string | null
+          notes?: string | null
+          metadata?: Json | null
+          created_at?: string
+          created_by?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          id?: string
+          person_id?: number
+          case_id?: number | null
+          encounter_id?: string | null
+          owning_org_id?: number
+          recorded_by_profile_id?: string | null
+          recorded_at?: string
+          source?: Database["core"]["Enums"]["record_source_enum"]
+          verification_status?: Database["core"]["Enums"]["verification_status_enum"]
+          sensitivity_level?: Database["core"]["Enums"]["sensitivity_level_enum"]
+          visibility_scope?: Database["core"]["Enums"]["visibility_scope_enum"]
+          episode_type?: Database["core"]["Enums"]["justice_episode_type_enum"]
+          event_date?: string
+          event_time?: string | null
+          agency?: string | null
+          case_number?: string | null
+          charges?: string | null
+          disposition?: string | null
+          location?: string | null
+          bail_amount?: number | null
+          booking_number?: string | null
+          release_date?: string | null
+          release_type?: string | null
+          court_date?: string | null
+          supervision_agency?: string | null
+          notes?: string | null
+          metadata?: Json | null
+          created_at?: string
+          created_by?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "justice_episodes_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "case_management"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "justice_episodes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "justice_episodes_encounter_id_fkey"
+            columns: ["encounter_id"]
+            isOneToOne: false
+            referencedRelation: "encounters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "justice_episodes_owning_org_id_fkey"
+            columns: ["owning_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "justice_episodes_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "justice_episodes_recorded_by_profile_id_fkey"
+            columns: ["recorded_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "justice_episodes_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      timeline_events: {
+        Row: {
+          id: string
+          person_id: number
+          case_id: number | null
+          encounter_id: string | null
+          owning_org_id: number
+          event_category: Database["core"]["Enums"]["timeline_event_category_enum"]
+          event_at: string
+          source_type: string | null
+          source_id: string | null
+          visibility_scope: Database["core"]["Enums"]["visibility_scope_enum"]
+          sensitivity_level: Database["core"]["Enums"]["sensitivity_level_enum"]
+          summary: string | null
+          metadata: Json | null
+          recorded_by_profile_id: string | null
+          created_at: string
+          created_by: string | null
+        }
+        Insert: {
+          id?: string
+          person_id: number
+          case_id?: number | null
+          encounter_id?: string | null
+          owning_org_id: number
+          event_category: Database["core"]["Enums"]["timeline_event_category_enum"]
+          event_at: string
+          source_type?: string | null
+          source_id?: string | null
+          visibility_scope?: Database["core"]["Enums"]["visibility_scope_enum"]
+          sensitivity_level?: Database["core"]["Enums"]["sensitivity_level_enum"]
+          summary?: string | null
+          metadata?: Json | null
+          recorded_by_profile_id?: string | null
+          created_at?: string
+          created_by?: string | null
+        }
+        Update: {
+          id?: string
+          person_id?: number
+          case_id?: number | null
+          encounter_id?: string | null
+          owning_org_id?: number
+          event_category?: Database["core"]["Enums"]["timeline_event_category_enum"]
+          event_at?: string
+          source_type?: string | null
+          source_id?: string | null
+          visibility_scope?: Database["core"]["Enums"]["visibility_scope_enum"]
+          sensitivity_level?: Database["core"]["Enums"]["sensitivity_level_enum"]
+          summary?: string | null
+          metadata?: Json | null
+          recorded_by_profile_id?: string | null
+          created_at?: string
+          created_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timeline_events_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "case_management"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timeline_events_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timeline_events_encounter_id_fkey"
+            columns: ["encounter_id"]
+            isOneToOne: false
+            referencedRelation: "encounters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timeline_events_owning_org_id_fkey"
+            columns: ["owning_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timeline_events_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timeline_events_recorded_by_profile_id_fkey"
+            columns: ["recorded_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -4642,8 +5160,6 @@ export type Database = {
           primary_language: string | null
           privacy_restrictions: string | null
           professional_title: string | null
-          related_person_id: number | null
-          relationship_to_client: string | null
           risk_level: Database["core"]["Enums"]["risk_level_enum"] | null
           service_eligibility_status:
             | Database["core"]["Enums"]["eligibility_status_enum"]
@@ -4687,8 +5203,6 @@ export type Database = {
           primary_language?: string | null
           privacy_restrictions?: string | null
           professional_title?: string | null
-          related_person_id?: number | null
-          relationship_to_client?: string | null
           risk_level?: Database["core"]["Enums"]["risk_level_enum"] | null
           service_eligibility_status?:
             | Database["core"]["Enums"]["eligibility_status_enum"]
@@ -4732,8 +5246,6 @@ export type Database = {
           primary_language?: string | null
           privacy_restrictions?: string | null
           professional_title?: string | null
-          related_person_id?: number | null
-          relationship_to_client?: string | null
           risk_level?: Database["core"]["Enums"]["risk_level_enum"] | null
           service_eligibility_status?:
             | Database["core"]["Enums"]["eligibility_status_enum"]
@@ -4746,15 +5258,7 @@ export type Database = {
             | Database["core"]["Enums"]["veteran_status_enum"]
             | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "people_related_person_id_fkey"
-            columns: ["related_person_id"]
-            isOneToOne: false
-            referencedRelation: "people"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       people_activities: {
         Row: {
@@ -4902,77 +5406,292 @@ export type Database = {
           },
         ]
       }
-      people_relationships: {
+      person_relationships: {
         Row: {
+          id: string
+          person_id: number
+          related_person_id: number | null
+          relationship_type: string
+          relationship_subtype: string | null
+          relationship_status: string | null
+          start_date: string | null
+          end_date: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          contact_email: string | null
+          contact_address: string | null
+          is_primary: boolean
+          is_emergency: boolean
+          safe_to_contact: boolean
+          safe_contact_notes: string | null
+          notes: string | null
+          metadata: Json | null
+          case_id: number | null
+          encounter_id: string | null
+          owning_org_id: number
+          recorded_by_profile_id: string | null
+          recorded_at: string
+          source: Database["core"]["Enums"]["record_source_enum"]
+          verification_status: Database["core"]["Enums"]["verification_status_enum"]
+          sensitivity_level: Database["core"]["Enums"]["sensitivity_level_enum"]
+          visibility_scope: Database["core"]["Enums"]["visibility_scope_enum"]
           created_at: string
           created_by: string | null
-          end_date: string | null
-          id: number
-          metadata: Json | null
-          notes: string | null
-          person1_id: number
-          person2_id: number
-          relationship_status: string | null
-          relationship_subtype: string | null
-          relationship_type: string
-          start_date: string | null
-          updated_at: string
+          updated_at: string | null
           updated_by: string | null
-          verified: boolean | null
-          verified_by: string | null
-          verified_date: string | null
         }
         Insert: {
+          id?: string
+          person_id: number
+          related_person_id?: number | null
+          relationship_type: string
+          relationship_subtype?: string | null
+          relationship_status?: string | null
+          start_date?: string | null
+          end_date?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          contact_email?: string | null
+          contact_address?: string | null
+          is_primary?: boolean
+          is_emergency?: boolean
+          safe_to_contact?: boolean
+          safe_contact_notes?: string | null
+          notes?: string | null
+          metadata?: Json | null
+          case_id?: number | null
+          encounter_id?: string | null
+          owning_org_id: number
+          recorded_by_profile_id?: string | null
+          recorded_at?: string
+          source?: Database["core"]["Enums"]["record_source_enum"]
+          verification_status?: Database["core"]["Enums"]["verification_status_enum"]
+          sensitivity_level?: Database["core"]["Enums"]["sensitivity_level_enum"]
+          visibility_scope?: Database["core"]["Enums"]["visibility_scope_enum"]
           created_at?: string
           created_by?: string | null
-          end_date?: string | null
-          id?: number
-          metadata?: Json | null
-          notes?: string | null
-          person1_id: number
-          person2_id: number
-          relationship_status?: string | null
-          relationship_subtype?: string | null
-          relationship_type: string
-          start_date?: string | null
-          updated_at?: string
+          updated_at?: string | null
           updated_by?: string | null
-          verified?: boolean | null
-          verified_by?: string | null
-          verified_date?: string | null
         }
         Update: {
+          id?: string
+          person_id?: number
+          related_person_id?: number | null
+          relationship_type?: string
+          relationship_subtype?: string | null
+          relationship_status?: string | null
+          start_date?: string | null
+          end_date?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          contact_email?: string | null
+          contact_address?: string | null
+          is_primary?: boolean
+          is_emergency?: boolean
+          safe_to_contact?: boolean
+          safe_contact_notes?: string | null
+          notes?: string | null
+          metadata?: Json | null
+          case_id?: number | null
+          encounter_id?: string | null
+          owning_org_id?: number
+          recorded_by_profile_id?: string | null
+          recorded_at?: string
+          source?: Database["core"]["Enums"]["record_source_enum"]
+          verification_status?: Database["core"]["Enums"]["verification_status_enum"]
+          sensitivity_level?: Database["core"]["Enums"]["sensitivity_level_enum"]
+          visibility_scope?: Database["core"]["Enums"]["visibility_scope_enum"]
           created_at?: string
           created_by?: string | null
-          end_date?: string | null
-          id?: number
-          metadata?: Json | null
-          notes?: string | null
-          person1_id?: number
-          person2_id?: number
-          relationship_status?: string | null
-          relationship_subtype?: string | null
-          relationship_type?: string
-          start_date?: string | null
-          updated_at?: string
+          updated_at?: string | null
           updated_by?: string | null
-          verified?: boolean | null
-          verified_by?: string | null
-          verified_date?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "people_relationships_person1_id_fkey"
-            columns: ["person1_id"]
+            foreignKeyName: "person_relationships_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "case_management"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "person_relationships_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "person_relationships_encounter_id_fkey"
+            columns: ["encounter_id"]
+            isOneToOne: false
+            referencedRelation: "encounters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "person_relationships_owning_org_id_fkey"
+            columns: ["owning_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "person_relationships_person_id_fkey"
+            columns: ["person_id"]
             isOneToOne: false
             referencedRelation: "people"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "people_relationships_person2_id_fkey"
-            columns: ["person2_id"]
+            foreignKeyName: "person_relationships_recorded_by_profile_id_fkey"
+            columns: ["recorded_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "person_relationships_related_person_id_fkey"
+            columns: ["related_person_id"]
             isOneToOne: false
             referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "person_relationships_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      person_characteristics: {
+        Row: {
+          id: string
+          person_id: number
+          case_id: number | null
+          encounter_id: string | null
+          owning_org_id: number
+          recorded_by_profile_id: string | null
+          recorded_at: string
+          source: Database["core"]["Enums"]["record_source_enum"]
+          verification_status: Database["core"]["Enums"]["verification_status_enum"]
+          sensitivity_level: Database["core"]["Enums"]["sensitivity_level_enum"]
+          visibility_scope: Database["core"]["Enums"]["visibility_scope_enum"]
+          observed_at: string
+          observed_by: string | null
+          characteristic_type: string
+          value_text: string | null
+          value_number: number | null
+          value_unit: string | null
+          body_location: string | null
+          notes: string | null
+          metadata: Json | null
+          created_at: string
+          created_by: string | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          id?: string
+          person_id: number
+          case_id?: number | null
+          encounter_id?: string | null
+          owning_org_id: number
+          recorded_by_profile_id?: string | null
+          recorded_at?: string
+          source?: Database["core"]["Enums"]["record_source_enum"]
+          verification_status?: Database["core"]["Enums"]["verification_status_enum"]
+          sensitivity_level?: Database["core"]["Enums"]["sensitivity_level_enum"]
+          visibility_scope?: Database["core"]["Enums"]["visibility_scope_enum"]
+          observed_at?: string
+          observed_by?: string | null
+          characteristic_type: string
+          value_text?: string | null
+          value_number?: number | null
+          value_unit?: string | null
+          body_location?: string | null
+          notes?: string | null
+          metadata?: Json | null
+          created_at?: string
+          created_by?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          id?: string
+          person_id?: number
+          case_id?: number | null
+          encounter_id?: string | null
+          owning_org_id?: number
+          recorded_by_profile_id?: string | null
+          recorded_at?: string
+          source?: Database["core"]["Enums"]["record_source_enum"]
+          verification_status?: Database["core"]["Enums"]["verification_status_enum"]
+          sensitivity_level?: Database["core"]["Enums"]["sensitivity_level_enum"]
+          visibility_scope?: Database["core"]["Enums"]["visibility_scope_enum"]
+          observed_at?: string
+          observed_by?: string | null
+          characteristic_type?: string
+          value_text?: string | null
+          value_number?: number | null
+          value_unit?: string | null
+          body_location?: string | null
+          notes?: string | null
+          metadata?: Json | null
+          created_at?: string
+          created_by?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "person_characteristics_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "case_management"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "person_characteristics_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "person_characteristics_encounter_id_fkey"
+            columns: ["encounter_id"]
+            isOneToOne: false
+            referencedRelation: "encounters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "person_characteristics_owning_org_id_fkey"
+            columns: ["owning_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "person_characteristics_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "person_characteristics_recorded_by_profile_id_fkey"
+            columns: ["recorded_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "person_characteristics_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -6847,6 +7566,10 @@ export type Database = {
         Args: { role_name: string; target_user_id: string }
         Returns: boolean
       }
+      log_consent_contact: {
+        Args: { p_person_id: number; p_org_id: number; p_summary: string }
+        Returns: undefined
+      }
       staff_caseload: {
         Args: { staff_uuid: string }
         Returns: {
@@ -7004,9 +7727,47 @@ export type Database = {
         | "distribution"
         | "inventory_tx"
         | "appointment"
+        | "encounter"
         | "manual"
         | "external"
         | "staff_time"
+      justice_episode_type_enum:
+        | "arrest"
+        | "charge"
+        | "court"
+        | "probation"
+        | "parole"
+        | "warrant"
+        | "other"
+      record_source_enum:
+        | "client_reported"
+        | "staff_observed"
+        | "document"
+        | "partner_org"
+        | "system"
+      sensitivity_level_enum:
+        | "standard"
+        | "sensitive"
+        | "high"
+        | "restricted"
+      timeline_event_category_enum:
+        | "encounter"
+        | "task"
+        | "referral"
+        | "supply"
+        | "appointment"
+        | "note"
+        | "client_update"
+        | "intake"
+        | "medical"
+        | "justice"
+        | "relationship"
+        | "characteristic"
+        | "consent"
+        | "system"
+        | "other"
+      verification_status_enum: "unverified" | "verified" | "disputed" | "stale"
+      visibility_scope_enum: "internal_to_org" | "shared_via_consent"
       court_compliance_enum:
         | "compliant"
         | "mostly_compliant"
@@ -8625,6 +9386,8 @@ export type Database = {
           person_id: number | null
           updated_at: string | null
           updated_by: string | null
+          provider_org_id: number | null
+          encounter_id: string | null
         }
         Insert: {
           client_id?: string | null
@@ -8641,6 +9404,8 @@ export type Database = {
           person_id?: number | null
           updated_at?: string | null
           updated_by?: string | null
+          provider_org_id?: number | null
+          encounter_id?: string | null
         }
         Update: {
           client_id?: string | null
@@ -8657,13 +9422,36 @@ export type Database = {
           person_id?: number | null
           updated_at?: string | null
           updated_by?: string | null
+          provider_org_id?: number | null
+          encounter_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "distributions_encounter_fkey"
+            columns: ["encounter_id"]
+            isOneToOne: false
+            referencedRelation: "encounters"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "distributions_location_id_fkey"
             columns: ["location_id"]
             isOneToOne: false
             referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "distributions_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "distributions_provider_org_id_fkey"
+            columns: ["provider_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -13079,7 +13867,23 @@ export const Constants = {
     },
   },
   case_mgmt: {
-    Enums: {},
+    Enums: {
+      encounter_type_enum: [
+        "outreach",
+        "intake",
+        "program",
+        "appointment",
+        "other",
+      ],
+      task_status_enum: [
+        "open",
+        "in_progress",
+        "blocked",
+        "done",
+        "canceled",
+      ],
+      task_priority_enum: ["low", "normal", "high", "urgent"],
+    },
   },
   core: {
     Enums: {
@@ -13221,10 +14025,57 @@ export const Constants = {
         "distribution",
         "inventory_tx",
         "appointment",
+        "encounter",
         "manual",
         "external",
         "staff_time",
       ],
+      justice_episode_type_enum: [
+        "arrest",
+        "charge",
+        "court",
+        "probation",
+        "parole",
+        "warrant",
+        "other",
+      ],
+      record_source_enum: [
+        "client_reported",
+        "staff_observed",
+        "document",
+        "partner_org",
+        "system",
+      ],
+      sensitivity_level_enum: [
+        "standard",
+        "sensitive",
+        "high",
+        "restricted",
+      ],
+      timeline_event_category_enum: [
+        "encounter",
+        "task",
+        "referral",
+        "supply",
+        "appointment",
+        "note",
+        "client_update",
+        "intake",
+        "medical",
+        "justice",
+        "relationship",
+        "characteristic",
+        "consent",
+        "system",
+        "other",
+      ],
+      verification_status_enum: [
+        "unverified",
+        "verified",
+        "disputed",
+        "stale",
+      ],
+      visibility_scope_enum: ["internal_to_org", "shared_via_consent"],
       court_compliance_enum: [
         "compliant",
         "mostly_compliant",

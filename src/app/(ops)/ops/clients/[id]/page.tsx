@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { resolveLandingPath } from '@/lib/portal-navigation';
-import { fetchStaffCaseActivities } from '@/lib/cases/fetchers';
+import { fetchStaffTimelineEvents } from '@/lib/cases/fetchers';
 import {
   fetchCostCategories,
   fetchPersonCostEvents,
@@ -14,15 +14,26 @@ import {
 } from '@/lib/costs/queries';
 import { normalizeEnumParam, toSearchParams } from '@/lib/search-params';
 import { getEffectiveConsent } from '@/lib/consents';
+import { fetchMedicalEpisodesForPerson } from '@/lib/medical/queries';
+import { fetchJusticeEpisodesForPerson } from '@/lib/justice/queries';
+import { fetchRelationshipsForPerson } from '@/lib/relationships/queries';
+import { fetchCharacteristicsForPerson } from '@/lib/characteristics/queries';
+import { filterTimelineEvent, TIMELINE_FILTERS, type TimelineFilterId } from '@/lib/timeline/filters';
+import type { TimelineEvent } from '@/lib/timeline/types';
 import { PageHeader } from '@shared/layout/page-header';
 import { PageTabNav, type PageTab } from '@shared/layout/page-tab-nav';
 import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
+import { Badge } from '@shared/ui/badge';
 import { Separator } from '@shared/ui/separator';
 import { Tabs, TabsList, TabsTrigger } from '@shared/ui/tabs';
 import { CostSnapshotCard } from '@workspace/costs/cost-snapshot-card';
 import { CostTimelineTable } from '@workspace/costs/cost-timeline-table';
 import { OutreachQuickLogCard } from '@workspace/staff/outreach-quick-log-card';
+import { MedicalEpisodesCard } from '@workspace/client-record/medical-episodes-card';
+import { JusticeEpisodesCard } from '@workspace/client-record/justice-episodes-card';
+import { RelationshipsCard } from '@workspace/client-record/relationships-card';
+import { CharacteristicsCard } from '@workspace/client-record/characteristics-card';
 import type { Database } from '@/types/supabase';
 
 type PageProps = { params: Promise<{ id: string }>; searchParams?: Promise<Record<string, string | string[] | undefined>> };
@@ -38,18 +49,20 @@ type CostCategoryRow = Database['core']['Tables']['cost_categories']['Row'];
 type ServiceCatalogRow = Database['core']['Tables']['service_catalog']['Row'];
 type StaffRateRow = Database['core']['Tables']['staff_rates']['Row'];
 
-const FILTERS = ['all', 'visits', 'tasks', 'referrals', 'supplies', 'appointments'] as const;
-type FilterId = (typeof FILTERS)[number];
 const VIEWS = ['directory', 'costs'] as const;
 
 export default async function OpsClientDetailPage({ params, searchParams }: PageProps) {
   const { id } = await params;
   const filterParam = searchParams ? await searchParams : undefined;
   const filterValue = filterParam?.filter;
-  const activeFilter: FilterId = FILTERS.includes((Array.isArray(filterValue) ? filterValue[0] : filterValue) as FilterId)
-    ? ((Array.isArray(filterValue) ? filterValue[0] : filterValue) as FilterId)
+  const activeFilter: TimelineFilterId = TIMELINE_FILTERS.includes(
+    (Array.isArray(filterValue) ? filterValue[0] : filterValue) as TimelineFilterId,
+  )
+    ? ((Array.isArray(filterValue) ? filterValue[0] : filterValue) as TimelineFilterId)
     : 'all';
   const canonicalParams = toSearchParams(filterParam);
+  const caseParam = canonicalParams.get('case');
+  const caseIdFromQuery = caseParam && /^\d+$/.test(caseParam) ? Number.parseInt(caseParam, 10) : null;
   const { value: activeView, redirected } = normalizeEnumParam(canonicalParams, 'view', VIEWS, 'directory');
   if (redirected) {
     redirect(`/ops/clients/${id}?${canonicalParams.toString()}`);
@@ -77,32 +90,54 @@ export default async function OpsClientDetailPage({ params, searchParams }: Page
   const showCostInputs = access.canManageCosts && Boolean(access.organizationId);
   const shouldLoadCosts = activeView === 'costs' && access.canViewCosts;
 
-  const [person, activities, consentSummary, costRollups, costEvents, costCategories, serviceCatalog, staffRates] = await Promise.all([
+  const shouldLoadTimeline = activeView !== 'costs';
+
+  const [
+    person,
+    timelineEvents,
+    consentSummary,
+    costRollups,
+    costEvents,
+    costCategories,
+    serviceCatalog,
+    staffRates,
+    medicalEpisodes,
+    justiceEpisodes,
+    relationships,
+    characteristics,
+  ] = await Promise.all([
     loadPerson(supabase, personId),
-    activeView === 'costs' ? Promise.resolve([]) : fetchStaffCaseActivities(supabase, personId, 120),
+    shouldLoadTimeline ? fetchStaffTimelineEvents(supabase, personId, 120) : Promise.resolve([]),
     getEffectiveConsent(supabase, personId),
     shouldLoadCosts ? fetchPersonCostRollups(supabase, personId) : Promise.resolve(null),
     shouldLoadCosts ? fetchPersonCostEvents(supabase, personId, 120) : Promise.resolve(null),
     showCostInputs ? fetchCostCategories(supabase) : Promise.resolve([]),
     showCostInputs ? fetchServiceCatalog(supabase) : Promise.resolve([]),
     showCostInputs && access.organizationId ? fetchStaffRates(supabase, access.organizationId) : Promise.resolve([]),
+    shouldLoadTimeline ? fetchMedicalEpisodesForPerson(supabase, personId, 12) : Promise.resolve([]),
+    shouldLoadTimeline ? fetchJusticeEpisodesForPerson(supabase, personId, 12) : Promise.resolve([]),
+    shouldLoadTimeline ? fetchRelationshipsForPerson(supabase, personId, 12) : Promise.resolve([]),
+    shouldLoadTimeline ? fetchCharacteristicsForPerson(supabase, personId, 12) : Promise.resolve([]),
   ]);
 
   if (!person) notFound();
 
   const orgLabel = access.organizationName ?? 'Unassigned org';
   const orgMissing = !access.organizationId && (access.canAccessOpsFrontline || access.canAccessOpsAdmin);
-  const newVisitHref = `/ops/visits/new?personId=${person.id}`;
+  const encounterParams = new URLSearchParams();
+  encounterParams.set('personId', String(person.id));
+  if (caseIdFromQuery) encounterParams.set('caseId', String(caseIdFromQuery));
+  const newEncounterHref = `/ops/encounters/new?${encounterParams.toString()}`;
   const costRollupRows = (costRollups ?? []) as PersonCostRollupRow[];
   const costEventRows = (costEvents ?? []) as CostEventWithCategory[];
   const staffRoleOptions = Array.from(
     new Set((staffRates as StaffRateRow[]).map((rate) => rate.role_name).filter(Boolean)),
   );
 
-  const filteredActivities =
+  const filteredEvents =
     activeView === 'costs'
       ? []
-      : activities.filter((activity) => filterActivity(activity.activityType, activeFilter));
+      : timelineEvents.filter((event) => filterTimelineEvent(event, activeFilter));
   const consentMeta = buildConsentMeta(consentSummary);
   const costTotals = costRollupRows.reduce(
     (acc, row) => {
@@ -146,9 +181,9 @@ export default async function OpsClientDetailPage({ params, searchParams }: Page
         description={
           activeView === 'costs'
             ? 'Cost summary reflects consented costs across organizations.'
-            : 'Journey timeline shows everything that happened with this person. Start a Visit to add notes, supplies, tasks, or referrals in one place.'
+            : 'Journey timeline shows everything that happened with this person. Start an encounter to add notes, supplies, tasks, or referrals in one place.'
         }
-        primaryAction={{ label: orgMissing ? 'Select acting org to start Visit' : 'New Visit', href: newVisitHref }}
+        primaryAction={{ label: orgMissing ? 'Select acting org to start Encounter' : 'New Encounter', href: newEncounterHref }}
         secondaryAction={{ label: 'Find another client', href: '/ops/clients?view=directory' }}
         breadcrumbs={[{ label: 'Clients', href: '/ops/clients?view=directory' }, { label: 'Profile' }]}
         meta={[{ label: `Created by ${orgLabel}`, tone: 'neutral' }, consentMeta]}
@@ -167,46 +202,44 @@ export default async function OpsClientDetailPage({ params, searchParams }: Page
             <CardHeader className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
               <div>
                 <CardTitle className="text-xl">Journey timeline</CardTitle>
-                <CardDescription>All Visits, tasks, referrals, supplies, and appointments tied to this person.</CardDescription>
+                <CardDescription>All encounters, tasks, referrals, supplies, and appointments tied to this person.</CardDescription>
               </div>
               <Tabs value={activeFilter} className="w-full">
                 <TabsList className="h-auto w-full flex-wrap justify-end gap-1 bg-transparent p-0">
-                  {FILTERS.map((filter) => (
+                  {TIMELINE_FILTERS.map((filter) => (
                     <TabsTrigger key={filter} value={filter} className="rounded-full border px-3 py-1 text-xs capitalize">
-                      <Link href={`/ops/clients/${person.id}?filter=${filter}&view=directory`}>{filter}</Link>
+                      <Link href={`/ops/clients/${person.id}?filter=${filter}&view=directory`}>{labelForFilter(filter)}</Link>
                     </TabsTrigger>
                   ))}
                 </TabsList>
               </Tabs>
             </CardHeader>
             <CardContent className="space-y-4">
-              {filteredActivities.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No activity yet. Start a Visit to log the next step.</p>
+              {filteredEvents.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No timeline events yet. Start an encounter to log the next step.</p>
               ) : (
-                filteredActivities.map((activity) => (
-                  <article key={activity.id} className="rounded-2xl border border-border/40 bg-card p-4 shadow-sm">
+                filteredEvents.map((event) => (
+                  <article key={event.id} className="rounded-2xl border border-border/40 bg-card p-4 shadow-sm">
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                       <div className="space-y-1">
-                        <p className="text-base font-semibold text-foreground">{activity.title}</p>
-                        <p className="text-sm text-muted-foreground capitalize">{activity.activityType ?? 'activity'}</p>
-                        {activity.description ? (
-                          <p className="text-sm text-foreground/80">{activity.description}</p>
+                        <p className="text-base font-semibold text-foreground">{event.summary ?? 'Timeline update'}</p>
+                        <p className="text-sm text-muted-foreground capitalize">{formatCategory(event.eventCategory)}</p>
+                        {resolveEventDetail(event) ? (
+                          <p className="text-sm text-foreground/80">{resolveEventDetail(event)}</p>
                         ) : null}
                       </div>
                       <div className="text-right text-xs text-muted-foreground">
-                        <p>{formatDate(activity.activityDate)}</p>
-                        {activity.activityTime ? <p>{activity.activityTime}</p> : null}
+                        <p>{formatDateTime(event.eventAt)}</p>
                       </div>
                     </div>
                     <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
-                      {activity.createdByOrg ? (
-                        <span className="border-border/70">
-                          Created by {activity.createdByOrg}
-                        </span>
+                      {event.createdByOrg ? <Badge variant="outline">Created by {event.createdByOrg}</Badge> : null}
+                      <Badge variant={event.visibilityScope === 'shared_via_consent' ? 'secondary' : 'outline'}>
+                        {event.visibilityScope === 'shared_via_consent' ? 'Shared' : 'Internal'}
+                      </Badge>
+                      {event.sensitivityLevel !== 'standard' ? (
+                        <Badge variant="destructive">{event.sensitivityLevel}</Badge>
                       ) : null}
-                      <span className="border-border/70">
-                        Visibility: {activity.visibility === 'client' ? 'Shared with client' : 'Internal'}
-                      </span>
                     </div>
                   </article>
                 ))
@@ -219,19 +252,19 @@ export default async function OpsClientDetailPage({ params, searchParams }: Page
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Quick actions</CardTitle>
-              <CardDescription>Keep actions inside a Visit to preserve provenance.</CardDescription>
+              <CardDescription>Keep actions inside an encounter to preserve provenance.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
               <Button asChild className="w-full">
-                <Link href={newVisitHref}>New Visit</Link>
+                <Link href={newEncounterHref}>New Encounter</Link>
               </Button>
               <Button asChild variant="outline" className="w-full">
-                <Link href={`${newVisitHref}&action=referral`}>Add referral</Link>
+                <Link href={newEncounterHref}>Add referral</Link>
               </Button>
               <Button asChild variant="outline" className="w-full">
-                <Link href={`${newVisitHref}&action=note`}>Add note</Link>
+                <Link href={newEncounterHref}>Add note</Link>
               </Button>
-              <p className="text-xs text-muted-foreground">Supplies and referrals must be logged from a Visit.</p>
+              <p className="text-xs text-muted-foreground">Supplies and referrals must be logged from an encounter.</p>
             </CardContent>
           </Card>
 
@@ -266,6 +299,15 @@ export default async function OpsClientDetailPage({ params, searchParams }: Page
           </Card>
         </div>
       </section>
+
+      {activeView === 'costs' ? null : (
+        <section className="grid gap-4 lg:grid-cols-2">
+          <MedicalEpisodesCard personId={person.id} caseId={caseIdFromQuery} episodes={medicalEpisodes} />
+          <JusticeEpisodesCard personId={person.id} caseId={caseIdFromQuery} episodes={justiceEpisodes} />
+          <RelationshipsCard personId={person.id} caseId={caseIdFromQuery} relationships={relationships} />
+          <CharacteristicsCard personId={person.id} caseId={caseIdFromQuery} characteristics={characteristics} />
+        </section>
+      )}
     </div>
   );
 }
@@ -285,25 +327,37 @@ async function loadPerson(
   return (data as PersonRow | null) ?? null;
 }
 
-function filterActivity(activityType: string | null, filter: FilterId) {
-  if (filter === 'all') return true;
-  if (!activityType) return false;
-  const normalized = activityType.toLowerCase();
-  if (filter === 'visits') return normalized.includes('visit');
-  if (filter === 'tasks') return normalized.includes('task');
-  if (filter === 'referrals') return normalized.includes('referral');
-  if (filter === 'supplies') return normalized.includes('supply') || normalized.includes('inventory');
-  if (filter === 'appointments') return normalized.includes('appointment');
-  return true;
+function resolveEventDetail(event: TimelineEvent): string | null {
+  const meta = event.metadata ?? {};
+  const candidates = [meta.description, meta.notes, meta.message, meta.summary];
+  for (const entry of candidates) {
+    if (typeof entry === 'string' && entry.trim().length > 0) return entry;
+  }
+  return null;
 }
 
-function formatDate(value: string | null) {
+function formatDateTime(value: string | null) {
   if (!value) return 'Unknown date';
   try {
-    return new Intl.DateTimeFormat('en-CA', { dateStyle: 'medium' }).format(new Date(value));
+    return new Intl.DateTimeFormat('en-CA', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
   } catch {
     return value;
   }
+}
+
+function labelForFilter(filter: TimelineFilterId) {
+  switch (filter) {
+    case 'encounters':
+      return 'Encounters';
+    case 'client_updates':
+      return 'Client updates';
+    default:
+      return filter.replaceAll('_', ' ');
+  }
+}
+
+function formatCategory(category: string) {
+  return category.replaceAll('_', ' ');
 }
 
 function buildConsentMeta(consent: Awaited<ReturnType<typeof getEffectiveConsent>>) {

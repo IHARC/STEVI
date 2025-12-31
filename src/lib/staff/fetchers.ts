@@ -1,4 +1,5 @@
 import type { SupabaseAnyServerClient } from '@/lib/supabase/types';
+import { fetchTasksForAssignee } from '@/lib/tasks/queries';
 
 export type StaffCase = {
   id: string;
@@ -25,29 +26,38 @@ export type OutreachLog = {
 };
 
 const CORE_SCHEMA = 'core';
-const CASELOAD_RPC = 'staff_caseload';
 const SHIFTS_RPC = 'staff_shifts_today';
 const OUTREACH_RPC = 'staff_outreach_logs';
 
 export async function fetchStaffCaseload(
   supabase: SupabaseAnyServerClient,
-  staffUserId: string,
+  staffProfileId: string,
 ): Promise<StaffCase[]> {
-  const core = supabase.schema(CORE_SCHEMA);
-  const { data, error } = await core.rpc(CASELOAD_RPC, { staff_uuid: staffUserId });
+  if (!staffProfileId) return [];
 
-  if (error) {
+  try {
+    const tasks = await fetchTasksForAssignee(supabase, staffProfileId, 200);
+    const seen = new Set<number>();
+    const caseload: StaffCase[] = [];
+
+    for (const task of tasks) {
+      if (seen.has(task.personId)) continue;
+      seen.add(task.personId);
+      caseload.push({
+        id: String(task.personId),
+        clientName: task.clientName ?? 'Client',
+        status: task.status,
+        nextStep: task.title,
+        nextAt: task.dueAt ?? null,
+      });
+      if (caseload.length >= 50) break;
+    }
+
+    return caseload;
+  } catch (error) {
     console.error('Failed to load staff caseload', error);
     throw new Error('Unable to load caseload right now.');
   }
-
-  return (data ?? []).map((entry: Record<string, unknown>) => ({
-    id: String(entry.person_id),
-    clientName: (entry.client_name as string | undefined) ?? 'Client',
-    status: (entry.status as string | undefined) ?? 'active',
-    nextStep: (entry.next_step as string | null | undefined) ?? null,
-    nextAt: entry.next_at ? String(entry.next_at) : null,
-  }));
 }
 
 export async function fetchStaffShifts(

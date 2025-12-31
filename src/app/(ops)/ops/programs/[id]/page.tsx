@@ -39,18 +39,18 @@ export default async function ProgramDetailPage({ params, searchParams }: PagePr
   }
 
   const orgMissing = (access.canAccessOpsFrontline || access.canAccessOpsAdmin) && !access.organizationId;
-  const newVisitHref = `/ops/visits/new?programId=${program.id}`;
-  const visitAction = orgMissing
-    ? { label: 'Select acting org to start Visit', href: newVisitHref }
-    : { label: 'Start Visit in this program', href: newVisitHref };
+  const newEncounterHref = `/ops/encounters/new?programId=${program.id}`;
+  const encounterAction = orgMissing
+    ? { label: 'Select acting org to start Encounter', href: newEncounterHref }
+    : { label: 'Start encounter in this program', href: newEncounterHref };
 
   return (
     <div className="space-y-6">
       <PageHeader
         eyebrow="Program"
         title={program.title}
-        description="Roster, attendance, and shift context for this program. Start Visits from here to keep provenance."
-        primaryAction={visitAction}
+        description="Roster, attendance, and shift context for this program. Start encounters from here to keep provenance."
+        primaryAction={encounterAction}
         secondaryAction={{ label: 'Back to programs', href: '/ops/programs?view=overview' }}
         breadcrumbs={[{ label: 'Programs', href: '/ops/programs?view=overview' }, { label: program.title }]}
         meta={[{ label: program.location, tone: 'info' }]}
@@ -60,10 +60,10 @@ export default async function ProgramDetailPage({ params, searchParams }: PagePr
         <Card>
           <CardHeader className="space-y-1">
             <CardTitle className="text-lg">Roster & attendance</CardTitle>
-            <CardDescription>Assign staff and volunteers; attendance rolls stay within the Visit record.</CardDescription>
+            <CardDescription>Assign staff and volunteers; attendance rolls stay within the encounter record.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 text-sm text-foreground/80">
-            <p className="text-muted-foreground">Wire roster to staffing data when available. Keep shift notes inside Visits to preserve provenance.</p>
+            <p className="text-muted-foreground">Wire roster to staffing data when available. Keep shift notes inside encounters to preserve provenance.</p>
             <Button asChild variant="outline" className="w-full">
               <Link href="/ops/programs?view=schedule">Manage schedule</Link>
             </Button>
@@ -81,7 +81,7 @@ export default async function ProgramDetailPage({ params, searchParams }: PagePr
             <p className="font-semibold mt-2">Schedule</p>
             <p className="text-muted-foreground">{program.startsAt} – {program.endsAt}</p>
             <Button asChild variant="outline" className="w-full mt-3">
-              <Link href={newVisitHref}>Log shift note</Link>
+              <Link href={newEncounterHref}>Log shift note</Link>
             </Button>
           </CardContent>
         </Card>

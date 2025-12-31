@@ -1,10 +1,12 @@
 import type { Database } from '@/types/supabase';
+import type { TimelineEvent } from '@/lib/timeline/types';
 import type { ConsentMethod, ConsentOrgSelection, ConsentScope, ConsentStatus } from '@/lib/consents';
 
 // Narrow case record shape to fields used in the UI. Keeps typecheck light while aligning to Supabase schema.
 export type CaseRecord = {
   id: number;
   person_id: number;
+  owning_org_id: number;
   case_number: string | null;
   case_type: string | null;
   status: string | null;
@@ -19,6 +21,7 @@ export type PersonRecord = Database['core']['Tables']['people']['Row'];
 
 export type CaseSummary = {
   id: number;
+  owningOrgId: number;
   caseNumber: string | null;
   caseType: string | null;
   status: string | null;
@@ -59,17 +62,7 @@ export type ClientCaseDetail = CaseSummary & {
   personId: number;
 };
 
-export type CaseActivity = {
-  id: string;
-  title: string;
-  description: string | null;
-  activityDate: string;
-  activityTime: string | null;
-  activityType: string;
-  createdByOrg: string | null;
-  sharedWithClient: boolean;
-  visibility: 'client' | 'internal';
-};
+export type CaseTimelineEvent = TimelineEvent;
 
 export type IntakeSubmission = {
   id: string;

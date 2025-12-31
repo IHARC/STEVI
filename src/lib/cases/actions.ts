@@ -21,8 +21,8 @@ import {
   syncConsentGrants,
 } from '@/lib/consents';
 
-const ACTIVITIES_TABLE = 'people_activities';
 const PEOPLE_TABLE = 'people';
+const TIMELINE_TABLE = 'timeline_events';
 
 const CONSENT_SCOPE_VALUES = ['all_orgs', 'selected_orgs', 'none'] as const;
 type ConsentScope = (typeof CONSENT_SCOPE_VALUES)[number];
@@ -60,32 +60,37 @@ export async function submitClientCaseUpdateAction(formData: FormData): Promise<
 
   const core = supabase.schema('core');
   const now = new Date();
-  const activityDate = now.toISOString().slice(0, 10);
-  const activityTime = now.toISOString().slice(11, 19);
 
-  const { error } = await core.from(ACTIVITIES_TABLE).insert({
-    person_id: caseDetail.personId,
-    activity_type: 'client_update',
-    activity_date: activityDate,
-    activity_time: activityTime,
-    title: 'Client update',
-    description: message,
-    staff_member: access.profile.display_name,
-    metadata: { client_visible: true, submitted_via: 'portal' },
-    created_by: access.userId,
-    provider_profile_id: access.profile.id,
-    provider_org_id: access.organizationId,
-  });
+  const { data, error } = await core
+    .from(TIMELINE_TABLE)
+    .insert({
+      person_id: caseDetail.personId,
+      case_id: caseId,
+      encounter_id: null,
+      owning_org_id: caseDetail.owningOrgId,
+      event_category: 'client_update',
+      event_at: now.toISOString(),
+      source_type: 'client_update',
+      source_id: null,
+      visibility_scope: 'shared_via_consent',
+      sensitivity_level: 'standard',
+      summary: 'Client update',
+      metadata: { message, submitted_via: 'portal' },
+      recorded_by_profile_id: access.profile.id,
+      created_by: access.userId,
+    })
+    .select('id')
+    .single();
 
-  if (error) {
+  if (error || !data) {
     throw new Error('Could not record your update.');
   }
 
   await logAuditEvent(supabase, {
     actorProfileId: access.profile.id,
     action: 'client_update_submitted',
-    entityType: 'case_management',
-    entityRef: null,
+    entityType: 'core.timeline_events',
+    entityRef: buildEntityRef({ schema: 'core', table: TIMELINE_TABLE, id: data.id }),
     meta: {
       case_id: caseId,
       person_id: caseDetail.personId,
@@ -565,30 +570,38 @@ export async function staffAddCaseNoteAction(formData: FormData): Promise<void> 
 
   const core = supabase.schema('core');
   const now = new Date();
-  const activityDate = now.toISOString().slice(0, 10);
-  const activityTime = now.toISOString().slice(11, 19);
 
-  const { error } = await core.from(ACTIVITIES_TABLE).insert({
-    person_id: detail.personId,
-    activity_type: 'note',
-    activity_date: activityDate,
-    activity_time: activityTime,
-    title,
-    description: description || null,
-    staff_member: access.profile.display_name,
-    metadata: { client_visible: false },
-    created_by: access.userId,
-    provider_profile_id: access.profile.id,
-    provider_org_id: access.organizationId,
-  });
+  const { data, error } = await core
+    .from(TIMELINE_TABLE)
+    .insert({
+      person_id: detail.personId,
+      case_id: caseId,
+      encounter_id: null,
+      owning_org_id: access.organizationId,
+      event_category: 'note',
+      event_at: now.toISOString(),
+      source_type: 'case_note',
+      source_id: null,
+      visibility_scope: 'internal_to_org',
+      sensitivity_level: 'standard',
+      summary: title,
+      metadata: {
+        description: description || null,
+        staff_member: access.profile.display_name,
+      },
+      recorded_by_profile_id: access.profile.id,
+      created_by: access.userId,
+    })
+    .select('id')
+    .single();
 
-  if (error) throw new Error('Unable to add note.');
+  if (error || !data) throw new Error('Unable to add note.');
 
   await logAuditEvent(supabase, {
     actorProfileId: access.profile.id,
     action: 'case_note_added',
-    entityType: 'case_management',
-    entityRef: null,
+    entityType: 'core.timeline_events',
+    entityRef: buildEntityRef({ schema: 'core', table: TIMELINE_TABLE, id: data.id }),
     meta: { case_id: caseId, person_id: detail.personId },
   });
 
