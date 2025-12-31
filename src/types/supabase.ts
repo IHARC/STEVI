@@ -7524,7 +7524,6 @@ export type Database = {
           person_type: Database["core"]["Enums"]["person_type"]
           phone: string
           professional_title: string
-          relationship_to_client: string
           risk_level: string
           status: Database["core"]["Enums"]["person_status"]
           total_count: number

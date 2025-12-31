@@ -5376,8 +5376,6 @@ export type Database = {
           primary_language: string | null
           privacy_restrictions: string | null
           professional_title: string | null
-          related_person_id: number | null
-          relationship_to_client: string | null
           risk_level: Database["core"]["Enums"]["risk_level_enum"] | null
           service_eligibility_status:
             | Database["core"]["Enums"]["eligibility_status_enum"]
@@ -5421,8 +5419,6 @@ export type Database = {
           primary_language?: string | null
           privacy_restrictions?: string | null
           professional_title?: string | null
-          related_person_id?: number | null
-          relationship_to_client?: string | null
           risk_level?: Database["core"]["Enums"]["risk_level_enum"] | null
           service_eligibility_status?:
             | Database["core"]["Enums"]["eligibility_status_enum"]
@@ -5466,8 +5462,6 @@ export type Database = {
           primary_language?: string | null
           privacy_restrictions?: string | null
           professional_title?: string | null
-          related_person_id?: number | null
-          relationship_to_client?: string | null
           risk_level?: Database["core"]["Enums"]["risk_level_enum"] | null
           service_eligibility_status?:
             | Database["core"]["Enums"]["eligibility_status_enum"]
@@ -5480,15 +5474,7 @@ export type Database = {
             | Database["core"]["Enums"]["veteran_status_enum"]
             | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "people_related_person_id_fkey"
-            columns: ["related_person_id"]
-            isOneToOne: false
-            referencedRelation: "people"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       people_activities: {
         Row: {
@@ -7264,7 +7250,6 @@ export type Database = {
           person_type: Database["core"]["Enums"]["person_type"]
           phone: string
           professional_title: string
-          relationship_to_client: string
           risk_level: string
           status: Database["core"]["Enums"]["person_status"]
           total_count: number
