@@ -42,7 +42,7 @@ export async function fetchRelationshipsForPerson(
     .schema(CORE_SCHEMA)
     .from(RELATIONSHIPS_TABLE)
     .select(
-      'id, relationship_type, relationship_subtype, relationship_status, related_person_id, contact_name, contact_phone, contact_email, contact_address, is_primary, is_emergency, safe_to_contact, safe_contact_notes, notes, visibility_scope, sensitivity_level, verification_status, source, recorded_at, organizations(name), related_person:people(first_name,last_name)',
+      'id, relationship_type, relationship_subtype, relationship_status, related_person_id, contact_name, contact_phone, contact_email, contact_address, is_primary, is_emergency, safe_to_contact, safe_contact_notes, notes, visibility_scope, sensitivity_level, verification_status, source, recorded_at, organizations(name), related_person:people!person_relationships_related_person_id_fkey(first_name,last_name)',
     )
     .eq('person_id', personId)
     .order('recorded_at', { ascending: false })

@@ -53,25 +53,29 @@ export default async function ClientCasesPage() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           {cases.map((item) => (
-            <Card key={item.id} className="h-full">
-              <CardHeader className="flex flex-row items-start justify-between gap-3">
-                <div className="space-y-0.5">
-                  <CardTitle className="text-lg">{item.caseType ?? 'Support case'}</CardTitle>
-                  <CardDescription>Case #{item.caseNumber ?? item.id}</CardDescription>
-                  <p className="text-sm text-muted-foreground">Case manager: {item.caseManagerName}</p>
-                </div>
-                <span className="capitalize">
-                  {item.status ?? 'active'}
-                </span>
-              </CardHeader>
-              <CardContent className="space-y-3 text-sm text-foreground/80">
-                <p>Priority: {item.priority ?? 'standard'}</p>
-                <p>Started: {item.startDate ? new Date(item.startDate).toLocaleDateString() : 'Pending'}</p>
-                <Button asChild variant="outline" className="mt-3 w-full">
-                  <Link href={`/cases/${item.id}`}>Open case</Link>
-                </Button>
-              </CardContent>
-            </Card>
+            <Link
+              key={item.id}
+              href={`/cases/${item.id}`}
+              className="block h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              aria-label={`Open case ${item.caseNumber ?? item.id}`}
+            >
+              <Card className="h-full">
+                <CardHeader className="flex flex-row items-start justify-between gap-3">
+                  <div className="space-y-0.5">
+                    <CardTitle className="text-lg">{item.caseType ?? 'Support case'}</CardTitle>
+                    <CardDescription>Case #{item.caseNumber ?? item.id}</CardDescription>
+                    <p className="text-sm text-muted-foreground">Case manager: {item.caseManagerName}</p>
+                  </div>
+                  <span className="capitalize">
+                    {item.status ?? 'active'}
+                  </span>
+                </CardHeader>
+                <CardContent className="space-y-3 text-sm text-foreground/80">
+                  <p>Priority: {item.priority ?? 'standard'}</p>
+                  <p>Started: {item.startDate ? new Date(item.startDate).toLocaleDateString() : 'Pending'}</p>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
       )}

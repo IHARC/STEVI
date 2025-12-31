@@ -1,8 +1,11 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
 import { Button } from '@shared/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@shared/ui/table';
 import { SortableTableHead, type ListSortOrder } from '@shared/list/sortable-table-head';
 import type { InventoryItem } from '@/lib/inventory/types';
-import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 export type ItemsTableHandlers = {
   onReceive: (item: InventoryItem) => void;
@@ -32,6 +35,12 @@ export function ItemsTable({
   onToggle,
   onDelete,
 }: ItemsTableProps) {
+  const router = useRouter();
+
+  const openItem = (itemId: string) => {
+    router.push(`/ops/inventory/items/${itemId}?view=items`);
+  };
+
   return (
     <Table>
       <TableHeader>
@@ -80,12 +89,24 @@ export function ItemsTable({
       </TableHeader>
       <TableBody>
         {items.map((item) => (
-          <TableRow key={item.id} className={!item.active ? 'opacity-60' : undefined}>
-            <TableCell className="font-medium">
-              <Link href={`/ops/inventory/items/${item.id}?view=items`} className="hover:underline">
-                {item.name}
-              </Link>
-            </TableCell>
+          <TableRow
+            key={item.id}
+            role="link"
+            tabIndex={0}
+            aria-label={`Open ${item.name} inventory item`}
+            onClick={() => openItem(item.id)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                openItem(item.id);
+              }
+            }}
+            className={cn(
+              !item.active && 'opacity-60',
+              'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+            )}
+          >
+            <TableCell className="font-medium">{item.name}</TableCell>
             <TableCell>{item.category ?? '—'}</TableCell>
             <TableCell>{item.unitType ?? '—'}</TableCell>
             <TableCell className="text-right">{item.onHandQuantity.toLocaleString()}</TableCell>
@@ -98,26 +119,55 @@ export function ItemsTable({
               </span>
             </TableCell>
             <TableCell className="space-x-2 text-right">
-              <Button size="sm" variant="outline" onClick={() => onReceive(item)}>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onReceive(item);
+                }}
+              >
                 Receive
               </Button>
-              <Button size="sm" variant="outline" onClick={() => onTransfer(item)}>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onTransfer(item);
+                }}
+              >
                 Transfer
               </Button>
-              <Button size="sm" variant="outline" onClick={() => onAdjust(item)}>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onAdjust(item);
+                }}
+              >
                 Adjust
               </Button>
-              <Button asChild size="sm" variant="ghost">
-                <Link href={`/ops/inventory/items/${item.id}?view=items`}>Open</Link>
-              </Button>
-              <Button size="sm" variant="ghost" onClick={() => onToggle(item, !item.active)} disabled={isPending}>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onToggle(item, !item.active);
+                }}
+                disabled={isPending}
+              >
                 {item.active ? 'Deactivate' : 'Activate'}
               </Button>
               <Button
                 size="sm"
                 variant="ghost"
                 className="text-destructive hover:text-destructive"
-                onClick={() => onDelete(item)}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onDelete(item);
+                }}
                 disabled={isPending}
               >
                 Delete

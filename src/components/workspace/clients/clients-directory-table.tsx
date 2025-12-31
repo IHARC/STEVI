@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Alert, AlertDescription, AlertTitle } from '@shared/ui/alert';
@@ -119,6 +118,10 @@ export function ClientsDirectoryTable({ items, totalCount, query, loadError, onb
   const privacyError = privacySearchRequired && q.trim().length < 2
     ? 'Search term of at least 2 characters is required when including client or potential client records (privacy protection).'
     : null;
+
+  const openPerson = (personId: number) => {
+    router.push(`/ops/clients/${personId}?view=directory`);
+  };
 
   const apply = (next: Partial<Props['query']> & { page?: number }) => {
     const merged = {
@@ -389,12 +392,24 @@ export function ClientsDirectoryTable({ items, totalCount, query, loadError, onb
                 onClick={() => applySort('updated_at', 'DESC')}
                 className="hidden md:table-cell"
               />
-              <TableHead className="text-right">Open</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {items.map((item) => (
-              <TableRow key={item.id}>
+              <TableRow
+                key={item.id}
+                role="link"
+                tabIndex={0}
+                aria-label={`Open ${item.first_name ?? 'client'} ${item.last_name ?? ''} record`.trim()}
+                onClick={() => openPerson(item.id)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    openPerson(item.id);
+                  }
+                }}
+                className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
                 <TableCell className="min-w-[160px] font-medium text-foreground">
                   {item.first_name?.trim() || '—'}
                 </TableCell>
@@ -420,11 +435,6 @@ export function ClientsDirectoryTable({ items, totalCount, query, loadError, onb
                 </TableCell>
                 <TableCell className="hidden lg:table-cell">{item.last_service_date ?? '—'}</TableCell>
                 <TableCell className="hidden md:table-cell">{formatTimestamp(item.updated_at)}</TableCell>
-                <TableCell className="text-right">
-                  <Button asChild size="sm" variant="outline">
-                    <Link href={`/ops/clients/${item.id}?view=directory`}>Open</Link>
-                  </Button>
-                </TableCell>
               </TableRow>
             ))}
             {items.length === 0 ? (

@@ -12,8 +12,8 @@ import type { Database } from '@/types/supabase';
 import { PageHeader } from '@shared/layout/page-header';
 import { PageTabNav, type PageTab } from '@shared/layout/page-tab-nav';
 import { Button } from '@shared/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@shared/ui/table';
 import { ClientsDirectoryTable } from '@workspace/clients/clients-directory-table';
+import { ClientsActivityTable, ClientsCaseloadTable } from '@workspace/clients/clients-overview-tables';
 import { normalizeEnumParam, paramsToRecord, toSearchParams } from '@/lib/search-params';
 
 type DirectoryItem = Database['core']['Functions']['get_people_list_with_types']['Returns'][number];
@@ -119,11 +119,11 @@ export default async function OpsClientsPage({ searchParams }: PageProps) {
       ) : null}
 
       {activeView === 'caseload' ? (
-        <CaseloadView caseload={caseload} />
+        <ClientsCaseloadTable caseload={caseload} />
       ) : null}
 
       {activeView === 'activity' ? (
-        <ActivityView cases={cases} />
+        <ClientsActivityTable cases={cases} />
       ) : null}
     </div>
   );
@@ -209,103 +209,6 @@ async function loadDirectory(
   const items = (data ?? []) as DirectoryItem[];
   const totalCount = items[0]?.total_count ? Number(items[0].total_count) : 0;
   return { items, totalCount, error: null };
-}
-
-function CaseloadView({ caseload }: { caseload: Awaited<ReturnType<typeof fetchStaffCaseload>> }) {
-  return (
-    <div className="space-y-3">
-      <div className="overflow-x-auto rounded-2xl border border-border/15 bg-background shadow-sm">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Client</TableHead>
-              <TableHead className="hidden md:table-cell">Status</TableHead>
-              <TableHead className="hidden lg:table-cell">Next step</TableHead>
-              <TableHead className="text-right">Open</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {caseload.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell className="font-medium">{item.clientName}</TableCell>
-                <TableCell className="hidden md:table-cell">
-                  <span className="capitalize">
-                    {item.status}
-                  </span>
-                </TableCell>
-                <TableCell className="hidden lg:table-cell text-sm text-muted-foreground">
-                  {item.nextStep ?? '—'}
-                </TableCell>
-                <TableCell className="text-right">
-                  <Button asChild size="sm" variant="outline">
-                    <Link href={`/ops/clients/${item.id}?view=directory`}>Open</Link>
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-            {caseload.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={4} className="py-10 text-center text-sm text-muted-foreground">
-                  No assigned caseload yet. Assign clients to yourself from an encounter to build your caseload.
-                </TableCell>
-              </TableRow>
-            ) : null}
-          </TableBody>
-        </Table>
-      </div>
-    </div>
-  );
-}
-
-function ActivityView({ cases }: { cases: Awaited<ReturnType<typeof fetchStaffCases>> }) {
-  return (
-    <div className="space-y-3">
-      <div className="overflow-x-auto rounded-2xl border border-border/15 bg-background shadow-sm">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Case</TableHead>
-              <TableHead className="hidden md:table-cell">Person</TableHead>
-              <TableHead className="hidden lg:table-cell">Manager</TableHead>
-              <TableHead className="hidden lg:table-cell">Priority</TableHead>
-              <TableHead className="hidden md:table-cell">Status</TableHead>
-              <TableHead className="text-right">Open</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {cases.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell className="min-w-[220px]">
-                  <div className="font-medium text-foreground">{item.caseType ?? 'Support case'}</div>
-                  <div className="mt-1 text-xs text-muted-foreground">Case #{item.id.toLocaleString()}</div>
-                </TableCell>
-                <TableCell className="hidden md:table-cell">#{item.personId?.toLocaleString() ?? '—'}</TableCell>
-                <TableCell className="hidden lg:table-cell">{item.caseManagerName}</TableCell>
-                <TableCell className="hidden lg:table-cell">{item.priority ?? '—'}</TableCell>
-                <TableCell className="hidden md:table-cell">
-                  <span className="capitalize">
-                    {item.status ?? 'active'}
-                  </span>
-                </TableCell>
-                <TableCell className="text-right">
-                  <Button asChild size="sm" variant="outline">
-                    <Link href={`/ops/clients/${item.personId}?case=${item.id}&view=directory`}>Open</Link>
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-            {cases.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} className="py-10 text-center text-sm text-muted-foreground">
-                  No recent activity. Log outreach, tasks, or encounters to populate the feed.
-                </TableCell>
-              </TableRow>
-            ) : null}
-          </TableBody>
-        </Table>
-      </div>
-    </div>
-  );
 }
 
 function labelForView(view: ViewId) {

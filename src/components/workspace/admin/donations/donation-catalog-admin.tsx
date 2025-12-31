@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@shared/ui/button';
@@ -57,6 +56,10 @@ export function DonationCatalogAdmin({ inventoryItems, catalogInventoryItemIds, 
   const [sort, setSort] = useState<Props['initial']['sort']>(initial.sort);
   const [pageSize, setPageSize] = useState<Props['initial']['pageSize']>(initial.pageSize);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
+
+  const openItem = (inventoryItemId: string) => {
+    router.push(`/ops/fundraising/items/${inventoryItemId}`);
+  };
 
   const page = initial.page;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
@@ -245,7 +248,6 @@ export function DonationCatalogAdmin({ inventoryItems, catalogInventoryItemIds, 
               <TableHead className="text-right">Priority</TableHead>
               <TableHead className="text-right">Status</TableHead>
               <TableHead className="text-right">Stripe</TableHead>
-              <TableHead className="text-right">Open</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -258,38 +260,47 @@ export function DonationCatalogAdmin({ inventoryItems, catalogInventoryItemIds, 
               const stock = item.metrics.currentStock;
 
               return (
-              <TableRow key={item.id} className={cn(!item.isActive && 'opacity-70')}>
-                <TableCell className="font-medium">
-                  <Link href={`/ops/fundraising/items/${item.inventoryItemId}`} className="hover:underline">
+                <TableRow
+                  key={item.id}
+                  role="link"
+                  tabIndex={0}
+                  aria-label={`Open ${item.title} catalogue item`}
+                  onClick={() => openItem(item.inventoryItemId)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      openItem(item.inventoryItemId);
+                    }
+                  }}
+                  className={cn(
+                    !item.isActive && 'opacity-70',
+                    'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                  )}
+                >
+                  <TableCell className="font-medium text-foreground">
                     {item.title}
-                  </Link>
-                  <div className="mt-1 text-xs text-muted-foreground">/{item.slug}</div>
-                </TableCell>
-                <TableCell>{item.category ?? '—'}</TableCell>
-                <TableCell className="text-right">{stock === null ? '—' : stock.toLocaleString()}</TableCell>
-                <TableCell className="text-right">{need.targetBuffer === null ? '—' : need.targetBuffer.toLocaleString()}</TableCell>
-                <TableCell className="text-right">{need.shortBy === null ? '—' : need.shortBy.toLocaleString()}</TableCell>
-                <TableCell className="text-right">{need.needPct === null ? '—' : `${Math.round(need.needPct * 100)}%`}</TableCell>
-                <TableCell className="text-right">{item.priority.toLocaleString()}</TableCell>
-                <TableCell className="text-right">
-                  <span>{item.isActive ? 'Active' : 'Hidden'}</span>
-                </TableCell>
-                <TableCell className="text-right">
-                  <span>
-                    {item.stripePriceId ? 'Synced' : 'Missing'}
-                  </span>
-                </TableCell>
-                <TableCell className="text-right">
-                  <Button asChild size="sm" variant="outline">
-                    <Link href={`/ops/fundraising/items/${item.inventoryItemId}`}>Open</Link>
-                  </Button>
-                </TableCell>
-              </TableRow>
+                    <div className="mt-1 text-xs text-muted-foreground">/{item.slug}</div>
+                  </TableCell>
+                  <TableCell>{item.category ?? '—'}</TableCell>
+                  <TableCell className="text-right">{stock === null ? '—' : stock.toLocaleString()}</TableCell>
+                  <TableCell className="text-right">{need.targetBuffer === null ? '—' : need.targetBuffer.toLocaleString()}</TableCell>
+                  <TableCell className="text-right">{need.shortBy === null ? '—' : need.shortBy.toLocaleString()}</TableCell>
+                  <TableCell className="text-right">{need.needPct === null ? '—' : `${Math.round(need.needPct * 100)}%`}</TableCell>
+                  <TableCell className="text-right">{item.priority.toLocaleString()}</TableCell>
+                  <TableCell className="text-right">
+                    <span>{item.isActive ? 'Active' : 'Hidden'}</span>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <span>
+                      {item.stripePriceId ? 'Synced' : 'Missing'}
+                    </span>
+                  </TableCell>
+                </TableRow>
               );
             })}
             {items.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={10} className="py-8 text-center text-sm text-muted-foreground">
+                <TableCell colSpan={9} className="py-8 text-center text-sm text-muted-foreground">
                   No catalogue items match your filters.
                 </TableCell>
               </TableRow>

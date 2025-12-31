@@ -127,22 +127,25 @@ function ScheduleView({ shifts }: { shifts: Array<{ id: string; title: string; l
 
 function ProgramCard({ program, highlight }: { program: { id: string; title: string; location: string; startsAt: string; endsAt: string }; highlight?: boolean }) {
   return (
-    <Card className={cn('h-full border-border/60', highlight && 'ring-1 ring-primary/40')}>
-      <CardHeader className="space-y-1">
-        <div className="flex items-center justify-between gap-2">
-          <CardTitle className="text-lg truncate">{program.title}</CardTitle>
-          <span>Today</span>
-        </div>
-        <CardDescription>{program.location}</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-3 text-sm text-foreground/80">
-        <p>
-          {program.startsAt} – {program.endsAt}
-        </p>
-        <Button asChild className="w-full">
-          <Link href={`/ops/programs/${program.id}?view=overview`}>Open program</Link>
-        </Button>
-      </CardContent>
-    </Card>
+    <Link
+      href={`/ops/programs/${program.id}?view=overview`}
+      className="block h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      aria-label={`Open program ${program.title}`}
+    >
+      <Card className={cn('h-full border-border/60', highlight && 'ring-1 ring-primary/40')}>
+        <CardHeader className="space-y-1">
+          <div className="flex items-center justify-between gap-2">
+            <CardTitle className="text-lg truncate">{program.title}</CardTitle>
+            <span>Today</span>
+          </div>
+          <CardDescription>{program.location}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm text-foreground/80">
+          <p>
+            {program.startsAt} – {program.endsAt}
+          </p>
+        </CardContent>
+      </Card>
+    </Link>
   );
 }

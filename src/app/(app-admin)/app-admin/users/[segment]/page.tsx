@@ -7,7 +7,6 @@ import { coerceSegment, fetchAdminUsers, fetchAdminUserSummary, parsePageParam, 
 import { getAffiliationStatuses, getGlobalRoles, getOrgRoleNames, toOptions, formatEnumLabel } from '@/lib/enum-values';
 import { PageHeader } from '@shared/layout/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
-import { Button } from '@shared/ui/button';
 import { UserFilterBar } from '@workspace/admin/users/user-filter-bar';
 import { UserSavedSearches } from '../user-saved-searches';
 import { UserPeekSheet } from '../user-peek-sheet';
@@ -139,7 +138,12 @@ export default async function AdminUsersSegmentPage({ params, searchParams }: Pa
           list.items.map((user) => {
             const combinedRoles = new Set([...(user.roles.global ?? []), ...(user.roles.org ?? [])]);
             return (
-              <Card key={user.profileId} className="border-border/60">
+              <Card key={user.profileId} className="relative border-border/60">
+                <Link
+                  href={`/app-admin/users/profile/${user.profileId}`}
+                  className="absolute inset-0 z-10 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  aria-label={`Open profile for ${user.displayName}`}
+                />
                 <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                   <div className="space-y-1">
                     <CardTitle className="text-lg">{user.displayName}</CardTitle>
@@ -159,11 +163,8 @@ export default async function AdminUsersSegmentPage({ params, searchParams }: Pa
                       ))}
                     </div>
                   </div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="relative z-20 flex flex-wrap gap-2">
                     <UserPeekSheet user={user} />
-                    <Button asChild variant="outline" size="sm">
-                      <Link href={`/app-admin/users/profile/${user.profileId}`}>Open profile</Link>
-                    </Button>
                   </div>
                 </CardHeader>
                 <CardContent className="text-xs text-muted-foreground">
