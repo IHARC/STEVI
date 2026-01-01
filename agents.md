@@ -71,7 +71,7 @@ Use Supabase MCP tools exclusively for database work. CLI guidance does not appl
 - If clutter becomes an issue, archive old migrations in-repo (e.g., `supabase/migrations/archive/`), but keep them in git.
 
 ### Authorization model
-- `PortalAccess` (`src/lib/portal-access.ts`) derives capability flags only from `get_user_roles` + `ensurePortalProfile`. Never rely on JWT/app_metadata fallbacks or UI hiding alone.
+- `PortalAccess` (`src/lib/portal-access/index.ts`) derives capability flags only from `get_user_roles` + `ensurePortalProfile`. Never rely on JWT/app_metadata fallbacks or UI hiding alone.
 
 ### Audit/rate limits
 - Route every mutation through `logAuditEvent`.

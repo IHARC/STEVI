@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useActionState, useMemo, useState } from 'react';
 import { Button } from '@shared/ui/button';
 import { Checkbox } from '@shared/ui/checkbox';
 import { Label } from '@shared/ui/label';
@@ -9,6 +9,7 @@ import { Textarea } from '@shared/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@shared/ui/radio-group';
 import { choiceCardVariants } from '@shared/ui/choice-card';
 import type { ConsentOrgSelection, ConsentScope } from '@/lib/consents';
+import type { ActionState } from '@/lib/server-actions/validate';
 
 type ConsentOverrideFormProps = {
   personId: number;
@@ -17,10 +18,14 @@ type ConsentOverrideFormProps = {
   preferredContactMethod: string | null;
   privacyRestrictions: string | null;
   policyVersion: string | null;
-  action: (formData: FormData) => Promise<void>;
+  action: (formData: FormData) => Promise<ActionState<{ message?: string }>>;
   submitLabel?: string;
   className?: string;
 };
+
+type ConsentOverrideState = ActionState<{ message?: string }>;
+
+const initialState: ConsentOverrideState = { status: 'idle' };
 
 const CONTACT_OPTIONS = [
   { value: 'email', label: 'Email' },
@@ -76,6 +81,10 @@ function ConsentOverrideFormInner({
   submitLabel = 'Save override',
   className,
 }: ConsentOverrideFormProps) {
+  const [state, formAction] = useActionState(
+    (_prev: ConsentOverrideState, formData: FormData) => action(formData),
+    initialState,
+  );
   const [selectedScope, setSelectedScope] = useState<ConsentScope>(consentScope);
   const [allowedOrgIds, setAllowedOrgIds] = useState<Set<number>>(
     () => new Set(orgSelections.filter((org) => org.allowed).map((org) => org.id)),
@@ -84,6 +93,9 @@ function ConsentOverrideFormInner({
   const [consentMethod, setConsentMethod] = useState<string>('documented');
   const [staffAttested, setStaffAttested] = useState(false);
   const [clientAttested, setClientAttested] = useState(false);
+  const resolvedState = 'status' in state ? null : state;
+  const errorMessage = resolvedState && !resolvedState.ok ? resolvedState.error : null;
+  const successMessage = resolvedState && resolvedState.ok ? resolvedState.data?.message : null;
 
   const orgCount = orgSelections.length;
   const allOrgIds = useMemo(() => orgSelections.map((org) => org.id), [orgSelections]);
@@ -109,7 +121,7 @@ function ConsentOverrideFormInner({
   };
 
   return (
-    <form action={action} className={className ?? 'space-y-4'}>
+    <form action={formAction} className={className ?? 'space-y-4'}>
       <input type="hidden" name="person_id" value={personId} />
       <input type="hidden" name="consent_scope" value={selectedScope} />
       <input type="hidden" name="preferred_contact" value={preferredContact} />
@@ -263,6 +275,8 @@ function ConsentOverrideFormInner({
       <Button type="submit" className="w-full" disabled={!staffAttested || !clientAttested || requiresSelection}>
         {submitLabel}
       </Button>
+      {errorMessage ? <p className="text-xs text-destructive">{errorMessage}</p> : null}
+      {successMessage ? <p className="text-xs text-emerald-600">{successMessage}</p> : null}
     </form>
   );
 }

@@ -48,6 +48,12 @@ function formatTimestamp(value: string) {
 
 export function CfsAttachmentsCard({ cfsId, attachments, canUpload, canDelete }: CfsAttachmentsCardProps) {
   const [state, formAction] = useActionState(uploadCfsAttachmentAction, initialCfsAttachmentActionState);
+  const resolvedState = 'status' in state ? null : state;
+  const errorMessage = resolvedState && !resolvedState.ok ? resolvedState.error : null;
+  const successMessage = resolvedState && resolvedState.ok ? resolvedState.data?.message : null;
+  const handleDelete = async (formData: FormData) => {
+    await deleteCfsAttachmentAction(formData);
+  };
 
   return (
     <Card className="border-border/70">
@@ -56,17 +62,17 @@ export function CfsAttachmentsCard({ cfsId, attachments, canUpload, canDelete }:
         <CardDescription>Upload photos or documents tied to this call for service.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {state.status === 'error' ? (
+        {errorMessage ? (
           <Alert variant="destructive">
             <AlertTitle>Unable to upload</AlertTitle>
-            <AlertDescription>{state.message ?? 'Please try again.'}</AlertDescription>
+            <AlertDescription>{errorMessage}</AlertDescription>
           </Alert>
         ) : null}
 
-        {state.status === 'success' ? (
+        {successMessage ? (
           <Alert>
             <AlertTitle>Attachment uploaded</AlertTitle>
-            <AlertDescription>{state.message ?? 'The attachment is now available.'}</AlertDescription>
+            <AlertDescription>{successMessage}</AlertDescription>
           </Alert>
         ) : null}
 
@@ -93,7 +99,7 @@ export function CfsAttachmentsCard({ cfsId, attachments, canUpload, canDelete }:
                       </Button>
                     ) : null}
                     {canDelete ? (
-                      <form action={deleteCfsAttachmentAction}>
+                      <form action={handleDelete}>
                         <input type="hidden" name="cfs_id" value={cfsId} />
                         <input type="hidden" name="attachment_id" value={item.id} />
                         <Button size="sm" variant="destructive" type="submit">

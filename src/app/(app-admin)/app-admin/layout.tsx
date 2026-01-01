@@ -11,7 +11,7 @@ import { getBrandingAssetsWithClient } from '@/lib/marketing/branding';
 import { getUserNavigation } from '@shared/layout/user-nav';
 import { SettingsShell } from '@shared/layout/settings-shell';
 import type { SettingsNavGroup, SettingsNavItem } from '@shared/layout/settings-nav';
-import type { CommandPaletteItem } from '@/lib/portal-access';
+import type { CommandPaletteItem } from '@/lib/portal-ui-access';
 import '@/styles/theme.ops.css';
 
 export const dynamic = 'force-dynamic';

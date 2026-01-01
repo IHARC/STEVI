@@ -3,7 +3,7 @@ import { TopNav } from '@shared/layout/top-nav';
 import { AppNavigationDesktop } from '@shared/layout/app-navigation';
 import { SiteFooter } from '@shared/SiteFooter';
 import { ClientPreviewBanner } from '@shared/layout/client-preview-banner';
-import type { CommandPaletteItem } from '@/lib/portal-access';
+import type { CommandPaletteItem } from '@/lib/portal-ui-access';
 import type { NavSection } from '@/lib/nav-types';
 import type { PrimaryNavItem } from '@/lib/primary-nav';
 import type { ResolvedBrandingAssets } from '@/lib/marketing/branding';

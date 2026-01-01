@@ -159,6 +159,25 @@ describe('buildPortalNav', () => {
     expect(groupIds).toContain('organizations');
   });
 
+  it('shows org-scoped navigation for partner org users', () => {
+    const partnerAccess = {
+      ...baseAccess,
+      canAccessOpsOrg: true,
+      canManageConsents: true,
+      organizationId: 42,
+      organizationName: 'Partner Org',
+      profile: buildProfile({ affiliation_type: 'agency_partner' }),
+    } satisfies PortalAccess;
+
+    const sections = buildPortalNav(partnerAccess);
+    const sectionIds = sections.map((section) => section.id);
+    expect(sectionIds).toEqual(['ops_org_scoped']);
+
+    const consentsGroup = sections[0]?.groups.find((group) => group.id === 'consents');
+    const consentItemIds = consentsGroup?.items.map((item) => item.id) ?? [];
+    expect(consentItemIds).toContain('consent-record');
+  });
+
   it('never includes client portal sections in the ops shell', () => {
     const access = { ...baseAccess, canAccessOpsFrontline: true };
     const sectionIds = buildPortalNav(access).map((section) => section.id);

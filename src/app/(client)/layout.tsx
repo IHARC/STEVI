@@ -5,7 +5,7 @@ import { PortalAccessProvider } from '@shared/providers/portal-access-provider';
 import { PortalLayoutProvider } from '@shared/providers/portal-layout-provider';
 import { getPortalRequestContext } from '@shared/providers/portal-request-context';
 import { buildClientNav } from '@/lib/client-navigation';
-import { buildCommandPaletteItems } from '@/lib/portal-access';
+import { buildCommandPaletteItems } from '@/lib/portal-ui-access';
 import { resolveQuickActions, navAreaLabel } from '@/lib/portal-navigation';
 import { buildPrimaryNavItems } from '@/lib/primary-nav';
 import { getBrandingAssetsWithClient } from '@/lib/marketing/branding';

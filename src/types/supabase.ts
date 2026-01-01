@@ -12804,6 +12804,25 @@ export type Database = {
           success: boolean
         }[]
       }
+      complete_appointment_with_costs: {
+        Args: {
+          p_appointment_id: string
+          p_cost_amount: number
+          p_cost_category_id: string
+          p_created_by: string
+          p_currency: string
+          p_metadata: Json | null
+          p_outcome_notes: string | null
+          p_person_id: number
+          p_quantity: number
+          p_unit_cost: number
+          p_uom: string
+        }
+        Returns: {
+          appointment_id: string
+          cost_event_id: string
+        }[]
+      }
       current_organization_id: { Args: never; Returns: string }
       current_profile_id: { Args: never; Returns: string }
       normalize_phone: { Args: { value: string }; Returns: string }

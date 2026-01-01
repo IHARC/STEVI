@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useActionState, useMemo, useState } from 'react';
 import { updateConsentsAction, renewConsentAction, revokeConsentAction } from '@/lib/cases/actions';
 import type { ConsentHistoryEntry, ConsentSnapshot } from '@/lib/cases/types';
 import type { ConsentMethod, ConsentScope, ConsentStatus } from '@/lib/consents';
@@ -12,6 +12,7 @@ import { Textarea } from '@shared/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@shared/ui/radio-group';
 import { Checkbox } from '@shared/ui/checkbox';
 import { choiceCardVariants } from '@shared/ui/choice-card';
+import type { ActionState } from '@/lib/server-actions/validate';
 
 export type ConsentSettingsProps = {
   personId: number;
@@ -19,6 +20,10 @@ export type ConsentSettingsProps = {
   policyVersion: string | null;
   history: ConsentHistoryEntry[];
 };
+
+type ConsentActionState = ActionState<{ message?: string }>;
+
+const initialConsentState: ConsentActionState = { status: 'idle' };
 
 export function ConsentSettings({ personId, snapshot, policyVersion, history }: ConsentSettingsProps) {
   const allowedOrgs = snapshot.orgSelections.filter((org) => org.allowed);
@@ -260,6 +265,10 @@ function ConsentFormInner({
   privacyRestrictions: string;
   policyVersion: string | null;
 }) {
+  const [state, formAction] = useActionState(
+    (_prev: ConsentActionState, formData: FormData) => updateConsentsAction(formData),
+    initialConsentState,
+  );
   const [selectedScope, setSelectedScope] = useState<ConsentScope>(scope);
   const [allowedOrgIds, setAllowedOrgIds] = useState<Set<number>>(
     () => new Set(orgSelections.filter((org) => org.allowed).map((org) => org.id)),
@@ -270,6 +279,9 @@ function ConsentFormInner({
   const orgCount = orgSelections.length;
   const allOrgIds = useMemo(() => orgSelections.map((org) => org.id), [orgSelections]);
   const requiresSelection = selectedScope === 'selected_orgs' && allowedOrgIds.size === 0;
+  const resolvedState = 'status' in state ? null : state;
+  const errorMessage = resolvedState && !resolvedState.ok ? resolvedState.error : null;
+  const successMessage = resolvedState && resolvedState.ok ? resolvedState.data?.message : null;
 
   const handleScopeChange = (value: ConsentScope) => {
     setSelectedScope(value);
@@ -291,7 +303,7 @@ function ConsentFormInner({
   };
 
   return (
-    <form action={updateConsentsAction} className="space-y-6">
+    <form action={formAction} className="space-y-6">
       <input type="hidden" name="person_id" value={personId} />
       {policyVersion ? <input type="hidden" name="policy_version" value={policyVersion} /> : null}
       {consentId ? <input type="hidden" name="consent_id" value={consentId} /> : null}
@@ -426,27 +438,56 @@ function ConsentFormInner({
       <Button type="submit" className="w-fit px-6" disabled={!confirmChecked || requiresSelection}>
         Save preferences
       </Button>
+      {errorMessage ? (
+        <Alert variant="destructive">
+          <AlertTitle>Unable to save</AlertTitle>
+          <AlertDescription>{errorMessage}</AlertDescription>
+        </Alert>
+      ) : null}
+      {successMessage ? (
+        <Alert>
+          <AlertTitle>Preferences saved</AlertTitle>
+          <AlertDescription>{successMessage}</AlertDescription>
+        </Alert>
+      ) : null}
     </form>
   );
 }
 
 function RenewConsentForm({ consentId }: { consentId: string | null }) {
+  const [state, formAction] = useActionState(
+    (_prev: ConsentActionState, formData: FormData) => renewConsentAction(formData),
+    initialConsentState,
+  );
+  const resolvedState = 'status' in state ? null : state;
+  const errorMessage = resolvedState && !resolvedState.ok ? resolvedState.error : null;
+  const successMessage = resolvedState && resolvedState.ok ? resolvedState.data?.message : null;
+
   return (
-    <form action={renewConsentAction} className="space-y-3 rounded-2xl border border-border/30 bg-muted p-4">
+    <form action={formAction} className="space-y-3 rounded-2xl border border-border/30 bg-muted p-4">
       {consentId ? <input type="hidden" name="consent_id" value={consentId} /> : null}
       <p className="text-sm text-foreground/80">Extend your consent for another term without changing your selections.</p>
       <Button type="submit" disabled={!consentId} className="w-full">
         Renew consent
       </Button>
+      {errorMessage ? <p className="text-xs text-destructive">{errorMessage}</p> : null}
+      {successMessage ? <p className="text-xs text-emerald-600">{successMessage}</p> : null}
     </form>
   );
 }
 
 function RevokeConsentForm({ consentId }: { consentId: string | null }) {
   const [confirmChecked, setConfirmChecked] = useState(false);
+  const [state, formAction] = useActionState(
+    (_prev: ConsentActionState, formData: FormData) => revokeConsentAction(formData),
+    initialConsentState,
+  );
+  const resolvedState = 'status' in state ? null : state;
+  const errorMessage = resolvedState && !resolvedState.ok ? resolvedState.error : null;
+  const successMessage = resolvedState && resolvedState.ok ? resolvedState.data?.message : null;
 
   return (
-    <form action={revokeConsentAction} className="space-y-3 rounded-2xl border border-border/30 bg-muted p-4">
+    <form action={formAction} className="space-y-3 rounded-2xl border border-border/30 bg-muted p-4">
       {consentId ? <input type="hidden" name="consent_id" value={consentId} /> : null}
       <input type="hidden" name="revoke_confirm" value={confirmChecked ? 'on' : ''} />
       <p className="text-sm text-foreground/80">
@@ -459,6 +500,8 @@ function RevokeConsentForm({ consentId }: { consentId: string | null }) {
       <Button type="submit" variant="destructive" disabled={!consentId || !confirmChecked} className="w-full">
         Withdraw consent
       </Button>
+      {errorMessage ? <p className="text-xs text-destructive">{errorMessage}</p> : null}
+      {successMessage ? <p className="text-xs text-emerald-600">{successMessage}</p> : null}
     </form>
   );
 }

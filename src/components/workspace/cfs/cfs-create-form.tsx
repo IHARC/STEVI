@@ -70,6 +70,8 @@ export function CfsCreateForm({ organizations, canPublicTrack }: CfsCreateFormPr
   const [publicTrackingEnabled, setPublicTrackingEnabled] = useState(false);
   const [notifyChannel, setNotifyChannel] = useState<'email' | 'sms'>('email');
   const [formResetKey, setFormResetKey] = useState(0);
+  const resolvedState = 'status' in state ? null : state;
+  const errorMessage = resolvedState && !resolvedState.ok ? resolvedState.error : null;
 
   const handleNotifyToggle = (value: boolean) => {
     setNotifyEnabled(value);
@@ -91,10 +93,10 @@ export function CfsCreateForm({ organizations, canPublicTrack }: CfsCreateFormPr
 
   return (
     <form action={formAction} className="space-y-6">
-      {state.status === 'error' ? (
+      {errorMessage ? (
         <Alert variant="destructive">
           <AlertTitle>Unable to create call</AlertTitle>
-          <AlertDescription>{state.message ?? 'Please review the form and try again.'}</AlertDescription>
+          <AlertDescription>{errorMessage}</AlertDescription>
         </Alert>
       ) : null}
 

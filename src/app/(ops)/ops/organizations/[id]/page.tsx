@@ -1,14 +1,11 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
-import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
-import { loadPortalAccess } from '@/lib/portal-access';
-import { resolveLandingPath } from '@/lib/portal-navigation';
-import { extractOrgFeatureFlags, ORG_FEATURE_OPTIONS } from '@/lib/organizations';
-import { fetchOrgInvites, fetchOrgMembersWithRoles, fetchOrgRoles, type OrgInviteRecord } from '@/lib/org/fetchers';
-import { checkRateLimit, type RateLimitResult } from '@/lib/rate-limit';
-import { ensurePortalProfile } from '@/lib/profile';
-import { fetchCostCategories, fetchCostDimensions, fetchServiceCatalog, fetchStaffRates } from '@/lib/costs/queries';
+import { ORG_FEATURE_OPTIONS } from '@/lib/organizations';
+import { loadOrganizationDetailContext, type OrganizationDetailContext, type OrganizationRow } from '@/lib/organizations/loaders';
+import { buildOrganizationDetailViewModel } from '@/lib/organizations/view-model';
+import type { OrgInviteRecord, OrgMemberRecord, OrgRoleRecord } from '@/lib/org/fetchers';
+import type { RateLimitResult } from '@/lib/rate-limit';
+import { formatDateTime } from '@/lib/formatters/datetime';
 import { PageHeader } from '@shared/layout/page-header';
 import { Button } from '@shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
@@ -18,14 +15,11 @@ import { NativeCheckbox } from '@shared/ui/native-checkbox';
 import { NativeSelect } from '@shared/ui/native-select';
 import { Separator } from '@shared/ui/separator';
 import { Textarea } from '@shared/ui/textarea';
-import type { Database } from '@/types/supabase';
 import { OrgMembersTable } from '../../org/members/org-members-table';
 import { InviteSheet } from '../../org/invites/invite-sheet';
-import { ORG_INVITE_EVENT, ORG_INVITE_RATE_LIMIT } from '../../org/invites/constants';
 import { OrgContactSettingsForm, OrgNotesSettingsForm } from '../../org/settings/org-settings-form';
 import { attachOrgMemberAction, deleteOrganizationAction, updateOrganizationAction } from '../actions';
 import { confirmAppointment, cancelAppointmentAsStaff } from '@/lib/appointments/actions';
-import { fetchScopedAppointments } from '@/lib/appointments/queries';
 import type { AppointmentWithRelations } from '@/lib/appointments/types';
 import { toLocalDateTimeInput } from '@/lib/datetime';
 import { AvailabilityPicker } from '@workspace/appointments/availability-picker';
@@ -37,14 +31,10 @@ import { CostSettingsTab } from '@workspace/costs/cost-settings-tab';
 
 export const dynamic = 'force-dynamic';
 
-type OrganizationRow = Database['core']['Tables']['organizations']['Row'];
-
 type PageProps = {
   params: Promise<{ id: string }>;
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
-
-type OrgTab = 'overview' | 'settings' | 'members' | 'invites' | 'appointments' | 'costs';
 
 const STATUS_OPTIONS: Array<OrganizationRow['status']> = ['active', 'inactive', 'pending', 'under_review'];
 const ORG_TYPE_OPTIONS: Array<NonNullable<OrganizationRow['organization_type']>> = [
@@ -72,162 +62,45 @@ const PARTNERSHIP_OPTIONS: Array<NonNullable<OrganizationRow['partnership_type']
   'other',
 ];
 
-const INVITE_DATE_FORMATTER = new Intl.DateTimeFormat('en-CA', { dateStyle: 'medium', timeStyle: 'short' });
-const APPOINTMENT_FORMATTER = new Intl.DateTimeFormat('en-CA', { dateStyle: 'medium', timeStyle: 'short' });
-
-function coerceTab(value: string | string[] | undefined): OrgTab {
-  const tab = Array.isArray(value) ? value[0] : value;
-  switch (tab) {
-    case 'settings':
-    case 'members':
-    case 'invites':
-    case 'appointments':
-    case 'costs':
-      return tab;
-    case 'overview':
-    default:
-      return 'overview';
-  }
-}
-
-function formatInviteDate(value: string) {
-  try {
-    return INVITE_DATE_FORMATTER.format(new Date(value));
-  } catch {
-    return value;
-  }
-}
-
-function formatAppointmentDate(value: string | null) {
-  if (!value) return 'Not scheduled yet';
-  try {
-    return APPOINTMENT_FORMATTER.format(new Date(value));
-  } catch {
-    return value;
-  }
-}
-
-function tabHref(orgId: number, tab: OrgTab) {
-  if (tab === 'overview') return `/ops/organizations/${orgId}`;
-  return `/ops/organizations/${orgId}?tab=${tab}`;
-}
-
 export default async function OrganizationDetailPage({ params, searchParams }: PageProps) {
   const { id } = await params;
-  const organizationId = Number.parseInt(id, 10);
-
-  if (!Number.isFinite(organizationId)) {
-    redirect('/ops/organizations');
-  }
-
-  const supabase = await createSupabaseRSCClient();
-  const access = await loadPortalAccess(supabase);
-
-  if (!access) {
-    redirect(`/auth/start?next=/ops/organizations/${organizationId}`);
-  }
-
   const resolvedSearch = searchParams ? await searchParams : undefined;
-  const tab = coerceTab(resolvedSearch?.tab);
-
-  const isIharcAdmin = access.isGlobalAdmin;
-  const isInternalIharc = access.isIharcMember || access.isGlobalAdmin;
-  const isAgencyPartner = access.profile.affiliation_type === 'agency_partner';
-  const isOwnOrg = access.organizationId !== null && access.organizationId === organizationId;
-  const orgRoleNames = access.orgRoles.map((role) => role.name);
-  const isOrgAdmin = orgRoleNames.includes('org_admin');
-  const isOrgRep = orgRoleNames.includes('org_rep');
-
-  const canViewThisOrg = isIharcAdmin || isInternalIharc || (access.isProfileApproved && isAgencyPartner && isOwnOrg);
-  if (!canViewThisOrg) {
-    redirect(resolveLandingPath(access));
-  }
-
-  const canEditFullOrgRecord = isIharcAdmin;
-  const canEditOrgSettings = isIharcAdmin || (isOwnOrg && access.canManageOrgUsers);
-  const canManageMembers = isIharcAdmin || (isOwnOrg && access.canManageOrgUsers);
-  const canManageInvites = isIharcAdmin || (isOwnOrg && access.canManageOrgInvites);
-  const canManageAppointments = isIharcAdmin || (isOwnOrg && (access.canAccessOpsOrg || access.canAccessOpsFrontline));
-  const canManageCosts = isIharcAdmin || (isOwnOrg && (access.canManageCosts || access.canAdminCosts));
-
-  const tabDefinitions = [
-    { id: 'overview', label: 'Overview' },
-    { id: 'settings', label: 'Settings', requires: canEditFullOrgRecord || canEditOrgSettings },
-    { id: 'members', label: 'Members', requires: canManageMembers },
-    { id: 'invites', label: 'Invites', requires: canManageInvites },
-    { id: 'appointments', label: 'Appointments', requires: canManageAppointments },
-    { id: 'costs', label: 'Costs', requires: canManageCosts },
-  ] satisfies Array<{ id: OrgTab; label: string; requires?: boolean }>;
-
-  const availableTabs = tabDefinitions.filter((entry) => entry.requires !== false);
-
-  if (!availableTabs.some((entry) => entry.id === tab)) {
-    redirect(tabHref(organizationId, 'overview'));
-  }
-
-  const { data: orgRow, error: orgError } = await supabase
-    .schema('core')
-    .from('organizations')
-    .select('*')
-    .eq('id', organizationId)
-    .maybeSingle();
-
-  if (orgError) throw orgError;
-  if (!orgRow) {
-    redirect('/ops/organizations');
-  }
-
-  const selectedFeatures = extractOrgFeatureFlags(orgRow.services_tags);
-  const shouldLoadAppointments = tab === 'appointments' && canManageAppointments;
-  const shouldLoadCosts = tab === 'costs' && canManageCosts;
-  const shouldLoadStaffRates = (shouldLoadCosts || shouldLoadAppointments) && access.canViewCosts;
-
-  const [members, roles, invites, inviteRateLimit, appointments, staffRates, costCategories, serviceCatalog, costDimensions] = await Promise.all([
-    tab === 'members' && canManageMembers ? fetchOrgMembersWithRoles(supabase, organizationId) : Promise.resolve(null),
-    tab === 'members' && canManageMembers ? fetchOrgRoles(supabase, organizationId) : Promise.resolve(null),
-    tab === 'invites' && canManageInvites ? fetchOrgInvites(supabase, organizationId, 50) : Promise.resolve(null),
-    tab === 'invites' && canManageInvites
-      ? checkRateLimit({
-          supabase,
-          type: ORG_INVITE_EVENT,
-          limit: ORG_INVITE_RATE_LIMIT.limit,
-          cooldownMs: ORG_INVITE_RATE_LIMIT.cooldownMs,
-        })
-      : Promise.resolve(null),
-    shouldLoadAppointments
-      ? (async () => {
-          await ensurePortalProfile(supabase, access.userId);
-          return fetchScopedAppointments(supabase, access, { includeCompleted: true, targetOrgId: organizationId });
-        })()
-      : Promise.resolve(null),
-    shouldLoadStaffRates ? fetchStaffRates(supabase, organizationId) : Promise.resolve(null),
-    shouldLoadCosts ? fetchCostCategories(supabase) : Promise.resolve(null),
-    shouldLoadCosts ? fetchServiceCatalog(supabase) : Promise.resolve(null),
-    shouldLoadCosts ? fetchCostDimensions(supabase) : Promise.resolve(null),
-  ]);
-
-  const orgName = orgRow.name ?? 'Organization';
-  const staffRoles = staffRates
-    ? Array.from(new Set(staffRates.map((rate) => rate.role_name))).sort((a, b) => a.localeCompare(b))
-    : [];
+  const context = await loadOrganizationDetailContext({ id, searchParams: resolvedSearch });
+  const viewModel = buildOrganizationDetailViewModel(context);
+  const { access, data, organizationId, tab } = context;
+  const {
+    organization,
+    members,
+    roles,
+    invites,
+    inviteRateLimit,
+    appointments,
+    staffRates,
+    costCategories,
+    serviceCatalog,
+    costDimensions,
+    selectedFeatures,
+  } = data;
+  const { isIharcAdmin, isOrgAdmin, isOrgRep, canEditFullOrgRecord, canEditOrgSettings, canManageCosts, canAdminCosts, currentProfileId } =
+    access;
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
         eyebrow="Operations"
-        title={orgName}
+        title={viewModel.orgName}
         description="Organization details, membership, invites, and org-scoped workflows. Access is scoped by role and Supabase RLS."
         breadcrumbs={[
           { label: 'Operations', href: '/ops/today' },
           { label: 'Organizations', href: '/ops/organizations' },
-          { label: orgName },
+          { label: viewModel.orgName },
         ]}
       >
         <div className="flex flex-wrap items-center gap-2">
           <span className="capitalize">
-            {(orgRow.status ?? 'active').replaceAll('_', ' ')}
+            {(organization.status ?? 'active').replaceAll('_', ' ')}
           </span>
-          <span>{orgRow.is_active ? 'Active' : 'Inactive'}</span>
+          <span>{organization.is_active ? 'Active' : 'Inactive'}</span>
           {isIharcAdmin ? <span>IHARC admin</span> : null}
           {!isIharcAdmin && isOrgAdmin ? <span>Org admin</span> : null}
           {!isIharcAdmin && !isOrgAdmin && isOrgRep ? <span>Org rep</span> : null}
@@ -235,17 +108,17 @@ export default async function OrganizationDetailPage({ params, searchParams }: P
       </PageHeader>
 
       <nav className="flex flex-wrap gap-2">
-        {availableTabs.map((entry) => (
-          <Button key={entry.id} asChild size="sm" variant={entry.id === tab ? 'default' : 'outline'}>
-            <Link href={tabHref(organizationId, entry.id)}>{entry.label}</Link>
+        {viewModel.tabs.map((entry) => (
+          <Button key={entry.id} asChild size="sm" variant={entry.isActive ? 'default' : 'outline'}>
+            <Link href={entry.href}>{entry.label}</Link>
           </Button>
         ))}
       </nav>
 
-      {tab === 'overview' ? <OverviewTab organization={orgRow} /> : null}
+      {tab === 'overview' ? <OverviewTab organization={organization} /> : null}
       {tab === 'settings' ? (
         <SettingsTab
-          organization={orgRow}
+          organization={organization}
           selectedFeatures={selectedFeatures}
           organizationId={organizationId}
           canEditFullOrgRecord={canEditFullOrgRecord}
@@ -257,7 +130,7 @@ export default async function OrganizationDetailPage({ params, searchParams }: P
           members={members}
           roles={roles}
           organizationId={organizationId}
-          currentProfileId={access.profile.id}
+          currentProfileId={currentProfileId}
           canEditFullOrgRecord={canEditFullOrgRecord}
         />
       ) : null}
@@ -271,8 +144,8 @@ export default async function OrganizationDetailPage({ params, searchParams }: P
       {tab === 'appointments' ? (
         <AppointmentsTab
           appointments={appointments}
-          organizationId={organizationId}
-          staffRoles={staffRoles}
+          overviewHref={viewModel.overviewHref}
+          staffRoles={viewModel.staffRoles}
         />
       ) : null}
       {tab === 'costs' ? (
@@ -281,8 +154,8 @@ export default async function OrganizationDetailPage({ params, searchParams }: P
           serviceCatalog={serviceCatalog}
           costCategories={costCategories}
           costDimensions={costDimensions}
-          canManageCosts={access.canManageCosts}
-          canAdminCosts={access.canAdminCosts}
+          canManageCosts={canManageCosts}
+          canAdminCosts={canAdminCosts}
         />
       ) : null}
     </div>
@@ -577,8 +450,8 @@ function MembersTab({
   currentProfileId,
   canEditFullOrgRecord,
 }: {
-  members: Awaited<ReturnType<typeof fetchOrgMembersWithRoles>> | null;
-  roles: Awaited<ReturnType<typeof fetchOrgRoles>> | null;
+  members: OrgMemberRecord[] | null;
+  roles: OrgRoleRecord[] | null;
   organizationId: number;
   currentProfileId: string;
   canEditFullOrgRecord: boolean;
@@ -710,7 +583,7 @@ function InvitesTab({
                       {invite.status}
                     </span>
                   </td>
-                  <td className="py-3 pr-4 text-muted-foreground">{formatInviteDate(invite.created_at)}</td>
+                  <td className="py-3 pr-4 text-muted-foreground">{formatDateTime(invite.created_at, invite.created_at)}</td>
                 </tr>
               ))}
             </tbody>
@@ -822,11 +695,11 @@ function ConfirmForm({
 
 function AppointmentsTab({
   appointments,
-  organizationId,
+  overviewHref,
   staffRoles,
 }: {
-  appointments: Awaited<ReturnType<typeof fetchScopedAppointments>> | null;
-  organizationId: number;
+  appointments: OrganizationDetailContext['data']['appointments'];
+  overviewHref: string;
   staffRoles: string[];
 }) {
   if (!appointments) {
@@ -841,7 +714,10 @@ function AppointmentsTab({
   }
 
   const handleConfirm = async (formData: FormData) => {
-    await confirmAppointment(formData);
+    const result = await confirmAppointment(formData);
+    if (!result.ok) {
+      throw new Error(result.error);
+    }
   };
 
   return (
@@ -852,7 +728,7 @@ function AppointmentsTab({
         description="Manage appointment requests linked to this organization and confirm times with clients."
         actions={
           <Button asChild variant="outline" size="sm">
-            <Link href={tabHref(organizationId, 'overview')}>Back to overview</Link>
+            <Link href={overviewHref}>Back to overview</Link>
           </Button>
         }
       />
@@ -907,7 +783,7 @@ function AppointmentsTab({
                   <div>
                     <p className="font-medium text-foreground">{appointment.title}</p>
                     <p className="text-xs text-muted-foreground">
-                      {appointment.client?.display_name ?? 'Client'} · {formatAppointmentDate(appointment.occurs_at)}
+                      {appointment.client?.display_name ?? 'Client'} · {formatDateTime(appointment.occurs_at, 'Not scheduled yet')}
                     </p>
                   </div>
                   <span className="capitalize">

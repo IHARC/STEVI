@@ -2,15 +2,11 @@ import type { AppIconName } from '@/lib/app-icons';
 import type { PortalAccess } from '@/lib/portal-access';
 import type { NavGroup, NavItem, NavSection } from '@/lib/nav-types';
 import type { PortalArea } from '@/lib/portal-areas';
+import { PORTAL_NAV_SECTIONS, type NavGroupData, type NavItemData, type NavSectionData } from '@/lib/portal-navigation.data';
+import { checkNavRule } from '@/lib/portal-navigation.rules';
+
 export type { PortalArea } from '@/lib/portal-areas';
 export { resolveLandingPath, inferPortalAreaFromPath } from '@/lib/portal-areas';
-
-type NavRule = (access: PortalAccess) => boolean;
-
-type NavItemDefinition = NavItem & { requires?: NavRule };
-type NavGroupDefinition = Omit<NavGroup, 'items'> & { items: NavItemDefinition[]; requires?: NavRule };
-type NavSectionDefinition = Omit<NavSection, 'groups'> & { groups: NavGroupDefinition[]; requires?: NavRule };
-
 export type { NavItem, NavGroup, NavSection } from '@/lib/nav-types';
 
 export type QuickAction = {
@@ -23,298 +19,15 @@ export type QuickAction = {
   disabledReason?: string;
 };
 
-const canSeeFrontline = (access: PortalAccess) => access.canAccessOpsFrontline;
-const canSeeClients = (access: PortalAccess) => access.canAccessOpsFrontline || access.canManageConsents;
-const canSeePrograms = (access: PortalAccess) => access.canAccessOpsFrontline || access.canAccessOpsAdmin;
-const canSeeInventory = (access: PortalAccess) => access.canAccessInventoryOps;
-const canSeeFundraising = (access: PortalAccess) => access.canAccessOpsSteviAdmin;
-const canSeeReports = (access: PortalAccess) =>
-  access.canReportCosts ||
-  access.canViewMetrics ||
-  (access.organizationFeatures.includes('calls_for_service') && access.canAccessCfs);
-const canSeeTimeTracking = (access: PortalAccess) =>
-  access.organizationFeatures.includes('time_tracking') &&
-  (access.canTrackTime || access.canViewAllTime || access.canManageTime);
-const canSeeCfs = (access: PortalAccess) =>
-  access.organizationFeatures.includes('calls_for_service') && access.canAccessCfs;
-const canSeeOrganizations = (access: PortalAccess) =>
-  access.canAccessOpsFrontline || access.canAccessOpsOrg || access.canAccessOpsAdmin || access.canAccessOpsSteviAdmin;
-const canSeeOrgScopedOrganizations = (access: PortalAccess) =>
-  access.canAccessOpsOrg && access.profile.affiliation_type === 'agency_partner' && !access.isIharcMember && !access.isGlobalAdmin;
-const NAV_SECTIONS: NavSectionDefinition[] = [
-  {
-    id: 'ops_frontline',
-    label: 'Operations',
-    description: 'Frontline tools for staff, volunteers, and admins',
-    area: 'ops_frontline',
-    requires: canSeeFrontline,
-    groups: [
-      {
-        id: 'today',
-        label: 'Today',
-        icon: 'dashboard',
-        isHub: true,
-        items: [
-          { id: 'today', href: '/ops/today', label: 'Today', icon: 'dashboard', match: ['/ops/today'], exact: true },
-        ],
-      },
-      {
-        id: 'cfs',
-        label: 'Calls for service',
-        icon: 'workflow',
-        requires: canSeeCfs,
-        isHub: true,
-        items: [
-          {
-            id: 'cfs-queue',
-            href: '/ops/cfs',
-            label: 'Queue',
-            icon: 'workflow',
-            match: ['/ops/cfs'],
-          },
-          {
-            id: 'cfs-incidents',
-            href: '/ops/incidents',
-            label: 'Incidents',
-            match: ['/ops/incidents'],
-          },
-          {
-            id: 'cfs-new',
-            href: '/ops/cfs/new',
-            label: 'New call',
-            match: ['/ops/cfs/new'],
-          },
-        ],
-      },
-      {
-        id: 'clients',
-        label: 'Clients',
-        icon: 'users',
-        requires: canSeeClients,
-        isHub: true,
-        items: [
-          {
-            id: 'clients-directory',
-            href: '/ops/clients?view=directory',
-            label: 'Directory',
-            match: ['/ops/clients'],
-            query: { view: 'directory' },
-          },
-          {
-            id: 'clients-caseload',
-            href: '/ops/clients?view=caseload',
-            label: 'Caseload',
-            match: ['/ops/clients'],
-            query: { view: 'caseload' },
-          },
-          {
-            id: 'clients-activity',
-            href: '/ops/clients?view=activity',
-            label: 'Activity',
-            match: ['/ops/clients'],
-            query: { view: 'activity' },
-          },
-          {
-            id: 'clients-consents',
-            href: '/ops/consents',
-            label: 'Consent requests',
-            match: ['/ops/consents'],
-          },
-          {
-            id: 'clients-consents-record',
-            href: '/ops/consents/record',
-            label: 'Record consent',
-            match: ['/ops/consents/record'],
-            requires: (access) => access.canManageConsents,
-          },
-          {
-            id: 'clients-portal-preview',
-            href: '/home?preview=1',
-            label: 'Preview client portal',
-            match: ['/home'],
-            requires: (access) => access.canAccessOpsFrontline || access.canAccessOpsAdmin || access.canAccessOpsOrg,
-          },
-        ],
-      },
-      {
-        id: 'programs',
-        label: 'Programs',
-        icon: 'calendarRange',
-        requires: canSeePrograms,
-        isHub: true,
-        items: [
-          {
-            id: 'programs-overview',
-            href: '/ops/programs?view=overview',
-            label: 'Overview',
-            match: ['/ops/programs'],
-            query: { view: 'overview' },
-          },
-          {
-            id: 'programs-schedule',
-            href: '/ops/programs?view=schedule',
-            label: 'Schedule',
-            match: ['/ops/programs'],
-            query: { view: 'schedule' },
-          },
-        ],
-      },
-      {
-        id: 'time',
-        label: 'Time tracking',
-        icon: 'clock',
-        requires: canSeeTimeTracking,
-        isHub: true,
-        items: [
-          {
-            id: 'timecards',
-            href: '/ops/time',
-            label: 'Timecards',
-            icon: 'clock',
-            match: ['/ops/time'],
-          },
-        ],
-      },
-      {
-        id: 'reports',
-        label: 'Reports',
-        icon: 'chart',
-        requires: canSeeReports,
-        isHub: true,
-        items: [
-          {
-            id: 'reports-costs',
-            href: '/ops/reports/costs',
-            label: 'Costs',
-            icon: 'chart',
-            match: ['/ops/reports/costs'],
-            requires: (access) => access.canReportCosts,
-          },
-          {
-            id: 'reports-cfs',
-            href: '/ops/reports/cfs',
-            label: 'CFS',
-            icon: 'chart',
-            match: ['/ops/reports/cfs'],
-            requires: (access) => access.canAccessCfs,
-          },
-        ],
-      },
-      {
-        id: 'inventory',
-        label: 'Inventory',
-        icon: 'boxes',
-        requires: canSeeInventory,
-        isHub: true,
-        items: [
-          {
-            id: 'inventory-dashboard',
-            href: '/ops/inventory?view=dashboard',
-            label: 'Dashboard',
-            match: ['/ops/inventory'],
-            query: { view: 'dashboard' },
-          },
-          {
-            id: 'inventory-items',
-            href: '/ops/inventory?view=items',
-            label: 'Items',
-            match: ['/ops/inventory'],
-            query: { view: 'items' },
-          },
-          {
-            id: 'inventory-locations',
-            href: '/ops/inventory?view=locations',
-            label: 'Locations',
-            match: ['/ops/inventory'],
-            query: { view: 'locations' },
-          },
-          {
-            id: 'inventory-receipts',
-            href: '/ops/inventory?view=receipts',
-            label: 'Receipts',
-            match: ['/ops/inventory'],
-            query: { view: 'receipts' },
-          },
-        ],
-      },
-      {
-        id: 'fundraising',
-        label: 'Fundraising',
-        icon: 'handHeart',
-        requires: canSeeFundraising,
-        isHub: true,
-        items: [
-          { id: 'fundraising', href: '/ops/fundraising', label: 'Fundraising', icon: 'handHeart', match: ['/ops/fundraising'] },
-        ],
-      },
-      {
-        id: 'organizations',
-        label: 'Organizations',
-        icon: 'building',
-        requires: canSeeOrganizations,
-        isHub: true,
-        items: [
-          { id: 'organizations', href: '/ops/organizations', label: 'Organizations', icon: 'building', match: ['/ops/organizations'] },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'ops_org_scoped',
-    label: 'Organizations',
-    description: 'Organization settings and membership for partner teams',
-    area: 'ops_frontline',
-    requires: canSeeOrgScopedOrganizations,
-    groups: [
-      {
-        id: 'organizations',
-        label: 'Organizations',
-        icon: 'building',
-        isHub: true,
-        items: [
-          {
-            id: 'organizations',
-            href: '/ops/organizations',
-            label: 'Organizations',
-            icon: 'building',
-            match: ['/ops/organizations'],
-          },
-        ],
-      },
-      {
-        id: 'consents',
-        label: 'Consents',
-        icon: 'shield',
-        isHub: true,
-        items: [
-          {
-            id: 'consent-requests',
-            href: '/ops/consents',
-            label: 'Consent requests',
-            match: ['/ops/consents'],
-          },
-          {
-            id: 'consent-record',
-            href: '/ops/consents/record',
-            label: 'Record consent',
-            match: ['/ops/consents/record'],
-            requires: (access) => access.canManageConsents,
-          },
-        ],
-      },
-    ],
-  },
-];
-
-function filterItems(items: NavItemDefinition[], access: PortalAccess): NavItem[] {
+function filterItems(items: NavItemData[], access: PortalAccess): NavItem[] {
   return items
-    .filter((item) => !item.requires || item.requires(access))
+    .filter((item) => checkNavRule(access, item.requires))
     .map(({ requires: _requires, ...item }) => item);
 }
 
-function filterGroups(groups: NavGroupDefinition[], access: PortalAccess): NavGroup[] {
+function filterGroups(groups: NavGroupData[], access: PortalAccess): NavGroup[] {
   return groups
-    .filter((group) => !group.requires || group.requires(access))
+    .filter((group) => checkNavRule(access, group.requires))
     .map((group) => ({
       id: group.id,
       label: group.label,
@@ -329,8 +42,8 @@ function filterGroups(groups: NavGroupDefinition[], access: PortalAccess): NavGr
 export function buildPortalNav(access: PortalAccess | null): NavSection[] {
   if (!access) return [];
 
-  return NAV_SECTIONS
-    .filter((section) => !section.requires || section.requires(access))
+  return (PORTAL_NAV_SECTIONS as NavSectionData[])
+    .filter((section) => checkNavRule(access, section.requires))
     .map((section) => ({
       id: section.id,
       label: section.label,

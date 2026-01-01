@@ -1,7 +1,8 @@
 import { fetchClientAppointments } from '@/lib/appointments/queries';
 import { fetchStaffCases } from '@/lib/cases/fetchers';
 import type { SupabaseAnyServerClient } from '@/lib/supabase/types';
-import type { CommandPaletteItem, PortalAccess } from '@/lib/portal-access';
+import type { PortalAccess } from '@/lib/portal-access';
+import type { CommandPaletteItem } from '@/lib/portal-ui-access';
 import type { Database } from '@/types/supabase';
 
 type PeopleListItem = Database['core']['Tables']['people']['Row'] & {

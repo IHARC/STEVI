@@ -8,10 +8,11 @@ import { PageHeader } from '@shared/layout/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Button } from '@shared/ui/button';
 import { Input } from '@shared/ui/input';
-import { Textarea } from '@shared/ui/textarea';
 import { Label } from '@shared/ui/label';
+import { Textarea } from '@shared/ui/textarea';
 import { ConsentOverrideForm } from '@workspace/admin/consents/consent-override-form';
-import { adminOverrideConsentAction, adminRenewConsentAction, adminRevokeConsentAction } from '@/lib/cases/actions';
+import { adminOverrideConsentAction } from '@/lib/cases/actions';
+import { AdminConsentActions } from '@/components/workspace/admin/consents/admin-consent-actions';
 import { approveConsentRequestAction, denyConsentRequestAction } from './actions';
 
 export const dynamic = 'force-dynamic';
@@ -278,48 +279,7 @@ export default async function AdminConsentsPage({ searchParams }: PageProps) {
                 />
 
                 {consentSummary?.consent ? (
-                  <div className="grid gap-2">
-                    <form action={adminRenewConsentAction} className="space-y-2">
-                      <input type="hidden" name="person_id" value={person.id} />
-                      <input type="hidden" name="consent_id" value={consentSummary.consent.id} />
-                      <div className="space-y-1">
-                        <Label htmlFor={`renew_method_${person.id}`} className="text-xs">
-                          Consent method
-                        </Label>
-                        <select
-                          id={`renew_method_${person.id}`}
-                          name="consent_method"
-                          defaultValue="verbal"
-                          className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                        >
-                          <option value="verbal">Verbal</option>
-                          <option value="documented">Documented</option>
-                          <option value="staff_assisted">Staff assisted</option>
-                        </select>
-                      </div>
-                      <div className="space-y-2 rounded-2xl border border-border/40 bg-muted/30 p-3 text-xs text-foreground">
-                        <p className="font-semibold">Required attestations</p>
-                        <label className="flex items-start gap-2">
-                          <input type="checkbox" name="attested_by_staff" required className="mt-1 h-4 w-4" />
-                          <span>I confirm the client was present and consent was explained in plain language.</span>
-                        </label>
-                        <label className="flex items-start gap-2">
-                          <input type="checkbox" name="attested_by_client" required className="mt-1 h-4 w-4" />
-                          <span>The client confirms they understand and agree to these sharing selections.</span>
-                        </label>
-                      </div>
-                      <Button type="submit" variant="outline" className="w-full">
-                        Renew consent
-                      </Button>
-                    </form>
-                    <form action={adminRevokeConsentAction} className="space-y-2">
-                      <input type="hidden" name="person_id" value={person.id} />
-                      <input type="hidden" name="consent_id" value={consentSummary.consent.id} />
-                      <Button type="submit" variant="destructive" className="w-full">
-                        Revoke consent
-                      </Button>
-                    </form>
-                  </div>
+                  <AdminConsentActions personId={person.id} consentId={consentSummary.consent.id} />
                 ) : null}
               </div>
             ) : null}

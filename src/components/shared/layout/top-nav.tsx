@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 import { useOptionalPortalLayout } from '@shared/providers/portal-layout-provider';
 import { usePortalAccess } from '@shared/providers/portal-access-provider';
 import { BrandLogo } from '@shared/branding/brand-logo';
-import type { CommandPaletteItem } from '@/lib/portal-access';
+import type { CommandPaletteItem } from '@/lib/portal-ui-access';
 import type { ResolvedBrandingAssets } from '@/lib/marketing/branding';
 import type { UserNavigation } from '@shared/layout/user-nav';
 import type { NavSection } from '@/lib/portal-navigation';

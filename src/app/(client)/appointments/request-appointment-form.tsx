@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@shared/ui/select';
-import type { AppointmentRequestState } from './types';
+import type { ActionState } from '@/lib/server-actions/validate';
 
 type RequestAppointmentFormProps = {
   action: (
@@ -24,6 +24,8 @@ type RequestAppointmentFormProps = {
   ) => Promise<AppointmentRequestState>;
   profileDisplayName: string | null | undefined;
 };
+
+type AppointmentRequestState = ActionState<{ message?: string }>;
 
 type RequestAppointmentValues = {
   reason: string;
@@ -47,6 +49,9 @@ export function RequestAppointmentForm({ action, profileDisplayName }: RequestAp
     },
   });
   const profileLabel = profileDisplayName ?? 'your profile';
+  const resolvedState = 'status' in state ? null : state;
+  const successMessage = resolvedState && resolvedState.ok ? resolvedState.data?.message : null;
+  const errorMessage = resolvedState && !resolvedState.ok ? resolvedState.error : null;
 
   return (
     <Form {...form}>
@@ -169,16 +174,16 @@ export function RequestAppointmentForm({ action, profileDisplayName }: RequestAp
           aria-live="polite"
           className="space-y-2 text-sm"
         >
-          {state.status === 'success' ? (
+          {successMessage ? (
             <Alert variant="default" className="border-primary/30 bg-primary/10 text-primary">
               <AlertTitle>Request sent</AlertTitle>
-              <AlertDescription>{state.message ?? 'We will contact you with a time.'}</AlertDescription>
+              <AlertDescription>{successMessage}</AlertDescription>
             </Alert>
           ) : null}
-          {state.status === 'error' ? (
+          {errorMessage ? (
             <Alert variant="destructive">
               <AlertTitle>Unable to send request</AlertTitle>
-              <AlertDescription>{state.message ?? 'Try again shortly.'}</AlertDescription>
+              <AlertDescription>{errorMessage}</AlertDescription>
             </Alert>
           ) : null}
         </div>

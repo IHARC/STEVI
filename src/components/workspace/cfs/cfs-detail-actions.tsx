@@ -35,6 +35,7 @@ import {
   updateCfsStatusAction,
   verifyCfsAction,
 } from '@/app/(ops)/ops/cfs/actions';
+import type { CfsActionState } from '@/app/(ops)/ops/cfs/actions';
 
 export type CfsDetailActionsProps = {
   cfsId: number;
@@ -61,9 +62,11 @@ export type CfsDetailActionsProps = {
   sharedAccess: Array<{ organization_id: number; access_level: string; is_active: boolean }>;
 };
 
-function ActionFeedback({ status, message }: { status: string; message?: string }) {
+function ActionFeedback({ state }: { state: CfsActionState }) {
+  if ('status' in state) return null;
+  const message = state.ok ? state.data?.message : state.error;
   if (!message) return null;
-  const tone = status === 'error' ? 'text-destructive' : 'text-emerald-600';
+  const tone = state.ok ? 'text-emerald-600' : 'text-destructive';
   return <p className={`text-xs ${tone}`}>{message}</p>;
 }
 
@@ -158,7 +161,7 @@ export function CfsDetailActions({
                 <Textarea id="triage_notes" name="phase_notes" />
               </div>
               <div className="md:col-span-2 flex justify-between items-center">
-                <ActionFeedback status={triageState.status} message={triageState.message} />
+                <ActionFeedback state={triageState} />
                 <Button type="submit">Save triage</Button>
               </div>
             </form>
@@ -200,7 +203,7 @@ export function CfsDetailActions({
                 <Textarea id="verify_notes" name="verification_notes" defaultValue={verificationNotes ?? ''} />
               </div>
               <div className="md:col-span-2 flex justify-between items-center">
-                <ActionFeedback status={verifyState.status} message={verifyState.message} />
+                <ActionFeedback state={verifyState} />
                 <Button type="submit">Save verification</Button>
               </div>
             </form>
@@ -252,7 +255,7 @@ export function CfsDetailActions({
                   <Textarea id="dispatch_notes" name="dispatch_notes" />
                 </div>
                 <div className="md:col-span-2 flex justify-between items-center">
-                  <ActionFeedback status={convertState.status} message={convertState.message} />
+                  <ActionFeedback state={convertState} />
                   <Button type="submit">Convert to incident</Button>
                 </div>
               </form>
@@ -285,7 +288,7 @@ export function CfsDetailActions({
                 <Textarea id="status_notes" name="status_notes" placeholder="Add a quick update for the timeline." />
               </div>
               <div className="md:col-span-2 flex justify-between items-center">
-                <ActionFeedback status={statusState.status} message={statusState.message} />
+                <ActionFeedback state={statusState} />
                 <Button type="submit" variant="outline">Update status</Button>
               </div>
             </form>
@@ -317,7 +320,7 @@ export function CfsDetailActions({
                 <Textarea id="resolution_notes" name="resolution_notes" />
               </div>
               <div className="md:col-span-2 flex justify-between items-center">
-                <ActionFeedback status={dismissState.status} message={dismissState.message} />
+                <ActionFeedback state={dismissState} />
                 <Button type="submit">Close call</Button>
               </div>
             </form>
@@ -333,7 +336,7 @@ export function CfsDetailActions({
                 <Textarea id="duplicate_notes" name="duplicate_notes" />
               </div>
               <div className="md:col-span-2 flex justify-between items-center">
-                <ActionFeedback status={duplicateState.status} message={duplicateState.message} />
+                <ActionFeedback state={duplicateState} />
                 <Button type="submit" variant="outline">Mark duplicate</Button>
               </div>
             </form>
@@ -374,7 +377,7 @@ export function CfsDetailActions({
                 <Textarea id="public_summary" name="public_summary" defaultValue={publicTrackingSummary ?? ''} />
               </div>
               <div className="md:col-span-2 flex justify-between items-center">
-                <ActionFeedback status={publicEnableState.status} message={publicEnableState.message} />
+                <ActionFeedback state={publicEnableState} />
                 <Button type="submit">Save public tracking</Button>
               </div>
             </form>
@@ -382,7 +385,7 @@ export function CfsDetailActions({
             {publicTrackingEnabled ? (
               <form action={publicDisableAction} className="flex items-center justify-between gap-4 border-t border-border/50 pt-4">
                 <input type="hidden" name="cfs_id" value={cfsId} />
-                <ActionFeedback status={publicDisableState.status} message={publicDisableState.message} />
+                <ActionFeedback state={publicDisableState} />
                 <Button type="submit" variant="outline">Disable tracking</Button>
               </form>
             ) : null}
@@ -425,7 +428,7 @@ export function CfsDetailActions({
                 <Textarea id="share_reason" name="share_reason" />
               </div>
               <div className="md:col-span-2 flex justify-between items-center">
-                <ActionFeedback status={shareState.status} message={shareState.message} />
+                <ActionFeedback state={shareState} />
                 <Button type="submit">Share call</Button>
               </div>
             </form>
@@ -446,7 +449,7 @@ export function CfsDetailActions({
                     </form>
                   ))}
                 </div>
-                <ActionFeedback status={revokeState.status} message={revokeState.message} />
+                <ActionFeedback state={revokeState} />
               </div>
             ) : null}
 
@@ -469,7 +472,7 @@ export function CfsDetailActions({
                   <Textarea id="transfer_reason" name="transfer_reason" />
                 </div>
                 <div className="md:col-span-2 flex justify-between items-center">
-                  <ActionFeedback status={transferState.status} message={transferState.message} />
+                  <ActionFeedback state={transferState} />
                   <Button type="submit" variant="outline">Transfer ownership</Button>
                 </div>
               </form>
@@ -492,7 +495,7 @@ export function CfsDetailActions({
                 <Textarea id="note" name="note" required minLength={4} />
               </div>
               <div className="flex justify-between items-center">
-                <ActionFeedback status={noteState.status} message={noteState.message} />
+                <ActionFeedback state={noteState} />
                 <Button type="submit">Add note</Button>
               </div>
             </form>

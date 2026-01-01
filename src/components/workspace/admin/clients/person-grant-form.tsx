@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useActionState, useState } from 'react';
 import { Button } from '@shared/ui/button';
 import { Input } from '@shared/ui/input';
 import { Label } from '@shared/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/ui/select';
+import type { ActionState } from '@/lib/server-actions/validate';
 
 type OrganizationOption = { id: number; name: string };
 
@@ -12,15 +13,26 @@ type PersonGrantFormProps = {
   personId: number;
   scopes: string[];
   organizations: OrganizationOption[];
-  action: (formData: FormData) => Promise<void>;
+  action: (formData: FormData) => Promise<ActionState<{ message?: string }>>;
 };
 
+type GrantActionState = ActionState<{ message?: string }>;
+
+const initialState: GrantActionState = { status: 'idle' };
+
 export function PersonGrantForm({ personId, scopes, organizations, action }: PersonGrantFormProps) {
+  const [state, formAction] = useActionState(
+    (_prev: GrantActionState, formData: FormData) => action(formData),
+    initialState,
+  );
   const [scope, setScope] = useState<string>(scopes[0] ?? '');
   const [orgId, setOrgId] = useState<string>('');
+  const resolvedState = 'status' in state ? null : state;
+  const errorMessage = resolvedState && !resolvedState.ok ? resolvedState.error : null;
+  const successMessage = resolvedState && resolvedState.ok ? resolvedState.data?.message : null;
 
   return (
-    <form action={action} className="space-y-3">
+    <form action={formAction} className="space-y-3">
       <input type="hidden" name="person_id" value={personId} />
       <input type="hidden" name="scope" value={scope} />
       <input type="hidden" name="grantee_org_id" value={orgId} />
@@ -69,6 +81,8 @@ export function PersonGrantForm({ personId, scopes, organizations, action }: Per
       <Button type="submit" className="w-full">
         Grant access
       </Button>
+      {errorMessage ? <p className="text-xs text-destructive">{errorMessage}</p> : null}
+      {successMessage ? <p className="text-xs text-emerald-600">{successMessage}</p> : null}
     </form>
   );
 }

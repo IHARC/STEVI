@@ -13,7 +13,7 @@ import {
 } from '@shared/ui/command';
 import { Button } from '@shared/ui/button';
 import { resolveAppIcon } from '@/lib/app-icons';
-import type { CommandPaletteItem } from '@/lib/portal-access';
+import type { CommandPaletteItem } from '@/lib/portal-ui-access';
 import { cn } from '@/lib/utils';
 import { CornerDownLeft, Search } from 'lucide-react';
 

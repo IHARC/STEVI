@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { buildUserMenuLinks, loadPortalAccess } from './portal-access';
+import { loadPortalAccess } from './portal-access';
+import { buildUserMenuLinks } from './portal-ui-access';
 import type { PortalProfile } from '@/lib/profile';
 import type { SupabaseAnyServerClient } from '@/lib/supabase/types';
 
@@ -221,12 +222,32 @@ describe('loadPortalAccess', () => {
 
     mockEnsurePortalProfile.mockResolvedValue({ ...baseProfile, organization_id: null });
 
-    const access = await loadPortalAccess(supabase);
+    const access = await loadPortalAccess(supabase, { allowSideEffects: true });
 
     expect(access?.organizationId).toBe(99);
     expect(access?.organizationName).toBe('IHARC');
     expect(access?.actingOrgChoices).toEqual([{ id: 99, name: 'IHARC' }]);
     expect(supabase.__profileUpdate).toHaveBeenCalledWith({ organization_id: 99, requested_organization_name: null });
+  });
+
+  it('does not auto-select an acting org when side effects are disabled', async () => {
+    const supabase = createSupabase({
+      rpcResults: {
+        get_actor_global_roles: { data: [{ role_name: 'iharc_admin' }], error: null },
+        get_actor_permissions_summary: { data: ['portal.manage_org_users'], error: null },
+        get_actor_org_roles: { data: [], error: null },
+        get_actor_org_permissions: { data: [], error: null },
+      },
+      orgResult: { data: { name: 'IHARC' }, error: null },
+      userPeopleResult: { data: [], error: null },
+    }) as SupabaseAnyServerClient & { __profileUpdate: ReturnType<typeof vi.fn> };
+
+    mockEnsurePortalProfile.mockResolvedValue({ ...baseProfile, organization_id: null });
+
+    const access = await loadPortalAccess(supabase);
+
+    expect(access?.organizationId).toBeNull();
+    expect(supabase.__profileUpdate).not.toHaveBeenCalled();
   });
 
   it('returns null when no authenticated user is present', async () => {

@@ -6,7 +6,7 @@ import { ensurePortalProfile } from '@/lib/profile';
 import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { checkRateLimit } from '@/lib/rate-limit';
-import { ORG_INVITE_EVENT, ORG_INVITE_RATE_LIMIT, formatInviteCooldown } from './constants';
+import { ORG_INVITE_EVENT, ORG_INVITE_RATE_LIMIT, formatInviteCooldown } from '@/lib/org/invites/constants';
 
 const invitesPath = (organizationId: number) => `/ops/organizations/${organizationId}`;
 

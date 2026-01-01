@@ -12,7 +12,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { useToast } from '@shared/ui/use-toast';
 import type { RateLimitResult } from '@/lib/rate-limit';
 import { createOrgInviteAction, type OrgInviteFormState } from './actions';
-import { ORG_INVITE_RATE_LIMIT, formatInviteCooldown } from './constants';
+import { ORG_INVITE_RATE_LIMIT, formatInviteCooldown } from '@/lib/org/invites/constants';
 
 type InviteSheetProps = {
   rateLimit: RateLimitResult;

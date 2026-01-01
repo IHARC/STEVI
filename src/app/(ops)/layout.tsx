@@ -4,7 +4,7 @@ import { AppShell } from '@workspace/shells/app-shell';
 import { PortalAccessProvider } from '@shared/providers/portal-access-provider';
 import { PortalLayoutProvider } from '@shared/providers/portal-layout-provider';
 import { getPortalRequestContext } from '@shared/providers/portal-request-context';
-import { buildCommandPaletteItems } from '@/lib/portal-access';
+import { buildCommandPaletteItems } from '@/lib/portal-ui-access';
 import { buildPortalNav, navAreaLabel, resolveQuickActions } from '@/lib/portal-navigation';
 import { fetchPortalInbox } from '@/lib/inbox';
 import { getBrandingAssetsWithClient } from '@/lib/marketing/branding';

@@ -3,11 +3,23 @@
 import { randomUUID } from 'crypto';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { z } from 'zod';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { assertOrganizationSelected, loadPortalAccess } from '@/lib/portal-access';
 import { buildEntityRef, logAuditEvent } from '@/lib/audit';
 import { queuePortalNotification } from '@/lib/notifications';
-import { getBoolean, getNumber, getString, parseEnum } from '@/lib/server-actions/form';
+import {
+  ActionState,
+  actionError,
+  actionOk,
+  parseFormData,
+  zodBoolean,
+  zodOptionalNumber,
+  zodOptionalString,
+  zodRequiredNumber,
+  zodRequiredString,
+} from '@/lib/server-actions/validate';
+import { assertRpcOk } from '@/lib/supabase/guards';
 import {
   CFS_ATTACHMENTS_BUCKET,
   CFS_ACCESS_LEVEL_OPTIONS,
@@ -34,20 +46,27 @@ const cfsDetailPath = (cfsId: number | string) => `/ops/cfs/${cfsId}`;
 const incidentDetailPath = (incidentId: number | string) => `/ops/incidents/${incidentId}`;
 const MAX_CFS_ATTACHMENT_BYTES = 15 * 1024 * 1024;
 
-export type CfsActionState = {
-  status: 'idle' | 'success' | 'error';
-  message?: string;
+async function loadActionAccess(supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>) {
+  return loadPortalAccess(supabase, { allowSideEffects: true });
+}
+
+type CfsActionData = {
   cfsId?: number;
   incidentId?: number;
   trackingId?: string;
+  message?: string;
 };
+
+export type CfsActionState = ActionState<CfsActionData>;
 
 export const initialCfsActionState: CfsActionState = { status: 'idle' };
 
-export type CfsAttachmentActionState = {
-  status: 'idle' | 'success' | 'error';
+type CfsAttachmentActionData = {
+  attachmentId?: string;
   message?: string;
 };
+
+export type CfsAttachmentActionState = ActionState<CfsAttachmentActionData>;
 
 export const initialCfsAttachmentActionState: CfsAttachmentActionState = { status: 'idle' };
 
@@ -58,6 +77,21 @@ type NotifySummary = {
   report_number: string;
   public_tracking_id: string | null;
 };
+
+const enumOrUndefined = <T extends string>(options: readonly T[]) =>
+  z.preprocess(
+    (value) => {
+      if (typeof value !== 'string') return undefined;
+      const trimmed = value.trim();
+      return trimmed.length ? trimmed : undefined;
+    },
+    z.enum(options as [T, ...T[]]).optional(),
+  );
+
+const enumWithDefault = <T extends string>(options: readonly T[], fallback: T) =>
+  enumOrUndefined(options).transform((value) => value ?? fallback);
+
+const requiredId = (label: string) => zodRequiredNumber(label, { int: true, positive: true });
 
 function parseOptionalDatetime(value: string | null): string | null {
   if (!value) return null;
@@ -140,69 +174,118 @@ export async function createCfsCallAction(
   formData: FormData,
 ): Promise<CfsActionState> {
   try {
+    const parsed = parseFormData(
+      formData,
+      z.object({
+        origin: enumWithDefault(CFS_ORIGIN_OPTIONS, 'community'),
+        source: enumWithDefault(CFS_SOURCE_OPTIONS, 'phone'),
+        report_method: enumWithDefault(REPORT_METHOD_OPTIONS, 'phone'),
+        report_priority_assessment: enumWithDefault(REPORT_PRIORITY_OPTIONS, 'routine'),
+        report_received_at: zodOptionalString(),
+        received_at: zodOptionalString(),
+        reporter_name: zodOptionalString(),
+        reporter_phone: zodOptionalString(),
+        reporter_email: zodOptionalString(),
+        reporter_address: zodOptionalString(),
+        reporter_relationship: zodOptionalString(),
+        anonymous_reporter: zodBoolean(),
+        anonymous_reporter_details: zodOptionalString(),
+        reporting_person_id: zodOptionalNumber(),
+        reporting_organization_id: zodOptionalNumber(),
+        referring_organization_id: zodOptionalNumber(),
+        referring_agency_name: zodOptionalString(),
+        location_text: zodOptionalString(),
+        reported_location: zodOptionalString(),
+        reported_coordinates: zodOptionalString(),
+        location_confidence: zodOptionalString(),
+        initial_report_narrative: zodRequiredString('Provide a short summary (at least 8 characters).', { min: 8 }),
+        type_hint: enumOrUndefined(INCIDENT_TYPE_OPTIONS),
+        priority_hint: enumOrUndefined(INCIDENT_PRIORITY_OPTIONS),
+        urgency_indicators: zodOptionalString(),
+        notify_opt_in: zodBoolean(),
+        notify_channel: enumWithDefault(NOTIFY_CHANNEL_OPTIONS, 'none'),
+        notify_target: zodOptionalString(),
+        public_tracking_enabled: zodBoolean(),
+        public_category: enumOrUndefined(PUBLIC_CATEGORY_OPTIONS),
+        public_location_area: zodOptionalString(),
+        public_summary: zodOptionalString(),
+      }),
+    );
+
+    if (!parsed.ok) {
+      return parsed;
+    }
+
+    const {
+      origin,
+      source,
+      report_method: reportMethod,
+      report_priority_assessment: reportPriority,
+      report_received_at,
+      received_at,
+      reporter_name: reporterName,
+      reporter_phone: reporterPhone,
+      reporter_email: reporterEmail,
+      reporter_address: reporterAddress,
+      reporter_relationship: reporterRelationship,
+      anonymous_reporter: anonymousReporter,
+      anonymous_reporter_details: anonymousDetails,
+      reporting_person_id,
+      reporting_organization_id,
+      referring_organization_id: referringOrgId,
+      referring_agency_name: referringAgencyName,
+      location_text: locationText,
+      reported_location: reportedLocation,
+      reported_coordinates: reportedCoordinates,
+      location_confidence: locationConfidence,
+      initial_report_narrative: initialNarrative,
+      type_hint: typeHint,
+      priority_hint: priorityHint,
+      urgency_indicators: urgencyIndicatorsRaw,
+      notify_opt_in: notifyOptIn,
+      notify_channel: notifyChannel,
+      notify_target: rawNotifyTarget,
+      public_tracking_enabled: publicTrackingEnabled,
+      public_category: publicCategory,
+      public_location_area: publicLocation,
+      public_summary: publicSummary,
+    } = parsed.data;
+
     const supabase = await createSupabaseServerClient();
-    const access = await loadPortalAccess(supabase);
+    const access = await loadActionAccess(supabase);
 
     if (!access || !access.canCreateCfs) {
-      return { status: 'error', message: 'You do not have permission to create calls for service.' };
+      return actionError('You do not have permission to create calls for service.');
     }
 
     assertOrganizationSelected(access, 'Select an acting organization before creating a call.');
 
-    const origin = parseEnum(getString(formData, 'origin'), CFS_ORIGIN_OPTIONS) ?? 'community';
-    const source = parseEnum(getString(formData, 'source'), CFS_SOURCE_OPTIONS) ?? 'phone';
-    const reportMethod = parseEnum(getString(formData, 'report_method'), REPORT_METHOD_OPTIONS) ?? 'phone';
-    const reportPriority = parseEnum(getString(formData, 'report_priority_assessment'), REPORT_PRIORITY_OPTIONS) ?? 'routine';
-    const reportReceivedAt = parseOptionalDatetime(getString(formData, 'report_received_at'));
-    const receivedAt = parseOptionalDatetime(getString(formData, 'received_at'));
+    const reportReceivedAt = parseOptionalDatetime(report_received_at ?? null);
+    const receivedAt = parseOptionalDatetime(received_at ?? null);
 
-    const reporterName = getString(formData, 'reporter_name');
-    const reporterPhone = getString(formData, 'reporter_phone');
-    const reporterEmail = getString(formData, 'reporter_email');
-    const reporterAddress = getString(formData, 'reporter_address');
-    const reporterRelationship = getString(formData, 'reporter_relationship');
-    const anonymousReporter = getBoolean(formData, 'anonymous_reporter');
-    const anonymousDetails = getString(formData, 'anonymous_reporter_details');
+    const urgencyIndicators = parseUrgencyIndicators(urgencyIndicatorsRaw ?? null);
 
-    let reportingPersonId = getNumber(formData, 'reporting_person_id');
-    let reportingOrgId = getNumber(formData, 'reporting_organization_id');
-    const referringOrgId = getNumber(formData, 'referring_organization_id');
-    const referringAgencyName = getString(formData, 'referring_agency_name');
+    let reportingPersonId = reporting_person_id ?? null;
+    let reportingOrgId = reporting_organization_id ?? null;
 
-    const locationText = getString(formData, 'location_text');
-    const reportedLocation = getString(formData, 'reported_location');
-    const reportedCoordinates = getString(formData, 'reported_coordinates');
-    const locationConfidence = getString(formData, 'location_confidence');
+    let notifyTarget = rawNotifyTarget ?? null;
 
-    const initialNarrative = getString(formData, 'initial_report_narrative', { required: true, trim: true });
-    if (!initialNarrative || initialNarrative.length < 8) {
-      return { status: 'error', message: 'Provide a short summary (at least 8 characters).' };
-    }
-
-    const typeHint = parseEnum(getString(formData, 'type_hint'), INCIDENT_TYPE_OPTIONS);
-    const priorityHint = parseEnum(getString(formData, 'priority_hint'), INCIDENT_PRIORITY_OPTIONS);
-
-    const urgencyIndicators = parseUrgencyIndicators(getString(formData, 'urgency_indicators'));
-
-    const notifyOptIn = getBoolean(formData, 'notify_opt_in');
-    const notifyChannel = parseEnum(getString(formData, 'notify_channel'), NOTIFY_CHANNEL_OPTIONS) ?? 'none';
-    const rawNotifyTarget = getString(formData, 'notify_target');
-    let notifyTarget = rawNotifyTarget;
-
-    if (notifyOptIn && (!notifyChannel || notifyChannel === 'none')) {
-      return { status: 'error', message: 'Select a notification channel or disable notifications.' };
+    if (notifyOptIn && notifyChannel === 'none') {
+      return actionError('Select a notification channel or disable notifications.', {
+        notify_channel: 'Select a notification channel or disable notifications.',
+      });
     }
 
     if (notifyOptIn && notifyChannel !== 'none') {
-      notifyTarget = normalizeNotifyTarget(notifyChannel, rawNotifyTarget);
+      notifyTarget = normalizeNotifyTarget(notifyChannel, rawNotifyTarget ?? null);
       if (!notifyTarget) {
-        return {
-          status: 'error',
-          message: notifyChannel === 'sms' ? 'Enter a valid phone number for SMS updates.' : 'Enter a valid email address.',
-        };
+        return actionError(
+          notifyChannel === 'sms' ? 'Enter a valid phone number for SMS updates.' : 'Enter a valid email address.',
+          { notify_target: notifyChannel === 'sms' ? 'Enter a valid phone number.' : 'Enter a valid email address.' },
+        );
       }
       if (notifyChannel === 'email' && !notifyTarget.includes('@')) {
-        return { status: 'error', message: 'Enter a valid email address.' };
+        return actionError('Enter a valid email address.', { notify_target: 'Enter a valid email address.' });
       }
     }
 
@@ -212,7 +295,10 @@ export async function createCfsCallAction(
     }
 
     if (reportingPersonId && reportingOrgId) {
-      return { status: 'error', message: 'Select either a reporting person or organization, not both.' };
+      return actionError('Select either a reporting person or organization, not both.', {
+        reporting_person_id: 'Select either a person or organization.',
+        reporting_organization_id: 'Select either a person or organization.',
+      });
     }
 
     const payload: Record<string, unknown> = {
@@ -247,12 +333,12 @@ export async function createCfsCallAction(
       referring_agency_name: referringAgencyName,
     };
 
-    const { data: callId, error } = await supabase
-      .schema('case_mgmt')
-      .rpc('cfs_create_call', { p_payload: payload });
+    const createResult = await supabase.schema('case_mgmt').rpc('cfs_create_call', { p_payload: payload });
+    assertRpcOk(createResult, 'cfs_create_call');
 
-    if (error || !callId) {
-      throw error ?? new Error('Unable to create the call.');
+    const callId = createResult.data;
+    if (!callId) {
+      throw new Error('Unable to create the call.');
     }
 
     const cfsId = Number(callId);
@@ -274,41 +360,44 @@ export async function createCfsCallAction(
       },
     });
 
-    const publicTrackingEnabled = getBoolean(formData, 'public_tracking_enabled');
     if (publicTrackingEnabled) {
       if (!access.canPublicTrackCfs) {
-        return { status: 'error', message: 'You do not have permission to enable public tracking.' };
-      }
-      const category = parseEnum(getString(formData, 'public_category'), PUBLIC_CATEGORY_OPTIONS);
-      const publicLocation = getString(formData, 'public_location_area');
-      const publicSummary = getString(formData, 'public_summary');
-
-      if (!category || !publicLocation) {
-        return { status: 'error', message: 'Provide a public category and location to enable tracking.' };
+        return actionError('You do not have permission to enable public tracking.');
       }
 
-      const { data: trackingId, error: trackingError } = await supabase
+      if (!publicCategory || !publicLocation) {
+        return actionError('Provide a public category and location to enable tracking.', {
+          public_category: 'Select a public category.',
+          public_location_area: 'Provide a public location area.',
+        });
+      }
+
+      const trackingResult = await supabase
         .schema('case_mgmt')
         .rpc('cfs_public_tracking_upsert', {
           p_cfs_id: cfsId,
-          p_category: category,
+          p_category: publicCategory,
           p_public_location_area: publicLocation,
           p_public_summary: publicSummary ?? undefined,
         });
 
-      if (trackingError) {
-        return { status: 'error', message: trackingError.message };
+      if (trackingResult.error) {
+        return actionError(trackingResult.error.message);
       }
 
-      if (trackingId) {
+      if (trackingResult.data) {
         await logAuditEvent(supabase, {
           actorProfileId: access.profile.id,
           action: 'cfs_public_tracking_enabled',
           entityType: 'case_mgmt.cfs_public_tracking',
-          entityRef: buildEntityRef({ schema: 'case_mgmt', table: 'cfs_public_tracking', id: String(trackingId) }),
+          entityRef: buildEntityRef({
+            schema: 'case_mgmt',
+            table: 'cfs_public_tracking',
+            id: String(trackingResult.data),
+          }),
           meta: {
             cfs_id: cfsId,
-            category,
+            category: publicCategory,
             public_location_area: publicLocation,
           },
         });
@@ -328,7 +417,7 @@ export async function createCfsCallAction(
     redirect(cfsDetailPath(cfsId));
   } catch (error) {
     console.error('createCfsCallAction error', error);
-    return { status: 'error', message: error instanceof Error ? error.message : 'Unable to create the call.' };
+    return actionError(error instanceof Error ? error.message : 'Unable to create the call.');
   }
 }
 
@@ -337,21 +426,40 @@ export async function triageCfsAction(
   formData: FormData,
 ): Promise<CfsActionState> {
   try {
-    const cfsId = getNumber(formData, 'cfs_id', { required: true }) as number;
-    const priority = parseEnum(getString(formData, 'report_priority_assessment'), REPORT_PRIORITY_OPTIONS) ?? 'routine';
-    const typeHint = parseEnum(getString(formData, 'type_hint'), INCIDENT_TYPE_OPTIONS);
-    const priorityHint = parseEnum(getString(formData, 'priority_hint'), INCIDENT_PRIORITY_OPTIONS);
-    const urgencyIndicators = parseUrgencyIndicators(getString(formData, 'urgency_indicators'));
-    const notes = getString(formData, 'phase_notes');
+    const parsed = parseFormData(
+      formData,
+      z.object({
+        cfs_id: requiredId('cfs_id is required.'),
+        report_priority_assessment: enumWithDefault(REPORT_PRIORITY_OPTIONS, 'routine'),
+        type_hint: enumOrUndefined(INCIDENT_TYPE_OPTIONS),
+        priority_hint: enumOrUndefined(INCIDENT_PRIORITY_OPTIONS),
+        urgency_indicators: zodOptionalString(),
+        phase_notes: zodOptionalString(),
+      }),
+    );
 
-    const supabase = await createSupabaseServerClient();
-    const access = await loadPortalAccess(supabase);
-
-    if (!access || !access.canTriageCfs) {
-      return { status: 'error', message: 'You do not have permission to triage this call.' };
+    if (!parsed.ok) {
+      return parsed;
     }
 
-    await supabase.schema('case_mgmt').rpc('cfs_triage', {
+    const {
+      cfs_id: cfsId,
+      report_priority_assessment: priority,
+      type_hint: typeHint,
+      priority_hint: priorityHint,
+      urgency_indicators: urgencyIndicatorsRaw,
+      phase_notes: notes,
+    } = parsed.data;
+    const urgencyIndicators = parseUrgencyIndicators(urgencyIndicatorsRaw ?? null);
+
+    const supabase = await createSupabaseServerClient();
+    const access = await loadActionAccess(supabase);
+
+    if (!access || !access.canTriageCfs) {
+      return actionError('You do not have permission to triage this call.');
+    }
+
+    const triageResult = await supabase.schema('case_mgmt').rpc('cfs_triage', {
       p_cfs_id: cfsId,
       p_payload: {
         report_priority_assessment: priority,
@@ -361,6 +469,7 @@ export async function triageCfsAction(
         phase_notes: notes,
       },
     });
+    assertRpcOk(triageResult, 'cfs_triage');
 
     await logAuditEvent(supabase, {
       actorProfileId: access.profile.id,
@@ -378,10 +487,10 @@ export async function triageCfsAction(
     });
 
     revalidatePath(cfsDetailPath(cfsId));
-    return { status: 'success', message: 'Call triaged.' };
+    return actionOk({ cfsId, message: 'Triage saved.' });
   } catch (error) {
     console.error('triageCfsAction error', error);
-    return { status: 'error', message: error instanceof Error ? error.message : 'Unable to triage the call.' };
+    return actionError(error instanceof Error ? error.message : 'Unable to triage the call.');
   }
 }
 
@@ -390,24 +499,41 @@ export async function verifyCfsAction(
   formData: FormData,
 ): Promise<CfsActionState> {
   try {
-    const cfsId = getNumber(formData, 'cfs_id', { required: true }) as number;
-    const status = parseEnum(getString(formData, 'verification_status'), VERIFICATION_STATUS_OPTIONS) ?? 'pending';
-    const method = parseEnum(getString(formData, 'verification_method'), VERIFICATION_METHOD_OPTIONS) ?? 'none_required';
-    const notes = getString(formData, 'verification_notes') ?? '';
+    const parsed = parseFormData(
+      formData,
+      z.object({
+        cfs_id: requiredId('cfs_id is required.'),
+        verification_status: enumWithDefault(VERIFICATION_STATUS_OPTIONS, 'pending'),
+        verification_method: enumWithDefault(VERIFICATION_METHOD_OPTIONS, 'none_required'),
+        verification_notes: zodOptionalString(),
+      }),
+    );
 
-    const supabase = await createSupabaseServerClient();
-    const access = await loadPortalAccess(supabase);
-
-    if (!access || !access.canTriageCfs) {
-      return { status: 'error', message: 'You do not have permission to verify this call.' };
+    if (!parsed.ok) {
+      return parsed;
     }
 
-    await supabase.schema('case_mgmt').rpc('cfs_verify', {
+    const {
+      cfs_id: cfsId,
+      verification_status: status,
+      verification_method: method,
+      verification_notes: notes,
+    } = parsed.data;
+
+    const supabase = await createSupabaseServerClient();
+    const access = await loadActionAccess(supabase);
+
+    if (!access || !access.canTriageCfs) {
+      return actionError('You do not have permission to verify this call.');
+    }
+
+    const verifyResult = await supabase.schema('case_mgmt').rpc('cfs_verify', {
       p_cfs_id: cfsId,
       p_status: status,
       p_method: method,
-      p_notes: notes,
+      p_notes: notes ?? '',
     });
+    assertRpcOk(verifyResult, 'cfs_verify');
 
     await logAuditEvent(supabase, {
       actorProfileId: access.profile.id,
@@ -425,10 +551,10 @@ export async function verifyCfsAction(
     });
 
     revalidatePath(cfsDetailPath(cfsId));
-    return { status: 'success', message: 'Verification saved.' };
+    return actionOk({ cfsId, message: 'Verification saved.' });
   } catch (error) {
     console.error('verifyCfsAction error', error);
-    return { status: 'error', message: error instanceof Error ? error.message : 'Unable to update verification.' };
+    return actionError(error instanceof Error ? error.message : 'Unable to update verification.');
   }
 }
 
@@ -437,22 +563,34 @@ export async function dismissCfsAction(
   formData: FormData,
 ): Promise<CfsActionState> {
   try {
-    const cfsId = getNumber(formData, 'cfs_id', { required: true }) as number;
-    const reportStatus = parseEnum(getString(formData, 'report_status'), REPORT_STATUS_OPTIONS) ?? 'resolved';
-    const notes = getString(formData, 'resolution_notes') ?? '';
+    const parsed = parseFormData(
+      formData,
+      z.object({
+        cfs_id: requiredId('cfs_id is required.'),
+        report_status: enumWithDefault(REPORT_STATUS_OPTIONS, 'resolved'),
+        resolution_notes: zodOptionalString(),
+      }),
+    );
 
-    const supabase = await createSupabaseServerClient();
-    const access = await loadPortalAccess(supabase);
-
-    if (!access || !access.canUpdateCfs) {
-      return { status: 'error', message: 'You do not have permission to close this call.' };
+    if (!parsed.ok) {
+      return parsed;
     }
 
-    await supabase.schema('case_mgmt').rpc('cfs_dismiss', {
+    const { cfs_id: cfsId, report_status: reportStatus, resolution_notes: notes } = parsed.data;
+
+    const supabase = await createSupabaseServerClient();
+    const access = await loadActionAccess(supabase);
+
+    if (!access || !access.canUpdateCfs) {
+      return actionError('You do not have permission to close this call.');
+    }
+
+    const dismissResult = await supabase.schema('case_mgmt').rpc('cfs_dismiss', {
       p_cfs_id: cfsId,
       p_report_status: reportStatus,
       p_notes: notes,
     });
+    assertRpcOk(dismissResult, 'cfs_dismiss');
 
     await logAuditEvent(supabase, {
       actorProfileId: access.profile.id,
@@ -471,10 +609,10 @@ export async function dismissCfsAction(
 
     revalidatePath(cfsDetailPath(cfsId));
     revalidatePath(CFS_LIST_PATH);
-    return { status: 'success', message: 'Call closed.' };
+    return actionOk({ cfsId, message: 'Call closed.' });
   } catch (error) {
     console.error('dismissCfsAction error', error);
-    return { status: 'error', message: error instanceof Error ? error.message : 'Unable to close the call.' };
+    return actionError(error instanceof Error ? error.message : 'Unable to close the call.');
   }
 }
 
@@ -483,22 +621,34 @@ export async function markDuplicateCfsAction(
   formData: FormData,
 ): Promise<CfsActionState> {
   try {
-    const cfsId = getNumber(formData, 'cfs_id', { required: true }) as number;
-    const duplicateOf = getNumber(formData, 'duplicate_of_report_id', { required: true }) as number;
-    const notes = getString(formData, 'duplicate_notes') ?? '';
+    const parsed = parseFormData(
+      formData,
+      z.object({
+        cfs_id: requiredId('cfs_id is required.'),
+        duplicate_of_report_id: requiredId('Duplicate report is required.'),
+        duplicate_notes: zodOptionalString(),
+      }),
+    );
 
-    const supabase = await createSupabaseServerClient();
-    const access = await loadPortalAccess(supabase);
-
-    if (!access || !access.canUpdateCfs) {
-      return { status: 'error', message: 'You do not have permission to mark duplicates.' };
+    if (!parsed.ok) {
+      return parsed;
     }
 
-    await supabase.schema('case_mgmt').rpc('cfs_mark_duplicate', {
+    const { cfs_id: cfsId, duplicate_of_report_id: duplicateOf, duplicate_notes: notes } = parsed.data;
+
+    const supabase = await createSupabaseServerClient();
+    const access = await loadActionAccess(supabase);
+
+    if (!access || !access.canUpdateCfs) {
+      return actionError('You do not have permission to mark duplicates.');
+    }
+
+    const duplicateResult = await supabase.schema('case_mgmt').rpc('cfs_mark_duplicate', {
       p_cfs_id: cfsId,
       p_duplicate_of: duplicateOf,
       p_notes: notes,
     });
+    assertRpcOk(duplicateResult, 'cfs_mark_duplicate');
 
     await logAuditEvent(supabase, {
       actorProfileId: access.profile.id,
@@ -517,10 +667,10 @@ export async function markDuplicateCfsAction(
 
     revalidatePath(cfsDetailPath(cfsId));
     revalidatePath(CFS_LIST_PATH);
-    return { status: 'success', message: 'Marked as duplicate.' };
+    return actionOk({ cfsId, message: 'Marked as duplicate.' });
   } catch (error) {
     console.error('markDuplicateCfsAction error', error);
-    return { status: 'error', message: error instanceof Error ? error.message : 'Unable to mark duplicate.' };
+    return actionError(error instanceof Error ? error.message : 'Unable to mark duplicate.');
   }
 }
 
@@ -529,34 +679,52 @@ export async function convertCfsToIncidentAction(
   formData: FormData,
 ): Promise<CfsActionState> {
   try {
-    const cfsId = getNumber(formData, 'cfs_id', { required: true }) as number;
-    const incidentType = parseEnum(getString(formData, 'incident_type'), INCIDENT_TYPE_OPTIONS);
-    const description = getString(formData, 'incident_description');
-    const incidentStatus = getString(formData, 'incident_status');
+    const parsed = parseFormData(
+      formData,
+      z.object({
+        cfs_id: requiredId('cfs_id is required.'),
+        incident_type: enumOrUndefined(INCIDENT_TYPE_OPTIONS),
+        incident_description: zodOptionalString(),
+        incident_status: zodOptionalString(),
+        dispatch_notes: zodOptionalString(),
+      }),
+    );
+
+    if (!parsed.ok) {
+      return parsed;
+    }
+
+    const {
+      cfs_id: cfsId,
+      incident_type: incidentType,
+      incident_description: description,
+      incident_status: incidentStatus,
+      dispatch_notes: dispatchNotes,
+    } = parsed.data;
 
     const supabase = await createSupabaseServerClient();
-    const access = await loadPortalAccess(supabase);
+    const access = await loadActionAccess(supabase);
 
     if (!access || !access.canDispatchCfs) {
-      return { status: 'error', message: 'You do not have permission to dispatch this call.' };
+      return actionError('You do not have permission to dispatch this call.');
     }
 
     const payload: Record<string, unknown> = {
       incident_type: incidentType,
       description,
       status: incidentStatus,
-      phase_notes: getString(formData, 'dispatch_notes'),
+      phase_notes: dispatchNotes ?? undefined,
     };
 
-    const { data: incidentId, error } = await supabase
+    const convertResult = await supabase
       .schema('case_mgmt')
       .rpc('cfs_convert_to_incident', { p_cfs_id: cfsId, p_payload: payload });
+    assertRpcOk(convertResult, 'cfs_convert_to_incident');
 
-    if (error || !incidentId) {
-      throw error ?? new Error('Unable to convert call.');
+    const incidentNumeric = Number(convertResult.data);
+    if (!incidentNumeric) {
+      throw new Error('Unable to convert call.');
     }
-
-    const incidentNumeric = Number(incidentId);
 
     await logAuditEvent(supabase, {
       actorProfileId: access.profile.id,
@@ -575,10 +743,10 @@ export async function convertCfsToIncidentAction(
 
     revalidatePath(cfsDetailPath(cfsId));
     revalidatePath(incidentDetailPath(incidentNumeric));
-    return { status: 'success', message: 'Converted to incident.', incidentId: incidentNumeric };
+    return actionOk({ cfsId, incidentId: incidentNumeric, message: 'Converted to incident.' });
   } catch (error) {
     console.error('convertCfsToIncidentAction error', error);
-    return { status: 'error', message: error instanceof Error ? error.message : 'Unable to convert to incident.' };
+    return actionError(error instanceof Error ? error.message : 'Unable to convert to incident.');
   }
 }
 
@@ -587,24 +755,41 @@ export async function shareCfsWithOrgAction(
   formData: FormData,
 ): Promise<CfsActionState> {
   try {
-    const cfsId = getNumber(formData, 'cfs_id', { required: true }) as number;
-    const orgId = getNumber(formData, 'organization_id', { required: true }) as number;
-    const accessLevel = parseEnum(getString(formData, 'access_level'), CFS_ACCESS_LEVEL_OPTIONS) ?? 'view';
-    const reason = getString(formData, 'share_reason');
+    const parsed = parseFormData(
+      formData,
+      z.object({
+        cfs_id: requiredId('cfs_id is required.'),
+        organization_id: requiredId('Organization is required.'),
+        access_level: enumWithDefault(CFS_ACCESS_LEVEL_OPTIONS, 'view'),
+        share_reason: zodOptionalString(),
+      }),
+    );
 
-    const supabase = await createSupabaseServerClient();
-    const access = await loadPortalAccess(supabase);
-
-    if (!access || !access.canShareCfs) {
-      return { status: 'error', message: 'You do not have permission to share this call.' };
+    if (!parsed.ok) {
+      return parsed;
     }
 
-    await supabase.schema('case_mgmt').rpc('cfs_grant_org_access', {
+    const {
+      cfs_id: cfsId,
+      organization_id: orgId,
+      access_level: accessLevel,
+      share_reason: reason,
+    } = parsed.data;
+
+    const supabase = await createSupabaseServerClient();
+    const access = await loadActionAccess(supabase);
+
+    if (!access || !access.canShareCfs) {
+      return actionError('You do not have permission to share this call.');
+    }
+
+    const grantResult = await supabase.schema('case_mgmt').rpc('cfs_grant_org_access', {
       p_cfs_id: cfsId,
       p_org_id: orgId,
       p_access_level: accessLevel,
       p_reason: reason ?? undefined,
     });
+    assertRpcOk(grantResult, 'cfs_grant_org_access');
 
     await logAuditEvent(supabase, {
       actorProfileId: access.profile.id,
@@ -615,10 +800,10 @@ export async function shareCfsWithOrgAction(
     });
 
     revalidatePath(cfsDetailPath(cfsId));
-    return { status: 'success', message: 'Organization added.' };
+    return actionOk({ cfsId, message: 'Organization added.' });
   } catch (error) {
     console.error('shareCfsWithOrgAction error', error);
-    return { status: 'error', message: error instanceof Error ? error.message : 'Unable to share this call.' };
+    return actionError(error instanceof Error ? error.message : 'Unable to share this call.');
   }
 }
 
@@ -627,22 +812,34 @@ export async function revokeCfsOrgAccessAction(
   formData: FormData,
 ): Promise<CfsActionState> {
   try {
-    const cfsId = getNumber(formData, 'cfs_id', { required: true }) as number;
-    const orgId = getNumber(formData, 'organization_id', { required: true }) as number;
-    const reason = getString(formData, 'revoke_reason');
+    const parsed = parseFormData(
+      formData,
+      z.object({
+        cfs_id: requiredId('cfs_id is required.'),
+        organization_id: requiredId('Organization is required.'),
+        revoke_reason: zodOptionalString(),
+      }),
+    );
 
-    const supabase = await createSupabaseServerClient();
-    const access = await loadPortalAccess(supabase);
-
-    if (!access || !access.canShareCfs) {
-      return { status: 'error', message: 'You do not have permission to revoke access.' };
+    if (!parsed.ok) {
+      return parsed;
     }
 
-    await supabase.schema('case_mgmt').rpc('cfs_revoke_org_access', {
+    const { cfs_id: cfsId, organization_id: orgId, revoke_reason: reason } = parsed.data;
+
+    const supabase = await createSupabaseServerClient();
+    const access = await loadActionAccess(supabase);
+
+    if (!access || !access.canShareCfs) {
+      return actionError('You do not have permission to revoke access.');
+    }
+
+    const revokeResult = await supabase.schema('case_mgmt').rpc('cfs_revoke_org_access', {
       p_cfs_id: cfsId,
       p_org_id: orgId,
       p_reason: reason ?? undefined,
     });
+    assertRpcOk(revokeResult, 'cfs_revoke_org_access');
 
     await logAuditEvent(supabase, {
       actorProfileId: access.profile.id,
@@ -653,10 +850,10 @@ export async function revokeCfsOrgAccessAction(
     });
 
     revalidatePath(cfsDetailPath(cfsId));
-    return { status: 'success', message: 'Access revoked.' };
+    return actionOk({ cfsId, message: 'Access revoked.' });
   } catch (error) {
     console.error('revokeCfsOrgAccessAction error', error);
-    return { status: 'error', message: error instanceof Error ? error.message : 'Unable to revoke access.' };
+    return actionError(error instanceof Error ? error.message : 'Unable to revoke access.');
   }
 }
 
@@ -665,22 +862,34 @@ export async function transferCfsOwnershipAction(
   formData: FormData,
 ): Promise<CfsActionState> {
   try {
-    const cfsId = getNumber(formData, 'cfs_id', { required: true }) as number;
-    const orgId = getNumber(formData, 'organization_id', { required: true }) as number;
-    const reason = getString(formData, 'transfer_reason');
+    const parsed = parseFormData(
+      formData,
+      z.object({
+        cfs_id: requiredId('cfs_id is required.'),
+        organization_id: requiredId('Organization is required.'),
+        transfer_reason: zodOptionalString(),
+      }),
+    );
 
-    const supabase = await createSupabaseServerClient();
-    const access = await loadPortalAccess(supabase);
-
-    if (!access || !access.canDispatchCfs) {
-      return { status: 'error', message: 'You do not have permission to transfer ownership.' };
+    if (!parsed.ok) {
+      return parsed;
     }
 
-    await supabase.schema('case_mgmt').rpc('cfs_transfer_ownership', {
+    const { cfs_id: cfsId, organization_id: orgId, transfer_reason: reason } = parsed.data;
+
+    const supabase = await createSupabaseServerClient();
+    const access = await loadActionAccess(supabase);
+
+    if (!access || !access.canDispatchCfs) {
+      return actionError('You do not have permission to transfer ownership.');
+    }
+
+    const transferResult = await supabase.schema('case_mgmt').rpc('cfs_transfer_ownership', {
       p_cfs_id: cfsId,
       p_new_org_id: orgId,
       p_reason: reason ?? undefined,
     });
+    assertRpcOk(transferResult, 'cfs_transfer_ownership');
 
     await logAuditEvent(supabase, {
       actorProfileId: access.profile.id,
@@ -692,10 +901,10 @@ export async function transferCfsOwnershipAction(
 
     revalidatePath(cfsDetailPath(cfsId));
     revalidatePath(CFS_LIST_PATH);
-    return { status: 'success', message: 'Ownership transferred.' };
+    return actionOk({ cfsId, message: 'Ownership transferred.' });
   } catch (error) {
     console.error('transferCfsOwnershipAction error', error);
-    return { status: 'error', message: error instanceof Error ? error.message : 'Unable to transfer ownership.' };
+    return actionError(error instanceof Error ? error.message : 'Unable to transfer ownership.');
   }
 }
 
@@ -704,38 +913,59 @@ export async function enablePublicTrackingAction(
   formData: FormData,
 ): Promise<CfsActionState> {
   try {
-    const cfsId = getNumber(formData, 'cfs_id', { required: true }) as number;
-    const category = parseEnum(getString(formData, 'public_category'), PUBLIC_CATEGORY_OPTIONS);
-    const publicLocation = getString(formData, 'public_location_area');
-    const publicSummary = getString(formData, 'public_summary');
+    const parsed = parseFormData(
+      formData,
+      z.object({
+        cfs_id: requiredId('cfs_id is required.'),
+        public_category: enumOrUndefined(PUBLIC_CATEGORY_OPTIONS),
+        public_location_area: zodOptionalString(),
+        public_summary: zodOptionalString(),
+      }),
+    );
+
+    if (!parsed.ok) {
+      return parsed;
+    }
+
+    const {
+      cfs_id: cfsId,
+      public_category: category,
+      public_location_area: publicLocation,
+      public_summary: publicSummary,
+    } = parsed.data;
 
     if (!category || !publicLocation) {
-      return { status: 'error', message: 'Provide a public category and location.' };
+      const fieldErrors: Record<string, string> = {};
+      if (!category) fieldErrors.public_category = 'Select a public category.';
+      if (!publicLocation) fieldErrors.public_location_area = 'Provide a public location.';
+      return actionError('Provide a public category and location.', fieldErrors);
     }
 
     const supabase = await createSupabaseServerClient();
-    const access = await loadPortalAccess(supabase);
+    const access = await loadActionAccess(supabase);
 
     if (!access || !access.canPublicTrackCfs) {
-      return { status: 'error', message: 'You do not have permission to update public tracking.' };
+      return actionError('You do not have permission to update public tracking.');
     }
 
-    const { data: trackingId, error } = await supabase.schema('case_mgmt').rpc('cfs_public_tracking_upsert', {
+    const trackingResult = await supabase.schema('case_mgmt').rpc('cfs_public_tracking_upsert', {
       p_cfs_id: cfsId,
       p_category: category,
       p_public_location_area: publicLocation,
       p_public_summary: publicSummary ?? undefined,
     });
 
-    if (error) {
-      throw error;
-    }
+    assertRpcOk(trackingResult, 'cfs_public_tracking_upsert');
 
     revalidatePath(cfsDetailPath(cfsId));
-    return { status: 'success', message: 'Public tracking enabled.', trackingId: trackingId ?? undefined };
+    return actionOk({
+      cfsId,
+      trackingId: trackingResult.data ?? undefined,
+      message: 'Public tracking enabled.',
+    });
   } catch (error) {
     console.error('enablePublicTrackingAction error', error);
-    return { status: 'error', message: error instanceof Error ? error.message : 'Unable to enable tracking.' };
+    return actionError(error instanceof Error ? error.message : 'Unable to enable tracking.');
   }
 }
 
@@ -744,22 +974,36 @@ export async function disablePublicTrackingAction(
   formData: FormData,
 ): Promise<CfsActionState> {
   try {
-    const cfsId = getNumber(formData, 'cfs_id', { required: true }) as number;
+    const parsed = parseFormData(
+      formData,
+      z.object({
+        cfs_id: requiredId('cfs_id is required.'),
+      }),
+    );
 
-    const supabase = await createSupabaseServerClient();
-    const access = await loadPortalAccess(supabase);
-
-    if (!access || !access.canPublicTrackCfs) {
-      return { status: 'error', message: 'You do not have permission to update public tracking.' };
+    if (!parsed.ok) {
+      return parsed;
     }
 
-    await supabase.schema('case_mgmt').rpc('cfs_public_tracking_disable', { p_cfs_id: cfsId });
+    const { cfs_id: cfsId } = parsed.data;
+
+    const supabase = await createSupabaseServerClient();
+    const access = await loadActionAccess(supabase);
+
+    if (!access || !access.canPublicTrackCfs) {
+      return actionError('You do not have permission to update public tracking.');
+    }
+
+    const disableResult = await supabase
+      .schema('case_mgmt')
+      .rpc('cfs_public_tracking_disable', { p_cfs_id: cfsId });
+    assertRpcOk(disableResult, 'cfs_public_tracking_disable');
 
     revalidatePath(cfsDetailPath(cfsId));
-    return { status: 'success', message: 'Public tracking disabled.' };
+    return actionOk({ cfsId, message: 'Public tracking disabled.' });
   } catch (error) {
     console.error('disablePublicTrackingAction error', error);
-    return { status: 'error', message: error instanceof Error ? error.message : 'Unable to disable tracking.' };
+    return actionError(error instanceof Error ? error.message : 'Unable to disable tracking.');
   }
 }
 
@@ -768,18 +1012,25 @@ export async function addCfsNoteAction(
   formData: FormData,
 ): Promise<CfsActionState> {
   try {
-    const cfsId = getNumber(formData, 'cfs_id', { required: true }) as number;
-    const note = getString(formData, 'note', { required: true, trim: true });
+    const parsed = parseFormData(
+      formData,
+      z.object({
+        cfs_id: requiredId('cfs_id is required.'),
+        note: zodRequiredString('Add a brief note (at least 4 characters).', { min: 4 }),
+      }),
+    );
 
-    if (!note || note.length < 4) {
-      return { status: 'error', message: 'Add a brief note (at least 4 characters).' };
+    if (!parsed.ok) {
+      return parsed;
     }
 
+    const { cfs_id: cfsId, note } = parsed.data;
+
     const supabase = await createSupabaseServerClient();
-    const access = await loadPortalAccess(supabase);
+    const access = await loadActionAccess(supabase);
 
     if (!access || !access.canUpdateCfs) {
-      return { status: 'error', message: 'You do not have permission to add notes.' };
+      return actionError('You do not have permission to add notes.');
     }
 
     assertOrganizationSelected(access, 'Select an acting organization to add a note.');
@@ -812,10 +1063,10 @@ export async function addCfsNoteAction(
     });
 
     revalidatePath(cfsDetailPath(cfsId));
-    return { status: 'success', message: 'Note added.' };
+    return actionOk({ cfsId, message: 'Note added.' });
   } catch (error) {
     console.error('addCfsNoteAction error', error);
-    return { status: 'error', message: error instanceof Error ? error.message : 'Unable to add note.' };
+    return actionError(error instanceof Error ? error.message : 'Unable to add note.');
   }
 }
 
@@ -824,15 +1075,26 @@ export async function updateCfsStatusAction(
   formData: FormData,
 ): Promise<CfsActionState> {
   try {
-    const cfsId = getNumber(formData, 'cfs_id', { required: true }) as number;
-    const status = parseEnum(getString(formData, 'status'), CFS_STATUS_OPTIONS) ?? 'received';
-    const notes = getString(formData, 'status_notes');
+    const parsed = parseFormData(
+      formData,
+      z.object({
+        cfs_id: requiredId('cfs_id is required.'),
+        status: enumWithDefault(CFS_STATUS_OPTIONS, 'received'),
+        status_notes: zodOptionalString(),
+      }),
+    );
+
+    if (!parsed.ok) {
+      return parsed;
+    }
+
+    const { cfs_id: cfsId, status, status_notes: notes } = parsed.data;
 
     const supabase = await createSupabaseServerClient();
-    const access = await loadPortalAccess(supabase);
+    const access = await loadActionAccess(supabase);
 
     if (!access || !access.canUpdateCfs) {
-      return { status: 'error', message: 'You do not have permission to update status.' };
+      return actionError('You do not have permission to update status.');
     }
 
     const { error } = await supabase
@@ -860,10 +1122,10 @@ export async function updateCfsStatusAction(
     }
 
     revalidatePath(cfsDetailPath(cfsId));
-    return { status: 'success', message: `Status updated: ${formatCfsLabel(status)}.` };
+    return actionOk({ cfsId, message: `Status updated: ${formatCfsLabel(status)}.` });
   } catch (error) {
     console.error('updateCfsStatusAction error', error);
-    return { status: 'error', message: error instanceof Error ? error.message : 'Unable to update status.' };
+    return actionError(error instanceof Error ? error.message : 'Unable to update status.');
   }
 }
 
@@ -872,23 +1134,34 @@ export async function uploadCfsAttachmentAction(
   formData: FormData,
 ): Promise<CfsAttachmentActionState> {
   try {
-    const cfsId = getNumber(formData, 'cfs_id', { required: true }) as number;
-    const notes = getString(formData, 'attachment_notes');
+    const parsed = parseFormData(
+      formData,
+      z.object({
+        cfs_id: requiredId('cfs_id is required.'),
+        attachment_notes: zodOptionalString(),
+      }),
+    );
+
+    if (!parsed.ok) {
+      return parsed;
+    }
+
+    const { cfs_id: cfsId, attachment_notes: notes } = parsed.data;
     const file = formData.get('attachment');
 
     if (!(file instanceof File)) {
-      return { status: 'error', message: 'Select a file to upload.' };
+      return actionError('Select a file to upload.', { attachment: 'Select a file to upload.' });
     }
 
     if (file.size > MAX_CFS_ATTACHMENT_BYTES) {
-      return { status: 'error', message: 'Attachment must be under 15 MB.' };
+      return actionError('Attachment must be under 15 MB.', { attachment: 'Attachment must be under 15 MB.' });
     }
 
     const supabase = await createSupabaseServerClient();
-    const access = await loadPortalAccess(supabase);
+    const access = await loadActionAccess(supabase);
 
     if (!access || !access.canUpdateCfs) {
-      return { status: 'error', message: 'You do not have permission to upload attachments.' };
+      return actionError('You do not have permission to upload attachments.');
     }
 
     assertOrganizationSelected(access, 'Select an acting organization to upload attachments.');
@@ -940,23 +1213,34 @@ export async function uploadCfsAttachmentAction(
     });
 
     revalidatePath(cfsDetailPath(cfsId));
-    return { status: 'success', message: 'Attachment uploaded.' };
+    return actionOk({ attachmentId: attachmentRow.id, message: 'Attachment uploaded.' });
   } catch (error) {
     console.error('uploadCfsAttachmentAction error', error);
-    return { status: 'error', message: error instanceof Error ? error.message : 'Unable to upload attachment.' };
+    return actionError(error instanceof Error ? error.message : 'Unable to upload attachment.');
   }
 }
 
-export async function deleteCfsAttachmentAction(formData: FormData): Promise<void> {
+export async function deleteCfsAttachmentAction(formData: FormData): Promise<CfsAttachmentActionState> {
   try {
-    const cfsId = getNumber(formData, 'cfs_id', { required: true }) as number;
-    const attachmentId = getString(formData, 'attachment_id', { required: true });
+    const parsed = parseFormData(
+      formData,
+      z.object({
+        cfs_id: requiredId('cfs_id is required.'),
+        attachment_id: zodRequiredString('Attachment is required.'),
+      }),
+    );
+
+    if (!parsed.ok) {
+      return parsed;
+    }
+
+    const { cfs_id: cfsId, attachment_id: attachmentId } = parsed.data;
 
     const supabase = await createSupabaseServerClient();
-    const access = await loadPortalAccess(supabase);
+    const access = await loadActionAccess(supabase);
 
     if (!access || !access.canDeleteCfs) {
-      return;
+      return actionError('You do not have permission to delete attachments.');
     }
 
     const { data: attachment, error } = await supabase
@@ -968,7 +1252,7 @@ export async function deleteCfsAttachmentAction(formData: FormData): Promise<voi
       .maybeSingle();
 
     if (error || !attachment) {
-      return;
+      return actionError('Attachment not found.');
     }
 
     const { error: storageError } = await supabase.storage.from(attachment.storage_bucket).remove([attachment.storage_path]);
@@ -996,9 +1280,9 @@ export async function deleteCfsAttachmentAction(formData: FormData): Promise<voi
     });
 
     revalidatePath(cfsDetailPath(cfsId));
-    return;
+    return actionOk({ attachmentId, message: 'Attachment deleted.' });
   } catch (error) {
     console.error('deleteCfsAttachmentAction error', error);
-    return;
+    return actionError(error instanceof Error ? error.message : 'Unable to delete attachment.');
   }
 }

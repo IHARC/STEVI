@@ -10,7 +10,7 @@ import type { NavSection } from '@/lib/portal-navigation';
 import { OpsHubRail } from '@workspace/layout/ops-hub-rail';
 import { LayoutDebugOverlay } from '@shared/layout/layout-debug-overlay';
 import { OpsMainGrid } from '@workspace/shells/ops-main-grid';
-import type { CommandPaletteItem } from '@/lib/portal-access';
+import type { CommandPaletteItem } from '@/lib/portal-ui-access';
 import { Toaster } from '@shared/ui/toaster';
 
 type AppShellProps = {

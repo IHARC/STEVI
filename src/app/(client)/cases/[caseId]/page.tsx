@@ -2,13 +2,10 @@ import { notFound, redirect } from 'next/navigation';
 import { createSupabaseRSCClient } from '@/lib/supabase/rsc';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { fetchClientCaseDetail, fetchClientTimelineEvents } from '@/lib/cases/fetchers';
-import { submitClientCaseUpdateAction } from '@/lib/cases/actions';
 import type { TimelineEvent } from '@/lib/timeline/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
-import { Button } from '@shared/ui/button';
-import { Textarea } from '@shared/ui/textarea';
-import { Label } from '@shared/ui/label';
 import { resolveLandingPath } from '@/lib/portal-navigation';
+import { ClientUpdateForm } from '@/components/client/cases/client-update-form';
 
 export const dynamic = 'force-dynamic';
 
@@ -101,23 +98,6 @@ export default async function CaseDetailPage({ params }: CasePageProps) {
         </Card>
       </div>
     </div>
-  );
-}
-
-function ClientUpdateForm({ caseId }: { caseId: number }) {
-  'use client';
-
-  const action = submitClientCaseUpdateAction;
-
-  return (
-    <form action={action} className="space-y-3">
-      <input type="hidden" name="case_id" value={caseId} />
-      <div className="grid gap-1">
-        <Label htmlFor="message">Message</Label>
-        <Textarea id="message" name="message" rows={4} placeholder="Share an update for your worker" required minLength={8} />
-      </div>
-      <Button type="submit" className="w-full">Send update</Button>
-    </form>
   );
 }
 
