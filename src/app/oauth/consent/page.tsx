@@ -95,10 +95,10 @@ export default async function OAuthConsentPage({ searchParams }: ConsentPageProp
       <div className="flex min-h-screen flex-col items-center px-6 py-12">
         <div className="flex w-full flex-1 items-center justify-center">
           <Card className="w-full max-w-lg">
-            <CardHeader className="space-y-4 text-center">
-              <div className="space-y-1">
-                <p className="text-sm font-semibold tracking-[0.2em] text-foreground">S.T.E.V.I</p>
-                <p className="text-xs text-muted-foreground">
+            <CardHeader className="space-y-5 text-center">
+              <div className="space-y-2">
+                <p className="text-3xl font-semibold tracking-[0.22em] text-foreground sm:text-4xl">S.T.E.V.I</p>
+                <p className="text-sm font-medium text-muted-foreground text-balance">
                   Supportive Technology to Enable Vulnerable Individuals
                 </p>
               </div>
@@ -114,15 +114,23 @@ export default async function OAuthConsentPage({ searchParams }: ConsentPageProp
             </CardContent>
           </Card>
         </div>
-        <div className="mt-8 flex w-full items-center justify-center gap-3 text-xs text-muted-foreground">
-          <span>Powered by</span>
-          <BrandLogo branding={branding} alt="IHARC" sizes="140px" className="h-6 w-auto" />
+        <div className="mt-8 flex w-full items-center justify-center">
+          <Separator className="w-full max-w-lg opacity-40" />
+        </div>
+        <div className="mt-6 flex w-full flex-wrap items-center justify-center gap-2 text-[11px] text-muted-foreground/70">
+          <span className="uppercase tracking-[0.18em]">Powered by</span>
+          <BrandLogo
+            branding={branding}
+            alt="IHARC"
+            sizes="120px"
+            className="h-4 w-auto opacity-70"
+          />
           <BrandLogo
             branding={branding}
             variant="dark"
             alt="IHARC"
-            sizes="140px"
-            className="h-6 w-auto"
+            sizes="120px"
+            className="h-4 w-auto opacity-70"
           />
         </div>
       </div>
