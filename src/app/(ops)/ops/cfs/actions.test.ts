@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { triageCfsAction } from '@/app/(ops)/ops/cfs/actions';
+import { createCfsCallAction, triageCfsAction } from '@/app/(ops)/ops/cfs/actions';
 import type { SupabaseAnyServerClient } from '@/lib/supabase/types';
 import type { PortalAccess } from '@/lib/portal-access';
 
@@ -41,6 +41,13 @@ const baseAccess = {
   canTriageCfs: true,
 } as unknown as PortalAccess;
 
+const createAccess = {
+  userId: 'user-1',
+  profile: { id: 'profile-1' },
+  organizationId: 9,
+  canCreateCfs: true,
+} as unknown as PortalAccess;
+
 describe('triageCfsAction', () => {
   beforeEach(() => {
     vi.resetAllMocks();
@@ -77,5 +84,34 @@ describe('triageCfsAction', () => {
     if ('ok' in result && !result.ok) {
       expect(result.fieldErrors?.cfs_id).toBeTruthy();
     }
+  });
+});
+
+describe('createCfsCallAction', () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+  });
+
+  it('returns error and skips notification when rpc fails', async () => {
+    const { supabase, rpc } = createSupabaseMock({ data: null, error: new Error('RPC failed') });
+    mockCreateSupabaseServerClient.mockResolvedValue(supabase);
+    mockLoadPortalAccess.mockResolvedValue(createAccess);
+
+    const formData = new FormData();
+    formData.set('initial_report_narrative', 'Caller reported a concern near the downtown area.');
+    formData.set('anonymous_reporter', 'false');
+    formData.set('notify_opt_in', 'true');
+    formData.set('notify_channel', 'email');
+    formData.set('notify_target', 'reporter@example.com');
+    formData.set('public_tracking_enabled', 'false');
+
+    const result = await createCfsCallAction({ status: 'idle' }, formData);
+
+    expect(rpc).toHaveBeenCalledOnce();
+    expect('ok' in result).toBe(true);
+    if ('ok' in result) {
+      expect(result.ok).toBe(false);
+    }
+    expect(mockQueuePortalNotification).not.toHaveBeenCalled();
   });
 });

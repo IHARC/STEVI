@@ -228,12 +228,17 @@ export async function createCfsCallAction(
     }
 
     if (notifyOptIn && notifyChannel !== 'none' && notifyTarget) {
-      await maybeNotifyReporter(supabase, cfsId, {
-        subject: `Request received (${cfsId})`,
-        bodyText: `We have received your request and our outreach team is reviewing it.\n\nTracking ID: ${cfsId}`,
-        bodySms: `Request received. Tracking ID ${cfsId}.`,
-        type: 'cfs_received',
-      });
+      await maybeNotifyReporter(
+        supabase,
+        cfsId,
+        {
+          subject: `Request received (${cfsId})`,
+          bodyText: `We have received your request and our outreach team is reviewing it.\n\nTracking ID: ${cfsId}`,
+          bodySms: `Request received. Tracking ID ${cfsId}.`,
+          type: 'cfs_received',
+        },
+        { actorProfileId: access.profile.id },
+      );
     }
 
     revalidatePath(CFS_LIST_PATH);

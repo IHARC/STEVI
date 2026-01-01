@@ -132,11 +132,11 @@ describe('completeAppointment', () => {
     );
   });
 
-  it('returns error and skips audit when rpc fails', async () => {
-    const { supabase } = createSupabaseMock({
+  it('returns error when rpc fails (covers audit failure inside the rpc)', async () => {
+    const { supabase, portalRpc } = createSupabaseMock({
       appointmentRow: baseAppointment,
       personLink: { person_id: 55 },
-      rpcResult: { data: null, error: new Error('RPC failed') },
+      rpcResult: { data: null, error: new Error('Audit failed') },
     });
 
     mockCreateSupabaseServerClient.mockResolvedValue(supabase);
@@ -152,5 +152,9 @@ describe('completeAppointment', () => {
     const result = await completeAppointment(formData);
 
     expect(result.ok).toBe(false);
+    expect(portalRpc).toHaveBeenCalledWith(
+      'complete_appointment_with_costs',
+      expect.objectContaining({ p_appointment_id: 'appt-1' }),
+    );
   });
 });

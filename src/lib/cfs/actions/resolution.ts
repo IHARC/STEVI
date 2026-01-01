@@ -56,12 +56,17 @@ export async function dismissCfsAction(
     });
     assertRpcOk(dismissResult, 'cfs_dismiss');
 
-    await maybeNotifyReporter(supabase, cfsId, {
-      subject: `Request closed (${cfsId})`,
-      bodyText: `Your request has been closed with status: ${formatReportStatus(reportStatus)}.`,
-      bodySms: `Your request has been closed (${formatReportStatus(reportStatus)}).`,
-      type: 'cfs_closed',
-    });
+    await maybeNotifyReporter(
+      supabase,
+      cfsId,
+      {
+        subject: `Request closed (${cfsId})`,
+        bodyText: `Your request has been closed with status: ${formatReportStatus(reportStatus)}.`,
+        bodySms: `Your request has been closed (${formatReportStatus(reportStatus)}).`,
+        type: 'cfs_closed',
+      },
+      { actorProfileId: access.profile.id },
+    );
 
     revalidatePath(cfsDetailPath(cfsId));
     revalidatePath(CFS_LIST_PATH);
@@ -106,13 +111,18 @@ export async function markDuplicateCfsAction(
     });
     assertRpcOk(duplicateResult, 'cfs_mark_duplicate');
 
-    await maybeNotifyReporter(supabase, cfsId, {
-      subject: `Request merged (${cfsId})`,
-      bodyText:
-        'Your request was merged with an existing report. The outreach team is continuing follow-up on the original request.',
-      bodySms: 'Your request was merged with an existing report. We are continuing follow-up.',
-      type: 'cfs_duplicate',
-    });
+    await maybeNotifyReporter(
+      supabase,
+      cfsId,
+      {
+        subject: `Request merged (${cfsId})`,
+        bodyText:
+          'Your request was merged with an existing report. The outreach team is continuing follow-up on the original request.',
+        bodySms: 'Your request was merged with an existing report. We are continuing follow-up.',
+        type: 'cfs_duplicate',
+      },
+      { actorProfileId: access.profile.id },
+    );
 
     revalidatePath(cfsDetailPath(cfsId));
     revalidatePath(CFS_LIST_PATH);
@@ -175,12 +185,17 @@ export async function convertCfsToIncidentAction(
       throw new Error('Unable to convert call.');
     }
 
-    await maybeNotifyReporter(supabase, cfsId, {
-      subject: `Request dispatched (${cfsId})`,
-      bodyText: 'Your request has been dispatched to an outreach team. We will follow up once there is an update.',
-      bodySms: 'Your request has been dispatched to an outreach team.',
-      type: 'cfs_dispatched',
-    });
+    await maybeNotifyReporter(
+      supabase,
+      cfsId,
+      {
+        subject: `Request dispatched (${cfsId})`,
+        bodyText: 'Your request has been dispatched to an outreach team. We will follow up once there is an update.',
+        bodySms: 'Your request has been dispatched to an outreach team.',
+        type: 'cfs_dispatched',
+      },
+      { actorProfileId: access.profile.id },
+    );
 
     revalidatePath(cfsDetailPath(cfsId));
     revalidatePath(incidentDetailPath(incidentNumeric));

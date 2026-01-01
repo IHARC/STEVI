@@ -65,12 +65,17 @@ export async function triageCfsAction(
     });
     assertRpcOk(triageResult, 'cfs_triage');
 
-    await maybeNotifyReporter(supabase, cfsId, {
-      subject: `Request triaged (${cfsId})`,
-      bodyText: 'Your request has been triaged. A coordinator is reviewing the next steps.',
-      bodySms: 'Your request has been triaged. A coordinator is reviewing next steps.',
-      type: 'cfs_triaged',
-    });
+    await maybeNotifyReporter(
+      supabase,
+      cfsId,
+      {
+        subject: `Request triaged (${cfsId})`,
+        bodyText: 'Your request has been triaged. A coordinator is reviewing the next steps.',
+        bodySms: 'Your request has been triaged. A coordinator is reviewing next steps.',
+        type: 'cfs_triaged',
+      },
+      { actorProfileId: access.profile.id },
+    );
 
     revalidatePath(cfsDetailPath(cfsId));
     return actionOk({ cfsId, message: 'Triage saved.' });
@@ -121,12 +126,17 @@ export async function verifyCfsAction(
     });
     assertRpcOk(verifyResult, 'cfs_verify');
 
-    await maybeNotifyReporter(supabase, cfsId, {
-      subject: `Request verified (${cfsId})`,
-      bodyText: 'Your request has been verified and is moving to the next step.',
-      bodySms: 'Your request has been verified and is moving to the next step.',
-      type: 'cfs_verified',
-    });
+    await maybeNotifyReporter(
+      supabase,
+      cfsId,
+      {
+        subject: `Request verified (${cfsId})`,
+        bodyText: 'Your request has been verified and is moving to the next step.',
+        bodySms: 'Your request has been verified and is moving to the next step.',
+        type: 'cfs_verified',
+      },
+      { actorProfileId: access.profile.id },
+    );
 
     revalidatePath(cfsDetailPath(cfsId));
     return actionOk({ cfsId, message: 'Verification saved.' });
