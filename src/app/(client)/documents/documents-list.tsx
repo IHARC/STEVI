@@ -10,22 +10,26 @@ import { Label } from '@shared/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/ui/select';
 import { Skeleton } from '@shared/ui/skeleton';
 import type { ClientDocument } from '@/lib/documents';
+import type { ActionState } from '@/lib/server-actions/validate';
 
 type DocumentsListProps = {
   documents: ClientDocument[];
-  onRequestLink: (prevState: ActionState, formData: FormData) => Promise<ActionState>;
-  onExtendAccess: (prevState: ActionState, formData: FormData) => Promise<ActionState>;
+  onRequestLink: (prevState: DocumentActionState, formData: FormData) => Promise<DocumentActionState>;
+  onExtendAccess: (prevState: DocumentActionState, formData: FormData) => Promise<DocumentActionState>;
 };
 
-type ActionState = { success: boolean; message?: string; error?: string };
+type DocumentActionData = { message: string };
+type DocumentActionState = ActionState<DocumentActionData>;
 
-const emptyState: ActionState = { success: false };
+const emptyState: DocumentActionState = { status: 'idle' };
 
 export function DocumentsList({ documents, onRequestLink, onExtendAccess }: DocumentsListProps) {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<string>('all');
   const [requestState, requestAction] = useActionState(onRequestLink, emptyState);
   const [extendState, extendAction] = useActionState(onExtendAccess, emptyState);
+  const requestError = 'ok' in requestState && !requestState.ok ? requestState.error : null;
+  const extendError = 'ok' in extendState && !extendState.ok ? extendState.error : null;
 
   const categories = useMemo(() => {
     const set = new Set<string>();
@@ -130,12 +134,8 @@ export function DocumentsList({ documents, onRequestLink, onExtendAccess }: Docu
                 />
               </div>
 
-              {requestState?.error ? (
-                <p className="mt-1 text-xs text-destructive">{requestState.error}</p>
-              ) : null}
-              {extendState?.error ? (
-                <p className="mt-1 text-xs text-destructive">{extendState.error}</p>
-              ) : null}
+              {requestError ? <p className="mt-1 text-xs text-destructive">{requestError}</p> : null}
+              {extendError ? <p className="mt-1 text-xs text-destructive">{extendError}</p> : null}
             </article>
           ))}
         </div>

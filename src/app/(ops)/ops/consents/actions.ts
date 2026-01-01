@@ -3,7 +3,6 @@
 import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { assertOrganizationSelected, loadPortalAccess } from '@/lib/portal-access';
-import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 import { listParticipatingOrganizations, saveConsent, type ConsentMethod } from '@/lib/consents';
 
 const CONSENT_SCOPE_VALUES = ['all_orgs', 'selected_orgs', 'none'] as const;
@@ -77,7 +76,7 @@ export async function requestConsentAction(formData: FormData): Promise<void> {
   const purpose = parseShortText(formData, 'purpose', 'Purpose');
   const note = parseOptionalText(formData, 'request_note');
 
-  const { data: requestId, error } = await supabase.schema('core').rpc('request_person_consent', {
+  const { error } = await supabase.schema('core').rpc('request_person_consent', {
     p_person_id: personId,
     p_org_id: access.organizationId,
     p_purpose: purpose,
@@ -87,20 +86,6 @@ export async function requestConsentAction(formData: FormData): Promise<void> {
 
   if (error) {
     throw new Error(error.message ?? 'Unable to request consent right now.');
-  }
-
-  if (requestId) {
-    await logAuditEvent(supabase, {
-      actorProfileId: access.profile.id,
-      action: 'consent_request_submitted',
-      entityType: 'core.person_consent_requests',
-      entityRef: buildEntityRef({ schema: 'core', table: 'person_consent_requests', id: String(requestId) }),
-      meta: {
-        person_id: personId,
-        requesting_org_id: access.organizationId,
-        purpose,
-      },
-    });
   }
 
   revalidatePath('/ops/consents');
@@ -128,18 +113,6 @@ export async function logConsentContactAction(formData: FormData): Promise<void>
   if (error) {
     throw new Error(error.message ?? 'Unable to log consent contact right now.');
   }
-
-  await logAuditEvent(supabase, {
-    actorProfileId: access.profile.id,
-    action: 'consent_contact_logged',
-    entityType: 'core.timeline_events',
-    entityRef: null,
-    meta: {
-      person_id: personId,
-      requesting_org_id: access.organizationId,
-      summary,
-    },
-  });
 
   revalidatePath('/ops/consents');
 }
@@ -193,7 +166,7 @@ export async function recordStaffConsentAction(formData: FormData): Promise<void
 
   const capturedOrgId = access.organizationId;
 
-  const { consent, previousConsent } = await saveConsent(supabase, {
+  await saveConsent(supabase, {
     personId,
     scope: consentScope,
     allowedOrgIds: Array.from(allowedSet),
@@ -232,70 +205,6 @@ export async function recordStaffConsentAction(formData: FormData): Promise<void
 
     if (requestUpdateError) {
       throw new Error('Consent recorded, but request could not be updated.');
-    }
-
-    await logAuditEvent(supabase, {
-      actorProfileId: access.profile.id,
-      action: 'consent_request_approved',
-      entityType: 'core.person_consent_requests',
-      entityRef: buildEntityRef({ schema: 'core', table: 'person_consent_requests', id: pendingRequest.id }),
-      meta: {
-        person_id: personId,
-        requesting_org_id: pendingRequest.requesting_org_id,
-        actor_role: 'org',
-        approved_in_person: true,
-      },
-    });
-  }
-
-  await logAuditEvent(supabase, {
-    actorProfileId: access.profile.id,
-    action: previousConsent ? 'consent_updated' : 'consent_created',
-    entityType: 'core.person_consents',
-    entityRef: buildEntityRef({ schema: 'core', table: 'person_consents', id: consent.id }),
-    meta: {
-      person_id: personId,
-      scope: consentScope,
-      previous_scope: previousConsent?.scope ?? null,
-      allowed_org_ids: Array.from(allowedSet),
-      blocked_org_ids: blockedOrgIds,
-      captured_method: consentMethod,
-      captured_org_id: capturedOrgId,
-      attested_by_staff: attestedByStaff,
-      attested_by_client: attestedByClient,
-      actor_role: 'org',
-      request_id: pendingRequest?.id ?? null,
-    },
-  });
-
-  if (previousConsent) {
-    const previousOrgs = await core
-      .from('person_consent_orgs')
-      .select('organization_id, allowed')
-      .eq('consent_id', previousConsent.id);
-
-    if (!previousOrgs.error) {
-      const orgRows = (previousOrgs.data ?? []) as Array<{ organization_id: number; allowed: boolean }>;
-      const previousAllowed = new Set(orgRows.filter((row) => row.allowed).map((row) => row.organization_id));
-      const nextAllowed = new Set(Array.from(allowedSet));
-      const changed =
-        previousAllowed.size !== nextAllowed.size ||
-        Array.from(nextAllowed).some((id) => !previousAllowed.has(id));
-
-      if (changed) {
-        await logAuditEvent(supabase, {
-          actorProfileId: access.profile.id,
-          action: 'consent_org_updated',
-          entityType: 'core.person_consents',
-          entityRef: buildEntityRef({ schema: 'core', table: 'person_consents', id: consent.id }),
-          meta: {
-            person_id: personId,
-            previous_allowed_org_ids: Array.from(previousAllowed),
-            allowed_org_ids: Array.from(nextAllowed),
-            actor_role: 'org',
-          },
-        });
-      }
     }
   }
 

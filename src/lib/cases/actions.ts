@@ -15,9 +15,7 @@ import {
   CONSENT_METHODS,
   CONSENT_SCOPES,
   getEffectiveConsent,
-  listConsentOrgs,
   listParticipatingOrganizations,
-  resolveConsentOrgSelections,
   renewConsent,
   revokeConsent,
   saveConsent,
@@ -215,21 +213,43 @@ export async function updateConsentsAction(formData: FormData): Promise<CaseActi
       });
     }
 
-    const { error } = await core
-      .from(PEOPLE_TABLE)
-      .update({
-        preferred_contact_method: preferredContact,
-        privacy_restrictions: privacyNotes,
-        updated_by: access.userId,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', person.id);
-
-    if (error) {
-      return actionError('Could not save your consent changes.');
+    const contactChangedFields: string[] = [];
+    if (person.preferred_contact_method !== preferredContact) {
+      contactChangedFields.push('preferred_contact_method');
+    }
+    if (person.privacy_restrictions !== privacyNotes) {
+      contactChangedFields.push('privacy_restrictions');
     }
 
-    const { consent, previousConsent } = await saveConsent(supabase, {
+    if (contactChangedFields.length > 0) {
+      const { error } = await core
+        .from(PEOPLE_TABLE)
+        .update({
+          preferred_contact_method: preferredContact,
+          privacy_restrictions: privacyNotes,
+          updated_by: access.userId,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', person.id);
+
+      if (error) {
+        return actionError('Could not save your consent changes.');
+      }
+
+      await logAuditEvent(supabase, {
+        actorProfileId: access.profile.id,
+        action: 'person_contact_updated',
+        entityType: 'core.people',
+        entityRef: buildEntityRef({ schema: 'core', table: 'people', id: person.id }),
+        meta: {
+          person_id: person.id,
+          changed_fields: contactChangedFields,
+          change_reason: 'consent_preferences',
+        },
+      });
+    }
+
+    await saveConsent(supabase, {
       personId: person.id,
       scope: consentScope,
       allowedOrgIds: Array.from(allowedSet),
@@ -242,75 +262,6 @@ export async function updateConsentsAction(formData: FormData): Promise<CaseActi
       notes: privacyNotes,
       policyVersion,
     });
-
-    await logAuditEvent(supabase, {
-      actorProfileId: access.profile.id,
-      action: previousConsent ? 'consent_updated' : 'consent_created',
-      entityType: 'core.person_consents',
-      entityRef: buildEntityRef({ schema: 'core', table: 'person_consents', id: consent.id }),
-      meta: {
-        person_id: person.id,
-        scope: consentScope,
-        previous_scope: previousConsent?.scope ?? null,
-        allowed_org_ids: Array.from(allowedSet),
-        blocked_org_ids: blockedOrgIds,
-        preferred_contact_method: preferredContact,
-        captured_method: 'portal',
-        attested_by_client: true,
-        attested_by_staff: false,
-        captured_org_id: null,
-        actor_role: 'client',
-      },
-    });
-
-    if (previousConsent) {
-      const previousOrgRows = await listConsentOrgs(supabase, previousConsent.id);
-      const previousResolution = resolveConsentOrgSelections(previousConsent.scope, participatingOrgs, previousOrgRows);
-      const nextResolution = resolveConsentOrgSelections(consentScope, participatingOrgs, [
-        ...Array.from(allowedSet).map((orgId) => ({
-          id: `allow-${orgId}`,
-          consentId: consent.id,
-          organizationId: orgId,
-          allowed: true,
-          setBy: access.profile.id,
-          setAt: new Date().toISOString(),
-          reason: null,
-        })),
-        ...blockedOrgIds.map((orgId) => ({
-          id: `block-${orgId}`,
-          consentId: consent.id,
-          organizationId: orgId,
-          allowed: false,
-          setBy: access.profile.id,
-          setAt: new Date().toISOString(),
-          reason: null,
-        })),
-      ]);
-
-      const previousAllowed = new Set(previousResolution.allowedOrgIds);
-      const nextAllowed = new Set(nextResolution.allowedOrgIds);
-      const changed =
-        previousResolution.allowedOrgIds.length !== nextResolution.allowedOrgIds.length ||
-        previousResolution.blockedOrgIds.length !== nextResolution.blockedOrgIds.length ||
-        Array.from(nextAllowed).some((id) => !previousAllowed.has(id));
-
-      if (changed) {
-        await logAuditEvent(supabase, {
-          actorProfileId: access.profile.id,
-          action: 'consent_org_updated',
-          entityType: 'core.person_consents',
-          entityRef: buildEntityRef({ schema: 'core', table: 'person_consents', id: consent.id }),
-          meta: {
-            person_id: person.id,
-            previous_allowed_org_ids: previousResolution.allowedOrgIds,
-            previous_blocked_org_ids: previousResolution.blockedOrgIds,
-            allowed_org_ids: nextResolution.allowedOrgIds,
-            blocked_org_ids: nextResolution.blockedOrgIds,
-            actor_role: 'client',
-          },
-        });
-      }
-    }
 
     revalidatePath('/profile/consents');
     return actionOk({ message: 'Consent preferences saved.' });
@@ -375,17 +326,49 @@ export async function adminOverrideConsentAction(formData: FormData): Promise<Ca
     }
 
     const core = supabase.schema('core');
-    const { error } = await core
+    const { data: existingPerson, error: personError } = await core
       .from(PEOPLE_TABLE)
-      .update({
-        preferred_contact_method: preferredContact,
-        privacy_restrictions: privacyNotes,
-        updated_by: access.userId,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', personId);
+      .select('preferred_contact_method, privacy_restrictions')
+      .eq('id', personId)
+      .maybeSingle();
 
-    if (error) return actionError('Unable to update consent.');
+    if (personError || !existingPerson) {
+      return actionError('Unable to load consent preferences.');
+    }
+
+    const contactChangedFields: string[] = [];
+    if (existingPerson.preferred_contact_method !== preferredContact) {
+      contactChangedFields.push('preferred_contact_method');
+    }
+    if (existingPerson.privacy_restrictions !== privacyNotes) {
+      contactChangedFields.push('privacy_restrictions');
+    }
+
+    if (contactChangedFields.length > 0) {
+      const { error } = await core
+        .from(PEOPLE_TABLE)
+        .update({
+          preferred_contact_method: preferredContact,
+          privacy_restrictions: privacyNotes,
+          updated_by: access.userId,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', personId);
+
+      if (error) return actionError('Unable to update consent.');
+
+      await logAuditEvent(supabase, {
+        actorProfileId: access.profile.id,
+        action: 'person_contact_updated',
+        entityType: 'core.people',
+        entityRef: buildEntityRef({ schema: 'core', table: 'people', id: personId }),
+        meta: {
+          person_id: personId,
+          changed_fields: contactChangedFields,
+          change_reason: 'consent_override',
+        },
+      });
+    }
 
     const participatingOrgs = await listParticipatingOrganizations(supabase, {
       excludeOrgId: access.iharcOrganizationId,
@@ -415,7 +398,7 @@ export async function adminOverrideConsentAction(formData: FormData): Promise<Ca
 
     const capturedOrgId = access.organizationId ?? access.iharcOrganizationId ?? null;
 
-    const { consent, previousConsent } = await saveConsent(supabase, {
+    await saveConsent(supabase, {
       personId,
       scope: consentScope,
       allowedOrgIds: Array.from(allowedSet),
@@ -428,27 +411,6 @@ export async function adminOverrideConsentAction(formData: FormData): Promise<Ca
       attestedByClient,
       notes: consentNotes,
       policyVersion,
-    });
-
-    await logAuditEvent(supabase, {
-      actorProfileId: access.profile.id,
-      action: previousConsent ? 'consent_updated' : 'consent_created',
-      entityType: 'core.person_consents',
-      entityRef: buildEntityRef({ schema: 'core', table: 'person_consents', id: consent.id }),
-      meta: {
-        person_id: personId,
-        scope: consentScope,
-        previous_scope: previousConsent?.scope ?? null,
-        allowed_org_ids: Array.from(allowedSet),
-        blocked_org_ids: blockedOrgIds,
-        preferred_contact_method: preferredContact,
-        override: true,
-        method: consentMethod,
-        captured_org_id: capturedOrgId,
-        attested_by_staff: attestedByStaff,
-        attested_by_client: attestedByClient,
-        actor_role: 'iharc',
-      },
     });
 
     revalidatePath('/ops/clients');
@@ -502,14 +464,6 @@ export async function revokeConsentAction(formData: FormData): Promise<CaseActio
       actorUserId: access.userId,
     });
 
-    await logAuditEvent(supabase, {
-      actorProfileId: access.profile.id,
-      action: 'consent_revoked',
-      entityType: 'core.person_consents',
-      entityRef: buildEntityRef({ schema: 'core', table: 'person_consents', id: consentId }),
-      meta: { person_id: person.id, revoked_by_client: true, actor_role: 'client' },
-    });
-
     revalidatePath('/profile/consents');
     return actionOk({ message: 'Consent revoked.' });
   } catch (error) {
@@ -542,20 +496,12 @@ export async function renewConsentAction(formData: FormData): Promise<CaseAction
       return actionError('Consent record not found.');
     }
 
-    const { consent } = await renewConsent(supabase, {
+    await renewConsent(supabase, {
       consentId,
       actorProfileId: access.profile.id,
       actorUserId: access.userId,
       method: 'portal',
       excludeOrgId: access.iharcOrganizationId,
-    });
-
-    await logAuditEvent(supabase, {
-      actorProfileId: access.profile.id,
-      action: 'consent_updated',
-      entityType: 'core.person_consents',
-      entityRef: buildEntityRef({ schema: 'core', table: 'person_consents', id: consent.id }),
-      meta: { person_id: person.id, renewed: true, actor_role: 'client' },
     });
 
     revalidatePath('/profile/consents');
@@ -601,14 +547,6 @@ export async function adminRevokeConsentAction(formData: FormData): Promise<Case
       actorUserId: access.userId,
     });
 
-    await logAuditEvent(supabase, {
-      actorProfileId: access.profile.id,
-      action: 'consent_revoked',
-      entityType: 'core.person_consents',
-      entityRef: buildEntityRef({ schema: 'core', table: 'person_consents', id: consentId }),
-      meta: { person_id: personId, revoked_by_admin: true, actor_role: 'iharc' },
-    });
-
     revalidatePath('/app-admin/consents');
     return actionOk({ message: 'Consent revoked.' });
   } catch (error) {
@@ -635,7 +573,6 @@ export async function adminRenewConsentAction(formData: FormData): Promise<CaseA
 
     const {
       consent_id: consentId,
-      person_id: personId,
       consent_method: consentMethod,
       attested_by_staff: attestedByStaff,
       attested_by_client: attestedByClient,
@@ -649,7 +586,7 @@ export async function adminRenewConsentAction(formData: FormData): Promise<CaseA
 
     const capturedOrgId = access.organizationId ?? access.iharcOrganizationId ?? null;
 
-    const { consent } = await renewConsent(supabase, {
+    await renewConsent(supabase, {
       consentId,
       actorProfileId: access.profile.id,
       actorUserId: access.userId,
@@ -658,22 +595,6 @@ export async function adminRenewConsentAction(formData: FormData): Promise<CaseA
       attestedByStaff,
       attestedByClient,
       excludeOrgId: access.iharcOrganizationId,
-    });
-
-    await logAuditEvent(supabase, {
-      actorProfileId: access.profile.id,
-      action: 'consent_updated',
-      entityType: 'core.person_consents',
-      entityRef: buildEntityRef({ schema: 'core', table: 'person_consents', id: consent.id }),
-      meta: {
-        person_id: personId,
-        renewed: true,
-        method: consentMethod,
-        captured_org_id: capturedOrgId,
-        attested_by_staff: attestedByStaff,
-        attested_by_client: attestedByClient,
-        actor_role: 'iharc',
-      },
     });
 
     revalidatePath('/app-admin/consents');
@@ -734,7 +655,6 @@ export async function adminCreateGrantAction(formData: FormData): Promise<CaseAc
       scope,
       granteeUserId,
       granteeOrgId,
-      actorProfileId: access.profile.id,
       actorUserId: access.userId,
     });
 
@@ -766,7 +686,7 @@ export async function adminRevokeGrantAction(formData: FormData): Promise<CaseAc
       return actionError('You do not have permission to manage grants.');
     }
 
-    await revokePersonGrant(supabase, { grantId, actorProfileId: access.profile.id });
+    await revokePersonGrant(supabase, { grantId });
     revalidatePath('/ops/clients');
     return actionOk({ message: 'Grant revoked.' });
   } catch (error) {

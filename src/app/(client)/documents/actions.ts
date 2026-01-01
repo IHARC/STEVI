@@ -1,42 +1,60 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { z } from 'zod';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { loadPortalAccess } from '@/lib/portal-access';
 import { queuePortalNotification } from '@/lib/notifications';
 import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 import { assertOnboardingComplete } from '@/lib/onboarding/guard';
+import { actionError, actionOk, parseFormData } from '@/lib/server-actions/validate';
+import type { ActionState } from '@/lib/server-actions/validate';
 
-type ActionResult = { success: boolean; message?: string; error?: string };
+const DEFAULT_REASON = 'Client requested assistance with document access.';
 
-function readValue(formData: FormData, key: string, maxLength = 300): string {
-  const raw = formData.get(key);
-  if (typeof raw !== 'string') return '';
-  return raw.trim().slice(0, maxLength);
-}
+type DocumentActionData = { message: string };
 
-async function baseAction(formData: FormData, action: 'request_link' | 'extend_access'): Promise<ActionResult> {
+type DocumentActionState = ActionState<DocumentActionData>;
+
+const requestSchema = z.object({
+  path: z.preprocess(
+    (value) => (typeof value === 'string' ? value.trim() : ''),
+    z
+      .string()
+      .min(1, 'Document path missing.')
+      .max(300, 'Document path must be 300 characters or fewer.'),
+  ),
+  reason: z.preprocess(
+    (value) => (typeof value === 'string' ? value.trim() : undefined),
+    z.string().max(500, 'Reason must be 500 characters or fewer.').optional(),
+  ),
+});
+
+async function baseAction(
+  formData: FormData,
+  action: 'request_link' | 'extend_access',
+): Promise<DocumentActionState> {
+  const parsed = parseFormData(formData, requestSchema);
+  if (!parsed.ok) {
+    return parsed;
+  }
+
+  const { path, reason: reasonRaw } = parsed.data;
+  const reason = reasonRaw || DEFAULT_REASON;
+
   const supabase = await createSupabaseServerClient();
   const access = await loadPortalAccess(supabase);
 
   if (!access) {
-    return { success: false, error: 'You need to sign in to request document updates.' };
+    return actionError('You need to sign in to request document updates.');
   }
 
   try {
     await assertOnboardingComplete(supabase, access.userId);
   } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Finish onboarding before requesting documents.',
-    };
-  }
-
-  const path = readValue(formData, 'path');
-  const reason = readValue(formData, 'reason', 500) || 'Client requested assistance with document access.';
-
-  if (!path) {
-    return { success: false, error: 'Document path missing.' };
+    return actionError(
+      error instanceof Error ? error.message : 'Finish onboarding before requesting documents.',
+    );
   }
 
   try {
@@ -58,17 +76,17 @@ async function baseAction(formData: FormData, action: 'request_link' | 'extend_a
 
     revalidatePath('/documents');
 
-    return { success: true, message: 'We received your request. The team will follow up shortly.' };
+    return actionOk({ message: 'We received your request. The team will follow up shortly.' });
   } catch (error) {
     console.error('Document request failed', error);
-    return { success: false, error: 'Unable to send your request. Please try again or contact support.' };
+    return actionError('Unable to send your request. Please try again or contact support.');
   }
 }
 
-export async function requestDocumentLinkAction(_prev: ActionResult, formData: FormData) {
+export async function requestDocumentLinkAction(_prev: DocumentActionState, formData: FormData) {
   return baseAction(formData, 'request_link');
 }
 
-export async function extendDocumentAccessAction(_prev: ActionResult, formData: FormData) {
+export async function extendDocumentAccessAction(_prev: DocumentActionState, formData: FormData) {
   return baseAction(formData, 'extend_access');
 }

@@ -104,7 +104,6 @@ export async function processClientIntake(
     supabase,
     personId: person.id,
     clientUserId: intakeRow.supabase_user_id,
-    actorProfileId: actorProfile.id,
     actorUserId,
     actorOrgId: actorProfile.organization_id,
   });
@@ -165,14 +164,12 @@ async function maybeGrantDefaults({
   supabase,
   personId,
   clientUserId,
-  actorProfileId,
   actorUserId,
   actorOrgId,
 }: {
   supabase: SupabaseServerClient;
   personId: number;
   clientUserId: string | null;
-  actorProfileId: string;
   actorUserId: string;
   actorOrgId: number | null;
 }) {
@@ -184,7 +181,6 @@ async function maybeGrantDefaults({
       scope: 'timeline_client',
       granteeUserId: clientUserId,
       granteeOrgId: null,
-      actorProfileId,
       actorUserId,
     });
     await createPersonGrant(supabase, {
@@ -192,7 +188,6 @@ async function maybeGrantDefaults({
       scope: 'view',
       granteeUserId: clientUserId,
       granteeOrgId: null,
-      actorProfileId,
       actorUserId,
     });
   }
@@ -207,7 +202,6 @@ async function maybeGrantDefaults({
         scope: 'timeline_full',
         granteeUserId: null,
         granteeOrgId: actorOrgId,
-        actorProfileId,
         actorUserId,
       });
       await createPersonGrant(supabase, {
@@ -215,7 +209,6 @@ async function maybeGrantDefaults({
         scope: 'write_notes',
         granteeUserId: null,
         granteeOrgId: actorOrgId,
-        actorProfileId,
         actorUserId,
       });
     }

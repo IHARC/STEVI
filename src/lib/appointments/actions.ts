@@ -663,28 +663,6 @@ export async function completeAppointment(formData: FormData): Promise<ActionRes
       throw new Error('Unable to create appointment cost event.');
     }
 
-    await logAuditEvent(supabase, {
-      actorProfileId: actorProfile.id,
-      action: 'appointment_completed',
-      entityType: 'appointment',
-      entityRef: buildEntityRef({ schema: 'portal', table: 'appointments', id: appointmentId }),
-      meta: { outcome_notes: outcomeNotes },
-    });
-
-    await logAuditEvent(supabase, {
-      actorProfileId: actorProfile.id,
-      action: 'cost_event_created',
-      entityType: 'core.cost_events',
-      entityRef: buildEntityRef({ schema: 'core', table: 'cost_events', id: completionRow.cost_event_id }),
-      meta: {
-        source_type: 'appointment',
-        source_id: appointmentId,
-        person_id: personLink.person_id,
-        organization_id: appointment.organization_id,
-        cost_amount: costAmount,
-      },
-    });
-
     await touchAppointmentListings();
 
     return actionOk({ message: 'Appointment completed.' });

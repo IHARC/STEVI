@@ -8,9 +8,7 @@ import { resolveOnboardingActor, composeContactContext } from '@/lib/onboarding/
 import { findPersonForUser } from '@/lib/cases/person';
 import {
   consentAllowsOrg,
-  listConsentOrgs,
   listParticipatingOrganizations,
-  resolveConsentOrgSelections,
   saveConsent,
 } from '@/lib/consents';
 import { normalizePhoneNumber } from '@/lib/phone';
@@ -534,7 +532,7 @@ export async function saveSharingPreferenceAction(
     return errorState('Select an acting organization before recording consent.');
   }
 
-  const { consent, previousConsent } = await saveConsent(supabase, {
+  await saveConsent(supabase, {
     personId,
     scope: consentScope,
     allowedOrgIds: Array.from(allowedSet),
@@ -548,73 +546,6 @@ export async function saveSharingPreferenceAction(
     notes: null,
     policyVersion: policyVersion ?? null,
   });
-
-  await logAuditEvent(supabase, {
-    actorProfileId: access.profile.id,
-    action: previousConsent ? 'consent_updated' : 'consent_created',
-    entityType: 'core.person_consents',
-    entityRef: buildEntityRef({ schema: 'core', table: 'person_consents', id: consent.id }),
-    meta: {
-      person_id: personId,
-      actor_role: actor,
-      scope: consentScope,
-      previous_scope: previousConsent?.scope ?? null,
-      allowed_org_ids: Array.from(allowedSet),
-      blocked_org_ids: blockedOrgIds,
-      method: actor === 'staff' ? 'staff_assisted' : 'portal',
-      captured_org_id: capturedOrgId,
-      attested_by_staff: actor === 'staff' ? attestedByStaff : false,
-      attested_by_client: consentConfirmed,
-    },
-  });
-
-  if (previousConsent) {
-    const previousOrgRows = await listConsentOrgs(supabase, previousConsent.id);
-    const previousResolution = resolveConsentOrgSelections(previousConsent.scope, participatingOrgs, previousOrgRows);
-    const nextResolution = resolveConsentOrgSelections(consentScope, participatingOrgs, [
-      ...Array.from(allowedSet).map((orgId) => ({
-        id: `allow-${orgId}`,
-        consentId: consent.id,
-        organizationId: orgId,
-        allowed: true,
-        setBy: access.profile.id,
-        setAt: new Date().toISOString(),
-        reason: null,
-      })),
-      ...blockedOrgIds.map((orgId) => ({
-        id: `block-${orgId}`,
-        consentId: consent.id,
-        organizationId: orgId,
-        allowed: false,
-        setBy: access.profile.id,
-        setAt: new Date().toISOString(),
-        reason: null,
-      })),
-    ]);
-    const previousAllowed = new Set(previousResolution.allowedOrgIds);
-    const nextAllowed = new Set(nextResolution.allowedOrgIds);
-    const changed =
-      previousResolution.allowedOrgIds.length !== nextResolution.allowedOrgIds.length ||
-      previousResolution.blockedOrgIds.length !== nextResolution.blockedOrgIds.length ||
-      Array.from(nextAllowed).some((id) => !previousAllowed.has(id));
-
-    if (changed) {
-      await logAuditEvent(supabase, {
-        actorProfileId: access.profile.id,
-        action: 'consent_org_updated',
-        entityType: 'core.person_consents',
-        entityRef: buildEntityRef({ schema: 'core', table: 'person_consents', id: consent.id }),
-        meta: {
-          person_id: personId,
-          previous_allowed_org_ids: previousResolution.allowedOrgIds,
-          previous_blocked_org_ids: previousResolution.blockedOrgIds,
-          allowed_org_ids: nextResolution.allowedOrgIds,
-          blocked_org_ids: nextResolution.blockedOrgIds,
-          actor_role: actor,
-        },
-      });
-    }
-  }
 
   const nextStatus = await getOnboardingStatus({ userId: access.userId, personId }, supabase);
 

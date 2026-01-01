@@ -1850,7 +1850,11 @@ export type Database = {
       }
       cfs_create_call: {
         Args: { p_payload: Json }
-        Returns: number
+        Returns: Json
+      }
+      cfs_add_note: {
+        Args: { p_cfs_id: number; p_note: string }
+        Returns: undefined
       }
       cfs_dismiss: {
         Args: { p_cfs_id: number; p_notes?: string; p_report_status: string }
@@ -1905,8 +1909,32 @@ export type Database = {
         Args: { p_cfs_id: number; p_payload: Json }
         Returns: undefined
       }
+      cfs_update_status: {
+        Args: {
+          p_cfs_id: number
+          p_notes?: string
+          p_status: Database["core"]["Enums"]["cfs_status_enum"]
+        }
+        Returns: undefined
+      }
       cfs_verify: {
         Args: { p_cfs_id: number; p_method: string; p_notes: string; p_status: string }
+        Returns: undefined
+      }
+      client_intake_update: {
+        Args: {
+          p_changed_fields: string[]
+          p_change_reason?: string | null
+          p_general_notes?: string | null
+          p_health_concerns?: Database["core"]["Enums"]["health_concern_enum"][] | null
+          p_housing_status?: Database["core"]["Enums"]["housing_status_enum"] | null
+          p_immediate_needs?: Database["core"]["Enums"]["assessment_urgency"] | null
+          p_intake_id: number
+          p_person_id: number
+          p_risk_factors?: Database["core"]["Enums"]["risk_factor_enum"][] | null
+          p_risk_level?: Database["core"]["Enums"]["risk_level_enum"] | null
+          p_situation_notes?: string | null
+        }
         Returns: undefined
       }
     }
@@ -7584,6 +7612,57 @@ export type Database = {
       }
       log_consent_contact: {
         Args: { p_person_id: number; p_org_id: number; p_summary: string }
+        Returns: undefined
+      }
+      person_alias_create: {
+        Args: {
+          p_alias_name: string
+          p_change_reason?: string | null
+          p_person_id: number
+        }
+        Returns: number
+      }
+      person_alias_set_active: {
+        Args: {
+          p_alias_id: number
+          p_change_reason?: string | null
+          p_is_active: boolean
+          p_person_id: number
+        }
+        Returns: undefined
+      }
+      person_alias_update: {
+        Args: {
+          p_alias_id: number
+          p_alias_name: string
+          p_change_reason?: string | null
+          p_person_id: number
+        }
+        Returns: undefined
+      }
+      person_update_contact: {
+        Args: {
+          p_change_reason?: string | null
+          p_changed_fields: string[]
+          p_email?: string | null
+          p_person_id: number
+          p_phone?: string | null
+          p_preferred_contact_method?: string | null
+        }
+        Returns: undefined
+      }
+      person_update_identity: {
+        Args: {
+          p_age?: number | null
+          p_change_reason?: string | null
+          p_changed_fields: string[]
+          p_date_of_birth?: string | null
+          p_first_name?: string | null
+          p_gender?: Database["core"]["Enums"]["gender_enum"] | null
+          p_last_name?: string | null
+          p_person_id: number
+          p_preferred_pronouns?: string | null
+        }
         Returns: undefined
       }
       staff_caseload: {

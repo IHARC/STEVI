@@ -1,4 +1,3 @@
-import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 import type { SupabaseServerClient } from '@/lib/supabase/types';
 import { getGrantScopes } from '@/lib/enum-values';
 
@@ -62,7 +61,6 @@ export async function createPersonGrant(
     scope,
     granteeUserId,
     granteeOrgId,
-    actorProfileId,
     actorUserId,
     expiresAt,
   }: {
@@ -70,7 +68,6 @@ export async function createPersonGrant(
     scope: GrantScope;
     granteeUserId: string | null;
     granteeOrgId: number | null;
-    actorProfileId: string;
     actorUserId: string;
     expiresAt?: string | null;
   },
@@ -98,34 +95,15 @@ export async function createPersonGrant(
   if (error) {
     throw new Error('Unable to save grant.');
   }
-
-  await logAuditEvent(supabase, {
-    actorProfileId,
-    action: 'person_access_grant_added',
-    entityType: 'people',
-    entityRef: buildEntityRef({ schema: 'core', table: 'people', id: personId }),
-    meta: { pk_int: personId, scope, grantee_user_id: granteeUserId, grantee_org_id: granteeOrgId },
-  });
 }
 
-export async function revokePersonGrant(
-  supabase: SupabaseServerClient,
-  { grantId, actorProfileId }: { grantId: string; actorProfileId: string },
-) {
+export async function revokePersonGrant(supabase: SupabaseServerClient, { grantId }: { grantId: string }) {
   const core = supabase.schema('core');
-  const { data, error } = await core.from(GRANTS_TABLE).delete().eq('id', grantId).select('person_id').maybeSingle();
+  const { error } = await core.from(GRANTS_TABLE).delete().eq('id', grantId).select('person_id').maybeSingle();
 
   if (error) {
     throw new Error('Unable to revoke grant.');
   }
-
-  await logAuditEvent(supabase, {
-    actorProfileId,
-    action: 'person_access_grant_revoked',
-    entityType: 'people',
-    entityRef: data ? buildEntityRef({ schema: 'core', table: 'people', id: data.person_id }) : null,
-    meta: { grant_id: grantId, person_id: data?.person_id ?? null },
-  });
 }
 
 export async function updatePersonGrantExpiry(
@@ -133,15 +111,13 @@ export async function updatePersonGrantExpiry(
   {
     grantId,
     expiresAt,
-    actorProfileId,
   }: {
     grantId: string;
     expiresAt: string;
-    actorProfileId: string;
   },
 ) {
   const core = supabase.schema('core');
-  const { data, error } = await core
+  const { error } = await core
     .from(GRANTS_TABLE)
     .update({ expires_at: expiresAt })
     .eq('id', grantId)
@@ -152,11 +128,4 @@ export async function updatePersonGrantExpiry(
     throw new Error('Unable to update grant expiry.');
   }
 
-  await logAuditEvent(supabase, {
-    actorProfileId,
-    action: 'person_access_grant_updated',
-    entityType: 'people',
-    entityRef: data ? buildEntityRef({ schema: 'core', table: 'people', id: data.person_id }) : null,
-    meta: { grant_id: grantId, person_id: data?.person_id ?? null, expires_at: expiresAt },
-  });
 }

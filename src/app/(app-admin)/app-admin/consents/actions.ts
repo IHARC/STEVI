@@ -3,7 +3,6 @@
 import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { loadPortalAccess } from '@/lib/portal-access';
-import { logAuditEvent, buildEntityRef } from '@/lib/audit';
 import { listParticipatingOrganizations, saveConsent } from '@/lib/consents';
 
 const CONSENT_SCOPE_VALUES = ['all_orgs', 'selected_orgs'] as const;
@@ -88,7 +87,7 @@ export async function approveConsentRequestAction(formData: FormData): Promise<v
 
   const capturedOrgId = access.organizationId ?? access.iharcOrganizationId ?? null;
 
-  const { consent, previousConsent } = await saveConsent(supabase, {
+  await saveConsent(supabase, {
     personId: requestRow.person_id,
     scope: consentScope,
     allowedOrgIds: Array.from(allowedSet),
@@ -117,37 +116,6 @@ export async function approveConsentRequestAction(formData: FormData): Promise<v
   if (updateError) {
     throw new Error('Consent recorded, but request could not be updated.');
   }
-
-  await logAuditEvent(supabase, {
-    actorProfileId: access.profile.id,
-    action: previousConsent ? 'consent_updated' : 'consent_created',
-    entityType: 'core.person_consents',
-    entityRef: buildEntityRef({ schema: 'core', table: 'person_consents', id: consent.id }),
-    meta: {
-      person_id: requestRow.person_id,
-      scope: consentScope,
-      allowed_org_ids: Array.from(allowedSet),
-      blocked_org_ids: blockedOrgIds,
-      method: consentMethod,
-      approved_from_request: requestRow.id,
-      captured_org_id: capturedOrgId,
-      attested_by_staff: attestedByStaff,
-      attested_by_client: attestedByClient,
-      actor_role: 'iharc',
-    },
-  });
-
-  await logAuditEvent(supabase, {
-    actorProfileId: access.profile.id,
-    action: 'consent_request_approved',
-    entityType: 'core.person_consent_requests',
-    entityRef: buildEntityRef({ schema: 'core', table: 'person_consent_requests', id: requestRow.id }),
-    meta: {
-      person_id: requestRow.person_id,
-      requesting_org_id: requestRow.requesting_org_id,
-      actor_role: 'iharc',
-    },
-  });
 
   revalidatePath('/app-admin/consents');
 }
@@ -193,18 +161,6 @@ export async function denyConsentRequestAction(formData: FormData): Promise<void
   if (updateError) {
     throw new Error('Unable to update consent request.');
   }
-
-  await logAuditEvent(supabase, {
-    actorProfileId: access.profile.id,
-    action: 'consent_request_denied',
-    entityType: 'core.person_consent_requests',
-    entityRef: buildEntityRef({ schema: 'core', table: 'person_consent_requests', id: requestRow.id }),
-    meta: {
-      person_id: requestRow.person_id,
-      requesting_org_id: requestRow.requesting_org_id,
-      actor_role: 'iharc',
-    },
-  });
 
   revalidatePath('/app-admin/consents');
 }

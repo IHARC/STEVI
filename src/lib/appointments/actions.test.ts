@@ -6,8 +6,6 @@ import type { PortalAccess } from '@/lib/portal-access';
 const mockCreateSupabaseServerClient = vi.fn();
 const mockLoadPortalAccess = vi.fn();
 const mockEnsurePortalProfile = vi.fn();
-const mockLogAuditEvent = vi.fn();
-const mockBuildEntityRef = vi.fn();
 const mockResolveStaffRate = vi.fn();
 const mockResolveCostCategoryIdByName = vi.fn();
 
@@ -25,11 +23,6 @@ vi.mock('@/lib/portal-access', async () => {
 
 vi.mock('@/lib/profile', () => ({
   ensurePortalProfile: (...args: unknown[]) => mockEnsurePortalProfile(...args),
-}));
-
-vi.mock('@/lib/audit', () => ({
-  logAuditEvent: (...args: unknown[]) => mockLogAuditEvent(...args),
-  buildEntityRef: (...args: unknown[]) => mockBuildEntityRef(...args),
 }));
 
 vi.mock('@/lib/costs/queries', () => ({
@@ -114,7 +107,7 @@ describe('completeAppointment', () => {
     vi.resetAllMocks();
   });
 
-  it('completes appointment via rpc and logs audit entries', async () => {
+  it('completes appointment via rpc', async () => {
     const { supabase, portalRpc } = createSupabaseMock({
       appointmentRow: baseAppointment,
       personLink: { person_id: 55 },
@@ -126,8 +119,6 @@ describe('completeAppointment', () => {
     mockEnsurePortalProfile.mockResolvedValue({ id: 'profile-1' });
     mockResolveStaffRate.mockResolvedValue({ hourly_rate: 75 });
     mockResolveCostCategoryIdByName.mockResolvedValue('cat-1');
-    mockBuildEntityRef.mockReturnValue('ref');
-
     const formData = new FormData();
     formData.set('appointment_id', 'appt-1');
     formData.set('outcome_notes', 'Completed successfully.');
@@ -139,7 +130,6 @@ describe('completeAppointment', () => {
       'complete_appointment_with_costs',
       expect.objectContaining({ p_appointment_id: 'appt-1' }),
     );
-    expect(mockLogAuditEvent).toHaveBeenCalledTimes(2);
   });
 
   it('returns error and skips audit when rpc fails', async () => {
@@ -162,6 +152,5 @@ describe('completeAppointment', () => {
     const result = await completeAppointment(formData);
 
     expect(result.ok).toBe(false);
-    expect(mockLogAuditEvent).not.toHaveBeenCalled();
   });
 });

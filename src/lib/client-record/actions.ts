@@ -4,8 +4,6 @@ import { revalidatePath } from 'next/cache';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { loadPortalAccess, assertOrganizationSelected } from '@/lib/portal-access';
 import { assertCanEditClientRecord } from '@/lib/permissions/client-record';
-import { buildEntityRef, logAuditEvent } from '@/lib/audit';
-import { withClientRecordAuditMeta } from '@/lib/client-record/audit';
 import { diffFields } from '@/lib/client-record/diff';
 import {
   GENDER_VALUES,
@@ -17,6 +15,7 @@ import {
 } from '@/lib/client-record/constants';
 import type { ClientRecordFormState } from '@/lib/client-record/form-state';
 import { getEnumArray, getNumber, getString, parseEnum } from '@/lib/server-actions/form';
+import { assertRpcOk } from '@/lib/supabase/guards';
 
 function parseOptionalString(value: FormDataEntryValue | null): string | null {
   if (typeof value !== 'string') return null;
@@ -38,9 +37,6 @@ function normalizeArray(value: string[] | null | undefined): string[] {
   return (value ?? []).filter(Boolean).slice().sort((a, b) => a.localeCompare(b));
 }
 
-function buildAuditMeta(meta: Record<string, unknown>) {
-  return withClientRecordAuditMeta(meta);
-}
 
 export async function updatePersonIdentityAction(
   _prev: ClientRecordFormState,
@@ -88,27 +84,18 @@ export async function updatePersonIdentityAction(
       return { status: 'success', message: 'No basic information changes to save.' };
     }
 
-    const now = new Date().toISOString();
-    const { error: updateError } = await core
-      .from('people')
-      .update({ ...updatePayload, updated_at: now, updated_by: access.userId })
-      .eq('id', personId);
-
-    if (updateError) {
-      return { status: 'error', message: updateError.message ?? 'Unable to update basic information.' };
-    }
-
-    await logAuditEvent(supabase, {
-      actorProfileId: access.profile.id,
-      action: 'person_identity_updated',
-      entityType: 'core.people',
-      entityRef: buildEntityRef({ schema: 'core', table: 'people', id: personId }),
-      meta: buildAuditMeta({
-        person_id: personId,
-        changed_fields: changedFields,
-        change_reason: changeReason,
-      }),
+    const updateResult = await supabase.schema('core').rpc('person_update_identity', {
+      p_person_id: personId,
+      p_first_name: firstName,
+      p_last_name: lastName,
+      p_date_of_birth: dateOfBirth,
+      p_age: age,
+      p_gender: gender,
+      p_preferred_pronouns: preferredPronouns,
+      p_changed_fields: changedFields,
+      p_change_reason: changeReason ?? null,
     });
+    assertRpcOk(updateResult, 'person_update_identity');
 
     revalidatePath(`/ops/clients/${personId}`);
 
@@ -158,27 +145,15 @@ export async function updatePersonContactAction(
       return { status: 'success', message: 'No contact changes to save.' };
     }
 
-    const now = new Date().toISOString();
-    const { error: updateError } = await core
-      .from('people')
-      .update({ ...updatePayload, updated_at: now, updated_by: access.userId })
-      .eq('id', personId);
-
-    if (updateError) {
-      return { status: 'error', message: updateError.message ?? 'Unable to update contact details.' };
-    }
-
-    await logAuditEvent(supabase, {
-      actorProfileId: access.profile.id,
-      action: 'person_contact_updated',
-      entityType: 'core.people',
-      entityRef: buildEntityRef({ schema: 'core', table: 'people', id: personId }),
-      meta: buildAuditMeta({
-        person_id: personId,
-        changed_fields: changedFields,
-        change_reason: changeReason,
-      }),
+    const updateResult = await supabase.schema('core').rpc('person_update_contact', {
+      p_person_id: personId,
+      p_email: email,
+      p_phone: phone,
+      p_preferred_contact_method: preferredContactMethod,
+      p_changed_fields: changedFields,
+      p_change_reason: changeReason ?? null,
     });
+    assertRpcOk(updateResult, 'person_update_contact');
 
     revalidatePath(`/ops/clients/${personId}`);
 
@@ -238,27 +213,20 @@ export async function updateSituationAction(
       return { status: 'success', message: 'No situation changes to save.' };
     }
 
-    const { error: updateError } = await caseMgmt
-      .from('client_intakes')
-      .update(updatePayload)
-      .eq('id', intakeId);
-
-    if (updateError) {
-      return { status: 'error', message: updateError.message ?? 'Unable to update intake details.' };
-    }
-
-    await logAuditEvent(supabase, {
-      actorProfileId: access.profile.id,
-      action: 'client_intake_updated',
-      entityType: 'case_mgmt.client_intakes',
-      entityRef: buildEntityRef({ schema: 'case_mgmt', table: 'client_intakes', id: intakeId }),
-      meta: buildAuditMeta({
-        person_id: personId,
-        intake_id: intakeId,
-        changed_fields: changedFields,
-        change_reason: changeReason,
-      }),
+    const updateResult = await supabase.schema('case_mgmt').rpc('client_intake_update', {
+      p_intake_id: intakeId,
+      p_person_id: personId,
+      p_housing_status: housingStatus,
+      p_risk_level: riskLevel,
+      p_immediate_needs: immediateNeeds,
+      p_health_concerns: healthConcerns,
+      p_risk_factors: riskFactors,
+      p_situation_notes: situationNotes,
+      p_general_notes: generalNotes,
+      p_changed_fields: changedFields,
+      p_change_reason: changeReason ?? null,
     });
+    assertRpcOk(updateResult, 'client_intake_update');
 
     revalidatePath(`/ops/clients/${personId}`);
 
@@ -296,68 +264,30 @@ export async function createAliasAction(
     }
 
     if (existing?.id && !existing.is_active) {
-      const now = new Date().toISOString();
-      const { error: restoreError } = await core
-        .from('people_aliases')
-        .update({
-          is_active: true,
-          deactivated_at: null,
-          deactivated_by: null,
-          updated_at: now,
-          updated_by: access.userId,
-        })
-        .eq('id', existing.id);
-
-      if (restoreError) {
-        return { status: 'error', message: restoreError.message ?? 'Unable to restore alias.' };
-      }
-
-      await logAuditEvent(supabase, {
-        actorProfileId: access.profile.id,
-        action: 'person_alias_restored',
-        entityType: 'core.people_aliases',
-        entityRef: buildEntityRef({ schema: 'core', table: 'people_aliases', id: existing.id }),
-        meta: buildAuditMeta({
-          person_id: personId,
-          alias_id: existing.id,
-          alias_name: aliasName,
-          change_reason: changeReason,
-        }),
+      const restoreResult = await supabase.schema('core').rpc('person_alias_set_active', {
+        p_person_id: personId,
+        p_alias_id: existing.id,
+        p_is_active: true,
+        p_change_reason: changeReason ?? null,
       });
+      assertRpcOk(restoreResult, 'person_alias_set_active');
 
       revalidatePath(`/ops/clients/${personId}`);
 
       return { status: 'success', message: 'Alias restored.' };
     }
 
-    const { data, error } = await core
-      .from('people_aliases')
-      .insert({
-        person_id: personId,
-        alias_name: aliasName,
-        created_by: access.userId,
-        updated_by: access.userId,
-        updated_at: new Date().toISOString(),
-      })
-      .select('id')
-      .single();
-
-    if (error || !data) {
-      return { status: 'error', message: error?.message ?? 'Unable to add alias.' };
-    }
-
-    await logAuditEvent(supabase, {
-      actorProfileId: access.profile.id,
-      action: 'person_alias_created',
-      entityType: 'core.people_aliases',
-      entityRef: buildEntityRef({ schema: 'core', table: 'people_aliases', id: data.id }),
-      meta: buildAuditMeta({
-        person_id: personId,
-        alias_id: data.id,
-        alias_name: aliasName,
-        change_reason: changeReason,
-      }),
+    const createResult = await supabase.schema('core').rpc('person_alias_create', {
+      p_person_id: personId,
+      p_alias_name: aliasName,
+      p_change_reason: changeReason ?? null,
     });
+    assertRpcOk(createResult, 'person_alias_create');
+
+    const aliasId = typeof createResult.data === 'number' ? createResult.data : Number(createResult.data);
+    if (!aliasId || Number.isNaN(aliasId)) {
+      return { status: 'error', message: 'Unable to add alias.' };
+    }
 
     revalidatePath(`/ops/clients/${personId}`);
 
@@ -410,32 +340,13 @@ export async function updateAliasAction(
       return { status: 'error', message: 'That alias already exists.' };
     }
 
-    const now = new Date().toISOString();
-    const { error: updateError } = await core
-      .from('people_aliases')
-      .update({
-        alias_name: aliasName,
-        updated_at: now,
-        updated_by: access.userId,
-      })
-      .eq('id', aliasId);
-
-    if (updateError) {
-      return { status: 'error', message: updateError.message ?? 'Unable to update alias.' };
-    }
-
-    await logAuditEvent(supabase, {
-      actorProfileId: access.profile.id,
-      action: 'person_alias_updated',
-      entityType: 'core.people_aliases',
-      entityRef: buildEntityRef({ schema: 'core', table: 'people_aliases', id: aliasId }),
-      meta: buildAuditMeta({
-        person_id: personId,
-        alias_id: aliasId,
-        alias_name: aliasName,
-        change_reason: changeReason,
-      }),
+    const updateResult = await supabase.schema('core').rpc('person_alias_update', {
+      p_person_id: personId,
+      p_alias_id: aliasId,
+      p_alias_name: aliasName,
+      p_change_reason: changeReason ?? null,
     });
+    assertRpcOk(updateResult, 'person_alias_update');
 
     revalidatePath(`/ops/clients/${personId}`);
 
@@ -477,34 +388,13 @@ export async function setAliasActiveAction(
       return { status: 'success', message: 'No alias changes to save.' };
     }
 
-    const now = new Date().toISOString();
-    const { error: updateError } = await core
-      .from('people_aliases')
-      .update({
-        is_active: isActive,
-        deactivated_at: isActive ? null : now,
-        deactivated_by: isActive ? null : access.userId,
-        updated_at: now,
-        updated_by: access.userId,
-      })
-      .eq('id', aliasId);
-
-    if (updateError) {
-      return { status: 'error', message: updateError.message ?? 'Unable to update alias status.' };
-    }
-
-    await logAuditEvent(supabase, {
-      actorProfileId: access.profile.id,
-      action: isActive ? 'person_alias_restored' : 'person_alias_deactivated',
-      entityType: 'core.people_aliases',
-      entityRef: buildEntityRef({ schema: 'core', table: 'people_aliases', id: aliasId }),
-      meta: buildAuditMeta({
-        person_id: personId,
-        alias_id: aliasId,
-        alias_name: existing.alias_name,
-        change_reason: changeReason,
-      }),
+    const updateResult = await supabase.schema('core').rpc('person_alias_set_active', {
+      p_person_id: personId,
+      p_alias_id: aliasId,
+      p_is_active: isActive,
+      p_change_reason: changeReason ?? null,
     });
+    assertRpcOk(updateResult, 'person_alias_set_active');
 
     revalidatePath(`/ops/clients/${personId}`);
 

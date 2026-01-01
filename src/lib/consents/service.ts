@@ -545,7 +545,7 @@ export async function syncConsentGrants(
   {
     personId,
     allowedOrgIds,
-    actorProfileId,
+    actorProfileId: _actorProfileId,
     actorUserId,
     managedScopes = DEFAULT_ORG_GRANT_SCOPES,
     excludeOrgIds = [],
@@ -592,12 +592,11 @@ export async function syncConsentGrants(
     existingKey.add(key);
 
     if (!allowedSet.has(orgId)) {
-      await revokePersonGrant(supabase, { grantId: row.id, actorProfileId });
+      await revokePersonGrant(supabase, { grantId: row.id });
     } else if (expiresAt && row.expires_at !== expiresAt) {
       await updatePersonGrantExpiry(supabase, {
         grantId: row.id,
         expiresAt,
-        actorProfileId,
       });
     }
   }
@@ -611,7 +610,6 @@ export async function syncConsentGrants(
         scope,
         granteeUserId: null,
         granteeOrgId: orgId,
-        actorProfileId,
         actorUserId,
         expiresAt,
       });

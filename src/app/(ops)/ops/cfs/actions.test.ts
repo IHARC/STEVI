@@ -5,8 +5,6 @@ import type { PortalAccess } from '@/lib/portal-access';
 
 const mockCreateSupabaseServerClient = vi.fn();
 const mockLoadPortalAccess = vi.fn();
-const mockLogAuditEvent = vi.fn();
-const mockBuildEntityRef = vi.fn();
 const mockQueuePortalNotification = vi.fn();
 
 vi.mock('@/lib/supabase/server', () => ({
@@ -20,11 +18,6 @@ vi.mock('@/lib/portal-access', async () => {
     loadPortalAccess: (...args: unknown[]) => mockLoadPortalAccess(...args),
   };
 });
-
-vi.mock('@/lib/audit', () => ({
-  logAuditEvent: (...args: unknown[]) => mockLogAuditEvent(...args),
-  buildEntityRef: (...args: unknown[]) => mockBuildEntityRef(...args),
-}));
 
 vi.mock('@/lib/notifications', () => ({
   queuePortalNotification: (...args: unknown[]) => mockQueuePortalNotification(...args),
@@ -53,7 +46,7 @@ describe('triageCfsAction', () => {
     vi.resetAllMocks();
   });
 
-  it('skips audit + notification when rpc fails', async () => {
+  it('skips notification when rpc fails', async () => {
     const { supabase, rpc } = createSupabaseMock({ data: null, error: new Error('RPC failed') });
     mockCreateSupabaseServerClient.mockResolvedValue(supabase);
     mockLoadPortalAccess.mockResolvedValue(baseAccess);
@@ -69,7 +62,6 @@ describe('triageCfsAction', () => {
     if ('ok' in result) {
       expect(result.ok).toBe(false);
     }
-    expect(mockLogAuditEvent).not.toHaveBeenCalled();
     expect(mockQueuePortalNotification).not.toHaveBeenCalled();
   });
 
