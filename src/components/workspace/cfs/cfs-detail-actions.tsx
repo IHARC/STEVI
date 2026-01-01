@@ -26,7 +26,6 @@ import {
   dismissCfsAction,
   enablePublicTrackingAction,
   disablePublicTrackingAction,
-  initialCfsActionState,
   markDuplicateCfsAction,
   shareCfsWithOrgAction,
   revokeCfsOrgAccessAction,
@@ -35,7 +34,7 @@ import {
   updateCfsStatusAction,
   verifyCfsAction,
 } from '@/app/(ops)/ops/cfs/actions';
-import type { CfsActionState } from '@/app/(ops)/ops/cfs/actions';
+import { initialCfsActionState, type CfsActionState } from '@/lib/cfs/actions/shared';
 
 export type CfsDetailActionsProps = {
   cfsId: number;

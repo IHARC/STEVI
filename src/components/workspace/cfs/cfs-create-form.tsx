@@ -22,7 +22,8 @@ import {
   REPORT_PRIORITY_OPTIONS,
   formatCfsLabel,
 } from '@/lib/cfs/constants';
-import { createCfsCallAction, initialCfsActionState } from '@/app/(ops)/ops/cfs/actions';
+import { createCfsCallAction } from '@/app/(ops)/ops/cfs/actions';
+import { initialCfsActionState } from '@/lib/cfs/actions/shared';
 import { CfsPersonSearch } from '@/components/workspace/cfs/cfs-person-search';
 
 const locationConfidenceOptions = ['exact', 'approximate', 'general_area', 'unknown'];

@@ -12,8 +12,8 @@ import { EmptyState } from '@shared/ui/empty-state';
 import {
   deleteCfsAttachmentAction,
   uploadCfsAttachmentAction,
-  initialCfsAttachmentActionState,
 } from '@/app/(ops)/ops/cfs/actions';
+import { initialCfsAttachmentActionState } from '@/lib/cfs/actions/shared';
 
 export type CfsAttachmentItem = {
   id: string;
