@@ -92,32 +92,39 @@ export default async function OAuthConsentPage({ searchParams }: ConsentPageProp
       : INITIAL_FORM_STATE;
 
     return (
-      <div className="flex min-h-screen items-center justify-center px-6 py-12">
-        <Card className="w-full max-w-lg">
-          <CardHeader className="space-y-4">
-            <div className="flex items-center gap-3">
-              <BrandLogo
-                branding={branding}
-                alt="STEVI"
-                sizes="160px"
-                className="h-8 w-auto"
-              />
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">STEVI</p>
-                <p className="text-sm font-semibold text-foreground">Secure sign-in</p>
+      <div className="flex min-h-screen flex-col items-center px-6 py-12">
+        <div className="flex w-full flex-1 items-center justify-center">
+          <Card className="w-full max-w-lg">
+            <CardHeader className="space-y-4 text-center">
+              <div className="space-y-1">
+                <p className="text-sm font-semibold tracking-[0.2em] text-foreground">S.T.E.V.I</p>
+                <p className="text-xs text-muted-foreground">
+                  Supportive Technology to Enable Vulnerable Individuals
+                </p>
               </div>
-            </div>
-            <div className="space-y-1">
-              <CardTitle className="text-2xl font-semibold">Sign in to continue</CardTitle>
-              <CardDescription className="text-sm text-muted-foreground">
-                Authenticate to approve access for this client.
-              </CardDescription>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <LoginForm action={loginUser} initialState={initialState} />
-          </CardContent>
-        </Card>
+              <div className="space-y-1">
+                <CardTitle className="text-2xl font-semibold">Sign in to continue</CardTitle>
+                <CardDescription className="text-sm text-muted-foreground">
+                  Authenticate to approve access for this client.
+                </CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <LoginForm action={loginUser} initialState={initialState} />
+            </CardContent>
+          </Card>
+        </div>
+        <div className="mt-8 flex w-full items-center justify-center gap-3 text-xs text-muted-foreground">
+          <span>Powered by</span>
+          <BrandLogo branding={branding} alt="IHARC" sizes="140px" className="h-6 w-auto" />
+          <BrandLogo
+            branding={branding}
+            variant="dark"
+            alt="IHARC"
+            sizes="140px"
+            className="h-6 w-auto"
+          />
+        </div>
       </div>
     );
   }
