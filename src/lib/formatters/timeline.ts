@@ -7,6 +7,8 @@ export function formatTimelineFilterLabel(filter: TimelineFilterId): string {
       return 'Encounters';
     case 'client_updates':
       return 'Client updates';
+    case 'observations':
+      return 'Observations';
     default:
       return formatSnakeCase(filter, filter);
   }

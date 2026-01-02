@@ -6,6 +6,7 @@ export const TIMELINE_FILTERS = [
   'tasks',
   'client_updates',
   'notes',
+  'observations',
   'medical',
   'justice',
   'relationships',
@@ -28,6 +29,8 @@ export function filterTimelineEvent(event: TimelineEvent, filter: TimelineFilter
       return event.eventCategory === 'client_update';
     case 'notes':
       return event.eventCategory === 'note';
+    case 'observations':
+      return event.eventCategory === 'observation';
     case 'medical':
       return event.eventCategory === 'medical';
     case 'justice':

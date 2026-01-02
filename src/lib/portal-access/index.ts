@@ -31,6 +31,9 @@ export type PortalAccess = {
   canManageCosts: boolean;
   canReportCosts: boolean;
   canAdminCosts: boolean;
+  canReadSensitiveObservations: boolean;
+  canReadRestrictedObservations: boolean;
+  canPromoteObservations: boolean;
   canTrackTime: boolean;
   canViewOwnTime: boolean;
   canViewAllTime: boolean;
@@ -204,6 +207,11 @@ function buildAccessSummary({
   const canManageCosts = isProfileApproved && (isGlobalAdmin || hasPermission('cost.manage') || hasPermission('cost.admin'));
   const canReportCosts = isProfileApproved && (isGlobalAdmin || hasPermission('cost.report') || hasPermission('cost.admin'));
   const canAdminCosts = isProfileApproved && (isGlobalAdmin || hasPermission('cost.admin'));
+  const canReadSensitiveObservations =
+    isProfileApproved &&
+    (isGlobalAdmin || hasPermission('observations.read_sensitive') || hasPermission('observations.read_restricted'));
+  const canReadRestrictedObservations = isProfileApproved && (isGlobalAdmin || hasPermission('observations.read_restricted'));
+  const canPromoteObservations = isProfileApproved && (isGlobalAdmin || hasPermission('observations.promote'));
   const canTrackTime = isProfileApproved && hasPermission('staff_time.track');
   const canViewOwnTime = isProfileApproved && (hasPermission('staff_time.view_self') || canTrackTime);
   const canViewAllTime = isProfileApproved && (hasPermission('staff_time.view_all') || hasPermission('staff_time.manage'));
@@ -251,6 +259,9 @@ function buildAccessSummary({
     canManageCosts,
     canReportCosts,
     canAdminCosts,
+    canReadSensitiveObservations,
+    canReadRestrictedObservations,
+    canPromoteObservations,
     canTrackTime,
     canViewOwnTime,
     canViewAllTime,

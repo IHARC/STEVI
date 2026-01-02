@@ -334,6 +334,13 @@ export default async function OpsClientDetailPage({ params, searchParams }: Page
 
 function TimelineEventItem({ event }: { event: TimelineEvent }) {
   const detail = resolveTimelineEventDetail(event);
+  const meta = event.metadata ?? {};
+  const observationCategory = event.eventCategory === 'observation' && typeof meta.category === 'string' ? meta.category : null;
+  const observationSource = event.eventCategory === 'observation' && typeof meta.source === 'string' ? meta.source : null;
+  const observationVerification =
+    event.eventCategory === 'observation' && typeof meta.verification_status === 'string'
+      ? meta.verification_status
+      : null;
 
   return (
     <article className="rounded-xl border border-border/40 bg-card p-2.5">
@@ -351,6 +358,9 @@ function TimelineEventItem({ event }: { event: TimelineEvent }) {
       </div>
       <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground">
         {event.createdByOrg ? <Badge variant="outline">Created by {event.createdByOrg}</Badge> : null}
+        {observationCategory ? <Badge variant="outline">{formatEnumLabel(observationCategory)}</Badge> : null}
+        {observationSource ? <Badge variant="outline">{formatEnumLabel(observationSource)}</Badge> : null}
+        {observationVerification ? <Badge variant="outline">{formatEnumLabel(observationVerification)}</Badge> : null}
         <Badge variant={event.visibilityScope === 'shared_via_consent' ? 'secondary' : 'outline'}>
           {event.visibilityScope === 'shared_via_consent' ? 'Shared' : 'Internal'}
         </Badge>

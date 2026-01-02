@@ -229,6 +229,38 @@ Deliverables:
 - Explicit policies for cross-org sharing of third-party observations (if allowed).
 - Audit visibility and redaction-safe summaries.
 
+## Implementation tracking (as of 2026-01-02)
+
+### Phase 1 — Observations MVP (this-client)
+
+- [x] `case_mgmt.observations` domain table with timeline projection.
+- [x] Encounter observation capture form (source + verification + sensitivity + visibility).
+- [x] Encounter observation list with badges and follow-up task creation.
+- [x] Timeline filter + observation badges (source + verification).
+
+### Phase 2 — Third-party observations + leads
+
+- [x] Subject variants: known person, named-unlinked, unidentified lead.
+- [x] Third-party confidentiality enforced (internal-only visibility).
+- [x] Lead capture fields: description + last-seen context.
+- [x] Lead management actions (status updates + resolve to person).
+
+### Phase 3 — Promotions + reporting views
+
+- [x] Promote to medical episode / safety incident / referral (role-gated).
+- [x] Promotion audit trail (`observation_promotions`).
+- [x] Ops leads view with recent leads + overdue welfare checks.
+- [x] Duplicate detection helper (description/location matching).
+
+### Verification (2026-01-02)
+
+- [x] Lint, typecheck, and test suite passing (`eslint`, `tsc --noEmit`, `vitest`).
+
+### Phase 4 — Access tiering (future)
+
+- [ ] Cross-org sharing rules for third-party observations.
+- [ ] Sensitivity tier review + redaction-safe summaries.
+
 ## Open questions (to resolve before Phase 2)
 
 1) **Cross-org access:** should third-party observations ever be visible to partner org staff, even with consent? If yes, under what permission/scope?

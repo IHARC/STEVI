@@ -8,12 +8,14 @@ import { fetchStaffCases } from '@/lib/cases/fetchers';
 import { getOnboardingStatusForPeople, type OnboardingStatus } from '@/lib/onboarding/status';
 import { PERSON_CATEGORY_VALUES, PERSON_STATUS_VALUES, PERSON_TYPE_VALUES, requiresPrivacySearch } from '@/lib/clients/directory';
 import type { PersonCategory, PersonStatus, PersonType } from '@/lib/clients/directory';
+import { buildLeadDuplicateMap, fetchObservationLeadsForOrg, fetchObservationPromotions, fetchOverdueWelfareObservationTasks } from '@/lib/observations/queries';
 import type { Database } from '@/types/supabase';
 import { PageHeader } from '@shared/layout/page-header';
 import { PageTabNav, type PageTab } from '@shared/layout/page-tab-nav';
 import { Button } from '@shared/ui/button';
 import { ClientsDirectoryTable } from '@workspace/clients/clients-directory-table';
 import { ClientsActivityTable, ClientsCaseloadTable } from '@workspace/clients/clients-overview-tables';
+import { ObservationLeadsBoard } from '@workspace/clients/observation-leads-board';
 import { normalizeEnumParam, paramsToRecord, toSearchParams } from '@/lib/search-params';
 
 type DirectoryItem = Database['core']['Functions']['get_people_list_with_types']['Returns'][number];
@@ -23,7 +25,7 @@ type PageProps = { searchParams?: Promise<Record<string, string | string[] | und
 
 export const dynamic = 'force-dynamic';
 
-const VIEWS = ['directory', 'caseload', 'activity'] as const;
+const VIEWS = ['directory', 'caseload', 'activity', 'leads'] as const;
 type ViewId = (typeof VIEWS)[number];
 
 export default async function OpsClientsPage({ searchParams }: PageProps) {
@@ -69,7 +71,27 @@ export default async function OpsClientsPage({ searchParams }: PageProps) {
     }
   }
 
-  const [caseload, cases] = await Promise.all([caseloadPromise, casesPromise]);
+  const showLeadsView = activeView === 'leads' && Boolean(access.organizationId);
+  const leadsPromise = showLeadsView && access.organizationId
+    ? fetchObservationLeadsForOrg(supabase, access.organizationId, { statuses: ['open', 'in_progress'], limit: 200 })
+    : Promise.resolve([]);
+  const overdueTasksPromise = showLeadsView && access.organizationId
+    ? fetchOverdueWelfareObservationTasks(supabase, access.organizationId, 50)
+    : Promise.resolve([]);
+
+  const [caseload, cases, leads, overdueTasks] = await Promise.all([
+    caseloadPromise,
+    casesPromise,
+    leadsPromise,
+    overdueTasksPromise,
+  ]);
+
+  const promotionsByObservation = showLeadsView && leads.length > 0
+    ? Object.fromEntries((await fetchObservationPromotions(supabase, leads.map((lead) => lead.id))).entries())
+    : {};
+  const duplicatesByObservation = showLeadsView && leads.length > 0
+    ? Object.fromEntries(buildLeadDuplicateMap(leads).entries())
+    : {};
 
   const peopleWithOnboarding: PersonWithOnboarding[] = directoryResult.items.map((person) => ({
     ...person,
@@ -86,7 +108,7 @@ export default async function OpsClientsPage({ searchParams }: PageProps) {
     <div className="space-y-4">
       <PageHeader
         title="Clients"
-        description="Directory, caseload, and recent activity in one hub. Start encounters and keep referrals or supplies within the encounter context."
+        description="Directory, caseload, activity, and leads in one hub. Start encounters and keep referrals or supplies within the encounter context."
         density="compact"
       />
 
@@ -124,6 +146,28 @@ export default async function OpsClientsPage({ searchParams }: PageProps) {
 
       {activeView === 'activity' ? (
         <ClientsActivityTable cases={cases} />
+      ) : null}
+
+      {activeView === 'leads' ? (
+        access.canAccessOpsFrontline ? (
+          access.organizationId ? (
+          <ObservationLeadsBoard
+            leads={leads}
+            promotionsByObservation={promotionsByObservation}
+            duplicatesByObservation={duplicatesByObservation}
+            overdueTasks={overdueTasks}
+            canPromote={access.canPromoteObservations}
+          />
+          ) : (
+            <div className="rounded-2xl border border-dashed border-border/60 bg-muted/20 p-6 text-sm text-muted-foreground">
+              Select an acting organization to view observation leads.
+            </div>
+          )
+        ) : (
+          <div className="rounded-2xl border border-dashed border-border/60 bg-muted/20 p-6 text-sm text-muted-foreground">
+            Frontline access is required to view observation leads.
+          </div>
+        )
       ) : null}
     </div>
   );
@@ -214,5 +258,6 @@ async function loadDirectory(
 function labelForView(view: ViewId) {
   if (view === 'directory') return 'Directory';
   if (view === 'caseload') return 'My caseload';
+  if (view === 'leads') return 'Leads';
   return 'Activity feed';
 }

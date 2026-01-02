@@ -12,6 +12,7 @@ import { fetchMedicalEpisodesForPerson } from '@/lib/medical/queries';
 import { fetchJusticeEpisodesForPerson } from '@/lib/justice/queries';
 import { fetchRelationshipsForPerson } from '@/lib/relationships/queries';
 import { fetchCharacteristicsForPerson } from '@/lib/characteristics/queries';
+import { fetchObservationsForEncounter, fetchObservationPromotions } from '@/lib/observations/queries';
 import { PageHeader } from '@shared/layout/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@shared/ui/card';
 import { Button } from '@shared/ui/button';
@@ -22,6 +23,8 @@ import { MedicalEpisodesCard } from '@workspace/client-record/medical-episodes-c
 import { JusticeEpisodesCard } from '@workspace/client-record/justice-episodes-card';
 import { RelationshipsCard } from '@workspace/client-record/relationships-card';
 import { CharacteristicsCard } from '@workspace/client-record/characteristics-card';
+import { ObservationForm } from '@workspace/observations/observation-form';
+import { ObservationList } from '@workspace/observations/observation-list';
 import type { Database } from '@/types/supabase';
 
 export const dynamic = 'force-dynamic';
@@ -50,7 +53,7 @@ export default async function EncounterDetailPage({ params }: PageProps) {
   const encounter = await fetchEncounterById(supabase, id);
   if (!encounter) notFound();
 
-  const [person, tasks, items, locations, medicalEpisodes, justiceEpisodes, relationships, characteristics] = await Promise.all([
+  const [person, tasks, items, locations, medicalEpisodes, justiceEpisodes, relationships, characteristics, observations] = await Promise.all([
     loadPerson(supabase, encounter.personId),
     fetchTasksForEncounter(supabase, encounter.id, 50),
     access.canAccessInventoryOps ? fetchInventoryItems(supabase) : Promise.resolve([]),
@@ -59,7 +62,12 @@ export default async function EncounterDetailPage({ params }: PageProps) {
     fetchJusticeEpisodesForPerson(supabase, encounter.personId, 6),
     fetchRelationshipsForPerson(supabase, encounter.personId, 6),
     fetchCharacteristicsForPerson(supabase, encounter.personId, 6),
+    fetchObservationsForEncounter(supabase, encounter.id, 50),
   ]);
+
+  const observationIds = observations.map((observation) => observation.id);
+  const promotionsMap = await fetchObservationPromotions(supabase, observationIds);
+  const promotionsByObservation = Object.fromEntries(promotionsMap.entries());
 
   if (!person) notFound();
 
@@ -68,6 +76,7 @@ export default async function EncounterDetailPage({ params }: PageProps) {
     { label: encounter.visibilityScope === 'shared_via_consent' ? 'Shared' : 'Internal', tone: 'info' as const },
   ];
   const encounterId = encounter.id;
+  const encounterPersonName = `${person.first_name ?? 'Person'} ${person.last_name ?? ''}`.trim();
 
   const closeAction = async () => {
     'use server';
@@ -80,7 +89,7 @@ export default async function EncounterDetailPage({ params }: PageProps) {
       <PageHeader
         eyebrow="Encounter"
         title={encounter.summary ?? `Encounter for ${person.first_name ?? 'Person'} ${person.last_name ?? ''}`.trim()}
-        description="Use this workspace to log tasks, supplies, and care updates tied to this encounter."
+        description="Use this workspace to log tasks, supplies, observations, and care updates tied to this encounter."
         actions={
           encounter.endedAt ? null : (
             <form action={closeAction}>
@@ -178,11 +187,34 @@ export default async function EncounterDetailPage({ params }: PageProps) {
             </CardContent>
           </Card>
 
+          <Card className="border-border/70">
+            <CardHeader>
+              <CardTitle className="text-lg">Encounter observations</CardTitle>
+              <CardDescription>Observations captured during this encounter.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm">
+              <ObservationList
+                observations={observations}
+                promotionsByObservation={promotionsByObservation}
+                encounterPersonName={encounterPersonName}
+                canPromote={access.canPromoteObservations}
+                showEncounterLink={false}
+              />
+            </CardContent>
+          </Card>
+
           <MedicalEpisodesCard personId={person.id} caseId={encounter.caseId} encounterId={encounter.id} episodes={medicalEpisodes} canEdit={canEditRecord} />
           <JusticeEpisodesCard personId={person.id} caseId={encounter.caseId} encounterId={encounter.id} episodes={justiceEpisodes} canEdit={canEditRecord} />
         </div>
 
         <div className="space-y-4">
+          <ObservationForm
+            encounterId={encounter.id}
+            encounterPersonId={person.id}
+            caseId={encounter.caseId}
+            canReadSensitive={access.canReadSensitiveObservations}
+            canReadRestricted={access.canReadRestrictedObservations}
+          />
           <EncounterTaskForm personId={person.id} caseId={encounter.caseId} encounterId={encounter.id} />
           <EncounterSuppliesForm
             personId={person.id}

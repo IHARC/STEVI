@@ -252,6 +252,353 @@ export type Database = {
           },
         ]
       }
+      observations: {
+        Row: {
+          id: string
+          person_id: number | null
+          case_id: number | null
+          encounter_id: string | null
+          owning_org_id: number
+          recorded_by_profile_id: string | null
+          recorded_at: string
+          source: Database["core"]["Enums"]["record_source_enum"]
+          verification_status: Database["core"]["Enums"]["verification_status_enum"]
+          sensitivity_level: Database["core"]["Enums"]["sensitivity_level_enum"]
+          visibility_scope: Database["core"]["Enums"]["visibility_scope_enum"]
+          category: Database["case_mgmt"]["Enums"]["observation_category_enum"]
+          summary: string
+          details: string | null
+          subject_type: Database["case_mgmt"]["Enums"]["observation_subject_enum"]
+          subject_person_id: number | null
+          subject_name: string | null
+          subject_description: string | null
+          last_seen_at: string | null
+          last_seen_location: string | null
+          reporter_person_id: number | null
+          lead_status: Database["case_mgmt"]["Enums"]["observation_lead_status_enum"] | null
+          lead_expires_at: string | null
+          metadata: Json | null
+          created_at: string
+          created_by: string | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          id?: string
+          person_id?: number | null
+          case_id?: number | null
+          encounter_id?: string | null
+          owning_org_id: number
+          recorded_by_profile_id?: string | null
+          recorded_at?: string
+          source?: Database["core"]["Enums"]["record_source_enum"]
+          verification_status?: Database["core"]["Enums"]["verification_status_enum"]
+          sensitivity_level?: Database["core"]["Enums"]["sensitivity_level_enum"]
+          visibility_scope?: Database["core"]["Enums"]["visibility_scope_enum"]
+          category: Database["case_mgmt"]["Enums"]["observation_category_enum"]
+          summary: string
+          details?: string | null
+          subject_type?: Database["case_mgmt"]["Enums"]["observation_subject_enum"]
+          subject_person_id?: number | null
+          subject_name?: string | null
+          subject_description?: string | null
+          last_seen_at?: string | null
+          last_seen_location?: string | null
+          reporter_person_id?: number | null
+          lead_status?: Database["case_mgmt"]["Enums"]["observation_lead_status_enum"] | null
+          lead_expires_at?: string | null
+          metadata?: Json | null
+          created_at?: string
+          created_by?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          id?: string
+          person_id?: number | null
+          case_id?: number | null
+          encounter_id?: string | null
+          owning_org_id?: number
+          recorded_by_profile_id?: string | null
+          recorded_at?: string
+          source?: Database["core"]["Enums"]["record_source_enum"]
+          verification_status?: Database["core"]["Enums"]["verification_status_enum"]
+          sensitivity_level?: Database["core"]["Enums"]["sensitivity_level_enum"]
+          visibility_scope?: Database["core"]["Enums"]["visibility_scope_enum"]
+          category?: Database["case_mgmt"]["Enums"]["observation_category_enum"]
+          summary?: string
+          details?: string | null
+          subject_type?: Database["case_mgmt"]["Enums"]["observation_subject_enum"]
+          subject_person_id?: number | null
+          subject_name?: string | null
+          subject_description?: string | null
+          last_seen_at?: string | null
+          last_seen_location?: string | null
+          reporter_person_id?: number | null
+          lead_status?: Database["case_mgmt"]["Enums"]["observation_lead_status_enum"] | null
+          lead_expires_at?: string | null
+          metadata?: Json | null
+          created_at?: string
+          created_by?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "observations_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "case_management"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "observations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "observations_encounter_id_fkey"
+            columns: ["encounter_id"]
+            isOneToOne: false
+            referencedRelation: "encounters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "observations_owning_org_id_fkey"
+            columns: ["owning_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "observations_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "observations_recorded_by_profile_id_fkey"
+            columns: ["recorded_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "observations_reporter_person_id_fkey"
+            columns: ["reporter_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "observations_subject_person_id_fkey"
+            columns: ["subject_person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "observations_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      observation_promotions: {
+        Row: {
+          id: string
+          observation_id: string
+          promotion_type: Database["case_mgmt"]["Enums"]["observation_promotion_enum"]
+          target_id: string
+          target_label: string | null
+          metadata: Json | null
+          created_at: string
+          created_by: string | null
+          created_by_profile_id: string | null
+        }
+        Insert: {
+          id?: string
+          observation_id: string
+          promotion_type: Database["case_mgmt"]["Enums"]["observation_promotion_enum"]
+          target_id: string
+          target_label?: string | null
+          metadata?: Json | null
+          created_at?: string
+          created_by?: string | null
+          created_by_profile_id?: string | null
+        }
+        Update: {
+          id?: string
+          observation_id?: string
+          promotion_type?: Database["case_mgmt"]["Enums"]["observation_promotion_enum"]
+          target_id?: string
+          target_label?: string | null
+          metadata?: Json | null
+          created_at?: string
+          created_by?: string | null
+          created_by_profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "observation_promotions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "observation_promotions_created_by_profile_id_fkey"
+            columns: ["created_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "observation_promotions_observation_id_fkey"
+            columns: ["observation_id"]
+            isOneToOne: false
+            referencedRelation: "observations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      referrals: {
+        Row: {
+          id: string
+          person_id: number
+          case_id: number | null
+          encounter_id: string | null
+          owning_org_id: number
+          referred_to_org_id: number | null
+          referred_to_name: string | null
+          referral_status: Database["case_mgmt"]["Enums"]["referral_status_enum"]
+          summary: string
+          details: string | null
+          referred_at: string
+          recorded_by_profile_id: string | null
+          recorded_at: string
+          source: Database["core"]["Enums"]["record_source_enum"]
+          verification_status: Database["core"]["Enums"]["verification_status_enum"]
+          sensitivity_level: Database["core"]["Enums"]["sensitivity_level_enum"]
+          visibility_scope: Database["core"]["Enums"]["visibility_scope_enum"]
+          metadata: Json | null
+          created_at: string
+          created_by: string | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          id?: string
+          person_id: number
+          case_id?: number | null
+          encounter_id?: string | null
+          owning_org_id: number
+          referred_to_org_id?: number | null
+          referred_to_name?: string | null
+          referral_status?: Database["case_mgmt"]["Enums"]["referral_status_enum"]
+          summary: string
+          details?: string | null
+          referred_at?: string
+          recorded_by_profile_id?: string | null
+          recorded_at?: string
+          source?: Database["core"]["Enums"]["record_source_enum"]
+          verification_status?: Database["core"]["Enums"]["verification_status_enum"]
+          sensitivity_level?: Database["core"]["Enums"]["sensitivity_level_enum"]
+          visibility_scope?: Database["core"]["Enums"]["visibility_scope_enum"]
+          metadata?: Json | null
+          created_at?: string
+          created_by?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          id?: string
+          person_id?: number
+          case_id?: number | null
+          encounter_id?: string | null
+          owning_org_id?: number
+          referred_to_org_id?: number | null
+          referred_to_name?: string | null
+          referral_status?: Database["case_mgmt"]["Enums"]["referral_status_enum"]
+          summary?: string
+          details?: string | null
+          referred_at?: string
+          recorded_by_profile_id?: string | null
+          recorded_at?: string
+          source?: Database["core"]["Enums"]["record_source_enum"]
+          verification_status?: Database["core"]["Enums"]["verification_status_enum"]
+          sensitivity_level?: Database["core"]["Enums"]["sensitivity_level_enum"]
+          visibility_scope?: Database["core"]["Enums"]["visibility_scope_enum"]
+          metadata?: Json | null
+          created_at?: string
+          created_by?: string | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referrals_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "case_management"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_encounter_id_fkey"
+            columns: ["encounter_id"]
+            isOneToOne: false
+            referencedRelation: "encounters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_owning_org_id_fkey"
+            columns: ["owning_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "people"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_recorded_by_profile_id_fkey"
+            columns: ["recorded_by_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_referred_to_org_id_fkey"
+            columns: ["referred_to_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_intakes: {
         Row: {
           id: number
@@ -1945,6 +2292,28 @@ export type Database = {
         | "program"
         | "appointment"
         | "other"
+      observation_category_enum:
+        | "health_concern"
+        | "safety_concern"
+        | "welfare_check"
+        | "housing_basic_needs"
+        | "relationship_social"
+        | "other"
+      observation_lead_status_enum:
+        | "open"
+        | "in_progress"
+        | "resolved"
+        | "archived"
+      observation_promotion_enum:
+        | "medical_episode"
+        | "safety_incident"
+        | "referral"
+      observation_subject_enum:
+        | "this_client"
+        | "known_person"
+        | "named_unlinked"
+        | "unidentified"
+      referral_status_enum: "open" | "sent" | "completed" | "canceled"
       task_status_enum:
         | "open"
         | "in_progress"
@@ -7852,6 +8221,7 @@ export type Database = {
         | "supply"
         | "appointment"
         | "note"
+        | "observation"
         | "client_update"
         | "intake"
         | "medical"
@@ -13989,6 +14359,32 @@ export const Constants = {
         "appointment",
         "other",
       ],
+      observation_category_enum: [
+        "health_concern",
+        "safety_concern",
+        "welfare_check",
+        "housing_basic_needs",
+        "relationship_social",
+        "other",
+      ],
+      observation_lead_status_enum: [
+        "open",
+        "in_progress",
+        "resolved",
+        "archived",
+      ],
+      observation_promotion_enum: [
+        "medical_episode",
+        "safety_incident",
+        "referral",
+      ],
+      observation_subject_enum: [
+        "this_client",
+        "known_person",
+        "named_unlinked",
+        "unidentified",
+      ],
+      referral_status_enum: ["open", "sent", "completed", "canceled"],
       task_status_enum: [
         "open",
         "in_progress",
@@ -14173,6 +14569,7 @@ export const Constants = {
         "supply",
         "appointment",
         "note",
+        "observation",
         "client_update",
         "intake",
         "medical",

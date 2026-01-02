@@ -37,4 +37,9 @@ describe('timeline filters', () => {
     expect(filterTimelineEvent(makeEvent('task'), 'tasks')).toBe(true);
     expect(filterTimelineEvent(makeEvent('note'), 'tasks')).toBe(false);
   });
+
+  it('filters observation events', () => {
+    expect(filterTimelineEvent(makeEvent('observation'), 'observations')).toBe(true);
+    expect(filterTimelineEvent(makeEvent('task'), 'observations')).toBe(false);
+  });
 });

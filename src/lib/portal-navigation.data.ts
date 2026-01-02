@@ -94,6 +94,13 @@ export const PORTAL_NAV_SECTIONS: NavSectionData[] = [
             query: { view: 'activity' },
           },
           {
+            id: 'clients-leads',
+            href: '/ops/clients?view=leads',
+            label: 'Leads',
+            match: ['/ops/clients'],
+            query: { view: 'leads' },
+          },
+          {
             id: 'clients-consents',
             href: '/ops/consents',
             label: 'Consent requests',

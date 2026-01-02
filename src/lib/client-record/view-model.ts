@@ -151,7 +151,7 @@ export function buildClientDetailViewModel(context: ClientDetailContext): Client
 
 export function resolveTimelineEventDetail(event: TimelineEvent): string | null {
   const meta = event.metadata ?? {};
-  const candidates = [meta.description, meta.notes, meta.message, meta.summary];
+  const candidates = [meta.description, meta.notes, meta.message, meta.summary, meta.subject_description, meta.last_seen_location];
   for (const entry of candidates) {
     if (typeof entry === 'string' && entry.trim().length > 0) return entry;
   }
