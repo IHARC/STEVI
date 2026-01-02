@@ -1,13 +1,13 @@
-1- An outreach worker coming across an individual who needs hand warmers and a bottle of water. During this interaction, they disclose that they were at the hospital the night prior and were told they have pneumonia. The client already exists in the database. 
+# Encounter-first scenarios (Canon)
+Last updated: 2026-01-02  
+Status: Canon (ground truth for acceptance)
 
-2- A Salvation Army staff member running the weekly drop-in lunch is approached and asked for help in getting connected with mental health supports. The individual already exists in the database and both salvation army and Fourcast are using the STEVI app in this scenario. 
+Use these end-to-end scenarios when designing, building, and testing the encounter-first UX.
 
-3. A person shows up at the library. They are new to town and are homeless. They have never been to town before. The librarian, as part of an effort to support the community, has limited access to STEVI, specifically for rapid intakes and initial service navigation (i.e directing them to the next step). This is in line with the ideal no wrong doors philosophy. 
-
-4. An outreach team consisting of an outreach nurse and an outreach worker come across an individual sleeping outside. He has a noticeable wound on his arm that looks infected. He declines EMS response/hospital transport. The nurse does a brief assessment and vitals check, then applies wound care dressings/bandaging. The person already exists in the database and has already provided consents for data sharing globally in stevi to all orgs. 
-## Scenarios (Canon)
-
-Use these end-to-end scenarios when designing, building, and testing the Encounter-first UX. They are the ground truth for acceptance.
+Related:
+- Use cases + user stories: `docs/use-cases.md`
+- Client record umbrella roadmap: `docs/client-record-vision-roadmap.md`
+- Encounter module roadmap: `docs/encounter-module-vision-roadmap.md`
 
 ### 1) Outreach: hand warmers + water; pneumonia disclosed; client exists
 - Actor: Outreach worker (field role).

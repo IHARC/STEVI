@@ -1,5 +1,5 @@
 # STEVI Client Record & Continuum-of-Care Foundation — Vision + Roadmap
-Last updated: 2025-12-31  
+Last updated: 2026-01-02  
 Status: Living plan (expect frequent edits)
 
 ## Why this document exists
@@ -44,6 +44,8 @@ This plan covers the **foundational** surfaces and models that make the client r
 These are the current “plan fragments” this roadmap unifies:
 
 - Canon end-to-end user flows (Encounter-first): `docs/Scenarios/Scenarios-1.md`
+- Use cases + user stories backlog: `docs/use-cases.md`
+- Encounter module vision + roadmap (Encounter-first UX details): `docs/encounter-module-vision-roadmap.md`
 - Org-level consent plan: `docs/consent-system-plan.md`
 - Onboarding/consent contract (who can do what): `docs/onboarding-contract.md`
 - App map + feature inventory (what exists vs planned): `docs/app-map.md`

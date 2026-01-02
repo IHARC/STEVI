@@ -1,4 +1,6 @@
 # Dual Shell Architecture
+Last updated: 2026-01-02  
+Status: Architecture reference (expect periodic updates)
 
 This document codifies the client/operations shell split for STEVI. It complements `docs/ui-standards.md` and the navigation ownership guidance in `docs/navigation-ownership.md`.
 

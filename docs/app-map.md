@@ -1,6 +1,6 @@
 # STEVI App Map (Working)
 
-Last updated: 2025-12-16  
+Last updated: 2026-01-02  
 Status: Working document (expect frequent edits)
 
 ## Purpose
@@ -12,6 +12,7 @@ This document is a practical “map” of STEVI’s information architecture:
 - tenancy model (IHARC platform admins + org tenants + per-org capabilities)
 
 It is meant to be read alongside:
+- `docs/README.md` (docs index + canonical sources)
 - `docs/ui-standards.md` (app‑wide UI standards + navigation conventions)
 - `docs/navigation-ownership.md`
 - `src/lib/portal-navigation.ts` (Ops hubs and gating)
@@ -82,7 +83,7 @@ Area inference + guards:
 
 Ops utility routes (not hubs, but live and linked from hub actions):
 - `/ops/profile` (operations account settings; affiliation + org selection)
-- `/ops/visits/new` (Visit-first entry point; currently scaffolding + org gating)
+- `/ops/encounters/new` (Encounter-first entry point; org gating + context capture)
 
 ### App Admin shell (IHARC super admin portal)
 Route group: `src/app/(app-admin)`  
@@ -134,11 +135,13 @@ Capabilities (enabled modules) are stored on the org record:
 
 Current known capability keys:
 - `appointments`
+- `calls_for_service`
 - `documents`
 - `notifications`
 - `inventory`
 - `donations`
 - `metrics`
+- `time_tracking`
 - `org_workspace`
 
 Rule of thumb:
@@ -205,6 +208,7 @@ Admin modules present in the repo but not currently exposed as routes:
 - Legacy `/ops/directory` route was removed in favor of `/ops/organizations` (folder may still exist but should not be used).
 - Legacy `/app-admin/organizations/*` pages were removed in favor of `/ops/organizations` + consolidated org detail tabs (folder may still exist but should not be used).
 - Legacy `/ops/org/*` org hub routes were removed; use `/ops/organizations/[id]` tabs instead.
+- Legacy `/ops/visits/*` folder is not a live route; use `/ops/encounters/*`.
 
 ## Feature inventory (working checklist)
 
@@ -225,7 +229,7 @@ Admin modules present in the repo but not currently exposed as routes:
 - [x] Inventory hub (dashboard/items/locations/receipts)
 - [x] Fundraising hub (admin-facing donation tooling)
 - [x] Organizations directory (list + IHARC-admin creation modal)
-- [ ] Visit-first flow beyond scaffolding (currently `/ops/visits/new` + hub links)
+- [x] Encounter-first flow (start + workspace) (`/ops/encounters/new`, `/ops/encounters/[id]`)
 
 ### Org tenant hub
 - [x] Org-scoped access to Organizations list/detail
