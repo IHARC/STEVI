@@ -32,6 +32,8 @@ export const OBSERVATION_LEAD_STATUSES: ObservationLeadStatus[] = [
 export const OBSERVATION_SOURCE_OPTIONS: RecordSource[] = [
   'staff_observed',
   'client_reported',
+  'document',
+  'partner_org',
 ];
 
 export const OBSERVATION_VERIFICATION_OPTIONS: VerificationStatus[] = [

@@ -107,12 +107,10 @@ What exists today in STEVI (high-level):
   - and surfacing of some domain panels for the encounter’s client.
 - The client profile timeline uses `core.timeline_events` as an event layer; encounters project into it.
 
-Key gap:
+Key gap (now addressed in implementation):
 
-- There is no first-class “Observation” / “Lead” output model that supports:
-  - second-hand attribution + verification,
-  - linking to another known person,
-  - or tracking an unknown person by description + last seen details.
+- Observations and leads are first-class encounter outputs with provenance, subject variants, and lead workflows.
+- Remaining gaps are in Phase 4 (cross-org sharing rules, redaction-safe summaries).
 
 ## Product design: “Observations” as a first-class encounter output
 
@@ -138,7 +136,7 @@ The form should be structured around two decisions:
 
 Then:
 - short summary + details
-- `source` (defaults to `staff_observed`; can be `client_reported`)
+- `source` (defaults to `staff_observed`; can be `client_reported`, `document`, or `partner_org`)
 - `verification_status`:
   - defaults to `unverified` when `source = client_reported`
   - defaults to `unverified` or `verified` depending on org policy when `staff_observed` (recommend `unverified` by default)
@@ -152,7 +150,7 @@ Third‑party observations must be treated as confidential disclosures:
 - **Default staff-only** visibility. Do not offer “Share via consent” on third-party observations.
 - **Reporter identity must not be exposed to clients.** (Even the subject of the observation should not see “who said it”.)
 
-Open question (to resolve): whether third‑party observations are shareable across staff in different orgs under consent. See “Open questions”.
+Future policy question: whether third‑party observations are shareable across staff in different orgs under consent.
 
 ### Retrieval: how staff find and use observations later
 
@@ -252,19 +250,20 @@ Deliverables:
 - [x] Ops leads view with recent leads + overdue welfare checks.
 - [x] Duplicate detection helper (description/location matching).
 
-### Verification (2026-01-02)
+### Verification (last recorded 2026-01-02)
 
 - [x] Lint, typecheck, and test suite passing (`eslint`, `tsc --noEmit`, `vitest`).
 
-### Phase 4 — Access tiering (future)
+### Phase 4 — Access tiering (in progress)
 
+- [x] Sensitivity-level enforcement in RLS (tiered access gates).
 - [ ] Cross-org sharing rules for third-party observations.
-- [ ] Sensitivity tier review + redaction-safe summaries.
+- [ ] Audit visibility and redaction-safe summaries.
 
-## Open questions (to resolve before Phase 2)
+## Policy decisions (current behavior)
 
-1) **Cross-org access:** should third-party observations ever be visible to partner org staff, even with consent? If yes, under what permission/scope?
-2) **Reporter attribution:** do we store the reporting client identity in a way that is queryable, or do we store only non-identifying provenance references?
-3) **Retention policy:** how long do “unidentified person” leads persist before archival?
-4) **“Named but unlinked” resolution:** what is the workflow to resolve a described person to a real `core.people` record without accidental mis-linking?
-5) **UI language:** what exact labels keep staff accurate and non-stigmatizing (“client reported”, “unverified”, “staff observed”)?
+1) **Cross-org access:** third-party observations are internal-only for the owning org; no cross-org sharing rules are implemented yet.
+2) **Reporter attribution:** `reporter_person_id` is stored for client-reported observations and is not exposed on client-facing surfaces.
+3) **Retention policy:** unnamed/named-unlinked leads default to a 90-day expiry (`lead_expires_at`) pending archival automation.
+4) **Resolution workflow:** “Resolve to person” is a manual search-and-link flow to reduce mis-linking risk.
+5) **UI language:** labels use enum formatting (`client_reported`, `staff_observed`, `unverified`, etc.); review for stigma/clarity remains open.
